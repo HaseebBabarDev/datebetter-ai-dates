@@ -36,8 +36,8 @@ export const DASHBOARD_TOUR_STEPS: TourStep[] = [
 export const CANDIDATE_DETAIL_TOUR_STEPS: TourStep[] = [
   {
     target: "[data-tour='quick-log']",
-    title: "Quick Log",
-    description: "Quickly log common interactions with just one tap. Perfect for tracking texts and calls.",
+    title: "Log Interactions",
+    description: "Track your dates, calls, texts, and more. Logging helps identify patterns over time.",
     placement: "bottom",
   },
   {
