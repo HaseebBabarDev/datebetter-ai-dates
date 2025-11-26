@@ -516,30 +516,6 @@ const Dashboard = () => {
                     </button>
                   )}
 
-                  {/* Good/Bad/Neutral Summary */}
-                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1 text-green-600">
-                        <ThumbsUp className="w-3 h-3" />
-                        <span className="text-sm font-medium">{recap.goodCandidates.length}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Good</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1 text-muted-foreground">
-                        <Minus className="w-3 h-3" />
-                        <span className="text-sm font-medium">{recap.neutralCandidates.length}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Neutral</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1 text-red-500">
-                        <ThumbsDown className="w-3 h-3" />
-                        <span className="text-sm font-medium">{recap.badCandidates.length}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Caution</p>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             )}
