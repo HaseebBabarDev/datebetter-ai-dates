@@ -65,7 +65,10 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   // Check if advice has already been responded to
   useEffect(() => {
     const checkAdviceResponse = async () => {
-      if (!scoreData?.advice || !user) return;
+      if (!scoreData?.advice || !user) {
+        setAdviceResponse(null);
+        return;
+      }
       
       const { data } = await supabase
         .from("advice_tracking")
@@ -74,9 +77,8 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
         .eq("advice_text", scoreData.advice)
         .maybeSingle();
       
-      if (data) {
-        setAdviceResponse(data);
-      }
+      // Reset to null when advice changes and no response exists yet
+      setAdviceResponse(data || null);
     };
     
     checkAdviceResponse();
