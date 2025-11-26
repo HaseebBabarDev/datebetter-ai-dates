@@ -193,7 +193,7 @@ const WelcomeScreen = () => {
 
         {/* Intake Reminder Modal */}
         <Dialog open={showReminder} onOpenChange={setShowReminder}>
-          <DialogContent className="border-primary/20">
+          <DialogContent className="border-primary/20 max-w-sm">
             <DialogHeader>
               <div className="flex justify-center mb-4">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
