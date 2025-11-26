@@ -292,12 +292,13 @@ const Dashboard = () => {
       ? candidates.find((c) => c.id === lastInteraction.candidate_id)
       : null;
 
-    // Categorize by compatibility/feeling
+    // Categorize by compatibility/feeling - Good vibes requires 40%+ score
     const goodCandidates = activeCandidates.filter(
-      (c) => (c.compatibility_score && c.compatibility_score >= 70) || (c.overall_chemistry && c.overall_chemistry >= 4)
+      (c) => (c.compatibility_score && c.compatibility_score >= 40) && 
+             (!Array.isArray(c.red_flags) || c.red_flags.length < 3)
     );
     const badCandidates = activeCandidates.filter(
-      (c) => (c.compatibility_score && c.compatibility_score < 50) || 
+      (c) => (c.compatibility_score && c.compatibility_score < 40) || 
              (Array.isArray(c.red_flags) && c.red_flags.length >= 3)
     );
     const neutralCandidates = activeCandidates.filter(
@@ -331,14 +332,15 @@ const Dashboard = () => {
       }
     }
 
-    // Apply quality filter
+    // Apply quality filter - matches recap thresholds (40%+ for good)
     if (qualityFilter === "good") {
       filtered = filtered.filter(
-        (c) => (c.compatibility_score && c.compatibility_score >= 70) || (c.overall_chemistry && c.overall_chemistry >= 4)
+        (c) => (c.compatibility_score && c.compatibility_score >= 40) && 
+               (!Array.isArray(c.red_flags) || c.red_flags.length < 3)
       );
     } else if (qualityFilter === "bad") {
       filtered = filtered.filter(
-        (c) => (c.compatibility_score && c.compatibility_score < 50) || 
+        (c) => (c.compatibility_score && c.compatibility_score < 40) || 
                (Array.isArray(c.red_flags) && c.red_flags.length >= 3)
       );
     }
