@@ -312,7 +312,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
               return (
                 <div key={key} className="text-center p-3 rounded-lg bg-muted/30">
                   <Icon className={`w-5 h-5 mx-auto mb-1.5 ${getScoreColor(score)}`} />
-                  <div className={`text-base font-bold ${getScoreColor(score)}`}>{score}</div>
+                  <div className={`text-base font-bold ${getScoreColor(score)}`}>{score}%</div>
                   <div className="text-xs text-muted-foreground">{label}</div>
                 </div>
               );
