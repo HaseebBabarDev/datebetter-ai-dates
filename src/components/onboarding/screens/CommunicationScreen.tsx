@@ -27,8 +27,9 @@ const CommunicationScreen = () => {
               key={o.value} 
               selected={data.communicationStyle === o.value} 
               onClick={() => updateData({ communicationStyle: o.value })} 
-              icon={<o.icon className="w-4 h-4" />}
-              title={o.label} 
+              icon={<o.icon />}
+              title={o.label}
+              compact
             />
           ))}
         </div>
