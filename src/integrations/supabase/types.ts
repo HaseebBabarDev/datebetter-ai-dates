@@ -110,6 +110,7 @@ export type Database = {
           first_intimacy_date: string | null
           gender_identity: Database["public"]["Enums"]["gender_identity"] | null
           green_flags: Json | null
+          height: string | null
           humor_compatibility: number | null
           id: string
           intellectual_connection: number | null
@@ -160,6 +161,7 @@ export type Database = {
             | Database["public"]["Enums"]["gender_identity"]
             | null
           green_flags?: Json | null
+          height?: string | null
           humor_compatibility?: number | null
           id?: string
           intellectual_connection?: number | null
@@ -210,6 +212,7 @@ export type Database = {
             | Database["public"]["Enums"]["gender_identity"]
             | null
           green_flags?: Json | null
+          height?: string | null
           humor_compatibility?: number | null
           id?: string
           intellectual_connection?: number | null

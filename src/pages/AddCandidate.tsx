@@ -146,6 +146,15 @@ const CAREER_OPTIONS = [
   { value: "between_jobs", label: "Between Jobs" },
 ];
 
+const HEIGHT_OPTIONS = [
+  { value: "under_5ft", label: "Under 5'0\" (152 cm)" },
+  { value: "5ft_5ft3", label: "5'0\" - 5'3\" (152-160 cm)" },
+  { value: "5ft4_5ft6", label: "5'4\" - 5'6\" (163-168 cm)" },
+  { value: "5ft7_5ft9", label: "5'7\" - 5'9\" (170-175 cm)" },
+  { value: "5ft10_6ft", label: "5'10\" - 6'0\" (178-183 cm)" },
+  { value: "over_6ft", label: "Over 6'0\" (183+ cm)" },
+];
+
 type Candidate = Tables<"candidates">;
 
 const AddCandidate = () => {
@@ -167,6 +176,7 @@ const AddCandidate = () => {
   const [metApp, setMetApp] = useState("");
   const [status, setStatus] = useState<Enums<"candidate_status">>("just_matched");
   const [notes, setNotes] = useState("");
+  const [height, setHeight] = useState("");
 
   // About Them
   const [theirReligion, setTheirReligion] = useState("");
@@ -219,6 +229,7 @@ const AddCandidate = () => {
         setMetApp(data.met_app || "");
         setStatus(data.status || "just_matched");
         setNotes(data.notes || "");
+        setHeight((data as any).height || "");
         setTheirReligion(data.their_religion || "");
         setTheirPolitics(data.their_politics || "");
         setTheirRelationshipGoal(data.their_relationship_goal || "");
@@ -274,6 +285,7 @@ const AddCandidate = () => {
         met_app: metVia === "dating_app" ? metApp : null,
         status,
         notes: notes || null,
+        height: height || null,
         their_religion: theirReligion || null,
         their_politics: theirPolitics || null,
         their_relationship_goal: theirRelationshipGoal || null,
@@ -462,6 +474,20 @@ const AddCandidate = () => {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Height</Label>
+                    <Select value={height} onValueChange={setHeight}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {HEIGHT_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">

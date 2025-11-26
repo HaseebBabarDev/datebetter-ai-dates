@@ -123,6 +123,15 @@ const CAREER_STAGE_OPTIONS = [
   "Student", "Entry Level", "Mid-Career", "Senior/Executive", "Entrepreneur", "Freelance/Creative", "Between Jobs", "Retired",
 ];
 
+const HEIGHT_OPTIONS = [
+  { value: "under_5ft", label: "Under 5'0\"" },
+  { value: "5ft_5ft3", label: "5'0\" - 5'3\"" },
+  { value: "5ft4_5ft6", label: "5'4\" - 5'6\"" },
+  { value: "5ft7_5ft9", label: "5'7\" - 5'9\"" },
+  { value: "5ft10_6ft", label: "5'10\" - 6'0\"" },
+  { value: "over_6ft", label: "Over 6'0\"" },
+];
+
 export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   onSuccess,
   trigger,
@@ -134,6 +143,7 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   // Basic Info
   const [nickname, setNickname] = useState("");
   const [age, setAge] = useState("");
+  const [height, setHeight] = useState("");
   const [genderIdentity, setGenderIdentity] = useState<Enums<"gender_identity"> | "">("");
   const [pronouns, setPronouns] = useState<Enums<"pronouns"> | "">("");
   const [isDefaultGender, setIsDefaultGender] = useState(false);
@@ -194,6 +204,7 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   const resetForm = () => {
     setNickname("");
     setAge("");
+    setHeight("");
     // Preserve default gender identity if set
     const savedDefault = localStorage.getItem(DEFAULT_GENDER_KEY);
     if (savedDefault) {
@@ -245,6 +256,7 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
         pronouns: pronouns || null,
         met_via: metVia || null,
         met_app: metVia === "dating_app" ? metApp : null,
+        height: height || null,
         their_religion: religion || null,
         their_politics: politics || null,
         their_relationship_goal: relationshipGoal || null,
@@ -355,6 +367,17 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
                     Set as default for new candidates
                   </Label>
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Height</Label>
+                <Select value={height} onValueChange={setHeight}>
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {HEIGHT_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
