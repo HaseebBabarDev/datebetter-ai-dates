@@ -15,7 +15,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onCandidateAdded }) => {
       </div>
       
       <h2 className="text-xl font-semibold text-foreground mb-2">
-        Your dating roster is empty
+        No candidates yet
       </h2>
       
       <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
