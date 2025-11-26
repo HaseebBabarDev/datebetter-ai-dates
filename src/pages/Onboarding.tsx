@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Brain, Shield, TrendingUp } from "lucide-react";
+import { Brain, Shield, TrendingUp, ArrowLeft } from "lucide-react";
 
 const Onboarding = () => {
   const navigate = useNavigate();
@@ -26,7 +26,10 @@ const Onboarding = () => {
 
   return (
     <div className="min-h-screen bg-[image:var(--gradient-subtle)]">
-      <header className="px-4 py-4 md:py-8">
+      <header className="px-4 py-4 md:py-8 flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="hover:bg-primary/10">
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
         <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))] bg-clip-text text-transparent">
           dateBetter
         </h1>
