@@ -10,6 +10,7 @@ interface OptionCardProps {
   description?: string;
   disabled?: boolean;
   className?: string;
+  compact?: boolean;
 }
 
 export const OptionCard: React.FC<OptionCardProps> = ({
@@ -20,6 +21,7 @@ export const OptionCard: React.FC<OptionCardProps> = ({
   description,
   disabled = false,
   className,
+  compact = false,
 }) => {
   return (
     <button
@@ -27,8 +29,9 @@ export const OptionCard: React.FC<OptionCardProps> = ({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "w-full p-4 rounded-xl border-2 text-left transition-all duration-200",
+        "w-full rounded-xl border-2 text-left transition-all duration-200",
         "hover:border-primary/50 hover:shadow-card",
+        compact ? "p-2.5" : "p-4",
         selected
           ? "border-primary bg-primary-very-light shadow-card"
           : "border-border bg-card",
@@ -36,29 +39,38 @@ export const OptionCard: React.FC<OptionCardProps> = ({
         className
       )}
     >
-      <div className="flex items-start gap-3">
+      <div className={cn("flex items-center", compact ? "gap-2" : "gap-3 items-start")}>
         {icon && (
           <div className={cn(
-            "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+            "rounded-lg flex items-center justify-center shrink-0",
+            compact ? "w-7 h-7" : "w-10 h-10",
             selected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
           )}>
-            {icon}
+            {React.isValidElement(icon) 
+              ? React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
+                  className: cn(
+                    (icon as React.ReactElement<{ className?: string }>).props.className,
+                    compact ? "w-3.5 h-3.5" : "w-4 h-4"
+                  )
+                })
+              : icon
+            }
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-1">
             <span className={cn(
-              "font-medium",
-              selected ? "text-primary" : "text-foreground"
+              selected ? "text-primary" : "text-foreground",
+              compact ? "text-xs font-medium leading-tight" : "font-medium"
             )}>
               {title}
             </span>
             {selected && (
-              <Check className="w-5 h-5 text-primary shrink-0" />
+              <Check className={cn("text-primary shrink-0", compact ? "w-3.5 h-3.5" : "w-5 h-5")} />
             )}
           </div>
           {description && (
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className={cn("text-muted-foreground mt-1", compact ? "text-xs" : "text-sm")}>
               {description}
             </p>
           )}
