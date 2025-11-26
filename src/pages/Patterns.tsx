@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +19,11 @@ import {
   Lightbulb,
   BarChart3,
   PieChart,
+  Share2,
+  Star,
+  Trophy,
 } from "lucide-react";
+import { toast } from "sonner";
 
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
@@ -41,6 +45,7 @@ interface PatternStats {
   adviceAcceptanceRate: number;
   totalAdviceGiven: number;
   meetingSources: { source: string; count: number }[];
+  dateTypeSuccess: { type: string; avgFeeling: number; count: number }[];
 }
 
 const Patterns = () => {
@@ -166,6 +171,26 @@ const Patterns = () => {
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
 
+      // Date type success rates (average feeling per type)
+      const dateTypeStats: Record<string, { total: number; count: number }> = {};
+      interactions.forEach((i) => {
+        if (i.overall_feeling !== null) {
+          if (!dateTypeStats[i.interaction_type]) {
+            dateTypeStats[i.interaction_type] = { total: 0, count: 0 };
+          }
+          dateTypeStats[i.interaction_type].total += i.overall_feeling;
+          dateTypeStats[i.interaction_type].count += 1;
+        }
+      });
+      const dateTypeSuccess = Object.entries(dateTypeStats)
+        .map(([type, { total, count }]) => ({
+          type,
+          avgFeeling: Math.round((total / count) * 10) / 10,
+          count,
+        }))
+        .sort((a, b) => b.avgFeeling - a.avgFeeling)
+        .slice(0, 5);
+
       setStats({
         totalCandidates: candidates.length,
         activeCandidates: activeCandidates.length,
@@ -182,6 +207,7 @@ const Patterns = () => {
         adviceAcceptanceRate,
         totalAdviceGiven: advice.length,
         meetingSources,
+        dateTypeSuccess,
       });
     } catch (error) {
       console.error("Error fetching pattern data:", error);
@@ -229,6 +255,36 @@ const Patterns = () => {
     }
   };
 
+  const shareToInstagram = async () => {
+    if (!stats) return;
+    
+    // Create shareable content
+    const shareText = `My Dating Patterns 💕\n\n` +
+      `📊 ${stats.totalCandidates} people tracked\n` +
+      `💫 ${stats.avgCompatibilityScore}% avg compatibility\n` +
+      `${stats.dateTypeSuccess[0] ? `🏆 Best date type: ${formatInteractionType(stats.dateTypeSuccess[0].type)}` : ''}\n` +
+      `${stats.avgOverallFeeling > 0 ? `⭐ ${stats.avgOverallFeeling.toFixed(1)}/5 avg date feeling` : ''}\n\n` +
+      `Track your dating journey with intention ✨`;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'My Dating Patterns',
+          text: shareText,
+        });
+        toast.success("Ready to share!");
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        toast.success("Copied to clipboard! Paste in your Instagram story");
+      }
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') {
+        await navigator.clipboard.writeText(shareText);
+        toast.success("Copied to clipboard!");
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -241,6 +297,11 @@ const Patterns = () => {
             <h1 className="font-semibold text-foreground">Dating Patterns</h1>
             <p className="text-xs text-muted-foreground">Insights from your journey</p>
           </div>
+          {stats && stats.totalCandidates > 0 && (
+            <Button variant="ghost" size="icon" onClick={shareToInstagram}>
+              <Share2 className="w-5 h-5" />
+            </Button>
+          )}
           <BarChart3 className="w-5 h-5 text-primary" />
         </div>
       </header>
@@ -360,6 +421,42 @@ const Patterns = () => {
                       </Badge>
                     ))}
                   </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Best Date Types */}
+            {stats.dateTypeSuccess.length > 0 && (
+              <Card className="border-green-500/30 bg-green-500/5">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-green-500" />
+                    Best Date Types
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Date types with highest success (avg feeling)
+                  </p>
+                  {stats.dateTypeSuccess.map(({ type, avgFeeling, count }, index) => (
+                    <div key={type} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {index === 0 && <Star className="w-4 h-4 text-yellow-500" />}
+                        <span className="text-xs">{formatInteractionType(type)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-3 h-3 ${star <= Math.round(avgFeeling) ? "text-yellow-500 fill-yellow-500" : "text-muted"}`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs text-muted-foreground">({count})</span>
+                      </div>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             )}
