@@ -51,11 +51,8 @@ const Onboarding = () => {
             return (
               <Card
                 key={index}
-                className="p-4 md:p-8 bg-[image:var(--gradient-card)] border-border/50 hover:shadow-[var(--shadow-soft)] transition-all duration-300 animate-fade-in opacity-0"
-                style={{ 
-                  animationDelay: `${index * 150}ms`,
-                  animationFillMode: 'forwards'
-                }}
+                className="p-4 md:p-8 bg-[image:var(--gradient-card)] border-border/50 hover:shadow-[var(--shadow-soft)] hover:-translate-y-1 transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: `${index * 150}ms` }}
               >
                 <div className="flex md:block items-center gap-3 md:gap-0">
                   <div className="mb-0 md:mb-6 w-10 h-10 md:w-16 md:h-16 shrink-0 rounded-xl md:rounded-2xl bg-gradient-to-br from-[hsl(var(--primary))] to-[hsl(var(--secondary))] flex items-center justify-center">
