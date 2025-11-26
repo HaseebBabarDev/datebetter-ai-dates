@@ -15,7 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, UserPlus, Sparkles, Heart, Pencil } from "lucide-react";
+import { ArrowLeft, UserPlus, Sparkles, Heart, Pencil, ChevronRight } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 const MET_VIA_OPTIONS = [
@@ -207,141 +208,156 @@ const AddCandidate = () => {
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-lg">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Basic Info</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="nickname">Nickname *</Label>
-                <Input
-                  id="nickname"
-                  placeholder="What do you call them?"
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  maxLength={50}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Use a nickname to keep things anonymous
-                </p>
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Tabs defaultValue="basics" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="basics">Basics</TabsTrigger>
+              <TabsTrigger value="details">Details</TabsTrigger>
+            </TabsList>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="age">Age</Label>
-                  <Input
-                    id="age"
-                    type="number"
-                    placeholder="Their age"
-                    value={age}
-                    onChange={(e) => setAge(e.target.value)}
-                    min={18}
-                    max={99}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Status</Label>
-                  <Select
-                    value={status}
-                    onValueChange={(v) => setStatus(v as Enums<"candidate_status">)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="just_matched">Just Matched</SelectItem>
-                      <SelectItem value="texting">Texting</SelectItem>
-                      <SelectItem value="planning_date">Planning Date</SelectItem>
-                      <SelectItem value="dating">Dating</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            <TabsContent value="basics" className="mt-4 space-y-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Basic Info</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="nickname">Nickname *</Label>
+                    <Input
+                      id="nickname"
+                      placeholder="What do you call them?"
+                      value={nickname}
+                      onChange={(e) => setNickname(e.target.value)}
+                      maxLength={50}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Use a nickname to keep things anonymous
+                    </p>
+                  </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">How You Met</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Where did you meet?</Label>
-                <Select value={metVia} onValueChange={setMetVia}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {MET_VIA_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="age">Age</Label>
+                      <Input
+                        id="age"
+                        type="number"
+                        placeholder="Their age"
+                        value={age}
+                        onChange={(e) => setAge(e.target.value)}
+                        min={18}
+                        max={99}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Status</Label>
+                      <Select
+                        value={status}
+                        onValueChange={(v) => setStatus(v as Enums<"candidate_status">)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="just_matched">Just Matched</SelectItem>
+                          <SelectItem value="texting">Texting</SelectItem>
+                          <SelectItem value="planning_date">Planning Date</SelectItem>
+                          <SelectItem value="dating">Dating</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-              {metVia === "dating_app" && (
-                <div className="space-y-2">
-                  <Label>Which app?</Label>
-                  <Select value={metApp} onValueChange={setMetApp}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select app..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {APP_OPTIONS.map((app) => (
-                        <SelectItem key={app} value={app}>
-                          {app}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              <p className="text-xs text-center text-muted-foreground">
+                Swipe to "Details" tab for more options <ChevronRight className="w-3 h-3 inline" />
+              </p>
+            </TabsContent>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Heart className="w-5 h-5 text-pink-500" />
-                Intimacy
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm">Been intimate?</p>
-                  <p className="text-xs text-muted-foreground">
-                    Helps track oxytocin bonding alerts
-                  </p>
-                </div>
-                <Switch
-                  checked={beenIntimate}
-                  onCheckedChange={setBeenIntimate}
-                />
-              </div>
+            <TabsContent value="details" className="mt-4 space-y-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">How You Met</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Where did you meet?</Label>
+                    <Select value={metVia} onValueChange={setMetVia}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {MET_VIA_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              {beenIntimate && (
-                <div className="space-y-2">
-                  <Label htmlFor="intimacyDate">First intimacy date</Label>
-                  <Input
-                    id="intimacyDate"
-                    type="date"
-                    value={firstIntimacyDate}
-                    onChange={(e) => setFirstIntimacyDate(e.target.value)}
-                    max={new Date().toISOString().split("T")[0]}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    We'll remind you about hormone-bonding effects for 48-72 hours after intimacy
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  {metVia === "dating_app" && (
+                    <div className="space-y-2">
+                      <Label>Which app?</Label>
+                      <Select value={metApp} onValueChange={setMetApp}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select app..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {APP_OPTIONS.map((app) => (
+                            <SelectItem key={app} value={app}>
+                              {app}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-          <div className="space-y-3">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-pink-500" />
+                    Intimacy
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-sm">Been intimate?</p>
+                      <p className="text-xs text-muted-foreground">
+                        Helps track oxytocin bonding alerts
+                      </p>
+                    </div>
+                    <Switch
+                      checked={beenIntimate}
+                      onCheckedChange={setBeenIntimate}
+                    />
+                  </div>
+
+                  {beenIntimate && (
+                    <div className="space-y-2">
+                      <Label htmlFor="intimacyDate">First intimacy date</Label>
+                      <Input
+                        id="intimacyDate"
+                        type="date"
+                        value={firstIntimacyDate}
+                        onChange={(e) => setFirstIntimacyDate(e.target.value)}
+                        max={new Date().toISOString().split("T")[0]}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        We'll remind you about hormone-bonding effects for 48-72 hours after intimacy
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
+          <div className="space-y-3 pt-2">
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading ? (
                 "Saving..."
