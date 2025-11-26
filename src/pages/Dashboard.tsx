@@ -161,6 +161,47 @@ const Dashboard = () => {
     return alerts;
   }, [interactions, candidates]);
 
+  // Post-intimacy drop detection - feelings/contact dropped after intimacy
+  const postIntimacyDropAlerts = useMemo(() => {
+    const alerts: { candidate: Candidate; reason: string }[] = [];
+    
+    candidates.forEach((candidate) => {
+      const candidateInteractions = interactions
+        .filter((i) => i.candidate_id === candidate.id)
+        .sort((a, b) => new Date(a.interaction_date || "").getTime() - new Date(b.interaction_date || "").getTime());
+      
+      // Find first intimate interaction
+      const firstIntimateIdx = candidateInteractions.findIndex((i) => i.interaction_type === "intimate");
+      if (firstIntimateIdx === -1) return;
+      
+      const preIntimateInteractions = candidateInteractions.slice(0, firstIntimateIdx);
+      const postIntimateInteractions = candidateInteractions.slice(firstIntimateIdx + 1);
+      
+      if (preIntimateInteractions.length < 2 || postIntimateInteractions.length < 1) return;
+      
+      // Calculate average feelings before vs after
+      const preAvg = preIntimateInteractions.reduce((sum, i) => sum + (i.overall_feeling || 3), 0) / preIntimateInteractions.length;
+      const postAvg = postIntimateInteractions.reduce((sum, i) => sum + (i.overall_feeling || 3), 0) / postIntimateInteractions.length;
+      
+      // Check for drop in feelings or frequency
+      const feelingDrop = preAvg - postAvg >= 1;
+      
+      // Check notes for drop indicators
+      const dropPhrases = ["fell off", "falling off", "distant", "pulled away", "less interested", "ghosting", "slow fade", "breadcrumbing", "mixed signals"];
+      const postNotes = postIntimateInteractions.map(i => (i.notes || "").toLowerCase()).join(" ");
+      const hasDropLanguage = dropPhrases.some(phrase => postNotes.includes(phrase));
+      
+      if (feelingDrop || hasDropLanguage) {
+        alerts.push({ 
+          candidate, 
+          reason: hasDropLanguage ? "Post-intimacy pullback detected" : "Feelings dropped after intimacy"
+        });
+      }
+    });
+    
+    return alerts;
+  }, [candidates, interactions]);
+
   // Love bombing detection - rapid escalation pattern
   const loveBombingAlerts = useMemo(() => {
     const alerts: { candidate: Candidate; reason: string }[] = [];
@@ -196,6 +237,43 @@ const Dashboard = () => {
     
     return alerts;
   }, [candidates, interactions]);
+
+  // Build candidate alerts map for badges
+  const candidateAlerts = useMemo(() => {
+    const alertsMap: Record<string, { type: string; label: string; color: string }[]> = {};
+    
+    // Oxytocin alerts
+    oxytocinAlerts.forEach(({ candidate, daysSince }) => {
+      if (!alertsMap[candidate.id]) alertsMap[candidate.id] = [];
+      alertsMap[candidate.id].push({
+        type: "oxytocin",
+        label: daysSince <= 2 ? "🔥 Bonding high" : "Oxytocin clearing",
+        color: daysSince <= 2 ? "bg-pink-500/20 text-pink-600" : "bg-amber-500/20 text-amber-600"
+      });
+    });
+    
+    // Love bombing alerts
+    loveBombingAlerts.forEach(({ candidate }) => {
+      if (!alertsMap[candidate.id]) alertsMap[candidate.id] = [];
+      alertsMap[candidate.id].push({
+        type: "love_bombing",
+        label: "⚠️ Love bombing?",
+        color: "bg-orange-500/20 text-orange-600"
+      });
+    });
+    
+    // Post-intimacy drop alerts
+    postIntimacyDropAlerts.forEach(({ candidate }) => {
+      if (!alertsMap[candidate.id]) alertsMap[candidate.id] = [];
+      alertsMap[candidate.id].push({
+        type: "post_intimacy_drop",
+        label: "📉 Post-intimacy drop",
+        color: "bg-purple-500/20 text-purple-600"
+      });
+    });
+    
+    return alertsMap;
+  }, [oxytocinAlerts, loveBombingAlerts, postIntimacyDropAlerts]);
 
   // Candidate recap
   const recap: CandidateRecap = useMemo(() => {
@@ -332,7 +410,7 @@ const Dashboard = () => {
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" className="relative text-foreground hover:bg-primary/10" onClick={() => navigate("/notifications")}>
                 <Bell className="w-5 h-5" />
-                {(oxytocinAlerts.length > 0 || loveBombingAlerts.length > 0 || candidates.filter(c => c.no_contact_active).length > 0 || cycleAlerts) && (
+                {(oxytocinAlerts.length > 0 || loveBombingAlerts.length > 0 || postIntimacyDropAlerts.length > 0 || candidates.filter(c => c.no_contact_active).length > 0 || cycleAlerts) && (
                   <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
                 )}
               </Button>
@@ -629,6 +707,7 @@ const Dashboard = () => {
                   candidates={filteredAndSortedCandidates}
                   onUpdate={fetchData}
                   showGroupHeaders={statusFilter === "all" && sortBy === "status" && !qualityFilter}
+                  candidateAlerts={candidateAlerts}
                 />
               </div>
             ) : (

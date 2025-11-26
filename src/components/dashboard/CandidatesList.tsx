@@ -1,6 +1,6 @@
 import React from "react";
 import { Tables } from "@/integrations/supabase/types";
-import { CandidateCard } from "./CandidateCard";
+import { CandidateCard, CandidateAlert } from "./CandidateCard";
 
 type Candidate = Tables<"candidates">;
 
@@ -8,6 +8,7 @@ interface CandidatesListProps {
   candidates: Candidate[];
   onUpdate: () => void;
   showGroupHeaders?: boolean;
+  candidateAlerts?: Record<string, CandidateAlert[]>;
 }
 
 const statusOrder: Record<string, number> = {
@@ -24,6 +25,7 @@ export const CandidatesList: React.FC<CandidatesListProps> = ({
   candidates,
   onUpdate,
   showGroupHeaders = true,
+  candidateAlerts = {},
 }) => {
   // If not showing group headers, render flat list
   if (!showGroupHeaders) {
@@ -41,6 +43,7 @@ export const CandidatesList: React.FC<CandidatesListProps> = ({
             key={candidate.id}
             candidate={candidate}
             onUpdate={onUpdate}
+            alerts={candidateAlerts[candidate.id]}
           />
         ))}
       </div>
@@ -71,6 +74,7 @@ export const CandidatesList: React.FC<CandidatesListProps> = ({
                 key={candidate.id}
                 candidate={candidate}
                 onUpdate={onUpdate}
+                alerts={candidateAlerts[candidate.id]}
               />
             ))}
           </div>
@@ -88,6 +92,7 @@ export const CandidatesList: React.FC<CandidatesListProps> = ({
                 key={candidate.id}
                 candidate={candidate}
                 onUpdate={onUpdate}
+                alerts={candidateAlerts[candidate.id]}
               />
             ))}
           </div>
@@ -105,6 +110,7 @@ export const CandidatesList: React.FC<CandidatesListProps> = ({
                 key={candidate.id}
                 candidate={candidate}
                 onUpdate={onUpdate}
+                alerts={candidateAlerts[candidate.id]}
               />
             ))}
           </div>

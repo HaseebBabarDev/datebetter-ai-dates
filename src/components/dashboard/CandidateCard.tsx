@@ -24,9 +24,16 @@ import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompa
 
 type Candidate = Tables<"candidates">;
 
+export interface CandidateAlert {
+  type: string;
+  label: string;
+  color: string;
+}
+
 interface CandidateCardProps {
   candidate: Candidate;
   onUpdate: () => void;
+  alerts?: CandidateAlert[];
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -76,7 +83,7 @@ const getNextStep = (status: string | null, updatedAt: string | null): string | 
   }
 };
 
-export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdate }) => {
+export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdate, alerts = [] }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [userSchedule, setUserSchedule] = useState<string | null>(null);
@@ -169,6 +176,20 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
               );
             })()}
           </div>
+
+          {/* Alert Badges */}
+          {alerts.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {alerts.map((alert, idx) => (
+                <span
+                  key={idx}
+                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${alert.color}`}
+                >
+                  {alert.label}
+                </span>
+              ))}
+            </div>
+          )}
 
           {candidate.compatibility_score && (
             <div className="mt-3">
