@@ -32,7 +32,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { SliderInput } from "@/components/onboarding/SliderInput";
-import { Plus, AlertTriangle } from "lucide-react";
+import { Plus, AlertTriangle, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
 
 interface AddInteractionFormProps {
@@ -41,6 +41,7 @@ interface AddInteractionFormProps {
   onRescore?: () => void;
   isNoContact?: boolean;
   onBrokeContact?: () => void;
+  hasPendingAdvice?: boolean;
   defaultType?: Enums<"interaction_type">;
   triggerButton?: React.ReactNode;
 }
@@ -76,12 +77,14 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   onRescore,
   isNoContact = false,
   onBrokeContact,
+  hasPendingAdvice = false,
   defaultType = "coffee",
   triggerButton,
 }) => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [showBrokeContactDialog, setShowBrokeContactDialog] = useState(false);
+  const [showPendingAdviceDialog, setShowPendingAdviceDialog] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [interactionType, setInteractionType] = useState<Enums<"interaction_type">>(defaultType);
@@ -147,7 +150,9 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   };
 
   const handleOpenChange = (newOpen: boolean) => {
-    if (newOpen && isNoContact) {
+    if (newOpen && hasPendingAdvice) {
+      setShowPendingAdviceDialog(true);
+    } else if (newOpen && isNoContact) {
       setShowBrokeContactDialog(true);
     } else {
       setOpen(newOpen);
@@ -164,6 +169,24 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
 
   return (
     <>
+      <AlertDialog open={showPendingAdviceDialog} onOpenChange={setShowPendingAdviceDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Lightbulb className="w-5 h-5 text-primary" />
+              Respond to AI Advice First
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>You have pending AI advice that needs your attention before logging a new interaction.</p>
+              <p>Please go to the <strong>Insights</strong> tab and accept or decline the advice to continue.</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>Got it</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <AlertDialog open={showBrokeContactDialog} onOpenChange={setShowBrokeContactDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
