@@ -16,11 +16,13 @@ import { SliderInput } from "@/components/onboarding/SliderInput";
 import { Badge } from "@/components/ui/badge";
 import { Edit2, Save, X, Calendar, MapPin, User, Briefcase, Heart, Users, Church, Vote } from "lucide-react";
 import { toast } from "sonner";
+import { CandidatePhotoUpload } from "./CandidatePhotoUpload";
 
 type Candidate = Tables<"candidates">;
 
 interface CandidateProfileProps {
   candidate: Candidate;
+  userId: string;
   onUpdate: (updates: Partial<Candidate>) => Promise<void>;
 }
 
@@ -111,8 +113,10 @@ const CAREER_STAGE_OPTIONS = [
 
 export const CandidateProfile: React.FC<CandidateProfileProps> = ({
   candidate,
+  userId,
   onUpdate,
 }) => {
+  const [photoUrl, setPhotoUrl] = useState(candidate.photo_url);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -212,6 +216,19 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Photo Upload */}
+      <Card>
+        <CardContent className="pt-6">
+          <CandidatePhotoUpload
+            candidateId={candidate.id}
+            userId={userId}
+            nickname={candidate.nickname}
+            currentPhotoUrl={photoUrl}
+            onPhotoUpdated={setPhotoUrl}
+          />
+        </CardContent>
+      </Card>
+
       {/* Edit Toggle */}
       <div className="flex justify-end">
         {!editing ? (
