@@ -1,0 +1,101 @@
+import React from "react";
+import { useOnboarding } from "@/contexts/OnboardingContext";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+
+interface OnboardingLayoutProps {
+  children: React.ReactNode;
+  showProgress?: boolean;
+  showBack?: boolean;
+  title?: string;
+  subtitle?: string;
+  headerGradient?: boolean;
+}
+
+export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
+  children,
+  showProgress = true,
+  showBack = true,
+  title,
+  subtitle,
+  headerGradient = false,
+}) => {
+  const { currentStep, totalSteps, prevStep } = useOnboarding();
+  const progress = ((currentStep + 1) / totalSteps) * 100;
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header */}
+      {headerGradient ? (
+        <header className="bg-[image:var(--gradient-header)] px-6 py-8 text-center">
+          {showBack && currentStep > 0 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute left-4 top-4 text-primary-foreground hover:bg-primary-foreground/10"
+              onClick={prevStep}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          )}
+          {title && (
+            <h1 className="text-2xl md:text-3xl font-bold text-primary-foreground mb-2">
+              {title}
+            </h1>
+          )}
+          {subtitle && (
+            <p className="text-primary-foreground/80 text-sm md:text-base">
+              {subtitle}
+            </p>
+          )}
+        </header>
+      ) : (
+        <header className="px-6 py-4 flex items-center justify-between border-b border-border/50">
+          <div className="flex items-center gap-4">
+            {showBack && currentStep > 0 && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-foreground"
+                onClick={prevStep}
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            )}
+            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              dateBetter
+            </h1>
+          </div>
+          {showProgress && currentStep > 0 && (
+            <span className="text-sm text-muted-foreground">
+              Step {currentStep} of {totalSteps - 1}
+            </span>
+          )}
+        </header>
+      )}
+
+      {/* Progress Bar */}
+      {showProgress && currentStep > 0 && (
+        <div className="px-6 py-2">
+          <Progress value={progress} className="h-1.5" />
+        </div>
+      )}
+
+      {/* Content */}
+      <main className="flex-1 overflow-auto">
+        <div className="container max-w-lg mx-auto px-6 py-8">
+          {!headerGradient && title && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-foreground mb-2">{title}</h2>
+              {subtitle && (
+                <p className="text-muted-foreground">{subtitle}</p>
+              )}
+            </div>
+          )}
+          {children}
+        </div>
+      </main>
+    </div>
+  );
+};

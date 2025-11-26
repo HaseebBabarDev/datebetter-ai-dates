@@ -14,7 +14,607 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      advice_tracking: {
+        Row: {
+          advice_text: string
+          advice_type: string | null
+          candidate_id: string | null
+          created_at: string | null
+          followed_through: boolean | null
+          id: string
+          responded_at: string | null
+          response: string | null
+          user_id: string
+        }
+        Insert: {
+          advice_text: string
+          advice_type?: string | null
+          candidate_id?: string | null
+          created_at?: string | null
+          followed_through?: boolean | null
+          id?: string
+          responded_at?: string | null
+          response?: string | null
+          user_id: string
+        }
+        Update: {
+          advice_text?: string
+          advice_type?: string | null
+          candidate_id?: string | null
+          created_at?: string | null
+          followed_through?: boolean | null
+          id?: string
+          responded_at?: string | null
+          response?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advice_tracking_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      behavioral_patterns: {
+        Row: {
+          acknowledged: boolean | null
+          candidate_id: string
+          details: Json | null
+          detected_at: string | null
+          id: string
+          pattern_type: string
+          severity: string | null
+          user_id: string
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          candidate_id: string
+          details?: Json | null
+          detected_at?: string | null
+          id?: string
+          pattern_type: string
+          severity?: string | null
+          user_id: string
+        }
+        Update: {
+          acknowledged?: boolean | null
+          candidate_id?: string
+          details?: Json | null
+          detected_at?: string | null
+          id?: string
+          pattern_type?: string
+          severity?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "behavioral_patterns_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidates: {
+        Row: {
+          age: number | null
+          ai_description: string | null
+          compatibility_score: number | null
+          created_at: string | null
+          energy_match: number | null
+          first_contact_date: string | null
+          first_intimacy_date: string | null
+          gender_identity: Database["public"]["Enums"]["gender_identity"] | null
+          green_flags: Json | null
+          humor_compatibility: number | null
+          id: string
+          intellectual_connection: number | null
+          last_score_update: string | null
+          met_app: string | null
+          met_via: string | null
+          nickname: string
+          no_contact_active: boolean | null
+          no_contact_day: number | null
+          no_contact_start_date: string | null
+          notes: string | null
+          overall_chemistry: number | null
+          photo_url: string | null
+          physical_attraction: number | null
+          pronouns: Database["public"]["Enums"]["pronouns"] | null
+          red_flags: Json | null
+          score_breakdown: Json | null
+          status: Database["public"]["Enums"]["candidate_status"] | null
+          their_ambition_level: number | null
+          their_attachment_style:
+            | Database["public"]["Enums"]["attachment_style"]
+            | null
+          their_career_stage: string | null
+          their_kids_desire: Database["public"]["Enums"]["kids_desire"] | null
+          their_kids_status: Database["public"]["Enums"]["kids_status"] | null
+          their_politics: Database["public"]["Enums"]["politics"] | null
+          their_relationship_goal:
+            | Database["public"]["Enums"]["relationship_goal"]
+            | null
+          their_religion: Database["public"]["Enums"]["religion"] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          ai_description?: string | null
+          compatibility_score?: number | null
+          created_at?: string | null
+          energy_match?: number | null
+          first_contact_date?: string | null
+          first_intimacy_date?: string | null
+          gender_identity?:
+            | Database["public"]["Enums"]["gender_identity"]
+            | null
+          green_flags?: Json | null
+          humor_compatibility?: number | null
+          id?: string
+          intellectual_connection?: number | null
+          last_score_update?: string | null
+          met_app?: string | null
+          met_via?: string | null
+          nickname: string
+          no_contact_active?: boolean | null
+          no_contact_day?: number | null
+          no_contact_start_date?: string | null
+          notes?: string | null
+          overall_chemistry?: number | null
+          photo_url?: string | null
+          physical_attraction?: number | null
+          pronouns?: Database["public"]["Enums"]["pronouns"] | null
+          red_flags?: Json | null
+          score_breakdown?: Json | null
+          status?: Database["public"]["Enums"]["candidate_status"] | null
+          their_ambition_level?: number | null
+          their_attachment_style?:
+            | Database["public"]["Enums"]["attachment_style"]
+            | null
+          their_career_stage?: string | null
+          their_kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
+          their_kids_status?: Database["public"]["Enums"]["kids_status"] | null
+          their_politics?: Database["public"]["Enums"]["politics"] | null
+          their_relationship_goal?:
+            | Database["public"]["Enums"]["relationship_goal"]
+            | null
+          their_religion?: Database["public"]["Enums"]["religion"] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          ai_description?: string | null
+          compatibility_score?: number | null
+          created_at?: string | null
+          energy_match?: number | null
+          first_contact_date?: string | null
+          first_intimacy_date?: string | null
+          gender_identity?:
+            | Database["public"]["Enums"]["gender_identity"]
+            | null
+          green_flags?: Json | null
+          humor_compatibility?: number | null
+          id?: string
+          intellectual_connection?: number | null
+          last_score_update?: string | null
+          met_app?: string | null
+          met_via?: string | null
+          nickname?: string
+          no_contact_active?: boolean | null
+          no_contact_day?: number | null
+          no_contact_start_date?: string | null
+          notes?: string | null
+          overall_chemistry?: number | null
+          photo_url?: string | null
+          physical_attraction?: number | null
+          pronouns?: Database["public"]["Enums"]["pronouns"] | null
+          red_flags?: Json | null
+          score_breakdown?: Json | null
+          status?: Database["public"]["Enums"]["candidate_status"] | null
+          their_ambition_level?: number | null
+          their_attachment_style?:
+            | Database["public"]["Enums"]["attachment_style"]
+            | null
+          their_career_stage?: string | null
+          their_kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
+          their_kids_status?: Database["public"]["Enums"]["kids_status"] | null
+          their_politics?: Database["public"]["Enums"]["politics"] | null
+          their_relationship_goal?:
+            | Database["public"]["Enums"]["relationship_goal"]
+            | null
+          their_religion?: Database["public"]["Enums"]["religion"] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      interactions: {
+        Row: {
+          ai_analysis: Json | null
+          candidate_id: string
+          created_at: string | null
+          duration: string | null
+          gut_feeling: string | null
+          id: string
+          interaction_date: string | null
+          interaction_type: Database["public"]["Enums"]["interaction_type"]
+          notes: string | null
+          overall_feeling: number | null
+          user_id: string
+          who_initiated: string | null
+          who_paid: string | null
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          candidate_id: string
+          created_at?: string | null
+          duration?: string | null
+          gut_feeling?: string | null
+          id?: string
+          interaction_date?: string | null
+          interaction_type: Database["public"]["Enums"]["interaction_type"]
+          notes?: string | null
+          overall_feeling?: number | null
+          user_id: string
+          who_initiated?: string | null
+          who_paid?: string | null
+        }
+        Update: {
+          ai_analysis?: Json | null
+          candidate_id?: string
+          created_at?: string | null
+          duration?: string | null
+          gut_feeling?: string | null
+          id?: string
+          interaction_date?: string | null
+          interaction_type?: Database["public"]["Enums"]["interaction_type"]
+          notes?: string | null
+          overall_feeling?: number | null
+          user_id?: string
+          who_initiated?: string | null
+          who_paid?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interactions_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      no_contact_progress: {
+        Row: {
+          broke_nc: boolean | null
+          candidate_id: string
+          created_at: string | null
+          day_number: number
+          hoover_attempt: boolean | null
+          id: string
+          message_sent: boolean | null
+          user_id: string
+        }
+        Insert: {
+          broke_nc?: boolean | null
+          candidate_id: string
+          created_at?: string | null
+          day_number: number
+          hoover_attempt?: boolean | null
+          id?: string
+          message_sent?: boolean | null
+          user_id: string
+        }
+        Update: {
+          broke_nc?: boolean | null
+          candidate_id?: string
+          created_at?: string | null
+          day_number?: number
+          hoover_attempt?: boolean | null
+          id?: string
+          message_sent?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "no_contact_progress_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          ambition_level: number | null
+          attachment_style:
+            | Database["public"]["Enums"]["attachment_style"]
+            | null
+          attraction_importance: number | null
+          behavioral_monitoring: number | null
+          birth_date: string | null
+          boundary_strength: number | null
+          career_stage: string | null
+          chemistry_factors: Json | null
+          communication_style:
+            | Database["public"]["Enums"]["communication_style"]
+            | null
+          conflict_style: string | null
+          created_at: string | null
+          custom_pronouns: string | null
+          cycle_length: number | null
+          cycle_regularity:
+            | Database["public"]["Enums"]["cycle_regularity"]
+            | null
+          dating_history_text: string | null
+          dating_patterns: Json | null
+          dealbreakers: Json | null
+          distance_preference: string | null
+          education_level: string | null
+          education_matters: boolean | null
+          exclusivity_before_intimacy: boolean | null
+          faith_importance: number | null
+          faith_requirements: Json | null
+          financial_importance: number | null
+          financial_situation: string | null
+          financial_vulnerability: number | null
+          flexibility_rating: number | null
+          gender_identity: Database["public"]["Enums"]["gender_identity"] | null
+          height_preference: string | null
+          hormone_profile: string | null
+          id: string
+          interested_in: string[] | null
+          intimacy_comfort: string | null
+          is_trans: boolean | null
+          kids_desire: Database["public"]["Enums"]["kids_desire"] | null
+          kids_status: Database["public"]["Enums"]["kids_status"] | null
+          kids_timeline: string | null
+          last_period_date: string | null
+          lgbtq_connection: number | null
+          living_situation: string | null
+          location: string | null
+          longest_relationship: string | null
+          love_bombing_sensitivity: number | null
+          love_languages: Json | null
+          marriage_before_kids: boolean | null
+          match_specificity: number | null
+          monogamy_required: boolean | null
+          name: string | null
+          onboarding_completed: boolean | null
+          onboarding_step: number | null
+          open_to_moving: boolean | null
+          open_to_single_parenthood: boolean | null
+          orientation_custom: string | null
+          pattern_recognition: Json | null
+          political_dealbreakers: Json | null
+          politics: Database["public"]["Enums"]["politics"] | null
+          politics_importance: number | null
+          post_intimacy_tendency: string | null
+          preferred_age_max: number | null
+          preferred_age_min: number | null
+          pronouns: Database["public"]["Enums"]["pronouns"] | null
+          red_flag_sensitivity: number | null
+          relationship_goal:
+            | Database["public"]["Enums"]["relationship_goal"]
+            | null
+          relationship_structure:
+            | Database["public"]["Enums"]["relationship_structure"]
+            | null
+          religion: Database["public"]["Enums"]["religion"] | null
+          religion_practice_level: string | null
+          response_time_preference: number | null
+          safety_priorities: Json | null
+          safety_requirements: Json | null
+          sexual_orientation:
+            | Database["public"]["Enums"]["sexual_orientation"]
+            | null
+          social_style: Database["public"]["Enums"]["social_style"] | null
+          time_since_last_relationship: string | null
+          track_cycle: boolean | null
+          transition_stage: string | null
+          trauma_experiences: Json | null
+          updated_at: string | null
+          user_id: string
+          work_schedule_type: string | null
+        }
+        Insert: {
+          ambition_level?: number | null
+          attachment_style?:
+            | Database["public"]["Enums"]["attachment_style"]
+            | null
+          attraction_importance?: number | null
+          behavioral_monitoring?: number | null
+          birth_date?: string | null
+          boundary_strength?: number | null
+          career_stage?: string | null
+          chemistry_factors?: Json | null
+          communication_style?:
+            | Database["public"]["Enums"]["communication_style"]
+            | null
+          conflict_style?: string | null
+          created_at?: string | null
+          custom_pronouns?: string | null
+          cycle_length?: number | null
+          cycle_regularity?:
+            | Database["public"]["Enums"]["cycle_regularity"]
+            | null
+          dating_history_text?: string | null
+          dating_patterns?: Json | null
+          dealbreakers?: Json | null
+          distance_preference?: string | null
+          education_level?: string | null
+          education_matters?: boolean | null
+          exclusivity_before_intimacy?: boolean | null
+          faith_importance?: number | null
+          faith_requirements?: Json | null
+          financial_importance?: number | null
+          financial_situation?: string | null
+          financial_vulnerability?: number | null
+          flexibility_rating?: number | null
+          gender_identity?:
+            | Database["public"]["Enums"]["gender_identity"]
+            | null
+          height_preference?: string | null
+          hormone_profile?: string | null
+          id?: string
+          interested_in?: string[] | null
+          intimacy_comfort?: string | null
+          is_trans?: boolean | null
+          kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
+          kids_status?: Database["public"]["Enums"]["kids_status"] | null
+          kids_timeline?: string | null
+          last_period_date?: string | null
+          lgbtq_connection?: number | null
+          living_situation?: string | null
+          location?: string | null
+          longest_relationship?: string | null
+          love_bombing_sensitivity?: number | null
+          love_languages?: Json | null
+          marriage_before_kids?: boolean | null
+          match_specificity?: number | null
+          monogamy_required?: boolean | null
+          name?: string | null
+          onboarding_completed?: boolean | null
+          onboarding_step?: number | null
+          open_to_moving?: boolean | null
+          open_to_single_parenthood?: boolean | null
+          orientation_custom?: string | null
+          pattern_recognition?: Json | null
+          political_dealbreakers?: Json | null
+          politics?: Database["public"]["Enums"]["politics"] | null
+          politics_importance?: number | null
+          post_intimacy_tendency?: string | null
+          preferred_age_max?: number | null
+          preferred_age_min?: number | null
+          pronouns?: Database["public"]["Enums"]["pronouns"] | null
+          red_flag_sensitivity?: number | null
+          relationship_goal?:
+            | Database["public"]["Enums"]["relationship_goal"]
+            | null
+          relationship_structure?:
+            | Database["public"]["Enums"]["relationship_structure"]
+            | null
+          religion?: Database["public"]["Enums"]["religion"] | null
+          religion_practice_level?: string | null
+          response_time_preference?: number | null
+          safety_priorities?: Json | null
+          safety_requirements?: Json | null
+          sexual_orientation?:
+            | Database["public"]["Enums"]["sexual_orientation"]
+            | null
+          social_style?: Database["public"]["Enums"]["social_style"] | null
+          time_since_last_relationship?: string | null
+          track_cycle?: boolean | null
+          transition_stage?: string | null
+          trauma_experiences?: Json | null
+          updated_at?: string | null
+          user_id: string
+          work_schedule_type?: string | null
+        }
+        Update: {
+          ambition_level?: number | null
+          attachment_style?:
+            | Database["public"]["Enums"]["attachment_style"]
+            | null
+          attraction_importance?: number | null
+          behavioral_monitoring?: number | null
+          birth_date?: string | null
+          boundary_strength?: number | null
+          career_stage?: string | null
+          chemistry_factors?: Json | null
+          communication_style?:
+            | Database["public"]["Enums"]["communication_style"]
+            | null
+          conflict_style?: string | null
+          created_at?: string | null
+          custom_pronouns?: string | null
+          cycle_length?: number | null
+          cycle_regularity?:
+            | Database["public"]["Enums"]["cycle_regularity"]
+            | null
+          dating_history_text?: string | null
+          dating_patterns?: Json | null
+          dealbreakers?: Json | null
+          distance_preference?: string | null
+          education_level?: string | null
+          education_matters?: boolean | null
+          exclusivity_before_intimacy?: boolean | null
+          faith_importance?: number | null
+          faith_requirements?: Json | null
+          financial_importance?: number | null
+          financial_situation?: string | null
+          financial_vulnerability?: number | null
+          flexibility_rating?: number | null
+          gender_identity?:
+            | Database["public"]["Enums"]["gender_identity"]
+            | null
+          height_preference?: string | null
+          hormone_profile?: string | null
+          id?: string
+          interested_in?: string[] | null
+          intimacy_comfort?: string | null
+          is_trans?: boolean | null
+          kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
+          kids_status?: Database["public"]["Enums"]["kids_status"] | null
+          kids_timeline?: string | null
+          last_period_date?: string | null
+          lgbtq_connection?: number | null
+          living_situation?: string | null
+          location?: string | null
+          longest_relationship?: string | null
+          love_bombing_sensitivity?: number | null
+          love_languages?: Json | null
+          marriage_before_kids?: boolean | null
+          match_specificity?: number | null
+          monogamy_required?: boolean | null
+          name?: string | null
+          onboarding_completed?: boolean | null
+          onboarding_step?: number | null
+          open_to_moving?: boolean | null
+          open_to_single_parenthood?: boolean | null
+          orientation_custom?: string | null
+          pattern_recognition?: Json | null
+          political_dealbreakers?: Json | null
+          politics?: Database["public"]["Enums"]["politics"] | null
+          politics_importance?: number | null
+          post_intimacy_tendency?: string | null
+          preferred_age_max?: number | null
+          preferred_age_min?: number | null
+          pronouns?: Database["public"]["Enums"]["pronouns"] | null
+          red_flag_sensitivity?: number | null
+          relationship_goal?:
+            | Database["public"]["Enums"]["relationship_goal"]
+            | null
+          relationship_structure?:
+            | Database["public"]["Enums"]["relationship_structure"]
+            | null
+          religion?: Database["public"]["Enums"]["religion"] | null
+          religion_practice_level?: string | null
+          response_time_preference?: number | null
+          safety_priorities?: Json | null
+          safety_requirements?: Json | null
+          sexual_orientation?:
+            | Database["public"]["Enums"]["sexual_orientation"]
+            | null
+          social_style?: Database["public"]["Enums"]["social_style"] | null
+          time_since_last_relationship?: string | null
+          track_cycle?: boolean | null
+          transition_stage?: string | null
+          trauma_experiences?: Json | null
+          updated_at?: string | null
+          user_id?: string
+          work_schedule_type?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +623,83 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      attachment_style: "secure" | "anxious" | "avoidant" | "disorganized"
+      candidate_status:
+        | "just_matched"
+        | "texting"
+        | "planning_date"
+        | "dating"
+        | "getting_serious"
+        | "no_contact"
+        | "archived"
+      communication_style:
+        | "direct"
+        | "diplomatic"
+        | "emotional"
+        | "logical"
+        | "adaptable"
+      cycle_regularity:
+        | "very_regular"
+        | "somewhat_regular"
+        | "irregular"
+        | "pcos_endo"
+        | "perimenopause"
+        | "not_applicable"
+      gender_identity:
+        | "woman_cis"
+        | "woman_trans"
+        | "non_binary"
+        | "gender_fluid"
+        | "self_describe"
+      interaction_type:
+        | "coffee"
+        | "dinner"
+        | "drinks"
+        | "movie"
+        | "facetime"
+        | "texting"
+        | "activity"
+        | "home_hangout"
+        | "group_hang"
+        | "trip"
+        | "event"
+        | "intimate"
+      kids_desire: "definitely_yes" | "maybe" | "definitely_no" | "already_have"
+      kids_status: "no_kids" | "has_young_kids" | "has_adult_kids"
+      politics:
+        | "progressive"
+        | "liberal"
+        | "moderate"
+        | "conservative"
+        | "traditional"
+      pronouns: "she_her" | "he_him" | "they_them" | "other"
+      relationship_goal: "casual" | "dating" | "serious" | "marriage" | "unsure"
+      relationship_structure: "monogamous" | "open" | "polyamorous" | "unsure"
+      religion:
+        | "none"
+        | "spiritual"
+        | "christian_catholic"
+        | "christian_protestant"
+        | "christian_other"
+        | "jewish"
+        | "muslim"
+        | "hindu"
+        | "buddhist"
+        | "other"
+      sexual_orientation:
+        | "straight"
+        | "lesbian"
+        | "bisexual"
+        | "pansexual"
+        | "queer"
+        | "asexual"
+        | "no_label"
+        | "self_describe"
+      social_style:
+        | "homebody"
+        | "social_butterfly"
+        | "balanced"
+        | "mood_dependent"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +826,93 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      attachment_style: ["secure", "anxious", "avoidant", "disorganized"],
+      candidate_status: [
+        "just_matched",
+        "texting",
+        "planning_date",
+        "dating",
+        "getting_serious",
+        "no_contact",
+        "archived",
+      ],
+      communication_style: [
+        "direct",
+        "diplomatic",
+        "emotional",
+        "logical",
+        "adaptable",
+      ],
+      cycle_regularity: [
+        "very_regular",
+        "somewhat_regular",
+        "irregular",
+        "pcos_endo",
+        "perimenopause",
+        "not_applicable",
+      ],
+      gender_identity: [
+        "woman_cis",
+        "woman_trans",
+        "non_binary",
+        "gender_fluid",
+        "self_describe",
+      ],
+      interaction_type: [
+        "coffee",
+        "dinner",
+        "drinks",
+        "movie",
+        "facetime",
+        "texting",
+        "activity",
+        "home_hangout",
+        "group_hang",
+        "trip",
+        "event",
+        "intimate",
+      ],
+      kids_desire: ["definitely_yes", "maybe", "definitely_no", "already_have"],
+      kids_status: ["no_kids", "has_young_kids", "has_adult_kids"],
+      politics: [
+        "progressive",
+        "liberal",
+        "moderate",
+        "conservative",
+        "traditional",
+      ],
+      pronouns: ["she_her", "he_him", "they_them", "other"],
+      relationship_goal: ["casual", "dating", "serious", "marriage", "unsure"],
+      relationship_structure: ["monogamous", "open", "polyamorous", "unsure"],
+      religion: [
+        "none",
+        "spiritual",
+        "christian_catholic",
+        "christian_protestant",
+        "christian_other",
+        "jewish",
+        "muslim",
+        "hindu",
+        "buddhist",
+        "other",
+      ],
+      sexual_orientation: [
+        "straight",
+        "lesbian",
+        "bisexual",
+        "pansexual",
+        "queer",
+        "asexual",
+        "no_label",
+        "self_describe",
+      ],
+      social_style: [
+        "homebody",
+        "social_butterfly",
+        "balanced",
+        "mood_dependent",
+      ],
+    },
   },
 } as const
