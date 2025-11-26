@@ -51,6 +51,7 @@ interface CandidateRecap {
   lastMatched: Candidate | null;
   lastInteracted: { candidate: Candidate; interaction: Interaction } | null;
   lastEnded: Candidate | null;
+  lastNoContact: Candidate | null;
   goodCandidates: Candidate[];
   badCandidates: Candidate[];
   neutralCandidates: Candidate[];
@@ -105,6 +106,36 @@ const Dashboard = () => {
       console.error("Error reopening relationship:", error);
     } finally {
       setReopeningId(null);
+    }
+  };
+
+  const [endingNoContactId, setEndingNoContactId] = useState<string | null>(null);
+
+  const handleEndNoContact = async (candidateId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEndingNoContactId(candidateId);
+    try {
+      const { error } = await supabase
+        .from("candidates")
+        .update({
+          no_contact_active: false,
+          status: "texting",
+          relationship_ended_at: null,
+          end_reason: null,
+        })
+        .eq("id", candidateId);
+      
+      if (error) throw error;
+      
+      setCandidates(prev => prev.map(c => 
+        c.id === candidateId 
+          ? { ...c, no_contact_active: false, status: "texting", relationship_ended_at: null, end_reason: null }
+          : c
+      ));
+    } catch (error) {
+      console.error("Error ending no contact:", error);
+    } finally {
+      setEndingNoContactId(null);
     }
   };
 
@@ -376,7 +407,7 @@ const Dashboard = () => {
       ? candidates.find((c) => c.id === lastInteraction.candidate_id)
       : null;
 
-    // Last ended relationship (within last 7 days)
+    // Last ended relationship (within last 7 days) - excludes no_contact since shown separately
     const recentlyEnded = candidates
       .filter((c) => {
         const endedAt = (c as any).relationship_ended_at;
@@ -390,6 +421,16 @@ const Dashboard = () => {
         return bDate.getTime() - aDate.getTime();
       });
     const lastEnded = recentlyEnded[0] || null;
+
+    // Last No Contact (currently active)
+    const noContactCandidates = candidates
+      .filter((c) => c.no_contact_active && c.status === "no_contact")
+      .sort((a, b) => {
+        const aDate = new Date((a as any).relationship_ended_at || a.updated_at || 0);
+        const bDate = new Date((b as any).relationship_ended_at || b.updated_at || 0);
+        return bDate.getTime() - aDate.getTime();
+      });
+    const lastNoContact = noContactCandidates[0] || null;
 
     // Categorize by compatibility/feeling - Good vibes requires 40%+ score
     const goodCandidates = activeCandidates.filter(
@@ -410,6 +451,7 @@ const Dashboard = () => {
         ? { candidate: lastInteractedCandidate, interaction: lastInteraction }
         : null,
       lastEnded,
+      lastNoContact,
       goodCandidates,
       badCandidates,
       neutralCandidates,
@@ -803,6 +845,43 @@ const Dashboard = () => {
                       >
                         <RefreshCw className={`w-3 h-3 mr-1 ${reopeningId === recap.lastEnded.id ? 'animate-spin' : ''}`} />
                         Reopen
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* No Contact Active */}
+                  {recap.lastNoContact && (
+                    <div className="w-full flex items-center gap-3 p-2 rounded-lg bg-slate-500/5 hover:bg-slate-500/10 transition-colors">
+                      <button
+                        onClick={() => navigate(`/candidate/${recap.lastNoContact!.id}`)}
+                        className="flex items-center gap-3 flex-1"
+                      >
+                        <Avatar className="w-10 h-10 border border-slate-300">
+                          <AvatarImage src={recap.lastNoContact.photo_url || undefined} />
+                          <AvatarFallback className="bg-slate-500/20 text-slate-600 text-sm">
+                            {recap.lastNoContact.nickname.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 text-left">
+                          <p className="text-sm font-medium text-foreground">{recap.lastNoContact.nickname}</p>
+                          <p className="text-xs text-slate-600 flex items-center gap-1">
+                            <Ban className="w-3 h-3" />
+                            No Contact — Day {recap.lastNoContact.no_contact_day || 1}
+                            {(recap.lastNoContact as any).relationship_ended_at && (
+                              <> • Ended {format(new Date((recap.lastNoContact as any).relationship_ended_at), "MMM d")}</>
+                            )}
+                          </p>
+                        </div>
+                      </button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => handleEndNoContact(recap.lastNoContact!.id, e)}
+                        disabled={endingNoContactId === recap.lastNoContact.id}
+                        className="shrink-0 text-xs h-7 px-2"
+                      >
+                        <RefreshCw className={`w-3 h-3 mr-1 ${endingNoContactId === recap.lastNoContact.id ? 'animate-spin' : ''}`} />
+                        End NC
                       </Button>
                     </div>
                   )}

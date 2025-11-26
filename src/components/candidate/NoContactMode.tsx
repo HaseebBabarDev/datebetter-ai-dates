@@ -119,6 +119,8 @@ export const NoContactMode: React.FC<NoContactModeProps> = ({
         no_contact_start_date: new Date().toISOString().split("T")[0],
         no_contact_day: 1,
         status: "no_contact",
+        relationship_ended_at: new Date().toISOString(),
+        end_reason: "No Contact",
       });
 
       // Create day 1 progress entry
@@ -128,7 +130,7 @@ export const NoContactMode: React.FC<NoContactModeProps> = ({
         day_number: 1,
       });
 
-      toast.success("No Contact Mode activated. You've got this!");
+      toast.success("No Contact Mode activated. Relationship ended. You've got this!");
       setCurrentDay(1);
       fetchProgress();
     } catch (error) {
@@ -179,12 +181,16 @@ export const NoContactMode: React.FC<NoContactModeProps> = ({
           .eq("id", todayEntry.id);
       }
 
+      // Reinstate the candidate - clear end status and set back to texting
       await onUpdate({
         no_contact_active: false,
         no_contact_day: currentDay,
+        status: "texting",
+        relationship_ended_at: null,
+        end_reason: null,
       });
 
-      toast("No Contact ended. It's okay - healing isn't linear. 💜");
+      toast("No Contact ended. Relationship reinstated. It's okay - healing isn't linear. 💜");
     } catch (error) {
       toast.error("Failed to update");
     } finally {
