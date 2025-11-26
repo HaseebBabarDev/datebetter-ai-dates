@@ -13,7 +13,8 @@ import KidsFamilyScreen from "@/components/onboarding/screens/KidsFamilyScreen";
 import FaithValuesScreen from "@/components/onboarding/screens/FaithValuesScreen";
 import PoliticsScreen from "@/components/onboarding/screens/PoliticsScreen";
 import CareerScreen from "@/components/onboarding/screens/CareerScreen";
-import LifestyleScreen from "@/components/onboarding/screens/LifestyleScreen";
+import LocationScheduleScreen from "@/components/onboarding/screens/LocationScheduleScreen";
+import SocialActivityScreen from "@/components/onboarding/screens/SocialActivityScreen";
 import PhysicalPreferencesScreen from "@/components/onboarding/screens/PhysicalPreferencesScreen";
 import CommunicationScreen from "@/components/onboarding/screens/CommunicationScreen";
 import PastPatternsScreen from "@/components/onboarding/screens/PastPatternsScreen";
@@ -34,13 +35,14 @@ const SetupContent = () => {
     <FaithValuesScreen key={6} />,
     <PoliticsScreen key={7} />,
     <CareerScreen key={8} />,
-    <LifestyleScreen key={9} />,
-    <PhysicalPreferencesScreen key={10} />,
-    <CommunicationScreen key={11} />,
-    <PastPatternsScreen key={12} />,
-    <BoundariesScreen key={13} />,
-    <SafetyIntimacyScreen key={14} />,
-    <CompletionScreen key={15} />,
+    <LocationScheduleScreen key={9} />,
+    <SocialActivityScreen key={10} />,
+    <PhysicalPreferencesScreen key={11} />,
+    <CommunicationScreen key={12} />,
+    <PastPatternsScreen key={13} />,
+    <BoundariesScreen key={14} />,
+    <SafetyIntimacyScreen key={15} />,
+    <CompletionScreen key={16} />,
   ];
 
   return screens[currentStep] || screens[0];
