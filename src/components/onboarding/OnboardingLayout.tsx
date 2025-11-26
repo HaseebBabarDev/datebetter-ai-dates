@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface OnboardingLayoutProps {
   children: React.ReactNode;
@@ -23,6 +24,27 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
 }) => {
   const { currentStep, totalSteps, prevStep } = useOnboarding();
   const progress = ((currentStep + 1) / totalSteps) * 100;
+  const [isVisible, setIsVisible] = useState(false);
+  const [displayStep, setDisplayStep] = useState(currentStep);
+
+  useEffect(() => {
+    // Fade out
+    setIsVisible(false);
+    
+    // After fade out, update content and fade in
+    const timer = setTimeout(() => {
+      setDisplayStep(currentStep);
+      setIsVisible(true);
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [currentStep]);
+
+  // Initial mount animation
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -78,13 +100,21 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       {/* Progress Bar */}
       {showProgress && currentStep > 0 && (
         <div className="px-6 py-2">
-          <Progress value={progress} className="h-1.5" />
+          <Progress value={progress} className="h-1.5 transition-all duration-300" />
         </div>
       )}
 
-      {/* Content */}
+      {/* Content with transition */}
       <main className="flex-1 overflow-auto">
-        <div className="container max-w-lg mx-auto px-6 py-8">
+        <div 
+          key={displayStep}
+          className={cn(
+            "container max-w-lg mx-auto px-6 py-8 transition-all duration-300 ease-out",
+            isVisible 
+              ? "opacity-100 translate-x-0" 
+              : "opacity-0 translate-x-4"
+          )}
+        >
           {!headerGradient && title && (
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-foreground mb-2">{title}</h2>
