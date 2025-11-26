@@ -19,6 +19,7 @@ import {
   Droplet,
   Flame,
   ThumbsUp,
+  Ban,
   ThumbsDown,
   Minus,
   Users,
@@ -332,6 +333,35 @@ const Dashboard = () => {
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Intimacy {daysSince === 0 ? "today" : `${daysSince} day${daysSince > 1 ? "s" : ""} ago`} — 
                     bonding hormones active for 48-72 hours. Take decisions slowly!
+                  </p>
+                </div>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  onClick={() => navigate(`/candidate/${candidate.id}`)}
+                  className="text-xs"
+                >
+                  View
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+
+        {/* No Contact Alert */}
+        {candidates.filter(c => c.no_contact_active).map((candidate) => (
+          <Card key={`nc-${candidate.id}`} className="border-slate-500/30 bg-slate-500/5">
+            <CardContent className="py-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-slate-500/20 flex items-center justify-center text-slate-600 shrink-0">
+                  <Ban className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-sm">
+                    🚫 No Contact: {candidate.nickname}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Day {candidate.no_contact_day || 0} — Stay strong! Focus on yourself.
                   </p>
                 </div>
                 <Button 
