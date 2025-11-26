@@ -54,7 +54,7 @@ const PhysicalPreferencesScreen = () => {
             ))}
           </div>
         </div>
-        <Button onClick={nextStep} className="w-full" size="lg">Continue</Button>
+        <Button onClick={nextStep} disabled={!data.heightPreference || (data.chemistryFactors?.length || 0) === 0} className="w-full" size="lg">Continue</Button>
       </div>
     </OnboardingLayout>
   );

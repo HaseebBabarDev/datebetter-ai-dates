@@ -106,7 +106,7 @@ const MentalHealthScreen = () => {
           rightLabel="Very important"
         />
 
-        <Button onClick={nextStep} className="w-full" size="lg">
+        <Button onClick={nextStep} disabled={!data.isNeurodivergent || !data.mentalHealthOpenness} className="w-full" size="lg">
           Continue
         </Button>
       </div>

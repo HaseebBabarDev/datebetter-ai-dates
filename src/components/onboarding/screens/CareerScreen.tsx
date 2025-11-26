@@ -96,7 +96,7 @@ const CareerScreen = () => {
             </Select>
           </div>
           <SliderInput label="Your career ambition:" value={data.ambitionLevel || 3} onChange={(v) => updateData({ ambitionLevel: v })} min={1} max={5} leftLabel="Relaxed" rightLabel="Very driven" />
-          <Button onClick={nextStep} disabled={!data.careerStage} className="w-full" size="lg">Continue</Button>
+          <Button onClick={nextStep} disabled={!data.careerStage || !data.educationLevel} className="w-full" size="lg">Continue</Button>
         </div>
       </OnboardingLayout>
     </>

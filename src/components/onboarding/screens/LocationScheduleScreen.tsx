@@ -70,7 +70,7 @@ const LocationScheduleScreen = () => {
           </div>
         </div>
 
-        <Button onClick={nextStep} disabled={!data.distancePreference} className="w-full" size="lg">
+        <Button onClick={nextStep} disabled={!data.distancePreference || !data.scheduleFlexibility} className="w-full" size="lg">
           Continue
         </Button>
       </div>
