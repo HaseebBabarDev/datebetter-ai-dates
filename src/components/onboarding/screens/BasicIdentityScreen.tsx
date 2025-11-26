@@ -30,6 +30,23 @@ const pronounOptions = [
   { value: "other", label: "Other" },
 ];
 
+const heightOptions = [
+  { value: "under_5ft", label: "Under 5'0\" (152 cm)" },
+  { value: "5ft_5ft3", label: "5'0\" - 5'3\" (152-160 cm)" },
+  { value: "5ft4_5ft6", label: "5'4\" - 5'6\" (163-168 cm)" },
+  { value: "5ft7_5ft9", label: "5'7\" - 5'9\" (170-175 cm)" },
+  { value: "5ft10_6ft", label: "5'10\" - 6'0\" (178-183 cm)" },
+  { value: "over_6ft", label: "Over 6'0\" (183+ cm)" },
+];
+
+const bodyTypeOptions = [
+  { value: "slim", label: "Slim" },
+  { value: "athletic", label: "Athletic" },
+  { value: "average", label: "Average" },
+  { value: "curvy", label: "Curvy" },
+  { value: "plus_size", label: "Plus size" },
+];
+
 const BasicIdentityScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
@@ -107,6 +124,46 @@ const BasicIdentityScreen = () => {
               className="mt-2"
             />
           )}
+        </div>
+
+        {/* Height */}
+        <div className="space-y-2">
+          <Label>Your height:</Label>
+          <Select
+            value={data.height}
+            onValueChange={(value) => updateData({ height: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select your height" />
+            </SelectTrigger>
+            <SelectContent>
+              {heightOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Body Type */}
+        <div className="space-y-2">
+          <Label>Your body type:</Label>
+          <Select
+            value={data.bodyType}
+            onValueChange={(value) => updateData({ bodyType: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select body type" />
+            </SelectTrigger>
+            <SelectContent>
+              {bodyTypeOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Continue Button */}
