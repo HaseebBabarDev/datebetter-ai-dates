@@ -106,7 +106,8 @@ const Dashboard = () => {
     const lastPeriod = new Date(profile.last_period_date);
     const cycleLength = profile.cycle_length || 28;
     const today = new Date();
-    const dayInCycle = differenceInDays(today, lastPeriod) % cycleLength;
+    const daysSinceLastPeriod = differenceInDays(today, lastPeriod);
+    const dayInCycle = daysSinceLastPeriod % cycleLength || cycleLength;
     const ovulationDay = Math.round(cycleLength / 2) - 2;
 
     let phase = "";
@@ -117,6 +118,10 @@ const Dashboard = () => {
       phase = "Menstrual Phase";
       warning = "Energy may be lower — be gentle with yourself. Estrogen rising.";
       icon = <Droplet className="w-4 h-4" />;
+    } else if (dayInCycle > 5 && dayInCycle < ovulationDay - 2) {
+      phase = "Follicular Phase";
+      warning = "Estrogen rising — confidence & energy increasing. Good time for new connections!";
+      icon = <Sparkles className="w-4 h-4" />;
     } else if (dayInCycle >= ovulationDay - 2 && dayInCycle <= ovulationDay + 2) {
       phase = "Ovulation Window";
       warning = "Peak fertility & attraction hormones. You may feel more drawn to masculine traits. Make decisions with your head, not just heart!";
@@ -125,9 +130,13 @@ const Dashboard = () => {
       phase = "Luteal Phase";
       warning = "Progesterone rising — you may crave comfort and security. Emotions can feel more intense.";
       icon = <AlertTriangle className="w-4 h-4" />;
+    } else {
+      phase = "Pre-Menstrual";
+      warning = "PMS territory — emotions may be heightened. Be extra mindful of big decisions.";
+      icon = <AlertTriangle className="w-4 h-4" />;
     }
 
-    return phase ? { phase, warning, icon, dayInCycle } : null;
+    return { phase, warning, icon, dayInCycle };
   }, [profile]);
 
   // Check for post-intimacy oxytocin alerts - bonding hormone peaks then drops
@@ -151,6 +160,42 @@ const Dashboard = () => {
 
     return alerts;
   }, [interactions, candidates]);
+
+  // Love bombing detection - rapid escalation pattern
+  const loveBombingAlerts = useMemo(() => {
+    const alerts: { candidate: Candidate; reason: string }[] = [];
+    
+    candidates.forEach((candidate) => {
+      const candidateInteractions = interactions.filter((i) => i.candidate_id === candidate.id);
+      if (candidateInteractions.length < 3) return;
+      
+      // Check for rapid interaction frequency (5+ interactions in first 2 weeks)
+      const firstInteractionDate = candidateInteractions.length > 0 
+        ? new Date(candidateInteractions[candidateInteractions.length - 1].interaction_date || candidate.created_at || "")
+        : null;
+      
+      if (firstInteractionDate) {
+        const daysSinceFirst = differenceInDays(new Date(), firstInteractionDate);
+        const interactionsPerWeek = candidateInteractions.length / Math.max(1, daysSinceFirst / 7);
+        
+        // Love bombing indicators
+        const loveBombingPhrases = ["too good to be true", "already said i love you", "wants to move in", "moving too fast", "constant texting", "showering with gifts", "future faking", "soulmate", "never felt this way"];
+        const notesText = candidateInteractions.map(i => (i.notes || "").toLowerCase()).join(" ");
+        const hasLoveBombingLanguage = loveBombingPhrases.some(phrase => notesText.includes(phrase));
+        
+        // Very high interaction frequency early on
+        if (daysSinceFirst <= 14 && candidateInteractions.length >= 7) {
+          alerts.push({ candidate, reason: "Very intense start — 7+ interactions in 2 weeks" });
+        } else if (interactionsPerWeek >= 5 && daysSinceFirst <= 30) {
+          alerts.push({ candidate, reason: "Rapid escalation detected" });
+        } else if (hasLoveBombingLanguage) {
+          alerts.push({ candidate, reason: "Love bombing language in notes" });
+        }
+      }
+    });
+    
+    return alerts;
+  }, [candidates, interactions]);
 
   // Candidate recap
   const recap: CandidateRecap = useMemo(() => {
@@ -287,7 +332,7 @@ const Dashboard = () => {
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" className="relative text-foreground hover:bg-primary/10" onClick={() => navigate("/notifications")}>
                 <Bell className="w-5 h-5" />
-                {(oxytocinAlerts.length > 0 || candidates.filter(c => c.no_contact_active).length > 0) && (
+                {(oxytocinAlerts.length > 0 || loveBombingAlerts.length > 0 || candidates.filter(c => c.no_contact_active).length > 0 || cycleAlerts) && (
                   <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
                 )}
               </Button>
@@ -363,6 +408,18 @@ const Dashboard = () => {
                   label: `${candidate.nickname}`,
                   sub: daysSince <= 2 ? "🔥 Bonding high" : "Clearing",
                   color: daysSince <= 2 ? "bg-pink-500/20 text-pink-600 border-pink-500/30" : "bg-amber-500/20 text-amber-600 border-amber-500/30",
+                  onClick: () => navigate(`/candidate/${candidate.id}`),
+                });
+              });
+
+              // Love Bombing Alerts - rapid escalation warning
+              loveBombingAlerts.forEach(({ candidate, reason }) => {
+                alerts.push({
+                  key: `lb-${candidate.id}`,
+                  icon: <AlertTriangle className="w-3 h-3" />,
+                  label: candidate.nickname,
+                  sub: "⚠️ Love bombing?",
+                  color: "bg-orange-500/20 text-orange-600 border-orange-500/30",
                   onClick: () => navigate(`/candidate/${candidate.id}`),
                 });
               });
