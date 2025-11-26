@@ -13,6 +13,8 @@ interface CandidateProfileProps {
   candidate: Candidate;
   userId: string;
   onUpdate: (updates: Partial<Candidate>) => Promise<void>;
+  showBasicOnly?: boolean;
+  showDetailsOnly?: boolean;
 }
 
 const GENDER_OPTIONS: { value: Enums<"gender_identity">; label: string }[] = [
@@ -83,6 +85,8 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
   candidate,
   userId,
   onUpdate,
+  showBasicOnly = false,
+  showDetailsOnly = false,
 }) => {
   const navigate = useNavigate();
   const [photoUrl, setPhotoUrl] = useState(candidate.photo_url);
@@ -100,70 +104,92 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
      (candidate.energy_match || 3)) / 5
   );
 
-  return (
-    <div className="space-y-4">
+  // Basic info section (photo + basic)
+  const BasicSection = () => (
+    <>
       {/* Photo & Edit Header */}
-      <Card>
-        <CardContent className="pt-4 pb-4">
-          <div className="flex items-center justify-between">
+      <Card className="overflow-hidden border-0 shadow-lg">
+        <CardContent className="p-0">
+          <div className="relative">
             <CandidatePhotoUpload
               candidateId={candidate.id}
               userId={userId}
               nickname={candidate.nickname}
               currentPhotoUrl={photoUrl}
               onPhotoUpdated={setPhotoUrl}
+              large
             />
             <Button 
-              variant="ghost" 
+              variant="secondary" 
               size="icon"
               onClick={() => navigate(`/add-candidate?edit=${candidate.id}`)}
-              className="text-muted-foreground hover:text-foreground"
+              className="absolute top-3 right-3 rounded-full shadow-lg"
             >
-              <Pencil className="w-5 h-5" />
+              <Pencil className="w-4 h-4" />
             </Button>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Basic Info */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <User className="w-5 h-5" />
-            Basic Info
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {candidate.age && (
-              <Badge variant="secondary" className="gap-1">
-                <User className="w-3 h-3" />
-                {candidate.age} years old
-              </Badge>
-            )}
-            {candidate.gender_identity && (
-              <Badge variant="secondary">{formatLabel(candidate.gender_identity, GENDER_OPTIONS)}</Badge>
-            )}
-            {candidate.pronouns && (
-              <Badge variant="secondary">{formatLabel(candidate.pronouns, PRONOUN_OPTIONS)}</Badge>
-            )}
-            {candidate.met_via && (
-              <Badge variant="secondary" className="gap-1">
-                <MapPin className="w-3 h-3" />
-                {candidate.met_app || candidate.met_via.replace("_", " ")}
-              </Badge>
-            )}
-            {candidate.first_contact_date && (
-              <Badge variant="secondary" className="gap-1">
-                <Calendar className="w-3 h-3" />
-                Since {new Date(candidate.first_contact_date).toLocaleDateString()}
-              </Badge>
+          <div className="p-4">
+            <h2 className="text-xl font-semibold">{candidate.nickname}</h2>
+            <div className="flex flex-wrap gap-2 mt-3">
+              {candidate.age && (
+                <Badge variant="secondary" className="gap-1">
+                  <User className="w-3 h-3" />
+                  {candidate.age} years old
+                </Badge>
+              )}
+              {candidate.gender_identity && (
+                <Badge variant="secondary">{formatLabel(candidate.gender_identity, GENDER_OPTIONS)}</Badge>
+              )}
+              {candidate.pronouns && (
+                <Badge variant="secondary">{formatLabel(candidate.pronouns, PRONOUN_OPTIONS)}</Badge>
+              )}
+              {candidate.met_via && (
+                <Badge variant="secondary" className="gap-1">
+                  <MapPin className="w-3 h-3" />
+                  {candidate.met_app || candidate.met_via.replace("_", " ")}
+                </Badge>
+              )}
+              {candidate.first_contact_date && (
+                <Badge variant="secondary" className="gap-1">
+                  <Calendar className="w-3 h-3" />
+                  Since {new Date(candidate.first_contact_date).toLocaleDateString()}
+                </Badge>
+              )}
+            </div>
+            {candidate.notes && (
+              <p className="text-sm text-muted-foreground mt-4 p-3 bg-muted/30 rounded-lg">{candidate.notes}</p>
             )}
           </div>
-          {candidate.notes && <p className="text-sm text-muted-foreground mt-3">{candidate.notes}</p>}
         </CardContent>
       </Card>
 
+      {/* Chemistry Summary */}
+      <Card>
+        <CardContent className="py-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Chemistry Score</span>
+            <div className="flex items-center gap-2">
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
+                    className={`w-2 h-6 rounded-full ${
+                      i <= chemistryAvg ? "bg-primary" : "bg-muted"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="font-semibold text-primary">{chemistryAvg}/5</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </>
+  );
+
+  // Detailed sections (values, goals, personality, chemistry)
+  const DetailsSection = () => (
+    <>
       {/* Values & Beliefs */}
       <Card>
         <CardHeader className="pb-2">
@@ -263,37 +289,52 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
       {/* Chemistry Ratings */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Chemistry Ratings</CardTitle>
+          <CardTitle className="text-lg">Chemistry Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Overall Chemistry</span>
-              <span className="font-medium">{candidate.overall_chemistry || 3}/5</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Physical Attraction</span>
-              <span className="font-medium">{candidate.physical_attraction || 3}/5</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Intellectual Connection</span>
-              <span className="font-medium">{candidate.intellectual_connection || 3}/5</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Humor Compatibility</span>
-              <span className="font-medium">{candidate.humor_compatibility || 3}/5</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Energy Match</span>
-              <span className="font-medium">{candidate.energy_match || 3}/5</span>
-            </div>
-            <div className="pt-2 border-t border-border flex items-center justify-between">
-              <span className="font-medium">Average Chemistry</span>
-              <span className="font-semibold text-primary">{chemistryAvg}/5</span>
-            </div>
+            {[
+              { label: "Overall Chemistry", value: candidate.overall_chemistry || 3 },
+              { label: "Physical Attraction", value: candidate.physical_attraction || 3 },
+              { label: "Intellectual Connection", value: candidate.intellectual_connection || 3 },
+              { label: "Humor Compatibility", value: candidate.humor_compatibility || 3 },
+              { label: "Energy Match", value: candidate.energy_match || 3 },
+            ].map(({ label, value }) => (
+              <div key={label} className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{label}</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div
+                        key={i}
+                        className={`w-1.5 h-4 rounded-full ${
+                          i <= value ? "bg-primary" : "bg-muted"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="font-medium text-sm w-6">{value}/5</span>
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
+    </>
+  );
+
+  if (showBasicOnly) {
+    return <div className="space-y-4"><BasicSection /></div>;
+  }
+
+  if (showDetailsOnly) {
+    return <div className="space-y-4"><DetailsSection /></div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <BasicSection />
+      <DetailsSection />
     </div>
   );
 };

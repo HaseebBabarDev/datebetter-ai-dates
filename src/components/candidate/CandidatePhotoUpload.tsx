@@ -11,6 +11,7 @@ interface CandidatePhotoUploadProps {
   nickname: string;
   currentPhotoUrl: string | null;
   onPhotoUpdated: (url: string | null) => void;
+  large?: boolean;
 }
 
 export const CandidatePhotoUpload: React.FC<CandidatePhotoUploadProps> = ({
@@ -19,6 +20,7 @@ export const CandidatePhotoUpload: React.FC<CandidatePhotoUploadProps> = ({
   nickname,
   currentPhotoUrl,
   onPhotoUpdated,
+  large = false,
 }) => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -109,6 +111,65 @@ export const CandidatePhotoUpload: React.FC<CandidatePhotoUploadProps> = ({
       setUploading(false);
     }
   };
+
+  if (large) {
+    return (
+      <div className="relative w-full aspect-square bg-muted">
+        {currentPhotoUrl ? (
+          <img
+            src={currentPhotoUrl}
+            alt={nickname}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-primary/10">
+            <span className="text-6xl font-bold text-primary/40">
+              {nickname.slice(0, 2).toUpperCase()}
+            </span>
+          </div>
+        )}
+        
+        {uploading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        )}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+
+        <div className="absolute bottom-3 left-3 flex gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="shadow-lg"
+          >
+            <Camera className="w-4 h-4 mr-1" />
+            {currentPhotoUrl ? "Change" : "Add Photo"}
+          </Button>
+          
+          {currentPhotoUrl && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleRemovePhoto}
+              disabled={uploading}
+              className="shadow-lg text-destructive hover:text-destructive"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-4">
