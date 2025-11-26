@@ -14,7 +14,6 @@ import {
   TrendingUp,
   Heart,
   AlertTriangle,
-  Clock,
   Sparkles,
   Droplet,
   Flame,
@@ -29,6 +28,7 @@ import {
 import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
 import { CandidatesList } from "@/components/dashboard/CandidatesList";
+import { LogInteractionDialog } from "@/components/dashboard/LogInteractionDialog";
 import { differenceInDays, addDays, format } from "date-fns";
 
 type Profile = Tables<"profiles">;
@@ -264,14 +264,7 @@ const Dashboard = () => {
             Add Candidate
           </Button>
           {candidates.length > 0 && (
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/candidate/${candidates[0]?.id}`, { state: { tab: "interactions" } })}
-              className="w-full"
-            >
-              <Clock className="w-4 h-4 mr-2" />
-              Log Interaction
-            </Button>
+            <LogInteractionDialog candidates={candidates} />
           )}
         </div>
 
