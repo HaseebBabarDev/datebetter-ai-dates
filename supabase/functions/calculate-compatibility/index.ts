@@ -68,17 +68,50 @@ serve(async (req) => {
       .order("interaction_date", { ascending: false })
       .limit(10);
 
-    // Build interaction summary for the prompt
+    // Build interaction summary and calculate sentiment
     let interactionSummary = "No interactions logged yet.";
+    let interactionSentiment = 0; // -30 to +10 range
+    let negativeCount = 0;
+    let positiveCount = 0;
+    
     if (interactions && interactions.length > 0) {
       const interactionDetails = interactions.map((i: any) => 
         `- ${i.interaction_date}: ${i.interaction_type}${i.duration ? ` (${i.duration})` : ''} - Feeling: ${i.overall_feeling}/5${i.gut_feeling ? `, Gut: "${i.gut_feeling}"` : ''}${i.notes ? ` - Notes: "${i.notes}"` : ''}`
       ).join("\n");
       interactionSummary = `${interactions.length} interactions logged:\n${interactionDetails}`;
+      
+      // Calculate sentiment from interactions
+      const negativeGutFeelings = ["sad", "anxious", "confused", "angry", "hurt", "frustrated", "disappointed"];
+      const positiveGutFeelings = ["happy", "excited", "hopeful", "content", "loved", "secure"];
+      
+      interactions.forEach((i: any) => {
+        const feeling = i.overall_feeling || 3;
+        const gut = (i.gut_feeling || "").toLowerCase();
+        const notes = (i.notes || "").toLowerCase();
+        
+        // Check for very negative signals in notes
+        const redFlagPhrases = ["seeing someone else", "broke up", "ghosted", "ignored", "cheating", "lied", "distant", "cold"];
+        const hasRedFlag = redFlagPhrases.some(phrase => notes.includes(phrase));
+        
+        if (feeling <= 2 || negativeGutFeelings.includes(gut) || hasRedFlag) {
+          negativeCount++;
+          interactionSentiment -= hasRedFlag ? 15 : (feeling === 1 ? 10 : 5);
+        } else if (feeling >= 4 && positiveGutFeelings.includes(gut)) {
+          positiveCount++;
+          interactionSentiment += 3;
+        }
+      });
+      
+      // Cap the sentiment adjustment
+      interactionSentiment = Math.max(-40, Math.min(10, interactionSentiment));
     }
 
     // Calculate base scores from profile data for consistency
     const baseScores = calculateBaseScores(profile, candidate);
+    
+    // Apply interaction sentiment to emotional score
+    const adjustedEmotionalScore = Math.max(0, Math.min(100, baseScores.emotional_compatibility + interactionSentiment));
+    const sentimentAdjustedOverall = Math.max(0, Math.min(100, baseScores.overall_score + Math.round(interactionSentiment * 0.5)));
 
     // Build the prompt for AI analysis
     const prompt = `You are a relationship compatibility analyst. Analyze the compatibility between the person using this app and their dating candidate. Always address them as "you" not "user".
@@ -131,15 +164,25 @@ CHEMISTRY RATINGS (1-5):
 INTERACTION HISTORY (most recent first):
 ${interactionSummary}
 
+INTERACTION ANALYSIS:
+- Total negative interactions: ${negativeCount}
+- Total positive interactions: ${positiveCount}
+- Calculated sentiment adjustment: ${interactionSentiment} points
+
 BASE COMPATIBILITY SCORES (calculated from profile matching):
 - Values Alignment: ${baseScores.values_alignment}
 - Lifestyle: ${baseScores.lifestyle_compatibility}
-- Emotional: ${baseScores.emotional_compatibility}
+- Emotional: ${baseScores.emotional_compatibility} (adjusted to ${adjustedEmotionalScore} after interactions)
 - Chemistry: ${baseScores.chemistry_score}
 - Future Goals: ${baseScores.future_goals}
-- Base Overall: ${baseScores.overall_score}
+- Base Overall: ${baseScores.overall_score} (adjusted to ${sentimentAdjustedOverall} after interactions)
 
-IMPORTANT: Use the base scores as your foundation. You may adjust them by UP TO 15 points based on interaction history insights, but maintain consistency with the calculated base. Negative interactions should reduce scores, positive ones can slightly increase them. 
+CRITICAL SCORING RULES:
+1. The overall_score MUST be at or below ${sentimentAdjustedOverall} if there are negative interactions
+2. Negative interactions (low feelings, sad/anxious gut feelings, concerning notes) MUST reduce the score
+3. Red flags in notes like "seeing someone else", "ghosted", "distant after intimacy" should heavily penalize emotional_compatibility
+4. Do NOT increase the score above the sentiment-adjusted score when interactions are negative
+5. The emotional_compatibility score should reflect the interaction sentiment - use ${adjustedEmotionalScore} as your target
 
 Consider these factors when adjusting lifestyle scores:
 - Distance/location compatibility (same_city is best, long_distance reduces score if they prefer nearby)
@@ -160,7 +203,7 @@ CRITICAL: In all output text (strengths, concerns, advice), always use "you" and
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a relationship compatibility analyst. Use the provided base scores as your foundation and adjust minimally based on interactions." },
+          { role: "system", content: "You are a relationship compatibility analyst. Use the provided sentiment-adjusted scores as your foundation. NEVER increase the score above the sentiment-adjusted score when there are negative interactions." },
           { role: "user", content: prompt }
         ],
         tools: [
@@ -174,7 +217,7 @@ CRITICAL: In all output text (strengths, concerns, advice), always use "you" and
                 properties: {
                   overall_score: { 
                     type: "number", 
-                    description: "Overall compatibility score 0-100, should be close to the base score with minor adjustments" 
+                    description: `Overall compatibility score 0-100. MUST NOT exceed ${negativeCount > 0 ? 'the sentiment-adjusted score' : 'base score'} when interactions are negative. Target: ${sentimentAdjustedOverall}` 
                   },
                   breakdown: {
                     type: "object",
@@ -255,6 +298,17 @@ CRITICAL: In all output text (strengths, concerns, advice), always use "you" and
           advice: "Continue logging interactions to get better insights."
         };
       }
+    }
+
+    // ENFORCE SCORE LIMITS: If there are negative interactions, cap the score
+    if (negativeCount > 0 && analysis.overall_score > sentimentAdjustedOverall) {
+      console.log(`Capping AI score from ${analysis.overall_score} to ${sentimentAdjustedOverall} due to ${negativeCount} negative interactions`);
+      analysis.overall_score = sentimentAdjustedOverall;
+    }
+    
+    // Also cap emotional compatibility if there are negative interactions
+    if (negativeCount > 0 && analysis.breakdown?.emotional_compatibility > adjustedEmotionalScore) {
+      analysis.breakdown.emotional_compatibility = adjustedEmotionalScore;
     }
 
     // Update candidate with compatibility score
