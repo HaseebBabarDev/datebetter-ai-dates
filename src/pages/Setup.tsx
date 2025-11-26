@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { OnboardingProvider, useOnboarding } from "@/contexts/OnboardingContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 // Import all screens
 import WelcomeScreen from "@/components/onboarding/screens/WelcomeScreen";
@@ -24,7 +25,18 @@ import SafetyIntimacyScreen from "@/components/onboarding/screens/SafetyIntimacy
 import CompletionScreen from "@/components/onboarding/screens/CompletionScreen";
 
 const SetupContent = () => {
-  const { currentStep } = useOnboarding();
+  const { currentStep, loading } = useOnboarding();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading your progress...</p>
+        </div>
+      </div>
+    );
+  }
 
   const screens = [
     <WelcomeScreen key={0} />,
@@ -51,9 +63,43 @@ const SetupContent = () => {
 };
 
 const Setup = () => {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const [checkingStatus, setCheckingStatus] = useState(true);
 
-  if (loading) {
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      if (!user) {
+        setCheckingStatus(false);
+        return;
+      }
+
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("onboarding_completed")
+          .eq("user_id", user.id)
+          .single();
+
+        if (profile?.onboarding_completed) {
+          navigate("/dashboard", { replace: true });
+          return;
+        }
+      } catch (error) {
+        console.error("Error checking onboarding status:", error);
+      } finally {
+        setCheckingStatus(false);
+      }
+    };
+
+    if (!authLoading && user) {
+      checkOnboardingStatus();
+    } else if (!authLoading) {
+      setCheckingStatus(false);
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || checkingStatus) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">

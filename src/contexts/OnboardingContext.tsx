@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface OnboardingData {
   // Screen 0: Welcome & Age
@@ -123,6 +125,7 @@ interface OnboardingContextType {
   data: OnboardingData;
   currentStep: number;
   totalSteps: number;
+  loading: boolean;
   updateData: (updates: Partial<OnboardingData>) => void;
   nextStep: () => void;
   prevStep: () => void;
@@ -133,12 +136,125 @@ interface OnboardingContextType {
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
 export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [data, setData] = useState<OnboardingData>({
-    genderIdentity: "woman_cis",
-    pronouns: "she_her",
-  });
+  const { user } = useAuth();
+  const [data, setData] = useState<OnboardingData>({});
   const [currentStep, setCurrentStep] = useState(0);
+  const [loading, setLoading] = useState(true);
   const totalSteps = 18; // 0-17
+
+  // Load existing profile data on mount
+  useEffect(() => {
+    const loadProfileData = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .single();
+
+        if (profile) {
+          // Map profile data to onboarding data
+          setData({
+            birthDate: profile.birth_date || undefined,
+            name: profile.name || undefined,
+            country: profile.country || undefined,
+            city: profile.city || undefined,
+            state: profile.state || undefined,
+            genderIdentity: profile.gender_identity || undefined,
+            pronouns: profile.pronouns || undefined,
+            customPronouns: profile.custom_pronouns || undefined,
+            height: profile.height || undefined,
+            bodyType: profile.body_type || undefined,
+            sexualOrientation: profile.sexual_orientation || undefined,
+            orientationCustom: profile.orientation_custom || undefined,
+            interestedIn: profile.interested_in || undefined,
+            matchSpecificity: profile.match_specificity || undefined,
+            isTrans: profile.is_trans || undefined,
+            transitionStage: profile.transition_stage || undefined,
+            hormoneProfile: profile.hormone_profile || undefined,
+            lgbtqConnection: profile.lgbtq_connection || undefined,
+            trackCycle: profile.track_cycle || undefined,
+            lastPeriodDate: profile.last_period_date || undefined,
+            cycleLength: profile.cycle_length || undefined,
+            cycleRegularity: profile.cycle_regularity || undefined,
+            relationshipStatus: profile.relationship_status || undefined,
+            relationshipGoal: profile.relationship_goal || undefined,
+            relationshipStructure: profile.relationship_structure || undefined,
+            monogamyRequired: profile.monogamy_required || undefined,
+            exclusivityBeforeIntimacy: profile.exclusivity_before_intimacy || undefined,
+            kidsStatus: profile.kids_status || undefined,
+            kidsDesire: profile.kids_desire || undefined,
+            kidsTimeline: profile.kids_timeline || undefined,
+            marriageBeforeKids: profile.marriage_before_kids || undefined,
+            openToSingleParenthood: profile.open_to_single_parenthood || undefined,
+            religion: profile.religion || undefined,
+            religionPracticeLevel: profile.religion_practice_level || undefined,
+            faithImportance: profile.faith_importance || undefined,
+            faithRequirements: profile.faith_requirements as string[] || undefined,
+            politics: profile.politics || undefined,
+            politicsImportance: profile.politics_importance || undefined,
+            politicalDealbreakers: profile.political_dealbreakers as string[] || undefined,
+            educationLevel: profile.education_level || undefined,
+            educationMatters: profile.education_matters || undefined,
+            careerStage: profile.career_stage || undefined,
+            ambitionLevel: profile.ambition_level || undefined,
+            financialImportance: profile.financial_importance || undefined,
+            distancePreference: profile.distance_preference || undefined,
+            livingSituation: profile.living_situation || undefined,
+            openToMoving: profile.open_to_moving || undefined,
+            socialStyle: profile.social_style || undefined,
+            workScheduleType: profile.work_schedule_type || undefined,
+            flexibilityRating: profile.flexibility_rating || undefined,
+            activityLevel: profile.activity_level || undefined,
+            scheduleFlexibility: profile.schedule_flexibility || undefined,
+            attractionImportance: profile.attraction_importance || undefined,
+            preferredAgeMin: profile.preferred_age_min || undefined,
+            preferredAgeMax: profile.preferred_age_max || undefined,
+            heightPreference: profile.height_preference || undefined,
+            chemistryFactors: profile.chemistry_factors as string[] || undefined,
+            communicationStyle: profile.communication_style || undefined,
+            responseTimePreference: profile.response_time_preference || undefined,
+            conflictStyle: profile.conflict_style || undefined,
+            loveLanguages: profile.love_languages as string[] || undefined,
+            attachmentStyle: profile.attachment_style || undefined,
+            longestRelationship: profile.longest_relationship || undefined,
+            timeSinceLastRelationship: profile.time_since_last_relationship || undefined,
+            patternRecognition: profile.pattern_recognition as string[] || undefined,
+            dealbreakers: profile.dealbreakers as string[] || undefined,
+            safetyPriorities: profile.safety_priorities as string[] || undefined,
+            boundaryStrength: profile.boundary_strength || undefined,
+            isNeurodivergent: profile.is_neurodivergent || undefined,
+            neurodivergenceTypes: profile.neurodivergence_types as string[] || undefined,
+            mentalHealthOpenness: profile.mental_health_openness || undefined,
+            mentalHealthImportance: profile.mental_health_importance || undefined,
+            inTherapy: profile.in_therapy || undefined,
+            intimacyComfort: profile.intimacy_comfort || undefined,
+            safetyRequirements: profile.safety_requirements as string[] || undefined,
+            postIntimacyTendency: profile.post_intimacy_tendency || undefined,
+            redFlagSensitivity: profile.red_flag_sensitivity || undefined,
+            loveBombingSensitivity: profile.love_bombing_sensitivity || undefined,
+            behavioralMonitoring: profile.behavioral_monitoring || undefined,
+          });
+
+          // Resume from saved step
+          if (profile.onboarding_step && profile.onboarding_step > 0) {
+            setCurrentStep(profile.onboarding_step);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfileData();
+  }, [user]);
 
   const updateData = useCallback((updates: Partial<OnboardingData>) => {
     setData(prev => ({ ...prev, ...updates }));
@@ -186,6 +302,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         data,
         currentStep,
         totalSteps,
+        loading,
         updateData,
         nextStep,
         prevStep,
