@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Plus,
   Settings,
@@ -24,6 +25,7 @@ import {
   Users,
   ChevronRight,
   Calendar,
+  List,
 } from "lucide-react";
 import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
@@ -253,290 +255,319 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 max-w-lg space-y-4">
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            onClick={() => navigate("/add-candidate")}
-            className="w-full bg-primary hover:bg-primary/90"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Candidate
-          </Button>
-          {candidates.length > 0 && (
-            <LogInteractionDialog candidates={candidates} />
-          )}
-        </div>
+      <main className="container mx-auto px-4 py-4 max-w-lg">
+        <Tabs defaultValue="home" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="home">Home</TabsTrigger>
+            <TabsTrigger value="manage">Manage Candidates</TabsTrigger>
+          </TabsList>
 
-        {/* Cycle Tracking CTA - Show if tracking enabled but no date set */}
-        {profile?.track_cycle && !profile?.last_period_date && (
-          <Card className="border-primary/30 bg-primary/5">
-            <CardContent className="py-4">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
-                  <Droplet className="w-4 h-4" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">Set Up Cycle Tracking</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Add your last period date to get hormone-aware dating insights.
-                  </p>
-                </div>
-                <Button size="sm" variant="outline" onClick={() => navigate("/settings")}>
-                  Update
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Cycle Alert - Show when tracking is fully set up */}
-        {cycleAlerts && (
-          <Card className="border-amber-500/30 bg-amber-500/5">
-            <CardContent className="py-4">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-600 shrink-0">
-                  {cycleAlerts.icon}
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">{cycleAlerts.phase} (Day {cycleAlerts.dayInCycle})</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{cycleAlerts.warning}</p>
-                </div>
-                <Button size="sm" variant="ghost" onClick={() => navigate("/settings")} className="text-xs">
-                  <Calendar className="w-3 h-3 mr-1" />
-                  Update
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Oxytocin Alerts */}
-        {oxytocinAlerts.length > 0 && oxytocinAlerts.map(({ candidate, daysSince }) => (
-          <Card key={candidate.id} className="border-pink-500/30 bg-pink-500/5 animate-pulse-slow">
-            <CardContent className="py-4">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-600 shrink-0">
-                  <Flame className="w-4 h-4" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm text-pink-700 dark:text-pink-400">
-                    🧠 Oxytocin Alert: {candidate.nickname}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Intimacy {daysSince === 0 ? "today" : `${daysSince} day${daysSince > 1 ? "s" : ""} ago`} — 
-                    bonding hormones active for 48-72 hours. Take decisions slowly!
-                  </p>
-                </div>
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  onClick={() => navigate(`/candidate/${candidate.id}`)}
-                  className="text-xs"
-                >
-                  View
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-
-        {/* No Contact Alert */}
-        {candidates.filter(c => c.no_contact_active).map((candidate) => (
-          <Card key={`nc-${candidate.id}`} className="border-slate-500/30 bg-slate-500/5">
-            <CardContent className="py-4">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-slate-500/20 flex items-center justify-center text-slate-600 shrink-0">
-                  <Ban className="w-4 h-4" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">
-                    🚫 No Contact: {candidate.nickname}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Day {candidate.no_contact_day || 0} — Stay strong! Focus on yourself.
-                  </p>
-                </div>
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  onClick={() => navigate(`/candidate/${candidate.id}`)}
-                  className="text-xs"
-                >
-                  View
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-2">
-          <Card className="cursor-pointer hover:border-primary/50" onClick={() => setStatusFilter("active")}>
-            <CardContent className="py-3 text-center">
-              <div className="text-2xl font-bold text-primary">{activeCandidateCount}</div>
-              <div className="text-xs text-muted-foreground">Active</div>
-            </CardContent>
-          </Card>
-          <Card className="cursor-pointer hover:border-green-500/50" onClick={() => {}}>
-            <CardContent className="py-3 text-center">
-              <div className="text-2xl font-bold text-green-600">{recap.goodCandidates.length}</div>
-              <div className="text-xs text-muted-foreground">Good Vibes</div>
-            </CardContent>
-          </Card>
-          <Card className="cursor-pointer hover:border-amber-500/50" onClick={() => {}}>
-            <CardContent className="py-3 text-center">
-              <div className="text-2xl font-bold text-amber-600">{recap.badCandidates.length}</div>
-              <div className="text-xs text-muted-foreground">Watch Out</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Candidate Recap */}
-        {candidates.length > 0 && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-primary" />
-                Recent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {/* Last Matched */}
-              {recap.lastMatched && (
-                <button
-                  onClick={() => navigate(`/candidate/${recap.lastMatched!.id}`)}
-                  className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <Avatar className="w-10 h-10 border border-border">
-                    <AvatarImage src={recap.lastMatched.photo_url || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                      {recap.lastMatched.nickname.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 text-left">
-                    <p className="text-sm font-medium">{recap.lastMatched.nickname}</p>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" />
-                      Last matched
-                      {recap.lastMatched.created_at && (
-                        <> • {format(new Date(recap.lastMatched.created_at), "MMM d")}</>
-                      )}
-                    </p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </button>
+          <TabsContent value="home" className="space-y-4 mt-0">
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                onClick={() => navigate("/add-candidate")}
+                className="w-full bg-primary hover:bg-primary/90"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Candidate
+              </Button>
+              {candidates.length > 0 && (
+                <LogInteractionDialog candidates={candidates} />
               )}
+            </div>
 
-              {/* Last Interaction */}
-              {recap.lastInteracted && (
-                <button
-                  onClick={() => navigate(`/candidate/${recap.lastInteracted!.candidate.id}`)}
-                  className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <Avatar className="w-10 h-10 border border-border">
-                    <AvatarImage src={recap.lastInteracted.candidate.photo_url || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                      {recap.lastInteracted.candidate.nickname.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 text-left">
-                    <p className="text-sm font-medium">{recap.lastInteracted.candidate.nickname}</p>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {recap.lastInteracted.interaction.interaction_type.replace("_", " ")}
-                      {recap.lastInteracted.interaction.interaction_date && (
-                        <> • {format(new Date(recap.lastInteracted.interaction.interaction_date), "MMM d")}</>
-                      )}
-                    </p>
+            {/* Cycle Tracking CTA - Show if tracking enabled but no date set */}
+            {profile?.track_cycle && !profile?.last_period_date && (
+              <Card className="border-primary/30 bg-primary/5">
+                <CardContent className="py-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                      <Droplet className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">Set Up Cycle Tracking</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Add your last period date to get hormone-aware dating insights.
+                      </p>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => navigate("/settings")}>
+                      Update
+                    </Button>
                   </div>
-                  <div className="flex items-center gap-1">
-                    {recap.lastInteracted.interaction.overall_feeling && recap.lastInteracted.interaction.overall_feeling >= 4 && (
-                      <ThumbsUp className="w-4 h-4 text-green-500" />
-                    )}
-                    {recap.lastInteracted.interaction.overall_feeling && recap.lastInteracted.interaction.overall_feeling <= 2 && (
-                      <ThumbsDown className="w-4 h-4 text-red-500" />
-                    )}
-                    {recap.lastInteracted.interaction.overall_feeling === 3 && (
-                      <Minus className="w-4 h-4 text-muted-foreground" />
-                    )}
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                </button>
-              )}
+                </CardContent>
+              </Card>
+            )}
 
-              {/* Good/Bad/Neutral Summary */}
-              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 text-green-600">
-                    <ThumbsUp className="w-3 h-3" />
-                    <span className="text-sm font-medium">{recap.goodCandidates.length}</span>
+            {/* Cycle Alert - Show when tracking is fully set up */}
+            {cycleAlerts && (
+              <Card className="border-amber-500/30 bg-amber-500/5">
+                <CardContent className="py-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-600 shrink-0">
+                      {cycleAlerts.icon}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{cycleAlerts.phase} (Day {cycleAlerts.dayInCycle})</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{cycleAlerts.warning}</p>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => navigate("/settings")} className="text-xs">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      Update
+                    </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">Good</p>
-                </div>
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 text-muted-foreground">
-                    <Minus className="w-3 h-3" />
-                    <span className="text-sm font-medium">{recap.neutralCandidates.length}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Neutral</p>
-                </div>
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 text-red-500">
-                    <ThumbsDown className="w-3 h-3" />
-                    <span className="text-sm font-medium">{recap.badCandidates.length}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Caution</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                </CardContent>
+              </Card>
+            )}
 
-        {/* Search and Filters */}
-        {candidates.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                Your Roster
-              </h2>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/patterns")}>
-                <TrendingUp className="w-4 h-4 mr-1" />
+            {/* Oxytocin Alerts */}
+            {oxytocinAlerts.length > 0 && oxytocinAlerts.map(({ candidate, daysSince }) => (
+              <Card key={candidate.id} className="border-pink-500/30 bg-pink-500/5 animate-pulse-slow">
+                <CardContent className="py-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-600 shrink-0">
+                      <Flame className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm text-pink-700 dark:text-pink-400">
+                        🧠 Oxytocin Alert: {candidate.nickname}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Intimacy {daysSince === 0 ? "today" : `${daysSince} day${daysSince > 1 ? "s" : ""} ago`} — 
+                        bonding hormones active for 48-72 hours. Take decisions slowly!
+                      </p>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      onClick={() => navigate(`/candidate/${candidate.id}`)}
+                      className="text-xs"
+                    >
+                      View
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            {/* No Contact Alert */}
+            {candidates.filter(c => c.no_contact_active).map((candidate) => (
+              <Card key={`nc-${candidate.id}`} className="border-slate-500/30 bg-slate-500/5">
+                <CardContent className="py-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-slate-500/20 flex items-center justify-center text-slate-600 shrink-0">
+                      <Ban className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">
+                        🚫 No Contact: {candidate.nickname}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Day {candidate.no_contact_day || 0} — Stay strong! Focus on yourself.
+                      </p>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      onClick={() => navigate(`/candidate/${candidate.id}`)}
+                      className="text-xs"
+                    >
+                      View
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-2">
+              <Card className="cursor-pointer hover:border-primary/50" onClick={() => setStatusFilter("active")}>
+                <CardContent className="py-3 text-center">
+                  <div className="text-2xl font-bold text-primary">{activeCandidateCount}</div>
+                  <div className="text-xs text-muted-foreground">Active</div>
+                </CardContent>
+              </Card>
+              <Card className="cursor-pointer hover:border-green-500/50" onClick={() => {}}>
+                <CardContent className="py-3 text-center">
+                  <div className="text-2xl font-bold text-green-600">{recap.goodCandidates.length}</div>
+                  <div className="text-xs text-muted-foreground">Good Vibes</div>
+                </CardContent>
+              </Card>
+              <Card className="cursor-pointer hover:border-amber-500/50" onClick={() => {}}>
+                <CardContent className="py-3 text-center">
+                  <div className="text-2xl font-bold text-amber-600">{recap.badCandidates.length}</div>
+                  <div className="text-xs text-muted-foreground">Watch Out</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Candidate Recap */}
+            {candidates.length > 0 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    Recent Activity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {/* Last Matched */}
+                  {recap.lastMatched && (
+                    <button
+                      onClick={() => navigate(`/candidate/${recap.lastMatched!.id}`)}
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <Avatar className="w-10 h-10 border border-border">
+                        <AvatarImage src={recap.lastMatched.photo_url || undefined} />
+                        <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                          {recap.lastMatched.nickname.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-medium">{recap.lastMatched.nickname}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Sparkles className="w-3 h-3" />
+                          Last matched
+                          {recap.lastMatched.created_at && (
+                            <> • {format(new Date(recap.lastMatched.created_at), "MMM d")}</>
+                          )}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                  )}
+
+                  {/* Last Interaction */}
+                  {recap.lastInteracted && (
+                    <button
+                      onClick={() => navigate(`/candidate/${recap.lastInteracted!.candidate.id}`)}
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <Avatar className="w-10 h-10 border border-border">
+                        <AvatarImage src={recap.lastInteracted.candidate.photo_url || undefined} />
+                        <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                          {recap.lastInteracted.candidate.nickname.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-medium">{recap.lastInteracted.candidate.nickname}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {recap.lastInteracted.interaction.interaction_type.replace("_", " ")}
+                          {recap.lastInteracted.interaction.interaction_date && (
+                            <> • {format(new Date(recap.lastInteracted.interaction.interaction_date), "MMM d")}</>
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {recap.lastInteracted.interaction.overall_feeling && recap.lastInteracted.interaction.overall_feeling >= 4 && (
+                          <ThumbsUp className="w-4 h-4 text-green-500" />
+                        )}
+                        {recap.lastInteracted.interaction.overall_feeling && recap.lastInteracted.interaction.overall_feeling <= 2 && (
+                          <ThumbsDown className="w-4 h-4 text-red-500" />
+                        )}
+                        {recap.lastInteracted.interaction.overall_feeling === 3 && (
+                          <Minus className="w-4 h-4 text-muted-foreground" />
+                        )}
+                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    </button>
+                  )}
+
+                  {/* Good/Bad/Neutral Summary */}
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-1 text-green-600">
+                        <ThumbsUp className="w-3 h-3" />
+                        <span className="text-sm font-medium">{recap.goodCandidates.length}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Good</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-1 text-muted-foreground">
+                        <Minus className="w-3 h-3" />
+                        <span className="text-sm font-medium">{recap.neutralCandidates.length}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Neutral</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-1 text-red-500">
+                        <ThumbsDown className="w-3 h-3" />
+                        <span className="text-sm font-medium">{recap.badCandidates.length}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Caution</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {candidates.length === 0 && (
+              <Card className="border-dashed">
+                <CardContent className="py-12 text-center">
+                  <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="font-medium text-foreground mb-2">No Candidates Yet</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Start tracking your dating journey by adding your first candidate.
+                  </p>
+                  <Button onClick={() => navigate("/add-candidate")}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Your First Candidate
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="manage" className="space-y-4 mt-0">
+            {/* Quick Actions for Manage Tab */}
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                onClick={() => navigate("/add-candidate")}
+                className="w-full bg-primary hover:bg-primary/90"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Candidate
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/patterns")} className="w-full">
+                <TrendingUp className="w-4 h-4 mr-2" />
                 View Patterns
               </Button>
             </div>
-            <CandidateSearch value={searchQuery} onChange={setSearchQuery} />
-            <CandidateFilters
-              sortBy={sortBy}
-              onSortChange={setSortBy}
-              statusFilter={statusFilter}
-              onStatusFilterChange={setStatusFilter}
-            />
-          </div>
-        )}
 
-        {/* Candidates List */}
-        {candidates.length > 0 ? (
-          <CandidatesList
-            candidates={filteredAndSortedCandidates}
-            onUpdate={fetchData}
-            showGroupHeaders={statusFilter === "all" && sortBy === "status"}
-          />
-        ) : (
-          <Card className="border-dashed">
-            <CardContent className="py-12 text-center">
-              <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="font-medium text-foreground mb-2">No Candidates Yet</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Start tracking your dating journey by adding your first candidate.
-              </p>
-              <Button onClick={() => navigate("/add-candidate")}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Your First Candidate
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+            {/* Search and Filters */}
+            {candidates.length > 0 ? (
+              <div className="space-y-3">
+                <CandidateSearch value={searchQuery} onChange={setSearchQuery} />
+                <CandidateFilters
+                  sortBy={sortBy}
+                  onSortChange={setSortBy}
+                  statusFilter={statusFilter}
+                  onStatusFilterChange={setStatusFilter}
+                />
+                <CandidatesList
+                  candidates={filteredAndSortedCandidates}
+                  onUpdate={fetchData}
+                  showGroupHeaders={statusFilter === "all" && sortBy === "status"}
+                />
+              </div>
+            ) : (
+              <Card className="border-dashed">
+                <CardContent className="py-12 text-center">
+                  <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="font-medium text-foreground mb-2">No Candidates Yet</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Start tracking your dating journey by adding your first candidate.
+                  </p>
+                  <Button onClick={() => navigate("/add-candidate")}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Your First Candidate
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
