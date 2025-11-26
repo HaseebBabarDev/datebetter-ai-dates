@@ -70,9 +70,10 @@ serve(async (req) => {
 
     // Build interaction summary and calculate sentiment
     let interactionSummary = "No interactions logged yet.";
-    let interactionSentiment = 0; // -30 to +10 range
+    let interactionSentiment = 0;
     let negativeCount = 0;
     let positiveCount = 0;
+    let hasCriticalRedFlag = false; // Deal-breakers like infidelity
     
     if (interactions && interactions.length > 0) {
       const interactionDetails = interactions.map((i: any) => 
@@ -84,34 +85,56 @@ serve(async (req) => {
       const negativeGutFeelings = ["sad", "anxious", "confused", "angry", "hurt", "frustrated", "disappointed"];
       const positiveGutFeelings = ["happy", "excited", "hopeful", "content", "loved", "secure"];
       
+      // Critical red flags that should tank the score (deal-breakers)
+      const criticalRedFlags = ["seeing someone else", "cheating", "cheated", "other woman", "other guy", "married", "has a girlfriend", "has a boyfriend", "lied about", "abusive", "hit me", "threatened"];
+      // Serious red flags
+      const seriousRedFlags = ["ghosted", "ignored", "blocked", "disappeared", "breadcrumbing", "love bombing"];
+      // Moderate red flags
+      const moderateRedFlags = ["distant", "cold", "switched up", "hot and cold", "inconsistent", "didn't answer", "didn't respond"];
+      
       interactions.forEach((i: any) => {
         const feeling = i.overall_feeling || 3;
         const gut = (i.gut_feeling || "").toLowerCase();
         const notes = (i.notes || "").toLowerCase();
         
-        // Check for very negative signals in notes
-        const redFlagPhrases = ["seeing someone else", "broke up", "ghosted", "ignored", "cheating", "lied", "distant", "cold"];
-        const hasRedFlag = redFlagPhrases.some(phrase => notes.includes(phrase));
+        // Check for critical red flags (deal-breakers)
+        const hasCritical = criticalRedFlags.some(phrase => notes.includes(phrase));
+        const hasSerious = seriousRedFlags.some(phrase => notes.includes(phrase));
+        const hasModerate = moderateRedFlags.some(phrase => notes.includes(phrase));
         
-        if (feeling <= 2 || negativeGutFeelings.includes(gut) || hasRedFlag) {
+        if (hasCritical) {
+          hasCriticalRedFlag = true;
           negativeCount++;
-          interactionSentiment -= hasRedFlag ? 15 : (feeling === 1 ? 10 : 5);
+          interactionSentiment -= 40; // Massive penalty
+        } else if (hasSerious) {
+          negativeCount++;
+          interactionSentiment -= 25;
+        } else if (hasModerate || feeling <= 2 || negativeGutFeelings.includes(gut)) {
+          negativeCount++;
+          interactionSentiment -= hasModerate ? 15 : (feeling === 1 ? 12 : 8);
         } else if (feeling >= 4 && positiveGutFeelings.includes(gut)) {
           positiveCount++;
           interactionSentiment += 3;
         }
       });
       
-      // Cap the sentiment adjustment
-      interactionSentiment = Math.max(-40, Math.min(10, interactionSentiment));
+      // Cap the sentiment adjustment (no floor for critical flags)
+      interactionSentiment = Math.max(hasCriticalRedFlag ? -60 : -45, Math.min(10, interactionSentiment));
     }
 
     // Calculate base scores from profile data for consistency
     const baseScores = calculateBaseScores(profile, candidate);
     
-    // Apply interaction sentiment to emotional score
-    const adjustedEmotionalScore = Math.max(0, Math.min(100, baseScores.emotional_compatibility + interactionSentiment));
-    const sentimentAdjustedOverall = Math.max(0, Math.min(100, baseScores.overall_score + Math.round(interactionSentiment * 0.5)));
+    // Apply interaction sentiment - full impact for negative, reduced for positive
+    const adjustedEmotionalScore = Math.max(5, Math.min(100, baseScores.emotional_compatibility + interactionSentiment));
+    
+    // For critical red flags, hard cap the overall score at 30 max
+    let sentimentAdjustedOverall;
+    if (hasCriticalRedFlag) {
+      sentimentAdjustedOverall = Math.min(30, Math.max(15, baseScores.overall_score + interactionSentiment));
+    } else {
+      sentimentAdjustedOverall = Math.max(20, Math.min(100, baseScores.overall_score + interactionSentiment));
+    }
 
     // Build the prompt for AI analysis
     const prompt = `You are a relationship compatibility analyst. Analyze the compatibility between the person using this app and their dating candidate. Always address them as "you" not "user".
@@ -168,21 +191,23 @@ INTERACTION ANALYSIS:
 - Total negative interactions: ${negativeCount}
 - Total positive interactions: ${positiveCount}
 - Calculated sentiment adjustment: ${interactionSentiment} points
+- CRITICAL RED FLAG DETECTED: ${hasCriticalRedFlag ? "YES - DEAL-BREAKER PRESENT" : "No"}
 
 BASE COMPATIBILITY SCORES (calculated from profile matching):
 - Values Alignment: ${baseScores.values_alignment}
 - Lifestyle: ${baseScores.lifestyle_compatibility}
-- Emotional: ${baseScores.emotional_compatibility} (adjusted to ${adjustedEmotionalScore} after interactions)
+- Emotional: ${baseScores.emotional_compatibility} (ADJUSTED TO ${adjustedEmotionalScore} after interactions)
 - Chemistry: ${baseScores.chemistry_score}
 - Future Goals: ${baseScores.future_goals}
-- Base Overall: ${baseScores.overall_score} (adjusted to ${sentimentAdjustedOverall} after interactions)
+- Base Overall: ${baseScores.overall_score} (HARD CAPPED TO ${sentimentAdjustedOverall} after interactions)
 
-CRITICAL SCORING RULES:
-1. The overall_score MUST be at or below ${sentimentAdjustedOverall} if there are negative interactions
-2. Negative interactions (low feelings, sad/anxious gut feelings, concerning notes) MUST reduce the score
-3. Red flags in notes like "seeing someone else", "ghosted", "distant after intimacy" should heavily penalize emotional_compatibility
-4. Do NOT increase the score above the sentiment-adjusted score when interactions are negative
-5. The emotional_compatibility score should reflect the interaction sentiment - use ${adjustedEmotionalScore} as your target
+CRITICAL SCORING RULES - YOU MUST FOLLOW THESE:
+1. ${hasCriticalRedFlag ? "CRITICAL RED FLAG DETECTED! Score MUST be 30 or below. This is a deal-breaker situation." : ""}
+2. The overall_score MUST NOT exceed ${sentimentAdjustedOverall} - this is a hard limit
+3. If someone admits to "seeing someone else", is cheating, or shows major disrespect - emotional_compatibility should be 20 or lower
+4. Your advice should match the severity of the score - a score under 35 means "walk away" advice
+5. Do not sugarcoat concerns when serious red flags are present
+6. The emotional_compatibility score should be ${adjustedEmotionalScore} or lower given the interactions
 
 Consider these factors when adjusting lifestyle scores:
 - Distance/location compatibility (same_city is best, long_distance reduces score if they prefer nearby)
