@@ -21,7 +21,9 @@ const CompletionScreen = () => {
       const { error } = await supabase.from("profiles").update({
         name: data.name,
         birth_date: data.birthDate,
-        location: data.location,
+        country: data.country,
+        city: data.city,
+        state: data.state,
         gender_identity: data.genderIdentity as any,
         pronouns: data.pronouns as any,
         sexual_orientation: data.sexualOrientation as any,
@@ -39,6 +41,7 @@ const CompletionScreen = () => {
         body_type: data.bodyType,
         activity_level: data.activityLevel,
         education_level: data.educationLevel,
+        schedule_flexibility: data.scheduleFlexibility,
         onboarding_completed: true,
         onboarding_step: 15,
       }).eq("user_id", user.id);

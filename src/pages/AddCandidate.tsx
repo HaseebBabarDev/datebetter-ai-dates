@@ -155,6 +155,34 @@ const HEIGHT_OPTIONS = [
   { value: "over_6ft", label: "Over 6'0\" (183+ cm)" },
 ];
 
+const COUNTRY_OPTIONS = [
+  { value: "US", label: "United States" },
+  { value: "CA", label: "Canada" },
+  { value: "UK", label: "United Kingdom" },
+  { value: "AU", label: "Australia" },
+  { value: "DE", label: "Germany" },
+  { value: "FR", label: "France" },
+  { value: "OTHER", label: "Other" },
+];
+
+const DISTANCE_APPROX_OPTIONS = [
+  { value: "same_city", label: "Same City (nearby)" },
+  { value: "regional", label: "Same Region (1-2 hrs away)" },
+  { value: "far", label: "Far (2-4 hrs away)" },
+  { value: "long_distance", label: "Long Distance (different region/country)" },
+];
+
+const SCHEDULE_OPTIONS = [
+  { value: "remote_flexible", label: "Remote / Fully Flexible" },
+  { value: "hybrid", label: "Hybrid" },
+  { value: "office_9_5", label: "Office 9-5" },
+  { value: "shift_work", label: "Shift Work" },
+  { value: "on_call", label: "On-Call / Variable" },
+  { value: "overnight", label: "Overnight / Night Shift" },
+  { value: "student", label: "Student" },
+  { value: "self_employed", label: "Self-Employed" },
+];
+
 type Candidate = Tables<"candidates">;
 
 const AddCandidate = () => {
@@ -177,6 +205,10 @@ const AddCandidate = () => {
   const [status, setStatus] = useState<Enums<"candidate_status">>("just_matched");
   const [notes, setNotes] = useState("");
   const [height, setHeight] = useState("");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [distanceApprox, setDistanceApprox] = useState("");
+  const [theirSchedule, setTheirSchedule] = useState("");
 
   // About Them
   const [theirReligion, setTheirReligion] = useState("");
@@ -230,6 +262,10 @@ const AddCandidate = () => {
         setStatus(data.status || "just_matched");
         setNotes(data.notes || "");
         setHeight((data as any).height || "");
+        setCountry((data as any).country || "");
+        setCity((data as any).city || "");
+        setDistanceApprox((data as any).distance_approximation || "");
+        setTheirSchedule((data as any).their_schedule_flexibility || "");
         setTheirReligion(data.their_religion || "");
         setTheirPolitics(data.their_politics || "");
         setTheirRelationshipGoal(data.their_relationship_goal || "");
@@ -286,6 +322,10 @@ const AddCandidate = () => {
         status,
         notes: notes || null,
         height: height || null,
+        country: country || null,
+        city: city || null,
+        distance_approximation: distanceApprox || null,
+        their_schedule_flexibility: theirSchedule || null,
         their_religion: theirReligion || null,
         their_politics: theirPolitics || null,
         their_relationship_goal: theirRelationshipGoal || null,
@@ -488,6 +528,59 @@ const AddCandidate = () => {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Country</Label>
+                      <Select value={country} onValueChange={setCountry}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {COUNTRY_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>City</Label>
+                      <Input
+                        placeholder="Their city"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Distance</Label>
+                      <Select value={distanceApprox} onValueChange={setDistanceApprox}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="How far?" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DISTANCE_APPROX_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Their Schedule</Label>
+                      <Select value={theirSchedule} onValueChange={setTheirSchedule}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Work style" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SCHEDULE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
