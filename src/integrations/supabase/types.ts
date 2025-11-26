@@ -763,6 +763,7 @@ export type Database = {
         | "trip"
         | "event"
         | "intimate"
+        | "phone_call"
       kids_desire: "definitely_yes" | "maybe" | "definitely_no" | "already_have"
       kids_status: "no_kids" | "has_young_kids" | "has_adult_kids"
       politics:
@@ -979,6 +980,7 @@ export const Constants = {
         "trip",
         "event",
         "intimate",
+        "phone_call",
       ],
       kids_desire: ["definitely_yes", "maybe", "definitely_no", "already_have"],
       kids_status: ["no_kids", "has_young_kids", "has_adult_kids"],
