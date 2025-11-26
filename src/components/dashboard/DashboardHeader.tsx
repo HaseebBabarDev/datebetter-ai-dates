@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Settings, Plus, Bell } from "lucide-react";
+import { Settings, Plus, Bell, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface DashboardHeaderProps {
@@ -20,6 +20,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userName }) =>
             <h1 className="text-xl font-semibold text-foreground">{userName}</h1>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/patterns")}>
+              <BarChart3 className="w-5 h-5" />
+            </Button>
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="w-5 h-5" />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-destructive rounded-full" />
