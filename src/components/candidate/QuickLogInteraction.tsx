@@ -74,7 +74,7 @@ export const QuickLogInteraction: React.FC<QuickLogInteractionProps> = ({
             key={action.type}
             variant="outline"
             size="sm"
-            className="gap-1.5 text-xs h-8"
+            className="gap-1.5 text-xs h-8 flex items-center justify-center"
             onClick={() => handleQuickLog(action.type)}
             disabled={loading !== null}
           >
