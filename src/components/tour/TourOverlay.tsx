@@ -59,32 +59,23 @@ export const TourOverlay: React.FC = () => {
   const getTooltipStyle = (): React.CSSProperties => {
     if (!targetRect) return { opacity: 0 };
 
+    const viewportWidth = window.innerWidth;
+    const tooltipWidth = Math.min(280, viewportWidth - 32);
+
     const style: React.CSSProperties = {
       position: "absolute",
       zIndex: 10001,
-      maxWidth: "320px",
+      width: tooltipWidth,
+      left: Math.max(16, Math.min(targetRect.left + targetRect.width / 2 - tooltipWidth / 2, viewportWidth - tooltipWidth - 16)),
     };
 
     switch (tooltipPlacement) {
       case "top":
-        style.bottom = `calc(100% - ${targetRect.top - padding - 8}px)`;
-        style.left = targetRect.left + targetRect.width / 2;
-        style.transform = "translateX(-50%)";
+        style.bottom = `calc(100% - ${targetRect.top - padding - 12}px)`;
         break;
       case "bottom":
-        style.top = targetRect.top + targetRect.height + padding + 8;
-        style.left = targetRect.left + targetRect.width / 2;
-        style.transform = "translateX(-50%)";
-        break;
-      case "left":
-        style.top = targetRect.top + targetRect.height / 2;
-        style.right = `calc(100% - ${targetRect.left - padding - 8}px)`;
-        style.transform = "translateY(-50%)";
-        break;
-      case "right":
-        style.top = targetRect.top + targetRect.height / 2;
-        style.left = targetRect.left + targetRect.width + padding + 8;
-        style.transform = "translateY(-50%)";
+      default:
+        style.top = targetRect.top + targetRect.height + padding + 12;
         break;
     }
 
@@ -137,15 +128,15 @@ export const TourOverlay: React.FC = () => {
       {/* Tooltip */}
       <div
         ref={tooltipRef}
-        className="bg-card border border-border rounded-lg shadow-xl p-4 pointer-events-auto animate-scale-in"
+        className="bg-card border border-border rounded-xl shadow-xl p-4 pointer-events-auto animate-scale-in"
         style={getTooltipStyle()}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-semibold text-foreground">{currentStepData.title}</h3>
+          <h3 className="font-semibold text-foreground text-base">{currentStepData.title}</h3>
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 -mt-1 -mr-1"
+            className="h-6 w-6 -mt-1 -mr-2 text-muted-foreground"
             onClick={skipTour}
           >
             <X className="h-4 w-4" />
@@ -156,23 +147,17 @@ export const TourOverlay: React.FC = () => {
           {currentStepData.description}
         </p>
 
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">
-            {currentStep + 1} of {steps.length}
-          </span>
-          
-          <div className="flex gap-2">
-            {currentStep > 0 && (
-              <Button variant="outline" size="sm" onClick={prevStep}>
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Back
-              </Button>
-            )}
-            <Button size="sm" onClick={nextStep}>
-              {currentStep === steps.length - 1 ? "Done" : "Next"}
-              {currentStep < steps.length - 1 && <ChevronRight className="h-4 w-4 ml-1" />}
+        <div className="flex items-center justify-end gap-2">
+          {currentStep > 0 && (
+            <Button variant="outline" size="sm" onClick={prevStep}>
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Back
             </Button>
-          </div>
+          )}
+          <Button size="sm" onClick={nextStep}>
+            {currentStep === steps.length - 1 ? "Got it" : "Next"}
+            {currentStep < steps.length - 1 && <ChevronRight className="h-4 w-4 ml-1" />}
+          </Button>
         </div>
       </div>
     </div>
