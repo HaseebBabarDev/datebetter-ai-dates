@@ -23,8 +23,10 @@ import { Badge } from "@/components/ui/badge";
 type Profile = Tables<"profiles">;
 
 const GENDER_OPTIONS = [
-  { value: "woman_cis", label: "Woman (cisgender)" },
+  { value: "woman_cis", label: "Woman" },
   { value: "woman_trans", label: "Woman (transgender)" },
+  { value: "man_cis", label: "Man" },
+  { value: "man_trans", label: "Man (transgender)" },
   { value: "non_binary", label: "Non-binary" },
   { value: "gender_fluid", label: "Gender fluid" },
   { value: "self_describe", label: "Prefer to self-describe" },
