@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Tables } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -14,6 +16,7 @@ import {
   Zap,
   MapPin
 } from "lucide-react";
+import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
 
 type Candidate = Tables<"candidates">;
 
@@ -68,10 +71,27 @@ const getNextStep = (status: string | null, updatedAt: string | null): string | 
 
 export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdate }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [userSchedule, setUserSchedule] = useState<string | null>(null);
   const status = statusConfig[candidate.status || "just_matched"];
   const redFlagCount = Array.isArray(candidate.red_flags) ? candidate.red_flags.length : 0;
   const greenFlagCount = Array.isArray(candidate.green_flags) ? candidate.green_flags.length : 0;
   const nextStep = getNextStep(candidate.status, candidate.updated_at);
+
+  useEffect(() => {
+    const fetchUserSchedule = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("schedule_flexibility")
+        .eq("user_id", user.id)
+        .single();
+      if (data) {
+        setUserSchedule(data.schedule_flexibility);
+      }
+    };
+    fetchUserSchedule();
+  }, [user]);
 
   const handleClick = () => {
     navigate(`/candidate/${candidate.id}`);
@@ -133,7 +153,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
             </div>
           )}
 
-          <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
+          <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground flex-wrap">
             {greenFlagCount > 0 && (
               <span className="flex items-center gap-1 text-emerald-600">
                 <Heart className="w-3 h-3" />
@@ -158,6 +178,11 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
                 {candidate.met_app || candidate.met_via}
               </span>
             )}
+            <ScheduleCompatibilityAlert
+              userSchedule={userSchedule}
+              candidateSchedule={(candidate as any).their_schedule_flexibility}
+              variant="compact"
+            />
           </div>
 
           {nextStep && (
