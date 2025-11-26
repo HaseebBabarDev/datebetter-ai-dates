@@ -17,9 +17,10 @@ type Candidate = Tables<"candidates">;
 
 interface LogInteractionDialogProps {
   candidates: Candidate[];
+  compact?: boolean;
 }
 
-export const LogInteractionDialog = ({ candidates }: LogInteractionDialogProps) => {
+export const LogInteractionDialog = ({ candidates, compact = false }: LogInteractionDialogProps) => {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
 
@@ -32,13 +33,26 @@ export const LogInteractionDialog = ({ candidates }: LogInteractionDialogProps) 
     navigate(`/candidate/${candidateId}`, { state: { tab: "interactions" } });
   };
 
+  const hasNoCandidates = activeCandidates.length === 0;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full">
-          <Clock className="w-4 h-4 mr-2" />
-          Log Interaction
-        </Button>
+        {compact ? (
+          <Button 
+            variant="outline" 
+            className="w-full flex-col h-auto py-3"
+            disabled={hasNoCandidates}
+          >
+            <Clock className="w-5 h-5 mb-1" />
+            <span className="text-xs">Log</span>
+          </Button>
+        ) : (
+          <Button variant="outline" className="w-full" disabled={hasNoCandidates}>
+            <Clock className="w-4 h-4 mr-2" />
+            Log Interaction
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-sm">
         <DialogHeader>
