@@ -15,13 +15,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
@@ -122,31 +120,7 @@ const CandidateDetail = () => {
     }
   }, [candidate?.id]);
 
-  const handleDeleteCandidate = async () => {
-    if (!candidate) return;
-
-    try {
-      // Delete interactions first
-      await supabase
-        .from("interactions")
-        .delete()
-        .eq("candidate_id", candidate.id);
-
-      // Delete the candidate
-      const { error } = await supabase
-        .from("candidates")
-        .delete()
-        .eq("id", candidate.id);
-
-      if (error) throw error;
-
-      toast.success(`${candidate.nickname} removed from your roster`);
-      navigate("/dashboard");
-    } catch (error) {
-      console.error("Error deleting candidate:", error);
-      toast.error("Failed to delete candidate");
-    }
-  };
+  const [showAccountabilityDialog, setShowAccountabilityDialog] = useState(false);
 
   if (authLoading || loading) {
     return (
@@ -191,27 +165,26 @@ const CandidateDetail = () => {
               {candidate.status?.replace("_", " ")}
             </p>
           </div>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
-                <Trash2 className="w-5 h-5" />
-              </Button>
-            </AlertDialogTrigger>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-muted-foreground"
+            onClick={() => setShowAccountabilityDialog(true)}
+          >
+            <Trash2 className="w-5 h-5" />
+          </Button>
+          <AlertDialog open={showAccountabilityDialog} onOpenChange={setShowAccountabilityDialog}>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete {candidate.nickname}?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently remove {candidate.nickname} from your roster, including all interaction history. This action cannot be undone.
+                <AlertDialogTitle>Accountability First</AlertDialogTitle>
+                <AlertDialogDescription className="space-y-2">
+                  <p>Deleting candidates isn't allowed to help you stay accountable to your dating journey.</p>
+                  <p>Your history matters — it helps you recognize patterns, learn from experiences, and make better choices.</p>
+                  <p className="font-medium text-foreground">You can archive candidates instead to hide them from your active list.</p>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDeleteCandidate}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Delete
-                </AlertDialogAction>
+                <AlertDialogAction>Got it</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
