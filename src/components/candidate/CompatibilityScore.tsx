@@ -44,12 +44,14 @@ interface CompatibilityScoreProps {
   candidate: Candidate;
   onUpdate: (updates: Partial<Candidate>) => void;
   onStartNoContact?: () => void;
+  onAdviceResponded?: () => void;
 }
 
 export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   candidate,
   onUpdate,
   onStartNoContact,
+  onAdviceResponded,
 }) => {
   const [loading, setLoading] = useState(false);
   const [adviceResponse, setAdviceResponse] = useState<AdviceTracking | null>(null);
@@ -176,6 +178,12 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       if (error) throw error;
 
       setAdviceResponse(data);
+      
+      // Notify parent that advice was responded to
+      if (onAdviceResponded) {
+        onAdviceResponded();
+      }
+      
       toast({
         title: accepted ? "Advice Accepted" : "Advice Declined",
         description: accepted 

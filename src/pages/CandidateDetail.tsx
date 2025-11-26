@@ -26,6 +26,10 @@ import { toast } from "sonner";
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
 
+interface ScoreBreakdown {
+  advice?: string;
+}
+
 const CandidateDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -34,14 +38,49 @@ const CandidateDetail = () => {
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasPendingAdvice, setHasPendingAdvice] = useState(false);
   const initialTab = (location.state as { tab?: string })?.tab;
   const [activeTab, setActiveTab] = useState<string | undefined>(initialTab);
 
   useEffect(() => {
     if (user && id) {
       fetchData();
+      checkPendingAdvice();
     }
   }, [user, id]);
+
+  const checkPendingAdvice = async () => {
+    if (!user || !id) return;
+    
+    // First get the candidate to check if there's advice
+    const { data: candidateData } = await supabase
+      .from("candidates")
+      .select("score_breakdown")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    
+    if (!candidateData?.score_breakdown) {
+      setHasPendingAdvice(false);
+      return;
+    }
+    
+    const scoreData = candidateData.score_breakdown as unknown as ScoreBreakdown;
+    if (!scoreData?.advice) {
+      setHasPendingAdvice(false);
+      return;
+    }
+    
+    // Check if advice has been responded to
+    const { data: adviceData } = await supabase
+      .from("advice_tracking")
+      .select("id")
+      .eq("candidate_id", id)
+      .eq("advice_text", scoreData.advice)
+      .maybeSingle();
+    
+    setHasPendingAdvice(!adviceData);
+  };
 
   const fetchData = async () => {
     try {
@@ -299,6 +338,7 @@ const CandidateDetail = () => {
               candidate={candidate}
               onUpdate={(updates) => setCandidate({ ...candidate, ...updates })}
               onStartNoContact={handleStartNoContact}
+              onAdviceResponded={checkPendingAdvice}
             />
             <CandidateProfile
               candidate={candidate}
@@ -312,17 +352,19 @@ const CandidateDetail = () => {
             <div className="grid grid-cols-2 gap-2">
               <AddInteractionForm
                 candidateId={candidate.id}
-                onSuccess={fetchData}
+                onSuccess={() => { fetchData(); checkPendingAdvice(); }}
                 onRescore={handleRescore}
                 isNoContact={candidate.no_contact_active || false}
                 onBrokeContact={handleBrokeContact}
+                hasPendingAdvice={hasPendingAdvice}
               />
               <AddInteractionForm
                 candidateId={candidate.id}
-                onSuccess={fetchData}
+                onSuccess={() => { fetchData(); checkPendingAdvice(); }}
                 onRescore={handleRescore}
                 isNoContact={candidate.no_contact_active || false}
                 onBrokeContact={handleBrokeContact}
+                hasPendingAdvice={hasPendingAdvice}
                 defaultType="intimate"
                 triggerButton={
                   <Button variant="outline" className="w-full gap-2 border-pink-500/30 text-pink-600 hover:bg-pink-500/10">
