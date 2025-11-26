@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate, Navigate } from "react-router-dom";
+import { useParams, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
@@ -29,11 +29,13 @@ type Interaction = Tables<"interactions">;
 const CandidateDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<string | undefined>(undefined);
+  const initialTab = (location.state as { tab?: string })?.tab;
+  const [activeTab, setActiveTab] = useState<string | undefined>(initialTab);
 
   useEffect(() => {
     if (user && id) {

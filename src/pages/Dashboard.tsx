@@ -266,7 +266,7 @@ const Dashboard = () => {
           {candidates.length > 0 && (
             <Button
               variant="outline"
-              onClick={() => navigate(`/candidate/${candidates[0]?.id}`)}
+              onClick={() => navigate(`/candidate/${candidates[0]?.id}`, { state: { tab: "interactions" } })}
               className="w-full"
             >
               <Clock className="w-4 h-4 mr-2" />
