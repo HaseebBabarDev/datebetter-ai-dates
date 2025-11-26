@@ -399,26 +399,26 @@ const CandidateDetail = () => {
 
       <main className="container mx-auto px-4 py-6 max-w-lg space-y-6">
         <Tabs value={defaultTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="profile" className="gap-1 text-xs px-2">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Insights</span>
+          <TabsList className="grid w-full grid-cols-5 h-auto p-1">
+            <TabsTrigger value="profile" className="flex-col gap-0.5 py-2 px-1">
+              <Sparkles className="w-4 h-4" />
+              <span className="text-[10px] font-medium">Insights</span>
             </TabsTrigger>
-            <TabsTrigger value="overview" className="gap-1 text-xs px-2">
-              <User className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Overview</span>
+            <TabsTrigger value="overview" className="flex-col gap-0.5 py-2 px-1">
+              <User className="w-4 h-4" />
+              <span className="text-[10px] font-medium">Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="interactions" className="gap-1 text-xs px-2">
-              <Clock className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">History</span>
+            <TabsTrigger value="interactions" className="flex-col gap-0.5 py-2 px-1">
+              <Clock className="w-4 h-4" />
+              <span className="text-[10px] font-medium">History</span>
             </TabsTrigger>
-            <TabsTrigger value="flags" className="gap-1 text-xs px-2">
-              <Flag className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Flags</span>
+            <TabsTrigger value="flags" className="flex-col gap-0.5 py-2 px-1">
+              <Flag className="w-4 h-4" />
+              <span className="text-[10px] font-medium">Flags</span>
             </TabsTrigger>
-            <TabsTrigger value="no-contact" className={`gap-1 text-xs px-2 ${candidate.no_contact_active ? "text-primary" : ""}`}>
-              <Ban className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">NC</span>
+            <TabsTrigger value="no-contact" className={`flex-col gap-0.5 py-2 px-1 ${candidate.no_contact_active ? "text-primary" : ""}`}>
+              <Ban className="w-4 h-4" />
+              <span className="text-[10px] font-medium">NC</span>
             </TabsTrigger>
           </TabsList>
 
@@ -461,6 +461,12 @@ const CandidateDetail = () => {
                 isNoContact={candidate.no_contact_active || false}
                 onBrokeContact={handleBrokeContact}
                 hasPendingAdvice={hasPendingAdvice}
+                triggerButton={
+                  <Button className="w-full gap-2">
+                    <Clock className="h-4 w-4" />
+                    Log Interaction
+                  </Button>
+                }
               />
               <AddInteractionForm
                 candidateId={candidate.id}
