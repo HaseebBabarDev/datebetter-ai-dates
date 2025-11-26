@@ -35,6 +35,10 @@ const CompletionScreen = () => {
         communication_style: data.communicationStyle as any,
         social_style: data.socialStyle as any,
         track_cycle: data.trackCycle,
+        height: data.height,
+        body_type: data.bodyType,
+        activity_level: data.activityLevel,
+        education_level: data.educationLevel,
         onboarding_completed: true,
         onboarding_step: 15,
       }).eq("user_id", user.id);
