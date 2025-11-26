@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Mail, Lock, ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import authBg from "@/assets/auth-bg.jpg";
 
 const Auth = () => {
@@ -37,6 +38,16 @@ const Auth = () => {
   };
 
   const { strength, label } = getPasswordStrength();
+
+  const checkOnboardingStatus = async (userId: string) => {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("onboarding_completed, onboarding_step")
+      .eq("user_id", userId)
+      .single();
+    
+    return profile;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +83,18 @@ const Auth = () => {
         });
       } else {
         toast({ title: isSignUp ? "Account created! Welcome to dateBetter" : "Welcome back!" });
+        
+        // Check onboarding status for returning users
+        if (!isSignUp) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const profile = await checkOnboardingStatus(user.id);
+            if (profile?.onboarding_completed) {
+              navigate("/dashboard");
+              return;
+            }
+          }
+        }
         navigate("/setup");
       }
     } catch (error) {

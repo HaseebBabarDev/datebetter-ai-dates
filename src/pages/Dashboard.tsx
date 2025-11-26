@@ -758,8 +758,8 @@ const Dashboard = () => {
             {(() => {
               const alerts: { key: string; icon: React.ReactNode; label: string; sub?: string; color: string; onClick?: () => void }[] = [];
               
-              // Cycle Setup CTA
-              if (profile?.track_cycle && !profile?.last_period_date) {
+              // Cycle Setup CTA - only show if not completed onboarding (they haven't consciously skipped it yet)
+              if (profile?.track_cycle && !profile?.last_period_date && !profile?.onboarding_completed) {
                 alerts.push({
                   key: "cycle-setup",
                   icon: <Droplet className="w-3 h-3" />,
