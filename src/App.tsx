@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Setup from "./pages/Setup";
 import Dashboard from "./pages/Dashboard";
 import CandidateDetail from "./pages/CandidateDetail";
+import Patterns from "./pages/Patterns";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/setup" element={<Setup />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/candidate/:id" element={<CandidateDetail />} />
+            <Route path="/patterns" element={<Patterns />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
