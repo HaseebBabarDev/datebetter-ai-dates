@@ -21,14 +21,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { SliderInput } from "@/components/onboarding/SliderInput";
-import { Plus } from "lucide-react";
+import { Plus, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 interface AddInteractionFormProps {
   candidateId: string;
   onSuccess: () => void;
   onRescore?: () => void;
+  isNoContact?: boolean;
+  onBrokeContact?: () => void;
 }
 
 const INTERACTION_TYPES: { value: Enums<"interaction_type">; label: string }[] = [
@@ -60,9 +72,12 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   candidateId,
   onSuccess,
   onRescore,
+  isNoContact = false,
+  onBrokeContact,
 }) => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
+  const [showBrokeContactDialog, setShowBrokeContactDialog] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [interactionType, setInteractionType] = useState<Enums<"interaction_type">>("coffee");
@@ -127,14 +142,52 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
     }
   };
 
+  const handleOpenSheet = () => {
+    if (isNoContact) {
+      setShowBrokeContactDialog(true);
+    } else {
+      setOpen(true);
+    }
+  };
+
+  const handleBrokeContact = () => {
+    setShowBrokeContactDialog(false);
+    if (onBrokeContact) {
+      onBrokeContact();
+    }
+    setOpen(true);
+  };
+
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button className="w-full gap-2">
-          <Plus className="h-4 w-4" />
-          Log Interaction
-        </Button>
-      </SheetTrigger>
+    <>
+      <AlertDialog open={showBrokeContactDialog} onOpenChange={setShowBrokeContactDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-amber-500" />
+              You're in No Contact Mode
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>Logging an interaction means you've had contact. This will end your No Contact streak.</p>
+              <p>Are you sure you want to continue? It's okay if you slipped — healing isn't linear.</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep No Contact</AlertDialogCancel>
+            <AlertDialogAction onClick={handleBrokeContact}>
+              Yes, I Broke Contact
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button className="w-full gap-2" onClick={handleOpenSheet}>
+            <Plus className="h-4 w-4" />
+            Log Interaction
+          </Button>
+        </SheetTrigger>
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Log Interaction</SheetTitle>
@@ -243,5 +296,6 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
         </form>
       </SheetContent>
     </Sheet>
+    </>
   );
 };

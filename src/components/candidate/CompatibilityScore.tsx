@@ -4,7 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Lightbulb } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Sparkles, RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Lightbulb, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,15 +39,18 @@ interface ScoreBreakdown {
 interface CompatibilityScoreProps {
   candidate: Candidate;
   onUpdate: (updates: Partial<Candidate>) => void;
+  onStartNoContact?: () => void;
 }
 
 export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   candidate,
   onUpdate,
+  onStartNoContact,
 }) => {
   const [loading, setLoading] = useState(false);
   const [adviceResponse, setAdviceResponse] = useState<AdviceTracking | null>(null);
   const [respondingToAdvice, setRespondingToAdvice] = useState(false);
+  const [showNoContactDialog, setShowNoContactDialog] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -115,7 +128,29 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
     }
   };
 
+  // Check if advice mentions no contact
+  const isNoContactAdvice = (advice: string) => {
+    const lowerAdvice = advice.toLowerCase();
+    return lowerAdvice.includes("no contact") || 
+           lowerAdvice.includes("distance") || 
+           lowerAdvice.includes("step back") ||
+           lowerAdvice.includes("take a break") ||
+           lowerAdvice.includes("space from");
+  };
+
   const respondToAdvice = async (accepted: boolean) => {
+    if (!scoreData?.advice || !user) return;
+    
+    // Check if accepting no contact advice
+    if (accepted && isNoContactAdvice(scoreData.advice)) {
+      setShowNoContactDialog(true);
+      return;
+    }
+    
+    await saveAdviceResponse(accepted);
+  };
+
+  const saveAdviceResponse = async (accepted: boolean) => {
     if (!scoreData?.advice || !user) return;
     
     setRespondingToAdvice(true);
@@ -152,6 +187,14 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       });
     } finally {
       setRespondingToAdvice(false);
+    }
+  };
+
+  const handleStartNoContact = async () => {
+    setShowNoContactDialog(false);
+    await saveAdviceResponse(true);
+    if (onStartNoContact) {
+      onStartNoContact();
     }
   };
 
@@ -341,6 +384,30 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
           </p>
         )}
       </CardContent>
+
+      {/* No Contact Confirmation Dialog */}
+      <AlertDialog open={showNoContactDialog} onOpenChange={setShowNoContactDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-primary" />
+              Start No Contact Mode?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>The advice suggests creating distance from {candidate.nickname}.</p>
+              <p>Would you like to start a 30-day No Contact journey? You'll get daily support messages and progress tracking.</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => saveAdviceResponse(true)}>
+              Accept Advice Only
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleStartNoContact}>
+              Start No Contact Mode
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
