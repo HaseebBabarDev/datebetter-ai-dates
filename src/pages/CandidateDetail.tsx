@@ -228,7 +228,7 @@ const CandidateDetail = () => {
   }
 
   // Determine default tab based on no contact status
-  const defaultTab = activeTab || (candidate.no_contact_active ? "no-contact" : "overview");
+  const defaultTab = activeTab || (candidate.no_contact_active ? "no-contact" : "profile");
 
   const handleStartNoContact = () => {
     setActiveTab("no-contact");
@@ -302,13 +302,13 @@ const CandidateDetail = () => {
       <main className="container mx-auto px-4 py-6 max-w-lg space-y-6">
         <Tabs value={defaultTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview" className="gap-1 text-xs px-2">
-              <User className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Overview</span>
-            </TabsTrigger>
             <TabsTrigger value="profile" className="gap-1 text-xs px-2">
               <Sparkles className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Insights</span>
+            </TabsTrigger>
+            <TabsTrigger value="overview" className="gap-1 text-xs px-2">
+              <User className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
             <TabsTrigger value="interactions" className="gap-1 text-xs px-2">
               <Clock className="w-3.5 h-3.5" />
@@ -324,15 +324,6 @@ const CandidateDetail = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="mt-4 space-y-4">
-            <CandidateProfile
-              candidate={candidate}
-              userId={user!.id}
-              onUpdate={handleUpdateCandidate}
-              showBasicOnly
-            />
-          </TabsContent>
-
           <TabsContent value="profile" className="mt-4 space-y-4">
             <CompatibilityScore
               candidate={candidate}
@@ -345,6 +336,15 @@ const CandidateDetail = () => {
               userId={user!.id}
               onUpdate={handleUpdateCandidate}
               showDetailsOnly
+            />
+          </TabsContent>
+
+          <TabsContent value="overview" className="mt-4 space-y-4">
+            <CandidateProfile
+              candidate={candidate}
+              userId={user!.id}
+              onUpdate={handleUpdateCandidate}
+              showBasicOnly
             />
           </TabsContent>
 
