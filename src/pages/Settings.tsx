@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home } from "lucide-react";
+import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { Badge } from "@/components/ui/badge";
@@ -260,6 +260,29 @@ const Settings = () => {
               <LogOut className="w-4 h-4 mr-2" />
               Sign Out
             </Button>
+
+            {/* Delete Account */}
+            <Card className="border-destructive/20 bg-destructive/5">
+              <CardContent className="pt-6 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Trash2 className="w-5 h-5 text-destructive" />
+                  <h3 className="font-semibold text-destructive">Delete Account</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Want to delete your account? Your plan will be downgraded to Free and all your data will be permanently removed.
+                </p>
+                <Button
+                  variant="outline"
+                  className="w-full border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => {
+                    window.location.href = `mailto:support@datebetterapp.com?subject=Account Deletion Request&body=Hi, I would like to delete my account.%0D%0A%0D%0AEmail: ${user?.email}%0D%0A%0D%0APlease confirm once my account has been deleted.`;
+                  }}
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  Request Account Deletion
+                </Button>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="preferences">
