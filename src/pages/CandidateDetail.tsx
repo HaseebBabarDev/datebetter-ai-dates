@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban } from "lucide-react";
+import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban, Home } from "lucide-react";
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
 import { FlagsSection } from "@/components/candidate/FlagsSection";
@@ -303,9 +303,12 @@ const CandidateDetail = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur border-b border-border z-10">
-        <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
+        <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
+            <Home className="w-5 h-5" />
           </Button>
           <div className="flex-1">
             <h1 className="font-semibold text-foreground">{candidate.nickname}</h1>

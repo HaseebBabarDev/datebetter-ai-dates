@@ -26,6 +26,7 @@ import {
   X,
   HeartHandshake,
   HeartCrack,
+  Home,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -334,9 +335,12 @@ const Patterns = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur border-b border-border z-10">
-        <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
+        <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
+            <Home className="w-5 h-5" />
           </Button>
           <div className="flex-1">
             <h1 className="font-semibold text-foreground">Dating Patterns</h1>
