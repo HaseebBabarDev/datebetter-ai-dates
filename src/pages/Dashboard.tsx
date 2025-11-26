@@ -7,6 +7,7 @@ import { CycleStatusBar } from "@/components/dashboard/CycleStatusBar";
 import { AlertsSection } from "@/components/dashboard/AlertsSection";
 import { CandidatesList } from "@/components/dashboard/CandidatesList";
 import { EmptyState } from "@/components/dashboard/EmptyState";
+import { AddCandidateForm } from "@/components/dashboard/AddCandidateForm";
 import { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
@@ -68,6 +69,13 @@ const Dashboard = () => {
       <DashboardHeader userName={profile?.name || "there"} />
       
       <main className="container mx-auto px-4 py-6 max-w-lg space-y-6">
+        {/* Add Candidate Button - Always visible when there are candidates */}
+        {candidates.length > 0 && (
+          <div className="flex justify-end">
+            <AddCandidateForm onSuccess={handleCandidateUpdate} />
+          </div>
+        )}
+
         {profile?.track_cycle && (
           <CycleStatusBar 
             lastPeriodDate={profile.last_period_date} 
@@ -83,7 +91,7 @@ const Dashboard = () => {
             onUpdate={handleCandidateUpdate} 
           />
         ) : (
-          <EmptyState />
+          <EmptyState onCandidateAdded={handleCandidateUpdate} />
         )}
       </main>
     </div>
