@@ -37,6 +37,7 @@ import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
 import { CandidatesList } from "@/components/dashboard/CandidatesList";
 import { LogInteractionDialog } from "@/components/dashboard/LogInteractionDialog";
+import { useTour, DASHBOARD_TOUR_STEPS } from "@/components/tour";
 import { differenceInDays, addDays, format } from "date-fns";
 import heroCouple from "@/assets/hero-couple.jpeg";
 
@@ -65,6 +66,7 @@ const statusOrder: Record<string, number> = {
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { startTour, hasCompletedTour } = useTour();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
@@ -74,6 +76,16 @@ const Dashboard = () => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [qualityFilter, setQualityFilter] = useState<"good" | "bad" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Start tour for new users
+  useEffect(() => {
+    if (!loading && profile && !hasCompletedTour("dashboard")) {
+      const timer = setTimeout(() => {
+        startTour("dashboard", DASHBOARD_TOUR_STEPS);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, profile, startTour, hasCompletedTour]);
 
   useEffect(() => {
     if (user) {
@@ -435,7 +447,7 @@ const Dashboard = () => {
                   <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
                 )}
               </Button>
-              <Button variant="ghost" size="icon" className="text-foreground hover:bg-primary/10" onClick={() => navigate("/settings")}>
+              <Button data-tour="settings" variant="ghost" size="icon" className="text-foreground hover:bg-primary/10" onClick={() => navigate("/settings")}>
                 <Settings className="w-5 h-5" />
               </Button>
             </div>
@@ -455,13 +467,16 @@ const Dashboard = () => {
             <div className="space-y-2">
               <div className="grid grid-cols-2 gap-2">
                 <Button
+                  data-tour="add-candidate"
                   onClick={() => navigate("/add-candidate")}
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 gap-2 font-semibold shadow-lg shadow-primary/30"
                 >
                   <Plus className="w-4 h-4" />
                   <span className="text-sm font-medium">Add Candidate</span>
                 </Button>
-                <LogInteractionDialog candidates={candidates} compact />
+                <div data-tour="log-interaction">
+                  <LogInteractionDialog candidates={candidates} compact />
+                </div>
               </div>
               <Button
                 variant="outline"
@@ -538,6 +553,7 @@ const Dashboard = () => {
               if (alerts.length === 0) return null;
 
               return (
+                <div data-tour="cycle-status">
                 <Carousel className="w-full" opts={{ align: "start", dragFree: true }}>
                   <CarouselContent className="-ml-2">
                     {alerts.map((alert) => (
@@ -563,6 +579,7 @@ const Dashboard = () => {
                     </CarouselItem>
                   </CarouselContent>
                 </Carousel>
+                </div>
               );
             })()}
 
@@ -724,12 +741,14 @@ const Dashboard = () => {
                   statusFilter={statusFilter}
                   onStatusFilterChange={setStatusFilter}
                 />
-                <CandidatesList
-                  candidates={filteredAndSortedCandidates}
-                  onUpdate={fetchData}
-                  showGroupHeaders={statusFilter === "all" && sortBy === "status" && !qualityFilter}
-                  candidateAlerts={candidateAlerts}
-                />
+                <div data-tour="candidates-list">
+                  <CandidatesList
+                    candidates={filteredAndSortedCandidates}
+                    onUpdate={fetchData}
+                    showGroupHeaders={statusFilter === "all" && sortBy === "status" && !qualityFilter}
+                    candidateAlerts={candidateAlerts}
+                  />
+                </div>
               </div>
             ) : (
               <div className="rounded-xl bg-card/80 backdrop-blur-sm border border-border border-dashed py-12 text-center">

@@ -16,6 +16,7 @@ import { ProfileCompleteness } from "@/components/candidate/ProfileCompleteness"
 import { AppRatingDialog, shouldShowRatingDialog } from "@/components/candidate/AppRatingDialog";
 import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTour, CANDIDATE_DETAIL_TOUR_STEPS } from "@/components/tour";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,6 +41,7 @@ const CandidateDetail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
+  const { startTour, hasCompletedTour } = useTour();
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [userProfile, setUserProfile] = useState<{ schedule_flexibility?: string | null }>({});
@@ -47,6 +49,16 @@ const CandidateDetail = () => {
   const [hasPendingAdvice, setHasPendingAdvice] = useState(false);
   const initialTab = (location.state as { tab?: string })?.tab;
   const [activeTab, setActiveTab] = useState<string | undefined>(initialTab);
+
+  // Start tour for new users on candidate detail
+  useEffect(() => {
+    if (!loading && candidate && !hasCompletedTour("candidate-detail")) {
+      const timer = setTimeout(() => {
+        startTour("candidate-detail", CANDIDATE_DETAIL_TOUR_STEPS);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, candidate, startTour, hasCompletedTour]);
 
   useEffect(() => {
     if (user && id) {
@@ -403,16 +415,18 @@ const CandidateDetail = () => {
 
       <main className="container mx-auto px-4 py-6 max-w-lg space-y-6">
         {!candidate.no_contact_active && (
-          <QuickLogInteraction
-            candidateId={candidate.id}
-            onSuccess={() => { fetchData(); checkPendingAdvice(); }}
-            onRescore={handleRescore}
-          />
+          <div data-tour="quick-log">
+            <QuickLogInteraction
+              candidateId={candidate.id}
+              onSuccess={() => { fetchData(); checkPendingAdvice(); }}
+              onRescore={handleRescore}
+            />
+          </div>
         )}
 
         <Tabs value={defaultTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5 h-auto p-1">
-            <TabsTrigger value="profile" className="flex-col gap-0.5 py-2 px-1">
+            <TabsTrigger data-tour="insights-tab" value="profile" className="flex-col gap-0.5 py-2 px-1">
               <Sparkles className="w-4 h-4" />
               <span className="text-[10px] font-medium">Insights</span>
             </TabsTrigger>
@@ -420,15 +434,15 @@ const CandidateDetail = () => {
               <User className="w-4 h-4" />
               <span className="text-[10px] font-medium">Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="interactions" className="flex-col gap-0.5 py-2 px-1">
+            <TabsTrigger data-tour="history-tab" value="interactions" className="flex-col gap-0.5 py-2 px-1">
               <Clock className="w-4 h-4" />
               <span className="text-[10px] font-medium">History</span>
             </TabsTrigger>
-            <TabsTrigger value="flags" className="flex-col gap-0.5 py-2 px-1">
+            <TabsTrigger data-tour="flags-tab" value="flags" className="flex-col gap-0.5 py-2 px-1">
               <Flag className="w-4 h-4" />
               <span className="text-[10px] font-medium">Flags</span>
             </TabsTrigger>
-            <TabsTrigger value="no-contact" className={`flex-col gap-0.5 py-2 px-1 ${candidate.no_contact_active ? "text-primary" : ""}`}>
+            <TabsTrigger data-tour="nc-tab" value="no-contact" className={`flex-col gap-0.5 py-2 px-1 ${candidate.no_contact_active ? "text-primary" : ""}`}>
               <Ban className="w-4 h-4" />
               <span className="text-[10px] font-medium">NC</span>
             </TabsTrigger>
