@@ -93,6 +93,7 @@ YOUR PROFILE:
 - Kids Desire: ${profile.kids_desire || "Not specified"}
 - Attachment Style: ${profile.attachment_style || "Not specified"}
 - Ambition Level: ${profile.ambition_level || 3}/5
+- Career Stage: ${profile.career_stage || "Not specified"}
 - Dealbreakers: ${JSON.stringify(profile.dealbreakers || [])}
 - Communication Style: ${profile.communication_style || "Not specified"}
 - Height: ${profile.height || "Not specified"}
@@ -143,6 +144,8 @@ IMPORTANT: Use the base scores as your foundation. You may adjust them by UP TO 
 Consider these factors when adjusting lifestyle scores:
 - Distance/location compatibility (same_city is best, long_distance reduces score if they prefer nearby)
 - Schedule flexibility compatibility (remote_flexible pairs well with most, office_9_5 and overnight may conflict)
+- Frequent travelers need partners who are understanding of their lifestyle - flexible schedules work best
+- Professional athletes have demanding, seasonal schedules - consider this for lifestyle compatibility
 - Activity level and lifestyle compatibility
 
 CRITICAL: In all output text (strengths, concerns, advice), always use "you" and "your" instead of "user" or "the user". Speak directly to the person.`;
@@ -411,11 +414,26 @@ function calculateBaseScores(profile: any, candidate: any) {
   if (profile.schedule_flexibility && candidate.their_schedule_flexibility) {
     const flexibleSchedules = ["remote_flexible", "hybrid", "self_employed", "student"];
     const rigidSchedules = ["office_9_5", "shift_work", "on_call", "overnight"];
+    const travelSchedules = ["frequent_traveler", "on_call"];
     
     const userFlex = flexibleSchedules.includes(profile.schedule_flexibility);
     const candFlex = flexibleSchedules.includes(candidate.their_schedule_flexibility);
+    const userTravels = travelSchedules.includes(profile.schedule_flexibility);
+    const candTravels = travelSchedules.includes(candidate.their_schedule_flexibility);
     
-    if (userFlex && candFlex) {
+    // Both frequent travelers - can understand each other's lifestyle
+    if (userTravels && candTravels) {
+      lifestyleScore += 15;
+    }
+    // One travels, one is flexible - good match
+    else if ((userTravels && candFlex) || (candTravels && userFlex)) {
+      lifestyleScore += 10;
+    }
+    // One travels, one is rigid - challenging
+    else if ((userTravels && !candFlex) || (candTravels && !userFlex)) {
+      lifestyleScore -= 10;
+    }
+    else if (userFlex && candFlex) {
       lifestyleScore += 15; // Both flexible
     } else if (userFlex !== candFlex) {
       lifestyleScore += 5; // One flexible helps
@@ -429,6 +447,16 @@ function calculateBaseScores(profile: any, candidate: any) {
       ) {
         lifestyleScore -= 15; // Conflicting schedules
       }
+    }
+  }
+  
+  // Career stage considerations (athletes, entrepreneurs have unique schedules)
+  const athleteFlexSchedules = ["remote_flexible", "hybrid", "self_employed", "student"];
+  if (profile.career_stage === "athlete" || candidate.their_career_stage === "athlete") {
+    // Athletes have demanding schedules but can be compatible with flexible partners
+    if ((profile.career_stage === "athlete" && athleteFlexSchedules.includes(candidate.their_schedule_flexibility || "")) ||
+        (candidate.their_career_stage === "athlete" && athleteFlexSchedules.includes(profile.schedule_flexibility || ""))) {
+      lifestyleScore += 5;
     }
   }
   

@@ -27,6 +27,7 @@ const careerOptions = [
   { value: "established", label: "Established (5-15 years)" },
   { value: "senior", label: "Senior/Executive (15+ years)" },
   { value: "entrepreneur", label: "Entrepreneur" },
+  { value: "athlete", label: "Professional Athlete" },
   { value: "between", label: "Between opportunities" },
 ];
 

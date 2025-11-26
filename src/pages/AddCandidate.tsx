@@ -149,6 +149,7 @@ const CAREER_OPTIONS = [
   { value: "senior", label: "Senior/Manager" },
   { value: "executive", label: "Executive" },
   { value: "entrepreneur", label: "Entrepreneur" },
+  { value: "athlete", label: "Professional Athlete" },
   { value: "freelance", label: "Freelance" },
   { value: "between_jobs", label: "Between Jobs" },
 ];
@@ -186,6 +187,7 @@ const SCHEDULE_OPTIONS = [
   { value: "shift_work", label: "Shift Work" },
   { value: "on_call", label: "On-Call / Variable" },
   { value: "overnight", label: "Overnight / Night Shift" },
+  { value: "frequent_traveler", label: "Frequent Traveler" },
   { value: "student", label: "Student" },
   { value: "self_employed", label: "Self-Employed" },
 ];
