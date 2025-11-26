@@ -2,17 +2,50 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
+import { Tables, Enums } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ArrowLeft, LogOut, User, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 
 type Profile = Tables<"profiles">;
+
+const GENDER_OPTIONS = [
+  { value: "woman_cis", label: "Woman (cisgender)" },
+  { value: "woman_trans", label: "Woman (transgender)" },
+  { value: "non_binary", label: "Non-binary" },
+  { value: "gender_fluid", label: "Gender fluid" },
+  { value: "self_describe", label: "Prefer to self-describe" },
+];
+
+const PRONOUN_OPTIONS = [
+  { value: "she_her", label: "She/Her" },
+  { value: "he_him", label: "He/Him" },
+  { value: "they_them", label: "They/Them" },
+  { value: "other", label: "Other" },
+];
+
+const ORIENTATION_OPTIONS = [
+  { value: "straight", label: "Straight" },
+  { value: "lesbian", label: "Lesbian" },
+  { value: "bisexual", label: "Bisexual" },
+  { value: "pansexual", label: "Pansexual" },
+  { value: "queer", label: "Queer" },
+  { value: "asexual", label: "Asexual" },
+  { value: "no_label", label: "Prefer not to label" },
+  { value: "self_describe", label: "Self-describe" },
+];
 
 const Settings = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -23,6 +56,10 @@ const Settings = () => {
 
   // Account form state
   const [name, setName] = useState("");
+  const [location, setLocation] = useState("");
+  const [genderIdentity, setGenderIdentity] = useState("");
+  const [pronouns, setPronouns] = useState("");
+  const [sexualOrientation, setSexualOrientation] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -42,6 +79,10 @@ const Settings = () => {
       if (data) {
         setProfile(data);
         setName(data.name || "");
+        setLocation(data.location || "");
+        setGenderIdentity(data.gender_identity || "");
+        setPronouns(data.pronouns || "");
+        setSexualOrientation(data.sexual_orientation || "");
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -55,7 +96,13 @@ const Settings = () => {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ name })
+        .update({
+          name,
+          location,
+          gender_identity: (genderIdentity || null) as Enums<"gender_identity"> | null,
+          pronouns: (pronouns || null) as Enums<"pronouns"> | null,
+          sexual_orientation: (sexualOrientation || null) as Enums<"sexual_orientation"> | null,
+        })
         .eq("user_id", user!.id);
 
       if (error) throw error;
@@ -117,20 +164,66 @@ const Settings = () => {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <User className="w-5 h-5 text-primary" />
-                  Profile
+                  Identity & Basics
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Your name"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Your name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input
+                      id="location"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      placeholder="City, State"
+                    />
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Gender Identity</Label>
+                    <Select value={genderIdentity} onValueChange={setGenderIdentity}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {GENDER_OPTIONS.map(opt => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Pronouns</Label>
+                    <Select value={pronouns} onValueChange={setPronouns}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {PRONOUN_OPTIONS.map(opt => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Sexual Orientation</Label>
+                  <Select value={sexualOrientation} onValueChange={setSexualOrientation}>
+                    <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                    <SelectContent>
+                      {ORIENTATION_OPTIONS.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <p className="text-xs text-muted-foreground pt-2 border-t">
                   {user.email}
                 </p>
               </CardContent>
