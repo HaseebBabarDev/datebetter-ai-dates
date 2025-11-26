@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Enums } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Sheet,
   SheetContent,
@@ -29,6 +30,8 @@ import {
 import { SliderInput } from "@/components/onboarding/SliderInput";
 import { Plus, User, MapPin, Church, Heart, Briefcase, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+
+const DEFAULT_GENDER_KEY = "candidate_default_gender_identity";
 
 interface AddCandidateFormProps {
   onSuccess: () => void;
@@ -131,6 +134,35 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   const [age, setAge] = useState("");
   const [genderIdentity, setGenderIdentity] = useState<Enums<"gender_identity"> | "">("");
   const [pronouns, setPronouns] = useState<Enums<"pronouns"> | "">("");
+  const [isDefaultGender, setIsDefaultGender] = useState(false);
+
+  // Load default gender identity from localStorage
+  useEffect(() => {
+    const savedDefault = localStorage.getItem(DEFAULT_GENDER_KEY);
+    if (savedDefault) {
+      setGenderIdentity(savedDefault as Enums<"gender_identity">);
+      setIsDefaultGender(true);
+    }
+  }, [open]);
+
+  const handleSetDefaultGender = (checked: boolean) => {
+    setIsDefaultGender(checked);
+    if (checked && genderIdentity) {
+      localStorage.setItem(DEFAULT_GENDER_KEY, genderIdentity);
+      toast.success("Default gender identity saved");
+    } else if (!checked) {
+      localStorage.removeItem(DEFAULT_GENDER_KEY);
+      toast.success("Default removed");
+    }
+  };
+
+  const handleGenderChange = (value: Enums<"gender_identity">) => {
+    setGenderIdentity(value);
+    // If this is set as default, update localStorage
+    if (isDefaultGender) {
+      localStorage.setItem(DEFAULT_GENDER_KEY, value);
+    }
+  };
 
   // Where Met
   const [metVia, setMetVia] = useState("");
@@ -160,7 +192,15 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   const resetForm = () => {
     setNickname("");
     setAge("");
-    setGenderIdentity("");
+    // Preserve default gender identity if set
+    const savedDefault = localStorage.getItem(DEFAULT_GENDER_KEY);
+    if (savedDefault) {
+      setGenderIdentity(savedDefault as Enums<"gender_identity">);
+      setIsDefaultGender(true);
+    } else {
+      setGenderIdentity("");
+      setIsDefaultGender(false);
+    }
     setPronouns("");
     setMetVia("");
     setMetApp("");
@@ -294,7 +334,7 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
               </div>
               <div className="space-y-2 col-span-2">
                 <Label>Gender Identity</Label>
-                <Select value={genderIdentity} onValueChange={(v) => setGenderIdentity(v as Enums<"gender_identity">)}>
+                <Select value={genderIdentity} onValueChange={handleGenderChange}>
                   <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
                   <SelectContent>
                     {GENDER_OPTIONS.map((opt) => (
@@ -302,6 +342,17 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
                     ))}
                   </SelectContent>
                 </Select>
+                <div className="flex items-center gap-2 mt-2">
+                  <Checkbox
+                    id="default-gender"
+                    checked={isDefaultGender}
+                    onCheckedChange={handleSetDefaultGender}
+                    disabled={!genderIdentity}
+                  />
+                  <Label htmlFor="default-gender" className="text-xs text-muted-foreground cursor-pointer">
+                    Set as default for new candidates
+                  </Label>
+                </div>
               </div>
             </div>
           </div>
