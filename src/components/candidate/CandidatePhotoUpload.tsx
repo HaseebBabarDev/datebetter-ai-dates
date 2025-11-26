@@ -111,18 +111,18 @@ export const CandidatePhotoUpload: React.FC<CandidatePhotoUploadProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex items-center gap-4">
       <div className="relative">
-        <Avatar className="w-24 h-24 border-4 border-border">
+        <Avatar className="w-16 h-16 border-2 border-border">
           <AvatarImage src={currentPhotoUrl || undefined} />
-          <AvatarFallback className="bg-primary/10 text-primary text-2xl font-semibold">
+          <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
             {nickname.slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         
         {uploading && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/50 rounded-full">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <Loader2 className="w-5 h-5 animate-spin text-primary" />
           </div>
         )}
       </div>
@@ -135,29 +135,33 @@ export const CandidatePhotoUpload: React.FC<CandidatePhotoUploadProps> = ({
         className="hidden"
       />
 
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-        >
-          <Camera className="w-4 h-4 mr-2" />
-          {currentPhotoUrl ? "Change" : "Add Photo"}
-        </Button>
-        
-        {currentPhotoUrl && (
+      <div className="flex flex-col gap-1">
+        <span className="font-medium text-foreground">{nickname}</span>
+        <div className="flex gap-2">
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleRemovePhoto}
+            onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="text-destructive hover:text-destructive"
+            className="h-7 px-2 text-xs"
           >
-            <X className="w-4 h-4 mr-2" />
-            Remove
+            <Camera className="w-3 h-3 mr-1" />
+            {currentPhotoUrl ? "Change" : "Add Photo"}
           </Button>
-        )}
+          
+          {currentPhotoUrl && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRemovePhoto}
+              disabled={uploading}
+              className="h-7 px-2 text-xs text-destructive hover:text-destructive"
+            >
+              <X className="w-3 h-3 mr-1" />
+              Remove
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
