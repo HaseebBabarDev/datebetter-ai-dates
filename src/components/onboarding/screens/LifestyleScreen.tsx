@@ -20,6 +20,14 @@ const socialOptions = [
   { value: "mood_dependent", label: "🌙 Depends on mood" },
 ];
 
+const activityOptions = [
+  { value: "sedentary", label: "Sedentary (little to no exercise)" },
+  { value: "light", label: "Light (1-2 times/week)" },
+  { value: "moderate", label: "Moderate (3-4 times/week)" },
+  { value: "active", label: "Active (5+ times/week)" },
+  { value: "very_active", label: "Very active (daily workouts)" },
+];
+
 const LifestyleScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
@@ -39,6 +47,12 @@ const LifestyleScreen = () => {
               <OptionCard key={o.value} selected={data.socialStyle === o.value} onClick={() => updateData({ socialStyle: o.value })} title={o.label} />
             ))}
           </div>
+        </div>
+        <div className="space-y-3">
+          <Label>Your activity level:</Label>
+          {activityOptions.map((o) => (
+            <OptionCard key={o.value} selected={data.activityLevel === o.value} onClick={() => updateData({ activityLevel: o.value })} title={o.label} />
+          ))}
         </div>
         <Button onClick={nextStep} disabled={!data.distancePreference} className="w-full" size="lg">Continue</Button>
       </div>

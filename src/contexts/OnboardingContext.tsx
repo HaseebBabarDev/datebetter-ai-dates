@@ -16,6 +16,8 @@ export interface OnboardingData {
   genderIdentity?: string;
   pronouns?: string;
   customPronouns?: string;
+  height?: string;
+  bodyType?: string;
   
   // Screen 3: Dating Preferences
   sexualOrientation?: string;
@@ -71,6 +73,7 @@ export interface OnboardingData {
   socialStyle?: string;
   workScheduleType?: string;
   flexibilityRating?: number;
+  activityLevel?: string;
   
   // Screen 11: Physical Preferences
   attractionImportance?: number;
