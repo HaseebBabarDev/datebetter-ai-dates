@@ -9,6 +9,7 @@ import { CandidatesList } from "@/components/dashboard/CandidatesList";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { AddCandidateForm } from "@/components/dashboard/AddCandidateForm";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
+import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
@@ -31,6 +32,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortOption>("status");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -61,6 +63,12 @@ const Dashboard = () => {
   const filteredAndSortedCandidates = useMemo(() => {
     let filtered = [...candidates];
 
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((c) => c.nickname.toLowerCase().includes(query));
+    }
+
     // Apply status filter
     if (statusFilter !== "all") {
       if (statusFilter === "active") {
@@ -87,7 +95,7 @@ const Dashboard = () => {
     });
 
     return filtered;
-  }, [candidates, sortBy, statusFilter]);
+  }, [candidates, sortBy, statusFilter, searchQuery]);
 
   if (authLoading || loading) {
     return (
@@ -113,16 +121,19 @@ const Dashboard = () => {
       <DashboardHeader userName={profile?.name || "there"} />
       
       <main className="container mx-auto px-4 py-6 max-w-lg space-y-6">
-        {/* Filters - Always visible when there are candidates */}
+        {/* Search and Filters - Always visible when there are candidates */}
         {candidates.length > 0 && (
-          <div className="flex items-center justify-between gap-2">
-            <CandidateFilters
-              sortBy={sortBy}
-              onSortChange={setSortBy}
-              statusFilter={statusFilter}
-              onStatusFilterChange={setStatusFilter}
-            />
-            <AddCandidateForm onSuccess={handleCandidateUpdate} />
+          <div className="space-y-3">
+            <CandidateSearch value={searchQuery} onChange={setSearchQuery} />
+            <div className="flex items-center justify-between gap-2">
+              <CandidateFilters
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+                statusFilter={statusFilter}
+                onStatusFilterChange={setStatusFilter}
+              />
+              <AddCandidateForm onSuccess={handleCandidateUpdate} />
+            </div>
           </div>
         )}
 
