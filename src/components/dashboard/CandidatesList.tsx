@@ -1,0 +1,90 @@
+import React from "react";
+import { Tables } from "@/integrations/supabase/types";
+import { CandidateCard } from "./CandidateCard";
+
+type Candidate = Tables<"candidates">;
+
+interface CandidatesListProps {
+  candidates: Candidate[];
+  onUpdate: () => void;
+}
+
+const statusOrder: Record<string, number> = {
+  getting_serious: 1,
+  dating: 2,
+  planning_date: 3,
+  texting: 4,
+  just_matched: 5,
+  no_contact: 6,
+  archived: 7,
+};
+
+export const CandidatesList: React.FC<CandidatesListProps> = ({
+  candidates,
+  onUpdate,
+}) => {
+  const activeCandidates = candidates.filter(
+    (c) => c.status !== "archived" && c.status !== "no_contact"
+  );
+  const noContactCandidates = candidates.filter((c) => c.status === "no_contact");
+  const archivedCandidates = candidates.filter((c) => c.status === "archived");
+
+  const sortedActive = [...activeCandidates].sort(
+    (a, b) => (statusOrder[a.status || ""] || 99) - (statusOrder[b.status || ""] || 99)
+  );
+
+  return (
+    <div className="space-y-6">
+      {sortedActive.length > 0 && (
+        <section>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+            Active ({sortedActive.length})
+          </h2>
+          <div className="space-y-3">
+            {sortedActive.map((candidate) => (
+              <CandidateCard
+                key={candidate.id}
+                candidate={candidate}
+                onUpdate={onUpdate}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {noContactCandidates.length > 0 && (
+        <section>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+            No Contact ({noContactCandidates.length})
+          </h2>
+          <div className="space-y-3">
+            {noContactCandidates.map((candidate) => (
+              <CandidateCard
+                key={candidate.id}
+                candidate={candidate}
+                onUpdate={onUpdate}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {archivedCandidates.length > 0 && (
+        <section>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+            Archived ({archivedCandidates.length})
+          </h2>
+          <div className="space-y-3 opacity-60">
+            {archivedCandidates.map((candidate) => (
+              <CandidateCard
+                key={candidate.id}
+                candidate={candidate}
+                onUpdate={onUpdate}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+};
