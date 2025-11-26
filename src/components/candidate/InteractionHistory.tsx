@@ -15,6 +15,7 @@ import {
   Plane,
   Calendar,
   Heart,
+  Phone,
 } from "lucide-react";
 
 type Interaction = Tables<"interactions">;
@@ -30,6 +31,7 @@ const INTERACTION_ICONS: Record<Enums<"interaction_type">, React.ReactNode> = {
   movie: <Film className="w-4 h-4" />,
   facetime: <Video className="w-4 h-4" />,
   texting: <MessageCircle className="w-4 h-4" />,
+  phone_call: <Phone className="w-4 h-4" />,
   activity: <Dumbbell className="w-4 h-4" />,
   home_hangout: <Home className="w-4 h-4" />,
   group_hang: <Users className="w-4 h-4" />,
@@ -45,6 +47,7 @@ const INTERACTION_LABELS: Record<Enums<"interaction_type">, string> = {
   movie: "Movie",
   facetime: "Video Call",
   texting: "Texting",
+  phone_call: "Phone Call",
   activity: "Activity",
   home_hangout: "Home Hangout",
   group_hang: "Group Hang",

@@ -53,6 +53,7 @@ const INTERACTION_TYPES: { value: Enums<"interaction_type">; label: string; high
   { value: "drinks", label: "Drinks" },
   { value: "movie", label: "Movie" },
   { value: "facetime", label: "Video Call" },
+  { value: "phone_call", label: "Phone Call" },
   { value: "texting", label: "Texting Session" },
   { value: "activity", label: "Activity/Sport" },
   { value: "home_hangout", label: "Home Hangout" },
