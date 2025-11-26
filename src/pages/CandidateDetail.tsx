@@ -10,6 +10,7 @@ import { InteractionHistory } from "@/components/candidate/InteractionHistory";
 import { FlagsSection } from "@/components/candidate/FlagsSection";
 import { AddInteractionForm } from "@/components/candidate/AddInteractionForm";
 import { NoContactMode } from "@/components/candidate/NoContactMode";
+import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Candidate = Tables<"candidates">;
@@ -130,7 +131,11 @@ const CandidateDetail = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile" className="mt-4">
+          <TabsContent value="profile" className="mt-4 space-y-4">
+            <CompatibilityScore
+              candidate={candidate}
+              onUpdate={(updates) => setCandidate({ ...candidate, ...updates })}
+            />
             <CandidateProfile
               candidate={candidate}
               onUpdate={handleUpdateCandidate}
