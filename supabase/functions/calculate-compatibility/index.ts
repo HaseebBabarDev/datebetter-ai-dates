@@ -85,6 +85,7 @@ serve(async (req) => {
 
 USER PROFILE:
 - Location: ${profile.city || "Not specified"}, ${profile.state || ""}, ${profile.country || "Not specified"}
+- Relationship Status: ${profile.relationship_status || "Not specified"}
 - Relationship Goal: ${profile.relationship_goal || "Not specified"}
 - Religion: ${profile.religion || "Not specified"}, Importance: ${profile.faith_importance || 3}/5
 - Politics: ${profile.politics || "Not specified"}, Importance: ${profile.politics_importance || 3}/5
@@ -106,6 +107,7 @@ CANDIDATE PROFILE:
 - Name: ${candidate.nickname}
 - Location: ${candidate.city || "Not specified"}, ${candidate.country || "Not specified"}
 - Distance from User: ${candidate.distance_approximation || "Not specified"}
+- Relationship Status: ${candidate.their_relationship_status || "Not specified"}
 - Relationship Goal: ${candidate.their_relationship_goal || "Not specified"}
 - Religion: ${candidate.their_religion || "Not specified"}
 - Politics: ${candidate.their_politics || "Not specified"}
@@ -300,6 +302,30 @@ function calculateBaseScores(profile: any, candidate: any) {
     if (diff === 0) valuesScore += 20;
     else if (diff === 1) valuesScore += 10;
     else if (diff >= 3 && profile.politics_importance >= 4) valuesScore -= 20;
+  }
+  
+  // Relationship status compatibility
+  if (profile.relationship_status && candidate.their_relationship_status) {
+    const userStatus = profile.relationship_status;
+    const candStatus = candidate.their_relationship_status;
+    
+    // Both single is ideal
+    if (userStatus === "single" && candStatus === "single") {
+      futureGoalsScore += 15;
+    }
+    // ENM compatibility
+    else if (userStatus === "ethical_non_monogamy" && candStatus === "ethical_non_monogamy") {
+      futureGoalsScore += 20;
+    }
+    // Mismatch: one is married (not ENM) - red flag
+    else if ((userStatus === "married" && candStatus !== "ethical_non_monogamy") ||
+             (candStatus === "married" && userStatus !== "ethical_non_monogamy")) {
+      futureGoalsScore -= 30;
+    }
+    // Recently divorced - consider with care
+    else if (userStatus === "recently_divorced" || candStatus === "recently_divorced") {
+      emotionalScore -= 10; // May need time to heal
+    }
   }
   
   // Relationship goals alignment

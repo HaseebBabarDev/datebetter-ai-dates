@@ -150,6 +150,9 @@ export type Database = {
           their_relationship_goal:
             | Database["public"]["Enums"]["relationship_goal"]
             | null
+          their_relationship_status:
+            | Database["public"]["Enums"]["relationship_status"]
+            | null
           their_religion: Database["public"]["Enums"]["religion"] | null
           their_schedule_flexibility: string | null
           their_smoking: string | null
@@ -209,6 +212,9 @@ export type Database = {
           their_relationship_goal?:
             | Database["public"]["Enums"]["relationship_goal"]
             | null
+          their_relationship_status?:
+            | Database["public"]["Enums"]["relationship_status"]
+            | null
           their_religion?: Database["public"]["Enums"]["religion"] | null
           their_schedule_flexibility?: string | null
           their_smoking?: string | null
@@ -267,6 +273,9 @@ export type Database = {
           their_politics?: Database["public"]["Enums"]["politics"] | null
           their_relationship_goal?:
             | Database["public"]["Enums"]["relationship_goal"]
+            | null
+          their_relationship_status?:
+            | Database["public"]["Enums"]["relationship_status"]
             | null
           their_religion?: Database["public"]["Enums"]["religion"] | null
           their_schedule_flexibility?: string | null
@@ -457,6 +466,9 @@ export type Database = {
           relationship_goal:
             | Database["public"]["Enums"]["relationship_goal"]
             | null
+          relationship_status:
+            | Database["public"]["Enums"]["relationship_status"]
+            | null
           relationship_structure:
             | Database["public"]["Enums"]["relationship_structure"]
             | null
@@ -562,6 +574,9 @@ export type Database = {
           red_flag_sensitivity?: number | null
           relationship_goal?:
             | Database["public"]["Enums"]["relationship_goal"]
+            | null
+          relationship_status?:
+            | Database["public"]["Enums"]["relationship_status"]
             | null
           relationship_structure?:
             | Database["public"]["Enums"]["relationship_structure"]
@@ -669,6 +684,9 @@ export type Database = {
           relationship_goal?:
             | Database["public"]["Enums"]["relationship_goal"]
             | null
+          relationship_status?:
+            | Database["public"]["Enums"]["relationship_status"]
+            | null
           relationship_structure?:
             | Database["public"]["Enums"]["relationship_structure"]
             | null
@@ -755,6 +773,11 @@ export type Database = {
         | "traditional"
       pronouns: "she_her" | "he_him" | "they_them" | "other"
       relationship_goal: "casual" | "dating" | "serious" | "marriage" | "unsure"
+      relationship_status:
+        | "single"
+        | "married"
+        | "recently_divorced"
+        | "ethical_non_monogamy"
       relationship_structure: "monogamous" | "open" | "polyamorous" | "unsure"
       religion:
         | "none"
@@ -968,6 +991,12 @@ export const Constants = {
       ],
       pronouns: ["she_her", "he_him", "they_them", "other"],
       relationship_goal: ["casual", "dating", "serious", "marriage", "unsure"],
+      relationship_status: [
+        "single",
+        "married",
+        "recently_divorced",
+        "ethical_non_monogamy",
+      ],
       relationship_structure: ["monogamous", "open", "polyamorous", "unsure"],
       religion: [
         "none",

@@ -38,6 +38,7 @@ export interface OnboardingData {
   cycleRegularity?: string;
   
   // Screen 5: Relationship Goals
+  relationshipStatus?: string;
   relationshipGoal?: string;
   relationshipStructure?: string;
   monogamyRequired?: boolean;

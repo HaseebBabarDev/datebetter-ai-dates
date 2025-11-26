@@ -72,6 +72,13 @@ const RELATIONSHIP_STRUCTURE_OPTIONS = [
   { value: "unsure", label: "Exploring options" },
 ];
 
+const RELATIONSHIP_STATUS_OPTIONS = [
+  { value: "single", label: "Single" },
+  { value: "married", label: "Married" },
+  { value: "recently_divorced", label: "Recently Divorced" },
+  { value: "ethical_non_monogamy", label: "Ethical Non-Monogamy" },
+];
+
 const KIDS_STATUS_OPTIONS = [
   { value: "no_kids", label: "No kids" },
   { value: "has_young_kids", label: "Have young kids" },
@@ -215,6 +222,20 @@ export const ProfilePreferencesEditor: React.FC = () => {
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
+            <div className="space-y-2">
+              <Label>Current Relationship Status</Label>
+              <Select
+                value={(formData as any).relationship_status || ""}
+                onValueChange={(v) => updateField("relationship_status" as any, v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {RELATIONSHIP_STATUS_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Looking For</Label>
