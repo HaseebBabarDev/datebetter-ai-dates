@@ -114,6 +114,27 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground text-xs;
+  }
+
+  /* Headings keep larger sizes */
+  h1 {
+    @apply text-2xl;
+  }
+  h2 {
+    @apply text-xl;
+  }
+  h3 {
+    @apply text-lg;
+  }
+
+  /* Base text is 12px */
+  p, span, label, div {
+    font-size: 0.75rem;
+  }
+
+  /* Preserve button text sizes */
+  button {
+    font-size: inherit;
   }
 }
