@@ -163,23 +163,25 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
         </div>
 
         {/* Breakdown */}
-        <div className="space-y-3">
-          {breakdownItems.map(({ key, label, icon: Icon }) => {
-            const score = scoreData.breakdown[key as keyof typeof scoreData.breakdown];
-            return (
-              <div key={key} className="space-y-1">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2">
-                    <Icon className="w-4 h-4 text-muted-foreground" />
-                    {label}
-                  </span>
-                  <span className={getScoreColor(score)}>{score}%</span>
+        {scoreData.breakdown && (
+          <div className="space-y-3">
+            {breakdownItems.map(({ key, label, icon: Icon }) => {
+              const score = scoreData.breakdown?.[key as keyof typeof scoreData.breakdown] ?? 0;
+              return (
+                <div key={key} className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2">
+                      <Icon className="w-4 h-4 text-muted-foreground" />
+                      {label}
+                    </span>
+                    <span className={getScoreColor(score)}>{score}%</span>
+                  </div>
+                  <Progress value={score} className={`h-2 [&>div]:${getScoreBg(score)}`} />
                 </div>
-                <Progress value={score} className={`h-2 [&>div]:${getScoreBg(score)}`} />
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Strengths */}
         {scoreData.strengths?.length > 0 && (
