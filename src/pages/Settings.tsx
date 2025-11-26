@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check } from "lucide-react";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { Badge } from "@/components/ui/badge";
@@ -338,11 +338,7 @@ const Settings = () => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Check className="w-4 h-4 text-green-500" />
-                      <span>Priority flag detection</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      <span>Advanced pattern insights</span>
+                      <span>Flag detection</span>
                     </div>
                   </div>
                   <Button className="w-full mt-4">
@@ -372,14 +368,6 @@ const Settings = () => {
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Check className="w-4 h-4 text-green-500" />
                       <span>Everything in Dating Often</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      <span>Unlimited AI advice</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      <span>Dating coach mode</span>
                     </div>
                   </div>
                   <Button className="w-full mt-4" variant="outline">
