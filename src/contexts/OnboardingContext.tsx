@@ -134,8 +134,8 @@ const OnboardingContext = createContext<OnboardingContextType | undefined>(undef
 
 export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [data, setData] = useState<OnboardingData>({
-    genderIdentity: "man_cis",
-    pronouns: "he_him",
+    genderIdentity: "woman_cis",
+    pronouns: "she_her",
   });
   const [currentStep, setCurrentStep] = useState(0);
   const totalSteps = 18; // 0-17
