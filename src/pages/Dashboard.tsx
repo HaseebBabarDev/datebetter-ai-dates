@@ -458,7 +458,25 @@ const Dashboard = () => {
           activityItems.push({
             type: "no_contact",
             candidate,
-            date: new Date((candidate as any).relationship_ended_at || candidate.updated_at || 0),
+            date: new Date(candidate.no_contact_start_date || candidate.relationship_ended_at || candidate.updated_at || 0),
+          });
+          seenCandidateIds.add(candidate.id);
+        }
+      });
+
+    // Also add recently ended relationships that went to no_contact but check by relationship_ended_at
+    candidates
+      .filter((c) => {
+        if (!c.relationship_ended_at) return false;
+        if (c.status !== "no_contact" && c.status !== "archived") return false;
+        return differenceInDays(new Date(), new Date(c.relationship_ended_at)) <= 14;
+      })
+      .forEach((candidate) => {
+        if (!seenCandidateIds.has(candidate.id)) {
+          activityItems.push({
+            type: candidate.no_contact_active ? "no_contact" : "ended",
+            candidate,
+            date: new Date(candidate.relationship_ended_at!),
           });
           seenCandidateIds.add(candidate.id);
         }

@@ -480,7 +480,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
 
       {/* Low Score Warning Dialog */}
       <AlertDialog open={showLowScoreWarning} onOpenChange={setShowLowScoreWarning}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="w-5 h-5" />
@@ -492,11 +492,20 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                   Your compatibility with <strong>{candidate.nickname}</strong> is only{" "}
                   <span className="font-bold text-destructive">{scoreData?.overall_score}%</span>.
                 </p>
-                <p>
-                  This is a significant mismatch. Consider whether this connection aligns with your goals and values.
-                </p>
+                
+                {/* Show AI Advice if available */}
+                {scoreData?.advice && (
+                  <div className="p-3 rounded-lg bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/10">
+                    <div className="flex items-start gap-2 mb-2">
+                      <Lightbulb className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                      <p className="text-sm font-medium text-primary">AI Advice</p>
+                    </div>
+                    <p className="text-sm text-foreground">{scoreData.advice}</p>
+                  </div>
+                )}
+                
                 <div className="bg-muted/50 rounded-lg p-3 text-sm">
-                  <p className="font-medium mb-1">You might want to consider:</p>
+                  <p className="font-medium mb-1">Consider:</p>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                     <li>Starting No Contact mode to gain clarity</li>
                     <li>Reflecting on recurring patterns</li>
@@ -506,20 +515,52 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel>I Understand</AlertDialogCancel>
-            {onStartNoContact && (
-              <AlertDialogAction 
-                onClick={() => {
-                  setShowLowScoreWarning(false);
-                  if (onStartNoContact) onStartNoContact();
-                }}
-                className="bg-primary"
-              >
-                <Shield className="w-4 h-4 mr-2" />
-                Start No Contact
-              </AlertDialogAction>
+          <AlertDialogFooter className="flex-col gap-2">
+            {/* Advice accept/decline buttons */}
+            {scoreData?.advice && !adviceResponse && (
+              <div className="flex gap-2 w-full">
+                <Button
+                  size="sm"
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  onClick={async () => {
+                    setShowLowScoreWarning(false);
+                    await respondToAdvice(true);
+                  }}
+                  disabled={respondingToAdvice}
+                >
+                  <Check className="w-4 h-4 mr-1" />
+                  Accept Advice
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={async () => {
+                    setShowLowScoreWarning(false);
+                    await saveAdviceResponse(false);
+                  }}
+                  disabled={respondingToAdvice}
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Decline
+                </Button>
+              </div>
             )}
+            <div className="flex gap-2 w-full">
+              <AlertDialogCancel className="flex-1">Close</AlertDialogCancel>
+              {onStartNoContact && (
+                <AlertDialogAction 
+                  onClick={() => {
+                    setShowLowScoreWarning(false);
+                    if (onStartNoContact) onStartNoContact();
+                  }}
+                  className="flex-1 bg-primary"
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  Start No Contact
+                </AlertDialogAction>
+              )}
+            </div>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
