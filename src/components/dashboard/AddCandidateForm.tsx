@@ -132,6 +132,30 @@ const HEIGHT_OPTIONS = [
   { value: "over_6ft", label: "Over 6'0\"" },
 ];
 
+const COUNTRY_OPTIONS = [
+  { value: "US", label: "United States" },
+  { value: "CA", label: "Canada" },
+  { value: "UK", label: "United Kingdom" },
+  { value: "AU", label: "Australia" },
+  { value: "OTHER", label: "Other" },
+];
+
+const DISTANCE_APPROX_OPTIONS = [
+  { value: "same_city", label: "Same City" },
+  { value: "regional", label: "Regional (1-2 hrs)" },
+  { value: "far", label: "Far (2-4 hrs)" },
+  { value: "long_distance", label: "Long Distance" },
+];
+
+const SCHEDULE_OPTIONS = [
+  { value: "remote_flexible", label: "Remote/Flexible" },
+  { value: "hybrid", label: "Hybrid" },
+  { value: "office_9_5", label: "Office 9-5" },
+  { value: "shift_work", label: "Shift Work" },
+  { value: "on_call", label: "On-Call" },
+  { value: "overnight", label: "Overnight" },
+];
+
 export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   onSuccess,
   trigger,
@@ -144,6 +168,10 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   const [nickname, setNickname] = useState("");
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [distanceApprox, setDistanceApprox] = useState("");
+  const [theirSchedule, setTheirSchedule] = useState("");
   const [genderIdentity, setGenderIdentity] = useState<Enums<"gender_identity"> | "">("");
   const [pronouns, setPronouns] = useState<Enums<"pronouns"> | "">("");
   const [isDefaultGender, setIsDefaultGender] = useState(false);
@@ -205,6 +233,10 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
     setNickname("");
     setAge("");
     setHeight("");
+    setCountry("");
+    setCity("");
+    setDistanceApprox("");
+    setTheirSchedule("");
     // Preserve default gender identity if set
     const savedDefault = localStorage.getItem(DEFAULT_GENDER_KEY);
     if (savedDefault) {
@@ -257,6 +289,10 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
         met_via: metVia || null,
         met_app: metVia === "dating_app" ? metApp : null,
         height: height || null,
+        country: country || null,
+        city: city || null,
+        distance_approximation: distanceApprox || null,
+        their_schedule_flexibility: theirSchedule || null,
         their_religion: religion || null,
         their_politics: politics || null,
         their_relationship_goal: relationshipGoal || null,
@@ -378,6 +414,53 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Country</Label>
+                  <Select value={country} onValueChange={setCountry}>
+                    <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                    <SelectContent>
+                      {COUNTRY_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>City</Label>
+                  <Input
+                    placeholder="City"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Distance</Label>
+                  <Select value={distanceApprox} onValueChange={setDistanceApprox}>
+                    <SelectTrigger><SelectValue placeholder="How far?" /></SelectTrigger>
+                    <SelectContent>
+                      {DISTANCE_APPROX_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Schedule</Label>
+                  <Select value={theirSchedule} onValueChange={setTheirSchedule}>
+                    <SelectTrigger><SelectValue placeholder="Work style" /></SelectTrigger>
+                    <SelectContent>
+                      {SCHEDULE_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           </div>

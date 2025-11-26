@@ -84,6 +84,7 @@ serve(async (req) => {
     const prompt = `You are a relationship compatibility analyst. Analyze the compatibility between a user and their dating candidate.
 
 USER PROFILE:
+- Location: ${profile.city || "Not specified"}, ${profile.state || ""}, ${profile.country || "Not specified"}
 - Relationship Goal: ${profile.relationship_goal || "Not specified"}
 - Religion: ${profile.religion || "Not specified"}, Importance: ${profile.faith_importance || 3}/5
 - Politics: ${profile.politics || "Not specified"}, Importance: ${profile.politics_importance || 3}/5
@@ -98,9 +99,13 @@ USER PROFILE:
 - Activity Level: ${profile.activity_level || "Not specified"}
 - Education Level: ${profile.education_level || "Not specified"}
 - Height Preference for partner: ${profile.height_preference || "No preference"}
+- Schedule Flexibility: ${profile.schedule_flexibility || "Not specified"}
+- Distance Preference: ${profile.distance_preference || "Not specified"}
 
 CANDIDATE PROFILE:
 - Name: ${candidate.nickname}
+- Location: ${candidate.city || "Not specified"}, ${candidate.country || "Not specified"}
+- Distance from User: ${candidate.distance_approximation || "Not specified"}
 - Relationship Goal: ${candidate.their_relationship_goal || "Not specified"}
 - Religion: ${candidate.their_religion || "Not specified"}
 - Politics: ${candidate.their_politics || "Not specified"}
@@ -111,6 +116,7 @@ CANDIDATE PROFILE:
 - Career Stage: ${candidate.their_career_stage || "Not specified"}
 - Education Level: ${candidate.their_education_level || "Not specified"}
 - Exercise Habits: ${candidate.their_exercise || "Not specified"}
+- Schedule Flexibility: ${candidate.their_schedule_flexibility || "Not specified"}
 
 CHEMISTRY RATINGS (1-5):
 - Physical Attraction: ${candidate.physical_attraction || 3}
@@ -130,7 +136,12 @@ BASE COMPATIBILITY SCORES (calculated from profile matching):
 - Future Goals: ${baseScores.future_goals}
 - Base Overall: ${baseScores.overall_score}
 
-IMPORTANT: Use the base scores as your foundation. You may adjust them by UP TO 15 points based on interaction history insights, but maintain consistency with the calculated base. Negative interactions should reduce scores, positive ones can slightly increase them. Consider activity level and lifestyle compatibility when adjusting lifestyle scores.`;
+IMPORTANT: Use the base scores as your foundation. You may adjust them by UP TO 15 points based on interaction history insights, but maintain consistency with the calculated base. Negative interactions should reduce scores, positive ones can slightly increase them. 
+
+Consider these factors when adjusting lifestyle scores:
+- Distance/location compatibility (same_city is best, long_distance reduces score if user prefers nearby)
+- Schedule flexibility compatibility (remote_flexible pairs well with most, office_9_5 and overnight may conflict)
+- Activity level and lifestyle compatibility`;
 
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -346,6 +357,50 @@ function calculateBaseScores(profile: any, candidate: any) {
       if (diff === 0) lifestyleScore += 20;
       else if (diff === 1) lifestyleScore += 10;
       else if (diff >= 3) lifestyleScore -= 15;
+    }
+  }
+  
+  // Distance compatibility
+  if (candidate.distance_approximation && profile.distance_preference) {
+    const distanceScore: Record<string, number> = {
+      same_city: 20,
+      regional: 10,
+      far: -5,
+      long_distance: -15
+    };
+    const distPref = profile.distance_preference;
+    const candDist = candidate.distance_approximation;
+    
+    // If user is okay with long distance, don't penalize
+    if (distPref === "ldr" || distPref === "relocate") {
+      lifestyleScore += 10;
+    } else {
+      lifestyleScore += (distanceScore[candDist] || 0);
+    }
+  }
+  
+  // Schedule flexibility compatibility
+  if (profile.schedule_flexibility && candidate.their_schedule_flexibility) {
+    const flexibleSchedules = ["remote_flexible", "hybrid", "self_employed", "student"];
+    const rigidSchedules = ["office_9_5", "shift_work", "on_call", "overnight"];
+    
+    const userFlex = flexibleSchedules.includes(profile.schedule_flexibility);
+    const candFlex = flexibleSchedules.includes(candidate.their_schedule_flexibility);
+    
+    if (userFlex && candFlex) {
+      lifestyleScore += 15; // Both flexible
+    } else if (userFlex !== candFlex) {
+      lifestyleScore += 5; // One flexible helps
+    } else {
+      // Both rigid - check if compatible
+      if (profile.schedule_flexibility === candidate.their_schedule_flexibility) {
+        lifestyleScore += 10; // Same schedule type
+      } else if (
+        (profile.schedule_flexibility === "overnight" && rigidSchedules.includes(candidate.their_schedule_flexibility)) ||
+        (candidate.their_schedule_flexibility === "overnight" && rigidSchedules.includes(profile.schedule_flexibility))
+      ) {
+        lifestyleScore -= 15; // Conflicting schedules
+      }
     }
   }
   

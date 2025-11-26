@@ -12,7 +12,9 @@ export interface OnboardingData {
   
   // Screen 2: Basic Identity
   name?: string;
-  location?: string;
+  country?: string;
+  city?: string;
+  state?: string;
   genderIdentity?: string;
   pronouns?: string;
   customPronouns?: string;
@@ -74,6 +76,7 @@ export interface OnboardingData {
   workScheduleType?: string;
   flexibilityRating?: number;
   activityLevel?: string;
+  scheduleFlexibility?: string;
   
   // Screen 11: Physical Preferences
   attractionImportance?: number;

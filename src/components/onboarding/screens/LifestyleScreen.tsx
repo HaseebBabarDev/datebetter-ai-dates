@@ -28,6 +28,17 @@ const activityOptions = [
   { value: "very_active", label: "Very active (daily workouts)" },
 ];
 
+const scheduleOptions = [
+  { value: "remote_flexible", label: "🏡 Remote / Fully Flexible" },
+  { value: "hybrid", label: "🔄 Hybrid (mix of office & remote)" },
+  { value: "office_9_5", label: "🏢 Office 9-5" },
+  { value: "shift_work", label: "🔄 Shift Work (varied hours)" },
+  { value: "on_call", label: "📞 On-Call / Variable" },
+  { value: "overnight", label: "🌙 Overnight / Night Shift" },
+  { value: "student", label: "📚 Student Schedule" },
+  { value: "self_employed", label: "💼 Self-Employed / Flexible" },
+];
+
 const LifestyleScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
@@ -40,6 +51,17 @@ const LifestyleScreen = () => {
             <OptionCard key={o.value} selected={data.distancePreference === o.value} onClick={() => updateData({ distancePreference: o.value })} title={o.label} />
           ))}
         </div>
+
+        <div className="space-y-3">
+          <Label>Your work schedule:</Label>
+          <p className="text-xs text-muted-foreground">This helps match you with compatible schedules</p>
+          <div className="grid grid-cols-2 gap-2">
+            {scheduleOptions.map((o) => (
+              <OptionCard key={o.value} selected={data.scheduleFlexibility === o.value} onClick={() => updateData({ scheduleFlexibility: o.value })} title={o.label} />
+            ))}
+          </div>
+        </div>
+
         <div className="space-y-3">
           <Label>Your social energy:</Label>
           <div className="grid grid-cols-2 gap-2">
@@ -48,12 +70,14 @@ const LifestyleScreen = () => {
             ))}
           </div>
         </div>
+
         <div className="space-y-3">
           <Label>Your activity level:</Label>
           {activityOptions.map((o) => (
             <OptionCard key={o.value} selected={data.activityLevel === o.value} onClick={() => updateData({ activityLevel: o.value })} title={o.label} />
           ))}
         </div>
+
         <Button onClick={nextStep} disabled={!data.distancePreference} className="w-full" size="lg">Continue</Button>
       </div>
     </OnboardingLayout>

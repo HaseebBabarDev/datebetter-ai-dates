@@ -103,8 +103,11 @@ export type Database = {
         Row: {
           age: number | null
           ai_description: string | null
+          city: string | null
           compatibility_score: number | null
+          country: string | null
           created_at: string | null
+          distance_approximation: string | null
           energy_match: number | null
           first_contact_date: string | null
           first_intimacy_date: string | null
@@ -144,6 +147,7 @@ export type Database = {
             | Database["public"]["Enums"]["relationship_goal"]
             | null
           their_religion: Database["public"]["Enums"]["religion"] | null
+          their_schedule_flexibility: string | null
           their_smoking: string | null
           their_social_style: string | null
           updated_at: string | null
@@ -152,8 +156,11 @@ export type Database = {
         Insert: {
           age?: number | null
           ai_description?: string | null
+          city?: string | null
           compatibility_score?: number | null
+          country?: string | null
           created_at?: string | null
+          distance_approximation?: string | null
           energy_match?: number | null
           first_contact_date?: string | null
           first_intimacy_date?: string | null
@@ -195,6 +202,7 @@ export type Database = {
             | Database["public"]["Enums"]["relationship_goal"]
             | null
           their_religion?: Database["public"]["Enums"]["religion"] | null
+          their_schedule_flexibility?: string | null
           their_smoking?: string | null
           their_social_style?: string | null
           updated_at?: string | null
@@ -203,8 +211,11 @@ export type Database = {
         Update: {
           age?: number | null
           ai_description?: string | null
+          city?: string | null
           compatibility_score?: number | null
+          country?: string | null
           created_at?: string | null
+          distance_approximation?: string | null
           energy_match?: number | null
           first_contact_date?: string | null
           first_intimacy_date?: string | null
@@ -246,6 +257,7 @@ export type Database = {
             | Database["public"]["Enums"]["relationship_goal"]
             | null
           their_religion?: Database["public"]["Enums"]["religion"] | null
+          their_schedule_flexibility?: string | null
           their_smoking?: string | null
           their_social_style?: string | null
           updated_at?: string | null
@@ -364,10 +376,12 @@ export type Database = {
           boundary_strength: number | null
           career_stage: string | null
           chemistry_factors: Json | null
+          city: string | null
           communication_style:
             | Database["public"]["Enums"]["communication_style"]
             | null
           conflict_style: string | null
+          country: string | null
           created_at: string | null
           custom_pronouns: string | null
           cycle_length: number | null
@@ -434,10 +448,12 @@ export type Database = {
           response_time_preference: number | null
           safety_priorities: Json | null
           safety_requirements: Json | null
+          schedule_flexibility: string | null
           sexual_orientation:
             | Database["public"]["Enums"]["sexual_orientation"]
             | null
           social_style: Database["public"]["Enums"]["social_style"] | null
+          state: string | null
           time_since_last_relationship: string | null
           track_cycle: boolean | null
           transition_stage: string | null
@@ -459,10 +475,12 @@ export type Database = {
           boundary_strength?: number | null
           career_stage?: string | null
           chemistry_factors?: Json | null
+          city?: string | null
           communication_style?:
             | Database["public"]["Enums"]["communication_style"]
             | null
           conflict_style?: string | null
+          country?: string | null
           created_at?: string | null
           custom_pronouns?: string | null
           cycle_length?: number | null
@@ -531,10 +549,12 @@ export type Database = {
           response_time_preference?: number | null
           safety_priorities?: Json | null
           safety_requirements?: Json | null
+          schedule_flexibility?: string | null
           sexual_orientation?:
             | Database["public"]["Enums"]["sexual_orientation"]
             | null
           social_style?: Database["public"]["Enums"]["social_style"] | null
+          state?: string | null
           time_since_last_relationship?: string | null
           track_cycle?: boolean | null
           transition_stage?: string | null
@@ -556,10 +576,12 @@ export type Database = {
           boundary_strength?: number | null
           career_stage?: string | null
           chemistry_factors?: Json | null
+          city?: string | null
           communication_style?:
             | Database["public"]["Enums"]["communication_style"]
             | null
           conflict_style?: string | null
+          country?: string | null
           created_at?: string | null
           custom_pronouns?: string | null
           cycle_length?: number | null
@@ -628,10 +650,12 @@ export type Database = {
           response_time_preference?: number | null
           safety_priorities?: Json | null
           safety_requirements?: Json | null
+          schedule_flexibility?: string | null
           sexual_orientation?:
             | Database["public"]["Enums"]["sexual_orientation"]
             | null
           social_style?: Database["public"]["Enums"]["social_style"] | null
+          state?: string | null
           time_since_last_relationship?: string | null
           track_cycle?: boolean | null
           transition_stage?: string | null

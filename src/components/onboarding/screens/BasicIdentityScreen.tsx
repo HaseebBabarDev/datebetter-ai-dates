@@ -13,6 +13,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const COUNTRY_OPTIONS = [
+  { value: "US", label: "United States" },
+  { value: "CA", label: "Canada" },
+  { value: "UK", label: "United Kingdom" },
+  { value: "AU", label: "Australia" },
+  { value: "DE", label: "Germany" },
+  { value: "FR", label: "France" },
+  { value: "ES", label: "Spain" },
+  { value: "IT", label: "Italy" },
+  { value: "NL", label: "Netherlands" },
+  { value: "BR", label: "Brazil" },
+  { value: "MX", label: "Mexico" },
+  { value: "IN", label: "India" },
+  { value: "JP", label: "Japan" },
+  { value: "KR", label: "South Korea" },
+  { value: "SG", label: "Singapore" },
+  { value: "OTHER", label: "Other" },
+];
+
 const genderOptions = [
   { value: "woman_cis", label: "Woman" },
   { value: "woman_trans", label: "Woman (transgender)" },
@@ -58,15 +77,49 @@ const BasicIdentityScreen = () => {
       subtitle="Let's get to know you"
     >
       <div className="space-y-6 animate-fade-in">
-        {/* Location */}
-        <div className="space-y-2">
-          <Label htmlFor="location">Where are you based?</Label>
-          <Input
-            id="location"
-            placeholder="City, State"
-            value={data.location || ""}
-            onChange={(e) => updateData({ location: e.target.value })}
-          />
+        {/* Location Section */}
+        <div className="space-y-4">
+          <Label className="text-base font-medium">Where are you based?</Label>
+          
+          <div className="space-y-2">
+            <Label htmlFor="country">Country</Label>
+            <Select
+              value={data.country}
+              onValueChange={(value) => updateData({ country: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select country" />
+              </SelectTrigger>
+              <SelectContent>
+                {COUNTRY_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                placeholder="City"
+                value={data.city || ""}
+                onChange={(e) => updateData({ city: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="state">State/Province</Label>
+              <Input
+                id="state"
+                placeholder="State"
+                value={data.state || ""}
+                onChange={(e) => updateData({ state: e.target.value })}
+              />
+            </div>
+          </div>
           <p className="text-xs text-muted-foreground">For finding nearby matches</p>
         </div>
 
