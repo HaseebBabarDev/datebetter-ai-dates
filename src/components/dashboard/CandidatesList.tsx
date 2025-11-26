@@ -7,6 +7,7 @@ type Candidate = Tables<"candidates">;
 interface CandidatesListProps {
   candidates: Candidate[];
   onUpdate: () => void;
+  showGroupHeaders?: boolean;
 }
 
 const statusOrder: Record<string, number> = {
@@ -22,7 +23,31 @@ const statusOrder: Record<string, number> = {
 export const CandidatesList: React.FC<CandidatesListProps> = ({
   candidates,
   onUpdate,
+  showGroupHeaders = true,
 }) => {
+  // If not showing group headers, render flat list
+  if (!showGroupHeaders) {
+    if (candidates.length === 0) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          No candidates match your filter
+        </div>
+      );
+    }
+    return (
+      <div className="space-y-3">
+        {candidates.map((candidate) => (
+          <CandidateCard
+            key={candidate.id}
+            candidate={candidate}
+            onUpdate={onUpdate}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // Grouped view
   const activeCandidates = candidates.filter(
     (c) => c.status !== "archived" && c.status !== "no_contact"
   );
