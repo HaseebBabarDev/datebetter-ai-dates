@@ -199,16 +199,16 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-500";
-    if (score >= 60) return "text-yellow-500";
-    if (score >= 40) return "text-orange-500";
+    if (score >= 85) return "text-green-500";
+    if (score >= 70) return "text-yellow-500";
+    if (score >= 55) return "text-orange-500";
     return "text-red-500";
   };
 
   const getScoreBg = (score: number) => {
-    if (score >= 80) return "bg-green-500";
-    if (score >= 60) return "bg-yellow-500";
-    if (score >= 40) return "bg-orange-500";
+    if (score >= 85) return "bg-green-500";
+    if (score >= 70) return "bg-yellow-500";
+    if (score >= 55) return "bg-orange-500";
     return "bg-red-500";
   };
 

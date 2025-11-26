@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Navigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Enums } from "@/integrations/supabase/types";
+import { Enums, Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, UserPlus, Sparkles, Heart } from "lucide-react";
+import { ArrowLeft, UserPlus, Sparkles, Heart, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 const MET_VIA_OPTIONS = [
@@ -43,10 +43,17 @@ const APP_OPTIONS = [
   "Other",
 ];
 
+type Candidate = Tables<"candidates">;
+
 const AddCandidate = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get("edit");
+  const isEditMode = !!editId;
+
   const [loading, setLoading] = useState(false);
+  const [fetchingCandidate, setFetchingCandidate] = useState(isEditMode);
 
   const [nickname, setNickname] = useState("");
   const [age, setAge] = useState("");
@@ -55,6 +62,41 @@ const AddCandidate = () => {
   const [status, setStatus] = useState<Enums<"candidate_status">>("just_matched");
   const [beenIntimate, setBeenIntimate] = useState(false);
   const [firstIntimacyDate, setFirstIntimacyDate] = useState("");
+
+  // Fetch candidate for edit mode
+  useEffect(() => {
+    if (editId && user) {
+      fetchCandidate();
+    }
+  }, [editId, user]);
+
+  const fetchCandidate = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("candidates")
+        .select("*")
+        .eq("id", editId!)
+        .eq("user_id", user!.id)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setNickname(data.nickname);
+        setAge(data.age?.toString() || "");
+        setMetVia(data.met_via || "");
+        setMetApp(data.met_app || "");
+        setStatus(data.status || "just_matched");
+        setBeenIntimate(!!data.first_intimacy_date);
+        setFirstIntimacyDate(data.first_intimacy_date || "");
+      }
+    } catch (error) {
+      console.error("Error fetching candidate:", error);
+      toast.error("Failed to load candidate");
+      navigate("/dashboard");
+    } finally {
+      setFetchingCandidate(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,45 +114,63 @@ const AddCandidate = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase
-        .from("candidates")
-        .insert({
-          user_id: user.id,
-          nickname: nickname.trim(),
-          age: age ? parseInt(age) : null,
-          met_via: metVia || null,
-          met_app: metVia === "dating_app" ? metApp : null,
-          status,
-          first_contact_date: new Date().toISOString().split("T")[0],
-          first_intimacy_date: beenIntimate && firstIntimacyDate ? firstIntimacyDate : null,
-        })
-        .select()
-        .single();
+      const candidateData = {
+        nickname: nickname.trim(),
+        age: age ? parseInt(age) : null,
+        met_via: metVia || null,
+        met_app: metVia === "dating_app" ? metApp : null,
+        status,
+        first_intimacy_date: beenIntimate && firstIntimacyDate ? firstIntimacyDate : null,
+      };
 
-      if (error) throw error;
+      if (isEditMode) {
+        // Update existing candidate
+        const { error } = await supabase
+          .from("candidates")
+          .update(candidateData)
+          .eq("id", editId!)
+          .eq("user_id", user.id);
 
-      // If they've been intimate, also log an intimate interaction
-      if (beenIntimate && firstIntimacyDate) {
-        await supabase.from("interactions").insert({
-          user_id: user.id,
-          candidate_id: data.id,
-          interaction_type: "intimate",
-          interaction_date: firstIntimacyDate,
-          overall_feeling: 4,
-        });
+        if (error) throw error;
+        toast.success(`${nickname} updated!`);
+        navigate(`/candidate/${editId}`);
+      } else {
+        // Insert new candidate
+        const { data, error } = await supabase
+          .from("candidates")
+          .insert({
+            user_id: user.id,
+            ...candidateData,
+            first_contact_date: new Date().toISOString().split("T")[0],
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // If they've been intimate, also log an intimate interaction
+        if (beenIntimate && firstIntimacyDate) {
+          await supabase.from("interactions").insert({
+            user_id: user.id,
+            candidate_id: data.id,
+            interaction_type: "intimate",
+            interaction_date: firstIntimacyDate,
+            overall_feeling: 4,
+          });
+        }
+
+        toast.success(`${nickname} added to your roster!`);
+        navigate(`/candidate/${data.id}`);
       }
-
-      toast.success(`${nickname} added to your roster!`);
-      navigate(`/candidate/${data.id}`);
     } catch (error) {
-      console.error("Error adding candidate:", error);
-      toast.error("Failed to add candidate");
+      console.error("Error saving candidate:", error);
+      toast.error(isEditMode ? "Failed to update candidate" : "Failed to add candidate");
     } finally {
       setLoading(false);
     }
   };
 
-  if (authLoading) {
+  if (authLoading || fetchingCandidate) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -127,14 +187,22 @@ const AddCandidate = () => {
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur border-b border-border z-10">
         <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
+          <Button variant="ghost" size="icon" onClick={() => navigate(isEditMode ? `/candidate/${editId}` : "/dashboard")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex-1">
-            <h1 className="font-semibold text-foreground">Add New Candidate</h1>
-            <p className="text-xs text-muted-foreground">Start tracking someone new</p>
+            <h1 className="font-semibold text-foreground">
+              {isEditMode ? "Edit Candidate" : "Add New Candidate"}
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              {isEditMode ? "Update their info" : "Start tracking someone new"}
+            </p>
           </div>
-          <UserPlus className="w-5 h-5 text-primary" />
+          {isEditMode ? (
+            <Pencil className="w-5 h-5 text-primary" />
+          ) : (
+            <UserPlus className="w-5 h-5 text-primary" />
+          )}
         </div>
       </header>
 
@@ -276,7 +344,12 @@ const AddCandidate = () => {
           <div className="space-y-3">
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading ? (
-                "Adding..."
+                "Saving..."
+              ) : isEditMode ? (
+                <>
+                  <Pencil className="w-5 h-5 mr-2" />
+                  Save Changes
+                </>
               ) : (
                 <>
                   <UserPlus className="w-5 h-5 mr-2" />
@@ -284,10 +357,12 @@ const AddCandidate = () => {
                 </>
               )}
             </Button>
-            <p className="text-xs text-center text-muted-foreground">
-              <Sparkles className="w-3 h-3 inline mr-1" />
-              You can add more details and calculate compatibility after
-            </p>
+            {!isEditMode && (
+              <p className="text-xs text-center text-muted-foreground">
+                <Sparkles className="w-3 h-3 inline mr-1" />
+                You can add more details and calculate compatibility after
+              </p>
+            )}
           </div>
         </form>
       </main>

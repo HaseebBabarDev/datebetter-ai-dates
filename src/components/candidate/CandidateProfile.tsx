@@ -1,19 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Tables, Enums } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit2, Calendar, MapPin, User, Briefcase, Heart, Users, Church, Vote } from "lucide-react";
+import { Pencil, Calendar, MapPin, User, Briefcase, Heart, Users, Church, Vote } from "lucide-react";
 import { CandidatePhotoUpload } from "./CandidatePhotoUpload";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 type Candidate = Tables<"candidates">;
 
@@ -92,8 +84,8 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
   userId,
   onUpdate,
 }) => {
+  const navigate = useNavigate();
   const [photoUrl, setPhotoUrl] = useState(candidate.photo_url);
-  const [showAccountabilityDialog, setShowAccountabilityDialog] = useState(false);
 
   const formatLabel = (value: string | null | undefined, options: { value: string; label: string }[]) => {
     if (!value) return null;
@@ -110,42 +102,28 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Photo Upload */}
+      {/* Photo & Edit Header */}
       <Card>
-        <CardContent className="pt-6">
-          <CandidatePhotoUpload
-            candidateId={candidate.id}
-            userId={userId}
-            nickname={candidate.nickname}
-            currentPhotoUrl={photoUrl}
-            onPhotoUpdated={setPhotoUrl}
-          />
+        <CardContent className="pt-4 pb-4">
+          <div className="flex items-center justify-between">
+            <CandidatePhotoUpload
+              candidateId={candidate.id}
+              userId={userId}
+              nickname={candidate.nickname}
+              currentPhotoUrl={photoUrl}
+              onPhotoUpdated={setPhotoUrl}
+            />
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate(`/add-candidate?edit=${candidate.id}`)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Pencil className="w-5 h-5" />
+            </Button>
+          </div>
         </CardContent>
       </Card>
-
-      {/* Edit Button - Shows Accountability Dialog */}
-      <div className="flex justify-end">
-        <Button variant="outline" size="sm" onClick={() => setShowAccountabilityDialog(true)}>
-          <Edit2 className="w-4 h-4 mr-1" />
-          Edit Profile
-        </Button>
-      </div>
-
-      <AlertDialog open={showAccountabilityDialog} onOpenChange={setShowAccountabilityDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Accountability First</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              <p>Editing past profile information isn't allowed to help you stay accountable.</p>
-              <p>Your original impressions and notes are valuable data points for understanding your dating patterns.</p>
-              <p className="font-medium text-foreground">You can still log new interactions and update their status as things progress.</p>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction>Got it</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {/* Basic Info */}
       <Card>
