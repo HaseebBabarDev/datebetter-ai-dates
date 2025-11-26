@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { Enums } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,8 +20,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { SliderInput } from "@/components/onboarding/SliderInput";
-import { Plus } from "lucide-react";
+import { Plus, User, MapPin, Church, Heart, Briefcase, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 interface AddCandidateFormProps {
@@ -40,15 +47,75 @@ const MET_VIA_OPTIONS = [
 ];
 
 const DATING_APPS = [
-  "Hinge",
-  "Bumble",
-  "Tinder",
-  "Coffee Meets Bagel",
-  "The League",
-  "Feeld",
-  "HER",
-  "OkCupid",
-  "Other",
+  "Hinge", "Bumble", "Tinder", "Coffee Meets Bagel", "The League", "Feeld", "HER", "OkCupid", "Other",
+];
+
+const GENDER_OPTIONS: { value: Enums<"gender_identity">; label: string }[] = [
+  { value: "woman_cis", label: "Woman (Cis)" },
+  { value: "woman_trans", label: "Woman (Trans)" },
+  { value: "non_binary", label: "Non-Binary" },
+  { value: "gender_fluid", label: "Gender Fluid" },
+  { value: "self_describe", label: "Self Describe" },
+];
+
+const PRONOUN_OPTIONS: { value: Enums<"pronouns">; label: string }[] = [
+  { value: "she_her", label: "She/Her" },
+  { value: "he_him", label: "He/Him" },
+  { value: "they_them", label: "They/Them" },
+  { value: "other", label: "Other" },
+];
+
+const RELIGION_OPTIONS: { value: Enums<"religion">; label: string }[] = [
+  { value: "none", label: "None/Atheist" },
+  { value: "spiritual", label: "Spiritual" },
+  { value: "christian_catholic", label: "Christian (Catholic)" },
+  { value: "christian_protestant", label: "Christian (Protestant)" },
+  { value: "christian_other", label: "Christian (Other)" },
+  { value: "jewish", label: "Jewish" },
+  { value: "muslim", label: "Muslim" },
+  { value: "hindu", label: "Hindu" },
+  { value: "buddhist", label: "Buddhist" },
+  { value: "other", label: "Other" },
+];
+
+const POLITICS_OPTIONS: { value: Enums<"politics">; label: string }[] = [
+  { value: "progressive", label: "Progressive" },
+  { value: "liberal", label: "Liberal" },
+  { value: "moderate", label: "Moderate" },
+  { value: "conservative", label: "Conservative" },
+  { value: "traditional", label: "Traditional" },
+];
+
+const RELATIONSHIP_GOAL_OPTIONS: { value: Enums<"relationship_goal">; label: string }[] = [
+  { value: "casual", label: "Casual" },
+  { value: "dating", label: "Dating" },
+  { value: "serious", label: "Serious Relationship" },
+  { value: "marriage", label: "Marriage" },
+  { value: "unsure", label: "Unsure" },
+];
+
+const KIDS_DESIRE_OPTIONS: { value: Enums<"kids_desire">; label: string }[] = [
+  { value: "definitely_yes", label: "Wants Kids" },
+  { value: "maybe", label: "Maybe/Open" },
+  { value: "definitely_no", label: "Doesn't Want Kids" },
+  { value: "already_have", label: "Already Has Kids" },
+];
+
+const KIDS_STATUS_OPTIONS: { value: Enums<"kids_status">; label: string }[] = [
+  { value: "no_kids", label: "No Kids" },
+  { value: "has_young_kids", label: "Has Young Kids" },
+  { value: "has_adult_kids", label: "Has Adult Kids" },
+];
+
+const ATTACHMENT_STYLE_OPTIONS: { value: Enums<"attachment_style">; label: string }[] = [
+  { value: "secure", label: "Secure" },
+  { value: "anxious", label: "Anxious" },
+  { value: "avoidant", label: "Avoidant" },
+  { value: "disorganized", label: "Disorganized" },
+];
+
+const CAREER_STAGE_OPTIONS = [
+  "Student", "Entry Level", "Mid-Career", "Senior/Executive", "Entrepreneur", "Freelance/Creative", "Between Jobs", "Retired",
 ];
 
 export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
@@ -59,11 +126,31 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Basic Info
   const [nickname, setNickname] = useState("");
+  const [age, setAge] = useState("");
+  const [genderIdentity, setGenderIdentity] = useState<Enums<"gender_identity"> | "">("");
+  const [pronouns, setPronouns] = useState<Enums<"pronouns"> | "">("");
+
+  // Where Met
   const [metVia, setMetVia] = useState("");
   const [metApp, setMetApp] = useState("");
-  const [age, setAge] = useState("");
 
+  // Values & Beliefs
+  const [religion, setReligion] = useState<Enums<"religion"> | "">("");
+  const [politics, setPolitics] = useState<Enums<"politics"> | "">("");
+
+  // Relationship Goals
+  const [relationshipGoal, setRelationshipGoal] = useState<Enums<"relationship_goal"> | "">("");
+  const [kidsDesire, setKidsDesire] = useState<Enums<"kids_desire"> | "">("");
+  const [kidsStatus, setKidsStatus] = useState<Enums<"kids_status"> | "">("");
+
+  // Career & Personality
+  const [careerStage, setCareerStage] = useState("");
+  const [attachmentStyle, setAttachmentStyle] = useState<Enums<"attachment_style"> | "">("");
+  const [ambitionLevel, setAmbitionLevel] = useState(3);
+
+  // Chemistry
   const [overallChemistry, setOverallChemistry] = useState(3);
   const [physicalAttraction, setPhysicalAttraction] = useState(3);
   const [intellectualConnection, setIntellectualConnection] = useState(3);
@@ -72,9 +159,19 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
 
   const resetForm = () => {
     setNickname("");
+    setAge("");
+    setGenderIdentity("");
+    setPronouns("");
     setMetVia("");
     setMetApp("");
-    setAge("");
+    setReligion("");
+    setPolitics("");
+    setRelationshipGoal("");
+    setKidsDesire("");
+    setKidsStatus("");
+    setCareerStage("");
+    setAttachmentStyle("");
+    setAmbitionLevel(3);
     setOverallChemistry(3);
     setPhysicalAttraction(3);
     setIntellectualConnection(3);
@@ -101,9 +198,19 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
       const { error } = await supabase.from("candidates").insert({
         user_id: user.id,
         nickname: nickname.trim(),
+        age: age ? parseInt(age) : null,
+        gender_identity: genderIdentity || null,
+        pronouns: pronouns || null,
         met_via: metVia || null,
         met_app: metVia === "dating_app" ? metApp : null,
-        age: age ? parseInt(age) : null,
+        their_religion: religion || null,
+        their_politics: politics || null,
+        their_relationship_goal: relationshipGoal || null,
+        their_kids_desire: kidsDesire || null,
+        their_kids_status: kidsStatus || null,
+        their_career_stage: careerStage || null,
+        their_attachment_style: attachmentStyle || null,
+        their_ambition_level: ambitionLevel,
         overall_chemistry: overallChemistry,
         physical_attraction: physicalAttraction,
         intellectual_connection: intellectualConnection,
@@ -136,123 +243,282 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="overflow-y-auto">
+      <SheetContent className="overflow-y-auto w-full sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>Add New Candidate</SheetTitle>
           <SheetDescription>
-            Add someone you're talking to or dating
+            Add someone you're talking to or dating. Fill in what you know!
           </SheetDescription>
         </SheetHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-          {/* Basic Info */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="nickname">Nickname *</Label>
-              <Input
-                id="nickname"
-                placeholder="Give them a memorable nickname"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                maxLength={50}
-              />
+        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
+          {/* Basic Info - Always visible */}
+          <div className="space-y-4 pb-4 border-b border-border">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <User className="w-4 h-4" />
+              Basic Info
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="age">Age</Label>
-              <Input
-                id="age"
-                type="number"
-                placeholder="Their age"
-                value={age}
-                onChange={(e) => setAge(e.target.value)}
-                min={18}
-                max={99}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Where did you meet?</Label>
-              <Select value={metVia} onValueChange={setMetVia}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select how you met" />
-                </SelectTrigger>
-                <SelectContent>
-                  {MET_VIA_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {metVia === "dating_app" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="nickname">Nickname *</Label>
+                <Input
+                  id="nickname"
+                  placeholder="Give them a memorable nickname"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  maxLength={50}
+                />
+              </div>
               <div className="space-y-2">
-                <Label>Which app?</Label>
-                <Select value={metApp} onValueChange={setMetApp}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select the app" />
-                  </SelectTrigger>
+                <Label htmlFor="age">Age</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  placeholder="Age"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  min={18}
+                  max={99}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Pronouns</Label>
+                <Select value={pronouns} onValueChange={(v) => setPronouns(v as Enums<"pronouns">)}>
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
                   <SelectContent>
-                    {DATING_APPS.map((app) => (
-                      <SelectItem key={app} value={app}>
-                        {app}
-                      </SelectItem>
+                    {PRONOUN_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-            )}
+              <div className="space-y-2 col-span-2">
+                <Label>Gender Identity</Label>
+                <Select value={genderIdentity} onValueChange={(v) => setGenderIdentity(v as Enums<"gender_identity">)}>
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {GENDER_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
 
-          {/* Chemistry Ratings */}
-          <div className="space-y-4">
-            <h3 className="font-medium text-foreground">Initial Chemistry</h3>
-            <p className="text-sm text-muted-foreground">
-              Rate your initial impressions (you can update these later)
-            </p>
+          <Accordion type="multiple" defaultValue={["where-met", "chemistry"]} className="w-full">
+            {/* Where Met */}
+            <AccordionItem value="where-met">
+              <AccordionTrigger className="text-sm">
+                <span className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Where You Met
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-3 pt-2">
+                <div className="space-y-2">
+                  <Label>How did you meet?</Label>
+                  <Select value={metVia} onValueChange={setMetVia}>
+                    <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                    <SelectContent>
+                      {MET_VIA_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {metVia === "dating_app" && (
+                  <div className="space-y-2">
+                    <Label>Which app?</Label>
+                    <Select value={metApp} onValueChange={setMetApp}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {DATING_APPS.map((app) => (
+                          <SelectItem key={app} value={app}>{app}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
 
-            <SliderInput
-              label="Overall Chemistry"
-              value={overallChemistry}
-              onChange={setOverallChemistry}
-              leftLabel="Low"
-              rightLabel="Electric"
-            />
+            {/* Values & Beliefs */}
+            <AccordionItem value="values">
+              <AccordionTrigger className="text-sm">
+                <span className="flex items-center gap-2">
+                  <Church className="w-4 h-4" />
+                  Values & Beliefs
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-3 pt-2">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Religion</Label>
+                    <Select value={religion} onValueChange={(v) => setReligion(v as Enums<"religion">)}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {RELIGION_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Politics</Label>
+                    <Select value={politics} onValueChange={(v) => setPolitics(v as Enums<"politics">)}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {POLITICS_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
 
-            <SliderInput
-              label="Physical Attraction"
-              value={physicalAttraction}
-              onChange={setPhysicalAttraction}
-              leftLabel="Neutral"
-              rightLabel="Very Attracted"
-            />
+            {/* Relationship Goals */}
+            <AccordionItem value="relationship">
+              <AccordionTrigger className="text-sm">
+                <span className="flex items-center gap-2">
+                  <Heart className="w-4 h-4" />
+                  Relationship Goals
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-3 pt-2">
+                <div className="space-y-2">
+                  <Label>What are they looking for?</Label>
+                  <Select value={relationshipGoal} onValueChange={(v) => setRelationshipGoal(v as Enums<"relationship_goal">)}>
+                    <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                    <SelectContent>
+                      {RELATIONSHIP_GOAL_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Kids Desire</Label>
+                    <Select value={kidsDesire} onValueChange={(v) => setKidsDesire(v as Enums<"kids_desire">)}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {KIDS_DESIRE_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Kids Status</Label>
+                    <Select value={kidsStatus} onValueChange={(v) => setKidsStatus(v as Enums<"kids_status">)}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {KIDS_STATUS_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
 
-            <SliderInput
-              label="Intellectual Connection"
-              value={intellectualConnection}
-              onChange={setIntellectualConnection}
-              leftLabel="Surface"
-              rightLabel="Deep"
-            />
+            {/* Career & Personality */}
+            <AccordionItem value="career">
+              <AccordionTrigger className="text-sm">
+                <span className="flex items-center gap-2">
+                  <Briefcase className="w-4 h-4" />
+                  Career & Personality
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-3 pt-2">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Career Stage</Label>
+                    <Select value={careerStage} onValueChange={setCareerStage}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {CAREER_STAGE_OPTIONS.map((opt) => (
+                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Attachment Style</Label>
+                    <Select value={attachmentStyle} onValueChange={(v) => setAttachmentStyle(v as Enums<"attachment_style">)}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {ATTACHMENT_STYLE_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <SliderInput
+                  label="Ambition Level"
+                  value={ambitionLevel}
+                  onChange={setAmbitionLevel}
+                  leftLabel="Laid-back"
+                  rightLabel="Very Driven"
+                />
+              </AccordionContent>
+            </AccordionItem>
 
-            <SliderInput
-              label="Humor Compatibility"
-              value={humorCompatibility}
-              onChange={setHumorCompatibility}
-              leftLabel="Different"
-              rightLabel="Same Wavelength"
-            />
-
-            <SliderInput
-              label="Energy Match"
-              value={energyMatch}
-              onChange={setEnergyMatch}
-              leftLabel="Draining"
-              rightLabel="Energizing"
-            />
-          </div>
+            {/* Chemistry Ratings */}
+            <AccordionItem value="chemistry">
+              <AccordionTrigger className="text-sm">
+                <span className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  Chemistry Ratings
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-3 pt-2">
+                <p className="text-xs text-muted-foreground">
+                  Rate your initial impressions (you can update these later)
+                </p>
+                <SliderInput
+                  label="Overall Chemistry"
+                  value={overallChemistry}
+                  onChange={setOverallChemistry}
+                  leftLabel="Low"
+                  rightLabel="Electric"
+                />
+                <SliderInput
+                  label="Physical Attraction"
+                  value={physicalAttraction}
+                  onChange={setPhysicalAttraction}
+                  leftLabel="Neutral"
+                  rightLabel="Very Attracted"
+                />
+                <SliderInput
+                  label="Intellectual Connection"
+                  value={intellectualConnection}
+                  onChange={setIntellectualConnection}
+                  leftLabel="Surface"
+                  rightLabel="Deep"
+                />
+                <SliderInput
+                  label="Humor Compatibility"
+                  value={humorCompatibility}
+                  onChange={setHumorCompatibility}
+                  leftLabel="Different"
+                  rightLabel="Same Wavelength"
+                />
+                <SliderInput
+                  label="Energy Match"
+                  value={energyMatch}
+                  onChange={setEnergyMatch}
+                  leftLabel="Draining"
+                  rightLabel="Energizing"
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Adding..." : "Add Candidate"}
