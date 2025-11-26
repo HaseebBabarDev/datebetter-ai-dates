@@ -170,26 +170,24 @@ const Dashboard = () => {
         .filter((i) => i.candidate_id === candidate.id)
         .sort((a, b) => new Date(a.interaction_date || "").getTime() - new Date(b.interaction_date || "").getTime());
       
-      // Find first intimate interaction
-      const firstIntimateIdx = candidateInteractions.findIndex((i) => i.interaction_type === "intimate");
-      if (firstIntimateIdx === -1) return;
+      // Find intimate interaction
+      const intimateIdx = candidateInteractions.findIndex((i) => i.interaction_type === "intimate");
+      if (intimateIdx === -1) return;
       
-      const preIntimateInteractions = candidateInteractions.slice(0, firstIntimateIdx);
-      const postIntimateInteractions = candidateInteractions.slice(firstIntimateIdx + 1);
+      const postIntimateInteractions = candidateInteractions.slice(intimateIdx + 1);
       
-      if (preIntimateInteractions.length < 2 || postIntimateInteractions.length < 1) return;
+      // Check notes for drop indicators in post-intimacy interactions
+      const dropPhrases = ["fell off", "falling off", "falling for", "distant", "distance", "pulled away", "less interested", "ghosting", "slow fade", "breadcrumbing", "mixed signals", "switched up", "didn't answer", "didn't pick up", "not responding"];
+      const allPostNotes = postIntimateInteractions.map(i => (i.notes || "").toLowerCase()).join(" ");
+      const candidateNotes = (candidate.notes || "").toLowerCase();
+      const hasDropLanguage = dropPhrases.some(phrase => allPostNotes.includes(phrase) || candidateNotes.includes(phrase));
       
-      // Calculate average feelings before vs after
-      const preAvg = preIntimateInteractions.reduce((sum, i) => sum + (i.overall_feeling || 3), 0) / preIntimateInteractions.length;
-      const postAvg = postIntimateInteractions.reduce((sum, i) => sum + (i.overall_feeling || 3), 0) / postIntimateInteractions.length;
-      
-      // Check for drop in feelings or frequency
-      const feelingDrop = preAvg - postAvg >= 1;
-      
-      // Check notes for drop indicators
-      const dropPhrases = ["fell off", "falling off", "distant", "pulled away", "less interested", "ghosting", "slow fade", "breadcrumbing", "mixed signals"];
-      const postNotes = postIntimateInteractions.map(i => (i.notes || "").toLowerCase()).join(" ");
-      const hasDropLanguage = dropPhrases.some(phrase => postNotes.includes(phrase));
+      // Check for feeling drop after intimacy
+      let feelingDrop = false;
+      if (postIntimateInteractions.length > 0) {
+        const avgPostFeeling = postIntimateInteractions.reduce((sum, i) => sum + (i.overall_feeling || 3), 0) / postIntimateInteractions.length;
+        feelingDrop = avgPostFeeling <= 2; // Low feelings after intimacy
+      }
       
       if (feelingDrop || hasDropLanguage) {
         alerts.push({ 
@@ -206,11 +204,40 @@ const Dashboard = () => {
   const loveBombingAlerts = useMemo(() => {
     const alerts: { candidate: Candidate; reason: string }[] = [];
     
+    // Love bombing phrases to check in notes
+    const loveBombingPhrases = [
+      "too good to be true", "already said i love you", "wants to move in", 
+      "moving too fast", "constant texting", "showering with gifts", 
+      "future faking", "soulmate", "never felt this way", "falling for me",
+      "wants to have kids", "wants kids with me", "hes falling", "he's falling",
+      "she's falling", "shes falling", "love you already", "marry me",
+      "move in together", "intense", "overwhelming"
+    ];
+    
     candidates.forEach((candidate) => {
       const candidateInteractions = interactions.filter((i) => i.candidate_id === candidate.id);
+      
+      // Check candidate notes for love bombing language
+      const candidateNotes = (candidate.notes || "").toLowerCase();
+      const hasLoveBombingInCandidateNotes = loveBombingPhrases.some(phrase => candidateNotes.includes(phrase));
+      
+      if (hasLoveBombingInCandidateNotes) {
+        alerts.push({ candidate, reason: "Love bombing signs in notes" });
+        return; // Already flagged
+      }
+      
+      // Check interaction notes
+      const notesText = candidateInteractions.map(i => (i.notes || "").toLowerCase()).join(" ");
+      const hasLoveBombingLanguage = loveBombingPhrases.some(phrase => notesText.includes(phrase));
+      
+      if (hasLoveBombingLanguage) {
+        alerts.push({ candidate, reason: "Love bombing language detected" });
+        return;
+      }
+      
+      // Check for rapid interaction frequency (original logic)
       if (candidateInteractions.length < 3) return;
       
-      // Check for rapid interaction frequency (5+ interactions in first 2 weeks)
       const firstInteractionDate = candidateInteractions.length > 0 
         ? new Date(candidateInteractions[candidateInteractions.length - 1].interaction_date || candidate.created_at || "")
         : null;
@@ -219,18 +246,10 @@ const Dashboard = () => {
         const daysSinceFirst = differenceInDays(new Date(), firstInteractionDate);
         const interactionsPerWeek = candidateInteractions.length / Math.max(1, daysSinceFirst / 7);
         
-        // Love bombing indicators
-        const loveBombingPhrases = ["too good to be true", "already said i love you", "wants to move in", "moving too fast", "constant texting", "showering with gifts", "future faking", "soulmate", "never felt this way"];
-        const notesText = candidateInteractions.map(i => (i.notes || "").toLowerCase()).join(" ");
-        const hasLoveBombingLanguage = loveBombingPhrases.some(phrase => notesText.includes(phrase));
-        
-        // Very high interaction frequency early on
         if (daysSinceFirst <= 14 && candidateInteractions.length >= 7) {
           alerts.push({ candidate, reason: "Very intense start — 7+ interactions in 2 weeks" });
         } else if (interactionsPerWeek >= 5 && daysSinceFirst <= 30) {
           alerts.push({ candidate, reason: "Rapid escalation detected" });
-        } else if (hasLoveBombingLanguage) {
-          alerts.push({ candidate, reason: "Love bombing language in notes" });
         }
       }
     });
