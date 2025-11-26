@@ -667,39 +667,6 @@ const Patterns = () => {
               </Card>
             )}
 
-            {/* Insight Summary */}
-            <Card className="border-primary/30 bg-primary/5">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Key Insights</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm text-muted-foreground">
-                {stats.activeCandidates > 3 && (
-                  <p>
-                    • You're actively talking to {stats.activeCandidates} people — consider focusing
-                    on quality over quantity.
-                  </p>
-                )}
-                {stats.commonRedFlags.length > 0 && (
-                  <p>
-                    • "{stats.commonRedFlags[0].flag}" keeps showing up. Pay attention to this
-                    pattern.
-                  </p>
-                )}
-                {stats.initiatorStats.find((i) => i.initiator === "me")?.count >
-                  (stats.initiatorStats.find((i) => i.initiator === "them")?.count || 0) && (
-                  <p>• You tend to initiate more — let them come to you sometimes.</p>
-                )}
-                {stats.avgOverallFeeling < 3 && (
-                  <p>
-                    • Your average date feeling is below 3. Consider what's making dates feel
-                    underwhelming.
-                  </p>
-                )}
-                {stats.adviceAcceptanceRate < 50 && stats.totalAdviceGiven > 2 && (
-                  <p>• You decline most advice. Trust your gut, but stay open to new perspectives.</p>
-                )}
-              </CardContent>
-            </Card>
           </>
         )}
       </main>
