@@ -108,6 +108,7 @@ export type Database = {
           country: string | null
           created_at: string | null
           distance_approximation: string | null
+          end_reason: string | null
           energy_match: number | null
           first_contact_date: string | null
           first_intimacy_date: string | null
@@ -130,6 +131,7 @@ export type Database = {
           physical_attraction: number | null
           pronouns: Database["public"]["Enums"]["pronouns"] | null
           red_flags: Json | null
+          relationship_ended_at: string | null
           score_breakdown: Json | null
           status: Database["public"]["Enums"]["candidate_status"] | null
           their_ambition_level: number | null
@@ -168,6 +170,7 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           distance_approximation?: string | null
+          end_reason?: string | null
           energy_match?: number | null
           first_contact_date?: string | null
           first_intimacy_date?: string | null
@@ -192,6 +195,7 @@ export type Database = {
           physical_attraction?: number | null
           pronouns?: Database["public"]["Enums"]["pronouns"] | null
           red_flags?: Json | null
+          relationship_ended_at?: string | null
           score_breakdown?: Json | null
           status?: Database["public"]["Enums"]["candidate_status"] | null
           their_ambition_level?: number | null
@@ -230,6 +234,7 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           distance_approximation?: string | null
+          end_reason?: string | null
           energy_match?: number | null
           first_contact_date?: string | null
           first_intimacy_date?: string | null
@@ -254,6 +259,7 @@ export type Database = {
           physical_attraction?: number | null
           pronouns?: Database["public"]["Enums"]["pronouns"] | null
           red_flags?: Json | null
+          relationship_ended_at?: string | null
           score_breakdown?: Json | null
           status?: Database["public"]["Enums"]["candidate_status"] | null
           their_ambition_level?: number | null

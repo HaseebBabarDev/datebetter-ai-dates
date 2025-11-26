@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban, Home } from "lucide-react";
+import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban, Home, XCircle, RefreshCw } from "lucide-react";
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
 import { FlagsSection } from "@/components/candidate/FlagsSection";
@@ -19,6 +19,7 @@ import { useTour, CANDIDATE_DETAIL_TOUR_STEPS } from "@/components/tour";
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -226,6 +227,10 @@ const CandidateDetail = () => {
   const [showNewCandidateDialog, setShowNewCandidateDialog] = useState(false);
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [isFirstCandidate, setIsFirstCandidate] = useState(false);
+  const [showEndRelationshipDialog, setShowEndRelationshipDialog] = useState(false);
+  const [showReopenDialog, setShowReopenDialog] = useState(false);
+  const [endReason, setEndReason] = useState("");
+  const [endingRelationship, setEndingRelationship] = useState(false);
   
   // Check if this is a new candidate from navigation state
   useEffect(() => {
@@ -308,6 +313,63 @@ const CandidateDetail = () => {
       toast("No Contact ended. It's okay - healing isn't linear. 💜");
     } catch (error) {
       console.error("Error ending no contact:", error);
+    }
+  };
+
+  const handleEndRelationship = async () => {
+    if (!candidate || !user) return;
+    
+    setEndingRelationship(true);
+    try {
+      const updates = {
+        status: "archived" as const,
+        relationship_ended_at: new Date().toISOString(),
+        end_reason: endReason || null,
+        no_contact_active: false,
+      };
+      
+      const { error } = await supabase
+        .from("candidates")
+        .update(updates)
+        .eq("id", candidate.id);
+      
+      if (error) throw error;
+      
+      setCandidate({ ...candidate, ...updates });
+      setShowEndRelationshipDialog(false);
+      setEndReason("");
+      toast.success(`Relationship with ${candidate.nickname} ended. Take care of yourself. 💜`);
+    } catch (error) {
+      console.error("Error ending relationship:", error);
+      toast.error("Failed to end relationship");
+    } finally {
+      setEndingRelationship(false);
+    }
+  };
+
+  const handleReopenRelationship = async () => {
+    if (!candidate || !user) return;
+    
+    try {
+      const updates = {
+        status: "texting" as const,
+        relationship_ended_at: null,
+        end_reason: null,
+      };
+      
+      const { error } = await supabase
+        .from("candidates")
+        .update(updates)
+        .eq("id", candidate.id);
+      
+      if (error) throw error;
+      
+      setCandidate({ ...candidate, ...updates });
+      setShowReopenDialog(false);
+      toast.success(`Reopened connection with ${candidate.nickname}!`);
+    } catch (error) {
+      console.error("Error reopening relationship:", error);
+      toast.error("Failed to reopen relationship");
     }
   };
 
@@ -413,24 +475,125 @@ const CandidateDetail = () => {
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-lg space-y-6">
-        {!candidate.no_contact_active && (
-          <div data-tour="quick-log">
-            <AddInteractionForm
-              candidateId={candidate.id}
-              onSuccess={() => { fetchData(); checkPendingAdvice(); }}
-              onRescore={handleRescore}
-              isNoContact={candidate.no_contact_active || false}
-              onBrokeContact={handleBrokeContact}
-              hasPendingAdvice={hasPendingAdvice}
-              triggerButton={
-                <Button className="w-full gap-2">
-                  <Clock className="h-4 w-4" />
-                  Log Interaction
-                </Button>
-              }
-            />
+        {/* Archived/Ended Relationship Banner */}
+        {candidate.status === "archived" && (
+          <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-3">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <XCircle className="w-5 h-5" />
+              <span className="font-medium">Relationship Ended</span>
+            </div>
+            {(candidate as any).relationship_ended_at && (
+              <p className="text-sm text-muted-foreground">
+                Ended on {new Date((candidate as any).relationship_ended_at).toLocaleDateString()}
+                {(candidate as any).end_reason && ` — ${(candidate as any).end_reason}`}
+              </p>
+            )}
+            <Button 
+              variant="outline" 
+              className="w-full gap-2"
+              onClick={() => setShowReopenDialog(true)}
+            >
+              <RefreshCw className="w-4 h-4" />
+              Reopen Relationship
+            </Button>
           </div>
         )}
+
+        {/* Active relationship actions */}
+        {!candidate.no_contact_active && candidate.status !== "archived" && (
+          <div className="space-y-2">
+            <div data-tour="quick-log">
+              <AddInteractionForm
+                candidateId={candidate.id}
+                onSuccess={() => { fetchData(); checkPendingAdvice(); }}
+                onRescore={handleRescore}
+                isNoContact={candidate.no_contact_active || false}
+                onBrokeContact={handleBrokeContact}
+                hasPendingAdvice={hasPendingAdvice}
+                triggerButton={
+                  <Button className="w-full gap-2">
+                    <Clock className="h-4 w-4" />
+                    Log Interaction
+                  </Button>
+                }
+              />
+            </div>
+            <Button 
+              variant="ghost" 
+              className="w-full gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              onClick={() => setShowEndRelationshipDialog(true)}
+            >
+              <XCircle className="w-4 h-4" />
+              End Relationship
+            </Button>
+          </div>
+        )}
+
+        {/* End Relationship Dialog */}
+        <AlertDialog open={showEndRelationshipDialog} onOpenChange={setShowEndRelationshipDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <XCircle className="w-5 h-5 text-destructive" />
+                End Relationship with {candidate.nickname}?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="space-y-4">
+                <p>This will archive {candidate.nickname} and track when and why it ended. You can always reopen it later.</p>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Reason (optional)</label>
+                  <select 
+                    className="w-full p-2 rounded-md border border-input bg-background text-foreground"
+                    value={endReason}
+                    onChange={(e) => setEndReason(e.target.value)}
+                  >
+                    <option value="">Select a reason...</option>
+                    <option value="Lost interest">Lost interest</option>
+                    <option value="They ended it">They ended it</option>
+                    <option value="Incompatible">Incompatible</option>
+                    <option value="Red flags">Red flags</option>
+                    <option value="Met someone else">Met someone else</option>
+                    <option value="Not ready to date">Not ready to date</option>
+                    <option value="Distance/logistics">Distance/logistics</option>
+                    <option value="Ghosted">Ghosted</option>
+                    <option value="Mutual decision">Mutual decision</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleEndRelationship}
+                disabled={endingRelationship}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {endingRelationship ? "Ending..." : "End Relationship"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Reopen Relationship Dialog */}
+        <AlertDialog open={showReopenDialog} onOpenChange={setShowReopenDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-primary" />
+                Reopen Relationship with {candidate.nickname}?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                This will move {candidate.nickname} back to your active candidates. Their history and data will be preserved.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleReopenRelationship}>
+                Reopen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <Tabs value={defaultTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5 h-auto p-1">
