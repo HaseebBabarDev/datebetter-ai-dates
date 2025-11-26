@@ -68,10 +68,7 @@ const Onboarding = () => {
           <Button
             variant="hero"
             size="lg"
-            onClick={() => {
-              // For demo, navigate back to home or to a setup flow
-              navigate("/");
-            }}
+            onClick={() => navigate("/auth?mode=signup")}
             className="font-semibold w-full md:w-auto"
           >
             Continue Setup →

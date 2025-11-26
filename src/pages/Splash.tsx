@@ -59,7 +59,7 @@ const Splash = () => {
         {/* Buttons */}
         <div className="w-full max-w-sm space-y-3">
           <Button
-            onClick={() => navigate("/auth")}
+            onClick={() => navigate("/onboarding")}
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-poppins font-medium"
             size="lg"
           >
