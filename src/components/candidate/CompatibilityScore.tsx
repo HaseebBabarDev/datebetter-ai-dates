@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Sparkles, RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Lightbulb, Shield } from "lucide-react";
+import { Sparkles, RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Lightbulb, Shield, ChevronDown, TrendingUp, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -222,15 +226,19 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
 
   if (!scoreData) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Sparkles className="w-5 h-5 text-primary" />
-            AI Compatibility Score
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
+      <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
+        <div className="relative p-6">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
+          <div className="relative flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">AI Compatibility</h3>
+              <p className="text-xs text-muted-foreground">Powered by AI analysis</p>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
             Get an AI-powered analysis of your compatibility based on your preferences and what you know about {candidate.nickname}.
           </p>
           <Button onClick={calculateScore} disabled={loading} className="w-full">
@@ -246,95 +254,142 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
               </>
             )}
           </Button>
-        </CardContent>
+        </div>
       </Card>
     );
   }
 
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Sparkles className="w-5 h-5 text-primary" />
-            Compatibility Score
-          </CardTitle>
-          <Button variant="ghost" size="sm" onClick={calculateScore} disabled={loading}>
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Overall Score */}
-        <div className="text-center">
-          <div className={`text-5xl font-bold ${getScoreColor(scoreData.overall_score)}`}>
-            {scoreData.overall_score}%
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">Overall Compatibility</p>
-        </div>
+  const [showAllInsights, setShowAllInsights] = useState(false);
 
-        {/* Breakdown */}
+  const firstStrength = scoreData.strengths?.[0];
+  const firstConcern = scoreData.concerns?.[0];
+  const remainingStrengths = scoreData.strengths?.slice(1) || [];
+  const remainingConcerns = scoreData.concerns?.slice(1) || [];
+  const hasMoreInsights = remainingStrengths.length > 0 || remainingConcerns.length > 0;
+
+  return (
+    <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
+      {/* Score Header */}
+      <div className="relative p-6 pb-4">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
+        <div className="relative flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">Compatibility</h3>
+              <p className="text-xs text-muted-foreground">AI-powered analysis</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className={`text-4xl font-bold ${getScoreColor(scoreData.overall_score)}`}>
+              {scoreData.overall_score}%
+            </div>
+            <Button variant="ghost" size="sm" onClick={calculateScore} disabled={loading} className="h-6 px-2 text-xs">
+              <RefreshCw className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <CardContent className="space-y-4 pt-0">
+        {/* Compact Breakdown */}
         {scoreData.breakdown && (
-          <div className="space-y-3">
+          <div className="grid grid-cols-5 gap-1">
             {breakdownItems.map(({ key, label, icon: Icon }) => {
               const score = scoreData.breakdown?.[key as keyof typeof scoreData.breakdown] ?? 0;
               return (
-                <div key={key} className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-2">
-                      <Icon className="w-4 h-4 text-muted-foreground" />
-                      {label}
-                    </span>
-                    <span className={getScoreColor(score)}>{score}%</span>
-                  </div>
-                  <Progress value={score} className={`h-2 [&>div]:${getScoreBg(score)}`} />
+                <div key={key} className="text-center p-2 rounded-lg bg-muted/30">
+                  <Icon className={`w-4 h-4 mx-auto mb-1 ${getScoreColor(score)}`} />
+                  <div className={`text-sm font-semibold ${getScoreColor(score)}`}>{score}</div>
+                  <div className="text-[10px] text-muted-foreground truncate">{label}</div>
                 </div>
               );
             })}
           </div>
         )}
 
-        {/* Strengths */}
-        {scoreData.strengths?.length > 0 && (
-          <div>
-            <h4 className="text-sm font-medium mb-2 text-green-600">Strengths</h4>
-            <div className="flex flex-wrap gap-2">
-              {scoreData.strengths.map((strength, i) => (
-                <Badge key={i} variant="secondary" className="bg-green-500/10 text-green-600">
-                  {strength}
-                </Badge>
-              ))}
-            </div>
+        {/* Key Insights - 1 Strength + 1 Concern */}
+        {(firstStrength || firstConcern) && (
+          <div className="space-y-2">
+            {firstStrength && (
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-green-500/5 border border-green-500/10">
+                <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                  <TrendingUp className="w-4 h-4 text-green-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-green-600 mb-0.5">Strength</p>
+                  <p className="text-sm text-foreground">{firstStrength}</p>
+                </div>
+              </div>
+            )}
+            {firstConcern && (
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-amber-600 mb-0.5">Watch for</p>
+                  <p className="text-sm text-foreground">{firstConcern}</p>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Concerns */}
-        {scoreData.concerns?.length > 0 && (
-          <div>
-            <h4 className="text-sm font-medium mb-2 text-orange-600">Areas to Watch</h4>
-            <div className="flex flex-wrap gap-2">
-              {scoreData.concerns.map((concern, i) => (
-                <Badge key={i} variant="secondary" className="bg-orange-500/10 text-orange-600">
-                  {concern}
-                </Badge>
+        {/* Collapsible More Insights */}
+        {hasMoreInsights && (
+          <Collapsible open={showAllInsights} onOpenChange={setShowAllInsights}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground hover:text-foreground">
+                <ChevronDown className={`w-4 h-4 mr-1 transition-transform ${showAllInsights ? "rotate-180" : ""}`} />
+                {showAllInsights ? "Show less" : `${remainingStrengths.length + remainingConcerns.length} more insights`}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-2 pt-2">
+              {remainingStrengths.map((strength, i) => (
+                <div key={`s-${i}`} className="flex items-start gap-3 p-3 rounded-xl bg-green-500/5 border border-green-500/10">
+                  <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                    <TrendingUp className="w-4 h-4 text-green-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-green-600 mb-0.5">Strength</p>
+                    <p className="text-sm text-foreground">{strength}</p>
+                  </div>
+                </div>
               ))}
-            </div>
-          </div>
+              {remainingConcerns.map((concern, i) => (
+                <div key={`c-${i}`} className="flex items-start gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                    <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-amber-600 mb-0.5">Watch for</p>
+                    <p className="text-sm text-foreground">{concern}</p>
+                  </div>
+                </div>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
         )}
 
-        {/* Advice with Accept/Decline */}
+        {/* AI Advice */}
         {scoreData.advice && (
-          <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
-            <div className="flex items-start gap-2 mb-3">
-              <Lightbulb className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-sm font-medium">AI Advice</h4>
-                <p className="text-sm text-muted-foreground mt-1">{scoreData.advice}</p>
+          <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/10">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <Lightbulb className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-medium text-primary mb-1">AI Advice</p>
+                <p className="text-sm text-foreground">{scoreData.advice}</p>
               </div>
             </div>
             
             {adviceResponse ? (
-              <div className={`text-sm px-3 py-2 rounded-md ${
+              <div className={`text-sm px-3 py-2 rounded-lg ${
                 adviceResponse.response === "accepted" 
                   ? "bg-green-500/10 text-green-600" 
                   : "bg-muted text-muted-foreground"
@@ -355,8 +410,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
               <div className="flex gap-2">
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="flex-1 border-green-500/30 text-green-600 hover:bg-green-500/10"
+                  className="flex-1 bg-green-600 hover:bg-green-700"
                   onClick={() => respondToAdvice(true)}
                   disabled={respondingToAdvice}
                 >
@@ -379,13 +433,13 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
         )}
 
         {candidate.last_score_update && (
-          <p className="text-xs text-muted-foreground text-center">
-            Last updated: {new Date(candidate.last_score_update).toLocaleDateString()}
+          <p className="text-[10px] text-muted-foreground text-center">
+            Updated {new Date(candidate.last_score_update).toLocaleDateString()}
           </p>
         )}
       </CardContent>
 
-      {/* No Contact Confirmation Dialog */}
+      {/* No Contact Dialog */}
       <AlertDialog open={showNoContactDialog} onOpenChange={setShowNoContactDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -395,7 +449,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-2">
               <p>The advice suggests creating distance from {candidate.nickname}.</p>
-              <p>Would you like to start a 30-day No Contact journey? You'll get daily support messages and progress tracking.</p>
+              <p>Would you like to start a 30-day No Contact journey?</p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -403,7 +457,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
               Accept Advice Only
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleStartNoContact}>
-              Start No Contact Mode
+              Start No Contact
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
