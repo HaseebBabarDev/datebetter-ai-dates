@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { OnboardingLayout } from "../OnboardingLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +17,26 @@ import {
 } from "@/components/ui/dialog";
 
 const WelcomeScreen = () => {
+  const { user } = useAuth();
+  const [userName, setUserName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from("profiles")
+        .select("name")
+        .eq("user_id", user.id)
+        .single();
+      
+      if (data?.name) {
+        setUserName(data.name);
+      }
+    };
+    
+    fetchUserName();
+  }, [user]);
   const { data, updateData, nextStep } = useOnboarding();
   const [showAgeGate, setShowAgeGate] = useState(false);
   
@@ -57,7 +79,7 @@ const WelcomeScreen = () => {
       showProgress={false}
       showBack={false}
       headerGradient
-      title="Welcome to dateBetter"
+      title={userName ? `Welcome, ${userName}!` : "Welcome to dateBetter"}
       subtitle="Your dating journey starts here"
     >
       <div className="space-y-8 animate-fade-in">
