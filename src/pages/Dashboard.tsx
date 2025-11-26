@@ -115,32 +115,36 @@ const Dashboard = () => {
 
     if (dayInCycle <= 5) {
       phase = "Menstrual Phase";
-      warning = "Energy may be lower — be gentle with yourself";
+      warning = "Energy may be lower — be gentle with yourself. Estrogen rising.";
       icon = <Droplet className="w-4 h-4" />;
     } else if (dayInCycle >= ovulationDay - 2 && dayInCycle <= ovulationDay + 2) {
       phase = "Ovulation Window";
-      warning = "Hormones peak — attraction feelings may be heightened. Make decisions carefully!";
+      warning = "Peak fertility & attraction hormones. You may feel more drawn to masculine traits. Make decisions with your head, not just heart!";
       icon = <Flame className="w-4 h-4" />;
     } else if (dayInCycle > ovulationDay + 2 && dayInCycle < cycleLength - 5) {
       phase = "Luteal Phase";
-      warning = "PMS territory — emotions may be more intense";
+      warning = "Progesterone rising — you may crave comfort and security. Emotions can feel more intense.";
       icon = <AlertTriangle className="w-4 h-4" />;
     }
 
     return phase ? { phase, warning, icon, dayInCycle } : null;
   }, [profile]);
 
-  // Check for post-intimacy oxytocin alerts
+  // Check for post-intimacy oxytocin alerts - bonding hormone peaks then drops
   const oxytocinAlerts = useMemo(() => {
-    const alerts: { candidate: Candidate; daysSince: number }[] = [];
+    const alerts: { candidate: Candidate; daysSince: number; phase: string }[] = [];
     const intimateInteractions = interactions.filter((i) => i.interaction_type === "intimate");
 
     intimateInteractions.forEach((interaction) => {
       const daysSince = differenceInDays(new Date(), new Date(interaction.interaction_date || ""));
-      if (daysSince <= 3) {
+      if (daysSince <= 5) {
         const candidate = candidates.find((c) => c.id === interaction.candidate_id);
         if (candidate && !alerts.find((a) => a.candidate.id === candidate.id)) {
-          alerts.push({ candidate, daysSince });
+          let phase = "";
+          if (daysSince === 0) phase = "Oxytocin peaked — bonding feelings strongest";
+          else if (daysSince <= 2) phase = "Oxytocin still elevated — attachment feelings high";
+          else phase = "Oxytocin dropping — you may feel more clear-headed now";
+          alerts.push({ candidate, daysSince, phase });
         }
       }
     });
@@ -276,8 +280,9 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-4 max-w-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">{greeting}</p>
-              <h1 className="text-xl font-semibold text-foreground">{profile?.name || "there"}</h1>
+              <h1 className="text-xl font-semibold text-foreground">
+                {greeting} {profile?.name || "Beautiful"}
+              </h1>
             </div>
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" className="relative text-foreground hover:bg-primary/10" onClick={() => navigate("/notifications")}>
@@ -350,14 +355,14 @@ const Dashboard = () => {
                 });
               }
 
-              // Oxytocin Alerts
-              oxytocinAlerts.forEach(({ candidate, daysSince }) => {
+              // Oxytocin Alerts - bonding hormone high after intimacy
+              oxytocinAlerts.forEach(({ candidate, daysSince, phase }) => {
                 alerts.push({
                   key: `oxy-${candidate.id}`,
                   icon: <Flame className="w-3 h-3" />,
-                  label: candidate.nickname,
-                  sub: daysSince === 0 ? "Today" : `${daysSince}d`,
-                  color: "bg-destructive/20 text-destructive border-destructive/30",
+                  label: `${candidate.nickname}`,
+                  sub: daysSince <= 2 ? "🔥 Bonding high" : "Clearing",
+                  color: daysSince <= 2 ? "bg-pink-500/20 text-pink-600 border-pink-500/30" : "bg-amber-500/20 text-amber-600 border-amber-500/30",
                   onClick: () => navigate(`/candidate/${candidate.id}`),
                 });
               });
