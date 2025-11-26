@@ -81,9 +81,9 @@ serve(async (req) => {
     const baseScores = calculateBaseScores(profile, candidate);
 
     // Build the prompt for AI analysis
-    const prompt = `You are a relationship compatibility analyst. Analyze the compatibility between a user and their dating candidate.
+    const prompt = `You are a relationship compatibility analyst. Analyze the compatibility between the person using this app and their dating candidate. Always address them as "you" not "user".
 
-USER PROFILE:
+YOUR PROFILE:
 - Location: ${profile.city || "Not specified"}, ${profile.state || ""}, ${profile.country || "Not specified"}
 - Relationship Status: ${profile.relationship_status || "Not specified"}
 - Relationship Goal: ${profile.relationship_goal || "Not specified"}
@@ -103,10 +103,10 @@ USER PROFILE:
 - Schedule Flexibility: ${profile.schedule_flexibility || "Not specified"}
 - Distance Preference: ${profile.distance_preference || "Not specified"}
 
-CANDIDATE PROFILE:
+CANDIDATE PROFILE (${candidate.nickname}):
 - Name: ${candidate.nickname}
 - Location: ${candidate.city || "Not specified"}, ${candidate.country || "Not specified"}
-- Distance from User: ${candidate.distance_approximation || "Not specified"}
+- Distance from you: ${candidate.distance_approximation || "Not specified"}
 - Relationship Status: ${candidate.their_relationship_status || "Not specified"}
 - Relationship Goal: ${candidate.their_relationship_goal || "Not specified"}
 - Religion: ${candidate.their_religion || "Not specified"}
@@ -141,9 +141,11 @@ BASE COMPATIBILITY SCORES (calculated from profile matching):
 IMPORTANT: Use the base scores as your foundation. You may adjust them by UP TO 15 points based on interaction history insights, but maintain consistency with the calculated base. Negative interactions should reduce scores, positive ones can slightly increase them. 
 
 Consider these factors when adjusting lifestyle scores:
-- Distance/location compatibility (same_city is best, long_distance reduces score if user prefers nearby)
+- Distance/location compatibility (same_city is best, long_distance reduces score if they prefer nearby)
 - Schedule flexibility compatibility (remote_flexible pairs well with most, office_9_5 and overnight may conflict)
-- Activity level and lifestyle compatibility`;
+- Activity level and lifestyle compatibility
+
+CRITICAL: In all output text (strengths, concerns, advice), always use "you" and "your" instead of "user" or "the user". Speak directly to the person.`;
 
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -194,7 +196,7 @@ Consider these factors when adjusting lifestyle scores:
                   },
                   advice: {
                     type: "string",
-                    description: "Brief personalized advice for the user"
+                    description: "Brief personalized advice addressing the person directly as 'you'"
                   }
                 },
                 required: ["overall_score", "breakdown", "strengths", "concerns", "advice"]
