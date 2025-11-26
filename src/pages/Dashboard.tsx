@@ -34,6 +34,7 @@ import {
   Bell,
   XCircle,
   RefreshCw,
+  Lightbulb,
 } from "lucide-react";
 import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
@@ -48,10 +49,16 @@ type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
 
 type RecentActivityItem = {
-  type: "matched" | "interacted" | "ended" | "no_contact";
-  candidate: Candidate;
+  type: "matched" | "interacted" | "ended" | "no_contact" | "notification";
+  candidate?: Candidate;
   interaction?: Interaction;
   date: Date;
+  notification?: {
+    notifType: "oxytocin" | "red_flags" | "high_match" | "low_match" | "stale" | "advice";
+    title: string;
+    message: string;
+    icon: "flame" | "alert" | "heart" | "trending" | "clock" | "lightbulb";
+  };
 };
 
 interface CandidateRecap {
@@ -482,10 +489,108 @@ const Dashboard = () => {
         }
       });
 
-    // Sort by date and take top 5
+    // Add notification items
+    const today = new Date();
+
+    // Oxytocin alerts (recent intimacy)
+    interactions
+      .filter((i) => i.interaction_type === "intimate")
+      .forEach((interaction) => {
+        const daysSince = differenceInDays(today, new Date(interaction.interaction_date || ""));
+        if (daysSince <= 3) {
+          const candidate = candidates.find((c) => c.id === interaction.candidate_id);
+          if (candidate) {
+            activityItems.push({
+              type: "notification",
+              candidate,
+              date: new Date(interaction.interaction_date || ""),
+              notification: {
+                notifType: "oxytocin",
+                title: "Oxytocin active",
+                message: `${candidate.nickname} — hormones affect judgment for 48-72hrs`,
+                icon: "flame",
+              },
+            });
+          }
+        }
+      });
+
+    // Red flag alerts
+    candidates.forEach((c) => {
+      const flags = c.red_flags as unknown[];
+      if (Array.isArray(flags) && flags.length >= 2 && c.status !== "archived" && c.status !== "no_contact") {
+        activityItems.push({
+          type: "notification",
+          candidate: c,
+          date: new Date(c.updated_at || c.created_at || ""),
+          notification: {
+            notifType: "red_flags",
+            title: `${flags.length} red flags`,
+            message: `${c.nickname} — Review concerns before proceeding`,
+            icon: "alert",
+          },
+        });
+      }
+    });
+
+    // High compatibility alerts
+    candidates
+      .filter((c) => c.compatibility_score && c.compatibility_score >= 80 && c.status !== "archived" && c.status !== "no_contact")
+      .forEach((c) => {
+        activityItems.push({
+          type: "notification",
+          candidate: c,
+          date: new Date(c.last_score_update || c.updated_at || c.created_at || ""),
+          notification: {
+            notifType: "high_match",
+            title: `${c.compatibility_score}% compatible`,
+            message: `${c.nickname} — High potential match!`,
+            icon: "heart",
+          },
+        });
+      });
+
+    // Low compatibility alerts
+    candidates
+      .filter((c) => c.compatibility_score && c.compatibility_score < 35 && !c.no_contact_active && c.status !== "archived")
+      .forEach((c) => {
+        activityItems.push({
+          type: "notification",
+          candidate: c,
+          date: new Date(c.last_score_update || c.updated_at || c.created_at || ""),
+          notification: {
+            notifType: "low_match",
+            title: `${c.compatibility_score}% compatibility`,
+            message: `${c.nickname} — Consider starting No Contact`,
+            icon: "trending",
+          },
+        });
+      });
+
+    // Stale candidates (no updates in 7+ days)
+    candidates.forEach((c) => {
+      if (c.updated_at && c.status !== "archived" && c.status !== "no_contact") {
+        const daysSince = differenceInDays(today, new Date(c.updated_at));
+        if (daysSince > 7) {
+          activityItems.push({
+            type: "notification",
+            candidate: c,
+            date: new Date(c.updated_at),
+            notification: {
+              notifType: "stale",
+              title: `No updates in ${daysSince} days`,
+              message: `${c.nickname} — Time to check in?`,
+              icon: "clock",
+            },
+          });
+        }
+      }
+    });
+
+    // Sort by date and take top 8 (increased to show more items)
     const recentActivity = activityItems
       .sort((a, b) => b.date.getTime() - a.date.getTime())
-      .slice(0, 5);
+      .slice(0, 8);
 
     // Categorize by compatibility/feeling
     const goodCandidates = activeCandidates.filter(
@@ -931,6 +1036,48 @@ const Dashboard = () => {
                             End NC
                           </Button>
                         </div>
+                      );
+                    }
+
+                    if (item.type === "notification" && item.notification && item.candidate) {
+                      const getNotifStyles = () => {
+                        switch (item.notification!.notifType) {
+                          case "oxytocin": return { bg: "bg-pink-500/10 hover:bg-pink-500/20", iconBg: "bg-pink-500/20", text: "text-pink-600" };
+                          case "red_flags": return { bg: "bg-amber-500/10 hover:bg-amber-500/20", iconBg: "bg-amber-500/20", text: "text-amber-600" };
+                          case "high_match": return { bg: "bg-emerald-500/10 hover:bg-emerald-500/20", iconBg: "bg-emerald-500/20", text: "text-emerald-600" };
+                          case "low_match": return { bg: "bg-orange-500/10 hover:bg-orange-500/20", iconBg: "bg-orange-500/20", text: "text-orange-600" };
+                          case "stale": return { bg: "bg-slate-500/10 hover:bg-slate-500/20", iconBg: "bg-slate-500/20", text: "text-slate-600" };
+                          case "advice": return { bg: "bg-purple-500/10 hover:bg-purple-500/20", iconBg: "bg-purple-500/20", text: "text-purple-600" };
+                          default: return { bg: "bg-primary/10 hover:bg-primary/20", iconBg: "bg-primary/20", text: "text-primary" };
+                        }
+                      };
+                      const getNotifIcon = () => {
+                        switch (item.notification!.icon) {
+                          case "flame": return <Flame className="w-4 h-4" />;
+                          case "alert": return <AlertTriangle className="w-4 h-4" />;
+                          case "heart": return <Heart className="w-4 h-4" />;
+                          case "trending": return <TrendingUp className="w-4 h-4" />;
+                          case "clock": return <Clock className="w-4 h-4" />;
+                          case "lightbulb": return <Lightbulb className="w-4 h-4" />;
+                          default: return <Bell className="w-4 h-4" />;
+                        }
+                      };
+                      const styles = getNotifStyles();
+                      return (
+                        <button
+                          key={`notif-${item.notification.notifType}-${item.candidate.id}-${idx}`}
+                          onClick={() => navigate(`/candidate/${item.candidate!.id}`)}
+                          className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors ${styles.bg}`}
+                        >
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${styles.iconBg} ${styles.text}`}>
+                            {getNotifIcon()}
+                          </div>
+                          <div className="flex-1 text-left">
+                            <p className={`text-sm font-medium ${styles.text}`}>{item.notification.title}</p>
+                            <p className="text-xs text-muted-foreground truncate">{item.notification.message}</p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </button>
                       );
                     }
 
