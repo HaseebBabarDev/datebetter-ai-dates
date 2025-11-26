@@ -59,8 +59,26 @@ serve(async (req) => {
       throw new Error("Candidate not found");
     }
 
+    // Fetch recent interactions for context
+    const { data: interactions } = await supabase
+      .from("interactions")
+      .select("*")
+      .eq("candidate_id", candidateId)
+      .eq("user_id", user.id)
+      .order("interaction_date", { ascending: false })
+      .limit(10);
+
+    // Build interaction summary for the prompt
+    let interactionSummary = "No interactions logged yet.";
+    if (interactions && interactions.length > 0) {
+      const interactionDetails = interactions.map((i: any) => 
+        `- ${i.interaction_date}: ${i.interaction_type}${i.duration ? ` (${i.duration})` : ''} - Feeling: ${i.overall_feeling}/5${i.gut_feeling ? `, Gut: "${i.gut_feeling}"` : ''}${i.notes ? ` - Notes: "${i.notes}"` : ''}`
+      ).join("\n");
+      interactionSummary = `${interactions.length} interactions logged:\n${interactionDetails}`;
+    }
+
     // Build the prompt for AI analysis
-    const prompt = `You are a relationship compatibility analyst. Analyze the compatibility between a user and their dating candidate based on the following profiles.
+    const prompt = `You are a relationship compatibility analyst. Analyze the compatibility between a user and their dating candidate based on the following profiles and interaction history.
 
 USER PROFILE:
 - Relationship Goal: ${profile.relationship_goal || "Not specified"}
@@ -91,6 +109,11 @@ CHEMISTRY RATINGS (1-5):
 - Energy Match: ${candidate.energy_match || 3}
 - Overall Chemistry: ${candidate.overall_chemistry || 3}
 
+INTERACTION HISTORY (most recent first):
+${interactionSummary}
+
+Consider the interaction history carefully - low feelings, uncertainty, and notes about concerning behavior should significantly impact the compatibility score and concerns.
+
 Provide a compatibility analysis with the following JSON structure:
 {
   "overall_score": <number 0-100>,
@@ -103,7 +126,7 @@ Provide a compatibility analysis with the following JSON structure:
   },
   "strengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
   "concerns": ["<concern 1>", "<concern 2>"],
-  "advice": "<brief personalized advice>"
+  "advice": "<brief personalized advice based on both profiles and recent interactions>"
 }
 
 Only respond with valid JSON, no additional text.`;
