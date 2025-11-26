@@ -24,7 +24,7 @@ type Interaction = Tables<"interactions">;
 
 interface Notification {
   id: string;
-  type: "warning" | "info" | "success" | "urgent" | "advice" | "oxytocin" | "no-contact";
+  type: "warning" | "info" | "success" | "urgent" | "advice" | "oxytocin" | "no-contact" | "low-score";
   icon: React.ReactNode;
   title: string;
   message: string;
@@ -140,6 +140,18 @@ const Notifications = () => {
       });
     });
 
+    // Low compatibility - suggest no contact
+    candidates.filter((c) => c.compatibility_score && c.compatibility_score < 35 && !c.no_contact_active && c.status !== "archived").forEach((c) => {
+      notifs.push({
+        id: `low-score-${c.id}`,
+        type: "low-score",
+        icon: <TrendingUp className="w-4 h-4" />,
+        title: `${c.compatibility_score}% compatibility`,
+        message: `${c.nickname} — Consider starting No Contact`,
+        candidateId: c.id,
+      });
+    });
+
     // Stale candidates
     candidates.forEach((c) => {
       if (c.updated_at && c.status !== "archived" && c.status !== "no_contact") {
@@ -186,6 +198,8 @@ const Notifications = () => {
         return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
       case "urgent":
         return "bg-destructive/10 text-destructive border-destructive/20";
+      case "low-score":
+        return "bg-orange-500/10 text-orange-600 border-orange-500/20";
       default:
         return "bg-primary/10 text-primary border-primary/20";
     }
@@ -199,6 +213,7 @@ const Notifications = () => {
       case "warning": return "bg-amber-500/20";
       case "success": return "bg-emerald-500/20";
       case "urgent": return "bg-destructive/20";
+      case "low-score": return "bg-orange-500/20";
       default: return "bg-primary/20";
     }
   };
