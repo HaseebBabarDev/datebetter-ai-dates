@@ -70,14 +70,16 @@ const RelationshipGoalsScreen = () => {
         <div className="space-y-4 p-4 rounded-xl bg-muted/50 border border-border">
           <h3 className="font-medium">Non-Negotiables</h3>
           
-          <div className="flex items-center justify-between">
-            <Label htmlFor="monogamy">Monogamy is absolutely required</Label>
-            <Switch
-              id="monogamy"
-              checked={data.monogamyRequired}
-              onCheckedChange={(checked) => updateData({ monogamyRequired: checked })}
-            />
-          </div>
+          {data.relationshipStructure === "monogamous" && (
+            <div className="flex items-center justify-between">
+              <Label htmlFor="monogamy">Monogamy is absolutely required</Label>
+              <Switch
+                id="monogamy"
+                checked={data.monogamyRequired}
+                onCheckedChange={(checked) => updateData({ monogamyRequired: checked })}
+              />
+            </div>
+          )}
           
           <div className="flex items-center justify-between">
             <Label htmlFor="exclusivity">I need exclusivity before intimacy</Label>
