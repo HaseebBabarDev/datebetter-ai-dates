@@ -127,7 +127,7 @@ const OnboardingContext = createContext<OnboardingContextType | undefined>(undef
 export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [data, setData] = useState<OnboardingData>({});
   const [currentStep, setCurrentStep] = useState(0);
-  const totalSteps = 16; // 0-15
+  const totalSteps = 17; // 0-16
 
   const updateData = useCallback((updates: Partial<OnboardingData>) => {
     setData(prev => ({ ...prev, ...updates }));
@@ -158,11 +158,12 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
       case 8: return !!data.politics;
       case 9: return !!data.careerStage;
       case 10: return !!data.distancePreference;
-      case 11: return (data.attractionImportance ?? 0) > 0;
-      case 12: return !!data.communicationStyle;
-      case 13: return !!data.attachmentStyle;
-      case 14: return (data.dealbreakers?.length ?? 0) > 0;
-      case 15: return !!data.intimacyComfort;
+      case 11: return true; // Social/Activity optional
+      case 12: return (data.attractionImportance ?? 0) > 0;
+      case 13: return !!data.communicationStyle;
+      case 14: return !!data.attachmentStyle;
+      case 15: return (data.dealbreakers?.length ?? 0) > 0;
+      case 16: return !!data.intimacyComfort;
       default: return false;
     }
   }, [data]);
