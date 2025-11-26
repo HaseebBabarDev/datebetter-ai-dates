@@ -269,23 +269,25 @@ const Dashboard = () => {
           </TabsList>
 
           <TabsContent value="home" className="space-y-4 mt-0">
-            {/* Quick Actions - 3 CTAs */}
-            <div className="grid grid-cols-3 gap-2">
-              <Button
-                onClick={() => navigate("/add-candidate")}
-                className="w-full bg-primary hover:bg-primary/90 flex-col h-auto py-3"
-              >
-                <Plus className="w-5 h-5 mb-1" />
-                <span className="text-xs">Add</span>
-              </Button>
-              <LogInteractionDialog candidates={candidates} compact />
+            {/* Quick Actions */}
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  onClick={() => navigate("/add-candidate")}
+                  className="w-full bg-primary hover:bg-primary/90 h-12 gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span className="text-sm font-medium">Add Candidate</span>
+                </Button>
+                <LogInteractionDialog candidates={candidates} compact />
+              </div>
               <Button
                 variant="outline"
                 onClick={() => navigate("/patterns")}
-                className="w-full flex-col h-auto py-3"
+                className="w-full h-10 gap-2"
               >
-                <TrendingUp className="w-5 h-5 mb-1" />
-                <span className="text-xs">Patterns</span>
+                <TrendingUp className="w-4 h-4" />
+                <span className="text-sm">View Patterns</span>
               </Button>
             </div>
 
@@ -297,19 +299,19 @@ const Dashboard = () => {
               if (profile?.track_cycle && !profile?.last_period_date) {
                 alerts.push(
                   <CarouselItem key="cycle-setup">
-                    <Card className="border-primary/30 bg-primary/5">
-                      <CardContent className="py-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
-                            <Droplet className="w-4 h-4" />
+                    <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl overflow-hidden">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                            <Droplet className="w-5 h-5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm">Set Up Cycle Tracking</p>
-                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                            <p className="font-semibold text-sm">Set Up Cycle Tracking</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
                               Add your last period date for hormone-aware insights.
                             </p>
                           </div>
-                          <Button size="sm" variant="outline" onClick={() => navigate("/settings")}>
+                          <Button size="sm" onClick={() => navigate("/settings")}>
                             Setup
                           </Button>
                         </div>
@@ -323,15 +325,15 @@ const Dashboard = () => {
               if (cycleAlerts) {
                 alerts.push(
                   <CarouselItem key="cycle-alert">
-                    <Card className="border-amber-500/30 bg-amber-500/5">
-                      <CardContent className="py-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-600 shrink-0">
+                    <Card className="border-amber-500/20 bg-gradient-to-r from-amber-500/5 to-amber-500/10 rounded-xl overflow-hidden">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-600 shrink-0">
                             {cycleAlerts.icon}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm">{cycleAlerts.phase} (Day {cycleAlerts.dayInCycle})</p>
-                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{cycleAlerts.warning}</p>
+                            <p className="font-semibold text-sm">{cycleAlerts.phase} (Day {cycleAlerts.dayInCycle})</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{cycleAlerts.warning}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -344,17 +346,17 @@ const Dashboard = () => {
               oxytocinAlerts.forEach(({ candidate, daysSince }) => {
                 alerts.push(
                   <CarouselItem key={`oxy-${candidate.id}`}>
-                    <Card className="border-pink-500/30 bg-pink-500/5">
-                      <CardContent className="py-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-600 shrink-0">
-                            <Flame className="w-4 h-4" />
+                    <Card className="border-pink-500/20 bg-gradient-to-r from-pink-500/5 to-pink-500/10 rounded-xl overflow-hidden">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center text-pink-600 shrink-0">
+                            <Flame className="w-5 h-5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm text-pink-700 dark:text-pink-400">
-                              🧠 Oxytocin: {candidate.nickname}
+                            <p className="font-semibold text-sm text-pink-700 dark:text-pink-400">
+                              Oxytocin Alert: {candidate.nickname}
                             </p>
-                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                            <p className="text-xs text-muted-foreground mt-0.5">
                               {daysSince === 0 ? "Today" : `${daysSince}d ago`} — hormones active 48-72hrs
                             </p>
                           </div>
@@ -362,7 +364,6 @@ const Dashboard = () => {
                             size="sm" 
                             variant="ghost" 
                             onClick={() => navigate(`/candidate/${candidate.id}`)}
-                            className="text-xs shrink-0"
                           >
                             View
                           </Button>
@@ -377,15 +378,15 @@ const Dashboard = () => {
               candidates.filter(c => c.no_contact_active).forEach((candidate) => {
                 alerts.push(
                   <CarouselItem key={`nc-${candidate.id}`}>
-                    <Card className="border-slate-500/30 bg-slate-500/5">
-                      <CardContent className="py-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-500/20 flex items-center justify-center text-slate-600 shrink-0">
-                            <Ban className="w-4 h-4" />
+                    <Card className="border-slate-500/20 bg-gradient-to-r from-slate-500/5 to-slate-500/10 rounded-xl overflow-hidden">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-lg bg-slate-500/20 flex items-center justify-center text-slate-600 shrink-0">
+                            <Ban className="w-5 h-5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm">
-                              🚫 NC: {candidate.nickname}
+                            <p className="font-semibold text-sm">
+                              No Contact: {candidate.nickname}
                             </p>
                             <p className="text-xs text-muted-foreground mt-0.5">
                               Day {candidate.no_contact_day || 0} — Stay strong!
@@ -395,7 +396,6 @@ const Dashboard = () => {
                             size="sm" 
                             variant="ghost" 
                             onClick={() => navigate(`/candidate/${candidate.id}`)}
-                            className="text-xs shrink-0"
                           >
                             View
                           </Button>
