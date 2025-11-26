@@ -33,6 +33,11 @@ const WelcomeScreen = () => {
       
       if (data?.name) {
         setUserName(data.name);
+      } else if (user.email) {
+        // Use email username as fallback
+        const emailName = user.email.split("@")[0];
+        // Capitalize first letter
+        setUserName(emailName.charAt(0).toUpperCase() + emailName.slice(1));
       }
     };
     
