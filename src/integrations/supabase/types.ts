@@ -349,6 +349,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          activity_level: string | null
           ambition_level: number | null
           attachment_style:
             | Database["public"]["Enums"]["attachment_style"]
@@ -356,6 +357,7 @@ export type Database = {
           attraction_importance: number | null
           behavioral_monitoring: number | null
           birth_date: string | null
+          body_type: string | null
           boundary_strength: number | null
           career_stage: string | null
           chemistry_factors: Json | null
@@ -383,6 +385,7 @@ export type Database = {
           financial_vulnerability: number | null
           flexibility_rating: number | null
           gender_identity: Database["public"]["Enums"]["gender_identity"] | null
+          height: string | null
           height_preference: string | null
           hormone_profile: string | null
           id: string
@@ -441,6 +444,7 @@ export type Database = {
           work_schedule_type: string | null
         }
         Insert: {
+          activity_level?: string | null
           ambition_level?: number | null
           attachment_style?:
             | Database["public"]["Enums"]["attachment_style"]
@@ -448,6 +452,7 @@ export type Database = {
           attraction_importance?: number | null
           behavioral_monitoring?: number | null
           birth_date?: string | null
+          body_type?: string | null
           boundary_strength?: number | null
           career_stage?: string | null
           chemistry_factors?: Json | null
@@ -477,6 +482,7 @@ export type Database = {
           gender_identity?:
             | Database["public"]["Enums"]["gender_identity"]
             | null
+          height?: string | null
           height_preference?: string | null
           hormone_profile?: string | null
           id?: string
@@ -535,6 +541,7 @@ export type Database = {
           work_schedule_type?: string | null
         }
         Update: {
+          activity_level?: string | null
           ambition_level?: number | null
           attachment_style?:
             | Database["public"]["Enums"]["attachment_style"]
@@ -542,6 +549,7 @@ export type Database = {
           attraction_importance?: number | null
           behavioral_monitoring?: number | null
           birth_date?: string | null
+          body_type?: string | null
           boundary_strength?: number | null
           career_stage?: string | null
           chemistry_factors?: Json | null
@@ -571,6 +579,7 @@ export type Database = {
           gender_identity?:
             | Database["public"]["Enums"]["gender_identity"]
             | null
+          height?: string | null
           height_preference?: string | null
           hormone_profile?: string | null
           id?: string

@@ -93,6 +93,11 @@ USER PROFILE:
 - Ambition Level: ${profile.ambition_level || 3}/5
 - Dealbreakers: ${JSON.stringify(profile.dealbreakers || [])}
 - Communication Style: ${profile.communication_style || "Not specified"}
+- Height: ${profile.height || "Not specified"}
+- Body Type: ${profile.body_type || "Not specified"}
+- Activity Level: ${profile.activity_level || "Not specified"}
+- Education Level: ${profile.education_level || "Not specified"}
+- Height Preference for partner: ${profile.height_preference || "No preference"}
 
 CANDIDATE PROFILE:
 - Name: ${candidate.nickname}
@@ -104,6 +109,8 @@ CANDIDATE PROFILE:
 - Attachment Style: ${candidate.their_attachment_style || "Not specified"}
 - Ambition Level: ${candidate.their_ambition_level || "Not specified"}/5
 - Career Stage: ${candidate.their_career_stage || "Not specified"}
+- Education Level: ${candidate.their_education_level || "Not specified"}
+- Exercise Habits: ${candidate.their_exercise || "Not specified"}
 
 CHEMISTRY RATINGS (1-5):
 - Physical Attraction: ${candidate.physical_attraction || 3}
@@ -123,9 +130,8 @@ BASE COMPATIBILITY SCORES (calculated from profile matching):
 - Future Goals: ${baseScores.future_goals}
 - Base Overall: ${baseScores.overall_score}
 
-IMPORTANT: Use the base scores as your foundation. You may adjust them by UP TO 15 points based on interaction history insights, but maintain consistency with the calculated base. Negative interactions should reduce scores, positive ones can slightly increase them.
+IMPORTANT: Use the base scores as your foundation. You may adjust them by UP TO 15 points based on interaction history insights, but maintain consistency with the calculated base. Negative interactions should reduce scores, positive ones can slightly increase them. Consider activity level and lifestyle compatibility when adjusting lifestyle scores.`;
 
-Analyze the compatibility and provide strengths, concerns, and personalized advice.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -326,6 +332,34 @@ function calculateBaseScores(profile: any, candidate: any) {
       emotionalScore -= 25;
     } else if (userStyle === "avoidant" && candStyle === "anxious") {
       emotionalScore -= 25;
+    }
+  }
+  
+  // Activity level / lifestyle compatibility
+  if (profile.activity_level && candidate.their_exercise) {
+    const activityLevels = ["sedentary", "light", "moderate", "active", "very_active"];
+    const exerciseLevels = ["never", "rarely", "sometimes", "regularly", "daily"];
+    const userIdx = activityLevels.indexOf(profile.activity_level);
+    const candIdx = exerciseLevels.indexOf(candidate.their_exercise);
+    if (userIdx >= 0 && candIdx >= 0) {
+      const diff = Math.abs(userIdx - candIdx);
+      if (diff === 0) lifestyleScore += 20;
+      else if (diff === 1) lifestyleScore += 10;
+      else if (diff >= 3) lifestyleScore -= 15;
+    }
+  }
+  
+  // Education compatibility (if user cares about education)
+  if (profile.education_matters && profile.education_level && candidate.their_education_level) {
+    const educationOrder = ["high_school", "some_college", "associates", "trade_school", "bachelors", "masters", "doctorate"];
+    const userIdx = educationOrder.indexOf(profile.education_level);
+    const candIdx = educationOrder.indexOf(candidate.their_education_level);
+    if (userIdx >= 0 && candIdx >= 0) {
+      if (candIdx >= userIdx) {
+        lifestyleScore += 10;
+      } else if (userIdx - candIdx >= 2) {
+        lifestyleScore -= 10;
+      }
     }
   }
   
