@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar, Lock, AlertTriangle } from "lucide-react";
+import { Lock, Clock, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import welcomeBg from "@/assets/welcome-bg.jpeg";
 
 const WelcomeScreen = () => {
   const { user } = useAuth();
@@ -39,6 +40,7 @@ const WelcomeScreen = () => {
   }, [user]);
   const { data, updateData, nextStep } = useOnboarding();
   const [showAgeGate, setShowAgeGate] = useState(false);
+  const [showReminder, setShowReminder] = useState(true);
   
   const [month, setMonth] = useState("");
   const [day, setDay] = useState("");
@@ -75,20 +77,23 @@ const WelcomeScreen = () => {
   const isValid = month && day && year && year.length === 4 && data.ageConfirmed;
 
   return (
-    <OnboardingLayout
-      showProgress={false}
-      showBack={false}
-      headerGradient
-      title={userName ? `Welcome, ${userName}!` : "Welcome to dateBetter"}
-      subtitle="Your dating journey starts here"
-    >
-      <div className="space-y-8 animate-fade-in">
-        {/* Illustration placeholder */}
-        <div className="flex justify-center">
-          <div className="w-40 h-40 rounded-full bg-gradient-to-br from-primary-very-light to-secondary/20 flex items-center justify-center">
-            <div className="text-6xl">👩‍👩‍👧‍👦</div>
-          </div>
-        </div>
+    <div className="min-h-screen relative">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${welcomeBg})` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/90" />
+      </div>
+
+      <OnboardingLayout
+        showProgress={false}
+        showBack={false}
+        headerGradient
+        title={userName ? `Welcome, ${userName}!` : "Welcome to dateBetter"}
+        subtitle="Your dating journey starts here"
+      >
+        <div className="space-y-8 animate-fade-in relative z-10">
 
         {/* Age Verification */}
         <div className="space-y-4">
@@ -154,38 +159,61 @@ const WelcomeScreen = () => {
         </p>
 
         {/* Continue Button */}
-        <Button
-          onClick={handleContinue}
-          disabled={!isValid}
-          className="w-full"
-          size="lg"
-        >
-          Get Started
-        </Button>
-      </div>
-
-      {/* Age Gate Modal */}
-      <Dialog open={showAgeGate} onOpenChange={setShowAgeGate}>
-        <DialogContent className="border-alert border-2">
-          <DialogHeader>
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 rounded-full bg-alert flex items-center justify-center">
-                <Lock className="w-8 h-8 text-destructive" />
-              </div>
-            </div>
-            <DialogTitle className="text-center">
-              You must be 18+ to use dateBetter
-            </DialogTitle>
-            <DialogDescription className="text-center">
-              Come back when you're older! Dating apps require users to be 18 or older for safety reasons.
-            </DialogDescription>
-          </DialogHeader>
-          <Button onClick={() => window.close()} className="w-full">
-            I Understand
+          <Button
+            onClick={handleContinue}
+            disabled={!isValid}
+            className="w-full"
+            size="lg"
+          >
+            Get Started
           </Button>
-        </DialogContent>
-      </Dialog>
-    </OnboardingLayout>
+        </div>
+
+        {/* Age Gate Modal */}
+        <Dialog open={showAgeGate} onOpenChange={setShowAgeGate}>
+          <DialogContent className="border-alert border-2">
+            <DialogHeader>
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-alert flex items-center justify-center">
+                  <Lock className="w-8 h-8 text-destructive" />
+                </div>
+              </div>
+              <DialogTitle className="text-center">
+                You must be 18+ to use dateBetter
+              </DialogTitle>
+              <DialogDescription className="text-center">
+                Come back when you're older! Dating apps require users to be 18 or older for safety reasons.
+              </DialogDescription>
+            </DialogHeader>
+            <Button onClick={() => window.close()} className="w-full">
+              I Understand
+            </Button>
+          </DialogContent>
+        </Dialog>
+
+        {/* Intake Reminder Modal */}
+        <Dialog open={showReminder} onOpenChange={setShowReminder}>
+          <DialogContent className="border-primary/20">
+            <DialogHeader>
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Clock className="w-8 h-8 text-primary" />
+                </div>
+              </div>
+              <DialogTitle className="text-center">
+                Take Your Time
+              </DialogTitle>
+              <DialogDescription className="text-center text-base">
+                This intake questionnaire takes about 10-15 minutes to complete. Your thoughtful answers help us provide personalized guidance for your dating journey. It's worth taking the time to answer honestly.
+              </DialogDescription>
+            </DialogHeader>
+            <Button onClick={() => setShowReminder(false)} className="w-full">
+              I'm Ready to Begin
+            </Button>
+          </DialogContent>
+        </Dialog>
+      </OnboardingLayout>
+    </div>
   );
 };
 
