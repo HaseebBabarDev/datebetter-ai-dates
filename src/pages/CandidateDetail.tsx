@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, Heart } from "lucide-react";
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
 import { FlagsSection } from "@/components/candidate/FlagsSection";
@@ -248,13 +248,29 @@ const CandidateDetail = () => {
           </TabsContent>
 
           <TabsContent value="interactions" className="mt-4 space-y-4">
-            <AddInteractionForm
-              candidateId={candidate.id}
-              onSuccess={fetchData}
-              onRescore={handleRescore}
-              isNoContact={candidate.no_contact_active || false}
-              onBrokeContact={handleBrokeContact}
-            />
+            <div className="grid grid-cols-2 gap-2">
+              <AddInteractionForm
+                candidateId={candidate.id}
+                onSuccess={fetchData}
+                onRescore={handleRescore}
+                isNoContact={candidate.no_contact_active || false}
+                onBrokeContact={handleBrokeContact}
+              />
+              <AddInteractionForm
+                candidateId={candidate.id}
+                onSuccess={fetchData}
+                onRescore={handleRescore}
+                isNoContact={candidate.no_contact_active || false}
+                onBrokeContact={handleBrokeContact}
+                defaultType="intimate"
+                triggerButton={
+                  <Button variant="outline" className="w-full gap-2 border-pink-500/30 text-pink-600 hover:bg-pink-500/10">
+                    <Heart className="h-4 w-4" />
+                    Log Intimacy
+                  </Button>
+                }
+              />
+            </div>
             <InteractionHistory interactions={interactions} />
           </TabsContent>
 

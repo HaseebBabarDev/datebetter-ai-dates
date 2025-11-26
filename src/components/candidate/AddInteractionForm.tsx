@@ -41,6 +41,8 @@ interface AddInteractionFormProps {
   onRescore?: () => void;
   isNoContact?: boolean;
   onBrokeContact?: () => void;
+  defaultType?: Enums<"interaction_type">;
+  triggerButton?: React.ReactNode;
 }
 
 const INTERACTION_TYPES: { value: Enums<"interaction_type">; label: string; highlight?: boolean }[] = [
@@ -74,13 +76,15 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   onRescore,
   isNoContact = false,
   onBrokeContact,
+  defaultType = "coffee",
+  triggerButton,
 }) => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [showBrokeContactDialog, setShowBrokeContactDialog] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [interactionType, setInteractionType] = useState<Enums<"interaction_type">>("coffee");
+  const [interactionType, setInteractionType] = useState<Enums<"interaction_type">>(defaultType);
   const [interactionDate, setInteractionDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -142,11 +146,11 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
     }
   };
 
-  const handleOpenSheet = () => {
-    if (isNoContact) {
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen && isNoContact) {
       setShowBrokeContactDialog(true);
     } else {
-      setOpen(true);
+      setOpen(newOpen);
     }
   };
 
@@ -181,12 +185,14 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
         </AlertDialogContent>
       </AlertDialog>
 
-      <Sheet open={open} onOpenChange={setOpen}>
+      <Sheet open={open} onOpenChange={handleOpenChange}>
         <SheetTrigger asChild>
-          <Button className="w-full gap-2" onClick={handleOpenSheet}>
-            <Plus className="h-4 w-4" />
-            Log Interaction
-          </Button>
+          {triggerButton || (
+            <Button className="w-full gap-2">
+              <Plus className="h-4 w-4" />
+              Log Interaction
+            </Button>
+          )}
         </SheetTrigger>
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
