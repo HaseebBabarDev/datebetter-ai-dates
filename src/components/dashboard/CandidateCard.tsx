@@ -80,25 +80,45 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
   const navigate = useNavigate();
   const { user } = useAuth();
   const [userSchedule, setUserSchedule] = useState<string | null>(null);
+  const [daysSinceContact, setDaysSinceContact] = useState<number | null>(null);
   const status = statusConfig[candidate.status || "just_matched"];
   const redFlagCount = Array.isArray(candidate.red_flags) ? candidate.red_flags.length : 0;
   const greenFlagCount = Array.isArray(candidate.green_flags) ? candidate.green_flags.length : 0;
   const nextStep = getNextStep(candidate.status, candidate.updated_at);
 
   useEffect(() => {
-    const fetchUserSchedule = async () => {
+    const fetchData = async () => {
       if (!user) return;
-      const { data } = await supabase
+      
+      // Fetch user schedule
+      const { data: profileData } = await supabase
         .from("profiles")
         .select("schedule_flexibility")
         .eq("user_id", user.id)
         .single();
-      if (data) {
-        setUserSchedule(data.schedule_flexibility);
+      if (profileData) {
+        setUserSchedule(profileData.schedule_flexibility);
+      }
+
+      // Fetch latest interaction
+      const { data: interactionData } = await supabase
+        .from("interactions")
+        .select("interaction_date")
+        .eq("candidate_id", candidate.id)
+        .order("interaction_date", { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (interactionData?.interaction_date) {
+        const lastDate = new Date(interactionData.interaction_date);
+        const today = new Date();
+        const diffTime = today.getTime() - lastDate.getTime();
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        setDaysSinceContact(diffDays);
       }
     };
-    fetchUserSchedule();
-  }, [user]);
+    fetchData();
+  }, [user, candidate.id]);
 
   const handleClick = () => {
     navigate(`/candidate/${candidate.id}`);
@@ -178,10 +198,10 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
                 {redFlagCount}
               </span>
             )}
-            {candidate.no_contact_active && candidate.no_contact_day && (
-              <span className="flex items-center gap-1">
+            {daysSinceContact !== null && !candidate.no_contact_active && (
+              <span className={`flex items-center gap-1 ${daysSinceContact > 7 ? 'text-amber-600' : daysSinceContact > 14 ? 'text-destructive' : ''}`}>
                 <Clock className="w-3 h-3" />
-                Day {candidate.no_contact_day}
+                {daysSinceContact === 0 ? 'Today' : daysSinceContact === 1 ? '1 day ago' : `${daysSinceContact}d ago`}
               </span>
             )}
             {candidate.met_via && (
