@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { OnboardingLayout } from "../OnboardingLayout";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { PartyPopper } from "lucide-react";
 
 const careerOptions = [
   { value: "student", label: "Student" },
@@ -35,45 +42,63 @@ const educationOptions = [
 
 const CareerScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
-    toast.success("Halfway there! (8/17)", {
-      description: "You're making great progress",
-      duration: 3000,
-    });
+    const timer = setTimeout(() => setShowPopup(true), 300);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
-    <OnboardingLayout title="Career & Education" subtitle="Your professional life">
-      <div className="space-y-6 animate-fade-in">
-        <div className="space-y-3">
-          <Label>Career status:</Label>
-          {careerOptions.map((o) => (
-            <OptionCard key={o.value} selected={data.careerStage === o.value} onClick={() => updateData({ careerStage: o.value })} title={o.label} />
-          ))}
+    <>
+      <Dialog open={showPopup} onOpenChange={setShowPopup}>
+        <DialogContent className="sm:max-w-sm text-center">
+          <DialogHeader className="items-center">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+              <PartyPopper className="w-8 h-8 text-primary" />
+            </div>
+            <DialogTitle className="text-xl">Halfway there!</DialogTitle>
+            <DialogDescription className="text-base">
+              8/17 steps complete. You're making great progress!
+            </DialogDescription>
+          </DialogHeader>
+          <Button onClick={() => setShowPopup(false)} className="w-full mt-2">
+            Keep Going
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      <OnboardingLayout title="Career & Education" subtitle="Your professional life">
+        <div className="space-y-6 animate-fade-in">
+          <div className="space-y-3">
+            <Label>Career status:</Label>
+            {careerOptions.map((o) => (
+              <OptionCard key={o.value} selected={data.careerStage === o.value} onClick={() => updateData({ careerStage: o.value })} title={o.label} />
+            ))}
+          </div>
+          <div className="space-y-2">
+            <Label>Education level:</Label>
+            <Select
+              value={data.educationLevel}
+              onValueChange={(value) => updateData({ educationLevel: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select education level" />
+              </SelectTrigger>
+              <SelectContent>
+                {educationOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <SliderInput label="Your career ambition:" value={data.ambitionLevel || 3} onChange={(v) => updateData({ ambitionLevel: v })} min={1} max={5} leftLabel="Relaxed" rightLabel="Very driven" />
+          <Button onClick={nextStep} disabled={!data.careerStage} className="w-full" size="lg">Continue</Button>
         </div>
-        <div className="space-y-2">
-          <Label>Education level:</Label>
-          <Select
-            value={data.educationLevel}
-            onValueChange={(value) => updateData({ educationLevel: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select education level" />
-            </SelectTrigger>
-            <SelectContent>
-              {educationOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <SliderInput label="Your career ambition:" value={data.ambitionLevel || 3} onChange={(v) => updateData({ ambitionLevel: v })} min={1} max={5} leftLabel="Relaxed" rightLabel="Very driven" />
-        <Button onClick={nextStep} disabled={!data.careerStage} className="w-full" size="lg">Continue</Button>
-      </div>
-    </OnboardingLayout>
+      </OnboardingLayout>
+    </>
   );
 };
 
