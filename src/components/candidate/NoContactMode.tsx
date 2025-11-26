@@ -417,12 +417,12 @@ export const NoContactMode: React.FC<NoContactModeProps> = ({
                   still progress. Would you like to start fresh?
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Keep Going</AlertDialogCancel>
-                <AlertDialogAction onClick={brokeNoContact}>
+              <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                <AlertDialogCancel className="mt-0">Keep Going</AlertDialogCancel>
+                <AlertDialogAction onClick={brokeNoContact} className="bg-destructive hover:bg-destructive/90">
                   End No Contact
                 </AlertDialogAction>
-                <AlertDialogAction onClick={restartNoContact} className="bg-primary">
+                <AlertDialogAction onClick={restartNoContact} className="bg-primary hover:bg-primary/90">
                   Restart from Day 1
                 </AlertDialogAction>
               </AlertDialogFooter>
