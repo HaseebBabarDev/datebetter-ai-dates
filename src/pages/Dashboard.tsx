@@ -32,6 +32,7 @@ import {
   Calendar,
   List,
   Clock,
+  Bell,
 } from "lucide-react";
 import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
@@ -254,9 +255,17 @@ const Dashboard = () => {
               <p className="text-sm text-muted-foreground">{greeting}</p>
               <h1 className="text-xl font-semibold text-foreground">{profile?.name || "there"}</h1>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => navigate("/settings")}>
-              <Settings className="w-5 h-5" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="relative" onClick={() => navigate("/notifications")}>
+                <Bell className="w-5 h-5" />
+                {(oxytocinAlerts.length > 0 || candidates.filter(c => c.no_contact_active).length > 0) && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
+                )}
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => navigate("/settings")}>
+                <Settings className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -299,24 +308,19 @@ const Dashboard = () => {
               if (profile?.track_cycle && !profile?.last_period_date) {
                 alerts.push(
                   <CarouselItem key="cycle-setup">
-                    <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl overflow-hidden">
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
-                            <Droplet className="w-5 h-5" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm">Set Up Cycle Tracking</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              Add your last period date for hormone-aware insights.
-                            </p>
-                          </div>
-                          <Button size="sm" onClick={() => navigate("/settings")}>
-                            Setup
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <button 
+                      onClick={() => navigate("/settings")}
+                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                        <Droplet className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="font-medium text-sm">Set Up Cycle Tracking</p>
+                        <p className="text-xs text-muted-foreground">Add period date for insights</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </button>
                   </CarouselItem>
                 );
               }
@@ -325,19 +329,18 @@ const Dashboard = () => {
               if (cycleAlerts) {
                 alerts.push(
                   <CarouselItem key="cycle-alert">
-                    <Card className="border-amber-500/20 bg-gradient-to-r from-amber-500/5 to-amber-500/10 rounded-xl overflow-hidden">
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-600 shrink-0">
-                            {cycleAlerts.icon}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm">{cycleAlerts.phase} (Day {cycleAlerts.dayInCycle})</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{cycleAlerts.warning}</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <div className="flex items-center gap-3 p-3 rounded-xl border border-amber-500/20 bg-amber-500/5">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-600 shrink-0">
+                        {cycleAlerts.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm text-amber-700 dark:text-amber-400">{cycleAlerts.phase}</p>
+                        <p className="text-xs text-muted-foreground truncate">{cycleAlerts.warning}</p>
+                      </div>
+                      <Badge variant="outline" className="shrink-0 text-[10px] border-amber-500/30 text-amber-600">
+                        Day {cycleAlerts.dayInCycle}
+                      </Badge>
+                    </div>
                   </CarouselItem>
                 );
               }
@@ -346,30 +349,23 @@ const Dashboard = () => {
               oxytocinAlerts.forEach(({ candidate, daysSince }) => {
                 alerts.push(
                   <CarouselItem key={`oxy-${candidate.id}`}>
-                    <Card className="border-pink-500/20 bg-gradient-to-r from-pink-500/5 to-pink-500/10 rounded-xl overflow-hidden">
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center text-pink-600 shrink-0">
-                            <Flame className="w-5 h-5" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm text-pink-700 dark:text-pink-400">
-                              Oxytocin Alert: {candidate.nickname}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              {daysSince === 0 ? "Today" : `${daysSince}d ago`} — hormones active 48-72hrs
-                            </p>
-                          </div>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            onClick={() => navigate(`/candidate/${candidate.id}`)}
-                          >
-                            View
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <button 
+                      onClick={() => navigate(`/candidate/${candidate.id}`)}
+                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-pink-500/20 bg-pink-500/5 hover:bg-pink-500/10 transition-all"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center text-pink-600 shrink-0">
+                        <Flame className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="font-medium text-sm text-pink-700 dark:text-pink-400">
+                          Oxytocin: {candidate.nickname}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Hormones active 48-72hrs</p>
+                      </div>
+                      <Badge variant="outline" className="shrink-0 text-[10px] border-pink-500/30 text-pink-600">
+                        {daysSince === 0 ? "Today" : `${daysSince}d`}
+                      </Badge>
+                    </button>
                   </CarouselItem>
                 );
               });
@@ -378,30 +374,21 @@ const Dashboard = () => {
               candidates.filter(c => c.no_contact_active).forEach((candidate) => {
                 alerts.push(
                   <CarouselItem key={`nc-${candidate.id}`}>
-                    <Card className="border-slate-500/20 bg-gradient-to-r from-slate-500/5 to-slate-500/10 rounded-xl overflow-hidden">
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-lg bg-slate-500/20 flex items-center justify-center text-slate-600 shrink-0">
-                            <Ban className="w-5 h-5" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm">
-                              No Contact: {candidate.nickname}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              Day {candidate.no_contact_day || 0} — Stay strong!
-                            </p>
-                          </div>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            onClick={() => navigate(`/candidate/${candidate.id}`)}
-                          >
-                            View
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <button 
+                      onClick={() => navigate(`/candidate/${candidate.id}`)}
+                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-500/20 bg-slate-500/5 hover:bg-slate-500/10 transition-all"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-slate-500/20 flex items-center justify-center text-slate-600 shrink-0">
+                        <Ban className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="font-medium text-sm">{candidate.nickname}</p>
+                        <p className="text-xs text-muted-foreground">Stay strong!</p>
+                      </div>
+                      <Badge variant="outline" className="shrink-0 text-[10px]">
+                        Day {candidate.no_contact_day || 0}
+                      </Badge>
+                    </button>
                   </CarouselItem>
                 );
               });
@@ -412,13 +399,19 @@ const Dashboard = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">
-                      {alerts.length} alert{alerts.length > 1 ? "s" : ""} • swipe to see more
+                      {alerts.length} alert{alerts.length > 1 ? "s" : ""}
                     </p>
+                    <button 
+                      onClick={() => navigate("/notifications")}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      View all
+                    </button>
                   </div>
                   <Carousel className="w-full">
                     <CarouselContent className="-ml-2">
                       {alerts.map((alert, i) => (
-                        <div key={i} className="pl-2 basis-[95%]">
+                        <div key={i} className="pl-2 basis-[92%]">
                           {alert}
                         </div>
                       ))}
