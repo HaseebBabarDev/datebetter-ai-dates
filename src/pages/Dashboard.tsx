@@ -207,8 +207,30 @@ const Dashboard = () => {
   // Post-intimacy drop detection - feelings/contact dropped after intimacy
   const postIntimacyDropAlerts = useMemo(() => {
     const alerts: { candidate: Candidate; reason: string }[] = [];
+    const flaggedIds = new Set<string>();
     
     candidates.forEach((candidate) => {
+      // First check AI-detected red flags for post-intimacy patterns
+      const redFlags = Array.isArray(candidate.red_flags) ? candidate.red_flags : [];
+      const postIntimacyFlagPhrases = [
+        "post-intimacy", "post intimacy", "after intimacy", "after sex", 
+        "pulled away", "fell off", "dropped off", "drop off", "ghost after",
+        "distance after", "distant after", "less interested after",
+        "breadcrumb", "slow fade", "switched up after"
+      ];
+      
+      const hasPostIntimacyRedFlag = redFlags.some((flag: string) => {
+        const lowerFlag = (flag || "").toLowerCase();
+        return postIntimacyFlagPhrases.some(phrase => lowerFlag.includes(phrase));
+      });
+      
+      if (hasPostIntimacyRedFlag) {
+        alerts.push({ candidate, reason: "AI detected post-intimacy behavior change" });
+        flaggedIds.add(candidate.id);
+        return;
+      }
+      
+      // Then check interaction patterns
       const candidateInteractions = interactions
         .filter((i) => i.candidate_id === candidate.id)
         .sort((a, b) => new Date(a.interaction_date || "").getTime() - new Date(b.interaction_date || "").getTime());
@@ -232,7 +254,7 @@ const Dashboard = () => {
         feelingDrop = avgPostFeeling <= 2; // Low feelings after intimacy
       }
       
-      if (feelingDrop || hasDropLanguage) {
+      if ((feelingDrop || hasDropLanguage) && !flaggedIds.has(candidate.id)) {
         alerts.push({ 
           candidate, 
           reason: hasDropLanguage ? "Post-intimacy pullback detected" : "Feelings dropped after intimacy"
