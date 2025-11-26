@@ -33,6 +33,7 @@ const CandidateDetail = () => {
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (user && id) {
@@ -149,7 +150,36 @@ const CandidateDetail = () => {
   }
 
   // Determine default tab based on no contact status
-  const defaultTab = candidate.no_contact_active ? "no-contact" : "profile";
+  const defaultTab = activeTab || (candidate.no_contact_active ? "no-contact" : "profile");
+
+  const handleStartNoContact = () => {
+    setActiveTab("no-contact");
+  };
+
+  const handleBrokeContact = async () => {
+    if (!candidate || !user) return;
+    
+    // Update candidate to end no contact
+    try {
+      await supabase
+        .from("candidates")
+        .update({
+          no_contact_active: false,
+          status: "texting", // Reset to a reasonable status
+        })
+        .eq("id", candidate.id);
+      
+      setCandidate({
+        ...candidate,
+        no_contact_active: false,
+        status: "texting",
+      });
+      
+      toast("No Contact ended. It's okay - healing isn't linear. 💜");
+    } catch (error) {
+      console.error("Error ending no contact:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -192,7 +222,7 @@ const CandidateDetail = () => {
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-lg space-y-6">
-        <Tabs defaultValue={defaultTab} className="w-full">
+        <Tabs value={defaultTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="interactions">
@@ -208,6 +238,7 @@ const CandidateDetail = () => {
             <CompatibilityScore
               candidate={candidate}
               onUpdate={(updates) => setCandidate({ ...candidate, ...updates })}
+              onStartNoContact={handleStartNoContact}
             />
             <CandidateProfile
               candidate={candidate}
@@ -221,6 +252,8 @@ const CandidateDetail = () => {
               candidateId={candidate.id}
               onSuccess={fetchData}
               onRescore={handleRescore}
+              isNoContact={candidate.no_contact_active || false}
+              onBrokeContact={handleBrokeContact}
             />
             <InteractionHistory interactions={interactions} />
           </TabsContent>
