@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, CheckCircle, Plus, X } from "lucide-react";
+import { AlertTriangle, CheckCircle, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 type Candidate = Tables<"candidates">;
 
@@ -14,218 +14,154 @@ interface FlagsSectionProps {
   onUpdate: (updates: Partial<Candidate>) => Promise<void>;
 }
 
-const COMMON_RED_FLAGS = [
-  "Love bombing",
-  "Inconsistent communication",
-  "Avoids commitment talk",
-  "Bad-mouths exes",
-  "Controlling behavior",
-  "Gaslighting",
-  "Future faking",
-  "Breadcrumbing",
-  "Hot and cold",
-  "Dismissive of feelings",
-];
-
-const COMMON_GREEN_FLAGS = [
-  "Consistent communication",
-  "Plans dates in advance",
-  "Remembers details",
-  "Introduces to friends",
-  "Respects boundaries",
-  "Emotionally available",
-  "Takes accountability",
-  "Shows genuine interest",
-  "Follows through",
-  "Open and honest",
-];
-
 export const FlagsSection: React.FC<FlagsSectionProps> = ({
   candidate,
   onUpdate,
 }) => {
-  const [newRedFlag, setNewRedFlag] = useState("");
-  const [newGreenFlag, setNewGreenFlag] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
 
   const redFlags = (candidate.red_flags as string[]) || [];
   const greenFlags = (candidate.green_flags as string[]) || [];
 
-  const addFlag = async (type: "red" | "green", flag: string) => {
-    if (!flag.trim()) return;
-
-    setSaving(true);
+  const detectFlags = async () => {
+    setAnalyzing(true);
     try {
-      const currentFlags = type === "red" ? redFlags : greenFlags;
-      const key = type === "red" ? "red_flags" : "green_flags";
-
-      if (currentFlags.includes(flag.trim())) {
-        toast.error("This flag already exists");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please sign in to analyze flags");
         return;
       }
 
-      await onUpdate({
-        [key]: [...currentFlags, flag.trim()],
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/detect-flags`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ candidateId: candidate.id }),
+        }
+      );
 
-      if (type === "red") {
-        setNewRedFlag("");
-      } else {
-        setNewGreenFlag("");
+      if (response.status === 429) {
+        toast.error("Rate limit exceeded. Please try again later.");
+        return;
       }
-      toast.success("Flag added");
-    } catch (error) {
-      toast.error("Failed to add flag");
-    } finally {
-      setSaving(false);
-    }
-  };
+      if (response.status === 402) {
+        toast.error("AI credits exhausted. Please add funds.");
+        return;
+      }
 
-  const removeFlag = async (type: "red" | "green", flag: string) => {
-    setSaving(true);
-    try {
-      const currentFlags = type === "red" ? redFlags : greenFlags;
-      const key = type === "red" ? "red_flags" : "green_flags";
+      if (!response.ok) {
+        throw new Error("Failed to analyze flags");
+      }
 
+      const flags = await response.json();
+      
+      // Update local state through parent
       await onUpdate({
-        [key]: currentFlags.filter((f) => f !== flag),
+        red_flags: flags.red_flags || [],
+        green_flags: flags.green_flags || [],
       });
-      toast.success("Flag removed");
+
+      toast.success("Flags analyzed successfully");
     } catch (error) {
-      toast.error("Failed to remove flag");
+      console.error("Error detecting flags:", error);
+      toast.error("Failed to analyze flags");
     } finally {
-      setSaving(false);
+      setAnalyzing(false);
     }
   };
+
+  const hasNoFlags = redFlags.length === 0 && greenFlags.length === 0;
 
   return (
     <div className="space-y-4">
-      {/* Red Flags */}
-      <Card className="border-destructive/20">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2 text-destructive">
-            <AlertTriangle className="w-5 h-5" />
-            Red Flags ({redFlags.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Add a red flag..."
-              value={newRedFlag}
-              onChange={(e) => setNewRedFlag(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addFlag("red", newRedFlag)}
-            />
+      {/* AI Analyze Button */}
+      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <p className="font-medium text-sm">Auto-detect Flags</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                AI analyzes interactions to detect behavioral patterns
+              </p>
+            </div>
             <Button
-              size="icon"
-              variant="destructive"
-              onClick={() => addFlag("red", newRedFlag)}
-              disabled={saving || !newRedFlag.trim()}
+              onClick={detectFlags}
+              disabled={analyzing}
+              size="sm"
+              className="gap-2"
             >
-              <Plus className="w-4 h-4" />
+              {analyzing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Sparkles className="w-4 h-4" />
+              )}
+              {analyzing ? "Analyzing..." : "Analyze"}
             </Button>
-          </div>
-
-          {redFlags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {redFlags.map((flag) => (
-                <Badge
-                  key={flag}
-                  variant="destructive"
-                  className="gap-1 pr-1"
-                >
-                  {flag}
-                  <button
-                    onClick={() => removeFlag("red", flag)}
-                    className="ml-1 hover:bg-destructive-foreground/20 rounded p-0.5"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          <div>
-            <p className="text-xs text-muted-foreground mb-2">Quick add:</p>
-            <div className="flex flex-wrap gap-1">
-              {COMMON_RED_FLAGS.filter((f) => !redFlags.includes(f)).map((flag) => (
-                <Badge
-                  key={flag}
-                  variant="outline"
-                  className="cursor-pointer hover:bg-destructive/10 text-xs"
-                  onClick={() => addFlag("red", flag)}
-                >
-                  + {flag}
-                </Badge>
-              ))}
-            </div>
           </div>
         </CardContent>
       </Card>
+
+      {hasNoFlags && (
+        <Card className="border-dashed">
+          <CardContent className="py-8 text-center">
+            <p className="text-muted-foreground text-sm">
+              No flags detected yet. Log some interactions and click "Analyze" to auto-detect patterns.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Red Flags */}
+      {redFlags.length > 0 && (
+        <Card className="border-destructive/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              Red Flags ({redFlags.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {redFlags.map((flag, idx) => (
+                <Badge
+                  key={idx}
+                  variant="destructive"
+                >
+                  {flag}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Green Flags */}
-      <Card className="border-green-500/20">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2 text-green-600">
-            <CheckCircle className="w-5 h-5" />
-            Green Flags ({greenFlags.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Add a green flag..."
-              value={newGreenFlag}
-              onChange={(e) => setNewGreenFlag(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addFlag("green", newGreenFlag)}
-            />
-            <Button
-              size="icon"
-              className="bg-green-600 hover:bg-green-700"
-              onClick={() => addFlag("green", newGreenFlag)}
-              disabled={saving || !newGreenFlag.trim()}
-            >
-              <Plus className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {greenFlags.length > 0 && (
+      {greenFlags.length > 0 && (
+        <Card className="border-green-500/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2 text-green-600">
+              <CheckCircle className="w-5 h-5" />
+              Green Flags ({greenFlags.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="flex flex-wrap gap-2">
-              {greenFlags.map((flag) => (
+              {greenFlags.map((flag, idx) => (
                 <Badge
-                  key={flag}
-                  className="gap-1 pr-1 bg-green-600"
+                  key={idx}
+                  className="bg-green-600"
                 >
                   {flag}
-                  <button
-                    onClick={() => removeFlag("green", flag)}
-                    className="ml-1 hover:bg-green-700/50 rounded p-0.5"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
                 </Badge>
               ))}
             </div>
-          )}
-
-          <div>
-            <p className="text-xs text-muted-foreground mb-2">Quick add:</p>
-            <div className="flex flex-wrap gap-1">
-              {COMMON_GREEN_FLAGS.filter((f) => !greenFlags.includes(f)).map((flag) => (
-                <Badge
-                  key={flag}
-                  variant="outline"
-                  className="cursor-pointer hover:bg-green-500/10 text-xs"
-                  onClick={() => addFlag("green", flag)}
-                >
-                  + {flag}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
