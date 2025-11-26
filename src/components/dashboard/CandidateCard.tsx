@@ -9,9 +9,9 @@ import {
   AlertTriangle, 
   Clock, 
   MessageCircle, 
-  Calendar,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Zap
 } from "lucide-react";
 
 type Candidate = Tables<"candidates">;
@@ -31,11 +31,39 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   archived: { label: "Archived", color: "bg-muted text-muted-foreground" },
 };
 
+const getNextStep = (status: string | null, updatedAt: string | null): string | null => {
+  const daysSinceUpdate = updatedAt 
+    ? Math.floor((Date.now() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
+
+  switch (status) {
+    case "just_matched":
+      return "Send a message to break the ice";
+    case "texting":
+      if (daysSinceUpdate > 3) return "It's been a few days - check in or suggest a date";
+      return "Keep chatting or suggest meeting up";
+    case "planning_date":
+      return "Confirm the date details";
+    case "dating":
+      if (daysSinceUpdate > 7) return "Schedule your next date";
+      return "Log your latest interaction";
+    case "getting_serious":
+      return "Have the relationship talk when ready";
+    case "no_contact":
+      return "Stay strong - focus on yourself";
+    case "archived":
+      return null;
+    default:
+      return "Add more details to their profile";
+  }
+};
+
 export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdate }) => {
   const navigate = useNavigate();
   const status = statusConfig[candidate.status || "just_matched"];
   const redFlagCount = Array.isArray(candidate.red_flags) ? candidate.red_flags.length : 0;
   const greenFlagCount = Array.isArray(candidate.green_flags) ? candidate.green_flags.length : 0;
+  const nextStep = getNextStep(candidate.status, candidate.updated_at);
 
   const handleClick = () => {
     navigate(`/candidate/${candidate.id}`);
@@ -112,6 +140,15 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
               </span>
             )}
           </div>
+
+          {nextStep && (
+            <div className="mt-3 pt-3 border-t border-border">
+              <span className="text-xs text-primary/80 flex items-center gap-1.5">
+                <Zap className="w-3 h-3" />
+                {nextStep}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </button>
