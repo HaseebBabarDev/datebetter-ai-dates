@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Trash2, Heart } from "lucide-react";
+import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban } from "lucide-react";
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
 import { FlagsSection } from "@/components/candidate/FlagsSection";
@@ -189,7 +189,7 @@ const CandidateDetail = () => {
   }
 
   // Determine default tab based on no contact status
-  const defaultTab = activeTab || (candidate.no_contact_active ? "no-contact" : "profile");
+  const defaultTab = activeTab || (candidate.no_contact_active ? "no-contact" : "overview");
 
   const handleStartNoContact = () => {
     setActiveTab("no-contact");
@@ -262,16 +262,37 @@ const CandidateDetail = () => {
 
       <main className="container mx-auto px-4 py-6 max-w-lg space-y-6">
         <Tabs value={defaultTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="interactions">
-              History
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="overview" className="gap-1 text-xs px-2">
+              <User className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="flags">Flags</TabsTrigger>
-            <TabsTrigger value="no-contact" className={candidate.no_contact_active ? "text-primary" : ""}>
-              NC
+            <TabsTrigger value="profile" className="gap-1 text-xs px-2">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Insights</span>
+            </TabsTrigger>
+            <TabsTrigger value="interactions" className="gap-1 text-xs px-2">
+              <Clock className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">History</span>
+            </TabsTrigger>
+            <TabsTrigger value="flags" className="gap-1 text-xs px-2">
+              <Flag className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Flags</span>
+            </TabsTrigger>
+            <TabsTrigger value="no-contact" className={`gap-1 text-xs px-2 ${candidate.no_contact_active ? "text-primary" : ""}`}>
+              <Ban className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">NC</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="overview" className="mt-4 space-y-4">
+            <CandidateProfile
+              candidate={candidate}
+              userId={user!.id}
+              onUpdate={handleUpdateCandidate}
+              showBasicOnly
+            />
+          </TabsContent>
 
           <TabsContent value="profile" className="mt-4 space-y-4">
             <CompatibilityScore
@@ -283,6 +304,7 @@ const CandidateDetail = () => {
               candidate={candidate}
               userId={user!.id}
               onUpdate={handleUpdateCandidate}
+              showDetailsOnly
             />
           </TabsContent>
 
