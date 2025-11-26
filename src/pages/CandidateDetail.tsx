@@ -85,7 +85,7 @@ const CandidateDetail = () => {
     }
   };
 
-  const handleRescore = useCallback(async () => {
+  const handleDetectFlags = useCallback(async () => {
     if (!candidate) return;
 
     try {
@@ -93,7 +93,7 @@ const CandidateDetail = () => {
       if (!session) return;
 
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calculate-compatibility`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/detect-flags`,
         {
           method: "POST",
           headers: {
@@ -104,11 +104,48 @@ const CandidateDetail = () => {
         }
       );
 
-      if (!response.ok) {
+      if (!response.ok) return;
+
+      const flags = await response.json();
+      
+      setCandidate(prev => prev ? {
+        ...prev,
+        red_flags: flags.red_flags || [],
+        green_flags: flags.green_flags || [],
+      } : null);
+    } catch (error) {
+      console.error("Error detecting flags:", error);
+    }
+  }, [candidate?.id]);
+
+  const handleRescore = useCallback(async () => {
+    if (!candidate) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      // Run compatibility scoring and flag detection in parallel
+      const [compatResponse] = await Promise.all([
+        fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calculate-compatibility`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ candidateId: candidate.id }),
+          }
+        ),
+        handleDetectFlags(),
+      ]);
+
+      if (!compatResponse.ok) {
         throw new Error("Failed to recalculate");
       }
 
-      const analysis = await response.json();
+      const analysis = await compatResponse.json();
       
       setCandidate(prev => prev ? {
         ...prev,
@@ -121,7 +158,7 @@ const CandidateDetail = () => {
     } catch (error) {
       console.error("Error rescoring:", error);
     }
-  }, [candidate?.id]);
+  }, [candidate?.id, handleDetectFlags]);
 
   const [showAccountabilityDialog, setShowAccountabilityDialog] = useState(false);
 
