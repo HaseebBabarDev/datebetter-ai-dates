@@ -390,8 +390,28 @@ const AddCandidate = () => {
           });
         }
 
+        // Auto-calculate compatibility score
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            await fetch(
+              `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calculate-compatibility`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({ candidateId: data.id }),
+              }
+            );
+          }
+        } catch (e) {
+          console.error("Auto-score failed:", e);
+        }
+
         toast.success(`${nickname} added!`);
-        navigate(`/candidate/${data.id}`);
+        navigate(`/candidate/${data.id}`, { state: { isNewCandidate: true } });
       }
     } catch (error) {
       console.error("Error saving candidate:", error);
