@@ -201,6 +201,8 @@ const AddCandidate = () => {
 
   const [loading, setLoading] = useState(false);
   const [fetchingCandidate, setFetchingCandidate] = useState(isEditMode);
+  const [activeTab, setActiveTab] = useState("basics");
+  const TABS = ["basics", "about", "chemistry"] as const;
 
   // Basic Info
   const [nickname, setNickname] = useState("");
@@ -462,7 +464,7 @@ const AddCandidate = () => {
 
       <main className="container mx-auto px-4 py-6 max-w-lg">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Tabs defaultValue="basics" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="basics" className="gap-1 text-xs">
                 <User className="w-3.5 h-3.5" />
@@ -972,13 +974,40 @@ const AddCandidate = () => {
           </Tabs>
 
           <div className="space-y-3 pt-2">
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading ? "Saving..." : isEditMode ? (
-                <><Pencil className="w-5 h-5 mr-2" />Save Additional Info</>
-              ) : (
-                <><UserPlus className="w-5 h-5 mr-2" />Add Candidate</>
-              )}
-            </Button>
+            {isEditMode ? (
+              <div className="flex gap-2">
+                <Button 
+                  type="submit" 
+                  variant="outline"
+                  className="flex-1" 
+                  size="lg" 
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : <><Pencil className="w-4 h-4 mr-2" />Save Changes</>}
+                </Button>
+                {activeTab !== "chemistry" && (
+                  <Button 
+                    type="submit" 
+                    className="flex-1" 
+                    size="lg" 
+                    disabled={loading}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const currentIndex = TABS.indexOf(activeTab as typeof TABS[number]);
+                      if (currentIndex < TABS.length - 1) {
+                        setActiveTab(TABS[currentIndex + 1]);
+                      }
+                    }}
+                  >
+                    Add More Info →
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                {loading ? "Saving..." : <><UserPlus className="w-5 h-5 mr-2" />Add Candidate</>}
+              </Button>
+            )}
             <p className="text-xs text-center text-muted-foreground">
               <Sparkles className="w-3 h-3 inline mr-1" />
               {isEditMode ? "More details = better compatibility insights" : "More details = better AI compatibility analysis"}
