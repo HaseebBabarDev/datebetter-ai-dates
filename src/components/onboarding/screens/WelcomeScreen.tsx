@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { OnboardingLayout } from "../OnboardingLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,31 +16,6 @@ import {
 import welcomeBg from "@/assets/welcome-bg.jpeg";
 
 const WelcomeScreen = () => {
-  const { user } = useAuth();
-  const [userName, setUserName] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchUserName = async () => {
-      if (!user) return;
-      
-      const { data } = await supabase
-        .from("profiles")
-        .select("name")
-        .eq("user_id", user.id)
-        .single();
-      
-      if (data?.name) {
-        setUserName(data.name);
-      } else if (user.email) {
-        // Use email username as fallback
-        const emailName = user.email.split("@")[0];
-        // Capitalize first letter
-        setUserName(emailName.charAt(0).toUpperCase() + emailName.slice(1));
-      }
-    };
-    
-    fetchUserName();
-  }, [user]);
   const { data, updateData, nextStep } = useOnboarding();
   const [showAgeGate, setShowAgeGate] = useState(false);
   const [showReminder, setShowReminder] = useState(true);
@@ -95,7 +68,7 @@ const WelcomeScreen = () => {
         showProgress={false}
         showBack={false}
         headerGradient
-        title={userName ? `Welcome, ${userName}!` : "Welcome to dateBetter"}
+        title="Welcome to dateBetter"
         subtitle="Your dating journey starts here"
       >
         <div className="space-y-8 animate-fade-in relative z-10">
