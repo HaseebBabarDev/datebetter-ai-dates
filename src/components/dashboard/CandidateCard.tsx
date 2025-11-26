@@ -90,10 +90,15 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
             <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
           </div>
 
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
             <Badge variant="secondary" className={`text-xs ${status.color}`}>
               {status.label}
             </Badge>
+            {candidate.no_contact_active && candidate.no_contact_day !== null && (
+              <Badge variant="outline" className="text-xs bg-slate-500/10 text-slate-600 border-slate-300">
+                🚫 Day {candidate.no_contact_day}
+              </Badge>
+            )}
             {candidate.age && (
               <span className="text-xs text-muted-foreground">{candidate.age}y</span>
             )}
