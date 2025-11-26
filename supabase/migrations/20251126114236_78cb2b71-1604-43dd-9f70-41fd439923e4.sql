@@ -1,0 +1,1 @@
+ALTER TYPE candidate_status ADD VALUE 'dating_casually' AFTER 'dating';

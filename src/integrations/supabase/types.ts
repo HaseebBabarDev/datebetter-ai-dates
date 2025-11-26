@@ -707,6 +707,7 @@ export type Database = {
         | "texting"
         | "planning_date"
         | "dating"
+        | "dating_casually"
         | "getting_serious"
         | "no_contact"
         | "archived"
@@ -913,6 +914,7 @@ export const Constants = {
         "texting",
         "planning_date",
         "dating",
+        "dating_casually",
         "getting_serious",
         "no_contact",
         "archived",
