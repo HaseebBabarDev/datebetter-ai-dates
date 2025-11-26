@@ -6,6 +6,45 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Format enum values to be human-readable (no underscores, proper casing)
+function formatEnumValue(value: string | null | undefined): string {
+  if (!value) return "Not specified";
+  
+  const friendlyNames: Record<string, string> = {
+    "definitely_yes": "definitely wants",
+    "definitely_no": "definitely doesn't want", 
+    "maybe": "is open to",
+    "already_have": "already has",
+    "no_kids": "no kids",
+    "has_young_kids": "has young kids",
+    "has_adult_kids": "has adult kids",
+    "woman_cis": "cisgender woman",
+    "woman_trans": "transgender woman",
+    "man_cis": "cisgender man",
+    "man_trans": "transgender man",
+    "non_binary": "non-binary",
+    "gender_fluid": "gender fluid",
+    "she_her": "she/her",
+    "he_him": "he/him",
+    "they_them": "they/them",
+    "same_city": "same city",
+    "long_distance": "long distance",
+    "office_9_5": "9-5 office schedule",
+    "remote_flexible": "remote/flexible",
+    "shift_work": "shift work",
+    "overnight": "overnight shifts",
+    "christian_catholic": "Catholic",
+    "christian_protestant": "Protestant",
+    "christian_other": "Christian (other)",
+  };
+  
+  const lower = value.toLowerCase();
+  if (friendlyNames[lower]) return friendlyNames[lower];
+  
+  // Default: replace underscores with spaces and title case
+  return value.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -137,45 +176,45 @@ serve(async (req) => {
     }
 
     // Build the prompt for AI analysis
-    const prompt = `You are a relationship compatibility analyst. Analyze the compatibility between the person using this app and their dating candidate. Always address them as "you" not "user".
+    const prompt = `You are a warm, direct relationship coach helping someone evaluate their dating situation. Analyze compatibility between them and their dating candidate. Always address them as "you" - be conversational, empathetic, but honest.
 
 YOUR PROFILE:
 - Location: ${profile.city || "Not specified"}, ${profile.state || ""}, ${profile.country || "Not specified"}
-- Relationship Status: ${profile.relationship_status || "Not specified"}
-- Relationship Goal: ${profile.relationship_goal || "Not specified"}
-- Religion: ${profile.religion || "Not specified"}, Importance: ${profile.faith_importance || 3}/5
-- Politics: ${profile.politics || "Not specified"}, Importance: ${profile.politics_importance || 3}/5
-- Kids Status: ${profile.kids_status || "Not specified"}
-- Kids Desire: ${profile.kids_desire || "Not specified"}
-- Attachment Style: ${profile.attachment_style || "Not specified"}
+- Relationship Status: ${formatEnumValue(profile.relationship_status)}
+- Relationship Goal: ${formatEnumValue(profile.relationship_goal)}
+- Religion: ${formatEnumValue(profile.religion)}, Importance: ${profile.faith_importance || 3}/5
+- Politics: ${formatEnumValue(profile.politics)}, Importance: ${profile.politics_importance || 3}/5
+- Kids Status: ${formatEnumValue(profile.kids_status)}
+- Kids Desire: You ${formatEnumValue(profile.kids_desire)} children
+- Attachment Style: ${formatEnumValue(profile.attachment_style)}
 - Ambition Level: ${profile.ambition_level || 3}/5
-- Career Stage: ${profile.career_stage || "Not specified"}
+- Career Stage: ${formatEnumValue(profile.career_stage)}
 - Dealbreakers: ${JSON.stringify(profile.dealbreakers || [])}
-- Communication Style: ${profile.communication_style || "Not specified"}
+- Communication Style: ${formatEnumValue(profile.communication_style)}
 - Height: ${profile.height || "Not specified"}
-- Body Type: ${profile.body_type || "Not specified"}
-- Activity Level: ${profile.activity_level || "Not specified"}
-- Education Level: ${profile.education_level || "Not specified"}
+- Body Type: ${formatEnumValue(profile.body_type)}
+- Activity Level: ${formatEnumValue(profile.activity_level)}
+- Education Level: ${formatEnumValue(profile.education_level)}
 - Height Preference for partner: ${profile.height_preference || "No preference"}
-- Schedule Flexibility: ${profile.schedule_flexibility || "Not specified"}
-- Distance Preference: ${profile.distance_preference || "Not specified"}
+- Schedule Flexibility: ${formatEnumValue(profile.schedule_flexibility)}
+- Distance Preference: ${formatEnumValue(profile.distance_preference)}
 
 CANDIDATE PROFILE (${candidate.nickname}):
 - Name: ${candidate.nickname}
 - Location: ${candidate.city || "Not specified"}, ${candidate.country || "Not specified"}
-- Distance from you: ${candidate.distance_approximation || "Not specified"}
-- Relationship Status: ${candidate.their_relationship_status || "Not specified"}
-- Relationship Goal: ${candidate.their_relationship_goal || "Not specified"}
-- Religion: ${candidate.their_religion || "Not specified"}
-- Politics: ${candidate.their_politics || "Not specified"}
-- Kids Status: ${candidate.their_kids_status || "Not specified"}
-- Kids Desire: ${candidate.their_kids_desire || "Not specified"}
-- Attachment Style: ${candidate.their_attachment_style || "Not specified"}
+- Distance from you: ${formatEnumValue(candidate.distance_approximation)}
+- Relationship Status: ${formatEnumValue(candidate.their_relationship_status)}
+- Relationship Goal: ${formatEnumValue(candidate.their_relationship_goal)}
+- Religion: ${formatEnumValue(candidate.their_religion)}
+- Politics: ${formatEnumValue(candidate.their_politics)}
+- Kids Status: ${formatEnumValue(candidate.their_kids_status)}
+- Kids Desire: ${candidate.nickname} ${formatEnumValue(candidate.their_kids_desire)} children
+- Attachment Style: ${formatEnumValue(candidate.their_attachment_style)}
 - Ambition Level: ${candidate.their_ambition_level || "Not specified"}/5
-- Career Stage: ${candidate.their_career_stage || "Not specified"}
-- Education Level: ${candidate.their_education_level || "Not specified"}
-- Exercise Habits: ${candidate.their_exercise || "Not specified"}
-- Schedule Flexibility: ${candidate.their_schedule_flexibility || "Not specified"}
+- Career Stage: ${formatEnumValue(candidate.their_career_stage)}
+- Education Level: ${formatEnumValue(candidate.their_education_level)}
+- Exercise Habits: ${formatEnumValue(candidate.their_exercise)}
+- Schedule Flexibility: ${formatEnumValue(candidate.their_schedule_flexibility)}
 
 CHEMISTRY RATINGS (1-5):
 - Physical Attraction: ${candidate.physical_attraction || 3}
@@ -209,14 +248,24 @@ CRITICAL SCORING RULES - YOU MUST FOLLOW THESE:
 5. Do not sugarcoat concerns when serious red flags are present
 6. The emotional_compatibility score should be ${adjustedEmotionalScore} or lower given the interactions
 
+WRITING STYLE FOR ADVICE - IMPORTANT:
+- Write like a supportive friend who tells it like it is, not a robot
+- Use natural, conversational language - "Look," "Here's the thing," "Real talk," etc.
+- Be direct about incompatibilities without being harsh - "This is a fundamental mismatch" not "directly conflicts"
+- Use phrases like "you two want different things" instead of technical descriptions
+- If kids desires conflict, say something like "${candidate.nickname} wants kids and you don't - that's a big deal that won't change"
+- Make advice actionable - "Have the conversation about X before investing more" 
+- Show empathy - "I know it's not what you want to hear, but..."
+- NEVER use underscores or technical enum values in your output
+
 Consider these factors when adjusting lifestyle scores:
-- Distance/location compatibility (same_city is best, long_distance reduces score if they prefer nearby)
-- Schedule flexibility compatibility (remote_flexible pairs well with most, office_9_5 and overnight may conflict)
+- Distance/location compatibility (same city is best, long distance reduces score if they prefer nearby)
+- Schedule flexibility compatibility (remote/flexible pairs well with most, 9-5 office and overnight may conflict)
 - Frequent travelers need partners who are understanding of their lifestyle - flexible schedules work best
 - Professional athletes have demanding, seasonal schedules - consider this for lifestyle compatibility
 - Activity level and lifestyle compatibility
 
-CRITICAL: In all output text (strengths, concerns, advice), always use "you" and "your" instead of "user" or "the user". Speak directly to the person.`;
+CRITICAL: In all output text (strengths, concerns, advice), use natural human language. Never output values like "definitely_yes" - always write "definitely wants" or similar human phrases.`;
 
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -228,7 +277,7 @@ CRITICAL: In all output text (strengths, concerns, advice), always use "you" and
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a relationship compatibility analyst. Use the provided sentiment-adjusted scores as your foundation. NEVER increase the score above the sentiment-adjusted score when there are negative interactions." },
+          { role: "system", content: "You are a warm, direct relationship coach - like a supportive best friend who tells it like it is. Write in natural, conversational language. Never use technical terms, underscores, or robotic phrasing. Use the provided sentiment-adjusted scores as your foundation. NEVER increase the score above the sentiment-adjusted score when there are negative interactions." },
           { role: "user", content: prompt }
         ],
         tools: [
