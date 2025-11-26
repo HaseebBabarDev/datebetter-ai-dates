@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { Edit, Info } from "lucide-react";
 
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
@@ -208,6 +209,21 @@ const CandidateDetail = () => {
   }, [candidate?.id, handleDetectFlags]);
 
   const [showAccountabilityDialog, setShowAccountabilityDialog] = useState(false);
+  const [showNewCandidateDialog, setShowNewCandidateDialog] = useState(false);
+  
+  // Check if this is a new candidate from navigation state
+  useEffect(() => {
+    const state = location.state as { isNewCandidate?: boolean } | null;
+    if (state?.isNewCandidate) {
+      setShowNewCandidateDialog(true);
+      // Clear the state so it doesn't show again on refresh
+      window.history.replaceState({}, document.title);
+      // Refetch after a short delay to get the calculated score
+      setTimeout(() => {
+        fetchData();
+      }, 1500);
+    }
+  }, [location.state]);
 
   if (authLoading || loading) {
     return (
@@ -301,6 +317,58 @@ const CandidateDetail = () => {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogAction>Got it</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          
+          {/* New Candidate Welcome Dialog */}
+          <AlertDialog open={showNewCandidateDialog} onOpenChange={setShowNewCandidateDialog}>
+            <AlertDialogContent className="max-w-sm">
+              <AlertDialogHeader>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                  </div>
+                  <AlertDialogTitle className="text-lg">
+                    {candidate.nickname} Added!
+                  </AlertDialogTitle>
+                </div>
+                <AlertDialogDescription className="space-y-3 text-left">
+                  <p className="text-base">
+                    We've calculated an initial compatibility score of{" "}
+                    <span className="font-semibold text-primary">
+                      {candidate.compatibility_score ?? "..."}%
+                    </span>
+                  </p>
+                  <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <Info className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-muted-foreground">
+                        <span className="font-medium text-foreground">Update their profile for better results.</span>{" "}
+                        It's okay if you don't know everything yet — just add what you know!
+                      </p>
+                    </div>
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                <AlertDialogAction 
+                  className="w-full sm:w-auto"
+                  onClick={() => setShowNewCandidateDialog(false)}
+                >
+                  Got It
+                </AlertDialogAction>
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto gap-2"
+                  onClick={() => {
+                    setShowNewCandidateDialog(false);
+                    navigate(`/add-candidate?edit=${candidate.id}`);
+                  }}
+                >
+                  <Edit className="w-4 h-4" />
+                  Add More Info
+                </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
