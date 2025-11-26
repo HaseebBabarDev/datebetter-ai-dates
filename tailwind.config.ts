@@ -14,10 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
+        'nunito': ['Nunito', 'sans-serif'],
         'playfair': ['Playfair Display', 'serif'],
-        'poppins': ['Poppins', 'sans-serif'],
-        'inter': ['Inter', 'sans-serif'],
-        'sans': ['Poppins', 'Inter', 'sans-serif'],
+        'sans': ['Nunito', 'sans-serif'],
         'serif': ['Playfair Display', 'serif'],
       },
       colors: {
