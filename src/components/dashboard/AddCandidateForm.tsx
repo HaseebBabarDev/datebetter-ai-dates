@@ -576,6 +576,20 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Adding..." : "Add Candidate"}
           </Button>
+          
+          <div className="text-center pt-2">
+            <Button
+              type="button"
+              variant="link"
+              className="text-sm text-muted-foreground"
+              onClick={() => {
+                setOpen(false);
+                window.location.href = '/add-candidate';
+              }}
+            >
+              Add more detailed info instead
+            </Button>
+          </div>
         </form>
       </SheetContent>
     </Sheet>

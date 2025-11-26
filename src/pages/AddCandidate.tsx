@@ -328,7 +328,7 @@ const AddCandidate = () => {
           });
         }
 
-        toast.success(`${nickname} added to your roster!`);
+        toast.success(`${nickname} added!`);
         navigate(`/candidate/${data.id}`);
       }
     } catch (error) {
@@ -803,7 +803,7 @@ const AddCandidate = () => {
               {loading ? "Saving..." : isEditMode ? (
                 <><Pencil className="w-5 h-5 mr-2" />Save Changes</>
               ) : (
-                <><UserPlus className="w-5 h-5 mr-2" />Add to Roster</>
+                <><UserPlus className="w-5 h-5 mr-2" />Add Candidate</>
               )}
             </Button>
             {!isEditMode && (
