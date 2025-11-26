@@ -19,6 +19,7 @@ import PhysicalPreferencesScreen from "@/components/onboarding/screens/PhysicalP
 import CommunicationScreen from "@/components/onboarding/screens/CommunicationScreen";
 import PastPatternsScreen from "@/components/onboarding/screens/PastPatternsScreen";
 import BoundariesScreen from "@/components/onboarding/screens/BoundariesScreen";
+import MentalHealthScreen from "@/components/onboarding/screens/MentalHealthScreen";
 import SafetyIntimacyScreen from "@/components/onboarding/screens/SafetyIntimacyScreen";
 import CompletionScreen from "@/components/onboarding/screens/CompletionScreen";
 
@@ -41,8 +42,9 @@ const SetupContent = () => {
     <CommunicationScreen key={12} />,
     <PastPatternsScreen key={13} />,
     <BoundariesScreen key={14} />,
-    <SafetyIntimacyScreen key={15} />,
-    <CompletionScreen key={16} />,
+    <MentalHealthScreen key={15} />,
+    <SafetyIntimacyScreen key={16} />,
+    <CompletionScreen key={17} />,
   ];
 
   return screens[currentStep] || screens[0];

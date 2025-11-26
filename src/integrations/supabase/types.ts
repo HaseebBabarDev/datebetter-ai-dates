@@ -140,8 +140,12 @@ export type Database = {
           their_drinking: string | null
           their_education_level: string | null
           their_exercise: string | null
+          their_in_therapy: string | null
           their_kids_desire: Database["public"]["Enums"]["kids_desire"] | null
           their_kids_status: Database["public"]["Enums"]["kids_status"] | null
+          their_mental_health_awareness: string | null
+          their_neurodivergence_types: Json | null
+          their_neurodivergent: string | null
           their_politics: Database["public"]["Enums"]["politics"] | null
           their_relationship_goal:
             | Database["public"]["Enums"]["relationship_goal"]
@@ -195,8 +199,12 @@ export type Database = {
           their_drinking?: string | null
           their_education_level?: string | null
           their_exercise?: string | null
+          their_in_therapy?: string | null
           their_kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
           their_kids_status?: Database["public"]["Enums"]["kids_status"] | null
+          their_mental_health_awareness?: string | null
+          their_neurodivergence_types?: Json | null
+          their_neurodivergent?: string | null
           their_politics?: Database["public"]["Enums"]["politics"] | null
           their_relationship_goal?:
             | Database["public"]["Enums"]["relationship_goal"]
@@ -250,8 +258,12 @@ export type Database = {
           their_drinking?: string | null
           their_education_level?: string | null
           their_exercise?: string | null
+          their_in_therapy?: string | null
           their_kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
           their_kids_status?: Database["public"]["Enums"]["kids_status"] | null
+          their_mental_health_awareness?: string | null
+          their_neurodivergence_types?: Json | null
+          their_neurodivergent?: string | null
           their_politics?: Database["public"]["Enums"]["politics"] | null
           their_relationship_goal?:
             | Database["public"]["Enums"]["relationship_goal"]
@@ -406,8 +418,10 @@ export type Database = {
           height_preference: string | null
           hormone_profile: string | null
           id: string
+          in_therapy: boolean | null
           interested_in: string[] | null
           intimacy_comfort: string | null
+          is_neurodivergent: string | null
           is_trans: boolean | null
           kids_desire: Database["public"]["Enums"]["kids_desire"] | null
           kids_status: Database["public"]["Enums"]["kids_status"] | null
@@ -421,8 +435,11 @@ export type Database = {
           love_languages: Json | null
           marriage_before_kids: boolean | null
           match_specificity: number | null
+          mental_health_importance: number | null
+          mental_health_openness: string | null
           monogamy_required: boolean | null
           name: string | null
+          neurodivergence_types: Json | null
           onboarding_completed: boolean | null
           onboarding_step: number | null
           open_to_moving: boolean | null
@@ -507,8 +524,10 @@ export type Database = {
           height_preference?: string | null
           hormone_profile?: string | null
           id?: string
+          in_therapy?: boolean | null
           interested_in?: string[] | null
           intimacy_comfort?: string | null
+          is_neurodivergent?: string | null
           is_trans?: boolean | null
           kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
           kids_status?: Database["public"]["Enums"]["kids_status"] | null
@@ -522,8 +541,11 @@ export type Database = {
           love_languages?: Json | null
           marriage_before_kids?: boolean | null
           match_specificity?: number | null
+          mental_health_importance?: number | null
+          mental_health_openness?: string | null
           monogamy_required?: boolean | null
           name?: string | null
+          neurodivergence_types?: Json | null
           onboarding_completed?: boolean | null
           onboarding_step?: number | null
           open_to_moving?: boolean | null
@@ -608,8 +630,10 @@ export type Database = {
           height_preference?: string | null
           hormone_profile?: string | null
           id?: string
+          in_therapy?: boolean | null
           interested_in?: string[] | null
           intimacy_comfort?: string | null
+          is_neurodivergent?: string | null
           is_trans?: boolean | null
           kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
           kids_status?: Database["public"]["Enums"]["kids_status"] | null
@@ -623,8 +647,11 @@ export type Database = {
           love_languages?: Json | null
           marriage_before_kids?: boolean | null
           match_specificity?: number | null
+          mental_health_importance?: number | null
+          mental_health_openness?: string | null
           monogamy_required?: boolean | null
           name?: string | null
+          neurodivergence_types?: Json | null
           onboarding_completed?: boolean | null
           onboarding_step?: number | null
           open_to_moving?: boolean | null
