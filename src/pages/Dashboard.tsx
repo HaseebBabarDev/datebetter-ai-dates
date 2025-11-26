@@ -5,6 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -361,26 +366,31 @@ const Dashboard = () => {
               if (alerts.length === 0) return null;
 
               return (
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-                  {alerts.map((alert) => (
-                    <button
-                      key={alert.key}
-                      onClick={alert.onClick}
-                      className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs font-medium transition-all hover:scale-[1.02] active:scale-[0.98] ${alert.color}`}
-                    >
-                      {alert.icon}
-                      <span>{alert.label}</span>
-                      {alert.sub && <span className="opacity-60">• {alert.sub}</span>}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => navigate("/notifications")}
-                    className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-border text-xs text-muted-foreground hover:bg-muted/50 transition-all"
-                  >
-                    <Bell className="w-3 h-3" />
-                    <span>All</span>
-                  </button>
-                </div>
+                <Carousel className="w-full" opts={{ align: "start", dragFree: true }}>
+                  <CarouselContent className="-ml-2">
+                    {alerts.map((alert) => (
+                      <CarouselItem key={alert.key} className="pl-2 basis-auto">
+                        <button
+                          onClick={alert.onClick}
+                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs font-medium transition-all hover:scale-[1.02] active:scale-[0.98] ${alert.color}`}
+                        >
+                          {alert.icon}
+                          <span>{alert.label}</span>
+                          {alert.sub && <span className="opacity-60">• {alert.sub}</span>}
+                        </button>
+                      </CarouselItem>
+                    ))}
+                    <CarouselItem className="pl-2 basis-auto">
+                      <button
+                        onClick={() => navigate("/notifications")}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-border text-xs text-muted-foreground hover:bg-muted/50 transition-all"
+                      >
+                        <Bell className="w-3 h-3" />
+                        <span>All</span>
+                      </button>
+                    </CarouselItem>
+                  </CarouselContent>
+                </Carousel>
               );
             })()}
 
