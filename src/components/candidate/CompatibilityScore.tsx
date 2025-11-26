@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, RefreshCw, Heart, Brain, Zap, Target, Users } from "lucide-react";
+import { Sparkles, RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Lightbulb } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Candidate = Tables<"candidates">;
+type AdviceTracking = Tables<"advice_tracking">;
 
 interface ScoreBreakdown {
   overall_score: number;
@@ -34,9 +36,32 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   onUpdate,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [adviceResponse, setAdviceResponse] = useState<AdviceTracking | null>(null);
+  const [respondingToAdvice, setRespondingToAdvice] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const scoreData = candidate.score_breakdown as unknown as ScoreBreakdown | null;
+
+  // Check if advice has already been responded to
+  useEffect(() => {
+    const checkAdviceResponse = async () => {
+      if (!scoreData?.advice || !user) return;
+      
+      const { data } = await supabase
+        .from("advice_tracking")
+        .select("*")
+        .eq("candidate_id", candidate.id)
+        .eq("advice_text", scoreData.advice)
+        .maybeSingle();
+      
+      if (data) {
+        setAdviceResponse(data);
+      }
+    };
+    
+    checkAdviceResponse();
+  }, [candidate.id, scoreData?.advice, user]);
 
   const calculateScore = async () => {
     setLoading(true);
@@ -71,6 +96,9 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
         last_score_update: new Date().toISOString(),
       });
 
+      // Reset advice response when new score is calculated
+      setAdviceResponse(null);
+
       toast({
         title: "Compatibility Analyzed",
         description: `Score: ${analysis.overall_score}%`,
@@ -84,6 +112,46 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const respondToAdvice = async (accepted: boolean) => {
+    if (!scoreData?.advice || !user) return;
+    
+    setRespondingToAdvice(true);
+    try {
+      const { data, error } = await supabase
+        .from("advice_tracking")
+        .insert({
+          user_id: user.id,
+          candidate_id: candidate.id,
+          advice_text: scoreData.advice,
+          advice_type: "compatibility",
+          response: accepted ? "accepted" : "declined",
+          followed_through: accepted,
+          responded_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setAdviceResponse(data);
+      toast({
+        title: accepted ? "Advice Accepted" : "Advice Declined",
+        description: accepted 
+          ? "Great! We'll track how this goes." 
+          : "No problem, we'll note your preference.",
+      });
+    } catch (error) {
+      console.error("Error tracking advice:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save your response",
+        variant: "destructive",
+      });
+    } finally {
+      setRespondingToAdvice(false);
     }
   };
 
@@ -211,11 +279,59 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
           </div>
         )}
 
-        {/* Advice */}
+        {/* Advice with Accept/Decline */}
         {scoreData.advice && (
-          <div className="p-3 bg-primary/5 rounded-lg">
-            <h4 className="text-sm font-medium mb-1">AI Advice</h4>
-            <p className="text-sm text-muted-foreground">{scoreData.advice}</p>
+          <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
+            <div className="flex items-start gap-2 mb-3">
+              <Lightbulb className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-medium">AI Advice</h4>
+                <p className="text-sm text-muted-foreground mt-1">{scoreData.advice}</p>
+              </div>
+            </div>
+            
+            {adviceResponse ? (
+              <div className={`text-sm px-3 py-2 rounded-md ${
+                adviceResponse.response === "accepted" 
+                  ? "bg-green-500/10 text-green-600" 
+                  : "bg-muted text-muted-foreground"
+              }`}>
+                {adviceResponse.response === "accepted" ? (
+                  <span className="flex items-center gap-2">
+                    <Check className="w-4 h-4" />
+                    You accepted this advice
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <X className="w-4 h-4" />
+                    You declined this advice
+                  </span>
+                )}
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 border-green-500/30 text-green-600 hover:bg-green-500/10"
+                  onClick={() => respondToAdvice(true)}
+                  disabled={respondingToAdvice}
+                >
+                  <Check className="w-4 h-4 mr-1" />
+                  Accept
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => respondToAdvice(false)}
+                  disabled={respondingToAdvice}
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Decline
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
