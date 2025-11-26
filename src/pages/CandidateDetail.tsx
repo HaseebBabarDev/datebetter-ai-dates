@@ -238,6 +238,7 @@ const CandidateDetail = () => {
             />
             <CandidateProfile
               candidate={candidate}
+              userId={user!.id}
               onUpdate={handleUpdateCandidate}
             />
           </TabsContent>
