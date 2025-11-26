@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Brain, Moon, Lock, Sparkles, Heart } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 
 const Splash = () => {
@@ -48,11 +49,11 @@ const Splash = () => {
 
         {/* Features */}
         <div className="w-full max-w-sm space-y-2 mb-8">
-          <FeatureItem text="AI scores every candidate for you" />
-          <FeatureItem text="Cycle-aware dating guidance" />
-          <FeatureItem text="Your privacy is completely protected" />
-          <FeatureItem text="Learning algorithms that improve with each interaction" />
-          <FeatureItem text="Built for women, by women" />
+          <FeatureItem icon={Brain} text="AI scores every candidate for you" />
+          <FeatureItem icon={Moon} text="Cycle-aware dating guidance" />
+          <FeatureItem icon={Lock} text="Your privacy is completely protected" />
+          <FeatureItem icon={Sparkles} text="Learning algorithms that improve with each interaction" />
+          <FeatureItem icon={Heart} text="Built for women, by women" />
         </div>
 
         {/* Buttons */}
@@ -78,8 +79,9 @@ const Splash = () => {
   );
 };
 
-const FeatureItem: React.FC<{ text: string }> = ({ text }) => (
+const FeatureItem: React.FC<{ icon: React.ElementType; text: string }> = ({ icon: Icon, text }) => (
   <div className="flex items-center gap-3 p-2.5 rounded-lg bg-card/40 backdrop-blur-sm border border-border/20">
+    <Icon className="w-4 h-4 text-primary shrink-0" />
     <span className="font-inter text-foreground/90 text-sm font-light">{text}</span>
   </div>
 );
