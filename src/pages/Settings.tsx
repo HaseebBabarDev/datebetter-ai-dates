@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables, Enums } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
@@ -53,6 +53,9 @@ const ORIENTATION_OPTIONS = [
 const Settings = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get("tab") || "account";
+  const section = searchParams.get("section");
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -149,7 +152,7 @@ const Settings = () => {
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-lg">
-        <Tabs defaultValue="account" className="w-full">
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="account" className="gap-1.5 text-xs sm:text-sm">
               <User className="w-4 h-4" />
@@ -257,7 +260,7 @@ const Settings = () => {
           </TabsContent>
 
           <TabsContent value="preferences">
-            <ProfilePreferencesEditor />
+            <ProfilePreferencesEditor defaultSection={section} />
           </TabsContent>
 
           <TabsContent value="billing" className="space-y-4">

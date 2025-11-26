@@ -144,7 +144,11 @@ const CYCLE_REGULARITY_OPTIONS = [
   { value: "not_applicable", label: "Not applicable" },
 ];
 
-export const ProfilePreferencesEditor: React.FC = () => {
+interface ProfilePreferencesEditorProps {
+  defaultSection?: string | null;
+}
+
+export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> = ({ defaultSection }) => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -211,7 +215,7 @@ export const ProfilePreferencesEditor: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <Accordion type="multiple" defaultValue={["relationship"]} className="space-y-2">
+      <Accordion type="multiple" defaultValue={defaultSection ? [defaultSection] : ["relationship"]} className="space-y-2">
 
         {/* Relationship Goals */}
         <AccordionItem value="relationship" className="border rounded-lg px-4">

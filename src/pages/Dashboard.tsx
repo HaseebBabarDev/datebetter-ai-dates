@@ -484,7 +484,7 @@ const Dashboard = () => {
                   icon: <Droplet className="w-3 h-3" />,
                   label: "Set up cycle",
                   color: "bg-secondary/20 text-secondary border-secondary/30",
-                  onClick: () => navigate("/settings"),
+                  onClick: () => navigate("/settings?tab=preferences&section=cycle"),
                 });
               }
 
