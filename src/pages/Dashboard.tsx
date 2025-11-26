@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,16 +8,29 @@ import { AlertsSection } from "@/components/dashboard/AlertsSection";
 import { CandidatesList } from "@/components/dashboard/CandidatesList";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { AddCandidateForm } from "@/components/dashboard/AddCandidateForm";
+import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
 import { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
+
+const statusOrder: Record<string, number> = {
+  getting_serious: 1,
+  dating: 2,
+  planning_date: 3,
+  texting: 4,
+  just_matched: 5,
+  no_contact: 6,
+  archived: 7,
+};
 
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<SortOption>("status");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
   useEffect(() => {
     if (user) {
@@ -45,6 +58,37 @@ const Dashboard = () => {
     fetchData();
   };
 
+  const filteredAndSortedCandidates = useMemo(() => {
+    let filtered = [...candidates];
+
+    // Apply status filter
+    if (statusFilter !== "all") {
+      if (statusFilter === "active") {
+        filtered = filtered.filter((c) => c.status !== "archived" && c.status !== "no_contact");
+      } else {
+        filtered = filtered.filter((c) => c.status === statusFilter);
+      }
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "score":
+          return (b.compatibility_score ?? 0) - (a.compatibility_score ?? 0);
+        case "status":
+          return (statusOrder[a.status || ""] || 99) - (statusOrder[b.status || ""] || 99);
+        case "date_added":
+          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        case "date_updated":
+          return new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime();
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [candidates, sortBy, statusFilter]);
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -69,9 +113,15 @@ const Dashboard = () => {
       <DashboardHeader userName={profile?.name || "there"} />
       
       <main className="container mx-auto px-4 py-6 max-w-lg space-y-6">
-        {/* Add Candidate Button - Always visible when there are candidates */}
+        {/* Filters - Always visible when there are candidates */}
         {candidates.length > 0 && (
-          <div className="flex justify-end">
+          <div className="flex items-center justify-between gap-2">
+            <CandidateFilters
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+            />
             <AddCandidateForm onSuccess={handleCandidateUpdate} />
           </div>
         )}
@@ -87,8 +137,9 @@ const Dashboard = () => {
         
         {candidates.length > 0 ? (
           <CandidatesList 
-            candidates={candidates} 
-            onUpdate={handleCandidateUpdate} 
+            candidates={filteredAndSortedCandidates} 
+            onUpdate={handleCandidateUpdate}
+            showGroupHeaders={statusFilter === "all" && sortBy === "status"}
           />
         ) : (
           <EmptyState onCandidateAdded={handleCandidateUpdate} />
