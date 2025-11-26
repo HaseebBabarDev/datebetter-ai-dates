@@ -77,8 +77,11 @@ serve(async (req) => {
       interactionSummary = `${interactions.length} interactions logged:\n${interactionDetails}`;
     }
 
+    // Calculate base scores from profile data for consistency
+    const baseScores = calculateBaseScores(profile, candidate);
+
     // Build the prompt for AI analysis
-    const prompt = `You are a relationship compatibility analyst. Analyze the compatibility between a user and their dating candidate based on the following profiles and interaction history.
+    const prompt = `You are a relationship compatibility analyst. Analyze the compatibility between a user and their dating candidate.
 
 USER PROFILE:
 - Relationship Goal: ${profile.relationship_goal || "Not specified"}
@@ -112,24 +115,17 @@ CHEMISTRY RATINGS (1-5):
 INTERACTION HISTORY (most recent first):
 ${interactionSummary}
 
-Consider the interaction history carefully - low feelings, uncertainty, and notes about concerning behavior should significantly impact the compatibility score and concerns.
+BASE COMPATIBILITY SCORES (calculated from profile matching):
+- Values Alignment: ${baseScores.values_alignment}
+- Lifestyle: ${baseScores.lifestyle_compatibility}
+- Emotional: ${baseScores.emotional_compatibility}
+- Chemistry: ${baseScores.chemistry_score}
+- Future Goals: ${baseScores.future_goals}
+- Base Overall: ${baseScores.overall_score}
 
-Provide a compatibility analysis with the following JSON structure:
-{
-  "overall_score": <number 0-100>,
-  "breakdown": {
-    "values_alignment": <number 0-100>,
-    "lifestyle_compatibility": <number 0-100>,
-    "emotional_compatibility": <number 0-100>,
-    "chemistry_score": <number 0-100>,
-    "future_goals": <number 0-100>
-  },
-  "strengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
-  "concerns": ["<concern 1>", "<concern 2>"],
-  "advice": "<brief personalized advice based on both profiles and recent interactions>"
-}
+IMPORTANT: Use the base scores as your foundation. You may adjust them by UP TO 15 points based on interaction history insights, but maintain consistency with the calculated base. Negative interactions should reduce scores, positive ones can slightly increase them.
 
-Only respond with valid JSON, no additional text.`;
+Analyze the compatibility and provide strengths, concerns, and personalized advice.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -140,9 +136,54 @@ Only respond with valid JSON, no additional text.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a relationship compatibility analyst. Always respond with valid JSON only." },
+          { role: "system", content: "You are a relationship compatibility analyst. Use the provided base scores as your foundation and adjust minimally based on interactions." },
           { role: "user", content: prompt }
         ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "provide_compatibility_analysis",
+              description: "Provide the compatibility analysis results",
+              parameters: {
+                type: "object",
+                properties: {
+                  overall_score: { 
+                    type: "number", 
+                    description: "Overall compatibility score 0-100, should be close to the base score with minor adjustments" 
+                  },
+                  breakdown: {
+                    type: "object",
+                    properties: {
+                      values_alignment: { type: "number", description: "Score 0-100 for values alignment" },
+                      lifestyle_compatibility: { type: "number", description: "Score 0-100 for lifestyle compatibility" },
+                      emotional_compatibility: { type: "number", description: "Score 0-100 for emotional compatibility" },
+                      chemistry_score: { type: "number", description: "Score 0-100 for chemistry" },
+                      future_goals: { type: "number", description: "Score 0-100 for future goals alignment" }
+                    },
+                    required: ["values_alignment", "lifestyle_compatibility", "emotional_compatibility", "chemistry_score", "future_goals"]
+                  },
+                  strengths: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "List of 2-4 relationship strengths"
+                  },
+                  concerns: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "List of 2-4 concerns or red flags"
+                  },
+                  advice: {
+                    type: "string",
+                    description: "Brief personalized advice for the user"
+                  }
+                },
+                required: ["overall_score", "breakdown", "strengths", "concerns", "advice"]
+              }
+            }
+          }
+        ],
+        tool_choice: { type: "function", function: { name: "provide_compatibility_analysis" } }
       }),
     });
 
@@ -153,19 +194,43 @@ Only respond with valid JSON, no additional text.`;
     }
 
     const aiData = await response.json();
-    const analysisText = aiData.choices?.[0]?.message?.content || "";
     
-    // Parse the JSON response
     let analysis;
-    try {
-      // Extract JSON from potential markdown code blocks
-      const jsonMatch = analysisText.match(/```json\s*([\s\S]*?)\s*```/) || 
-                        analysisText.match(/```\s*([\s\S]*?)\s*```/) ||
-                        [null, analysisText];
-      analysis = JSON.parse(jsonMatch[1] || analysisText);
-    } catch (e) {
-      console.error("Failed to parse AI response:", analysisText);
-      throw new Error("Failed to parse compatibility analysis");
+    
+    // Handle tool call response
+    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+    if (toolCall && toolCall.function?.arguments) {
+      try {
+        analysis = JSON.parse(toolCall.function.arguments);
+      } catch (e) {
+        console.error("Failed to parse tool call arguments:", toolCall.function.arguments);
+        // Fall back to base scores
+        analysis = {
+          overall_score: baseScores.overall_score,
+          breakdown: baseScores,
+          strengths: ["Profile data available for analysis"],
+          concerns: ["Unable to generate detailed analysis"],
+          advice: "Continue logging interactions to get better insights."
+        };
+      }
+    } else {
+      // Fallback: try to parse content as JSON
+      const analysisText = aiData.choices?.[0]?.message?.content || "";
+      try {
+        const jsonMatch = analysisText.match(/```json\s*([\s\S]*?)\s*```/) || 
+                          analysisText.match(/```\s*([\s\S]*?)\s*```/) ||
+                          [null, analysisText];
+        analysis = JSON.parse(jsonMatch[1] || analysisText);
+      } catch (e) {
+        console.error("Failed to parse AI response, using base scores");
+        analysis = {
+          overall_score: baseScores.overall_score,
+          breakdown: baseScores,
+          strengths: ["Profile data available for analysis"],
+          concerns: ["Unable to generate detailed analysis"],
+          advice: "Continue logging interactions to get better insights."
+        };
+      }
     }
 
     // Update candidate with compatibility score
@@ -193,3 +258,108 @@ Only respond with valid JSON, no additional text.`;
     );
   }
 });
+
+// Calculate deterministic base scores from profile matching
+function calculateBaseScores(profile: any, candidate: any) {
+  let valuesScore = 50;
+  let lifestyleScore = 50;
+  let emotionalScore = 50;
+  let futureGoalsScore = 50;
+  
+  // Values alignment (religion, politics)
+  if (profile.religion && candidate.their_religion) {
+    if (profile.religion === candidate.their_religion) {
+      valuesScore += 25;
+    } else if (profile.faith_importance >= 4) {
+      valuesScore -= 20;
+    }
+  }
+  
+  if (profile.politics && candidate.their_politics) {
+    const politicsOrder = ["progressive", "liberal", "moderate", "conservative", "traditional"];
+    const userIdx = politicsOrder.indexOf(profile.politics);
+    const candIdx = politicsOrder.indexOf(candidate.their_politics);
+    const diff = Math.abs(userIdx - candIdx);
+    if (diff === 0) valuesScore += 20;
+    else if (diff === 1) valuesScore += 10;
+    else if (diff >= 3 && profile.politics_importance >= 4) valuesScore -= 20;
+  }
+  
+  // Relationship goals alignment
+  if (profile.relationship_goal && candidate.their_relationship_goal) {
+    if (profile.relationship_goal === candidate.their_relationship_goal) {
+      futureGoalsScore += 30;
+    } else {
+      const serious = ["serious", "marriage"];
+      const casual = ["casual", "dating"];
+      const userSerious = serious.includes(profile.relationship_goal);
+      const candSerious = serious.includes(candidate.their_relationship_goal);
+      if (userSerious !== candSerious) futureGoalsScore -= 25;
+    }
+  }
+  
+  // Kids compatibility
+  if (profile.kids_desire && candidate.their_kids_desire) {
+    if (profile.kids_desire === "definitely_no" && 
+        (candidate.their_kids_desire === "definitely_yes" || candidate.their_kids_desire === "already_have")) {
+      futureGoalsScore -= 30;
+    } else if (profile.kids_desire === "definitely_yes" && candidate.their_kids_desire === "definitely_no") {
+      futureGoalsScore -= 30;
+    } else if (profile.kids_desire === candidate.their_kids_desire) {
+      futureGoalsScore += 15;
+    }
+  }
+  
+  // Attachment style compatibility
+  if (profile.attachment_style && candidate.their_attachment_style) {
+    const compatible: Record<string, string[]> = {
+      secure: ["secure", "anxious", "avoidant"],
+      anxious: ["secure"],
+      avoidant: ["secure"],
+      disorganized: ["secure"]
+    };
+    const userStyle = profile.attachment_style as string;
+    const candStyle = candidate.their_attachment_style as string;
+    if (compatible[userStyle]?.includes(candStyle)) {
+      emotionalScore += 20;
+    } else if (userStyle === "anxious" && candStyle === "avoidant") {
+      emotionalScore -= 25;
+    } else if (userStyle === "avoidant" && candStyle === "anxious") {
+      emotionalScore -= 25;
+    }
+  }
+  
+  // Chemistry score from ratings
+  const chemistryAvg = (
+    (candidate.physical_attraction || 3) +
+    (candidate.intellectual_connection || 3) +
+    (candidate.humor_compatibility || 3) +
+    (candidate.energy_match || 3) +
+    (candidate.overall_chemistry || 3)
+  ) / 5;
+  const chemistryScore = Math.round(chemistryAvg * 20); // Convert 1-5 to 0-100
+  
+  // Clamp scores
+  valuesScore = Math.max(0, Math.min(100, valuesScore));
+  lifestyleScore = Math.max(0, Math.min(100, lifestyleScore));
+  emotionalScore = Math.max(0, Math.min(100, emotionalScore));
+  futureGoalsScore = Math.max(0, Math.min(100, futureGoalsScore));
+  
+  // Overall weighted average
+  const overall = Math.round(
+    (valuesScore * 0.2) +
+    (lifestyleScore * 0.15) +
+    (emotionalScore * 0.2) +
+    (chemistryScore * 0.25) +
+    (futureGoalsScore * 0.2)
+  );
+  
+  return {
+    values_alignment: valuesScore,
+    lifestyle_compatibility: lifestyleScore,
+    emotional_compatibility: emotionalScore,
+    chemistry_score: chemistryScore,
+    future_goals: futureGoalsScore,
+    overall_score: overall
+  };
+}
