@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { OnboardingLayout } from "../OnboardingLayout";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 const careerOptions = [
   { value: "student", label: "Student" },
@@ -34,6 +35,13 @@ const educationOptions = [
 
 const CareerScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
+
+  useEffect(() => {
+    toast.success("Halfway there!", {
+      description: "You're making great progress",
+      duration: 3000,
+    });
+  }, []);
 
   return (
     <OnboardingLayout title="Career & Education" subtitle="Your professional life">
