@@ -133,6 +133,9 @@ export type Database = {
             | Database["public"]["Enums"]["attachment_style"]
             | null
           their_career_stage: string | null
+          their_drinking: string | null
+          their_education_level: string | null
+          their_exercise: string | null
           their_kids_desire: Database["public"]["Enums"]["kids_desire"] | null
           their_kids_status: Database["public"]["Enums"]["kids_status"] | null
           their_politics: Database["public"]["Enums"]["politics"] | null
@@ -140,6 +143,8 @@ export type Database = {
             | Database["public"]["Enums"]["relationship_goal"]
             | null
           their_religion: Database["public"]["Enums"]["religion"] | null
+          their_smoking: string | null
+          their_social_style: string | null
           updated_at: string | null
           user_id: string
         }
@@ -178,6 +183,9 @@ export type Database = {
             | Database["public"]["Enums"]["attachment_style"]
             | null
           their_career_stage?: string | null
+          their_drinking?: string | null
+          their_education_level?: string | null
+          their_exercise?: string | null
           their_kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
           their_kids_status?: Database["public"]["Enums"]["kids_status"] | null
           their_politics?: Database["public"]["Enums"]["politics"] | null
@@ -185,6 +193,8 @@ export type Database = {
             | Database["public"]["Enums"]["relationship_goal"]
             | null
           their_religion?: Database["public"]["Enums"]["religion"] | null
+          their_smoking?: string | null
+          their_social_style?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -223,6 +233,9 @@ export type Database = {
             | Database["public"]["Enums"]["attachment_style"]
             | null
           their_career_stage?: string | null
+          their_drinking?: string | null
+          their_education_level?: string | null
+          their_exercise?: string | null
           their_kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
           their_kids_status?: Database["public"]["Enums"]["kids_status"] | null
           their_politics?: Database["public"]["Enums"]["politics"] | null
@@ -230,6 +243,8 @@ export type Database = {
             | Database["public"]["Enums"]["relationship_goal"]
             | null
           their_religion?: Database["public"]["Enums"]["religion"] | null
+          their_smoking?: string | null
+          their_social_style?: string | null
           updated_at?: string | null
           user_id?: string
         }

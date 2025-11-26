@@ -268,10 +268,20 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                 {formatLabel(candidate.their_attachment_style, ATTACHMENT_STYLE_OPTIONS)} Attachment
               </Badge>
             )}
+            {(candidate as any).their_social_style && (
+              <Badge variant="outline">
+                {(candidate as any).their_social_style.replace("_", " ")}
+              </Badge>
+            )}
+            {(candidate as any).their_education_level && (
+              <Badge variant="outline">
+                {(candidate as any).their_education_level.replace("_", " ")}
+              </Badge>
+            )}
             {candidate.their_career_stage && (
               <Badge variant="outline" className="gap-1">
                 <Briefcase className="w-3 h-3" />
-                {candidate.their_career_stage}
+                {candidate.their_career_stage.replace("_", " ")}
               </Badge>
             )}
             {candidate.their_ambition_level && (
@@ -279,12 +289,40 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                 Ambition: {candidate.their_ambition_level}/5
               </Badge>
             )}
-            {!candidate.their_attachment_style && !candidate.their_career_stage && (
+            {!candidate.their_attachment_style && !candidate.their_career_stage && !(candidate as any).their_education_level && (
               <p className="text-sm text-muted-foreground">No personality info recorded</p>
             )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Lifestyle */}
+      {((candidate as any).their_drinking || (candidate as any).their_smoking || (candidate as any).their_exercise) && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Lifestyle</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {(candidate as any).their_drinking && (
+                <Badge variant="outline">
+                  🍷 {(candidate as any).their_drinking}
+                </Badge>
+              )}
+              {(candidate as any).their_smoking && (
+                <Badge variant="outline">
+                  🚬 {(candidate as any).their_smoking}
+                </Badge>
+              )}
+              {(candidate as any).their_exercise && (
+                <Badge variant="outline">
+                  💪 {(candidate as any).their_exercise}
+                </Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Chemistry Ratings */}
       <Card>
