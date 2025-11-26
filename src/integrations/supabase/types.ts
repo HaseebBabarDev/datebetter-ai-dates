@@ -666,6 +666,8 @@ export type Database = {
         | "non_binary"
         | "gender_fluid"
         | "self_describe"
+        | "man_cis"
+        | "man_trans"
       interaction_type:
         | "coffee"
         | "dinner"
@@ -873,6 +875,8 @@ export const Constants = {
         "non_binary",
         "gender_fluid",
         "self_describe",
+        "man_cis",
+        "man_trans",
       ],
       interaction_type: [
         "coffee",

@@ -19,10 +19,8 @@ const orientationOptions = [
 ];
 
 const interestedInOptions = [
-  { value: "men_cis", label: "Men (cisgender)" },
-  { value: "men_trans", label: "Men (transgender)" },
-  { value: "women_cis", label: "Women (cisgender)" },
-  { value: "women_trans", label: "Women (transgender)" },
+  { value: "men", label: "Men" },
+  { value: "women", label: "Women" },
   { value: "non_binary", label: "Non-binary people" },
   { value: "all", label: "All genders" },
 ];
