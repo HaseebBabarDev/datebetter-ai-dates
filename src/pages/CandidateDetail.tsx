@@ -9,6 +9,7 @@ import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
 import { FlagsSection } from "@/components/candidate/FlagsSection";
 import { AddInteractionForm } from "@/components/candidate/AddInteractionForm";
+import { NoContactMode } from "@/components/candidate/NoContactMode";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Candidate = Tables<"candidates">;
@@ -96,6 +97,9 @@ const CandidateDetail = () => {
     );
   }
 
+  // Determine default tab based on no contact status
+  const defaultTab = candidate.no_contact_active ? "no-contact" : "profile";
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -114,13 +118,16 @@ const CandidateDetail = () => {
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-lg space-y-6">
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue={defaultTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="interactions">
-              History ({interactions.length})
+              History
             </TabsTrigger>
             <TabsTrigger value="flags">Flags</TabsTrigger>
+            <TabsTrigger value="no-contact" className={candidate.no_contact_active ? "text-primary" : ""}>
+              NC
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="mt-4">
@@ -140,6 +147,13 @@ const CandidateDetail = () => {
 
           <TabsContent value="flags" className="mt-4">
             <FlagsSection
+              candidate={candidate}
+              onUpdate={handleUpdateCandidate}
+            />
+          </TabsContent>
+
+          <TabsContent value="no-contact" className="mt-4">
+            <NoContactMode
               candidate={candidate}
               onUpdate={handleUpdateCandidate}
             />
