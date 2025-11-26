@@ -32,8 +32,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { SliderInput } from "@/components/onboarding/SliderInput";
-import { Plus, AlertTriangle, Lightbulb } from "lucide-react";
+import { Plus, AlertTriangle, Lightbulb, Phone, Heart } from "lucide-react";
 import { toast } from "sonner";
+import { detectCrisisContent, CRISIS_RESOURCES, CrisisDetectionResult } from "@/lib/crisisDetection";
 
 interface AddInteractionFormProps {
   candidateId: string;
@@ -86,6 +87,8 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   const [open, setOpen] = useState(false);
   const [showBrokeContactDialog, setShowBrokeContactDialog] = useState(false);
   const [showPendingAdviceDialog, setShowPendingAdviceDialog] = useState(false);
+  const [showCrisisDialog, setShowCrisisDialog] = useState(false);
+  const [crisisResult, setCrisisResult] = useState<CrisisDetectionResult | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [interactionType, setInteractionType] = useState<Enums<"interaction_type">>(defaultType);
@@ -108,12 +111,23 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
     setNotes("");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, skipCrisisCheck = false) => {
     e.preventDefault();
 
     if (!user) {
       toast.error("You must be logged in");
       return;
+    }
+
+    // Check for crisis content in notes and gut feeling
+    if (!skipCrisisCheck) {
+      const textToCheck = `${notes} ${gutFeeling}`;
+      const crisis = detectCrisisContent(textToCheck);
+      if (crisis.detected) {
+        setCrisisResult(crisis);
+        setShowCrisisDialog(true);
+        return;
+      }
     }
 
     setLoading(true);
@@ -148,6 +162,13 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCrisisAcknowledged = async () => {
+    setShowCrisisDialog(false);
+    // Continue with saving the interaction
+    const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
+    await handleSubmit(fakeEvent, true);
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -204,6 +225,63 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
             <AlertDialogCancel>Keep No Contact</AlertDialogCancel>
             <AlertDialogAction onClick={handleBrokeContact}>
               Yes, I Broke Contact
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Crisis Detection Dialog */}
+      <AlertDialog open={showCrisisDialog} onOpenChange={setShowCrisisDialog}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <Heart className="w-5 h-5" />
+              {crisisResult?.severity === "severe" ? "We Care About Your Safety" : "Concerning Content Detected"}
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4">
+                <p className="text-foreground font-medium">
+                  {crisisResult?.severity === "severe" 
+                    ? "We noticed some concerning language in your notes. Your safety matters to us."
+                    : "We detected some language that suggests a difficult situation."}
+                </p>
+                
+                <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 space-y-3">
+                  <p className="text-sm font-medium text-destructive">If you or someone you know is in crisis:</p>
+                  
+                  <div className="space-y-2">
+                    <a 
+                      href={`tel:${CRISIS_RESOURCES.suicide.phone}`}
+                      className="flex items-center gap-2 text-sm bg-background rounded-md p-2 hover:bg-muted transition-colors"
+                    >
+                      <Phone className="w-4 h-4 text-destructive" />
+                      <span><strong>988</strong> - Suicide & Crisis Lifeline</span>
+                    </a>
+                    
+                    <a 
+                      href={`tel:${CRISIS_RESOURCES.domesticViolence.phone}`}
+                      className="flex items-center gap-2 text-sm bg-background rounded-md p-2 hover:bg-muted transition-colors"
+                    >
+                      <Phone className="w-4 h-4 text-destructive" />
+                      <span><strong>1-800-799-7233</strong> - Domestic Violence Hotline</span>
+                    </a>
+                    
+                    <p className="text-xs text-muted-foreground">
+                      Or text HOME to 741741 for the Crisis Text Line
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-sm text-muted-foreground">
+                  Your notes will still be saved. We just wanted to make sure you have these resources.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Go Back</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCrisisAcknowledged}>
+              I Understand, Continue
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
