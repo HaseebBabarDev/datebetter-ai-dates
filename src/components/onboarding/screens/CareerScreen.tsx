@@ -37,7 +37,7 @@ const CareerScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
   useEffect(() => {
-    toast.success("Halfway there!", {
+    toast.success("Halfway there! (8/17)", {
       description: "You're making great progress",
       duration: 3000,
     });

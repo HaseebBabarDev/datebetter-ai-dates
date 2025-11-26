@@ -29,8 +29,14 @@ const SafetyIntimacyScreen = () => {
             <OptionCard key={o.value} selected={data.intimacyComfort === o.value} onClick={() => updateData({ intimacyComfort: o.value })} title={o.label} />
           ))}
         </div>
-        <SliderInput label="Red flag detection sensitivity:" value={data.redFlagSensitivity || 5} onChange={(v) => updateData({ redFlagSensitivity: v })} min={1} max={10} leftLabel="Low" rightLabel="High" />
-        <SliderInput label="Love bombing alerts:" value={data.loveBombingSensitivity || 5} onChange={(v) => updateData({ loveBombingSensitivity: v })} min={1} max={10} leftLabel="Low" rightLabel="High" />
+        <div className="space-y-2">
+          <SliderInput label="Red flag detection sensitivity:" value={data.redFlagSensitivity || 5} onChange={(v) => updateData({ redFlagSensitivity: v })} min={1} max={10} leftLabel="Low" rightLabel="High" />
+          <p className="text-xs text-muted-foreground">Higher = stricter filtering of concerning behaviors</p>
+        </div>
+        <div className="space-y-2">
+          <SliderInput label="Love bombing alerts:" value={data.loveBombingSensitivity || 5} onChange={(v) => updateData({ loveBombingSensitivity: v })} min={1} max={10} leftLabel="Low" rightLabel="High" />
+          <p className="text-xs text-muted-foreground">Higher = more alerts for excessive early affection</p>
+        </div>
         <Button onClick={nextStep} disabled={!data.intimacyComfort} className="w-full" size="lg">Complete Setup</Button>
       </div>
     </OnboardingLayout>
