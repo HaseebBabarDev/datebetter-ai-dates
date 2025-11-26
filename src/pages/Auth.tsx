@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Mail, Lock, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, User } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -15,6 +15,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -58,7 +59,7 @@ const Auth = () => {
     
     try {
       const { error } = isSignUp 
-        ? await signUp(email, password)
+        ? await signUp(email, password, name)
         : await signIn(email, password);
       
       if (error) {
@@ -104,6 +105,25 @@ const Auth = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Name (Sign Up only) */}
+          {isSignUp && (
+            <div className="space-y-2">
+              <Label htmlFor="name">Your name</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Enter your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+          )}
+
           {/* Email */}
           <div className="space-y-2">
             <Label htmlFor="email">Email address</Label>
