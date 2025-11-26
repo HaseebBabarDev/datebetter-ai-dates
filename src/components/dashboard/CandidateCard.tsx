@@ -34,6 +34,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   texting: { label: "Texting", color: "bg-blue-500/10 text-blue-600" },
   planning_date: { label: "Planning Date", color: "bg-amber-500/10 text-amber-600" },
   dating: { label: "Dating", color: "bg-emerald-500/10 text-emerald-600" },
+  dating_casually: { label: "Dating Casually", color: "bg-teal-500/10 text-teal-600" },
   getting_serious: { label: "Getting Serious", color: "bg-pink-500/10 text-pink-600" },
   no_contact: { label: "No Contact", color: "bg-slate-500/10 text-slate-600" },
   archived: { label: "Archived", color: "bg-muted text-muted-foreground" },
@@ -62,6 +63,8 @@ const getNextStep = (status: string | null, updatedAt: string | null): string | 
     case "dating":
       if (daysSinceUpdate > 7) return "Schedule your next date";
       return "Log your latest interaction";
+    case "dating_casually":
+      return "Enjoy the moment - keep it light and fun";
     case "getting_serious":
       return "Have the relationship talk when ready";
     case "no_contact":
