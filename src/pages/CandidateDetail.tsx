@@ -11,6 +11,7 @@ import { FlagsSection } from "@/components/candidate/FlagsSection";
 import { AddInteractionForm } from "@/components/candidate/AddInteractionForm";
 import { NoContactMode } from "@/components/candidate/NoContactMode";
 import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
+import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
@@ -37,6 +38,7 @@ const CandidateDetail = () => {
   const { user, loading: authLoading } = useAuth();
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
+  const [userProfile, setUserProfile] = useState<{ schedule_flexibility?: string | null }>({});
   const [loading, setLoading] = useState(true);
   const [hasPendingAdvice, setHasPendingAdvice] = useState(false);
   const initialTab = (location.state as { tab?: string })?.tab;
@@ -84,7 +86,7 @@ const CandidateDetail = () => {
 
   const fetchData = async () => {
     try {
-      const [candidateRes, interactionsRes] = await Promise.all([
+      const [candidateRes, interactionsRes, profileRes] = await Promise.all([
         supabase
           .from("candidates")
           .select("*")
@@ -97,10 +99,16 @@ const CandidateDetail = () => {
           .eq("candidate_id", id!)
           .eq("user_id", user!.id)
           .order("interaction_date", { ascending: false }),
+        supabase
+          .from("profiles")
+          .select("schedule_flexibility")
+          .eq("user_id", user!.id)
+          .single(),
       ]);
 
       if (candidateRes.data) setCandidate(candidateRes.data);
       if (interactionsRes.data) setInteractions(interactionsRes.data);
+      if (profileRes.data) setUserProfile(profileRes.data);
     } catch (error) {
       console.error("Error fetching candidate:", error);
     } finally {
@@ -325,6 +333,11 @@ const CandidateDetail = () => {
           </TabsList>
 
           <TabsContent value="profile" className="mt-4 space-y-4">
+            <ScheduleCompatibilityAlert
+              userSchedule={userProfile.schedule_flexibility}
+              candidateSchedule={(candidate as any).their_schedule_flexibility}
+              variant="full"
+            />
             <CompatibilityScore
               candidate={candidate}
               onUpdate={(updates) => setCandidate({ ...candidate, ...updates })}
