@@ -128,7 +128,7 @@ export const NoContactMode: React.FC<NoContactModeProps> = ({
         day_number: 1,
       });
 
-      toast.success("No Contact Mode activated. You've got this! 💪");
+      toast.success("No Contact Mode activated. You've got this!");
       setCurrentDay(1);
       fetchProgress();
     } catch (error) {
@@ -214,7 +214,7 @@ export const NoContactMode: React.FC<NoContactModeProps> = ({
         day_number: 1,
       });
 
-      toast.success("Fresh start! Day 1 begins now. 💪");
+      toast.success("Fresh start! Day 1 begins now.");
       setCurrentDay(1);
       fetchProgress();
     } catch (error) {

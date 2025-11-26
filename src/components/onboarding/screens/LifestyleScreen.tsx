@@ -4,6 +4,18 @@ import { OnboardingLayout } from "../OnboardingLayout";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { OptionCard } from "../OptionCard";
+import { 
+  Home, 
+  Sparkles, 
+  Scale, 
+  Moon, 
+  Laptop, 
+  Building2, 
+  RefreshCw, 
+  Phone, 
+  GraduationCap, 
+  Briefcase 
+} from "lucide-react";
 
 const distanceOptions = [
   { value: "5mi", label: "Same neighborhood (5 miles)" },
@@ -14,10 +26,10 @@ const distanceOptions = [
 ];
 
 const socialOptions = [
-  { value: "homebody", label: "🏠 Homebody" },
-  { value: "social_butterfly", label: "🦋 Social butterfly" },
-  { value: "balanced", label: "⚖️ Balanced" },
-  { value: "mood_dependent", label: "🌙 Depends on mood" },
+  { value: "homebody", label: "Homebody", icon: Home },
+  { value: "social_butterfly", label: "Social butterfly", icon: Sparkles },
+  { value: "balanced", label: "Balanced", icon: Scale },
+  { value: "mood_dependent", label: "Depends on mood", icon: Moon },
 ];
 
 const activityOptions = [
@@ -29,14 +41,14 @@ const activityOptions = [
 ];
 
 const scheduleOptions = [
-  { value: "remote_flexible", label: "🏡 Remote / Fully Flexible" },
-  { value: "hybrid", label: "🔄 Hybrid (mix of office & remote)" },
-  { value: "office_9_5", label: "🏢 Office 9-5" },
-  { value: "shift_work", label: "🔄 Shift Work (varied hours)" },
-  { value: "on_call", label: "📞 On-Call / Variable" },
-  { value: "overnight", label: "🌙 Overnight / Night Shift" },
-  { value: "student", label: "📚 Student Schedule" },
-  { value: "self_employed", label: "💼 Self-Employed / Flexible" },
+  { value: "remote_flexible", label: "Remote / Fully Flexible", icon: Laptop },
+  { value: "hybrid", label: "Hybrid (mix of office & remote)", icon: RefreshCw },
+  { value: "office_9_5", label: "Office 9-5", icon: Building2 },
+  { value: "shift_work", label: "Shift Work (varied hours)", icon: RefreshCw },
+  { value: "on_call", label: "On-Call / Variable", icon: Phone },
+  { value: "overnight", label: "Overnight / Night Shift", icon: Moon },
+  { value: "student", label: "Student Schedule", icon: GraduationCap },
+  { value: "self_employed", label: "Self-Employed / Flexible", icon: Briefcase },
 ];
 
 const LifestyleScreen = () => {
@@ -57,7 +69,13 @@ const LifestyleScreen = () => {
           <p className="text-xs text-muted-foreground">This helps match you with compatible schedules</p>
           <div className="grid grid-cols-2 gap-2">
             {scheduleOptions.map((o) => (
-              <OptionCard key={o.value} selected={data.scheduleFlexibility === o.value} onClick={() => updateData({ scheduleFlexibility: o.value })} title={o.label} />
+              <OptionCard 
+                key={o.value} 
+                selected={data.scheduleFlexibility === o.value} 
+                onClick={() => updateData({ scheduleFlexibility: o.value })} 
+                icon={<o.icon className="w-4 h-4" />}
+                title={o.label} 
+              />
             ))}
           </div>
         </div>
@@ -66,7 +84,13 @@ const LifestyleScreen = () => {
           <Label>Your social energy:</Label>
           <div className="grid grid-cols-2 gap-2">
             {socialOptions.map((o) => (
-              <OptionCard key={o.value} selected={data.socialStyle === o.value} onClick={() => updateData({ socialStyle: o.value })} title={o.label} />
+              <OptionCard 
+                key={o.value} 
+                selected={data.socialStyle === o.value} 
+                onClick={() => updateData({ socialStyle: o.value })} 
+                icon={<o.icon className="w-4 h-4" />}
+                title={o.label} 
+              />
             ))}
           </div>
         </div>

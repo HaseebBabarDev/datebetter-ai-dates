@@ -4,7 +4,7 @@ import { Tables, Enums } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Calendar, MapPin, User, Briefcase, Heart, Users, Church, Vote } from "lucide-react";
+import { Pencil, Calendar, MapPin, User, Briefcase, Heart, Users, Church, Vote, Wine, Cigarette, Dumbbell } from "lucide-react";
 import { CandidatePhotoUpload } from "./CandidatePhotoUpload";
 
 type Candidate = Tables<"candidates">;
@@ -307,18 +307,21 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {(candidate as any).their_drinking && (
-                <Badge variant="outline">
-                  🍷 {(candidate as any).their_drinking}
+                <Badge variant="outline" className="gap-1">
+                  <Wine className="w-3 h-3" />
+                  {(candidate as any).their_drinking}
                 </Badge>
               )}
               {(candidate as any).their_smoking && (
-                <Badge variant="outline">
-                  🚬 {(candidate as any).their_smoking}
+                <Badge variant="outline" className="gap-1">
+                  <Cigarette className="w-3 h-3" />
+                  {(candidate as any).their_smoking}
                 </Badge>
               )}
               {(candidate as any).their_exercise && (
-                <Badge variant="outline">
-                  💪 {(candidate as any).their_exercise}
+                <Badge variant="outline" className="gap-1">
+                  <Dumbbell className="w-3 h-3" />
+                  {(candidate as any).their_exercise}
                 </Badge>
               )}
             </div>

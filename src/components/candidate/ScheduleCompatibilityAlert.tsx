@@ -157,7 +157,7 @@ export const ScheduleCompatibilityAlert: React.FC<ScheduleCompatibilityAlertProp
         title={message}
       >
         <Icon className="w-3 h-3" />
-        {level === "conflict" ? "⚠️ Schedule" : "🕐 Schedule"}
+        Schedule
       </span>
     );
   }
