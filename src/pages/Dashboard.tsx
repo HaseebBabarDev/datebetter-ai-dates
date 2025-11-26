@@ -275,6 +275,22 @@ const Dashboard = () => {
           )}
         </div>
 
+        {/* Recent Intimacy Reminder - Show if no recent intimate interactions */}
+        {candidates.length > 0 && oxytocinAlerts.length === 0 && (
+          <Card className="border-pink-500/20 bg-pink-500/5">
+            <CardContent className="py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-pink-500" />
+                  <p className="text-xs text-muted-foreground">
+                    Log intimate interactions to get oxytocin bonding alerts
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Cycle Tracking CTA - Show if tracking enabled but no date set */}
         {profile?.track_cycle && !profile?.last_period_date && (
           <Card className="border-primary/30 bg-primary/5">
