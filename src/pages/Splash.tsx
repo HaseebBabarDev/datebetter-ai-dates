@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import splashImage from "@/assets/splash-couple.jpeg";
+import logo from "@/assets/logo.jpg";
 
 const Splash = () => {
   const navigate = useNavigate();
@@ -20,7 +21,14 @@ const Splash = () => {
 
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-8">
-        {/* Logo Section */}
+        {/* Logo */}
+        <img 
+          src={logo} 
+          alt="dateBetter logo" 
+          className="w-24 h-24 rounded-full mb-4"
+        />
+
+        {/* Logo Text */}
         <div className="text-center mb-6">
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
             dateBetter
@@ -69,7 +77,6 @@ const Splash = () => {
 
 const FeatureItem: React.FC<{ text: string }> = ({ text }) => (
   <div className="flex items-center gap-3 p-2 rounded-lg bg-card/50 backdrop-blur-sm border border-border/30">
-    <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
     <span className="text-foreground/90 text-sm">{text}</span>
   </div>
 );
