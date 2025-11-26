@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -14,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, UserPlus, Sparkles } from "lucide-react";
+import { ArrowLeft, UserPlus, Sparkles, Heart } from "lucide-react";
 import { toast } from "sonner";
 
 const MET_VIA_OPTIONS = [
@@ -52,6 +53,8 @@ const AddCandidate = () => {
   const [metVia, setMetVia] = useState("");
   const [metApp, setMetApp] = useState("");
   const [status, setStatus] = useState<Enums<"candidate_status">>("just_matched");
+  const [beenIntimate, setBeenIntimate] = useState(false);
+  const [firstIntimacyDate, setFirstIntimacyDate] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,11 +82,23 @@ const AddCandidate = () => {
           met_app: metVia === "dating_app" ? metApp : null,
           status,
           first_contact_date: new Date().toISOString().split("T")[0],
+          first_intimacy_date: beenIntimate && firstIntimacyDate ? firstIntimacyDate : null,
         })
         .select()
         .single();
 
       if (error) throw error;
+
+      // If they've been intimate, also log an intimate interaction
+      if (beenIntimate && firstIntimacyDate) {
+        await supabase.from("interactions").insert({
+          user_id: user.id,
+          candidate_id: data.id,
+          interaction_type: "intimate",
+          interaction_date: firstIntimacyDate,
+          overall_feeling: 4,
+        });
+      }
 
       toast.success(`${nickname} added to your roster!`);
       navigate(`/candidate/${data.id}`);
@@ -214,6 +229,45 @@ const AddCandidate = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Heart className="w-5 h-5 text-pink-500" />
+                Intimacy
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Been intimate?</p>
+                  <p className="text-xs text-muted-foreground">
+                    Helps track oxytocin bonding alerts
+                  </p>
+                </div>
+                <Switch
+                  checked={beenIntimate}
+                  onCheckedChange={setBeenIntimate}
+                />
+              </div>
+
+              {beenIntimate && (
+                <div className="space-y-2">
+                  <Label htmlFor="intimacyDate">First intimacy date</Label>
+                  <Input
+                    id="intimacyDate"
+                    type="date"
+                    value={firstIntimacyDate}
+                    onChange={(e) => setFirstIntimacyDate(e.target.value)}
+                    max={new Date().toISOString().split("T")[0]}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    We'll remind you about hormone-bonding effects for 48-72 hours after intimacy
+                  </p>
                 </div>
               )}
             </CardContent>
