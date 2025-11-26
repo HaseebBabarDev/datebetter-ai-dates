@@ -1,9 +1,13 @@
-import React from "react";
-import { AlertTriangle, Heart, Clock, TrendingUp } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { AlertTriangle, Heart, Clock, TrendingUp, Lightbulb } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 import { differenceInDays } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 type Candidate = Tables<"candidates">;
+type AdviceTracking = Tables<"advice_tracking">;
 
 interface AlertsSectionProps {
   candidates: Candidate[];
@@ -11,14 +15,63 @@ interface AlertsSectionProps {
 
 interface Alert {
   id: string;
-  type: "warning" | "info" | "success" | "urgent";
+  type: "warning" | "info" | "success" | "urgent" | "advice";
   icon: React.ReactNode;
   title: string;
   message: string;
+  candidateId?: string;
+}
+
+interface AdviceStats {
+  pending: number;
+  accepted: number;
+  declined: number;
 }
 
 export const AlertsSection: React.FC<AlertsSectionProps> = ({ candidates }) => {
-  const alerts = generateAlerts(candidates);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [pendingAdvice, setPendingAdvice] = useState<{ candidate: Candidate; advice: string }[]>([]);
+  const [adviceStats, setAdviceStats] = useState<AdviceStats>({ pending: 0, accepted: 0, declined: 0 });
+
+  useEffect(() => {
+    const fetchAdviceStatus = async () => {
+      if (!user) return;
+
+      // Get all advice tracking records
+      const { data: trackedAdvice } = await supabase
+        .from("advice_tracking")
+        .select("candidate_id, advice_text, response")
+        .eq("user_id", user.id);
+
+      const trackedSet = new Set(
+        trackedAdvice?.map((a) => `${a.candidate_id}-${a.advice_text}`) || []
+      );
+
+      // Find candidates with untracked advice
+      const pending: { candidate: Candidate; advice: string }[] = [];
+      candidates.forEach((c) => {
+        const scoreData = c.score_breakdown as any;
+        if (scoreData?.advice) {
+          const key = `${c.id}-${scoreData.advice}`;
+          if (!trackedSet.has(key)) {
+            pending.push({ candidate: c, advice: scoreData.advice });
+          }
+        }
+      });
+
+      setPendingAdvice(pending);
+
+      // Calculate stats
+      const accepted = trackedAdvice?.filter((a) => a.response === "accepted").length || 0;
+      const declined = trackedAdvice?.filter((a) => a.response === "declined").length || 0;
+      setAdviceStats({ pending: pending.length, accepted, declined });
+    };
+
+    fetchAdviceStatus();
+  }, [user, candidates]);
+
+  const alerts = generateAlerts(candidates, pendingAdvice, adviceStats);
 
   if (alerts.length === 0) return null;
 
@@ -28,24 +81,33 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({ candidates }) => {
         Insights & Alerts
       </h2>
       <div className="space-y-2">
-        {alerts.slice(0, 3).map((alert) => (
-          <AlertCard key={alert.id} alert={alert} />
+        {alerts.slice(0, 4).map((alert) => (
+          <AlertCard 
+            key={alert.id} 
+            alert={alert} 
+            onClick={alert.candidateId ? () => navigate(`/candidate/${alert.candidateId}`) : undefined}
+          />
         ))}
       </div>
     </div>
   );
 };
 
-const AlertCard: React.FC<{ alert: Alert }> = ({ alert }) => {
+const AlertCard: React.FC<{ alert: Alert; onClick?: () => void }> = ({ alert, onClick }) => {
   const styles = {
     warning: "bg-amber-500/10 border-amber-500/20 text-amber-600",
     info: "bg-primary/10 border-primary/20 text-primary",
     success: "bg-emerald-500/10 border-emerald-500/20 text-emerald-600",
     urgent: "bg-destructive/10 border-destructive/20 text-destructive",
+    advice: "bg-purple-500/10 border-purple-500/20 text-purple-600",
   };
 
   return (
-    <div className={`rounded-xl p-3 border ${styles[alert.type]}`}>
+    <button 
+      onClick={onClick}
+      disabled={!onClick}
+      className={`w-full rounded-xl p-3 border ${styles[alert.type]} text-left transition-all ${onClick ? "hover:scale-[1.02] cursor-pointer" : ""}`}
+    >
       <div className="flex items-start gap-3">
         <div className="shrink-0 mt-0.5">{alert.icon}</div>
         <div className="flex-1 min-w-0">
@@ -53,13 +115,45 @@ const AlertCard: React.FC<{ alert: Alert }> = ({ alert }) => {
           <p className="text-xs opacity-80 mt-0.5">{alert.message}</p>
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 
-function generateAlerts(candidates: Candidate[]): Alert[] {
+function generateAlerts(
+  candidates: Candidate[], 
+  pendingAdvice: { candidate: Candidate; advice: string }[],
+  adviceStats: AdviceStats
+): Alert[] {
   const alerts: Alert[] = [];
   const today = new Date();
+
+  // Show pending advice first (most actionable)
+  if (pendingAdvice.length > 0) {
+    const first = pendingAdvice[0];
+    alerts.push({
+      id: `advice-${first.candidate.id}`,
+      type: "advice",
+      icon: <Lightbulb className="w-4 h-4" />,
+      title: `Advice for ${first.candidate.nickname}`,
+      message: pendingAdvice.length > 1 
+        ? `${pendingAdvice.length} pieces of advice waiting for your response`
+        : "Tap to review and respond to this advice",
+      candidateId: first.candidate.id,
+    });
+  }
+
+  // Show advice acceptance rate if there's history
+  if (adviceStats.accepted + adviceStats.declined >= 3) {
+    const total = adviceStats.accepted + adviceStats.declined;
+    const rate = Math.round((adviceStats.accepted / total) * 100);
+    alerts.push({
+      id: "advice-stats",
+      type: "info",
+      icon: <TrendingUp className="w-4 h-4" />,
+      title: "Advice Acceptance Rate",
+      message: `You've accepted ${rate}% of AI advice (${adviceStats.accepted}/${total})`,
+    });
+  }
 
   // Check for candidates with red flags
   const redFlagCandidates = candidates.filter((c) => {
@@ -74,6 +168,7 @@ function generateAlerts(candidates: Candidate[]): Alert[] {
       icon: <AlertTriangle className="w-4 h-4" />,
       title: "Red Flag Alert",
       message: `${redFlagCandidates[0].nickname} has ${flagCount} red flags logged`,
+      candidateId: redFlagCandidates[0].id,
     });
   }
 
@@ -87,6 +182,7 @@ function generateAlerts(candidates: Candidate[]): Alert[] {
         icon: <Clock className="w-4 h-4" />,
         title: `Day ${c.no_contact_day} of No Contact`,
         message: `Stay strong! You're doing great with ${c.nickname}`,
+        candidateId: c.id,
       });
     }
   });
@@ -102,6 +198,7 @@ function generateAlerts(candidates: Candidate[]): Alert[] {
       icon: <Heart className="w-4 h-4" />,
       title: "High Compatibility Match",
       message: `${highCompatibility[0].nickname} scores ${highCompatibility[0].compatibility_score}% compatible`,
+      candidateId: highCompatibility[0].id,
     });
   }
 
@@ -117,6 +214,7 @@ function generateAlerts(candidates: Candidate[]): Alert[] {
       icon: <TrendingUp className="w-4 h-4" />,
       title: "Time for an Update?",
       message: `You haven't logged anything for ${staleCandidates[0].nickname} in a week`,
+      candidateId: staleCandidates[0].id,
     });
   }
 
