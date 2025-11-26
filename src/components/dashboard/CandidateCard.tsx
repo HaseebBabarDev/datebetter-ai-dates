@@ -54,10 +54,43 @@ const distanceConfig: Record<string, { label: string; icon: typeof MapPin; color
   long_distance: { label: "Long Distance", icon: Globe, color: "text-purple-600 bg-purple-500/10" },
 };
 
-const getNextStep = (status: string | null, updatedAt: string | null): string | null => {
+interface NextStepParams {
+  status: string | null;
+  updatedAt: string | null;
+  compatibilityScore: number | null;
+  redFlagCount: number;
+  alerts: CandidateAlert[];
+}
+
+const getNextStep = ({ status, updatedAt, compatibilityScore, redFlagCount, alerts }: NextStepParams): string | null => {
   const daysSinceUpdate = updatedAt 
     ? Math.floor((Date.now() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24))
     : 0;
+
+  // Check for negative sentiment indicators
+  const hasPostIntimacyDrop = alerts.some(a => a.type === "post_intimacy_drop");
+  const hasLoveBombing = alerts.some(a => a.type === "love_bombing");
+  const isLowScore = compatibilityScore !== null && compatibilityScore < 40;
+  const hasManyRedFlags = redFlagCount >= 3;
+  const isNegativeSentiment = hasPostIntimacyDrop || isLowScore || hasManyRedFlags;
+
+  // Override for negative sentiment - always suggest caution
+  if (isNegativeSentiment) {
+    if (hasPostIntimacyDrop) {
+      return "⚠️ Take a step back - evaluate if this is worth pursuing";
+    }
+    if (hasManyRedFlags) {
+      return "🚩 Multiple red flags - consider ending things";
+    }
+    if (isLowScore) {
+      return "📉 Low compatibility - reflect on whether to continue";
+    }
+  }
+
+  // Love bombing warning (but might not be deal-breaker yet)
+  if (hasLoveBombing) {
+    return "⚠️ Slow down - watch for love bombing patterns";
+  }
 
   switch (status) {
     case "just_matched":
@@ -91,7 +124,13 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
   const status = statusConfig[candidate.status || "just_matched"];
   const redFlagCount = Array.isArray(candidate.red_flags) ? candidate.red_flags.length : 0;
   const greenFlagCount = Array.isArray(candidate.green_flags) ? candidate.green_flags.length : 0;
-  const nextStep = getNextStep(candidate.status, candidate.updated_at);
+  const nextStep = getNextStep({
+    status: candidate.status,
+    updatedAt: candidate.updated_at,
+    compatibilityScore: candidate.compatibility_score,
+    redFlagCount,
+    alerts,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
