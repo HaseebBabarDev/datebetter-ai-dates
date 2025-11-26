@@ -54,14 +54,15 @@ const LocationScheduleScreen = () => {
         <div className="space-y-3">
           <Label>Your work schedule:</Label>
           <p className="text-xs text-muted-foreground">Helps match compatible schedules</p>
-          <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2">
             {scheduleOptions.map((o) => (
               <OptionCard 
                 key={o.value} 
                 selected={data.scheduleFlexibility === o.value} 
                 onClick={() => updateData({ scheduleFlexibility: o.value })} 
-                icon={<o.icon className="w-4 h-4" />}
-                title={o.label} 
+                icon={<o.icon />}
+                title={o.label}
+                compact
               />
             ))}
           </div>

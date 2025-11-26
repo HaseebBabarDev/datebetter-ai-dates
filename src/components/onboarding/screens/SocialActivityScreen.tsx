@@ -35,8 +35,9 @@ const SocialActivityScreen = () => {
                 key={o.value} 
                 selected={data.socialStyle === o.value} 
                 onClick={() => updateData({ socialStyle: o.value })} 
-                icon={<o.icon className="w-4 h-4" />}
-                title={o.label} 
+                icon={<o.icon />}
+                title={o.label}
+                compact
               />
             ))}
           </div>
