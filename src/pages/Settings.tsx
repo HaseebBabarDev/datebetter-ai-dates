@@ -311,7 +311,7 @@ const Settings = () => {
                 </CardContent>
               </Card>
 
-              {/* Growth Plan */}
+              {/* Dating Often Plan */}
               <Card className="cursor-pointer hover:border-primary/50 transition-colors border-primary/30 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-bl">
                   Best Value
@@ -319,7 +319,7 @@ const Settings = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h4 className="font-semibold">Growth</h4>
+                      <h4 className="font-semibold">Dating Often</h4>
                       <p className="text-sm text-muted-foreground">15 candidate updates/month</p>
                     </div>
                     <div className="text-right">
@@ -346,17 +346,17 @@ const Settings = () => {
                     </div>
                   </div>
                   <Button className="w-full mt-4">
-                    Upgrade to Growth
+                    Upgrade to Dating Often
                   </Button>
                 </CardContent>
               </Card>
 
-              {/* Pro Plan */}
+              {/* Dating More Plan */}
               <Card className="cursor-pointer hover:border-primary/50 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h4 className="font-semibold">Pro</h4>
+                      <h4 className="font-semibold">Dating More</h4>
                       <p className="text-sm text-muted-foreground">100 candidate updates/month</p>
                     </div>
                     <div className="text-right">
@@ -371,7 +371,7 @@ const Settings = () => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Check className="w-4 h-4 text-green-500" />
-                      <span>Everything in Growth</span>
+                      <span>Everything in Dating Often</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Sparkles className="w-4 h-4 text-primary" />
@@ -383,7 +383,7 @@ const Settings = () => {
                     </div>
                   </div>
                   <Button className="w-full mt-4" variant="outline">
-                    Upgrade to Pro
+                    Upgrade to Dating More
                   </Button>
                 </CardContent>
               </Card>
