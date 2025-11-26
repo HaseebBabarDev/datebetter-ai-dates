@@ -266,9 +266,9 @@ const Dashboard = () => {
         <img 
           src={heroCouple} 
           alt="" 
-          className="w-full h-full object-cover object-top opacity-30"
+          className="w-full h-full object-cover object-top opacity-50"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
       </div>
 
       {/* Header */}
