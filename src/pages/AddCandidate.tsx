@@ -973,26 +973,15 @@ const AddCandidate = () => {
             </TabsContent>
           </Tabs>
 
-          <div className="space-y-3 pt-2">
+          <div className="space-y-2 pt-2">
             {isEditMode ? (
-              <div className="flex gap-2">
-                <Button 
-                  type="submit" 
-                  variant="outline"
-                  className="flex-1" 
-                  size="lg" 
-                  disabled={loading}
-                >
-                  {loading ? "Saving..." : <><Pencil className="w-4 h-4 mr-2" />Save Changes</>}
-                </Button>
+              <div className="flex flex-col gap-2">
                 {activeTab !== "chemistry" && (
                   <Button 
-                    type="submit" 
-                    className="flex-1" 
-                    size="lg" 
+                    type="button" 
+                    className="w-full text-xs h-9" 
                     disabled={loading}
-                    onClick={(e) => {
-                      e.preventDefault();
+                    onClick={() => {
                       const currentIndex = TABS.indexOf(activeTab as typeof TABS[number]);
                       if (currentIndex < TABS.length - 1) {
                         setActiveTab(TABS[currentIndex + 1]);
@@ -1002,6 +991,14 @@ const AddCandidate = () => {
                     Add More Info →
                   </Button>
                 )}
+                <Button 
+                  type="submit" 
+                  variant="outline"
+                  className="w-full text-xs h-9" 
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Save Changes"}
+                </Button>
               </div>
             ) : (
               <Button type="submit" className="w-full" size="lg" disabled={loading}>
