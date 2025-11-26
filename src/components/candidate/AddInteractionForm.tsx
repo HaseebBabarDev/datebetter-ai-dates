@@ -43,7 +43,8 @@ interface AddInteractionFormProps {
   onBrokeContact?: () => void;
 }
 
-const INTERACTION_TYPES: { value: Enums<"interaction_type">; label: string }[] = [
+const INTERACTION_TYPES: { value: Enums<"interaction_type">; label: string; highlight?: boolean }[] = [
+  { value: "intimate", label: "💕 Intimate", highlight: true },
   { value: "coffee", label: "Coffee Date" },
   { value: "dinner", label: "Dinner" },
   { value: "drinks", label: "Drinks" },
@@ -55,7 +56,6 @@ const INTERACTION_TYPES: { value: Enums<"interaction_type">; label: string }[] =
   { value: "group_hang", label: "Group Hang" },
   { value: "trip", label: "Trip Together" },
   { value: "event", label: "Event/Concert" },
-  { value: "intimate", label: "Intimate" },
 ];
 
 const DURATION_OPTIONS = [
@@ -209,7 +209,11 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   {INTERACTION_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
+                    <SelectItem 
+                      key={type.value} 
+                      value={type.value}
+                      className={type.highlight ? "text-pink-600 font-medium" : ""}
+                    >
                       {type.label}
                     </SelectItem>
                   ))}
