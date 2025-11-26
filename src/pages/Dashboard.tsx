@@ -38,7 +38,7 @@ import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboa
 import { CandidatesList } from "@/components/dashboard/CandidatesList";
 import { LogInteractionDialog } from "@/components/dashboard/LogInteractionDialog";
 import { differenceInDays, addDays, format } from "date-fns";
-import heroCouple from "@/assets/hero-sunny.jpg";
+import heroCouple from "@/assets/hero-couple.jpeg";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -260,33 +260,33 @@ const Dashboard = () => {
   ).length;
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-amber-950">
+    <div className="min-h-screen relative overflow-hidden bg-background">
       {/* Hero Background Image */}
       <div className="fixed inset-0 z-0">
         <img 
           src={heroCouple} 
           alt="" 
-          className="w-full h-full object-cover object-center opacity-50"
+          className="w-full h-full object-cover object-top opacity-30"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-amber-900/40 via-amber-950/70 to-amber-950" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-yellow-500/10 bg-amber-950/60">
+      <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-border bg-background/80">
         <div className="container mx-auto px-4 py-4 max-w-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-yellow-200/60">{greeting}</p>
-              <h1 className="text-xl font-semibold text-yellow-50">{profile?.name || "there"}</h1>
+              <p className="text-sm text-muted-foreground">{greeting}</p>
+              <h1 className="text-xl font-semibold text-foreground">{profile?.name || "there"}</h1>
             </div>
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="relative text-yellow-50 hover:bg-yellow-500/10" onClick={() => navigate("/notifications")}>
+              <Button variant="ghost" size="icon" className="relative text-foreground hover:bg-primary/10" onClick={() => navigate("/notifications")}>
                 <Bell className="w-5 h-5" />
                 {(oxytocinAlerts.length > 0 || candidates.filter(c => c.no_contact_active).length > 0) && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-yellow-400 rounded-full" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
                 )}
               </Button>
-              <Button variant="ghost" size="icon" className="text-yellow-50 hover:bg-yellow-500/10" onClick={() => navigate("/settings")}>
+              <Button variant="ghost" size="icon" className="text-foreground hover:bg-primary/10" onClick={() => navigate("/settings")}>
                 <Settings className="w-5 h-5" />
               </Button>
             </div>
@@ -296,9 +296,9 @@ const Dashboard = () => {
 
       <main className="relative z-10 container mx-auto px-4 py-4 max-w-lg pb-20">
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setQualityFilter(null); }} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4 bg-yellow-900/30 backdrop-blur-sm border border-yellow-500/20">
-            <TabsTrigger value="home" className="data-[state=active]:bg-yellow-500/30 data-[state=active]:text-yellow-50 text-yellow-100/70">Home</TabsTrigger>
-            <TabsTrigger value="manage" className="data-[state=active]:bg-yellow-500/30 data-[state=active]:text-yellow-50 text-yellow-100/70">Manage Candidates</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-4 bg-muted/50 backdrop-blur-sm border border-border">
+            <TabsTrigger value="home" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground">Home</TabsTrigger>
+            <TabsTrigger value="manage" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground">Manage Candidates</TabsTrigger>
           </TabsList>
 
           <TabsContent value="home" className="space-y-4 mt-0">
@@ -307,7 +307,7 @@ const Dashboard = () => {
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   onClick={() => navigate("/add-candidate")}
-                  className="w-full bg-yellow-400 hover:bg-yellow-300 text-amber-950 h-12 gap-2 font-semibold shadow-lg shadow-yellow-400/30"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 gap-2 font-semibold shadow-lg shadow-primary/30"
                 >
                   <Plus className="w-4 h-4" />
                   <span className="text-sm font-medium">Add Candidate</span>
@@ -317,7 +317,7 @@ const Dashboard = () => {
               <Button
                 variant="outline"
                 onClick={() => navigate("/patterns")}
-                className="w-full h-10 gap-2 border-yellow-500/30 text-yellow-100 hover:bg-yellow-500/10 bg-yellow-900/20"
+                className="w-full h-10 gap-2 border-border text-foreground hover:bg-primary/10"
               >
                 <TrendingUp className="w-4 h-4" />
                 <span className="text-sm">View Patterns</span>
@@ -334,7 +334,7 @@ const Dashboard = () => {
                   key: "cycle-setup",
                   icon: <Droplet className="w-3 h-3" />,
                   label: "Set up cycle",
-                  color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
+                  color: "bg-secondary/20 text-secondary border-secondary/30",
                   onClick: () => navigate("/settings"),
                 });
               }
@@ -346,7 +346,7 @@ const Dashboard = () => {
                   icon: cycleAlerts.icon,
                   label: cycleAlerts.phase,
                   sub: `Day ${cycleAlerts.dayInCycle}`,
-                  color: "bg-orange-500/20 text-orange-300 border-orange-500/30",
+                  color: "bg-accent/20 text-accent-foreground border-accent/30",
                 });
               }
 
@@ -357,7 +357,7 @@ const Dashboard = () => {
                   icon: <Flame className="w-3 h-3" />,
                   label: candidate.nickname,
                   sub: daysSince === 0 ? "Today" : `${daysSince}d`,
-                  color: "bg-rose-500/20 text-rose-300 border-rose-500/30",
+                  color: "bg-destructive/20 text-destructive border-destructive/30",
                   onClick: () => navigate(`/candidate/${candidate.id}`),
                 });
               });
@@ -369,7 +369,7 @@ const Dashboard = () => {
                   icon: <Ban className="w-3 h-3" />,
                   label: candidate.nickname,
                   sub: `Day ${candidate.no_contact_day || 0}`,
-                  color: "bg-stone-500/20 text-stone-300 border-stone-500/30",
+                  color: "bg-muted text-muted-foreground border-border",
                   onClick: () => navigate(`/candidate/${candidate.id}`),
                 });
               });
@@ -394,7 +394,7 @@ const Dashboard = () => {
                     <CarouselItem className="pl-2 basis-auto">
                       <button
                         onClick={() => navigate("/notifications")}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-yellow-500/30 text-xs text-yellow-200/60 hover:bg-yellow-500/10 transition-all"
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-border text-xs text-muted-foreground hover:bg-primary/10 transition-all"
                       >
                         <Bell className="w-3 h-3" />
                         <span>All</span>
@@ -408,34 +408,34 @@ const Dashboard = () => {
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-2">
               <div 
-                className="cursor-pointer hover:scale-[1.02] transition-all rounded-xl p-3 bg-yellow-500/15 backdrop-blur-sm border border-yellow-500/20 text-center" 
+                className="cursor-pointer hover:scale-[1.02] transition-all rounded-xl p-3 bg-primary/10 backdrop-blur-sm border border-primary/20 text-center" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter(null); }}
               >
-                <div className="text-2xl font-bold text-yellow-300">{activeCandidateCount}</div>
-                <div className="text-xs text-yellow-100/60">Active</div>
+                <div className="text-2xl font-bold text-primary">{activeCandidateCount}</div>
+                <div className="text-xs text-muted-foreground">Active</div>
               </div>
               <div 
-                className="cursor-pointer hover:scale-[1.02] transition-all rounded-xl p-3 bg-lime-500/15 backdrop-blur-sm border border-lime-500/20 text-center" 
+                className="cursor-pointer hover:scale-[1.02] transition-all rounded-xl p-3 bg-emerald-500/10 backdrop-blur-sm border border-emerald-500/20 text-center" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter("good"); }}
               >
-                <div className="text-2xl font-bold text-lime-300">{recap.goodCandidates.length}</div>
-                <div className="text-xs text-yellow-100/60">Good Vibes</div>
+                <div className="text-2xl font-bold text-emerald-600">{recap.goodCandidates.length}</div>
+                <div className="text-xs text-muted-foreground">Good Vibes</div>
               </div>
               <div 
-                className="cursor-pointer hover:scale-[1.02] transition-all rounded-xl p-3 bg-orange-500/15 backdrop-blur-sm border border-orange-500/20 text-center" 
+                className="cursor-pointer hover:scale-[1.02] transition-all rounded-xl p-3 bg-rose-500/10 backdrop-blur-sm border border-rose-500/20 text-center" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter("bad"); }}
               >
-                <div className="text-2xl font-bold text-orange-300">{recap.badCandidates.length}</div>
-                <div className="text-xs text-yellow-100/60">Watch Out</div>
+                <div className="text-2xl font-bold text-rose-600">{recap.badCandidates.length}</div>
+                <div className="text-xs text-muted-foreground">Watch Out</div>
               </div>
             </div>
 
             {/* Candidate Recap */}
             {candidates.length > 0 && (
-              <div className="rounded-xl bg-yellow-900/30 backdrop-blur-sm border border-yellow-500/20 overflow-hidden">
-                <div className="px-4 py-3 border-b border-yellow-500/10">
-                  <h3 className="text-sm font-medium text-yellow-50 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-yellow-400" />
+              <div className="rounded-xl bg-card/80 backdrop-blur-sm border border-border overflow-hidden">
+                <div className="px-4 py-3 border-b border-border">
+                  <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-primary" />
                     Recent Activity
                   </h3>
                 </div>
@@ -444,17 +444,17 @@ const Dashboard = () => {
                   {recap.lastMatched && (
                     <button
                       onClick={() => navigate(`/candidate/${recap.lastMatched!.id}`)}
-                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-yellow-500/10 transition-colors"
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-primary/10 transition-colors"
                     >
-                      <Avatar className="w-10 h-10 border border-yellow-500/30">
+                      <Avatar className="w-10 h-10 border border-border">
                         <AvatarImage src={recap.lastMatched.photo_url || undefined} />
-                        <AvatarFallback className="bg-yellow-500/20 text-yellow-300 text-sm">
+                        <AvatarFallback className="bg-primary/20 text-primary text-sm">
                           {recap.lastMatched.nickname.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 text-left">
-                        <p className="text-sm font-medium text-yellow-50">{recap.lastMatched.nickname}</p>
-                        <p className="text-xs text-yellow-100/50 flex items-center gap-1">
+                        <p className="text-sm font-medium text-foreground">{recap.lastMatched.nickname}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
                           <Sparkles className="w-3 h-3" />
                           Last matched
                           {recap.lastMatched.created_at && (
@@ -462,7 +462,7 @@ const Dashboard = () => {
                           )}
                         </p>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-yellow-100/40" />
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
                     </button>
                   )}
 
@@ -470,17 +470,17 @@ const Dashboard = () => {
                   {recap.lastInteracted && (
                     <button
                       onClick={() => navigate(`/candidate/${recap.lastInteracted!.candidate.id}`)}
-                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-yellow-500/10 transition-colors"
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-primary/10 transition-colors"
                     >
-                      <Avatar className="w-10 h-10 border border-yellow-500/30">
+                      <Avatar className="w-10 h-10 border border-border">
                         <AvatarImage src={recap.lastInteracted.candidate.photo_url || undefined} />
-                        <AvatarFallback className="bg-yellow-500/20 text-yellow-300 text-sm">
+                        <AvatarFallback className="bg-primary/20 text-primary text-sm">
                           {recap.lastInteracted.candidate.nickname.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 text-left">
-                        <p className="text-sm font-medium text-yellow-50">{recap.lastInteracted.candidate.nickname}</p>
-                        <p className="text-xs text-yellow-100/50 flex items-center gap-1">
+                        <p className="text-sm font-medium text-foreground">{recap.lastInteracted.candidate.nickname}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {recap.lastInteracted.interaction.interaction_type.replace("_", " ")}
                           {recap.lastInteracted.interaction.interaction_date && (
@@ -490,15 +490,15 @@ const Dashboard = () => {
                       </div>
                       <div className="flex items-center gap-1">
                         {recap.lastInteracted.interaction.overall_feeling && recap.lastInteracted.interaction.overall_feeling >= 4 && (
-                          <ThumbsUp className="w-4 h-4 text-lime-400" />
+                          <ThumbsUp className="w-4 h-4 text-emerald-500" />
                         )}
                         {recap.lastInteracted.interaction.overall_feeling && recap.lastInteracted.interaction.overall_feeling <= 2 && (
-                          <ThumbsDown className="w-4 h-4 text-orange-400" />
+                          <ThumbsDown className="w-4 h-4 text-rose-500" />
                         )}
                         {recap.lastInteracted.interaction.overall_feeling === 3 && (
-                          <Minus className="w-4 h-4 text-yellow-100/40" />
+                          <Minus className="w-4 h-4 text-muted-foreground" />
                         )}
-                        <ChevronRight className="w-4 h-4 text-yellow-100/40" />
+                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
                       </div>
                     </button>
                   )}
@@ -508,13 +508,13 @@ const Dashboard = () => {
             )}
 
             {candidates.length === 0 && (
-              <div className="rounded-xl bg-yellow-900/30 backdrop-blur-sm border border-yellow-500/20 border-dashed py-12 text-center">
-                <Users className="w-12 h-12 mx-auto text-yellow-200/40 mb-4" />
-                <h3 className="font-medium text-yellow-50 mb-2">No Candidates Yet</h3>
-                <p className="text-sm text-yellow-100/50 mb-4">
+              <div className="rounded-xl bg-card/80 backdrop-blur-sm border border-border border-dashed py-12 text-center">
+                <Users className="w-12 h-12 mx-auto text-muted-foreground/40 mb-4" />
+                <h3 className="font-medium text-foreground mb-2">No Candidates Yet</h3>
+                <p className="text-sm text-muted-foreground mb-4">
                   Start tracking your dating journey by adding your first candidate.
                 </p>
-                <Button onClick={() => navigate("/add-candidate")} className="bg-yellow-400 hover:bg-yellow-300 text-amber-950">
+                <Button onClick={() => navigate("/add-candidate")} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Your First Candidate
                 </Button>
@@ -527,12 +527,12 @@ const Dashboard = () => {
             <div className="grid grid-cols-2 gap-2">
               <Button
                 onClick={() => navigate("/add-candidate")}
-                className="w-full bg-yellow-400 hover:bg-yellow-300 text-amber-950 font-semibold"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Candidate
               </Button>
-              <Button variant="outline" onClick={() => navigate("/patterns")} className="w-full border-yellow-500/30 text-yellow-100 hover:bg-yellow-500/10 bg-yellow-900/20">
+              <Button variant="outline" onClick={() => navigate("/patterns")} className="w-full border-border text-foreground hover:bg-primary/10">
                 <TrendingUp className="w-4 h-4 mr-2" />
                 View Patterns
               </Button>
@@ -541,12 +541,12 @@ const Dashboard = () => {
             {/* Quality Filter Indicator */}
             {qualityFilter && (
               <div className="flex items-center gap-2">
-                <span className={`text-xs px-2 py-1 rounded-full ${qualityFilter === "good" ? "bg-lime-500/20 text-lime-300" : "bg-orange-500/20 text-orange-300"}`}>
+                <span className={`text-xs px-2 py-1 rounded-full ${qualityFilter === "good" ? "bg-emerald-500/20 text-emerald-600" : "bg-rose-500/20 text-rose-600"}`}>
                   Showing: {qualityFilter === "good" ? "Good Vibes" : "Watch Out"}
                 </span>
                 <button 
                   onClick={() => setQualityFilter(null)} 
-                  className="text-xs text-yellow-100/50 hover:text-yellow-50"
+                  className="text-xs text-muted-foreground hover:text-foreground"
                 >
                   Clear
                 </button>
@@ -570,13 +570,13 @@ const Dashboard = () => {
                 />
               </div>
             ) : (
-              <div className="rounded-xl bg-yellow-900/30 backdrop-blur-sm border border-yellow-500/20 border-dashed py-12 text-center">
-                <Users className="w-12 h-12 mx-auto text-yellow-200/40 mb-4" />
-                <h3 className="font-medium text-yellow-50 mb-2">No Candidates Yet</h3>
-                <p className="text-sm text-yellow-100/50 mb-4">
+              <div className="rounded-xl bg-card/80 backdrop-blur-sm border border-border border-dashed py-12 text-center">
+                <Users className="w-12 h-12 mx-auto text-muted-foreground/40 mb-4" />
+                <h3 className="font-medium text-foreground mb-2">No Candidates Yet</h3>
+                <p className="text-sm text-muted-foreground mb-4">
                   Start tracking your dating journey by adding your first candidate.
                 </p>
-                <Button onClick={() => navigate("/add-candidate")} className="bg-yellow-400 hover:bg-yellow-300 text-amber-950">
+                <Button onClick={() => navigate("/add-candidate")} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Your First Candidate
                 </Button>
