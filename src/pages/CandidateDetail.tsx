@@ -12,6 +12,7 @@ import { AddInteractionForm } from "@/components/candidate/AddInteractionForm";
 import { NoContactMode } from "@/components/candidate/NoContactMode";
 import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
 import { ProfileCompleteness } from "@/components/candidate/ProfileCompleteness";
+import { AppRatingDialog, shouldShowRatingDialog } from "@/components/candidate/AppRatingDialog";
 import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -211,12 +212,15 @@ const CandidateDetail = () => {
 
   const [showAccountabilityDialog, setShowAccountabilityDialog] = useState(false);
   const [showNewCandidateDialog, setShowNewCandidateDialog] = useState(false);
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
+  const [isFirstCandidate, setIsFirstCandidate] = useState(false);
   
   // Check if this is a new candidate from navigation state
   useEffect(() => {
-    const state = location.state as { isNewCandidate?: boolean } | null;
+    const state = location.state as { isNewCandidate?: boolean; isFirstCandidate?: boolean } | null;
     if (state?.isNewCandidate) {
       setShowNewCandidateDialog(true);
+      setIsFirstCandidate(state?.isFirstCandidate || false);
       // Clear the state so it doesn't show again on refresh
       window.history.replaceState({}, document.title);
       // Refetch after a short delay to get the calculated score
@@ -225,6 +229,17 @@ const CandidateDetail = () => {
       }, 1500);
     }
   }, [location.state]);
+
+  // Handle showing rating dialog after new candidate dialog closes
+  const handleNewCandidateDialogClose = (open: boolean) => {
+    setShowNewCandidateDialog(open);
+    if (!open && isFirstCandidate && shouldShowRatingDialog()) {
+      // Small delay before showing rating dialog
+      setTimeout(() => {
+        setShowRatingDialog(true);
+      }, 500);
+    }
+  };
 
   if (authLoading || loading) {
     return (
@@ -323,7 +338,7 @@ const CandidateDetail = () => {
           </AlertDialog>
           
           {/* New Candidate Welcome Dialog */}
-          <AlertDialog open={showNewCandidateDialog} onOpenChange={setShowNewCandidateDialog}>
+          <AlertDialog open={showNewCandidateDialog} onOpenChange={handleNewCandidateDialogClose}>
             <AlertDialogContent className="max-w-sm">
               <AlertDialogHeader>
                 <div className="flex items-center gap-2 mb-2">
@@ -355,7 +370,7 @@ const CandidateDetail = () => {
               <AlertDialogFooter className="flex-col sm:flex-row gap-2">
                 <AlertDialogAction 
                   className="w-full sm:w-auto"
-                  onClick={() => setShowNewCandidateDialog(false)}
+                  onClick={() => handleNewCandidateDialogClose(false)}
                 >
                   Got It
                 </AlertDialogAction>
@@ -363,7 +378,7 @@ const CandidateDetail = () => {
                   variant="outline"
                   className="w-full sm:w-auto gap-2"
                   onClick={() => {
-                    setShowNewCandidateDialog(false);
+                    handleNewCandidateDialogClose(false);
                     navigate(`/add-candidate?edit=${candidate.id}`);
                   }}
                 >
@@ -373,6 +388,12 @@ const CandidateDetail = () => {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          
+          {/* App Rating Dialog */}
+          <AppRatingDialog 
+            open={showRatingDialog} 
+            onOpenChange={setShowRatingDialog} 
+          />
         </div>
       </header>
 

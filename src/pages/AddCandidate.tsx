@@ -368,6 +368,14 @@ const AddCandidate = () => {
         toast.success(`${nickname} updated!`);
         navigate(`/candidate/${editId}`);
       } else {
+        // Check if this is the user's first candidate
+        const { count: existingCount } = await supabase
+          .from("candidates")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id);
+        
+        const isFirstCandidate = (existingCount ?? 0) === 0;
+
         const { data, error } = await supabase
           .from("candidates")
           .insert({
@@ -411,7 +419,7 @@ const AddCandidate = () => {
         }
 
         toast.success(`${nickname} added!`);
-        navigate(`/candidate/${data.id}`, { state: { isNewCandidate: true } });
+        navigate(`/candidate/${data.id}`, { state: { isNewCandidate: true, isFirstCandidate } });
       }
     } catch (error) {
       console.error("Error saving candidate:", error);
