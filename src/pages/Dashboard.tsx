@@ -47,11 +47,15 @@ type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
 
+type RecentActivityItem = {
+  type: "matched" | "interacted" | "ended" | "no_contact";
+  candidate: Candidate;
+  interaction?: Interaction;
+  date: Date;
+};
+
 interface CandidateRecap {
-  lastMatched: Candidate | null;
-  lastInteracted: { candidate: Candidate; interaction: Interaction } | null;
-  lastEnded: Candidate | null;
-  lastNoContact: Candidate | null;
+  recentActivity: RecentActivityItem[];
   goodCandidates: Candidate[];
   badCandidates: Candidate[];
   neutralCandidates: Candidate[];
@@ -396,43 +400,76 @@ const Dashboard = () => {
       (c) => c.status !== "archived" && c.status !== "no_contact"
     );
 
-    // Last matched
-    const lastMatched = [...candidates]
-      .filter((c) => c.created_at)
-      .sort((a, b) => new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime())[0] || null;
+    // Build unified recent activity list
+    const activityItems: RecentActivityItem[] = [];
+    const seenCandidateIds = new Set<string>();
 
-    // Last interacted
-    const lastInteraction = interactions[0];
-    const lastInteractedCandidate = lastInteraction
-      ? candidates.find((c) => c.id === lastInteraction.candidate_id)
-      : null;
+    // Add recent interactions (up to 5)
+    interactions.slice(0, 5).forEach((interaction) => {
+      const candidate = candidates.find((c) => c.id === interaction.candidate_id);
+      if (candidate && !seenCandidateIds.has(candidate.id)) {
+        activityItems.push({
+          type: "interacted",
+          candidate,
+          interaction,
+          date: new Date(interaction.interaction_date || interaction.created_at || 0),
+        });
+        seenCandidateIds.add(candidate.id);
+      }
+    });
 
-    // Last ended relationship (within last 7 days) - excludes no_contact since shown separately
-    const recentlyEnded = candidates
+    // Add recently matched (within last 14 days)
+    candidates
+      .filter((c) => c.created_at && differenceInDays(new Date(), new Date(c.created_at)) <= 14)
+      .forEach((candidate) => {
+        if (!seenCandidateIds.has(candidate.id)) {
+          activityItems.push({
+            type: "matched",
+            candidate,
+            date: new Date(candidate.created_at!),
+          });
+          seenCandidateIds.add(candidate.id);
+        }
+      });
+
+    // Add recently ended (within last 14 days)
+    candidates
       .filter((c) => {
         const endedAt = (c as any).relationship_ended_at;
         if (!endedAt || c.status !== "archived") return false;
-        const daysSince = differenceInDays(new Date(), new Date(endedAt));
-        return daysSince <= 7;
+        return differenceInDays(new Date(), new Date(endedAt)) <= 14;
       })
-      .sort((a, b) => {
-        const aDate = new Date((a as any).relationship_ended_at || 0);
-        const bDate = new Date((b as any).relationship_ended_at || 0);
-        return bDate.getTime() - aDate.getTime();
+      .forEach((candidate) => {
+        if (!seenCandidateIds.has(candidate.id)) {
+          activityItems.push({
+            type: "ended",
+            candidate,
+            date: new Date((candidate as any).relationship_ended_at),
+          });
+          seenCandidateIds.add(candidate.id);
+        }
       });
-    const lastEnded = recentlyEnded[0] || null;
 
-    // Last No Contact (currently active)
-    const noContactCandidates = candidates
+    // Add no contact candidates
+    candidates
       .filter((c) => c.no_contact_active && c.status === "no_contact")
-      .sort((a, b) => {
-        const aDate = new Date((a as any).relationship_ended_at || a.updated_at || 0);
-        const bDate = new Date((b as any).relationship_ended_at || b.updated_at || 0);
-        return bDate.getTime() - aDate.getTime();
+      .forEach((candidate) => {
+        if (!seenCandidateIds.has(candidate.id)) {
+          activityItems.push({
+            type: "no_contact",
+            candidate,
+            date: new Date((candidate as any).relationship_ended_at || candidate.updated_at || 0),
+          });
+          seenCandidateIds.add(candidate.id);
+        }
       });
-    const lastNoContact = noContactCandidates[0] || null;
 
-    // Categorize by compatibility/feeling - Good vibes requires 40%+ score
+    // Sort by date and take top 5
+    const recentActivity = activityItems
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .slice(0, 5);
+
+    // Categorize by compatibility/feeling
     const goodCandidates = activeCandidates.filter(
       (c) => (c.compatibility_score && c.compatibility_score >= 40) && 
              (!Array.isArray(c.red_flags) || c.red_flags.length < 3)
@@ -446,12 +483,7 @@ const Dashboard = () => {
     );
 
     return {
-      lastMatched,
-      lastInteracted: lastInteractedCandidate && lastInteraction
-        ? { candidate: lastInteractedCandidate, interaction: lastInteraction }
-        : null,
-      lastEnded,
-      lastNoContact,
+      recentActivity,
       goodCandidates,
       badCandidates,
       neutralCandidates,
@@ -746,146 +778,146 @@ const Dashboard = () => {
                   </h3>
                 </div>
                 <div className="p-3 space-y-2">
-                  {/* Last Matched */}
-                  {recap.lastMatched && (
-                    <button
-                      onClick={() => navigate(`/candidate/${recap.lastMatched!.id}`)}
-                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-primary/10 transition-colors"
-                    >
-                      <Avatar className="w-10 h-10 border border-border">
-                        <AvatarImage src={recap.lastMatched.photo_url || undefined} />
-                        <AvatarFallback className="bg-primary/20 text-primary text-sm">
-                          {recap.lastMatched.nickname.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 text-left">
-                        <p className="text-sm font-medium text-foreground">{recap.lastMatched.nickname}</p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Sparkles className="w-3 h-3" />
-                          Last matched
-                          {recap.lastMatched.created_at && (
-                            <> • {format(new Date(recap.lastMatched.created_at), "MMM d")}</>
-                          )}
-                        </p>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                    </button>
+                  {recap.recentActivity.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
                   )}
+                  {recap.recentActivity.map((item, idx) => {
+                    if (item.type === "matched") {
+                      return (
+                        <button
+                          key={`matched-${item.candidate.id}-${idx}`}
+                          onClick={() => navigate(`/candidate/${item.candidate.id}`)}
+                          className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-primary/10 transition-colors"
+                        >
+                          <Avatar className="w-10 h-10 border border-border">
+                            <AvatarImage src={item.candidate.photo_url || undefined} />
+                            <AvatarFallback className="bg-primary/20 text-primary text-sm">
+                              {item.candidate.nickname.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 text-left">
+                            <p className="text-sm font-medium text-foreground">{item.candidate.nickname}</p>
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Sparkles className="w-3 h-3" />
+                              Matched • {format(item.date, "MMM d")}
+                            </p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                      );
+                    }
 
-                  {/* Last Interaction */}
-                  {recap.lastInteracted && (
-                    <button
-                      onClick={() => navigate(`/candidate/${recap.lastInteracted!.candidate.id}`)}
-                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-primary/10 transition-colors"
-                    >
-                      <Avatar className="w-10 h-10 border border-border">
-                        <AvatarImage src={recap.lastInteracted.candidate.photo_url || undefined} />
-                        <AvatarFallback className="bg-primary/20 text-primary text-sm">
-                          {recap.lastInteracted.candidate.nickname.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 text-left">
-                        <p className="text-sm font-medium text-foreground">{recap.lastInteracted.candidate.nickname}</p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {recap.lastInteracted.interaction.interaction_type.replace("_", " ")}
-                          {recap.lastInteracted.interaction.interaction_date && (
-                            <> • {format(new Date(recap.lastInteracted.interaction.interaction_date), "MMM d")}</>
-                          )}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {recap.lastInteracted.interaction.overall_feeling && recap.lastInteracted.interaction.overall_feeling >= 4 && (
-                          <ThumbsUp className="w-4 h-4 text-emerald-500" />
-                        )}
-                        {recap.lastInteracted.interaction.overall_feeling && recap.lastInteracted.interaction.overall_feeling <= 2 && (
-                          <ThumbsDown className="w-4 h-4 text-rose-500" />
-                        )}
-                        {recap.lastInteracted.interaction.overall_feeling === 3 && (
-                          <Minus className="w-4 h-4 text-muted-foreground" />
-                        )}
-                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                    </button>
-                  )}
+                    if (item.type === "interacted" && item.interaction) {
+                      return (
+                        <button
+                          key={`interacted-${item.candidate.id}-${idx}`}
+                          onClick={() => navigate(`/candidate/${item.candidate.id}`)}
+                          className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-primary/10 transition-colors"
+                        >
+                          <Avatar className="w-10 h-10 border border-border">
+                            <AvatarImage src={item.candidate.photo_url || undefined} />
+                            <AvatarFallback className="bg-primary/20 text-primary text-sm">
+                              {item.candidate.nickname.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 text-left">
+                            <p className="text-sm font-medium text-foreground">{item.candidate.nickname}</p>
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {item.interaction.interaction_type.replace("_", " ")} • {format(item.date, "MMM d")}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {item.interaction.overall_feeling && item.interaction.overall_feeling >= 4 && (
+                              <ThumbsUp className="w-4 h-4 text-emerald-500" />
+                            )}
+                            {item.interaction.overall_feeling && item.interaction.overall_feeling <= 2 && (
+                              <ThumbsDown className="w-4 h-4 text-rose-500" />
+                            )}
+                            {item.interaction.overall_feeling === 3 && (
+                              <Minus className="w-4 h-4 text-muted-foreground" />
+                            )}
+                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                        </button>
+                      );
+                    }
 
-                  {/* Last Ended Relationship */}
-                  {recap.lastEnded && (
-                    <div className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-primary/10 transition-colors">
-                      <button
-                        onClick={() => navigate(`/candidate/${recap.lastEnded!.id}`)}
-                        className="flex items-center gap-3 flex-1"
-                      >
-                        <Avatar className="w-10 h-10 border border-border">
-                          <AvatarImage src={recap.lastEnded.photo_url || undefined} />
-                          <AvatarFallback className="bg-muted text-muted-foreground text-sm">
-                            {recap.lastEnded.nickname.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 text-left">
-                          <p className="text-sm font-medium text-foreground">{recap.lastEnded.nickname}</p>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <XCircle className="w-3 h-3" />
-                            Ended
-                            {(recap.lastEnded as any).relationship_ended_at && (
-                              <> • {format(new Date((recap.lastEnded as any).relationship_ended_at), "MMM d")}</>
-                            )}
-                            {(recap.lastEnded as any).end_reason && (
-                              <> — {(recap.lastEnded as any).end_reason}</>
-                            )}
-                          </p>
+                    if (item.type === "ended") {
+                      return (
+                        <div key={`ended-${item.candidate.id}-${idx}`} className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-primary/10 transition-colors">
+                          <button
+                            onClick={() => navigate(`/candidate/${item.candidate.id}`)}
+                            className="flex items-center gap-3 flex-1"
+                          >
+                            <Avatar className="w-10 h-10 border border-border">
+                              <AvatarImage src={item.candidate.photo_url || undefined} />
+                              <AvatarFallback className="bg-muted text-muted-foreground text-sm">
+                                {item.candidate.nickname.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 text-left">
+                              <p className="text-sm font-medium text-foreground">{item.candidate.nickname}</p>
+                              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                <XCircle className="w-3 h-3" />
+                                Ended • {format(item.date, "MMM d")}
+                                {(item.candidate as any).end_reason && (
+                                  <> — {(item.candidate as any).end_reason}</>
+                                )}
+                              </p>
+                            </div>
+                          </button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => handleReopenRelationship(item.candidate.id, e)}
+                            disabled={reopeningId === item.candidate.id}
+                            className="shrink-0 text-xs h-7 px-2"
+                          >
+                            <RefreshCw className={`w-3 h-3 mr-1 ${reopeningId === item.candidate.id ? 'animate-spin' : ''}`} />
+                            Reopen
+                          </Button>
                         </div>
-                      </button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => handleReopenRelationship(recap.lastEnded!.id, e)}
-                        disabled={reopeningId === recap.lastEnded.id}
-                        className="shrink-0 text-xs h-7 px-2"
-                      >
-                        <RefreshCw className={`w-3 h-3 mr-1 ${reopeningId === recap.lastEnded.id ? 'animate-spin' : ''}`} />
-                        Reopen
-                      </Button>
-                    </div>
-                  )}
+                      );
+                    }
 
-                  {/* No Contact Active */}
-                  {recap.lastNoContact && (
-                    <div className="w-full flex items-center gap-3 p-2 rounded-lg bg-slate-500/5 hover:bg-slate-500/10 transition-colors">
-                      <button
-                        onClick={() => navigate(`/candidate/${recap.lastNoContact!.id}`)}
-                        className="flex items-center gap-3 flex-1"
-                      >
-                        <Avatar className="w-10 h-10 border border-slate-300">
-                          <AvatarImage src={recap.lastNoContact.photo_url || undefined} />
-                          <AvatarFallback className="bg-slate-500/20 text-slate-600 text-sm">
-                            {recap.lastNoContact.nickname.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 text-left">
-                          <p className="text-sm font-medium text-foreground">{recap.lastNoContact.nickname}</p>
-                          <p className="text-xs text-slate-600 flex items-center gap-1">
-                            <Ban className="w-3 h-3" />
-                            No Contact — Day {recap.lastNoContact.no_contact_day || 1}
-                            {(recap.lastNoContact as any).relationship_ended_at && (
-                              <> • Ended {format(new Date((recap.lastNoContact as any).relationship_ended_at), "MMM d")}</>
-                            )}
-                          </p>
+                    if (item.type === "no_contact") {
+                      return (
+                        <div key={`nc-${item.candidate.id}-${idx}`} className="w-full flex items-center gap-3 p-2 rounded-lg bg-slate-500/5 hover:bg-slate-500/10 transition-colors">
+                          <button
+                            onClick={() => navigate(`/candidate/${item.candidate.id}`)}
+                            className="flex items-center gap-3 flex-1"
+                          >
+                            <Avatar className="w-10 h-10 border border-slate-300">
+                              <AvatarImage src={item.candidate.photo_url || undefined} />
+                              <AvatarFallback className="bg-slate-500/20 text-slate-600 text-sm">
+                                {item.candidate.nickname.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 text-left">
+                              <p className="text-sm font-medium text-foreground">{item.candidate.nickname}</p>
+                              <p className="text-xs text-slate-600 flex items-center gap-1">
+                                <Ban className="w-3 h-3" />
+                                No Contact — Day {item.candidate.no_contact_day || 1} • {format(item.date, "MMM d")}
+                              </p>
+                            </div>
+                          </button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => handleEndNoContact(item.candidate.id, e)}
+                            disabled={endingNoContactId === item.candidate.id}
+                            className="shrink-0 text-xs h-7 px-2"
+                          >
+                            <RefreshCw className={`w-3 h-3 mr-1 ${endingNoContactId === item.candidate.id ? 'animate-spin' : ''}`} />
+                            End NC
+                          </Button>
                         </div>
-                      </button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => handleEndNoContact(recap.lastNoContact!.id, e)}
-                        disabled={endingNoContactId === recap.lastNoContact.id}
-                        className="shrink-0 text-xs h-7 px-2"
-                      >
-                        <RefreshCw className={`w-3 h-3 mr-1 ${endingNoContactId === recap.lastNoContact.id ? 'animate-spin' : ''}`} />
-                        End NC
-                      </Button>
-                    </div>
-                  )}
+                      );
+                    }
 
+                    return null;
+                  })}
                 </div>
               </div>
             )}
