@@ -299,13 +299,13 @@ const Patterns = () => {
               <CardContent className="space-y-2">
                 {stats.statusDistribution.map(({ status, count }) => (
                   <div key={status} className="flex items-center justify-between">
-                    <span className="text-sm">{formatStatus(status)}</span>
+                    <span className="text-xs">{formatStatus(status)}</span>
                     <div className="flex items-center gap-2">
                       <Progress
                         value={(count / stats.totalCandidates) * 100}
                         className="w-24 h-2"
                       />
-                      <span className="text-sm text-muted-foreground w-8 text-right">{count}</span>
+                      <span className="text-xs text-muted-foreground w-8 text-right">{count}</span>
                     </div>
                   </div>
                 ))}
@@ -374,15 +374,15 @@ const Patterns = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {stats.interactionTypes.map(({ type, count }) => (
+                {stats.interactionTypes.map(({ type, count }) => (
                     <div key={type} className="flex items-center justify-between">
-                      <span className="text-sm">{formatInteractionType(type)}</span>
+                      <span className="text-xs">{formatInteractionType(type)}</span>
                       <div className="flex items-center gap-2">
                         <Progress
                           value={(count / stats.totalInteractions) * 100}
                           className="w-24 h-2"
                         />
-                        <span className="text-sm text-muted-foreground w-8 text-right">{count}</span>
+                        <span className="text-xs text-muted-foreground w-8 text-right">{count}</span>
                       </div>
                     </div>
                   ))}
@@ -430,7 +430,7 @@ const Patterns = () => {
                 <CardContent className="space-y-2">
                   {stats.meetingSources.map(({ source, count }) => (
                     <div key={source} className="flex items-center justify-between">
-                      <span className="text-sm capitalize">{source.replace("_", " ")}</span>
+                      <span className="text-xs capitalize">{source.replace("_", " ")}</span>
                       <Badge variant="secondary">{count}</Badge>
                     </div>
                   ))}
