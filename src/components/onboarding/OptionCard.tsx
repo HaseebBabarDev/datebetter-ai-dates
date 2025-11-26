@@ -60,8 +60,9 @@ export const OptionCard: React.FC<OptionCardProps> = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-1">
             <span className={cn(
+              "text-xs font-medium",
               selected ? "text-primary" : "text-foreground",
-              compact ? "text-xs font-medium leading-tight" : "font-medium"
+              compact && "leading-tight"
             )}>
               {title}
             </span>
@@ -70,7 +71,7 @@ export const OptionCard: React.FC<OptionCardProps> = ({
             )}
           </div>
           {description && (
-            <p className={cn("text-muted-foreground mt-1", compact ? "text-xs" : "text-sm")}>
+            <p className="text-xs text-muted-foreground mt-1">
               {description}
             </p>
           )}
