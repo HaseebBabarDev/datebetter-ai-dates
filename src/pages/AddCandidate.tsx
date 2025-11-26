@@ -974,17 +974,15 @@ const AddCandidate = () => {
           <div className="space-y-3 pt-2">
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading ? "Saving..." : isEditMode ? (
-                <><Pencil className="w-5 h-5 mr-2" />Save Changes</>
+                <><Pencil className="w-5 h-5 mr-2" />Save Additional Info</>
               ) : (
                 <><UserPlus className="w-5 h-5 mr-2" />Add Candidate</>
               )}
             </Button>
-            {!isEditMode && (
-              <p className="text-xs text-center text-muted-foreground">
-                <Sparkles className="w-3 h-3 inline mr-1" />
-                More details = better AI compatibility analysis
-              </p>
-            )}
+            <p className="text-xs text-center text-muted-foreground">
+              <Sparkles className="w-3 h-3 inline mr-1" />
+              {isEditMode ? "More details = better compatibility insights" : "More details = better AI compatibility analysis"}
+            </p>
           </div>
         </form>
       </main>
