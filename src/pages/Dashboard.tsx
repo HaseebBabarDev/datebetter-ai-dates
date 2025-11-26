@@ -253,17 +253,50 @@ const Dashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-lg space-y-4">
-        {/* Add Candidate CTA */}
-        <Button
-          onClick={() => navigate("/add-candidate")}
-          className="w-full bg-primary hover:bg-primary/90"
-          size="lg"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Add New Candidate
-        </Button>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            onClick={() => navigate("/add-candidate")}
+            className="w-full bg-primary hover:bg-primary/90"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Candidate
+          </Button>
+          {candidates.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/candidate/${candidates[0]?.id}`)}
+              className="w-full"
+            >
+              <Clock className="w-4 h-4 mr-2" />
+              Log Interaction
+            </Button>
+          )}
+        </div>
 
-        {/* Cycle Alert */}
+        {/* Cycle Tracking CTA - Show if tracking enabled but no date set */}
+        {profile?.track_cycle && !profile?.last_period_date && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardContent className="py-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                  <Droplet className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-sm">Set Up Cycle Tracking</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Add your last period date to get hormone-aware dating insights.
+                  </p>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => navigate("/settings")}>
+                  Update
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Cycle Alert - Show when tracking is fully set up */}
         {cycleAlerts && (
           <Card className="border-amber-500/30 bg-amber-500/5">
             <CardContent className="py-4">
@@ -271,30 +304,44 @@ const Dashboard = () => {
                 <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-600 shrink-0">
                   {cycleAlerts.icon}
                 </div>
-                <div>
+                <div className="flex-1">
                   <p className="font-medium text-sm">{cycleAlerts.phase} (Day {cycleAlerts.dayInCycle})</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{cycleAlerts.warning}</p>
                 </div>
+                <Button size="sm" variant="ghost" onClick={() => navigate("/settings")} className="text-xs">
+                  <Calendar className="w-3 h-3 mr-1" />
+                  Update
+                </Button>
               </div>
             </CardContent>
           </Card>
         )}
 
         {/* Oxytocin Alerts */}
-        {oxytocinAlerts.map(({ candidate, daysSince }) => (
-          <Card key={candidate.id} className="border-pink-500/30 bg-pink-500/5">
+        {oxytocinAlerts.length > 0 && oxytocinAlerts.map(({ candidate, daysSince }) => (
+          <Card key={candidate.id} className="border-pink-500/30 bg-pink-500/5 animate-pulse-slow">
             <CardContent className="py-4">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-600 shrink-0">
-                  <Heart className="w-4 h-4" />
+                  <Flame className="w-4 h-4" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-sm">Oxytocin Alert: {candidate.nickname}</p>
+                  <p className="font-medium text-sm text-pink-700 dark:text-pink-400">
+                    🧠 Oxytocin Alert: {candidate.nickname}
+                  </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {daysSince === 0 ? "Today" : `${daysSince} day${daysSince > 1 ? "s" : ""} ago`} — 
-                    bonding hormones may cloud judgment for 48-72 hours. Wait before making big decisions!
+                    Intimacy {daysSince === 0 ? "today" : `${daysSince} day${daysSince > 1 ? "s" : ""} ago`} — 
+                    bonding hormones active for 48-72 hours. Take decisions slowly!
                   </p>
                 </div>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  onClick={() => navigate(`/candidate/${candidate.id}`)}
+                  className="text-xs"
+                >
+                  View
+                </Button>
               </div>
             </CardContent>
           </Card>
