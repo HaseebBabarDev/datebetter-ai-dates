@@ -11,6 +11,7 @@ import { FlagsSection } from "@/components/candidate/FlagsSection";
 import { AddInteractionForm } from "@/components/candidate/AddInteractionForm";
 import { NoContactMode } from "@/components/candidate/NoContactMode";
 import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
+import { ProfileCompleteness } from "@/components/candidate/ProfileCompleteness";
 import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -412,6 +413,7 @@ const CandidateDetail = () => {
               onStartNoContact={handleStartNoContact}
               onAdviceResponded={checkPendingAdvice}
             />
+            <ProfileCompleteness candidate={candidate} />
             <CandidateProfile
               candidate={candidate}
               userId={user!.id}
