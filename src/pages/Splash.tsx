@@ -1,23 +1,19 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Brain, Shield, Lock, Heart, Sparkles } from "lucide-react";
+import splashImage from "@/assets/splash-couple.jpeg";
 
 const Splash = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Video Background */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
+      {/* Image Background */}
+      <img
+        src={splashImage}
+        alt="Couple walking on beach"
         className="absolute inset-0 w-full h-full object-cover"
-      >
-        <source src="/videos/splash-video.mp4" type="video/mp4" />
-      </video>
+      />
 
       {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background/90" />
@@ -41,11 +37,11 @@ const Splash = () => {
 
         {/* Features */}
         <div className="w-full max-w-sm space-y-2 mb-8">
-          <FeatureItem icon={Brain} text="AI scores every candidate for you" />
-          <FeatureItem icon={Shield} text="Cycle-aware dating guidance" />
-          <FeatureItem icon={Lock} text="Your privacy is completely protected" />
-          <FeatureItem icon={Sparkles} text="Learning algorithms that improve with each interaction" />
-          <FeatureItem icon={Heart} text="Built for women, by women" />
+          <FeatureItem text="AI scores every candidate for you" />
+          <FeatureItem text="Cycle-aware dating guidance" />
+          <FeatureItem text="Your privacy is completely protected" />
+          <FeatureItem text="Learning algorithms that improve with each interaction" />
+          <FeatureItem text="Built for women, by women" />
         </div>
 
         {/* Buttons */}
@@ -71,14 +67,9 @@ const Splash = () => {
   );
 };
 
-const FeatureItem: React.FC<{ icon: React.ElementType; text: string }> = ({
-  icon: Icon,
-  text,
-}) => (
+const FeatureItem: React.FC<{ text: string }> = ({ text }) => (
   <div className="flex items-center gap-3 p-2 rounded-lg bg-card/50 backdrop-blur-sm border border-border/30">
-    <div className="w-8 h-8 rounded-md bg-primary/20 flex items-center justify-center shrink-0">
-      <Icon className="w-4 h-4 text-primary" />
-    </div>
+    <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
     <span className="text-foreground/90 text-sm">{text}</span>
   </div>
 );
