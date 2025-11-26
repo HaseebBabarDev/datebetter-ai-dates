@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import splashImage from "@/assets/splash-couple.jpeg";
 import logo from "@/assets/logo.jpg";
 
 const Splash = () => {
@@ -9,15 +8,19 @@ const Splash = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Image Background */}
-      <img
-        src={splashImage}
-        alt="Couple walking on beach"
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
         className="absolute inset-0 w-full h-full object-cover"
-      />
+      >
+        <source src="/videos/splash-video.mp4" type="video/mp4" />
+      </video>
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background/90" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background/85" />
 
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-8">
@@ -25,21 +28,21 @@ const Splash = () => {
         <img 
           src={logo} 
           alt="dateBetter logo" 
-          className="w-24 h-24 rounded-full mb-4"
+          className="w-20 h-20 rounded-full mb-4 shadow-lg"
         />
 
         {/* Logo Text */}
-        <div className="text-center mb-6">
-          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
+        <div className="text-center mb-4">
+          <h1 className="font-poppins text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2 tracking-tight">
             dateBetter
           </h1>
-          <p className="text-lg md:text-xl text-foreground/90 font-medium">
+          <p className="font-inter text-lg md:text-xl text-foreground/90 font-light tracking-wide">
             Data for Dating
           </p>
         </div>
 
         {/* Tagline */}
-        <p className="text-center text-foreground/80 text-sm md:text-base mb-6 max-w-sm">
+        <p className="font-inter text-center text-foreground/80 text-sm md:text-base mb-6 max-w-sm font-light">
           AI-backed app helping women select better partners
         </p>
 
@@ -56,7 +59,7 @@ const Splash = () => {
         <div className="w-full max-w-sm space-y-3">
           <Button
             onClick={() => navigate("/auth")}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-poppins font-medium"
             size="lg"
           >
             Create Account
@@ -64,7 +67,7 @@ const Splash = () => {
           <Button
             onClick={() => navigate("/auth")}
             variant="outline"
-            className="w-full border-primary/50 text-foreground hover:bg-primary/10"
+            className="w-full border-primary/50 text-foreground hover:bg-primary/10 font-poppins font-medium"
             size="lg"
           >
             Login
@@ -76,8 +79,8 @@ const Splash = () => {
 };
 
 const FeatureItem: React.FC<{ text: string }> = ({ text }) => (
-  <div className="flex items-center gap-3 p-2 rounded-lg bg-card/50 backdrop-blur-sm border border-border/30">
-    <span className="text-foreground/90 text-sm">{text}</span>
+  <div className="flex items-center gap-3 p-2.5 rounded-lg bg-card/40 backdrop-blur-sm border border-border/20">
+    <span className="font-inter text-foreground/90 text-sm font-light">{text}</span>
   </div>
 );
 
