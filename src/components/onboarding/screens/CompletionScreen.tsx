@@ -27,6 +27,7 @@ const CompletionScreen = () => {
         gender_identity: data.genderIdentity as any,
         pronouns: data.pronouns as any,
         sexual_orientation: data.sexualOrientation as any,
+        relationship_status: data.relationshipStatus as any,
         relationship_goal: data.relationshipGoal as any,
         relationship_structure: data.relationshipStructure as any,
         kids_status: data.kidsStatus as any,

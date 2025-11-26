@@ -84,6 +84,13 @@ const RELATIONSHIP_GOAL_OPTIONS: { value: Enums<"relationship_goal">; label: str
   { value: "unsure", label: "Unsure" },
 ];
 
+const RELATIONSHIP_STATUS_OPTIONS = [
+  { value: "single", label: "Single" },
+  { value: "married", label: "Married" },
+  { value: "recently_divorced", label: "Recently Divorced" },
+  { value: "ethical_non_monogamy", label: "Ethical Non-Monogamy" },
+];
+
 const KIDS_DESIRE_OPTIONS: { value: Enums<"kids_desire">; label: string }[] = [
   { value: "definitely_yes", label: "Wants Kids" },
   { value: "maybe", label: "Maybe/Open" },
@@ -213,6 +220,7 @@ const AddCandidate = () => {
   // About Them
   const [theirReligion, setTheirReligion] = useState("");
   const [theirPolitics, setTheirPolitics] = useState("");
+  const [theirRelationshipStatus, setTheirRelationshipStatus] = useState("");
   const [theirRelationshipGoal, setTheirRelationshipGoal] = useState("");
   const [theirKidsDesire, setTheirKidsDesire] = useState("");
   const [theirKidsStatus, setTheirKidsStatus] = useState("");
@@ -268,6 +276,7 @@ const AddCandidate = () => {
         setTheirSchedule((data as any).their_schedule_flexibility || "");
         setTheirReligion(data.their_religion || "");
         setTheirPolitics(data.their_politics || "");
+        setTheirRelationshipStatus((data as any).their_relationship_status || "");
         setTheirRelationshipGoal(data.their_relationship_goal || "");
         setTheirKidsDesire(data.their_kids_desire || "");
         setTheirKidsStatus(data.their_kids_status || "");
@@ -328,6 +337,7 @@ const AddCandidate = () => {
         their_schedule_flexibility: theirSchedule || null,
         their_religion: theirReligion || null,
         their_politics: theirPolitics || null,
+        their_relationship_status: theirRelationshipStatus || null,
         their_relationship_goal: theirRelationshipGoal || null,
         their_kids_desire: theirKidsDesire || null,
         their_kids_status: theirKidsStatus || null,
@@ -700,18 +710,33 @@ const AddCandidate = () => {
                   <CardTitle className="text-lg">Relationship Goals</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>What are they looking for?</Label>
-                    <Select value={theirRelationshipGoal} onValueChange={setTheirRelationshipGoal}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {RELATIONSHIP_GOAL_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Their Relationship Status</Label>
+                      <Select value={theirRelationshipStatus} onValueChange={setTheirRelationshipStatus}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {RELATIONSHIP_STATUS_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>What are they looking for?</Label>
+                      <Select value={theirRelationshipGoal} onValueChange={setTheirRelationshipGoal}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {RELATIONSHIP_GOAL_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">

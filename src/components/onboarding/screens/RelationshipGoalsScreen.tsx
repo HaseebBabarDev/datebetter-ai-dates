@@ -5,7 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { OptionCard } from "../OptionCard";
-import { Heart, Coffee, Sparkles, Diamond, HelpCircle } from "lucide-react";
+import { Heart, Coffee, Sparkles, Diamond, HelpCircle, User, Users, HeartCrack, Infinity } from "lucide-react";
+
+const statusOptions = [
+  { value: "single", label: "Single", description: "Not currently in a relationship", icon: User },
+  { value: "married", label: "Married", description: "Currently married", icon: Users },
+  { value: "recently_divorced", label: "Recently Divorced", description: "Recently ended a marriage", icon: HeartCrack },
+  { value: "ethical_non_monogamy", label: "Ethical Non-Monogamy", description: "In an open/poly relationship", icon: Infinity },
+];
 
 const goalOptions = [
   { value: "casual", label: "Casual dating", description: "Fun without commitment", icon: Coffee },
@@ -25,7 +32,7 @@ const structureOptions = [
 const RelationshipGoalsScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
-  const isValid = data.relationshipGoal;
+  const isValid = data.relationshipStatus && data.relationshipGoal;
 
   return (
     <OnboardingLayout
@@ -33,6 +40,23 @@ const RelationshipGoalsScreen = () => {
       subtitle="What are you looking for?"
     >
       <div className="space-y-6 animate-fade-in">
+        {/* Current Relationship Status */}
+        <div className="space-y-3">
+          <Label className="text-base">What's your current relationship status?</Label>
+          <div className="space-y-2">
+            {statusOptions.map((option) => (
+              <OptionCard
+                key={option.value}
+                selected={data.relationshipStatus === option.value}
+                onClick={() => updateData({ relationshipStatus: option.value })}
+                icon={<option.icon className="w-5 h-5" />}
+                title={option.label}
+                description={option.description}
+              />
+            ))}
+          </div>
+        </div>
+
         {/* Primary Goal */}
         <div className="space-y-3">
           <Label className="text-base">What are you looking for?</Label>

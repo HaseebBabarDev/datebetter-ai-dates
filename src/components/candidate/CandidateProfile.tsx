@@ -63,6 +63,13 @@ const RELATIONSHIP_GOAL_OPTIONS: { value: Enums<"relationship_goal">; label: str
   { value: "unsure", label: "Unsure" },
 ];
 
+const RELATIONSHIP_STATUS_OPTIONS = [
+  { value: "single", label: "Single" },
+  { value: "married", label: "Married" },
+  { value: "recently_divorced", label: "Recently Divorced" },
+  { value: "ethical_non_monogamy", label: "Ethical Non-Monogamy" },
+];
+
 const KIDS_DESIRE_OPTIONS: { value: Enums<"kids_desire">; label: string }[] = [
   { value: "definitely_yes", label: "Wants Kids" },
   { value: "maybe", label: "Maybe/Open" },
@@ -231,6 +238,12 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
+            {(candidate as any).their_relationship_status && (
+              <Badge variant="outline" className="gap-1">
+                <Users className="w-3 h-3" />
+                {formatLabel((candidate as any).their_relationship_status, RELATIONSHIP_STATUS_OPTIONS)}
+              </Badge>
+            )}
             {candidate.their_relationship_goal && (
               <Badge variant="outline" className="gap-1">
                 <Heart className="w-3 h-3" />
