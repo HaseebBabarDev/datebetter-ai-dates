@@ -229,7 +229,6 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
     { key: "lifestyle_compatibility", label: "Lifestyle", icon: Users },
     { key: "emotional_compatibility", label: "Emotional", icon: Brain },
     { key: "chemistry_score", label: "Chemistry", icon: Zap },
-    { key: "future_goals", label: "Goals", icon: Target },
   ];
 
   if (!scoreData) {
@@ -305,14 +304,14 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       <CardContent className="space-y-4 pt-0">
         {/* Compact Breakdown */}
         {scoreData.breakdown && (
-          <div className="grid grid-cols-5 gap-1">
+          <div className="grid grid-cols-4 gap-2">
             {breakdownItems.map(({ key, label, icon: Icon }) => {
               const score = scoreData.breakdown?.[key as keyof typeof scoreData.breakdown] ?? 0;
               return (
-                <div key={key} className="text-center p-2 rounded-lg bg-muted/30">
-                  <Icon className={`w-4 h-4 mx-auto mb-1 ${getScoreColor(score)}`} />
-                  <div className={`text-sm font-semibold ${getScoreColor(score)}`}>{score}</div>
-                  <div className="text-[10px] text-muted-foreground truncate">{label}</div>
+                <div key={key} className="text-center p-3 rounded-lg bg-muted/30">
+                  <Icon className={`w-5 h-5 mx-auto mb-1.5 ${getScoreColor(score)}`} />
+                  <div className={`text-base font-bold ${getScoreColor(score)}`}>{score}</div>
+                  <div className="text-xs text-muted-foreground">{label}</div>
                 </div>
               );
             })}
