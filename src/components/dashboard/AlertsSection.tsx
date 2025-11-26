@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { AlertTriangle, Heart, Clock, TrendingUp, Lightbulb } from "lucide-react";
+import { AlertTriangle, Heart, Clock, TrendingUp, Lightbulb, XCircle } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
-import { differenceInDays } from "date-fns";
+import { differenceInDays, differenceInHours } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,7 @@ type AdviceTracking = Tables<"advice_tracking">;
 
 interface AlertsSectionProps {
   candidates: Candidate[];
+  archivedCandidates?: Candidate[];
 }
 
 interface Alert {
@@ -28,7 +29,7 @@ interface AdviceStats {
   declined: number;
 }
 
-export const AlertsSection: React.FC<AlertsSectionProps> = ({ candidates }) => {
+export const AlertsSection: React.FC<AlertsSectionProps> = ({ candidates, archivedCandidates = [] }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [pendingAdvice, setPendingAdvice] = useState<{ candidate: Candidate; advice: string }[]>([]);
@@ -71,7 +72,7 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({ candidates }) => {
     fetchAdviceStatus();
   }, [user, candidates]);
 
-  const alerts = generateAlerts(candidates, pendingAdvice, adviceStats);
+  const alerts = generateAlerts(candidates, pendingAdvice, adviceStats, archivedCandidates);
 
   if (alerts.length === 0) return null;
 
@@ -122,10 +123,30 @@ const AlertCard: React.FC<{ alert: Alert; onClick?: () => void }> = ({ alert, on
 function generateAlerts(
   candidates: Candidate[], 
   pendingAdvice: { candidate: Candidate; advice: string }[],
-  adviceStats: AdviceStats
+  adviceStats: AdviceStats,
+  archivedCandidates: Candidate[]
 ): Alert[] {
   const alerts: Alert[] = [];
   const today = new Date();
+
+  // Check for recently ended relationships (within last 48 hours)
+  const recentlyEnded = archivedCandidates.filter((c) => {
+    const endedAt = (c as any).relationship_ended_at;
+    if (!endedAt) return false;
+    return differenceInHours(today, new Date(endedAt)) <= 48;
+  });
+  
+  recentlyEnded.forEach((c) => {
+    const endReason = (c as any).end_reason;
+    alerts.push({
+      id: `ended-${c.id}`,
+      type: "info",
+      icon: <XCircle className="w-4 h-4" />,
+      title: `Ended: ${c.nickname}`,
+      message: endReason ? `Reason: ${endReason}` : "Relationship archived. Take care of yourself.",
+      candidateId: c.id,
+    });
+  });
 
   // Show pending advice first (most actionable)
   if (pendingAdvice.length > 0) {

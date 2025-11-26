@@ -33,6 +33,7 @@ import {
   Clock,
   Bell,
 } from "lucide-react";
+import { XCircle } from "lucide-react";
 import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
 import { CandidatesList } from "@/components/dashboard/CandidatesList";
@@ -48,6 +49,7 @@ type Interaction = Tables<"interactions">;
 interface CandidateRecap {
   lastMatched: Candidate | null;
   lastInteracted: { candidate: Candidate; interaction: Interaction } | null;
+  lastEnded: Candidate | null;
   goodCandidates: Candidate[];
   badCandidates: Candidate[];
   neutralCandidates: Candidate[];
@@ -323,6 +325,21 @@ const Dashboard = () => {
       ? candidates.find((c) => c.id === lastInteraction.candidate_id)
       : null;
 
+    // Last ended relationship (within last 7 days)
+    const recentlyEnded = candidates
+      .filter((c) => {
+        const endedAt = (c as any).relationship_ended_at;
+        if (!endedAt || c.status !== "archived") return false;
+        const daysSince = differenceInDays(new Date(), new Date(endedAt));
+        return daysSince <= 7;
+      })
+      .sort((a, b) => {
+        const aDate = new Date((a as any).relationship_ended_at || 0);
+        const bDate = new Date((b as any).relationship_ended_at || 0);
+        return bDate.getTime() - aDate.getTime();
+      });
+    const lastEnded = recentlyEnded[0] || null;
+
     // Categorize by compatibility/feeling - Good vibes requires 40%+ score
     const goodCandidates = activeCandidates.filter(
       (c) => (c.compatibility_score && c.compatibility_score >= 40) && 
@@ -341,6 +358,7 @@ const Dashboard = () => {
       lastInteracted: lastInteractedCandidate && lastInteraction
         ? { candidate: lastInteractedCandidate, interaction: lastInteraction }
         : null,
+      lastEnded,
       goodCandidates,
       badCandidates,
       neutralCandidates,
@@ -550,6 +568,23 @@ const Dashboard = () => {
                 });
               });
 
+              // Recently Ended Relationships (within 48 hours)
+              candidates.filter(c => {
+                const endedAt = (c as any).relationship_ended_at;
+                if (!endedAt || c.status !== "archived") return false;
+                const hoursSince = differenceInDays(new Date(), new Date(endedAt)) * 24;
+                return hoursSince <= 48;
+              }).forEach((candidate) => {
+                alerts.push({
+                  key: `ended-${candidate.id}`,
+                  icon: <XCircle className="w-3 h-3" />,
+                  label: candidate.nickname,
+                  sub: "Ended",
+                  color: "bg-muted text-muted-foreground border-border",
+                  onClick: () => navigate(`/candidate/${candidate.id}`),
+                });
+              });
+
               if (alerts.length === 0) return null;
 
               return (
@@ -678,6 +713,35 @@ const Dashboard = () => {
                         )}
                         <ChevronRight className="w-4 h-4 text-muted-foreground" />
                       </div>
+                    </button>
+                  )}
+
+                  {/* Last Ended Relationship */}
+                  {recap.lastEnded && (
+                    <button
+                      onClick={() => navigate(`/candidate/${recap.lastEnded!.id}`)}
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-primary/10 transition-colors"
+                    >
+                      <Avatar className="w-10 h-10 border border-border">
+                        <AvatarImage src={recap.lastEnded.photo_url || undefined} />
+                        <AvatarFallback className="bg-muted text-muted-foreground text-sm">
+                          {recap.lastEnded.nickname.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-medium text-foreground">{recap.lastEnded.nickname}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <XCircle className="w-3 h-3" />
+                          Ended
+                          {(recap.lastEnded as any).relationship_ended_at && (
+                            <> • {format(new Date((recap.lastEnded as any).relationship_ended_at), "MMM d")}</>
+                          )}
+                          {(recap.lastEnded as any).end_reason && (
+                            <> — {(recap.lastEnded as any).end_reason}</>
+                          )}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
                     </button>
                   )}
 
