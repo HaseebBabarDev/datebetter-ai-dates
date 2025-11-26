@@ -11,7 +11,8 @@ import {
   MessageCircle, 
   Sparkles,
   ChevronRight,
-  Zap
+  Zap,
+  MapPin
 } from "lucide-react";
 
 type Candidate = Tables<"candidates">;
@@ -29,6 +30,13 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   getting_serious: { label: "Getting Serious", color: "bg-pink-500/10 text-pink-600" },
   no_contact: { label: "No Contact", color: "bg-slate-500/10 text-slate-600" },
   archived: { label: "Archived", color: "bg-muted text-muted-foreground" },
+};
+
+const distanceConfig: Record<string, { label: string; icon: string; color: string }> = {
+  same_city: { label: "Nearby", icon: "📍", color: "text-emerald-600 bg-emerald-500/10" },
+  regional: { label: "Regional", icon: "🚗", color: "text-blue-600 bg-blue-500/10" },
+  far: { label: "Far", icon: "✈️", color: "text-amber-600 bg-amber-500/10" },
+  long_distance: { label: "Long Distance", icon: "🌍", color: "text-purple-600 bg-purple-500/10" },
 };
 
 const getNextStep = (status: string | null, updatedAt: string | null): string | null => {
@@ -101,6 +109,12 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
             )}
             {candidate.age && (
               <span className="text-xs text-muted-foreground">{candidate.age}y</span>
+            )}
+            {(candidate as any).distance_approximation && distanceConfig[(candidate as any).distance_approximation] && (
+              <span className={`text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1 ${distanceConfig[(candidate as any).distance_approximation].color}`}>
+                <span>{distanceConfig[(candidate as any).distance_approximation].icon}</span>
+                {distanceConfig[(candidate as any).distance_approximation].label}
+              </span>
             )}
           </div>
 
