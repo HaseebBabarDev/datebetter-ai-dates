@@ -15,9 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, LogOut, User, Settings2 } from "lucide-react";
+import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
+import { Badge } from "@/components/ui/badge";
 
 type Profile = Tables<"profiles">;
 
@@ -147,14 +148,18 @@ const Settings = () => {
 
       <main className="container mx-auto px-4 py-6 max-w-lg">
         <Tabs defaultValue="account" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="account" className="gap-2">
+          <TabsList className="grid w-full grid-cols-3 mb-4">
+            <TabsTrigger value="account" className="gap-1.5 text-xs sm:text-sm">
               <User className="w-4 h-4" />
-              Account
+              <span className="hidden sm:inline">Account</span>
             </TabsTrigger>
-            <TabsTrigger value="preferences" className="gap-2">
+            <TabsTrigger value="preferences" className="gap-1.5 text-xs sm:text-sm">
               <Settings2 className="w-4 h-4" />
-              Preferences
+              <span className="hidden sm:inline">Preferences</span>
+            </TabsTrigger>
+            <TabsTrigger value="billing" className="gap-1.5 text-xs sm:text-sm">
+              <CreditCard className="w-4 h-4" />
+              <span className="hidden sm:inline">Billing</span>
             </TabsTrigger>
           </TabsList>
 
@@ -251,6 +256,142 @@ const Settings = () => {
 
           <TabsContent value="preferences">
             <ProfilePreferencesEditor />
+          </TabsContent>
+
+          <TabsContent value="billing" className="space-y-4">
+            {/* Current Plan */}
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-muted-foreground">Current Plan</span>
+                  <Badge variant="secondary" className="bg-primary/10 text-primary">Active</Badge>
+                </div>
+                <h3 className="text-xl font-bold">Free Plan</h3>
+                <p className="text-sm text-muted-foreground">2 candidate entries & updates included</p>
+              </CardContent>
+            </Card>
+
+            {/* Plans */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm text-muted-foreground">Upgrade for more updates</h4>
+              
+              {/* Starter Plan */}
+              <Card className="cursor-pointer hover:border-primary/50 transition-colors">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-semibold">Starter</h4>
+                        <Badge variant="outline" className="text-xs">Popular</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">7 candidate updates/month</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold">$9.99</p>
+                      <p className="text-xs text-muted-foreground">/month</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t space-y-1.5">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>7 candidate profile updates</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>AI compatibility scoring</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>Flag detection</span>
+                    </div>
+                  </div>
+                  <Button className="w-full mt-4" variant="outline">
+                    Upgrade to Starter
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Growth Plan */}
+              <Card className="cursor-pointer hover:border-primary/50 transition-colors border-primary/30 relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-bl">
+                  Best Value
+                </div>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-semibold">Growth</h4>
+                      <p className="text-sm text-muted-foreground">15 candidate updates/month</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold">$15.99</p>
+                      <p className="text-xs text-muted-foreground">/month</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t space-y-1.5">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>15 candidate profile updates</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>AI compatibility scoring</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>Priority flag detection</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <span>Advanced pattern insights</span>
+                    </div>
+                  </div>
+                  <Button className="w-full mt-4">
+                    Upgrade to Growth
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Pro Plan */}
+              <Card className="cursor-pointer hover:border-primary/50 transition-colors">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-semibold">Pro</h4>
+                      <p className="text-sm text-muted-foreground">100 candidate updates/month</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold">$39.99</p>
+                      <p className="text-xs text-muted-foreground">/month</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t space-y-1.5">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>100 candidate profile updates</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>Everything in Growth</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <span>Unlimited AI advice</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <span>Dating coach mode</span>
+                    </div>
+                  </div>
+                  <Button className="w-full mt-4" variant="outline">
+                    Upgrade to Pro
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            <p className="text-xs text-center text-muted-foreground pt-2">
+              All plans include unlimited candidate entries. Updates reset monthly.
+            </p>
           </TabsContent>
         </Tabs>
       </main>
