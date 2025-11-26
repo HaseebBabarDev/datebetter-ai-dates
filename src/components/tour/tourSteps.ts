@@ -55,7 +55,7 @@ export const CANDIDATE_DETAIL_TOUR_STEPS: TourStep[] = [
   {
     target: "[data-tour='flags-tab']",
     title: "Red & Green Flags",
-    description: "We automatically detect warning signs and positive indicators from your interactions.",
+    description: "Our AI analyzes your interactions and notes to automatically detect red flags (warning signs) and green flags (positive indicators). Stay informed about potential issues early.",
     placement: "bottom",
   },
   {
