@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +22,10 @@ import {
   Share2,
   Star,
   Trophy,
+  Check,
+  X,
+  HeartHandshake,
+  HeartCrack,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -44,8 +48,17 @@ interface PatternStats {
   avgOverallFeeling: number;
   adviceAcceptanceRate: number;
   totalAdviceGiven: number;
+  acceptedAdvice: number;
+  declinedAdvice: number;
+  pendingAdvice: number;
   meetingSources: { source: string; count: number }[];
   dateTypeSuccess: { type: string; avgFeeling: number; count: number }[];
+  relationshipOutcomes: {
+    active: number;
+    ended: number;
+    activeWithAcceptedAdvice: number;
+    endedWithDeclinedAdvice: number;
+  };
 }
 
 const Patterns = () => {
@@ -153,12 +166,35 @@ const Patterns = () => {
           feelingsWithValues.length
         : 0;
 
-      // Advice acceptance rate
+      // Advice stats
       const respondedAdvice = advice.filter((a) => a.response !== null);
       const acceptedAdvice = advice.filter((a) => a.response === "accepted");
+      const declinedAdvice = advice.filter((a) => a.response === "declined");
+      const pendingAdvice = advice.filter((a) => a.response === null);
       const adviceAcceptanceRate = respondedAdvice.length
         ? Math.round((acceptedAdvice.length / respondedAdvice.length) * 100)
         : 0;
+
+      // Relationship outcomes - active vs ended
+      const activeStatuses = ['just_matched', 'texting', 'planning_date', 'dating', 'dating_casually', 'getting_serious'];
+      const endedStatuses = ['no_contact', 'archived'];
+      const activeRelationships = candidates.filter((c) => activeStatuses.includes(c.status || ''));
+      const endedRelationships = candidates.filter((c) => endedStatuses.includes(c.status || ''));
+
+      // Correlation: advice acceptance vs relationship outcome
+      const candidatesWithAcceptedAdvice = new Set(
+        acceptedAdvice.map((a) => a.candidate_id)
+      );
+      const candidatesWithDeclinedAdvice = new Set(
+        declinedAdvice.map((a) => a.candidate_id)
+      );
+      
+      const activeWithAcceptedAdvice = activeRelationships.filter(
+        (c) => candidatesWithAcceptedAdvice.has(c.id)
+      ).length;
+      const endedWithDeclinedAdvice = endedRelationships.filter(
+        (c) => candidatesWithDeclinedAdvice.has(c.id) && !candidatesWithAcceptedAdvice.has(c.id)
+      ).length;
 
       // Meeting sources
       const sourceCounts: Record<string, number> = {};
@@ -206,8 +242,17 @@ const Patterns = () => {
         avgOverallFeeling,
         adviceAcceptanceRate,
         totalAdviceGiven: advice.length,
+        acceptedAdvice: acceptedAdvice.length,
+        declinedAdvice: declinedAdvice.length,
+        pendingAdvice: pendingAdvice.length,
         meetingSources,
         dateTypeSuccess,
+        relationshipOutcomes: {
+          active: activeRelationships.length,
+          ended: endedRelationships.length,
+          activeWithAcceptedAdvice,
+          endedWithDeclinedAdvice,
+        },
       });
     } catch (error) {
       console.error("Error fetching pattern data:", error);
@@ -541,22 +586,83 @@ const Patterns = () => {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Lightbulb className="w-5 h-5 text-amber-500" />
-                    Advice Acceptance
+                    AI Advice Tracker
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm">Acceptance Rate</span>
-                        <span className="text-sm font-medium">{stats.adviceAcceptanceRate}%</span>
-                      </div>
-                      <Progress value={stats.adviceAcceptanceRate} className="h-2" />
+                <CardContent className="space-y-4">
+                  {/* Accepted vs Declined */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="p-3 bg-green-500/10 rounded-lg text-center">
+                      <Check className="w-4 h-4 mx-auto mb-1 text-green-600" />
+                      <div className="text-lg font-bold text-green-600">{stats.acceptedAdvice}</div>
+                      <div className="text-xs text-muted-foreground">Accepted</div>
+                    </div>
+                    <div className="p-3 bg-red-500/10 rounded-lg text-center">
+                      <X className="w-4 h-4 mx-auto mb-1 text-red-500" />
+                      <div className="text-lg font-bold text-red-500">{stats.declinedAdvice}</div>
+                      <div className="text-xs text-muted-foreground">Declined</div>
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg text-center">
+                      <Clock className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                      <div className="text-lg font-bold">{stats.pendingAdvice}</div>
+                      <div className="text-xs text-muted-foreground">Pending</div>
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    You've received {stats.totalAdviceGiven} pieces of AI advice
-                  </p>
+                  
+                  {/* Progress bar */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-muted-foreground">Acceptance Rate</span>
+                      <span className="text-xs font-medium">{stats.adviceAcceptanceRate}%</span>
+                    </div>
+                    <Progress value={stats.adviceAcceptanceRate} className="h-2" />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Relationship Outcomes */}
+            {stats.totalCandidates > 0 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <HeartHandshake className="w-5 h-5 text-pink-500" />
+                    Relationship Progress
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Active vs Ended */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-3 bg-green-500/10 rounded-lg text-center">
+                      <Heart className="w-4 h-4 mx-auto mb-1 text-green-600" />
+                      <div className="text-xl font-bold text-green-600">{stats.relationshipOutcomes.active}</div>
+                      <div className="text-xs text-muted-foreground">Active</div>
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg text-center">
+                      <HeartCrack className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                      <div className="text-xl font-bold">{stats.relationshipOutcomes.ended}</div>
+                      <div className="text-xs text-muted-foreground">Ended</div>
+                    </div>
+                  </div>
+
+                  {/* Advice correlation insight */}
+                  {(stats.relationshipOutcomes.activeWithAcceptedAdvice > 0 || stats.relationshipOutcomes.endedWithDeclinedAdvice > 0) && (
+                    <div className="p-3 bg-primary/5 rounded-lg space-y-2">
+                      <p className="text-xs font-medium text-primary">Advice Impact</p>
+                      {stats.relationshipOutcomes.activeWithAcceptedAdvice > 0 && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Check className="w-3 h-3 text-green-500" />
+                          {stats.relationshipOutcomes.activeWithAcceptedAdvice} active relationship{stats.relationshipOutcomes.activeWithAcceptedAdvice > 1 ? 's' : ''} followed advice
+                        </p>
+                      )}
+                      {stats.relationshipOutcomes.endedWithDeclinedAdvice > 0 && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <X className="w-3 h-3 text-red-400" />
+                          {stats.relationshipOutcomes.endedWithDeclinedAdvice} ended relationship{stats.relationshipOutcomes.endedWithDeclinedAdvice > 1 ? 's' : ''} ignored advice
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
