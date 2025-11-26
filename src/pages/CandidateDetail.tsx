@@ -11,6 +11,7 @@ import { FlagsSection } from "@/components/candidate/FlagsSection";
 import { AddInteractionForm } from "@/components/candidate/AddInteractionForm";
 import { NoContactMode } from "@/components/candidate/NoContactMode";
 import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
+import { QuickLogInteraction } from "@/components/candidate/QuickLogInteraction";
 import { ProfileCompleteness } from "@/components/candidate/ProfileCompleteness";
 import { AppRatingDialog, shouldShowRatingDialog } from "@/components/candidate/AppRatingDialog";
 import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
@@ -401,6 +402,14 @@ const CandidateDetail = () => {
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-lg space-y-6">
+        {!candidate.no_contact_active && (
+          <QuickLogInteraction
+            candidateId={candidate.id}
+            onSuccess={() => { fetchData(); checkPendingAdvice(); }}
+            onRescore={handleRescore}
+          />
+        )}
+
         <Tabs value={defaultTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5 h-auto p-1">
             <TabsTrigger value="profile" className="flex-col gap-0.5 py-2 px-1">
