@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
 import { FlagsSection } from "@/components/candidate/FlagsSection";
@@ -12,6 +12,17 @@ import { AddInteractionForm } from "@/components/candidate/AddInteractionForm";
 import { NoContactMode } from "@/components/candidate/NoContactMode";
 import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 type Candidate = Tables<"candidates">;
@@ -111,6 +122,32 @@ const CandidateDetail = () => {
     }
   }, [candidate?.id]);
 
+  const handleDeleteCandidate = async () => {
+    if (!candidate) return;
+
+    try {
+      // Delete interactions first
+      await supabase
+        .from("interactions")
+        .delete()
+        .eq("candidate_id", candidate.id);
+
+      // Delete the candidate
+      const { error } = await supabase
+        .from("candidates")
+        .delete()
+        .eq("id", candidate.id);
+
+      if (error) throw error;
+
+      toast.success(`${candidate.nickname} removed from your roster`);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error deleting candidate:", error);
+      toast.error("Failed to delete candidate");
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -148,12 +185,36 @@ const CandidateDetail = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div>
+          <div className="flex-1">
             <h1 className="font-semibold text-foreground">{candidate.nickname}</h1>
             <p className="text-xs text-muted-foreground capitalize">
               {candidate.status?.replace("_", " ")}
             </p>
           </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                <Trash2 className="w-5 h-5" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete {candidate.nickname}?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently remove {candidate.nickname} from your roster, including all interaction history. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteCandidate}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </header>
 
