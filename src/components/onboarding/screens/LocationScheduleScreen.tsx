@@ -11,7 +11,8 @@ import {
   Phone, 
   GraduationCap, 
   Briefcase,
-  Moon
+  Moon,
+  Plane
 } from "lucide-react";
 
 const distanceOptions = [
@@ -29,6 +30,7 @@ const scheduleOptions = [
   { value: "shift_work", label: "Shift Work", icon: RefreshCw },
   { value: "on_call", label: "On-Call", icon: Phone },
   { value: "overnight", label: "Night Shift", icon: Moon },
+  { value: "frequent_traveler", label: "Frequent Traveler", icon: Plane },
   { value: "student", label: "Student", icon: GraduationCap },
   { value: "self_employed", label: "Self-Employed", icon: Briefcase },
 ];
