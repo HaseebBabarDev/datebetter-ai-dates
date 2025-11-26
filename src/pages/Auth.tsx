@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, User } from "lucide-react";
+import authBg from "@/assets/auth-bg.jpg";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -81,10 +82,18 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen relative">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${authBg})` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background/80" />
+      </div>
+
       {/* Header */}
-      <header className="px-6 py-4 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+      <header className="relative z-10 px-6 py-4 flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="bg-background/50 backdrop-blur-sm">
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
@@ -92,17 +101,18 @@ const Auth = () => {
         </h1>
       </header>
 
-      <main className="container max-w-md mx-auto px-6 py-8">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold mb-2">
-            {isSignUp ? "Create Your Account" : "Welcome Back"}
-          </h2>
-          <p className="text-muted-foreground">
-            {isSignUp 
-              ? "Start your journey to better dating" 
-              : "Sign in to continue your journey"}
-          </p>
-        </div>
+      <main className="relative z-10 container max-w-md mx-auto px-6 py-8">
+        <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold mb-2">
+              {isSignUp ? "Create Your Account" : "Welcome Back"}
+            </h2>
+            <p className="text-muted-foreground">
+              {isSignUp 
+                ? "Start your journey to better dating" 
+                : "Sign in to continue your journey"}
+            </p>
+          </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Name (Sign Up only) */}
@@ -253,6 +263,7 @@ const Auth = () => {
             {isSignUp ? "Sign in" : "Sign up"}
           </button>
         </p>
+        </div>
       </main>
     </div>
   );
