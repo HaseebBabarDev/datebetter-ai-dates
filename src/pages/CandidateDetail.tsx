@@ -11,7 +11,6 @@ import { FlagsSection } from "@/components/candidate/FlagsSection";
 import { AddInteractionForm } from "@/components/candidate/AddInteractionForm";
 import { NoContactMode } from "@/components/candidate/NoContactMode";
 import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
-import { QuickLogInteraction } from "@/components/candidate/QuickLogInteraction";
 import { ProfileCompleteness } from "@/components/candidate/ProfileCompleteness";
 import { AppRatingDialog, shouldShowRatingDialog } from "@/components/candidate/AppRatingDialog";
 import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
@@ -416,10 +415,19 @@ const CandidateDetail = () => {
       <main className="container mx-auto px-4 py-6 max-w-lg space-y-6">
         {!candidate.no_contact_active && (
           <div data-tour="quick-log">
-            <QuickLogInteraction
+            <AddInteractionForm
               candidateId={candidate.id}
               onSuccess={() => { fetchData(); checkPendingAdvice(); }}
               onRescore={handleRescore}
+              isNoContact={candidate.no_contact_active || false}
+              onBrokeContact={handleBrokeContact}
+              hasPendingAdvice={hasPendingAdvice}
+              triggerButton={
+                <Button className="w-full gap-2">
+                  <Clock className="h-4 w-4" />
+                  Log Interaction
+                </Button>
+              }
             />
           </div>
         )}
