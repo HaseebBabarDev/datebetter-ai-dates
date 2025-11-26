@@ -367,7 +367,11 @@ const Settings = () => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Check className="w-4 h-4 text-green-500" />
-                      <span>Everything in Dating Often</span>
+                      <span>AI compatibility scoring</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>Flag detection</span>
                     </div>
                   </div>
                   <Button className="w-full mt-4" variant="outline">
