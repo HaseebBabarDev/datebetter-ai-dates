@@ -5,15 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
 import {
   Plus,
   Settings,
@@ -300,123 +294,78 @@ const Dashboard = () => {
               </Button>
             </div>
 
-            {/* Alerts Carousel */}
+            {/* Alerts */}
             {(() => {
-              const alerts: React.ReactNode[] = [];
+              const alerts: { key: string; icon: React.ReactNode; label: string; sub?: string; color: string; onClick?: () => void }[] = [];
               
               // Cycle Setup CTA
               if (profile?.track_cycle && !profile?.last_period_date) {
-                alerts.push(
-                  <CarouselItem key="cycle-setup">
-                    <button 
-                      onClick={() => navigate("/settings")}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
-                        <Droplet className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1 min-w-0 text-left">
-                        <p className="font-medium text-sm">Set Up Cycle Tracking</p>
-                        <p className="text-xs text-muted-foreground">Add period date for insights</p>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                  </CarouselItem>
-                );
+                alerts.push({
+                  key: "cycle-setup",
+                  icon: <Droplet className="w-3 h-3" />,
+                  label: "Set up cycle",
+                  color: "bg-primary/10 text-primary border-primary/20",
+                  onClick: () => navigate("/settings"),
+                });
               }
 
               // Cycle Alert
               if (cycleAlerts) {
-                alerts.push(
-                  <CarouselItem key="cycle-alert">
-                    <div className="flex items-center gap-3 p-3 rounded-xl border border-amber-500/20 bg-amber-500/5">
-                      <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-600 shrink-0">
-                        {cycleAlerts.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-amber-700 dark:text-amber-400">{cycleAlerts.phase}</p>
-                        <p className="text-xs text-muted-foreground truncate">{cycleAlerts.warning}</p>
-                      </div>
-                      <Badge variant="outline" className="shrink-0 text-[10px] border-amber-500/30 text-amber-600">
-                        Day {cycleAlerts.dayInCycle}
-                      </Badge>
-                    </div>
-                  </CarouselItem>
-                );
+                alerts.push({
+                  key: "cycle-alert",
+                  icon: cycleAlerts.icon,
+                  label: cycleAlerts.phase,
+                  sub: `Day ${cycleAlerts.dayInCycle}`,
+                  color: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+                });
               }
 
               // Oxytocin Alerts
               oxytocinAlerts.forEach(({ candidate, daysSince }) => {
-                alerts.push(
-                  <CarouselItem key={`oxy-${candidate.id}`}>
-                    <button 
-                      onClick={() => navigate(`/candidate/${candidate.id}`)}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-pink-500/20 bg-pink-500/5 hover:bg-pink-500/10 transition-all"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center text-pink-600 shrink-0">
-                        <Flame className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1 min-w-0 text-left">
-                        <p className="font-medium text-sm text-pink-700 dark:text-pink-400">
-                          Oxytocin: {candidate.nickname}
-                        </p>
-                        <p className="text-xs text-muted-foreground">Hormones active 48-72hrs</p>
-                      </div>
-                      <Badge variant="outline" className="shrink-0 text-[10px] border-pink-500/30 text-pink-600">
-                        {daysSince === 0 ? "Today" : `${daysSince}d`}
-                      </Badge>
-                    </button>
-                  </CarouselItem>
-                );
+                alerts.push({
+                  key: `oxy-${candidate.id}`,
+                  icon: <Flame className="w-3 h-3" />,
+                  label: candidate.nickname,
+                  sub: daysSince === 0 ? "Today" : `${daysSince}d`,
+                  color: "bg-pink-500/10 text-pink-600 border-pink-500/20",
+                  onClick: () => navigate(`/candidate/${candidate.id}`),
+                });
               });
 
               // No Contact Alerts
               candidates.filter(c => c.no_contact_active).forEach((candidate) => {
-                alerts.push(
-                  <CarouselItem key={`nc-${candidate.id}`}>
-                    <button 
-                      onClick={() => navigate(`/candidate/${candidate.id}`)}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-500/20 bg-slate-500/5 hover:bg-slate-500/10 transition-all"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-slate-500/20 flex items-center justify-center text-slate-600 shrink-0">
-                        <Ban className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1 min-w-0 text-left">
-                        <p className="font-medium text-sm">{candidate.nickname}</p>
-                        <p className="text-xs text-muted-foreground">Stay strong!</p>
-                      </div>
-                      <Badge variant="outline" className="shrink-0 text-[10px]">
-                        Day {candidate.no_contact_day || 0}
-                      </Badge>
-                    </button>
-                  </CarouselItem>
-                );
+                alerts.push({
+                  key: `nc-${candidate.id}`,
+                  icon: <Ban className="w-3 h-3" />,
+                  label: candidate.nickname,
+                  sub: `Day ${candidate.no_contact_day || 0}`,
+                  color: "bg-slate-500/10 text-slate-600 border-slate-500/20",
+                  onClick: () => navigate(`/candidate/${candidate.id}`),
+                });
               });
 
               if (alerts.length === 0) return null;
 
               return (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">
-                      {alerts.length} alert{alerts.length > 1 ? "s" : ""}
-                    </p>
-                    <button 
-                      onClick={() => navigate("/notifications")}
-                      className="text-xs text-primary hover:underline"
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                  {alerts.map((alert) => (
+                    <button
+                      key={alert.key}
+                      onClick={alert.onClick}
+                      className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs font-medium transition-all hover:scale-[1.02] active:scale-[0.98] ${alert.color}`}
                     >
-                      View all
+                      {alert.icon}
+                      <span>{alert.label}</span>
+                      {alert.sub && <span className="opacity-60">• {alert.sub}</span>}
                     </button>
-                  </div>
-                  <Carousel className="w-full">
-                    <CarouselContent className="-ml-2">
-                      {alerts.map((alert, i) => (
-                        <div key={i} className="pl-2 basis-[92%]">
-                          {alert}
-                        </div>
-                      ))}
-                    </CarouselContent>
-                  </Carousel>
+                  ))}
+                  <button
+                    onClick={() => navigate("/notifications")}
+                    className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-border text-xs text-muted-foreground hover:bg-muted/50 transition-all"
+                  >
+                    <Bell className="w-3 h-3" />
+                    <span>All</span>
+                  </button>
                 </div>
               );
             })()}
