@@ -63,8 +63,10 @@ const Dashboard = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("home");
   const [sortBy, setSortBy] = useState<SortOption>("status");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
+  const [qualityFilter, setQualityFilter] = useState<"good" | "bad" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -196,6 +198,18 @@ const Dashboard = () => {
       }
     }
 
+    // Apply quality filter
+    if (qualityFilter === "good") {
+      filtered = filtered.filter(
+        (c) => (c.compatibility_score && c.compatibility_score >= 70) || (c.overall_chemistry && c.overall_chemistry >= 4)
+      );
+    } else if (qualityFilter === "bad") {
+      filtered = filtered.filter(
+        (c) => (c.compatibility_score && c.compatibility_score < 50) || 
+               (Array.isArray(c.red_flags) && c.red_flags.length >= 3)
+      );
+    }
+
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "score":
@@ -212,7 +226,7 @@ const Dashboard = () => {
     });
 
     return filtered;
-  }, [candidates, sortBy, statusFilter, searchQuery]);
+  }, [candidates, sortBy, statusFilter, qualityFilter, searchQuery]);
 
   const greeting = getGreeting();
 
@@ -265,7 +279,7 @@ const Dashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 py-4 max-w-lg">
-        <Tabs defaultValue="home" className="w-full">
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setQualityFilter(null); }} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="home">Home</TabsTrigger>
             <TabsTrigger value="manage">Manage Candidates</TabsTrigger>
@@ -372,19 +386,28 @@ const Dashboard = () => {
 
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-2">
-              <Card className="cursor-pointer hover:border-primary/50" onClick={() => setStatusFilter("active")}>
+              <Card 
+                className="cursor-pointer hover:border-primary/50 transition-colors" 
+                onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter(null); }}
+              >
                 <CardContent className="py-3 text-center">
                   <div className="text-2xl font-bold text-primary">{activeCandidateCount}</div>
                   <div className="text-xs text-muted-foreground">Active</div>
                 </CardContent>
               </Card>
-              <Card className="cursor-pointer hover:border-green-500/50" onClick={() => {}}>
+              <Card 
+                className="cursor-pointer hover:border-green-500/50 transition-colors" 
+                onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter("good"); }}
+              >
                 <CardContent className="py-3 text-center">
                   <div className="text-2xl font-bold text-green-600">{recap.goodCandidates.length}</div>
                   <div className="text-xs text-muted-foreground">Good Vibes</div>
                 </CardContent>
               </Card>
-              <Card className="cursor-pointer hover:border-amber-500/50" onClick={() => {}}>
+              <Card 
+                className="cursor-pointer hover:border-amber-500/50 transition-colors" 
+                onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter("bad"); }}
+              >
                 <CardContent className="py-3 text-center">
                   <div className="text-2xl font-bold text-amber-600">{recap.badCandidates.length}</div>
                   <div className="text-xs text-muted-foreground">Watch Out</div>
@@ -502,6 +525,21 @@ const Dashboard = () => {
               </Button>
             </div>
 
+            {/* Quality Filter Indicator */}
+            {qualityFilter && (
+              <div className="flex items-center gap-2">
+                <span className={`text-xs px-2 py-1 rounded-full ${qualityFilter === "good" ? "bg-green-500/10 text-green-600" : "bg-amber-500/10 text-amber-600"}`}>
+                  Showing: {qualityFilter === "good" ? "Good Vibes" : "Watch Out"}
+                </span>
+                <button 
+                  onClick={() => setQualityFilter(null)} 
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+
             {/* Search and Filters */}
             {candidates.length > 0 ? (
               <div className="space-y-3">
@@ -515,7 +553,7 @@ const Dashboard = () => {
                 <CandidatesList
                   candidates={filteredAndSortedCandidates}
                   onUpdate={fetchData}
-                  showGroupHeaders={statusFilter === "all" && sortBy === "status"}
+                  showGroupHeaders={statusFilter === "all" && sortBy === "status" && !qualityFilter}
                 />
               </div>
             ) : (
