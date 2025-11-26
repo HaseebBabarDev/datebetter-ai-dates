@@ -25,19 +25,27 @@ const WelcomeScreen = () => {
     const fetchUserName = async () => {
       if (!user) return;
       
-      const { data } = await supabase
-        .from("profiles")
-        .select("name")
-        .eq("user_id", user.id)
-        .single();
-      
-      if (data?.name) {
-        setUserName(data.name);
-      } else if (user.email) {
-        // Use email username as fallback
-        const emailName = user.email.split("@")[0];
-        // Capitalize first letter
-        setUserName(emailName.charAt(0).toUpperCase() + emailName.slice(1));
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("name")
+          .eq("user_id", user.id)
+          .single();
+        
+        if (data?.name) {
+          setUserName(data.name);
+        } else if (user.email) {
+          // Use email username as fallback
+          const emailName = user.email.split("@")[0];
+          // Capitalize first letter
+          setUserName(emailName.charAt(0).toUpperCase() + emailName.slice(1));
+        }
+      } catch (error) {
+        // Fallback to email if profile fetch fails
+        if (user.email) {
+          const emailName = user.email.split("@")[0];
+          setUserName(emailName.charAt(0).toUpperCase() + emailName.slice(1));
+        }
       }
     };
     
@@ -95,7 +103,7 @@ const WelcomeScreen = () => {
         showProgress={false}
         showBack={false}
         headerGradient
-        title={userName ? `Welcome, ${userName}!` : "Welcome to dateBetter"}
+        title={userName ? `Hello, ${userName}!` : "Welcome to dateBetter"}
         subtitle="Your dating journey starts here"
       >
         <div className="space-y-8 animate-fade-in relative z-10">
