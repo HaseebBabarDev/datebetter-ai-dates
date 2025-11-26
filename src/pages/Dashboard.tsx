@@ -38,6 +38,7 @@ import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboa
 import { CandidatesList } from "@/components/dashboard/CandidatesList";
 import { LogInteractionDialog } from "@/components/dashboard/LogInteractionDialog";
 import { differenceInDays, addDays, format } from "date-fns";
+import heroCouple from "@/assets/hero-couple.jpeg";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -259,23 +260,33 @@ const Dashboard = () => {
   ).length;
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--gradient-page)" }}>
+    <div className="min-h-screen relative overflow-hidden bg-neutral-900">
+      {/* Hero Background Image */}
+      <div className="fixed inset-0 z-0">
+        <img 
+          src={heroCouple} 
+          alt="" 
+          className="w-full h-full object-cover object-top opacity-40"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-neutral-900/60 via-neutral-900/80 to-neutral-900" />
+      </div>
+
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-lg border-b border-border/50" style={{ background: "var(--gradient-header)" }}>
+      <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-white/10 bg-neutral-900/50">
         <div className="container mx-auto px-4 py-4 max-w-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">{greeting}</p>
-              <h1 className="text-xl font-semibold text-foreground">{profile?.name || "there"}</h1>
+              <p className="text-sm text-neutral-400">{greeting}</p>
+              <h1 className="text-xl font-semibold text-white">{profile?.name || "there"}</h1>
             </div>
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="relative" onClick={() => navigate("/notifications")}>
+              <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/10" onClick={() => navigate("/notifications")}>
                 <Bell className="w-5 h-5" />
                 {(oxytocinAlerts.length > 0 || candidates.filter(c => c.no_contact_active).length > 0) && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-amber-400 rounded-full" />
                 )}
               </Button>
-              <Button variant="ghost" size="icon" onClick={() => navigate("/settings")}>
+              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" onClick={() => navigate("/settings")}>
                 <Settings className="w-5 h-5" />
               </Button>
             </div>
@@ -283,11 +294,11 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-4 max-w-lg">
+      <main className="relative z-10 container mx-auto px-4 py-4 max-w-lg pb-20">
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setQualityFilter(null); }} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="home">Home</TabsTrigger>
-            <TabsTrigger value="manage">Manage Candidates</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-4 bg-white/10 backdrop-blur-sm border border-white/10">
+            <TabsTrigger value="home" className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-white/70">Home</TabsTrigger>
+            <TabsTrigger value="manage" className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-white/70">Manage Candidates</TabsTrigger>
           </TabsList>
 
           <TabsContent value="home" className="space-y-4 mt-0">
@@ -296,7 +307,7 @@ const Dashboard = () => {
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   onClick={() => navigate("/add-candidate")}
-                  className="w-full bg-primary hover:bg-primary/90 h-12 gap-2"
+                  className="w-full bg-amber-500 hover:bg-amber-400 text-neutral-900 h-12 gap-2 font-semibold shadow-lg shadow-amber-500/20"
                 >
                   <Plus className="w-4 h-4" />
                   <span className="text-sm font-medium">Add Candidate</span>
@@ -306,7 +317,7 @@ const Dashboard = () => {
               <Button
                 variant="outline"
                 onClick={() => navigate("/patterns")}
-                className="w-full h-10 gap-2"
+                className="w-full h-10 gap-2 border-white/20 text-white hover:bg-white/10 bg-white/5"
               >
                 <TrendingUp className="w-4 h-4" />
                 <span className="text-sm">View Patterns</span>
@@ -323,7 +334,7 @@ const Dashboard = () => {
                   key: "cycle-setup",
                   icon: <Droplet className="w-3 h-3" />,
                   label: "Set up cycle",
-                  color: "bg-primary/10 text-primary border-primary/20",
+                  color: "bg-amber-500/20 text-amber-400 border-amber-500/30",
                   onClick: () => navigate("/settings"),
                 });
               }
@@ -335,7 +346,7 @@ const Dashboard = () => {
                   icon: cycleAlerts.icon,
                   label: cycleAlerts.phase,
                   sub: `Day ${cycleAlerts.dayInCycle}`,
-                  color: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+                  color: "bg-amber-500/20 text-amber-400 border-amber-500/30",
                 });
               }
 
@@ -346,7 +357,7 @@ const Dashboard = () => {
                   icon: <Flame className="w-3 h-3" />,
                   label: candidate.nickname,
                   sub: daysSince === 0 ? "Today" : `${daysSince}d`,
-                  color: "bg-pink-500/10 text-pink-600 border-pink-500/20",
+                  color: "bg-pink-500/20 text-pink-400 border-pink-500/30",
                   onClick: () => navigate(`/candidate/${candidate.id}`),
                 });
               });
@@ -358,7 +369,7 @@ const Dashboard = () => {
                   icon: <Ban className="w-3 h-3" />,
                   label: candidate.nickname,
                   sub: `Day ${candidate.no_contact_day || 0}`,
-                  color: "bg-slate-500/10 text-slate-600 border-slate-500/20",
+                  color: "bg-white/10 text-white/80 border-white/20",
                   onClick: () => navigate(`/candidate/${candidate.id}`),
                 });
               });
@@ -383,7 +394,7 @@ const Dashboard = () => {
                     <CarouselItem className="pl-2 basis-auto">
                       <button
                         onClick={() => navigate("/notifications")}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-border text-xs text-muted-foreground hover:bg-muted/50 transition-all"
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-white/20 text-xs text-white/60 hover:bg-white/10 transition-all"
                       >
                         <Bell className="w-3 h-3" />
                         <span>All</span>
@@ -396,60 +407,54 @@ const Dashboard = () => {
 
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-2">
-              <Card 
-                className="cursor-pointer hover:scale-[1.02] transition-all border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10" 
+              <div 
+                className="cursor-pointer hover:scale-[1.02] transition-all rounded-xl p-3 bg-white/10 backdrop-blur-sm border border-white/10 text-center" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter(null); }}
               >
-                <CardContent className="py-3 text-center">
-                  <div className="text-2xl font-bold text-primary">{activeCandidateCount}</div>
-                  <div className="text-xs text-muted-foreground">Active</div>
-                </CardContent>
-              </Card>
-              <Card 
-                className="cursor-pointer hover:scale-[1.02] transition-all border-green-500/20 bg-gradient-to-br from-green-500/5 to-green-500/10" 
+                <div className="text-2xl font-bold text-amber-400">{activeCandidateCount}</div>
+                <div className="text-xs text-white/60">Active</div>
+              </div>
+              <div 
+                className="cursor-pointer hover:scale-[1.02] transition-all rounded-xl p-3 bg-emerald-500/10 backdrop-blur-sm border border-emerald-500/20 text-center" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter("good"); }}
               >
-                <CardContent className="py-3 text-center">
-                  <div className="text-2xl font-bold text-green-600">{recap.goodCandidates.length}</div>
-                  <div className="text-xs text-muted-foreground">Good Vibes</div>
-                </CardContent>
-              </Card>
-              <Card 
-                className="cursor-pointer hover:scale-[1.02] transition-all border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-amber-500/10" 
+                <div className="text-2xl font-bold text-emerald-400">{recap.goodCandidates.length}</div>
+                <div className="text-xs text-white/60">Good Vibes</div>
+              </div>
+              <div 
+                className="cursor-pointer hover:scale-[1.02] transition-all rounded-xl p-3 bg-rose-500/10 backdrop-blur-sm border border-rose-500/20 text-center" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter("bad"); }}
               >
-                <CardContent className="py-3 text-center">
-                  <div className="text-2xl font-bold text-amber-600">{recap.badCandidates.length}</div>
-                  <div className="text-xs text-muted-foreground">Watch Out</div>
-                </CardContent>
-              </Card>
+                <div className="text-2xl font-bold text-rose-400">{recap.badCandidates.length}</div>
+                <div className="text-xs text-white/60">Watch Out</div>
+              </div>
             </div>
 
             {/* Candidate Recap */}
             {candidates.length > 0 && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-primary" />
+              <div className="rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 overflow-hidden">
+                <div className="px-4 py-3 border-b border-white/10">
+                  <h3 className="text-sm font-medium text-white flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-amber-400" />
                     Recent Activity
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
+                  </h3>
+                </div>
+                <div className="p-3 space-y-2">
                   {/* Last Matched */}
                   {recap.lastMatched && (
                     <button
                       onClick={() => navigate(`/candidate/${recap.lastMatched!.id}`)}
-                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
                     >
-                      <Avatar className="w-10 h-10 border border-border">
+                      <Avatar className="w-10 h-10 border border-white/20">
                         <AvatarImage src={recap.lastMatched.photo_url || undefined} />
-                        <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                        <AvatarFallback className="bg-amber-500/20 text-amber-400 text-sm">
                           {recap.lastMatched.nickname.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 text-left">
-                        <p className="text-sm font-medium">{recap.lastMatched.nickname}</p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <p className="text-sm font-medium text-white">{recap.lastMatched.nickname}</p>
+                        <p className="text-xs text-white/50 flex items-center gap-1">
                           <Sparkles className="w-3 h-3" />
                           Last matched
                           {recap.lastMatched.created_at && (
@@ -457,7 +462,7 @@ const Dashboard = () => {
                           )}
                         </p>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      <ChevronRight className="w-4 h-4 text-white/40" />
                     </button>
                   )}
 
@@ -465,17 +470,17 @@ const Dashboard = () => {
                   {recap.lastInteracted && (
                     <button
                       onClick={() => navigate(`/candidate/${recap.lastInteracted!.candidate.id}`)}
-                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
                     >
-                      <Avatar className="w-10 h-10 border border-border">
+                      <Avatar className="w-10 h-10 border border-white/20">
                         <AvatarImage src={recap.lastInteracted.candidate.photo_url || undefined} />
-                        <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                        <AvatarFallback className="bg-amber-500/20 text-amber-400 text-sm">
                           {recap.lastInteracted.candidate.nickname.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 text-left">
-                        <p className="text-sm font-medium">{recap.lastInteracted.candidate.nickname}</p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <p className="text-sm font-medium text-white">{recap.lastInteracted.candidate.nickname}</p>
+                        <p className="text-xs text-white/50 flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {recap.lastInteracted.interaction.interaction_type.replace("_", " ")}
                           {recap.lastInteracted.interaction.interaction_date && (
@@ -485,37 +490,35 @@ const Dashboard = () => {
                       </div>
                       <div className="flex items-center gap-1">
                         {recap.lastInteracted.interaction.overall_feeling && recap.lastInteracted.interaction.overall_feeling >= 4 && (
-                          <ThumbsUp className="w-4 h-4 text-green-500" />
+                          <ThumbsUp className="w-4 h-4 text-emerald-400" />
                         )}
                         {recap.lastInteracted.interaction.overall_feeling && recap.lastInteracted.interaction.overall_feeling <= 2 && (
-                          <ThumbsDown className="w-4 h-4 text-red-500" />
+                          <ThumbsDown className="w-4 h-4 text-rose-400" />
                         )}
                         {recap.lastInteracted.interaction.overall_feeling === 3 && (
-                          <Minus className="w-4 h-4 text-muted-foreground" />
+                          <Minus className="w-4 h-4 text-white/40" />
                         )}
-                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        <ChevronRight className="w-4 h-4 text-white/40" />
                       </div>
                     </button>
                   )}
 
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
 
             {candidates.length === 0 && (
-              <Card className="border-dashed">
-                <CardContent className="py-12 text-center">
-                  <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="font-medium text-foreground mb-2">No Candidates Yet</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Start tracking your dating journey by adding your first candidate.
-                  </p>
-                  <Button onClick={() => navigate("/add-candidate")}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Your First Candidate
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 border-dashed py-12 text-center">
+                <Users className="w-12 h-12 mx-auto text-white/40 mb-4" />
+                <h3 className="font-medium text-white mb-2">No Candidates Yet</h3>
+                <p className="text-sm text-white/50 mb-4">
+                  Start tracking your dating journey by adding your first candidate.
+                </p>
+                <Button onClick={() => navigate("/add-candidate")} className="bg-amber-500 hover:bg-amber-400 text-neutral-900">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Your First Candidate
+                </Button>
+              </div>
             )}
           </TabsContent>
 
@@ -524,12 +527,12 @@ const Dashboard = () => {
             <div className="grid grid-cols-2 gap-2">
               <Button
                 onClick={() => navigate("/add-candidate")}
-                className="w-full bg-primary hover:bg-primary/90"
+                className="w-full bg-amber-500 hover:bg-amber-400 text-neutral-900 font-semibold"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Candidate
               </Button>
-              <Button variant="outline" onClick={() => navigate("/patterns")} className="w-full">
+              <Button variant="outline" onClick={() => navigate("/patterns")} className="w-full border-white/20 text-white hover:bg-white/10 bg-white/5">
                 <TrendingUp className="w-4 h-4 mr-2" />
                 View Patterns
               </Button>
@@ -538,12 +541,12 @@ const Dashboard = () => {
             {/* Quality Filter Indicator */}
             {qualityFilter && (
               <div className="flex items-center gap-2">
-                <span className={`text-xs px-2 py-1 rounded-full ${qualityFilter === "good" ? "bg-green-500/10 text-green-600" : "bg-amber-500/10 text-amber-600"}`}>
+                <span className={`text-xs px-2 py-1 rounded-full ${qualityFilter === "good" ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400"}`}>
                   Showing: {qualityFilter === "good" ? "Good Vibes" : "Watch Out"}
                 </span>
                 <button 
                   onClick={() => setQualityFilter(null)} 
-                  className="text-xs text-muted-foreground hover:text-foreground"
+                  className="text-xs text-white/50 hover:text-white"
                 >
                   Clear
                 </button>
@@ -567,19 +570,17 @@ const Dashboard = () => {
                 />
               </div>
             ) : (
-              <Card className="border-dashed">
-                <CardContent className="py-12 text-center">
-                  <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="font-medium text-foreground mb-2">No Candidates Yet</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Start tracking your dating journey by adding your first candidate.
-                  </p>
-                  <Button onClick={() => navigate("/add-candidate")}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Your First Candidate
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 border-dashed py-12 text-center">
+                <Users className="w-12 h-12 mx-auto text-white/40 mb-4" />
+                <h3 className="font-medium text-white mb-2">No Candidates Yet</h3>
+                <p className="text-sm text-white/50 mb-4">
+                  Start tracking your dating journey by adding your first candidate.
+                </p>
+                <Button onClick={() => navigate("/add-candidate")} className="bg-amber-500 hover:bg-amber-400 text-neutral-900">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Your First Candidate
+                </Button>
+              </div>
             )}
           </TabsContent>
         </Tabs>
