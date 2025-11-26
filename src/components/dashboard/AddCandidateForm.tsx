@@ -28,7 +28,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { SliderInput } from "@/components/onboarding/SliderInput";
-import { Plus, User, MapPin, Church, Heart, Briefcase, Sparkles } from "lucide-react";
+import { Plus, User, MapPin, Church, Heart, Briefcase, Sparkles, Brain } from "lucide-react";
 import { toast } from "sonner";
 
 const DEFAULT_GENDER_KEY = "candidate_default_gender_identity";
@@ -156,6 +156,19 @@ const SCHEDULE_OPTIONS = [
   { value: "overnight", label: "Overnight" },
 ];
 
+const NEURODIVERGENT_OPTIONS = [
+  { value: "yes", label: "Yes" },
+  { value: "no", label: "No" },
+  { value: "unknown", label: "Unknown" },
+];
+
+const MENTAL_HEALTH_AWARENESS_OPTIONS = [
+  { value: "very_understanding", label: "Very Understanding" },
+  { value: "somewhat", label: "Somewhat" },
+  { value: "not_sure", label: "Not Sure" },
+  { value: "unknown", label: "Unknown" },
+];
+
 export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   onSuccess,
   trigger,
@@ -229,6 +242,10 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   const [humorCompatibility, setHumorCompatibility] = useState(3);
   const [energyMatch, setEnergyMatch] = useState(3);
 
+  // Mental Health & Neurodivergence
+  const [theirNeurodivergent, setTheirNeurodivergent] = useState("");
+  const [theirMentalHealthAwareness, setTheirMentalHealthAwareness] = useState("");
+
   const resetForm = () => {
     setNickname("");
     setAge("");
@@ -262,6 +279,8 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
     setIntellectualConnection(3);
     setHumorCompatibility(3);
     setEnergyMatch(3);
+    setTheirNeurodivergent("");
+    setTheirMentalHealthAwareness("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -306,6 +325,8 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
         intellectual_connection: intellectualConnection,
         humor_compatibility: humorCompatibility,
         energy_match: energyMatch,
+        their_neurodivergent: theirNeurodivergent || null,
+        their_mental_health_awareness: theirMentalHealthAwareness || null,
         first_contact_date: new Date().toISOString().split("T")[0],
       });
 
@@ -625,6 +646,42 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
                   leftLabel="Laid-back"
                   rightLabel="Very Driven"
                 />
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Mental Health & Neurodivergence */}
+            <AccordionItem value="mental-health">
+              <AccordionTrigger className="text-sm">
+                <span className="flex items-center gap-2">
+                  <Brain className="w-4 h-4" />
+                  Mental Health
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-3 pt-2">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Neurodivergent?</Label>
+                    <Select value={theirNeurodivergent} onValueChange={setTheirNeurodivergent}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {NEURODIVERGENT_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>MH Awareness</Label>
+                    <Select value={theirMentalHealthAwareness} onValueChange={setTheirMentalHealthAwareness}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {MENTAL_HEALTH_AWARENESS_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </AccordionContent>
             </AccordionItem>
 

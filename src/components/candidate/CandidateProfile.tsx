@@ -4,7 +4,7 @@ import { Tables, Enums } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Calendar, MapPin, User, Briefcase, Heart, Users, Church, Vote, Wine, Cigarette, Dumbbell } from "lucide-react";
+import { Pencil, Calendar, MapPin, User, Briefcase, Heart, Users, Church, Vote, Wine, Cigarette, Dumbbell, Brain } from "lucide-react";
 import { CandidatePhotoUpload } from "./CandidatePhotoUpload";
 
 type Candidate = Tables<"candidates">;
@@ -297,6 +297,33 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
           </div>
         </CardContent>
       </Card>
+
+      {/* Mental Health & Neurodivergence */}
+      {((candidate as any).their_neurodivergent || (candidate as any).their_mental_health_awareness) && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Brain className="w-5 h-5" />
+              Mental Health
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {(candidate as any).their_neurodivergent && (candidate as any).their_neurodivergent !== "unknown" && (
+                <Badge variant="outline" className="gap-1">
+                  <Brain className="w-3 h-3" />
+                  Neurodivergent: {(candidate as any).their_neurodivergent === "yes" ? "Yes" : "No"}
+                </Badge>
+              )}
+              {(candidate as any).their_mental_health_awareness && (candidate as any).their_mental_health_awareness !== "unknown" && (
+                <Badge variant="outline">
+                  MH Awareness: {(candidate as any).their_mental_health_awareness.replace("_", " ")}
+                </Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Lifestyle */}
       {((candidate as any).their_drinking || (candidate as any).their_smoking || (candidate as any).their_exercise) && (
