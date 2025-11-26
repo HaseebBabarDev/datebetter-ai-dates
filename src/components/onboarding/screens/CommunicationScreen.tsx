@@ -4,13 +4,14 @@ import { OnboardingLayout } from "../OnboardingLayout";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { OptionCard } from "../OptionCard";
+import { MessageSquare, Feather, Heart, Brain, RefreshCw } from "lucide-react";
 
 const commOptions = [
-  { value: "direct", label: "💬 Direct & honest" },
-  { value: "diplomatic", label: "🕊️ Diplomatic" },
-  { value: "emotional", label: "❤️ Emotional" },
-  { value: "logical", label: "🧠 Logical" },
-  { value: "adaptable", label: "🔄 Adaptable" },
+  { value: "direct", label: "Direct & honest", icon: MessageSquare },
+  { value: "diplomatic", label: "Diplomatic", icon: Feather },
+  { value: "emotional", label: "Emotional", icon: Heart },
+  { value: "logical", label: "Logical", icon: Brain },
+  { value: "adaptable", label: "Adaptable", icon: RefreshCw },
 ];
 
 const CommunicationScreen = () => {
@@ -22,7 +23,13 @@ const CommunicationScreen = () => {
         <div className="space-y-3">
           <Label>How do you communicate?</Label>
           {commOptions.map((o) => (
-            <OptionCard key={o.value} selected={data.communicationStyle === o.value} onClick={() => updateData({ communicationStyle: o.value })} title={o.label} />
+            <OptionCard 
+              key={o.value} 
+              selected={data.communicationStyle === o.value} 
+              onClick={() => updateData({ communicationStyle: o.value })} 
+              icon={<o.icon className="w-4 h-4" />}
+              title={o.label} 
+            />
           ))}
         </div>
         <Button onClick={nextStep} disabled={!data.communicationStyle} className="w-full" size="lg">Continue</Button>

@@ -14,7 +14,11 @@ import {
   Sparkles,
   ChevronRight,
   Zap,
-  MapPin
+  MapPin,
+  Car,
+  Plane,
+  Globe,
+  Ban
 } from "lucide-react";
 import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
 
@@ -35,11 +39,11 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   archived: { label: "Archived", color: "bg-muted text-muted-foreground" },
 };
 
-const distanceConfig: Record<string, { label: string; icon: string; color: string }> = {
-  same_city: { label: "Nearby", icon: "📍", color: "text-emerald-600 bg-emerald-500/10" },
-  regional: { label: "Regional", icon: "🚗", color: "text-blue-600 bg-blue-500/10" },
-  far: { label: "Far", icon: "✈️", color: "text-amber-600 bg-amber-500/10" },
-  long_distance: { label: "Long Distance", icon: "🌍", color: "text-purple-600 bg-purple-500/10" },
+const distanceConfig: Record<string, { label: string; icon: typeof MapPin; color: string }> = {
+  same_city: { label: "Nearby", icon: MapPin, color: "text-emerald-600 bg-emerald-500/10" },
+  regional: { label: "Regional", icon: Car, color: "text-blue-600 bg-blue-500/10" },
+  far: { label: "Far", icon: Plane, color: "text-amber-600 bg-amber-500/10" },
+  long_distance: { label: "Long Distance", icon: Globe, color: "text-purple-600 bg-purple-500/10" },
 };
 
 const getNextStep = (status: string | null, updatedAt: string | null): string | null => {
@@ -123,19 +127,24 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
               {status.label}
             </Badge>
             {candidate.no_contact_active && candidate.no_contact_day !== null && (
-              <Badge variant="outline" className="text-xs bg-slate-500/10 text-slate-600 border-slate-300">
-                🚫 Day {candidate.no_contact_day}
+              <Badge variant="outline" className="text-xs bg-slate-500/10 text-slate-600 border-slate-300 gap-1">
+                <Ban className="w-3 h-3" />
+                Day {candidate.no_contact_day}
               </Badge>
             )}
             {candidate.age && (
               <span className="text-xs text-muted-foreground">{candidate.age}y</span>
             )}
-            {(candidate as any).distance_approximation && distanceConfig[(candidate as any).distance_approximation] && (
-              <span className={`text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1 ${distanceConfig[(candidate as any).distance_approximation].color}`}>
-                <span>{distanceConfig[(candidate as any).distance_approximation].icon}</span>
-                {distanceConfig[(candidate as any).distance_approximation].label}
-              </span>
-            )}
+            {(candidate as any).distance_approximation && distanceConfig[(candidate as any).distance_approximation] && (() => {
+              const config = distanceConfig[(candidate as any).distance_approximation];
+              const DistIcon = config.icon;
+              return (
+                <span className={`text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1 ${config.color}`}>
+                  <DistIcon className="w-3 h-3" />
+                  {config.label}
+                </span>
+              );
+            })()}
           </div>
 
           {candidate.compatibility_score && (
