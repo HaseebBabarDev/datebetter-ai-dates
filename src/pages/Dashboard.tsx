@@ -32,8 +32,9 @@ import {
   List,
   Clock,
   Bell,
+  XCircle,
+  RefreshCw,
 } from "lucide-react";
-import { XCircle } from "lucide-react";
 import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
 import { CandidatesList } from "@/components/dashboard/CandidatesList";
@@ -78,6 +79,34 @@ const Dashboard = () => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [qualityFilter, setQualityFilter] = useState<"good" | "bad" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [reopeningId, setReopeningId] = useState<string | null>(null);
+
+  const handleReopenRelationship = async (candidateId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setReopeningId(candidateId);
+    try {
+      const { error } = await supabase
+        .from("candidates")
+        .update({
+          status: "texting",
+          relationship_ended_at: null,
+          end_reason: null,
+        })
+        .eq("id", candidateId);
+      
+      if (error) throw error;
+      
+      setCandidates(prev => prev.map(c => 
+        c.id === candidateId 
+          ? { ...c, status: "texting", relationship_ended_at: null, end_reason: null }
+          : c
+      ));
+    } catch (error) {
+      console.error("Error reopening relationship:", error);
+    } finally {
+      setReopeningId(null);
+    }
+  };
 
   // Start tour for new users
   useEffect(() => {
@@ -718,31 +747,42 @@ const Dashboard = () => {
 
                   {/* Last Ended Relationship */}
                   {recap.lastEnded && (
-                    <button
-                      onClick={() => navigate(`/candidate/${recap.lastEnded!.id}`)}
-                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-primary/10 transition-colors"
-                    >
-                      <Avatar className="w-10 h-10 border border-border">
-                        <AvatarImage src={recap.lastEnded.photo_url || undefined} />
-                        <AvatarFallback className="bg-muted text-muted-foreground text-sm">
-                          {recap.lastEnded.nickname.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 text-left">
-                        <p className="text-sm font-medium text-foreground">{recap.lastEnded.nickname}</p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <XCircle className="w-3 h-3" />
-                          Ended
-                          {(recap.lastEnded as any).relationship_ended_at && (
-                            <> • {format(new Date((recap.lastEnded as any).relationship_ended_at), "MMM d")}</>
-                          )}
-                          {(recap.lastEnded as any).end_reason && (
-                            <> — {(recap.lastEnded as any).end_reason}</>
-                          )}
-                        </p>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                    </button>
+                    <div className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-primary/10 transition-colors">
+                      <button
+                        onClick={() => navigate(`/candidate/${recap.lastEnded!.id}`)}
+                        className="flex items-center gap-3 flex-1"
+                      >
+                        <Avatar className="w-10 h-10 border border-border">
+                          <AvatarImage src={recap.lastEnded.photo_url || undefined} />
+                          <AvatarFallback className="bg-muted text-muted-foreground text-sm">
+                            {recap.lastEnded.nickname.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 text-left">
+                          <p className="text-sm font-medium text-foreground">{recap.lastEnded.nickname}</p>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <XCircle className="w-3 h-3" />
+                            Ended
+                            {(recap.lastEnded as any).relationship_ended_at && (
+                              <> • {format(new Date((recap.lastEnded as any).relationship_ended_at), "MMM d")}</>
+                            )}
+                            {(recap.lastEnded as any).end_reason && (
+                              <> — {(recap.lastEnded as any).end_reason}</>
+                            )}
+                          </p>
+                        </div>
+                      </button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => handleReopenRelationship(recap.lastEnded!.id, e)}
+                        disabled={reopeningId === recap.lastEnded.id}
+                        className="shrink-0 text-xs h-7 px-2"
+                      >
+                        <RefreshCw className={`w-3 h-3 mr-1 ${reopeningId === recap.lastEnded.id ? 'animate-spin' : ''}`} />
+                        Reopen
+                      </Button>
+                    </div>
                   )}
 
                 </div>
