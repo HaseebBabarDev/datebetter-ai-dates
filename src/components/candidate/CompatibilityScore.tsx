@@ -57,6 +57,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   const [adviceResponse, setAdviceResponse] = useState<AdviceTracking | null>(null);
   const [respondingToAdvice, setRespondingToAdvice] = useState(false);
   const [showNoContactDialog, setShowNoContactDialog] = useState(false);
+  const [showLowScoreWarning, setShowLowScoreWarning] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -120,10 +121,15 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       // Reset advice response when new score is calculated
       setAdviceResponse(null);
 
-      toast({
-        title: "Compatibility Analyzed",
-        description: `Score: ${analysis.overall_score}%`,
-      });
+      // Show low score warning if compatibility is very low
+      if (analysis.overall_score < 35) {
+        setShowLowScoreWarning(true);
+      } else {
+        toast({
+          title: "Compatibility Analyzed",
+          description: `Score: ${analysis.overall_score}%`,
+        });
+      }
     } catch (error) {
       console.error("Error calculating compatibility:", error);
       toast({
@@ -468,6 +474,52 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
             <AlertDialogAction onClick={handleStartNoContact}>
               Start No Contact
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Low Score Warning Dialog */}
+      <AlertDialog open={showLowScoreWarning} onOpenChange={setShowLowScoreWarning}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              Low Compatibility Warning
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p>
+                  Your compatibility with <strong>{candidate.nickname}</strong> is only{" "}
+                  <span className="font-bold text-destructive">{scoreData?.overall_score}%</span>.
+                </p>
+                <p>
+                  This is a significant mismatch. Consider whether this connection aligns with your goals and values.
+                </p>
+                <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                  <p className="font-medium mb-1">You might want to consider:</p>
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Starting No Contact mode to gain clarity</li>
+                    <li>Reflecting on recurring patterns</li>
+                    <li>Prioritizing your emotional wellbeing</li>
+                  </ul>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel>I Understand</AlertDialogCancel>
+            {onStartNoContact && (
+              <AlertDialogAction 
+                onClick={() => {
+                  setShowLowScoreWarning(false);
+                  if (onStartNoContact) onStartNoContact();
+                }}
+                className="bg-primary"
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                Start No Contact
+              </AlertDialogAction>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
