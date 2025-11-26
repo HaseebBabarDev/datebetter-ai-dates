@@ -259,9 +259,9 @@ const Dashboard = () => {
   ).length;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{ background: "var(--gradient-page)" }}>
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
+      <header className="sticky top-0 z-50 backdrop-blur-lg border-b border-border/50" style={{ background: "var(--gradient-header)" }}>
         <div className="container mx-auto px-4 py-4 max-w-lg">
           <div className="flex items-center justify-between">
             <div>
@@ -397,7 +397,7 @@ const Dashboard = () => {
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-2">
               <Card 
-                className="cursor-pointer hover:border-primary/50 transition-colors" 
+                className="cursor-pointer hover:scale-[1.02] transition-all border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter(null); }}
               >
                 <CardContent className="py-3 text-center">
@@ -406,7 +406,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
               <Card 
-                className="cursor-pointer hover:border-green-500/50 transition-colors" 
+                className="cursor-pointer hover:scale-[1.02] transition-all border-green-500/20 bg-gradient-to-br from-green-500/5 to-green-500/10" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter("good"); }}
               >
                 <CardContent className="py-3 text-center">
@@ -415,7 +415,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
               <Card 
-                className="cursor-pointer hover:border-amber-500/50 transition-colors" 
+                className="cursor-pointer hover:scale-[1.02] transition-all border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-amber-500/10" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter("bad"); }}
               >
                 <CardContent className="py-3 text-center">
