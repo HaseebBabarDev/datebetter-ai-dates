@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,7 @@ import { AddInteractionForm } from "@/components/candidate/AddInteractionForm";
 import { NoContactMode } from "@/components/candidate/NoContactMode";
 import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
@@ -71,6 +72,44 @@ const CandidateDetail = () => {
       console.error("Error updating candidate:", error);
     }
   };
+
+  const handleRescore = useCallback(async () => {
+    if (!candidate) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calculate-compatibility`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ candidateId: candidate.id }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to recalculate");
+      }
+
+      const analysis = await response.json();
+      
+      setCandidate(prev => prev ? {
+        ...prev,
+        compatibility_score: analysis.overall_score,
+        score_breakdown: analysis,
+        last_score_update: new Date().toISOString(),
+      } : null);
+
+      toast.success(`Compatibility updated: ${analysis.overall_score}%`);
+    } catch (error) {
+      console.error("Error rescoring:", error);
+    }
+  }, [candidate?.id]);
 
   if (authLoading || loading) {
     return (
@@ -146,6 +185,7 @@ const CandidateDetail = () => {
             <AddInteractionForm
               candidateId={candidate.id}
               onSuccess={fetchData}
+              onRescore={handleRescore}
             />
             <InteractionHistory interactions={interactions} />
           </TabsContent>

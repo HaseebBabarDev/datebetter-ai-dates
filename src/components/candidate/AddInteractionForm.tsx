@@ -28,6 +28,7 @@ import { toast } from "sonner";
 interface AddInteractionFormProps {
   candidateId: string;
   onSuccess: () => void;
+  onRescore?: () => void;
 }
 
 const INTERACTION_TYPES: { value: Enums<"interaction_type">; label: string }[] = [
@@ -58,6 +59,7 @@ const DURATION_OPTIONS = [
 export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   candidateId,
   onSuccess,
+  onRescore,
 }) => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
@@ -108,10 +110,15 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
 
       if (error) throw error;
 
-      toast.success("Interaction logged!");
+      toast.success("Interaction logged! Updating compatibility...");
       resetForm();
       setOpen(false);
       onSuccess();
+      
+      // Trigger rescore after logging interaction
+      if (onRescore) {
+        onRescore();
+      }
     } catch (error) {
       console.error("Error adding interaction:", error);
       toast.error("Failed to log interaction");
