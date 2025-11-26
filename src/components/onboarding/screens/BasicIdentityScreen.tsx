@@ -67,7 +67,7 @@ const bodyTypeOptions = [
 const BasicIdentityScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
-  const isValid = data.genderIdentity;
+  const isValid = data.genderIdentity && data.country && data.pronouns;
 
   return (
     <OnboardingLayout

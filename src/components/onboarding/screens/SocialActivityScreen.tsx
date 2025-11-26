@@ -55,7 +55,7 @@ const SocialActivityScreen = () => {
           ))}
         </div>
 
-        <Button onClick={nextStep} className="w-full" size="lg">
+        <Button onClick={nextStep} disabled={!data.socialStyle || !data.activityLevel} className="w-full" size="lg">
           Continue
         </Button>
       </div>
