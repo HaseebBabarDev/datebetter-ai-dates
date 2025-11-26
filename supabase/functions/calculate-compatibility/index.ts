@@ -363,6 +363,28 @@ function calculateBaseScores(profile: any, candidate: any) {
     }
   }
   
+  // Height preference matching
+  if (profile.height_preference && profile.height_preference !== "no_preference" && candidate.height && profile.height) {
+    const heightOrder = ["under_5ft", "5ft_5ft3", "5ft4_5ft6", "5ft7_5ft9", "5ft10_6ft", "over_6ft"];
+    const userHeightIdx = heightOrder.indexOf(profile.height);
+    const candHeightIdx = heightOrder.indexOf(candidate.height);
+    
+    if (userHeightIdx >= 0 && candHeightIdx >= 0) {
+      const heightMatch = 
+        (profile.height_preference === "taller" && candHeightIdx > userHeightIdx) ||
+        (profile.height_preference === "shorter" && candHeightIdx < userHeightIdx) ||
+        (profile.height_preference === "similar" && Math.abs(candHeightIdx - userHeightIdx) <= 1);
+      
+      if (heightMatch) {
+        lifestyleScore += 15;
+      } else if (profile.height_preference === "taller" && candHeightIdx < userHeightIdx) {
+        lifestyleScore -= 10;
+      } else if (profile.height_preference === "shorter" && candHeightIdx > userHeightIdx) {
+        lifestyleScore -= 10;
+      }
+    }
+  }
+  
   // Chemistry score from ratings
   const chemistryAvg = (
     (candidate.physical_attraction || 3) +
