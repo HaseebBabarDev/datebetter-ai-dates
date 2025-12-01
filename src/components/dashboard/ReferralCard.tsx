@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Gift, Copy, Check, Share2 } from "lucide-react";
 import { toast } from "sonner";
@@ -42,40 +41,31 @@ export function ReferralCard() {
   };
 
   return (
-    <Card className="border-accent/30 bg-accent/5">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-full bg-accent/20">
-            <Gift className="w-5 h-5 text-accent-foreground" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground">Refer a Friend</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Get 1 month free when they sign up for a paid plan
-            </p>
-            <div className="flex gap-2 mt-3">
-              <Button
-                size="sm"
-                variant="secondary"
-                className="gap-1.5 text-xs"
-                onClick={handleCopy}
-              >
-                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                {copied ? "Copied!" : "Copy Link"}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-1.5 text-xs"
-                onClick={handleShare}
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                Share
-              </Button>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border/50 bg-muted/30">
+      <div className="flex items-center gap-2 min-w-0">
+        <Gift className="w-4 h-4 text-muted-foreground shrink-0" />
+        <p className="text-xs text-muted-foreground truncate">
+          Refer a friend, get 1 month free
+        </p>
+      </div>
+      <div className="flex items-center gap-1.5 shrink-0">
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 px-2 text-xs"
+          onClick={handleCopy}
+        >
+          {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 px-2 text-xs"
+          onClick={handleShare}
+        >
+          <Share2 className="w-3 h-3" />
+        </Button>
+      </div>
+    </div>
   );
 }
