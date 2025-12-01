@@ -41,7 +41,6 @@ export interface OnboardingData {
   
   // Screen 5: Dating Motivation (NEW)
   datingMotivation?: string[];
-  typicalPartnerType?: string;
   
   // Screen 6: Relationship Goals
   relationshipStatus?: string;
@@ -244,7 +243,6 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
             loveBombingSensitivity: profile.love_bombing_sensitivity || undefined,
             behavioralMonitoring: profile.behavioral_monitoring || undefined,
             datingMotivation: (profile as any).dating_motivation as string[] || undefined,
-            typicalPartnerType: (profile as any).typical_partner_type || undefined,
           });
 
           // Resume from saved step

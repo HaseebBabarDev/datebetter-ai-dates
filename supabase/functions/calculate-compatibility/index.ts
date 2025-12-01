@@ -177,29 +177,60 @@ serve(async (req) => {
 
     // Build the prompt for AI analysis
     const datingMotivation = (profile as any).dating_motivation || [];
-    const typicalPartnerType = (profile as any).typical_partner_type || "regular";
-    
-    // Determine if user dates high-profile partners
-    const isHighProfileDating = ["influencer", "athlete", "musician_dj", "celebrity", "wealthy"].includes(typicalPartnerType);
     const isLookingForLove = datingMotivation.includes("love");
+    
+    // Detect high-profile partner from candidate data
+    const careerStage = (candidate.their_career_stage || "").toLowerCase();
+    const notes = (candidate.notes || "").toLowerCase();
+    const metVia = (candidate.met_via || "").toLowerCase();
+    const metApp = (candidate.met_app || "").toLowerCase();
+    
+    // Keywords that indicate high-profile partners
+    const highProfileKeywords = [
+      "influencer", "content creator", "youtuber", "tiktoker", "instagram",
+      "athlete", "player", "nba", "nfl", "mlb", "soccer", "football", "basketball",
+      "dj", "musician", "rapper", "singer", "artist", "producer", "band",
+      "celebrity", "famous", "public figure", "actor", "actress", "model",
+      "wealthy", "rich", "millionaire", "billionaire", "entrepreneur", "ceo", "founder",
+      "travels a lot", "always busy", "touring", "on the road"
+    ];
+    
+    const combinedText = `${careerStage} ${notes} ${metVia} ${metApp}`;
+    const detectedHighProfile = highProfileKeywords.some(keyword => combinedText.includes(keyword));
+    
+    // Determine partner type for context
+    let detectedPartnerType = "regular professional";
+    if (combinedText.match(/influencer|content creator|youtuber|tiktoker|instagram/)) {
+      detectedPartnerType = "influencer/content creator";
+    } else if (combinedText.match(/athlete|player|nba|nfl|mlb|soccer|football|basketball/)) {
+      detectedPartnerType = "athlete";
+    } else if (combinedText.match(/dj|musician|rapper|singer|producer|band|touring/)) {
+      detectedPartnerType = "musician/DJ";
+    } else if (combinedText.match(/celebrity|famous|actor|actress|model/)) {
+      detectedPartnerType = "celebrity/public figure";
+    } else if (combinedText.match(/wealthy|rich|millionaire|billionaire|entrepreneur|ceo|founder/)) {
+      detectedPartnerType = "high net worth individual";
+    }
     
     const motivationContext = datingMotivation.length > 0 
       ? `- Dating Motivations: ${datingMotivation.map((m: string) => formatEnumValue(m)).join(", ")}`
       : "- Dating Motivations: Not specified";
-    
-    const partnerTypeContext = typicalPartnerType !== "regular"
-      ? `- Typically dates: ${formatEnumValue(typicalPartnerType)} partners`
-      : "";
 
-    const highProfileWarning = isHighProfileDating && isLookingForLove ? `
-IMPORTANT CONTEXT - HIGH-PROFILE PARTNER DYNAMICS:
-The user typically dates ${formatEnumValue(typicalPartnerType)}s and is looking for love. When providing advice:
-- Be realistic about the challenges: high-profile partners often have many options and demanding schedules
-- If the candidate has not clearly chosen exclusivity or shown serious commitment signals, advise caution
-- Watch for signs they may be "one of many" - inconsistent availability, vague about relationship status, keeps things casual
-- If relationship goal is anything less than "serious" or "marriage", strongly advise moving with caution
+    const highProfileWarning = detectedHighProfile ? `
+IMPORTANT CONTEXT - HIGH-PROFILE PARTNER DETECTED:
+D.E.V.I. has identified that ${candidate.nickname} appears to be a ${detectedPartnerType}. When providing advice:
+${isLookingForLove ? `
+- The user is looking for LOVE - be realistic about the challenges with high-profile partners
+- High-profile individuals often have many romantic options and demanding schedules
+- If ${candidate.nickname} has not clearly chosen exclusivity or shown serious commitment, advise the user to move with CAUTION
+- Watch for signs they may be "one of many": inconsistent availability, vague about relationship status, keeping things casual, breadcrumbing
+- If their relationship goal is anything less than "serious" or "marriage-minded", STRONGLY advise proceeding carefully
 - Don't discourage the user, but help them see the situation clearly and protect their heart
-- Look for GREEN flags showing genuine investment: introducing to inner circle, making time despite busy schedule, clear communication about intentions
+- Look for GREEN flags showing genuine investment: introducing to inner circle, making time despite busy schedule, clear communication about intentions, consistency
+` : `
+- The user is not primarily seeking love, so focus on whether the dynamic meets their actual goals
+- Still note any concerning patterns but frame advice around their stated motivations
+`}
 ` : "";
 
     const prompt = `You are D.E.V.I. (Dating Evaluation & Vetting Intelligence), a warm, direct relationship coach helping someone evaluate their dating situation. Analyze compatibility between them and their dating candidate. Always address them as "you" - be conversational, empathetic, but honest.
@@ -207,7 +238,6 @@ ${highProfileWarning}
 YOUR PROFILE:
 - Location: ${profile.city || "Not specified"}, ${profile.state || ""}, ${profile.country || "Not specified"}
 ${motivationContext}
-${partnerTypeContext}
 - Relationship Status: ${formatEnumValue(profile.relationship_status)}
 - Relationship Goal: ${formatEnumValue(profile.relationship_goal)}
 - Religion: ${formatEnumValue(profile.religion)}, Importance: ${profile.faith_importance || 3}/5

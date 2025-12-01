@@ -42,7 +42,6 @@ const CompletionScreen = () => {
         cycle_length: data.cycleLength,
         cycle_regularity: data.cycleRegularity as any,
         dating_motivation: data.datingMotivation,
-        typical_partner_type: data.typicalPartnerType,
         relationship_status: data.relationshipStatus as any,
         relationship_goal: data.relationshipGoal as any,
         relationship_structure: data.relationshipStructure as any,
