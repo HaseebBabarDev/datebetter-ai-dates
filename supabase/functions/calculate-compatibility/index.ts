@@ -150,6 +150,7 @@ serve(async (req) => {
     let hasGhostingPattern = false;
     let hasBlockedPattern = false;
     let hasObsessiveContactPattern = false; // User keeps contacting after being ghosted/blocked
+    let hasCandidateHarassment = false; // Candidate obsessively contacts/stalks user
     let shouldEndRelationship = false; // When true, score will be capped very low
     
     if (interactions && interactions.length > 0) {
@@ -199,6 +200,18 @@ serve(async (req) => {
         "perfect for me", "we're meant to be", "destiny", "fate brought us"
       ];
       
+      // Candidate obsessively contacting user (harassment/stalking)
+      const candidateObsessivePhrases = [
+        "keeps texting me", "keeps calling me", "keeps messaging me", "won't stop texting",
+        "won't stop calling", "blowing up my phone", "spam calling", "spam texting",
+        "showed up at my", "showed up unannounced", "came to my house", "came to my work",
+        "waiting outside", "following me", "stalking", "harassing me", "won't leave me alone",
+        "threatening me", "threatening to", "making threats", "sent threats",
+        "contacted my friends", "contacted my family", "messaged my mom", "messaged my sister",
+        "keeps showing up", "won't take no", "doesn't respect my boundaries",
+        "created fake account", "new number", "different number", "made new account"
+      ];
+      
       // Combine all notes for pattern detection
       const allNotes = interactions.map((i: any) => (i.notes || "").toLowerCase()).join(" ");
       const candidateNotes = (candidate.notes || "").toLowerCase();
@@ -224,12 +237,20 @@ serve(async (req) => {
         console.log("DETECTED: Blocked pattern - RELATIONSHIP SHOULD END");
       }
       
-      // 3. Obsessive contact detection (user keeps contacting after ghosting/blocking)
+      // 3a. Obsessive contact detection (user keeps contacting after ghosting/blocking)
       hasObsessiveContactPattern = obsessiveContactPhrases.some(phrase => combinedNotes.includes(phrase));
       if (hasObsessiveContactPattern && (hasGhostingPattern || hasBlockedPattern)) {
         shouldEndRelationship = true;
         interactionSentiment -= 30; // Additional penalty
         console.log("DETECTED: Obsessive contact pattern after ghosting/blocking - CRITICAL");
+      }
+      
+      // 3b. Candidate harassment/stalking detection (candidate obsessively contacting user)
+      hasCandidateHarassment = candidateObsessivePhrases.some(phrase => combinedNotes.includes(phrase));
+      if (hasCandidateHarassment) {
+        shouldEndRelationship = true;
+        interactionSentiment -= 60;
+        console.log("DETECTED: Candidate harassment/stalking - RELATIONSHIP SHOULD END IMMEDIATELY");
       }
       
       // 4. Love bombing detection
@@ -481,7 +502,8 @@ INTERACTION ANALYSIS:
 - RELATIONSHIP SHOULD END: ${shouldEndRelationship ? "YES - CRITICAL PATTERN DETECTED" : "No"}
 - GHOSTING DETECTED: ${hasGhostingPattern ? "YES - They are ghosting/have ghosted the user" : "No"}
 - BLOCKED DETECTED: ${hasBlockedPattern ? "YES - User has been blocked" : "No"}
-- OBSESSIVE CONTACT: ${hasObsessiveContactPattern ? "YES - User keeps contacting after being ghosted/blocked" : "No"}
+- OBSESSIVE CONTACT (by user): ${hasObsessiveContactPattern ? "YES - User keeps contacting after being ghosted/blocked" : "No"}
+- HARASSMENT/STALKING (by candidate): ${hasCandidateHarassment ? "YES - Candidate is obsessively contacting/stalking the user" : "No"}
 - LOVE BOMBING DETECTED: ${hasLoveBombingPattern ? "YES - Actions don't match words (overpromising)" : "No"}
 - POST-INTIMACY DROP-OFF: ${hasPostIntimacyDropOff ? "YES - Behavior changed negatively after intimacy" : "No"}
 
@@ -504,8 +526,9 @@ CRITICAL SCORING RULES - YOU MUST FOLLOW THESE:
 8. ${hasGhostingPattern ? "**GHOSTING DETECTED**: When someone ghosts you, it's OVER. They have made their choice by not communicating. Tell the user to respect themselves and move on. Do NOT suggest reaching out again." : ""}
 9. ${hasBlockedPattern ? "**BLOCKED**: Being blocked is a CLEAR signal the relationship is over. There is nothing to salvage. Advise the user to accept this and focus on healing." : ""}
 10. ${hasObsessiveContactPattern ? "**OBSESSIVE CONTACT WARNING**: The user appears to be repeatedly contacting someone who has ghosted/blocked them. This is unhealthy behavior. Gently but firmly advise them to STOP contacting this person immediately and work on themselves." : ""}
-11. ${hasLoveBombingPattern ? "**LOVE BOMBING**: When someone makes big promises (providing, family, taking care of you) but their situation doesn't support it, this is manipulation. Their words don't match their ability to deliver. Advise ending this relationship." : ""}
-12. ${hasPostIntimacyDropOff ? "**POST-INTIMACY DROP-OFF**: The candidate's behavior changed negatively AFTER intimacy. This is a classic pattern of someone who was only interested in sex. Tell the user this person showed their true intentions and they deserve better." : ""}
+11. ${hasCandidateHarassment ? "**HARASSMENT/STALKING ALERT**: The candidate is showing dangerous obsessive behavior (repeatedly contacting, showing up uninvited, stalking, threatening). This is a SAFETY CONCERN. Advise the user to block them everywhere, document incidents, and consider involving authorities if threats continue. This is NON-NEGOTIABLE - they must cut ALL contact." : ""}
+12. ${hasLoveBombingPattern ? "**LOVE BOMBING**: When someone makes big promises (providing, family, taking care of you) but their situation doesn't support it, this is manipulation. Their words don't match their ability to deliver. Advise ending this relationship." : ""}
+13. ${hasPostIntimacyDropOff ? "**POST-INTIMACY DROP-OFF**: The candidate's behavior changed negatively AFTER intimacy. This is a classic pattern of someone who was only interested in sex. Tell the user this person showed their true intentions and they deserve better." : ""}
 
 WRITING STYLE FOR ADVICE - IMPORTANT:
 - CRITICAL: Your advice MUST directly reference the most recent interaction content. If they mentioned vacation, talk about that. If they had a fight, address that.
