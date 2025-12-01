@@ -19,7 +19,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { PartyPopper, TrendingUp } from "lucide-react";
+import { PartyPopper } from "lucide-react";
+import logo from "@/assets/logo.jpg";
 
 const careerOptions = [
   { value: "student", label: "Student", subtitle: "" },
@@ -186,8 +187,12 @@ const CareerScreen = () => {
               </Select>
               
               {showIncomeWarning && (
-                <div className="flex items-start gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg animate-fade-in">
-                  <TrendingUp className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2.5 p-3 bg-primary/5 border border-primary/20 rounded-lg animate-fade-in">
+                  <img 
+                    src={logo} 
+                    alt="DEVI" 
+                    className="w-6 h-6 rounded-full object-cover shrink-0 ring-1 ring-primary/20"
+                  />
                   <p className="text-xs text-muted-foreground">
                     <span className="font-medium text-foreground">DEVI says:</span> Your standards are valid. Men earning $250K+ are less common, so you may see fewer qualified candidates, but we're optimizing for quality over quantity.
                   </p>
