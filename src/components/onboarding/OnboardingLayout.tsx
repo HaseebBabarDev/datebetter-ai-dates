@@ -91,7 +91,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
           </div>
           {showProgress && currentStep > 0 && (
             <span className="text-xs text-muted-foreground">
-              {currentStep}/{totalSteps - 1}
+              {progress >= 50 ? "½ way there!" : ""}
             </span>
           )}
         </header>
