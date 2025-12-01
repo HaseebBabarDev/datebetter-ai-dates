@@ -129,13 +129,14 @@ serve(async (req) => {
       throw new Error("Candidate not found");
     }
 
-    // Fetch recent interactions for context
+    // Fetch recent interactions for context (order by date then created_at to get true most recent)
     const { data: interactions } = await supabase
       .from("interactions")
       .select("*")
       .eq("candidate_id", candidateId)
       .eq("user_id", user.id)
       .order("interaction_date", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(10);
 
     // Build interaction summary and calculate sentiment
