@@ -39,18 +39,21 @@ export const OptionCard: React.FC<OptionCardProps> = ({
         className
       )}
     >
-      <div className="flex items-center gap-2">
+      <div className={cn(
+        "flex gap-2",
+        description && !compact ? "items-start" : "items-center"
+      )}>
         {icon && (
           <div className={cn(
             "rounded flex items-center justify-center shrink-0",
-            compact ? "w-5 h-5" : "w-6 h-6",
+            compact ? "w-5 h-5" : "w-8 h-8",
             selected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
           )}>
             {React.isValidElement(icon) 
               ? React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
                   className: cn(
                     (icon as React.ReactElement<{ className?: string }>).props.className,
-                    "w-3 h-3"
+                    compact ? "w-3 h-3" : "w-4 h-4"
                   )
                 })
               : icon
@@ -58,22 +61,24 @@ export const OptionCard: React.FC<OptionCardProps> = ({
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-1">
-            <span className={cn(
-              "text-xs font-medium leading-tight",
-              selected ? "text-primary" : "text-foreground"
-            )}>
-              {title}
-            </span>
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1">
+              <span className={cn(
+                "text-xs font-medium leading-tight block",
+                selected ? "text-primary" : "text-foreground"
+              )}>
+                {title}
+              </span>
+              {description && !compact && (
+                <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight text-left">
+                  {description}
+                </p>
+              )}
+            </div>
             {selected && (
-              <Check className="w-3.5 h-3.5 text-primary shrink-0" />
+              <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
             )}
           </div>
-          {description && !compact && (
-            <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
-              {description}
-            </p>
-          )}
         </div>
       </div>
     </button>
