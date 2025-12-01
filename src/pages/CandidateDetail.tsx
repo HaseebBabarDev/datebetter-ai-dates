@@ -554,22 +554,6 @@ const CandidateDetail = () => {
         {!candidate.no_contact_active && candidate.status !== "archived" && (
           <div className="space-y-2">
             <UpgradeNudge candidateId={candidate.id} />
-            {subscription && getRemainingUpdates(candidate.id) > 0 && (
-              <div className="flex justify-end">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge variant="outline" className="text-xs cursor-help">
-                        {getRemainingUpdates(candidate.id)} update{getRemainingUpdates(candidate.id) !== 1 ? 's' : ''} remaining
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Analyze also counts toward updates</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            )}
             <div data-tour="quick-log">
               <AddInteractionForm
                 candidateId={candidate.id}
