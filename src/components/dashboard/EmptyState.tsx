@@ -36,7 +36,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onCandidateAdded }) => {
         
         <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
           <Sparkles className="w-3 h-3" />
-          AI-powered compatibility scoring included
+          D.E.V.I.-powered compatibility scoring included
         </p>
       </div>
     </div>
