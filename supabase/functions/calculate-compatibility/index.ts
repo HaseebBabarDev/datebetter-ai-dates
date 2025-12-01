@@ -176,10 +176,38 @@ serve(async (req) => {
     }
 
     // Build the prompt for AI analysis
-    const prompt = `You are D.E.V.I. (Dating Evaluation & Vetting Intelligence), a warm, direct relationship coach helping someone evaluate their dating situation. Analyze compatibility between them and their dating candidate. Always address them as "you" - be conversational, empathetic, but honest.
+    const datingMotivation = (profile as any).dating_motivation || [];
+    const typicalPartnerType = (profile as any).typical_partner_type || "regular";
+    
+    // Determine if user dates high-profile partners
+    const isHighProfileDating = ["influencer", "athlete", "musician_dj", "celebrity", "wealthy"].includes(typicalPartnerType);
+    const isLookingForLove = datingMotivation.includes("love");
+    
+    const motivationContext = datingMotivation.length > 0 
+      ? `- Dating Motivations: ${datingMotivation.map((m: string) => formatEnumValue(m)).join(", ")}`
+      : "- Dating Motivations: Not specified";
+    
+    const partnerTypeContext = typicalPartnerType !== "regular"
+      ? `- Typically dates: ${formatEnumValue(typicalPartnerType)} partners`
+      : "";
 
+    const highProfileWarning = isHighProfileDating && isLookingForLove ? `
+IMPORTANT CONTEXT - HIGH-PROFILE PARTNER DYNAMICS:
+The user typically dates ${formatEnumValue(typicalPartnerType)}s and is looking for love. When providing advice:
+- Be realistic about the challenges: high-profile partners often have many options and demanding schedules
+- If the candidate has not clearly chosen exclusivity or shown serious commitment signals, advise caution
+- Watch for signs they may be "one of many" - inconsistent availability, vague about relationship status, keeps things casual
+- If relationship goal is anything less than "serious" or "marriage", strongly advise moving with caution
+- Don't discourage the user, but help them see the situation clearly and protect their heart
+- Look for GREEN flags showing genuine investment: introducing to inner circle, making time despite busy schedule, clear communication about intentions
+` : "";
+
+    const prompt = `You are D.E.V.I. (Dating Evaluation & Vetting Intelligence), a warm, direct relationship coach helping someone evaluate their dating situation. Analyze compatibility between them and their dating candidate. Always address them as "you" - be conversational, empathetic, but honest.
+${highProfileWarning}
 YOUR PROFILE:
 - Location: ${profile.city || "Not specified"}, ${profile.state || ""}, ${profile.country || "Not specified"}
+${motivationContext}
+${partnerTypeContext}
 - Relationship Status: ${formatEnumValue(profile.relationship_status)}
 - Relationship Goal: ${formatEnumValue(profile.relationship_goal)}
 - Religion: ${formatEnumValue(profile.religion)}, Importance: ${profile.faith_importance || 3}/5

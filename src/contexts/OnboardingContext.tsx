@@ -39,7 +39,11 @@ export interface OnboardingData {
   cycleLength?: number;
   cycleRegularity?: string;
   
-  // Screen 5: Relationship Goals
+  // Screen 5: Dating Motivation (NEW)
+  datingMotivation?: string[];
+  typicalPartnerType?: string;
+  
+  // Screen 6: Relationship Goals
   relationshipStatus?: string;
   relationshipGoal?: string;
   relationshipStructure?: string;
@@ -140,7 +144,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [data, setData] = useState<OnboardingData>({});
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(true);
-  const totalSteps = 18; // 0-17
+  const totalSteps = 19; // 0-18 (added Dating Motivation screen)
 
   // Load existing profile data on mount
   useEffect(() => {
@@ -239,6 +243,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
             redFlagSensitivity: profile.red_flag_sensitivity || undefined,
             loveBombingSensitivity: profile.love_bombing_sensitivity || undefined,
             behavioralMonitoring: profile.behavioral_monitoring || undefined,
+            datingMotivation: (profile as any).dating_motivation as string[] || undefined,
+            typicalPartnerType: (profile as any).typical_partner_type || undefined,
           });
 
           // Resume from saved step
@@ -278,20 +284,21 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
       case 1: return !!data.termsAccepted && !!data.privacyAccepted;
       case 2: return !!data.name && !!data.genderIdentity;
       case 3: return !!data.sexualOrientation && (data.interestedIn?.length ?? 0) > 0;
-      case 4: return true; // Optional
-      case 5: return !!data.relationshipGoal;
-      case 6: return !!data.kidsStatus && !!data.kidsDesire;
-      case 7: return !!data.religion;
-      case 8: return !!data.politics;
-      case 9: return !!data.careerStage;
-      case 10: return !!data.distancePreference;
-      case 11: return true; // Social/Activity optional
-      case 12: return (data.attractionImportance ?? 0) > 0;
-      case 13: return !!data.communicationStyle;
-      case 14: return !!data.attachmentStyle;
-      case 15: return (data.dealbreakers?.length ?? 0) > 0;
-      case 16: return true; // Mental health optional
-      case 17: return !!data.intimacyComfort;
+      case 4: return true; // Hormone/Cycle optional
+      case 5: return (data.datingMotivation?.length ?? 0) > 0; // Dating Motivation
+      case 6: return !!data.relationshipGoal;
+      case 7: return !!data.kidsStatus && !!data.kidsDesire;
+      case 8: return !!data.religion;
+      case 9: return !!data.politics;
+      case 10: return !!data.careerStage;
+      case 11: return !!data.distancePreference;
+      case 12: return true; // Social/Activity optional
+      case 13: return (data.attractionImportance ?? 0) > 0;
+      case 14: return !!data.communicationStyle;
+      case 15: return !!data.attachmentStyle;
+      case 16: return (data.dealbreakers?.length ?? 0) > 0;
+      case 17: return true; // Mental health optional
+      case 18: return !!data.intimacyComfort;
       default: return false;
     }
   }, [data]);
