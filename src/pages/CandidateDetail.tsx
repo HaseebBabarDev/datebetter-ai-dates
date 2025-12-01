@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban, Home, XCircle, RefreshCw } from "lucide-react";
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
@@ -16,6 +17,7 @@ import { AppRatingDialog, shouldShowRatingDialog } from "@/components/candidate/
 import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useTour, CANDIDATE_DETAIL_TOUR_STEPS } from "@/components/tour";
 import {
   AlertDialog,
@@ -43,6 +45,7 @@ const CandidateDetail = () => {
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   const { startTour, hasCompletedTour } = useTour();
+  const { getRemainingUpdates, subscription } = useSubscription();
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [userProfile, setUserProfile] = useState<{ schedule_flexibility?: string | null }>({});
@@ -545,6 +548,13 @@ const CandidateDetail = () => {
         {!candidate.no_contact_active && candidate.status !== "archived" && (
           <div className="space-y-2">
             <UpgradeNudge candidateId={candidate.id} />
+            {subscription && getRemainingUpdates(candidate.id) > 0 && (
+              <div className="flex justify-end">
+                <Badge variant="outline" className="text-xs">
+                  {getRemainingUpdates(candidate.id)} update{getRemainingUpdates(candidate.id) !== 1 ? 's' : ''} remaining
+                </Badge>
+              </div>
+            )}
             <div data-tour="quick-log">
               <AddInteractionForm
                 candidateId={candidate.id}
