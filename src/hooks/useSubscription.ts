@@ -44,9 +44,9 @@ export function useSubscription() {
         .from("user_subscriptions")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
-      if (subError && subError.code !== "PGRST116") {
+      if (subError) {
         console.error("Error fetching subscription:", subError);
       }
 
@@ -78,17 +78,26 @@ export function useSubscription() {
         });
       }
 
-      // Fetch usage tracking
-      const { data: usageData } = await supabase
-        .from("usage_tracking")
-        .select("*")
+      // Fetch interactions grouped by candidate to count actual usage
+      const { data: interactions } = await supabase
+        .from("interactions")
+        .select("candidate_id")
         .eq("user_id", user.id);
 
-      if (usageData) {
-        setUsage(usageData.map((u) => ({
-          candidate_id: u.candidate_id,
-          updates_used: u.updates_used,
-        })));
+      if (interactions) {
+        // Count interactions per candidate
+        const interactionCounts: Record<string, number> = {};
+        interactions.forEach((i) => {
+          interactionCounts[i.candidate_id] = (interactionCounts[i.candidate_id] || 0) + 1;
+        });
+
+        // Convert to usage array
+        const usageFromInteractions = Object.entries(interactionCounts).map(([candidate_id, count]) => ({
+          candidate_id,
+          updates_used: count,
+        }));
+
+        setUsage(usageFromInteractions);
       }
 
       // Fetch candidate count
@@ -111,55 +120,17 @@ export function useSubscription() {
   };
 
   const canUseUpdate = (candidateId: string) => {
-    if (!subscription) return false;
+    if (!subscription) return true; // Allow while loading
     const candidateUsage = usage.find((u) => u.candidate_id === candidateId);
     const usedUpdates = candidateUsage?.updates_used || 0;
     return usedUpdates < subscription.updates_per_candidate;
   };
 
   const getRemainingUpdates = (candidateId: string) => {
-    if (!subscription) return 0;
+    if (!subscription) return 1; // Show 1 while loading
     const candidateUsage = usage.find((u) => u.candidate_id === candidateId);
     const usedUpdates = candidateUsage?.updates_used || 0;
     return Math.max(0, subscription.updates_per_candidate - usedUpdates);
-  };
-
-  const incrementUsage = async (candidateId: string) => {
-    if (!user) return false;
-
-    try {
-      // Check if usage record exists
-      const { data: existing } = await supabase
-        .from("usage_tracking")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("candidate_id", candidateId)
-        .single();
-
-      if (existing) {
-        // Update existing record
-        await supabase
-          .from("usage_tracking")
-          .update({ updates_used: existing.updates_used + 1 })
-          .eq("id", existing.id);
-      } else {
-        // Create new record
-        await supabase
-          .from("usage_tracking")
-          .insert({
-            user_id: user.id,
-            candidate_id: candidateId,
-            updates_used: 1,
-          });
-      }
-
-      // Refresh usage data
-      await fetchSubscriptionAndUsage();
-      return true;
-    } catch (error) {
-      console.error("Error incrementing usage:", error);
-      return false;
-    }
   };
 
   return {
@@ -170,7 +141,6 @@ export function useSubscription() {
     canAddCandidate,
     canUseUpdate,
     getRemainingUpdates,
-    incrementUsage,
     refetch: fetchSubscriptionAndUsage,
     planLimits: PLAN_LIMITS,
   };

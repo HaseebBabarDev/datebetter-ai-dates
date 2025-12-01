@@ -86,7 +86,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   triggerButton,
 }) => {
   const { user } = useAuth();
-  const { canUseUpdate, getRemainingUpdates, incrementUsage, subscription } = useSubscription();
+  const { canUseUpdate, getRemainingUpdates, subscription, refetch } = useSubscription();
   const [open, setOpen] = useState(false);
   const [showBrokeContactDialog, setShowBrokeContactDialog] = useState(false);
   const [showPendingAdviceDialog, setShowPendingAdviceDialog] = useState(false);
@@ -150,14 +150,14 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
       });
 
       if (error) throw error;
-
-      // Increment usage tracking
-      await incrementUsage(candidateId);
       
       toast.success("Interaction logged! Updating compatibility...");
       resetForm();
       setOpen(false);
       onSuccess();
+      
+      // Refresh subscription usage data
+      refetch();
       
       // Trigger rescore after logging interaction
       if (onRescore) {
