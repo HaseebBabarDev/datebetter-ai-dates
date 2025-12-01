@@ -67,11 +67,25 @@ serve(async (req) => {
       who_paid: i.who_paid,
     })) || [];
 
+    // Format status for AI readability
+    const statusMap: Record<string, string> = {
+      "just_matched": "just matched",
+      "texting": "texting stage",
+      "planning_date": "planning a date",
+      "dating": "situationship",
+      "dating_casually": "dating casually",
+      "getting_serious": "getting serious",
+      "serious_relationship": "in a serious relationship",
+      "no_contact": "no contact",
+      "archived": "archived/ended",
+    };
+    const formattedStatus = statusMap[candidate.status] || candidate.status || "Unknown";
+
     const prompt = `Analyze this dating candidate's behavior patterns based on their profile and interaction history. Detect any red flags (warning signs) and green flags (positive signs).
 
 CANDIDATE INFO:
 - Nickname: ${candidate.nickname}
-- Status: ${candidate.status}
+- Status: ${formattedStatus}
 - Attachment Style: ${candidate.their_attachment_style || "Unknown"}
 - Notes: ${candidate.notes || "None"}
 

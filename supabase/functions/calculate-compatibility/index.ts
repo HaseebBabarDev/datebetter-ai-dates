@@ -36,6 +36,16 @@ function formatEnumValue(value: string | null | undefined): string {
     "christian_catholic": "Catholic",
     "christian_protestant": "Protestant",
     "christian_other": "Christian (other)",
+    // Candidate status values
+    "just_matched": "just matched",
+    "texting": "texting stage",
+    "planning_date": "planning a date",
+    "dating": "situationship",
+    "dating_casually": "dating casually",
+    "getting_serious": "getting serious",
+    "serious_relationship": "in a serious relationship",
+    "no_contact": "no contact",
+    "archived": "archived/ended",
   };
   
   const lower = value.toLowerCase();
