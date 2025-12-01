@@ -67,7 +67,7 @@ const bodyTypeOptions = [
 const BasicIdentityScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
-  const isValid = data.genderIdentity && data.country && data.pronouns;
+  const isValid = data.name && data.genderIdentity && data.country && data.pronouns;
 
   return (
     <OnboardingLayout
@@ -75,6 +75,17 @@ const BasicIdentityScreen = () => {
       subtitle="Let's get to know you"
     >
       <div className="space-y-4 animate-fade-in">
+        {/* Name Section */}
+        <div className="space-y-2">
+          <Label htmlFor="name" className="text-sm font-medium">What should we call you?</Label>
+          <Input
+            id="name"
+            placeholder="Your name"
+            value={data.name || ""}
+            onChange={(e) => updateData({ name: e.target.value })}
+          />
+        </div>
+
         {/* Location Section */}
         <div className="space-y-3">
           <Label className="text-sm font-medium">Where are you based?</Label>
