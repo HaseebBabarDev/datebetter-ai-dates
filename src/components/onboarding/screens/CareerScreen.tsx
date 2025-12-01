@@ -194,7 +194,7 @@ const CareerScreen = () => {
                     className="w-6 h-6 rounded-full object-cover shrink-0 ring-1 ring-primary/20"
                   />
                   <p className="text-xs text-muted-foreground">
-                    <span className="font-medium text-foreground">D.E.V.I. says:</span> Your standards are valid. Men earning $250K+ are less common, so you may see fewer qualified candidates, but we're optimizing for quality over quantity.
+                    <span className="font-medium text-foreground">D.E.V.I. says:</span> Your standards are valid. Partners earning $250K+ are less common, so you may see fewer qualified candidates, but we're optimizing for quality over quantity.
                   </p>
                 </div>
               )}
