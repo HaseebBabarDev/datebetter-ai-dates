@@ -86,19 +86,19 @@ const WelcomeScreen = () => {
             <span className="text-[10px] text-foreground/70">Dating Evaluation & Vetting Intelligence</span>
           </div>
 
-          {/* Onboarding Info - Compact inline */}
-          <div className="flex justify-center gap-1.5">
-            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-card/50 backdrop-blur-sm border border-border/30 text-[10px]">
-              <Clock className="w-2.5 h-2.5 text-primary" />
-              <span className="text-foreground/80">10-15 min</span>
+          {/* Onboarding Info - Pill badges */}
+          <div className="flex justify-center gap-2">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card shadow-sm border border-border/50">
+              <Clock className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-medium text-foreground">10-15 min</span>
             </div>
-            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-card/50 backdrop-blur-sm border border-border/30 text-[10px]">
-              <ShieldCheck className="w-2.5 h-2.5 text-primary" />
-              <span className="text-foreground/80">Private</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card shadow-sm border border-border/50">
+              <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-medium text-foreground">Private</span>
             </div>
-            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-card/50 backdrop-blur-sm border border-border/30 text-[10px]">
-              <Sparkles className="w-2.5 h-2.5 text-primary" />
-              <span className="text-foreground/80">Personalized</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card shadow-sm border border-border/50">
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-medium text-foreground">Personalized</span>
             </div>
           </div>
 
