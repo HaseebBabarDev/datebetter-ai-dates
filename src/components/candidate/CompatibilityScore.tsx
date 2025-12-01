@@ -601,7 +601,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
 
       {/* Low Score Warning Dialog */}
       <AlertDialog open={showLowScoreWarning} onOpenChange={setShowLowScoreWarning}>
-        <AlertDialogContent className="max-w-md">
+        <AlertDialogContent className="max-w-[380px] sm:max-w-[420px]">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="w-5 h-5" />
@@ -636,13 +636,13 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col gap-2">
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-2">
             {/* Advice accept/decline buttons */}
             {scoreData?.advice && !adviceResponse && (
-              <div className="flex gap-2 w-full">
+              <div className="flex gap-2 w-full sm:w-auto">
                 <Button
                   size="sm"
-                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700"
                   onClick={async () => {
                     setShowLowScoreWarning(false);
                     await respondToAdvice(true);
@@ -655,7 +655,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                 <Button
                   size="sm"
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 sm:flex-none"
                   onClick={async () => {
                     setShowLowScoreWarning(false);
                     await saveAdviceResponse(false);
@@ -667,15 +667,15 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                 </Button>
               </div>
             )}
-            <div className="flex gap-2 w-full">
-              <AlertDialogCancel className="flex-1">Close</AlertDialogCancel>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <AlertDialogCancel className="flex-1 sm:flex-none">Close</AlertDialogCancel>
               {onStartNoContact && (
                 <AlertDialogAction 
                   onClick={() => {
                     setShowLowScoreWarning(false);
                     if (onStartNoContact) onStartNoContact();
                   }}
-                  className="flex-1 bg-primary"
+                  className="flex-1 sm:flex-none bg-primary"
                 >
                   <Shield className="w-4 h-4 mr-2" />
                   Start No Contact
