@@ -46,6 +46,27 @@ function formatEnumValue(value: string | null | undefined): string {
     "serious_relationship": "in a serious relationship",
     "no_contact": "no contact",
     "archived": "archived/ended",
+    // Relationship status values
+    "single": "single",
+    "in_relationship": "currently in a relationship",
+    "married": "married",
+    "recently_divorced": "recently divorced",
+    "ethical_non_monogamy": "in an ethically non-monogamous relationship",
+    // Relationship goal values
+    "casual": "casual dating",
+    "serious": "serious relationship",
+    "marriage": "marriage-minded",
+    "unsure": "unsure/exploring",
+    // Income ranges
+    "under_25k": "under $25,000",
+    "25k_50k": "$25,000 - $50,000",
+    "50k_75k": "$50,000 - $75,000",
+    "75k_100k": "$75,000 - $100,000",
+    "100k_150k": "$100,000 - $150,000",
+    "150k_250k": "$150,000 - $250,000",
+    "250k_500k": "$250,000 - $500,000",
+    "over_500k": "over $500,000",
+    "prefer_not_to_say": "prefers not to say",
   };
   
   const lower = value.toLowerCase();
@@ -257,12 +278,16 @@ ${motivationContext}
 - Attachment Style: ${formatEnumValue(profile.attachment_style)}
 - Ambition Level: ${profile.ambition_level || 3}/5
 - Career Stage: ${formatEnumValue(profile.career_stage)}
+- Income Range: ${formatEnumValue((profile as any).income_range) || "Not specified"}
+- Preferred Partner Income: ${formatEnumValue((profile as any).preferred_income_range) || "No preference"}
+- Financial Importance: ${(profile as any).financial_importance || 3}/5
 - Dealbreakers: ${JSON.stringify(profile.dealbreakers || [])}
 - Communication Style: ${formatEnumValue(profile.communication_style)}
 - Height: ${profile.height || "Not specified"}
 - Body Type: ${formatEnumValue(profile.body_type)}
 - Activity Level: ${formatEnumValue(profile.activity_level)}
 - Education Level: ${formatEnumValue(profile.education_level)}
+- Preferred Partner Education: ${formatEnumValue((profile as any).preferred_education_level) || "No preference"}
 - Height Preference for partner: ${profile.height_preference || "No preference"}
 - Schedule Flexibility: ${formatEnumValue(profile.schedule_flexibility)}
 - Distance Preference: ${formatEnumValue(profile.distance_preference)}
@@ -332,6 +357,9 @@ Consider these factors when adjusting lifestyle scores:
 - Frequent travelers need partners who are understanding of their lifestyle - flexible schedules work best
 - Professional athletes have demanding, seasonal schedules - consider this for lifestyle compatibility
 - Activity level and lifestyle compatibility
+- Financial compatibility: if user has specified income preferences, consider whether the match aligns
+- Education compatibility: if user values education level, factor this into lifestyle assessment
+- If user is "in a relationship" but dating others, adjust advice to acknowledge their current situation
 
 CRITICAL: In all output text (strengths, concerns, advice), use natural human language. Never output values like "definitely_yes" - always write "definitely wants" or similar human phrases.`;
 
