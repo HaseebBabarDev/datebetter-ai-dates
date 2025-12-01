@@ -752,7 +752,6 @@ const Dashboard = () => {
               <UpgradeNudge />
               <FreeUpgradeBanner />
               <DailyLoggingCTA interactions={interactions} candidates={candidates} />
-              <ReferralCard />
               <Button
                 variant="outline"
                 onClick={() => navigate("/patterns")}
@@ -1119,6 +1118,9 @@ const Dashboard = () => {
                 </Button>
               </div>
             )}
+
+            {/* Referral CTA at bottom */}
+            <ReferralCard />
           </TabsContent>
 
           <TabsContent value="manage" className="space-y-4 mt-0">
