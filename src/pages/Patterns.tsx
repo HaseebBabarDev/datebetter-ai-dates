@@ -31,6 +31,7 @@ import {
   Shield,
 } from "lucide-react";
 import { toast } from "sonner";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
@@ -72,6 +73,7 @@ interface PatternStats {
     timesBrokeNC: number;
     avgDaysCompleted: number;
   };
+  ncTrendData: { day: number; reached: number; hoover: number }[];
 }
 
 const Patterns = () => {
@@ -267,6 +269,14 @@ const Patterns = () => {
         ? Math.round(allDays.reduce((sum, d) => sum + d, 0) / allDays.length)
         : 0;
 
+      // NC Trend Data - how many people reached each day
+      const ncTrendData: { day: number; reached: number; hoover: number }[] = [];
+      for (let day = 1; day <= 30; day++) {
+        const reachedThisDay = ncProgress.filter((p) => p.day_number >= day).length;
+        const hooverOnDay = ncProgress.filter((p) => p.day_number === day && p.hoover_attempt).length;
+        ncTrendData.push({ day, reached: reachedThisDay, hoover: hooverOnDay });
+      }
+
       setStats({
         totalCandidates: candidates.length,
         activeCandidates: activeCandidates.length,
@@ -301,6 +311,7 @@ const Patterns = () => {
           timesBrokeNC,
           avgDaysCompleted,
         },
+        ncTrendData,
       });
     } catch (error) {
       console.error("Error fetching pattern data:", error);
@@ -780,6 +791,61 @@ const Patterns = () => {
                         value={(stats.noContactMetrics.avgDaysCompleted / 30) * 100} 
                         className="h-2 mt-2" 
                       />
+                    </div>
+                  )}
+
+                  {/* Progress Trend Chart */}
+                  {stats.ncTrendData.length > 0 && stats.ncTrendData[0].reached > 0 && (
+                    <div className="pt-2">
+                      <p className="text-xs font-medium text-muted-foreground mb-2">30-Day Progress Trend</p>
+                      <div className="h-32 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={stats.ncTrendData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                            <defs>
+                              <linearGradient id="ncGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4}/>
+                                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                              </linearGradient>
+                            </defs>
+                            <XAxis 
+                              dataKey="day" 
+                              tick={{ fontSize: 10 }} 
+                              tickLine={false}
+                              axisLine={false}
+                              tickFormatter={(value) => value % 5 === 0 ? `D${value}` : ''}
+                            />
+                            <YAxis 
+                              tick={{ fontSize: 10 }} 
+                              tickLine={false}
+                              axisLine={false}
+                              allowDecimals={false}
+                            />
+                            <Tooltip 
+                              contentStyle={{ 
+                                background: 'hsl(var(--background))', 
+                                border: '1px solid hsl(var(--border))',
+                                borderRadius: '8px',
+                                fontSize: '12px'
+                              }}
+                              formatter={(value: number, name: string) => [
+                                value, 
+                                name === 'reached' ? 'People Reached' : 'Hoover Attempts'
+                              ]}
+                              labelFormatter={(label) => `Day ${label}`}
+                            />
+                            <Area 
+                              type="monotone" 
+                              dataKey="reached" 
+                              stroke="hsl(var(--primary))" 
+                              fill="url(#ncGradient)"
+                              strokeWidth={2}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 text-center">
+                        People who reached each day in their NC journey
+                      </p>
                     </div>
                   )}
                 </CardContent>
