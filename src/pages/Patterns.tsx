@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,
   TrendingUp,
@@ -413,7 +414,7 @@ const Patterns = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 max-w-lg space-y-4">
+      <main className="container mx-auto px-4 py-4 max-w-lg">
         {!stats || stats.totalCandidates === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
@@ -425,165 +426,59 @@ const Patterns = () => {
             </CardContent>
           </Card>
         ) : (
-          <>
-            {/* Overview Stats */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-primary" />
-                  Overview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-primary/10 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-primary">{stats.totalCandidates}</div>
-                    <div className="text-xs text-muted-foreground">Total Candidates</div>
-                  </div>
-                  <div className="p-3 bg-muted rounded-lg text-center">
-                    <div className="text-2xl font-bold">{stats.totalInteractions}</div>
-                    <div className="text-xs text-muted-foreground">Interactions</div>
-                  </div>
-                  <div className="p-3 bg-muted rounded-lg text-center">
-                    <div className="text-2xl font-bold">{stats.avgCompatibilityScore}%</div>
-                    <div className="text-xs text-muted-foreground">Avg Compatibility</div>
-                  </div>
-                  <div className="p-3 bg-muted rounded-lg text-center">
-                    <div className="text-2xl font-bold">{stats.avgOverallFeeling.toFixed(1)}/5</div>
-                    <div className="text-xs text-muted-foreground">Avg Date Feeling</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-4 mb-4">
+              <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
+              <TabsTrigger value="dating" className="text-xs">Dating</TabsTrigger>
+              <TabsTrigger value="insights" className="text-xs">Insights</TabsTrigger>
+              <TabsTrigger value="nocontact" className="text-xs">No Contact</TabsTrigger>
+            </TabsList>
 
-            {/* Status Distribution */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Where They Are
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {stats.statusDistribution.map(({ status, count }) => (
-                  <div key={status} className="flex items-center justify-between">
-                    <span className="text-xs">{formatStatus(status)}</span>
-                    <div className="flex items-center gap-2">
-                      <Progress
-                        value={(count / stats.totalCandidates) * 100}
-                        className="w-24 h-2"
-                      />
-                      <span className="text-xs text-muted-foreground w-8 text-right">{count}</span>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Common Red Flags */}
-            {stats.commonRedFlags.length > 0 && (
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="space-y-4">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5 text-destructive" />
-                    Recurring Red Flags
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    Overview
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Patterns you keep encountering — be aware of these
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {stats.commonRedFlags.map(({ flag }) => (
-                      <Badge
-                        key={flag}
-                        variant="secondary"
-                        className="bg-destructive/10 text-destructive"
-                      >
-                        {flag}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Common Green Flags */}
-            {stats.commonGreenFlags.length > 0 && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-green-500" />
-                    What You Value
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Green flags you've noticed — keep looking for these
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {stats.commonGreenFlags.map(({ flag }) => (
-                      <Badge key={flag} variant="secondary" className="bg-green-500/10 text-green-600">
-                        {flag}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Best Date Types */}
-            {stats.dateTypeSuccess.length > 0 && (
-              <Card className="border-green-500/30 bg-green-500/5">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Trophy className="w-5 h-5 text-green-500" />
-                    Best Date Types
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Date types with highest success (avg feeling)
-                  </p>
-                  {stats.dateTypeSuccess.map(({ type, avgFeeling, count }, index) => (
-                    <div key={type} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {index === 0 && <Star className="w-4 h-4 text-yellow-500" />}
-                        <span className="text-xs">{formatInteractionType(type)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={`w-3 h-3 ${star <= Math.round(avgFeeling) ? "text-yellow-500 fill-yellow-500" : "text-muted"}`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-xs text-muted-foreground">({count})</span>
-                      </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 bg-primary/10 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-primary">{stats.totalCandidates}</div>
+                      <div className="text-xs text-muted-foreground">Total Candidates</div>
                     </div>
-                  ))}
+                    <div className="p-3 bg-muted rounded-lg text-center">
+                      <div className="text-2xl font-bold">{stats.totalInteractions}</div>
+                      <div className="text-xs text-muted-foreground">Interactions</div>
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg text-center">
+                      <div className="text-2xl font-bold">{stats.avgCompatibilityScore}%</div>
+                      <div className="text-xs text-muted-foreground">Avg Compatibility</div>
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg text-center">
+                      <div className="text-2xl font-bold">{stats.avgOverallFeeling.toFixed(1)}/5</div>
+                      <div className="text-xs text-muted-foreground">Avg Date Feeling</div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-            )}
 
-            {/* Interaction Patterns */}
-            {stats.interactionTypes.length > 0 && (
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <MessageCircle className="w-5 h-5" />
-                    Your Date Style
+                    <Users className="w-5 h-5" />
+                    Where They Are
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                {stats.interactionTypes.map(({ type, count }) => (
-                    <div key={type} className="flex items-center justify-between">
-                      <span className="text-xs">{formatInteractionType(type)}</span>
+                  {stats.statusDistribution.map(({ status, count }) => (
+                    <div key={status} className="flex items-center justify-between">
+                      <span className="text-xs">{formatStatus(status)}</span>
                       <div className="flex items-center gap-2">
                         <Progress
-                          value={(count / stats.totalInteractions) * 100}
+                          value={(count / stats.totalCandidates) * 100}
                           className="w-24 h-2"
                         />
                         <span className="text-xs text-muted-foreground w-8 text-right">{count}</span>
@@ -592,267 +487,412 @@ const Patterns = () => {
                   ))}
                 </CardContent>
               </Card>
-            )}
 
-            {/* Who Initiates */}
-            {stats.initiatorStats.length > 0 && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Target className="w-5 h-5" />
-                    Who Makes the Move?
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-3 gap-2">
-                    {stats.initiatorStats.map(({ initiator, count }) => {
-                      const total = stats.initiatorStats.reduce((sum, i) => sum + i.count, 0);
-                      const percent = Math.round((count / total) * 100);
-                      return (
-                        <div key={initiator} className="p-3 bg-muted rounded-lg text-center">
-                          <div className="text-xl font-bold">{percent}%</div>
-                          <div className="text-xs text-muted-foreground">
-                            {getInitiatorLabel(initiator)}
-                          </div>
+              {stats.totalCandidates > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <HeartHandshake className="w-5 h-5 text-pink-500" />
+                      Relationship Progress
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-3 bg-green-500/10 rounded-lg text-center">
+                        <Heart className="w-4 h-4 mx-auto mb-1 text-green-600" />
+                        <div className="text-xl font-bold text-green-600">{stats.relationshipOutcomes.active}</div>
+                        <div className="text-xs text-muted-foreground">Active</div>
+                      </div>
+                      <div className="p-3 bg-muted rounded-lg text-center">
+                        <HeartCrack className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                        <div className="text-xl font-bold">{stats.relationshipOutcomes.ended}</div>
+                        <div className="text-xs text-muted-foreground">Ended</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            {/* Dating Tab */}
+            <TabsContent value="dating" className="space-y-4">
+              {stats.commonRedFlags.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <AlertTriangle className="w-5 h-5 text-destructive" />
+                      Recurring Red Flags
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Patterns you keep encountering — be aware of these
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {stats.commonRedFlags.map(({ flag }) => (
+                        <Badge
+                          key={flag}
+                          variant="secondary"
+                          className="bg-destructive/10 text-destructive"
+                        >
+                          {flag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {stats.commonGreenFlags.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Heart className="w-5 h-5 text-green-500" />
+                      What You Value
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Green flags you've noticed — keep looking for these
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {stats.commonGreenFlags.map(({ flag }) => (
+                        <Badge key={flag} variant="secondary" className="bg-green-500/10 text-green-600">
+                          {flag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {stats.dateTypeSuccess.length > 0 && (
+                <Card className="border-green-500/30 bg-green-500/5">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Trophy className="w-5 h-5 text-green-500" />
+                      Best Date Types
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Date types with highest success (avg feeling)
+                    </p>
+                    {stats.dateTypeSuccess.map(({ type, avgFeeling, count }, index) => (
+                      <div key={type} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {index === 0 && <Star className="w-4 h-4 text-yellow-500" />}
+                          <span className="text-xs">{formatInteractionType(type)}</span>
                         </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                        <div className="flex items-center gap-2">
+                          <div className="flex">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`w-3 h-3 ${star <= Math.round(avgFeeling) ? "text-yellow-500 fill-yellow-500" : "text-muted"}`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-xs text-muted-foreground">({count})</span>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
 
-            {/* Meeting Sources */}
-            {stats.meetingSources.length > 0 && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Clock className="w-5 h-5" />
-                    Where You Meet People
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {stats.meetingSources.map(({ source, count }) => (
-                    <div key={source} className="flex items-center justify-between">
-                      <span className="text-xs capitalize">{source.replace("_", " ")}</span>
-                      <Badge variant="secondary">{count}</Badge>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
+              {stats.interactionTypes.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <MessageCircle className="w-5 h-5" />
+                      Your Date Style
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {stats.interactionTypes.map(({ type, count }) => (
+                      <div key={type} className="flex items-center justify-between">
+                        <span className="text-xs">{formatInteractionType(type)}</span>
+                        <div className="flex items-center gap-2">
+                          <Progress
+                            value={(count / stats.totalInteractions) * 100}
+                            className="w-24 h-2"
+                          />
+                          <span className="text-xs text-muted-foreground w-8 text-right">{count}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
 
-            {/* Advice Stats */}
-            {stats.totalAdviceGiven > 0 && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Lightbulb className="w-5 h-5 text-amber-500" />
-                    AI Advice Tracker
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Accepted vs Declined */}
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="p-3 bg-green-500/10 rounded-lg text-center">
-                      <Check className="w-4 h-4 mx-auto mb-1 text-green-600" />
-                      <div className="text-lg font-bold text-green-600">{stats.acceptedAdvice}</div>
-                      <div className="text-xs text-muted-foreground">Accepted</div>
+              {stats.initiatorStats.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Target className="w-5 h-5" />
+                      Who Makes the Move?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-2">
+                      {stats.initiatorStats.map(({ initiator, count }) => {
+                        const total = stats.initiatorStats.reduce((sum, i) => sum + i.count, 0);
+                        const percent = Math.round((count / total) * 100);
+                        return (
+                          <div key={initiator} className="p-3 bg-muted rounded-lg text-center">
+                            <div className="text-xl font-bold">{percent}%</div>
+                            <div className="text-xs text-muted-foreground">
+                              {getInitiatorLabel(initiator)}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                    <div className="p-3 bg-red-500/10 rounded-lg text-center">
-                      <X className="w-4 h-4 mx-auto mb-1 text-red-500" />
-                      <div className="text-lg font-bold text-red-500">{stats.declinedAdvice}</div>
-                      <div className="text-xs text-muted-foreground">Declined</div>
-                    </div>
-                    <div className="p-3 bg-muted rounded-lg text-center">
-                      <Clock className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
-                      <div className="text-lg font-bold">{stats.pendingAdvice}</div>
-                      <div className="text-xs text-muted-foreground">Pending</div>
-                    </div>
-                  </div>
-                  
-                  {/* Progress bar */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-muted-foreground">Acceptance Rate</span>
-                      <span className="text-xs font-medium">{stats.adviceAcceptanceRate}%</span>
-                    </div>
-                    <Progress value={stats.adviceAcceptanceRate} className="h-2" />
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                  </CardContent>
+                </Card>
+              )}
 
-            {/* Relationship Outcomes */}
-            {stats.totalCandidates > 0 && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <HeartHandshake className="w-5 h-5 text-pink-500" />
-                    Relationship Progress
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Active vs Ended */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="p-3 bg-green-500/10 rounded-lg text-center">
-                      <Heart className="w-4 h-4 mx-auto mb-1 text-green-600" />
-                      <div className="text-xl font-bold text-green-600">{stats.relationshipOutcomes.active}</div>
-                      <div className="text-xs text-muted-foreground">Active</div>
-                    </div>
-                    <div className="p-3 bg-muted rounded-lg text-center">
-                      <HeartCrack className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
-                      <div className="text-xl font-bold">{stats.relationshipOutcomes.ended}</div>
-                      <div className="text-xs text-muted-foreground">Ended</div>
-                    </div>
-                  </div>
+              {stats.meetingSources.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Clock className="w-5 h-5" />
+                      Where You Meet People
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {stats.meetingSources.map(({ source, count }) => (
+                      <div key={source} className="flex items-center justify-between">
+                        <span className="text-xs capitalize">{source.replace("_", " ")}</span>
+                        <Badge variant="secondary">{count}</Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
 
-                  {/* Advice correlation insight */}
-                  {(stats.relationshipOutcomes.activeWithAcceptedAdvice > 0 || stats.relationshipOutcomes.endedWithDeclinedAdvice > 0) && (
-                    <div className="p-3 bg-primary/5 rounded-lg space-y-2">
-                      <p className="text-xs font-medium text-primary">Advice Impact</p>
+            {/* Insights Tab */}
+            <TabsContent value="insights" className="space-y-4">
+              {stats.totalAdviceGiven > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Lightbulb className="w-5 h-5 text-amber-500" />
+                      AI Advice Tracker
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="p-3 bg-green-500/10 rounded-lg text-center">
+                        <Check className="w-4 h-4 mx-auto mb-1 text-green-600" />
+                        <div className="text-lg font-bold text-green-600">{stats.acceptedAdvice}</div>
+                        <div className="text-xs text-muted-foreground">Accepted</div>
+                      </div>
+                      <div className="p-3 bg-red-500/10 rounded-lg text-center">
+                        <X className="w-4 h-4 mx-auto mb-1 text-red-500" />
+                        <div className="text-lg font-bold text-red-500">{stats.declinedAdvice}</div>
+                        <div className="text-xs text-muted-foreground">Declined</div>
+                      </div>
+                      <div className="p-3 bg-muted rounded-lg text-center">
+                        <Clock className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                        <div className="text-lg font-bold">{stats.pendingAdvice}</div>
+                        <div className="text-xs text-muted-foreground">Pending</div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-muted-foreground">Acceptance Rate</span>
+                        <span className="text-xs font-medium">{stats.adviceAcceptanceRate}%</span>
+                      </div>
+                      <Progress value={stats.adviceAcceptanceRate} className="h-2" />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {(stats.relationshipOutcomes.activeWithAcceptedAdvice > 0 || stats.relationshipOutcomes.endedWithDeclinedAdvice > 0) && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <HeartHandshake className="w-5 h-5 text-pink-500" />
+                      Advice Impact
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
                       {stats.relationshipOutcomes.activeWithAcceptedAdvice > 0 && (
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Check className="w-3 h-3 text-green-500" />
+                        <p className="text-sm text-muted-foreground flex items-center gap-2">
+                          <Check className="w-4 h-4 text-green-500" />
                           {stats.relationshipOutcomes.activeWithAcceptedAdvice} active relationship{stats.relationshipOutcomes.activeWithAcceptedAdvice > 1 ? 's' : ''} followed advice
                         </p>
                       )}
                       {stats.relationshipOutcomes.endedWithDeclinedAdvice > 0 && (
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <X className="w-3 h-3 text-red-400" />
+                        <p className="text-sm text-muted-foreground flex items-center gap-2">
+                          <X className="w-4 h-4 text-red-400" />
                           {stats.relationshipOutcomes.endedWithDeclinedAdvice} ended relationship{stats.relationshipOutcomes.endedWithDeclinedAdvice > 1 ? 's' : ''} ignored advice
                         </p>
                       )}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+                  </CardContent>
+                </Card>
+              )}
 
-            {/* No Contact Metrics */}
-            {stats.noContactMetrics.totalStarted > 0 && (
-              <Card className="border-purple-500/30 bg-purple-500/5">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-purple-500" />
-                    No Contact Journey
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-xs text-muted-foreground">
-                    Tracking your healing boundaries
-                  </p>
-                  
-                  {/* Main stats */}
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="p-3 bg-purple-500/10 rounded-lg text-center">
-                      <Ban className="w-4 h-4 mx-auto mb-1 text-purple-500" />
-                      <div className="text-lg font-bold text-purple-600">{stats.noContactMetrics.totalStarted}</div>
-                      <div className="text-xs text-muted-foreground">Started</div>
-                    </div>
-                    <div className="p-3 bg-amber-500/10 rounded-lg text-center">
-                      <Clock className="w-4 h-4 mx-auto mb-1 text-amber-500" />
-                      <div className="text-lg font-bold text-amber-600">{stats.noContactMetrics.currentlyActive}</div>
-                      <div className="text-xs text-muted-foreground">Active</div>
-                    </div>
-                    <div className="p-3 bg-green-500/10 rounded-lg text-center">
-                      <Trophy className="w-4 h-4 mx-auto mb-1 text-green-500" />
-                      <div className="text-lg font-bold text-green-600">{stats.noContactMetrics.completedJourneys}</div>
-                      <div className="text-xs text-muted-foreground">Completed</div>
-                    </div>
-                  </div>
+              {stats.totalAdviceGiven === 0 && (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Lightbulb className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="font-medium text-foreground mb-2">No Advice Yet</h3>
+                    <p className="text-sm text-muted-foreground">
+                      AI advice insights will appear here once you start receiving recommendations.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
 
-                  {/* Secondary stats */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="p-3 bg-muted rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">Hoover Attempts</span>
-                        <span className="text-sm font-bold">{stats.noContactMetrics.totalHooverAttempts}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">Times they tried to contact you</p>
-                    </div>
-                    <div className="p-3 bg-muted rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">Broke NC</span>
-                        <span className="text-sm font-bold text-red-500">{stats.noContactMetrics.timesBrokeNC}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">Times you broke no contact</p>
-                    </div>
-                  </div>
-
-                  {/* Avg days insight */}
-                  {stats.noContactMetrics.avgDaysCompleted > 0 && (
-                    <div className="p-3 bg-primary/5 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-primary">Average Days Completed</span>
-                        <span className="text-lg font-bold text-primary">{stats.noContactMetrics.avgDaysCompleted}/30</span>
-                      </div>
-                      <Progress 
-                        value={(stats.noContactMetrics.avgDaysCompleted / 30) * 100} 
-                        className="h-2 mt-2" 
-                      />
-                    </div>
-                  )}
-
-                  {/* Progress Trend Chart */}
-                  {stats.ncTrendData.length > 0 && stats.ncTrendData[0].reached > 0 && (
-                    <div className="pt-2">
-                      <p className="text-xs font-medium text-muted-foreground mb-2">30-Day Progress Trend</p>
-                      <div className="h-32 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={stats.ncTrendData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                            <defs>
-                              <linearGradient id="ncGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4}/>
-                                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                              </linearGradient>
-                            </defs>
-                            <XAxis 
-                              dataKey="day" 
-                              tick={{ fontSize: 10 }} 
-                              tickLine={false}
-                              axisLine={false}
-                              tickFormatter={(value) => value % 5 === 0 ? `D${value}` : ''}
-                            />
-                            <YAxis 
-                              tick={{ fontSize: 10 }} 
-                              tickLine={false}
-                              axisLine={false}
-                              allowDecimals={false}
-                            />
-                            <Tooltip 
-                              contentStyle={{ 
-                                background: 'hsl(var(--background))', 
-                                border: '1px solid hsl(var(--border))',
-                                borderRadius: '8px',
-                                fontSize: '12px'
-                              }}
-                              formatter={(value: number, name: string) => [
-                                value, 
-                                name === 'reached' ? 'People Reached' : 'Hoover Attempts'
-                              ]}
-                              labelFormatter={(label) => `Day ${label}`}
-                            />
-                            <Area 
-                              type="monotone" 
-                              dataKey="reached" 
-                              stroke="hsl(var(--primary))" 
-                              fill="url(#ncGradient)"
-                              strokeWidth={2}
-                            />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1 text-center">
-                        People who reached each day in their NC journey
+            {/* No Contact Tab */}
+            <TabsContent value="nocontact" className="space-y-4">
+              {stats.noContactMetrics.totalStarted > 0 ? (
+                <>
+                  <Card className="border-purple-500/30 bg-purple-500/5">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-purple-500" />
+                        No Contact Journey
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-xs text-muted-foreground">
+                        Tracking your healing boundaries
                       </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+                      
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="p-3 bg-purple-500/10 rounded-lg text-center">
+                          <Ban className="w-4 h-4 mx-auto mb-1 text-purple-500" />
+                          <div className="text-lg font-bold text-purple-600">{stats.noContactMetrics.totalStarted}</div>
+                          <div className="text-xs text-muted-foreground">Started</div>
+                        </div>
+                        <div className="p-3 bg-amber-500/10 rounded-lg text-center">
+                          <Clock className="w-4 h-4 mx-auto mb-1 text-amber-500" />
+                          <div className="text-lg font-bold text-amber-600">{stats.noContactMetrics.currentlyActive}</div>
+                          <div className="text-xs text-muted-foreground">Active</div>
+                        </div>
+                        <div className="p-3 bg-green-500/10 rounded-lg text-center">
+                          <Trophy className="w-4 h-4 mx-auto mb-1 text-green-500" />
+                          <div className="text-lg font-bold text-green-600">{stats.noContactMetrics.completedJourneys}</div>
+                          <div className="text-xs text-muted-foreground">Completed</div>
+                        </div>
+                      </div>
 
-          </>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="p-3 bg-muted rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Hoover Attempts</span>
+                            <span className="text-sm font-bold">{stats.noContactMetrics.totalHooverAttempts}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">Times they tried to contact you</p>
+                        </div>
+                        <div className="p-3 bg-muted rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Broke NC</span>
+                            <span className="text-sm font-bold text-red-500">{stats.noContactMetrics.timesBrokeNC}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">Times you broke no contact</p>
+                        </div>
+                      </div>
+
+                      {stats.noContactMetrics.avgDaysCompleted > 0 && (
+                        <div className="p-3 bg-primary/5 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-primary">Average Days Completed</span>
+                            <span className="text-lg font-bold text-primary">{stats.noContactMetrics.avgDaysCompleted}/30</span>
+                          </div>
+                          <Progress 
+                            value={(stats.noContactMetrics.avgDaysCompleted / 30) * 100} 
+                            className="h-2 mt-2" 
+                          />
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {stats.ncTrendData.length > 0 && stats.ncTrendData[0].reached > 0 && (
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <TrendingUp className="w-5 h-5 text-primary" />
+                          30-Day Progress Trend
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-40 w-full">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={stats.ncTrendData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                              <defs>
+                                <linearGradient id="ncGradient" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4}/>
+                                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                                </linearGradient>
+                              </defs>
+                              <XAxis 
+                                dataKey="day" 
+                                tick={{ fontSize: 10 }} 
+                                tickLine={false}
+                                axisLine={false}
+                                tickFormatter={(value) => value % 5 === 0 ? `D${value}` : ''}
+                              />
+                              <YAxis 
+                                tick={{ fontSize: 10 }} 
+                                tickLine={false}
+                                axisLine={false}
+                                allowDecimals={false}
+                              />
+                              <Tooltip 
+                                contentStyle={{ 
+                                  background: 'hsl(var(--background))', 
+                                  border: '1px solid hsl(var(--border))',
+                                  borderRadius: '8px',
+                                  fontSize: '12px'
+                                }}
+                                formatter={(value: number, name: string) => [
+                                  value, 
+                                  name === 'reached' ? 'People Reached' : 'Hoover Attempts'
+                                ]}
+                                labelFormatter={(label) => `Day ${label}`}
+                              />
+                              <Area 
+                                type="monotone" 
+                                dataKey="reached" 
+                                stroke="hsl(var(--primary))" 
+                                fill="url(#ncGradient)"
+                                strokeWidth={2}
+                              />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2 text-center">
+                          People who reached each day in their NC journey
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              ) : (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Shield className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="font-medium text-foreground mb-2">No Contact Data Yet</h3>
+                    <p className="text-sm text-muted-foreground">
+                      No contact journey metrics will appear here once you start a no-contact period with someone.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
         )}
       </main>
     </div>
