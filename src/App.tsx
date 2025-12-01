@@ -17,6 +17,8 @@ import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 import Devi from "./pages/Devi";
 import NotFound from "./pages/NotFound";
+import ListStudio from "./pages/ListStudio";
+import StudioDetail from "./pages/StudioDetail";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,8 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/devi" element={<Devi />} />
+              <Route path="/list-studio" element={<ListStudio />} />
+              <Route path="/studio/:id" element={<StudioDetail />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
