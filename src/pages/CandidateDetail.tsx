@@ -429,7 +429,7 @@ const CandidateDetail = () => {
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur border-b border-border z-10">
         <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="icon" onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/dashboard")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
