@@ -35,7 +35,7 @@ import {
   XCircle,
   RefreshCw,
   Lightbulb,
-  Bot,
+  Star,
 } from "lucide-react";
 import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
@@ -769,7 +769,7 @@ const Dashboard = () => {
               // D.E.V.I. badge
               alerts.push({
                 key: "devi",
-                icon: <Bot className="w-3 h-3" />,
+                icon: <Star className="w-3 h-3" />,
                 label: "D.E.V.I.",
                 color: "bg-primary/20 text-primary border-primary/30",
                 onClick: () => navigate("/devi"),
@@ -916,7 +916,7 @@ const Dashboard = () => {
                     <TrendingUp className="w-4 h-4 text-primary" />
                     Recent Activity
                     <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-medium">
-                      <Bot className="w-3 h-3" />
+                      <Star className="w-3 h-3" />
                       D.E.V.I.
                     </span>
                   </h3>
