@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Sparkles, RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Lightbulb, Shield, ChevronDown, TrendingUp, AlertTriangle } from "lucide-react";
+import { Flower2, RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Lightbulb, Shield, ChevronDown, TrendingUp, AlertTriangle, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -246,7 +246,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
           <div className="relative flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-primary" />
+              <Flower2 className="w-6 h-6 text-primary" />
             </div>
             <div>
               <h3 className="font-semibold text-foreground">D.E.V.I. Compatibility</h3>
@@ -264,7 +264,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4 mr-2" />
+                <Flower2 className="w-4 h-4 mr-2" />
                 Calculate Compatibility
               </>
             )}
@@ -290,7 +290,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
         <div className="relative flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-primary" />
+              <Flower2 className="w-6 h-6 text-primary" />
             </div>
             <div>
               <h3 className="font-semibold text-foreground">Compatibility</h3>
