@@ -40,7 +40,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   just_matched: { label: "Just Matched", color: "bg-primary/10 text-primary" },
   texting: { label: "Texting", color: "bg-blue-500/10 text-blue-600" },
   planning_date: { label: "Planning Date", color: "bg-amber-500/10 text-amber-600" },
-  dating: { label: "Dating", color: "bg-emerald-500/10 text-emerald-600" },
+  dating: { label: "Situationship", color: "bg-emerald-500/10 text-emerald-600" },
   dating_casually: { label: "Dating Casually", color: "bg-teal-500/10 text-teal-600" },
   getting_serious: { label: "Getting Serious", color: "bg-pink-500/10 text-pink-600" },
   serious_relationship: { label: "Serious Relationship", color: "bg-rose-500/10 text-rose-600" },

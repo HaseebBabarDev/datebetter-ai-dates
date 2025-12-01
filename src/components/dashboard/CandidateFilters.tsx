@@ -34,7 +34,7 @@ const statusOptions: { value: StatusFilter; label: string }[] = [
   { value: "dating_casually", label: "Dating Casually" },
   { value: "getting_serious", label: "Getting Serious" },
   { value: "serious_relationship", label: "Serious Relationship" },
-  { value: "dating", label: "Dating" },
+  { value: "dating", label: "Situationship" },
   { value: "no_contact", label: "No Contact" },
   { value: "archived", label: "Archived" },
 ];

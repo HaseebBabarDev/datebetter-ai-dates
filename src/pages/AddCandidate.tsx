@@ -528,7 +528,7 @@ const AddCandidate = () => {
                           <SelectItem value="dating_casually">Dating Casually</SelectItem>
                           <SelectItem value="getting_serious">Getting Serious</SelectItem>
                           <SelectItem value="serious_relationship">Serious Relationship</SelectItem>
-                          <SelectItem value="dating">Dating</SelectItem>
+                          <SelectItem value="dating">Situationship</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
