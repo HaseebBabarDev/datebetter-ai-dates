@@ -45,6 +45,7 @@ import { differenceInDays, addDays, format } from "date-fns";
 import heroCouple from "@/assets/hero-couple.jpeg";
 import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
 import { FreeUpgradeBanner } from "@/components/subscription/FreeUpgradeBanner";
+import { DailyLoggingCTA } from "@/components/dashboard/DailyLoggingCTA";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -748,6 +749,7 @@ const Dashboard = () => {
               </div>
               <UpgradeNudge />
               <FreeUpgradeBanner />
+              <DailyLoggingCTA interactions={interactions} candidates={candidates} />
               <Button
                 variant="outline"
                 onClick={() => navigate("/patterns")}
