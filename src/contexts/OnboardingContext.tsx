@@ -48,6 +48,7 @@ export interface OnboardingData {
   relationshipStructure?: string;
   monogamyRequired?: boolean;
   exclusivityBeforeIntimacy?: boolean;
+  relationshipPriorities?: string[];
   
   // Screen 6: Kids & Family
   kidsStatus?: string;

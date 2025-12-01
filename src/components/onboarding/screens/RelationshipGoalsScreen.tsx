@@ -5,33 +5,64 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { OptionCard } from "../OptionCard";
+import { RankedOption } from "../RankedOption";
 import { Heart, Coffee, Sparkles, Diamond, HelpCircle, User, Users, HeartCrack, Infinity } from "lucide-react";
 
 const statusOptions = [
-  { value: "single", label: "Single", description: "Not currently in a relationship", icon: User },
-  { value: "in_relationship", label: "In a Relationship", description: "Currently dating someone", icon: Heart },
-  { value: "married", label: "Married", description: "Currently married", icon: Users },
-  { value: "recently_divorced", label: "Recently Divorced", description: "Recently ended a marriage", icon: HeartCrack },
-  { value: "ethical_non_monogamy", label: "Ethical Non-Monogamy", description: "In an open/poly relationship", icon: Infinity },
+  { value: "single", label: "Single", icon: User },
+  { value: "in_relationship", label: "In a Relationship", icon: Heart },
+  { value: "married", label: "Married", icon: Users },
+  { value: "recently_divorced", label: "Recently Divorced", icon: HeartCrack },
+  { value: "ethical_non_monogamy", label: "Ethical Non-Monogamy", icon: Infinity },
 ];
 
 const goalOptions = [
-  { value: "casual", label: "Casual dating", description: "Fun without commitment", icon: Coffee },
-  { value: "dating", label: "Dating", description: "Getting to know people", icon: Sparkles },
-  { value: "serious", label: "Serious relationship", description: "Looking for a partner", icon: Heart },
-  { value: "marriage", label: "Marriage-minded", description: "Ready for forever", icon: Diamond },
-  { value: "unsure", label: "Not sure yet", description: "Exploring options", icon: HelpCircle },
+  { value: "casual", label: "Casual dating", icon: Coffee },
+  { value: "dating", label: "Dating", icon: Sparkles },
+  { value: "serious", label: "Serious relationship", icon: Heart },
+  { value: "marriage", label: "Marriage-minded", icon: Diamond },
+  { value: "unsure", label: "Not sure yet", icon: HelpCircle },
 ];
 
 const structureOptions = [
-  { value: "monogamous", label: "Strictly monogamous", description: "One partner only" },
-  { value: "open", label: "Open relationship", description: "Primary partner + others" },
-  { value: "polyamorous", label: "Polyamorous", description: "Multiple loving relationships" },
-  { value: "unsure", label: "Exploring", description: "Open to different structures" },
+  { value: "monogamous", label: "Strictly monogamous" },
+  { value: "open", label: "Open relationship" },
+  { value: "polyamorous", label: "Polyamorous" },
+  { value: "unsure", label: "Exploring" },
+];
+
+const priorityOptions = [
+  { value: "emotional_connection", label: "Emotional connection" },
+  { value: "physical_chemistry", label: "Physical chemistry" },
+  { value: "shared_values", label: "Shared values" },
+  { value: "communication", label: "Communication" },
+  { value: "trust", label: "Trust & loyalty" },
+  { value: "independence", label: "Independence" },
 ];
 
 const RelationshipGoalsScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
+
+  const relationshipPriorities = data.relationshipPriorities || [];
+
+  const handlePriorityClick = (value: string) => {
+    const currentIndex = relationshipPriorities.indexOf(value);
+    
+    if (currentIndex !== -1) {
+      updateData({ 
+        relationshipPriorities: relationshipPriorities.filter(p => p !== value) 
+      });
+    } else if (relationshipPriorities.length < 2) {
+      updateData({ 
+        relationshipPriorities: [...relationshipPriorities, value] 
+      });
+    }
+  };
+
+  const getRank = (value: string): number | null => {
+    const index = relationshipPriorities.indexOf(value);
+    return index !== -1 ? index + 1 : null;
+  };
 
   const isValid = data.relationshipStatus && data.relationshipGoal;
 
@@ -91,13 +122,30 @@ const RelationshipGoalsScreen = () => {
           </div>
         </div>
 
+        {/* Top 2 Priorities */}
+        <div className="space-y-2">
+          <Label className="text-sm">Top 2 priorities in a relationship (rank in order)</Label>
+          <p className="text-xs text-muted-foreground">Select your top 2 priorities</p>
+          <div className="grid grid-cols-2 gap-2">
+            {priorityOptions.map((o) => (
+              <RankedOption
+                key={o.value}
+                label={o.label}
+                rank={getRank(o.value)}
+                onClick={() => handlePriorityClick(o.value)}
+                disabled={relationshipPriorities.length >= 2 && !relationshipPriorities.includes(o.value)}
+              />
+            ))}
+          </div>
+        </div>
+
         {/* Non-negotiables */}
         <div className="space-y-3 p-3 rounded-xl bg-muted/50 border border-border">
-          <h3 className="font-medium">Non-Negotiables</h3>
+          <h3 className="font-medium text-sm">Non-Negotiables</h3>
           
           {data.relationshipStructure === "monogamous" && (
             <div className="flex items-center justify-between">
-              <Label htmlFor="monogamy">Monogamy is absolutely required</Label>
+              <Label htmlFor="monogamy" className="text-xs">Monogamy is absolutely required</Label>
               <Switch
                 id="monogamy"
                 checked={data.monogamyRequired}
@@ -107,7 +155,7 @@ const RelationshipGoalsScreen = () => {
           )}
           
           <div className="flex items-center justify-between">
-            <Label htmlFor="exclusivity">I need exclusivity before intimacy</Label>
+            <Label htmlFor="exclusivity" className="text-xs">I need exclusivity before intimacy</Label>
             <Switch
               id="exclusivity"
               checked={data.exclusivityBeforeIntimacy}
