@@ -50,6 +50,25 @@ const ORIENTATION_OPTIONS = [
   { value: "self_describe", label: "Self-describe" },
 ];
 
+const COUNTRY_OPTIONS = [
+  { value: "US", label: "United States" },
+  { value: "CA", label: "Canada" },
+  { value: "UK", label: "United Kingdom" },
+  { value: "AU", label: "Australia" },
+  { value: "DE", label: "Germany" },
+  { value: "FR", label: "France" },
+  { value: "ES", label: "Spain" },
+  { value: "IT", label: "Italy" },
+  { value: "NL", label: "Netherlands" },
+  { value: "BR", label: "Brazil" },
+  { value: "MX", label: "Mexico" },
+  { value: "IN", label: "India" },
+  { value: "JP", label: "Japan" },
+  { value: "KR", label: "South Korea" },
+  { value: "SG", label: "Singapore" },
+  { value: "OTHER", label: "Other" },
+];
+
 const Settings = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
@@ -64,6 +83,7 @@ const Settings = () => {
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
+  const [country, setCountry] = useState("");
   const [genderIdentity, setGenderIdentity] = useState("");
   const [pronouns, setPronouns] = useState("");
   const [sexualOrientation, setSexualOrientation] = useState("");
@@ -88,6 +108,7 @@ const Settings = () => {
         setName(data.name || "");
         setCity(data.city || "");
         setState(data.state || "");
+        setCountry(data.country || "");
         setGenderIdentity(data.gender_identity || "");
         setPronouns(data.pronouns || "");
         setSexualOrientation(data.sexual_orientation || "");
@@ -108,6 +129,7 @@ const Settings = () => {
           name,
           city,
           state,
+          country,
           gender_identity: (genderIdentity || null) as Enums<"gender_identity"> | null,
           pronouns: (pronouns || null) as Enums<"pronouns"> | null,
           sexual_orientation: (sexualOrientation || null) as Enums<"sexual_orientation"> | null,
@@ -192,6 +214,17 @@ const Settings = () => {
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Your name"
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label>Country</Label>
+                  <Select value={country} onValueChange={setCountry}>
+                    <SelectTrigger><SelectValue placeholder="Select country..." /></SelectTrigger>
+                    <SelectContent>
+                      {COUNTRY_OPTIONS.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
