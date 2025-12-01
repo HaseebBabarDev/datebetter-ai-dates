@@ -319,6 +319,16 @@ CHEMISTRY RATINGS (1-5):
 INTERACTION HISTORY (most recent first):
 ${interactionSummary}
 
+MOST RECENT INTERACTION TO ADDRESS:
+${interactions && interactions.length > 0 
+  ? `The latest interaction was on ${interactions[0].interaction_date}: ${interactions[0].interaction_type}
+  ${interactions[0].notes ? `Notes: "${interactions[0].notes}"` : "No notes"}
+  ${interactions[0].gut_feeling ? `User felt: ${interactions[0].gut_feeling}` : ""}
+  Overall feeling: ${interactions[0].overall_feeling}/5
+  
+  YOUR ADVICE MUST DIRECTLY ADDRESS THIS SPECIFIC SITUATION. Do not give generic advice - respond to what actually happened.`
+  : "No interactions logged yet - give advice based on profile compatibility."}
+
 INTERACTION ANALYSIS:
 - Total negative interactions: ${negativeCount}
 - Total positive interactions: ${positiveCount}
@@ -342,12 +352,15 @@ CRITICAL SCORING RULES - YOU MUST FOLLOW THESE:
 6. The emotional_compatibility score should be ${adjustedEmotionalScore} or lower given the interactions
 
 WRITING STYLE FOR ADVICE - IMPORTANT:
+- CRITICAL: Your advice MUST directly reference the most recent interaction content. If they mentioned vacation, talk about that. If they had a fight, address that.
+- DO NOT give generic advice like "keep communicating" - be SPECIFIC to what's actually happening
 - Write like a supportive friend who tells it like it is, not a robot
 - Use natural, conversational language - "Look," "Here's the thing," "Real talk," etc.
+- Reference the specific situation: "So ${candidate.nickname} wants to go on vacation together..." or "After that conversation about..."
 - Be direct about incompatibilities without being harsh - "This is a fundamental mismatch" not "directly conflicts"
 - Use phrases like "you two want different things" instead of technical descriptions
 - If kids desires conflict, say something like "${candidate.nickname} wants kids and you don't - that's a big deal that won't change"
-- Make advice actionable - "Have the conversation about X before investing more" 
+- Make advice actionable and situation-specific - not generic "communicate more"
 - Show empathy - "I know it's not what you want to hear, but..."
 - NEVER use underscores or technical enum values in your output
 
@@ -412,7 +425,7 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
                   },
                   advice: {
                     type: "string",
-                    description: "Brief personalized advice addressing the person directly as 'you'"
+                    description: "Personalized advice that DIRECTLY ADDRESSES the most recent interaction content. Reference specific details from their latest interaction (e.g., vacation plans, conversations they mentioned). Never give generic advice - be specific to the situation."
                   }
                 },
                 required: ["overall_score", "breakdown", "strengths", "concerns", "advice"]
