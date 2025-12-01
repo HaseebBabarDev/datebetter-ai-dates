@@ -52,6 +52,22 @@ const incomeOptions = [
   { value: "prefer_not_say", label: "Prefer not to say" },
 ];
 
+const preferredEducationOptions = [
+  { value: "no_preference", label: "No preference" },
+  ...educationOptions,
+];
+
+const preferredIncomeOptions = [
+  { value: "no_preference", label: "No preference" },
+  { value: "under_25k", label: "Under $25,000" },
+  { value: "25k_50k", label: "$25,000 - $50,000" },
+  { value: "50k_75k", label: "$50,000 - $75,000" },
+  { value: "75k_100k", label: "$75,000 - $100,000" },
+  { value: "100k_150k", label: "$100,000 - $150,000" },
+  { value: "150k_250k", label: "$150,000 - $250,000" },
+  { value: "250k_plus", label: "$250,000+" },
+];
+
 const CareerScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
   const [showPopup, setShowPopup] = useState(false);
@@ -127,6 +143,42 @@ const CareerScreen = () => {
             </Select>
           </div>
           <SliderInput label="Your career ambition:" value={data.ambitionLevel || 3} onChange={(v) => updateData({ ambitionLevel: v })} min={1} max={5} leftLabel="Relaxed" rightLabel="Very driven" />
+          
+          <div className="pt-2 border-t border-border/50">
+            <Label className="text-sm text-muted-foreground mb-2 block">His preferences:</Label>
+            <div className="space-y-2">
+              <Select
+                value={data.preferredEducationLevel}
+                onValueChange={(value) => updateData({ preferredEducationLevel: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Preferred education level" />
+                </SelectTrigger>
+                <SelectContent>
+                  {preferredEducationOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={data.preferredIncomeRange}
+                onValueChange={(value) => updateData({ preferredIncomeRange: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Preferred income range" />
+                </SelectTrigger>
+                <SelectContent>
+                  {preferredIncomeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <Button onClick={nextStep} disabled={!data.careerStage || !data.educationLevel} className="w-full" size="lg">Continue</Button>
         </div>
       </OnboardingLayout>
