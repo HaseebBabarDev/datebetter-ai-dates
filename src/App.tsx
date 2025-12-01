@@ -19,6 +19,7 @@ import Devi from "./pages/Devi";
 import NotFound from "./pages/NotFound";
 import ListStudio from "./pages/ListStudio";
 import StudioDetail from "./pages/StudioDetail";
+import OwnerDashboard from "./pages/OwnerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="/devi" element={<Devi />} />
               <Route path="/list-studio" element={<ListStudio />} />
               <Route path="/studio/:id" element={<StudioDetail />} />
+              <Route path="/owner-dashboard" element={<OwnerDashboard />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
