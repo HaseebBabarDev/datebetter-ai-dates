@@ -153,7 +153,7 @@ const CareerScreen = () => {
           <SliderInput label="Your career ambition:" value={data.ambitionLevel || 3} onChange={(v) => updateData({ ambitionLevel: v })} min={1} max={5} leftLabel="Relaxed" rightLabel="Very driven" />
           
           <div className="pt-2 border-t border-border/50">
-            <Label className="text-sm text-muted-foreground mb-2 block">His preferences:</Label>
+            <Label className="text-sm text-muted-foreground mb-2 block">Partner's income & education preferences:</Label>
             <div className="space-y-2">
               <Select
                 value={data.preferredEducationLevel}
