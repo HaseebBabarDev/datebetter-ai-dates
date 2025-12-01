@@ -5,6 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban, Home, XCircle, RefreshCw } from "lucide-react";
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
@@ -550,9 +556,18 @@ const CandidateDetail = () => {
             <UpgradeNudge candidateId={candidate.id} />
             {subscription && getRemainingUpdates(candidate.id) > 0 && (
               <div className="flex justify-end">
-                <Badge variant="outline" className="text-xs">
-                  {getRemainingUpdates(candidate.id)} update{getRemainingUpdates(candidate.id) !== 1 ? 's' : ''} remaining
-                </Badge>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge variant="outline" className="text-xs cursor-help">
+                        {getRemainingUpdates(candidate.id)} update{getRemainingUpdates(candidate.id) !== 1 ? 's' : ''} remaining
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Analyze also counts toward updates</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             )}
             <div data-tour="quick-log">

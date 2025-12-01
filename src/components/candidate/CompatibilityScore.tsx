@@ -545,9 +545,18 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
         {/* Updates remaining badge */}
         {canRefresh && (
           <div className="flex justify-center">
-            <span className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
-              {remainingUpdates} updates remaining
-            </span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full cursor-help">
+                    {remainingUpdates} updates remaining
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Analyze also counts toward updates</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         )}
 
