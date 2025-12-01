@@ -412,20 +412,9 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
           </div>
         )}
 
-        {/* Key Insights - 1 Strength + 1 Concern */}
+        {/* Key Insights - 1 Concern + 1 Strength */}
         {(firstStrength || firstConcern) && (
           <div className="space-y-2">
-            {firstStrength && (
-              <div className="flex items-start gap-3 p-3 rounded-xl bg-green-500/5 border border-green-500/10">
-                <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                  <TrendingUp className="w-4 h-4 text-green-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-green-600 mb-0.5">Strength</p>
-                  <p className="text-sm text-foreground">{firstStrength}</p>
-                </div>
-              </div>
-            )}
             {firstConcern && (
               <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
                 <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
@@ -434,6 +423,17 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-amber-600 mb-0.5">Watch for</p>
                   <p className="text-sm text-foreground">{firstConcern}</p>
+                </div>
+              </div>
+            )}
+            {firstStrength && (
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-green-500/5 border border-green-500/10">
+                <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                  <TrendingUp className="w-4 h-4 text-green-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-green-600 mb-0.5">Strength</p>
+                  <p className="text-sm text-foreground">{firstStrength}</p>
                 </div>
               </div>
             )}
