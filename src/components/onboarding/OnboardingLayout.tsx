@@ -50,7 +50,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       {headerGradient ? (
-        <header className="bg-[image:var(--gradient-header)] px-6 py-6 text-center">
+        <header className="bg-[image:var(--gradient-header)] px-6 py-3 text-center">
           {showBack && currentStep > 0 && (
             <Button
               variant="ghost"
@@ -109,7 +109,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         <div 
           key={displayStep}
           className={cn(
-            "container max-w-lg mx-auto px-6 py-4 transition-all duration-300 ease-out",
+            "container max-w-lg mx-auto px-6 py-2 transition-all duration-300 ease-out",
             isVisible 
               ? "opacity-100 translate-x-0" 
               : "opacity-0 translate-x-4"
