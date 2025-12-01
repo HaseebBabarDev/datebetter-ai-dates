@@ -145,6 +145,8 @@ serve(async (req) => {
     let negativeCount = 0;
     let positiveCount = 0;
     let hasCriticalRedFlag = false; // Deal-breakers like infidelity
+    let hasLoveBombingPattern = false;
+    let hasPostIntimacyDropOff = false;
     
     if (interactions && interactions.length > 0) {
       const interactionDetails = interactions.map((i: any) => 
@@ -159,9 +161,74 @@ serve(async (req) => {
       // Critical red flags that should tank the score (deal-breakers)
       const criticalRedFlags = ["seeing someone else", "cheating", "cheated", "other woman", "other guy", "married", "has a girlfriend", "has a boyfriend", "lied about", "abusive", "hit me", "threatened", "wants to end", "end things", "break up", "breaking up", "over between us", "done with", "leave me alone", "leave it alone", "don't contact", "stop contacting"];
       // Serious red flags
-      const seriousRedFlags = ["ghosted", "ignored", "blocked", "disappeared", "breadcrumbing", "love bombing", "not interested", "just friends", "moving on", "need space", "taking a break"];
-      // Moderate red flags
-      const moderateRedFlags = ["distant", "cold", "switched up", "hot and cold", "inconsistent", "didn't answer", "didn't respond", "bummed", "confused", "pointless", "idk what to do"];
+      const seriousRedFlags = ["ghosted", "ignored", "blocked", "disappeared", "breadcrumbing", "love bombing", "not interested", "just friends", "moving on", "need space", "taking a break", "stopped responding", "no response", "went silent", "radio silence"];
+      // Moderate red flags  
+      const moderateRedFlags = ["distant", "cold", "switched up", "hot and cold", "inconsistent", "didn't answer", "didn't respond", "bummed", "confused", "pointless", "idk what to do", "less interested", "pulled back", "different energy"];
+      
+      // Love bombing detection phrases (overpromising)
+      const loveBombingPhrases = [
+        "want to take care of", "want to provide", "want a family", "wants kids with me", 
+        "marry me", "move in together", "soulmate", "never felt this way", "meant to be",
+        "planning our future", "talking about marriage", "talking about kids",
+        "want to give you everything", "i'll take care of everything", "future together"
+      ];
+      
+      // Check for love bombing combined with financial instability
+      const allNotes = interactions.map((i: any) => (i.notes || "").toLowerCase()).join(" ");
+      const candidateNotes = (candidate.notes || "").toLowerCase();
+      const combinedNotes = `${allNotes} ${candidateNotes}`;
+      
+      const hasLoveBombingLanguage = loveBombingPhrases.some(phrase => combinedNotes.includes(phrase));
+      const hasFinancialInstability = combinedNotes.includes("not financially stable") || 
+        combinedNotes.includes("earning hourly") || 
+        combinedNotes.includes("broke") ||
+        combinedNotes.includes("no money") ||
+        combinedNotes.includes("can't afford") ||
+        combinedNotes.includes("struggling financially");
+      
+      // Love bombing + financial instability = actions don't match words
+      if (hasLoveBombingLanguage && hasFinancialInstability) {
+        hasLoveBombingPattern = true;
+        interactionSentiment -= 25;
+        console.log("DETECTED: Love bombing with financial instability - actions don't match words");
+      } else if (hasLoveBombingLanguage) {
+        // Just love bombing language (still concerning if very early)
+        const daysSinceFirstContact = candidate.first_contact_date 
+          ? Math.floor((Date.now() - new Date(candidate.first_contact_date).getTime()) / (1000 * 60 * 60 * 24))
+          : 999;
+        if (daysSinceFirstContact <= 14) {
+          hasLoveBombingPattern = true;
+          interactionSentiment -= 15;
+          console.log("DETECTED: Early love bombing language within 2 weeks of contact");
+        }
+      }
+      
+      // Check for post-intimacy drop-off pattern
+      const hasIntimacy = interactions.some((i: any) => i.interaction_type === "intimate");
+      if (hasIntimacy) {
+        // Find the intimate interaction index
+        const intimateIndex = interactions.findIndex((i: any) => i.interaction_type === "intimate");
+        // Check interactions AFTER intimacy (lower index = more recent)
+        const postIntimacyInteractions = interactions.slice(0, intimateIndex);
+        
+        if (postIntimacyInteractions.length > 0) {
+          const avgFeelingPostIntimacy = postIntimacyInteractions.reduce((sum: number, i: any) => 
+            sum + (i.overall_feeling || 3), 0) / postIntimacyInteractions.length;
+          
+          const hasNegativePostIntimacy = postIntimacyInteractions.some((i: any) => {
+            const notes = (i.notes || "").toLowerCase();
+            return i.overall_feeling <= 2 || 
+              seriousRedFlags.some(flag => notes.includes(flag)) ||
+              moderateRedFlags.some(flag => notes.includes(flag));
+          });
+          
+          if (avgFeelingPostIntimacy < 3 || hasNegativePostIntimacy) {
+            hasPostIntimacyDropOff = true;
+            interactionSentiment -= 20;
+            console.log("DETECTED: Post-intimacy drop-off pattern");
+          }
+        }
+      }
       
       interactions.forEach((i: any) => {
         const feeling = i.overall_feeling || 3;
@@ -335,6 +402,8 @@ INTERACTION ANALYSIS:
 - Total positive interactions: ${positiveCount}
 - Calculated sentiment adjustment: ${interactionSentiment} points
 - CRITICAL RED FLAG DETECTED: ${hasCriticalRedFlag ? "YES - DEAL-BREAKER PRESENT" : "No"}
+- LOVE BOMBING PATTERN DETECTED: ${hasLoveBombingPattern ? "YES - Actions don't match words (overpromising despite financial instability or too-soon declarations)" : "No"}
+- POST-INTIMACY DROP-OFF DETECTED: ${hasPostIntimacyDropOff ? "YES - Behavior changed negatively after intimacy" : "No"}
 
 BASE COMPATIBILITY SCORES (calculated from profile matching):
 - Values Alignment: ${baseScores.values_alignment}
@@ -351,6 +420,8 @@ CRITICAL SCORING RULES - YOU MUST FOLLOW THESE:
 4. Your advice should match the severity of the score - a score under 35 means "walk away" advice
 5. Do not sugarcoat concerns when serious red flags are present
 6. The emotional_compatibility score should be ${adjustedEmotionalScore} or lower given the interactions
+7. ${hasLoveBombingPattern ? "LOVE BOMBING WARNING: When someone makes big promises (providing, family, taking care of you) but their financial situation doesn't support it, this is a RED FLAG. Their words don't match their ability to deliver. Address this directly in your advice." : ""}
+8. ${hasPostIntimacyDropOff ? "POST-INTIMACY DROP-OFF: The candidate's behavior or user's feelings changed negatively AFTER intimacy. This is a classic pattern of someone who was only interested in sex. Call this out clearly in your advice." : ""}
 
 WRITING STYLE FOR ADVICE - IMPORTANT:
 - CRITICAL: Your advice MUST directly reference the most recent interaction content. If they mentioned vacation, talk about that. If they had a fight, address that.
