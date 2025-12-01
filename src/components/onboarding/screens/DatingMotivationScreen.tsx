@@ -38,16 +38,21 @@ const DatingMotivationScreen = () => {
         <div className="space-y-3">
           <Label className="text-base">What's driving your dating life right now? (select top 2)</Label>
           <div className="space-y-2">
-            {motivationOptions.map((option) => (
-              <OptionCard
-                key={option.value}
-                selected={(data.datingMotivation || []).includes(option.value)}
-                onClick={() => toggleMotivation(option.value)}
-                icon={<option.icon className="w-5 h-5" />}
-                title={option.label}
-                description={option.description}
-              />
-            ))}
+            {motivationOptions.map((option) => {
+              const isSelected = (data.datingMotivation || []).includes(option.value);
+              const isDisabled = !isSelected && (data.datingMotivation || []).length >= 2;
+              return (
+                <OptionCard
+                  key={option.value}
+                  selected={isSelected}
+                  onClick={() => toggleMotivation(option.value)}
+                  icon={<option.icon className="w-5 h-5" />}
+                  title={option.label}
+                  description={option.description}
+                  disabled={isDisabled}
+                />
+              );
+            })}
           </div>
         </div>
 
