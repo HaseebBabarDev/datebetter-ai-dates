@@ -48,6 +48,91 @@ interface CompatibilityScoreProps {
   onAdviceResponded?: () => void;
 }
 
+// Advice Section with Read More
+const AdviceSection: React.FC<{
+  advice: string;
+  adviceResponse: AdviceTracking | null;
+  respondingToAdvice: boolean;
+  onAccept: () => void;
+  onDecline: () => void;
+}> = ({ advice, adviceResponse, respondingToAdvice, onAccept, onDecline }) => {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = advice.length > 200;
+  
+  return (
+    <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/10">
+      <div className="flex items-center gap-2 mb-3">
+        <img 
+          src={logo} 
+          alt="D.E.V.I." 
+          className="w-7 h-7 rounded-full object-cover ring-1 ring-primary/20"
+        />
+        <span className="text-xs font-semibold text-primary flex items-center gap-1">
+          D.E.V.I. Advice
+          <Sparkles className="w-3 h-3" />
+        </span>
+      </div>
+      
+      <div className="mb-3">
+        <p className={`text-sm text-foreground leading-relaxed ${!expanded && isLong ? "line-clamp-4" : ""}`}>
+          {advice}
+        </p>
+        {isLong && (
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="text-xs text-primary hover:text-primary/80 mt-1 flex items-center gap-1 transition-colors"
+          >
+            <ChevronDown className={`w-3 h-3 transition-transform ${expanded ? "rotate-180" : ""}`} />
+            {expanded ? "Show less" : "Read more"}
+          </button>
+        )}
+      </div>
+      
+      {adviceResponse ? (
+        <div className={`text-sm px-3 py-2 rounded-lg ${
+          adviceResponse.response === "accepted" 
+            ? "bg-green-500/10 text-green-600" 
+            : "bg-muted text-muted-foreground"
+        }`}>
+          {adviceResponse.response === "accepted" ? (
+            <span className="flex items-center gap-2">
+              <Check className="w-4 h-4" />
+              You accepted this advice
+            </span>
+          ) : (
+            <span className="flex items-center gap-2">
+              <X className="w-4 h-4" />
+              You declined this advice
+            </span>
+          )}
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            className="flex-1 bg-green-600 hover:bg-green-700"
+            onClick={onAccept}
+            disabled={respondingToAdvice}
+          >
+            <Check className="w-4 h-4 mr-1" />
+            Accept
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1"
+            onClick={onDecline}
+            disabled={respondingToAdvice}
+          >
+            <X className="w-4 h-4 mr-1" />
+            Decline
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   candidate,
   onUpdate,
@@ -393,65 +478,13 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
 
         {/* AI Advice */}
         {scoreData.advice && (
-          <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/10">
-            <div className="flex items-center gap-2 mb-3">
-              <img 
-                src={logo} 
-                alt="D.E.V.I." 
-                className="w-7 h-7 rounded-full object-cover ring-1 ring-primary/20"
-              />
-              <span className="text-xs font-semibold text-primary flex items-center gap-1">
-                D.E.V.I. Advice
-                <Sparkles className="w-3 h-3" />
-              </span>
-            </div>
-            
-            <div className="max-h-32 overflow-y-auto mb-3 pr-1 scrollbar-thin">
-              <p className="text-sm text-foreground leading-relaxed">{scoreData.advice}</p>
-            </div>
-            
-            {adviceResponse ? (
-              <div className={`text-sm px-3 py-2 rounded-lg ${
-                adviceResponse.response === "accepted" 
-                  ? "bg-green-500/10 text-green-600" 
-                  : "bg-muted text-muted-foreground"
-              }`}>
-                {adviceResponse.response === "accepted" ? (
-                  <span className="flex items-center gap-2">
-                    <Check className="w-4 h-4" />
-                    You accepted this advice
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    <X className="w-4 h-4" />
-                    You declined this advice
-                  </span>
-                )}
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  className="flex-1 bg-green-600 hover:bg-green-700"
-                  onClick={() => respondToAdvice(true)}
-                  disabled={respondingToAdvice}
-                >
-                  <Check className="w-4 h-4 mr-1" />
-                  Accept
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => respondToAdvice(false)}
-                  disabled={respondingToAdvice}
-                >
-                  <X className="w-4 h-4 mr-1" />
-                  Decline
-                </Button>
-              </div>
-            )}
-          </div>
+          <AdviceSection 
+            advice={scoreData.advice}
+            adviceResponse={adviceResponse}
+            respondingToAdvice={respondingToAdvice}
+            onAccept={() => respondToAdvice(true)}
+            onDecline={() => respondToAdvice(false)}
+          />
         )}
 
         {candidate.last_score_update && (
