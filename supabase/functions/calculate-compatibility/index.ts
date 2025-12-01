@@ -147,6 +147,10 @@ serve(async (req) => {
     let hasCriticalRedFlag = false; // Deal-breakers like infidelity
     let hasLoveBombingPattern = false;
     let hasPostIntimacyDropOff = false;
+    let hasGhostingPattern = false;
+    let hasBlockedPattern = false;
+    let hasObsessiveContactPattern = false; // User keeps contacting after being ghosted/blocked
+    let shouldEndRelationship = false; // When true, score will be capped very low
     
     if (interactions && interactions.length > 0) {
       const interactionDetails = interactions.map((i: any) => 
@@ -158,26 +162,77 @@ serve(async (req) => {
       const negativeGutFeelings = ["sad", "anxious", "confused", "angry", "hurt", "frustrated", "disappointed"];
       const positiveGutFeelings = ["happy", "excited", "hopeful", "content", "loved", "secure"];
       
+      // RELATIONSHIP ENDING FLAGS - These should result in advice to END the relationship
+      const relationshipEndingFlags = [
+        "ghosted", "ghosting", "got ghosted", "being ghosted", "blocked me", "got blocked", 
+        "they blocked", "blocked on", "unfriended", "removed me",
+        "love bombing", "love bombed", "lovebombed",
+        "post intimacy drop", "dropped off after sex", "changed after intimacy", "different after sex",
+        "keeps ignoring", "still ignoring", "won't respond", "no response for days", "no response for weeks"
+      ];
+      
       // Critical red flags that should tank the score (deal-breakers)
       const criticalRedFlags = ["seeing someone else", "cheating", "cheated", "other woman", "other guy", "married", "has a girlfriend", "has a boyfriend", "lied about", "abusive", "hit me", "threatened", "wants to end", "end things", "break up", "breaking up", "over between us", "done with", "leave me alone", "leave it alone", "don't contact", "stop contacting"];
+      
       // Serious red flags
-      const seriousRedFlags = ["ghosted", "ignored", "blocked", "disappeared", "breadcrumbing", "love bombing", "not interested", "just friends", "moving on", "need space", "taking a break", "stopped responding", "no response", "went silent", "radio silence"];
+      const seriousRedFlags = ["ignored", "disappeared", "breadcrumbing", "not interested", "just friends", "moving on", "need space", "taking a break", "stopped responding", "went silent", "radio silence"];
+      
       // Moderate red flags  
       const moderateRedFlags = ["distant", "cold", "switched up", "hot and cold", "inconsistent", "didn't answer", "didn't respond", "bummed", "confused", "pointless", "idk what to do", "less interested", "pulled back", "different energy"];
+      
+      // Obsessive contact indicators (user keeps reaching out after rejection)
+      const obsessiveContactPhrases = [
+        "i texted again", "i called again", "i messaged again", "i reached out again",
+        "still trying to reach", "keep texting", "keep calling", "keep messaging",
+        "texted multiple times", "called multiple times", "won't give up",
+        "contacted even though", "messaged even though", "reached out after being blocked",
+        "made a new account", "contacted from different", "tried again"
+      ];
       
       // Love bombing detection phrases (overpromising)
       const loveBombingPhrases = [
         "want to take care of", "want to provide", "want a family", "wants kids with me", 
         "marry me", "move in together", "soulmate", "never felt this way", "meant to be",
         "planning our future", "talking about marriage", "talking about kids",
-        "want to give you everything", "i'll take care of everything", "future together"
+        "want to give you everything", "i'll take care of everything", "future together",
+        "you're the one", "you're my everything", "can't live without you",
+        "perfect for me", "we're meant to be", "destiny", "fate brought us"
       ];
       
-      // Check for love bombing combined with financial instability
+      // Combine all notes for pattern detection
       const allNotes = interactions.map((i: any) => (i.notes || "").toLowerCase()).join(" ");
       const candidateNotes = (candidate.notes || "").toLowerCase();
       const combinedNotes = `${allNotes} ${candidateNotes}`;
       
+      // DETECT RELATIONSHIP-ENDING PATTERNS
+      
+      // 1. Ghosting detection
+      const ghostingIndicators = ["ghosted", "ghosting", "got ghosted", "being ghosted", "went silent", "radio silence", "stopped responding", "no response", "disappeared"];
+      hasGhostingPattern = ghostingIndicators.some(phrase => combinedNotes.includes(phrase));
+      if (hasGhostingPattern) {
+        shouldEndRelationship = true;
+        interactionSentiment -= 50;
+        console.log("DETECTED: Ghosting pattern - RELATIONSHIP SHOULD END");
+      }
+      
+      // 2. Blocked detection
+      const blockedIndicators = ["blocked me", "got blocked", "they blocked", "blocked on", "unfriended", "removed me"];
+      hasBlockedPattern = blockedIndicators.some(phrase => combinedNotes.includes(phrase));
+      if (hasBlockedPattern) {
+        shouldEndRelationship = true;
+        interactionSentiment -= 60;
+        console.log("DETECTED: Blocked pattern - RELATIONSHIP SHOULD END");
+      }
+      
+      // 3. Obsessive contact detection (user keeps contacting after ghosting/blocking)
+      hasObsessiveContactPattern = obsessiveContactPhrases.some(phrase => combinedNotes.includes(phrase));
+      if (hasObsessiveContactPattern && (hasGhostingPattern || hasBlockedPattern)) {
+        shouldEndRelationship = true;
+        interactionSentiment -= 30; // Additional penalty
+        console.log("DETECTED: Obsessive contact pattern after ghosting/blocking - CRITICAL");
+      }
+      
+      // 4. Love bombing detection
       const hasLoveBombingLanguage = loveBombingPhrases.some(phrase => combinedNotes.includes(phrase));
       const hasFinancialInstability = combinedNotes.includes("not financially stable") || 
         combinedNotes.includes("earning hourly") || 
@@ -186,29 +241,31 @@ serve(async (req) => {
         combinedNotes.includes("can't afford") ||
         combinedNotes.includes("struggling financially");
       
-      // Love bombing + financial instability = actions don't match words
-      if (hasLoveBombingLanguage && hasFinancialInstability) {
+      // Love bombing with ANY concerning pattern = major red flag
+      if (hasLoveBombingLanguage) {
         hasLoveBombingPattern = true;
-        interactionSentiment -= 25;
-        console.log("DETECTED: Love bombing with financial instability - actions don't match words");
-      } else if (hasLoveBombingLanguage) {
-        // Just love bombing language (still concerning if very early)
         const daysSinceFirstContact = candidate.first_contact_date 
           ? Math.floor((Date.now() - new Date(candidate.first_contact_date).getTime()) / (1000 * 60 * 60 * 24))
           : 999;
-        if (daysSinceFirstContact <= 14) {
-          hasLoveBombingPattern = true;
-          interactionSentiment -= 15;
-          console.log("DETECTED: Early love bombing language within 2 weeks of contact");
+        
+        if (hasFinancialInstability) {
+          shouldEndRelationship = true;
+          interactionSentiment -= 45;
+          console.log("DETECTED: Love bombing with financial instability - RELATIONSHIP SHOULD END");
+        } else if (daysSinceFirstContact <= 14) {
+          shouldEndRelationship = true;
+          interactionSentiment -= 40;
+          console.log("DETECTED: Early love bombing within 2 weeks - RELATIONSHIP SHOULD END");
+        } else {
+          interactionSentiment -= 25;
+          console.log("DETECTED: Love bombing pattern");
         }
       }
       
-      // Check for post-intimacy drop-off pattern
+      // 5. Post-intimacy drop-off detection
       const hasIntimacy = interactions.some((i: any) => i.interaction_type === "intimate");
       if (hasIntimacy) {
-        // Find the intimate interaction index
         const intimateIndex = interactions.findIndex((i: any) => i.interaction_type === "intimate");
-        // Check interactions AFTER intimacy (lower index = more recent)
         const postIntimacyInteractions = interactions.slice(0, intimateIndex);
         
         if (postIntimacyInteractions.length > 0) {
@@ -218,32 +275,41 @@ serve(async (req) => {
           const hasNegativePostIntimacy = postIntimacyInteractions.some((i: any) => {
             const notes = (i.notes || "").toLowerCase();
             return i.overall_feeling <= 2 || 
-              seriousRedFlags.some(flag => notes.includes(flag)) ||
-              moderateRedFlags.some(flag => notes.includes(flag));
+              ghostingIndicators.some(flag => notes.includes(flag)) ||
+              blockedIndicators.some(flag => notes.includes(flag)) ||
+              seriousRedFlags.some(flag => notes.includes(flag));
           });
           
           if (avgFeelingPostIntimacy < 3 || hasNegativePostIntimacy) {
             hasPostIntimacyDropOff = true;
-            interactionSentiment -= 20;
-            console.log("DETECTED: Post-intimacy drop-off pattern");
+            shouldEndRelationship = true;
+            interactionSentiment -= 45;
+            console.log("DETECTED: Post-intimacy drop-off - RELATIONSHIP SHOULD END");
           }
         }
       }
       
+      // Process each interaction for additional penalties
       interactions.forEach((i: any) => {
         const feeling = i.overall_feeling || 3;
         const gut = (i.gut_feeling || "").toLowerCase();
         const notes = (i.notes || "").toLowerCase();
         
-        // Check for critical red flags (deal-breakers)
+        // Check for relationship-ending flags in this interaction
+        const hasEndingFlag = relationshipEndingFlags.some(phrase => notes.includes(phrase));
         const hasCritical = criticalRedFlags.some(phrase => notes.includes(phrase));
         const hasSerious = seriousRedFlags.some(phrase => notes.includes(phrase));
         const hasModerate = moderateRedFlags.some(phrase => notes.includes(phrase));
         
-        if (hasCritical) {
-          hasCriticalRedFlag = true;
+        if (hasEndingFlag) {
+          shouldEndRelationship = true;
           negativeCount++;
-          interactionSentiment -= 40; // Massive penalty
+          interactionSentiment -= 35;
+        } else if (hasCritical) {
+          hasCriticalRedFlag = true;
+          shouldEndRelationship = true;
+          negativeCount++;
+          interactionSentiment -= 40;
         } else if (hasSerious) {
           negativeCount++;
           interactionSentiment -= 25;
@@ -256,8 +322,14 @@ serve(async (req) => {
         }
       });
       
-      // Cap the sentiment adjustment (no floor for critical flags)
-      interactionSentiment = Math.max(hasCriticalRedFlag ? -60 : -45, Math.min(10, interactionSentiment));
+      // Cap the sentiment adjustment based on severity
+      if (shouldEndRelationship) {
+        interactionSentiment = Math.max(-80, Math.min(-40, interactionSentiment));
+      } else if (hasCriticalRedFlag) {
+        interactionSentiment = Math.max(-60, Math.min(10, interactionSentiment));
+      } else {
+        interactionSentiment = Math.max(-45, Math.min(10, interactionSentiment));
+      }
     }
 
     // Calculate base scores from profile data for consistency
@@ -266,9 +338,13 @@ serve(async (req) => {
     // Apply interaction sentiment - full impact for negative, reduced for positive
     const adjustedEmotionalScore = Math.max(5, Math.min(100, baseScores.emotional_compatibility + interactionSentiment));
     
-    // For critical red flags, hard cap the overall score at 30 max
+    // Hard cap the overall score based on severity of issues
     let sentimentAdjustedOverall;
-    if (hasCriticalRedFlag) {
+    if (shouldEndRelationship) {
+      // Relationship-ending patterns: cap at 20 max
+      sentimentAdjustedOverall = Math.min(20, Math.max(5, baseScores.overall_score + interactionSentiment));
+      console.log(`SCORE CAPPED at ${sentimentAdjustedOverall} due to relationship-ending pattern`);
+    } else if (hasCriticalRedFlag) {
       sentimentAdjustedOverall = Math.min(30, Math.max(15, baseScores.overall_score + interactionSentiment));
     } else {
       sentimentAdjustedOverall = Math.max(20, Math.min(100, baseScores.overall_score + interactionSentiment));
@@ -402,8 +478,12 @@ INTERACTION ANALYSIS:
 - Total positive interactions: ${positiveCount}
 - Calculated sentiment adjustment: ${interactionSentiment} points
 - CRITICAL RED FLAG DETECTED: ${hasCriticalRedFlag ? "YES - DEAL-BREAKER PRESENT" : "No"}
-- LOVE BOMBING PATTERN DETECTED: ${hasLoveBombingPattern ? "YES - Actions don't match words (overpromising despite financial instability or too-soon declarations)" : "No"}
-- POST-INTIMACY DROP-OFF DETECTED: ${hasPostIntimacyDropOff ? "YES - Behavior changed negatively after intimacy" : "No"}
+- RELATIONSHIP SHOULD END: ${shouldEndRelationship ? "YES - CRITICAL PATTERN DETECTED" : "No"}
+- GHOSTING DETECTED: ${hasGhostingPattern ? "YES - They are ghosting/have ghosted the user" : "No"}
+- BLOCKED DETECTED: ${hasBlockedPattern ? "YES - User has been blocked" : "No"}
+- OBSESSIVE CONTACT: ${hasObsessiveContactPattern ? "YES - User keeps contacting after being ghosted/blocked" : "No"}
+- LOVE BOMBING DETECTED: ${hasLoveBombingPattern ? "YES - Actions don't match words (overpromising)" : "No"}
+- POST-INTIMACY DROP-OFF: ${hasPostIntimacyDropOff ? "YES - Behavior changed negatively after intimacy" : "No"}
 
 BASE COMPATIBILITY SCORES (calculated from profile matching):
 - Values Alignment: ${baseScores.values_alignment}
@@ -414,14 +494,18 @@ BASE COMPATIBILITY SCORES (calculated from profile matching):
 - Base Overall: ${baseScores.overall_score} (HARD CAPPED TO ${sentimentAdjustedOverall} after interactions)
 
 CRITICAL SCORING RULES - YOU MUST FOLLOW THESE:
-1. ${hasCriticalRedFlag ? "CRITICAL RED FLAG DETECTED! Score MUST be 30 or below. This is a deal-breaker situation." : ""}
-2. The overall_score MUST NOT exceed ${sentimentAdjustedOverall} - this is a hard limit
-3. If someone admits to "seeing someone else", is cheating, or shows major disrespect - emotional_compatibility should be 20 or lower
-4. Your advice should match the severity of the score - a score under 35 means "walk away" advice
-5. Do not sugarcoat concerns when serious red flags are present
-6. The emotional_compatibility score should be ${adjustedEmotionalScore} or lower given the interactions
-7. ${hasLoveBombingPattern ? "LOVE BOMBING WARNING: When someone makes big promises (providing, family, taking care of you) but their financial situation doesn't support it, this is a RED FLAG. Their words don't match their ability to deliver. Address this directly in your advice." : ""}
-8. ${hasPostIntimacyDropOff ? "POST-INTIMACY DROP-OFF: The candidate's behavior or user's feelings changed negatively AFTER intimacy. This is a classic pattern of someone who was only interested in sex. Call this out clearly in your advice." : ""}
+1. ${shouldEndRelationship ? "**RELATIONSHIP MUST END** - One or more critical patterns detected. Score MUST be 20 or below. Your advice MUST clearly tell the user to END this relationship and move on. Be compassionate but FIRM." : ""}
+2. ${hasCriticalRedFlag ? "CRITICAL RED FLAG DETECTED! Score MUST be 30 or below. This is a deal-breaker situation." : ""}
+3. The overall_score MUST NOT exceed ${sentimentAdjustedOverall} - this is a hard limit
+4. If someone admits to "seeing someone else", is cheating, or shows major disrespect - emotional_compatibility should be 20 or lower
+5. Your advice should match the severity of the score - a score under 35 means "walk away" advice
+6. Do not sugarcoat concerns when serious red flags are present
+7. The emotional_compatibility score should be ${adjustedEmotionalScore} or lower given the interactions
+8. ${hasGhostingPattern ? "**GHOSTING DETECTED**: When someone ghosts you, it's OVER. They have made their choice by not communicating. Tell the user to respect themselves and move on. Do NOT suggest reaching out again." : ""}
+9. ${hasBlockedPattern ? "**BLOCKED**: Being blocked is a CLEAR signal the relationship is over. There is nothing to salvage. Advise the user to accept this and focus on healing." : ""}
+10. ${hasObsessiveContactPattern ? "**OBSESSIVE CONTACT WARNING**: The user appears to be repeatedly contacting someone who has ghosted/blocked them. This is unhealthy behavior. Gently but firmly advise them to STOP contacting this person immediately and work on themselves." : ""}
+11. ${hasLoveBombingPattern ? "**LOVE BOMBING**: When someone makes big promises (providing, family, taking care of you) but their situation doesn't support it, this is manipulation. Their words don't match their ability to deliver. Advise ending this relationship." : ""}
+12. ${hasPostIntimacyDropOff ? "**POST-INTIMACY DROP-OFF**: The candidate's behavior changed negatively AFTER intimacy. This is a classic pattern of someone who was only interested in sex. Tell the user this person showed their true intentions and they deserve better." : ""}
 
 WRITING STYLE FOR ADVICE - IMPORTANT:
 - CRITICAL: Your advice MUST directly reference the most recent interaction content. If they mentioned vacation, talk about that. If they had a fight, address that.
