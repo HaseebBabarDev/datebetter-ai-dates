@@ -124,13 +124,13 @@ export function useSubscription() {
           .update({ updates_used: existing.updates_used + 1 })
           .eq("id", existing.id);
       } else {
-        // Create new record (first D.E.V.I. calculation is free, so start at 0)
+        // Create new record - first analysis counts as 1 usage
         await supabase
           .from("usage_tracking")
           .insert({
             user_id: user.id,
             candidate_id: candidateId,
-            updates_used: 0, // First calculation is free
+            updates_used: 1,
           });
       }
 
