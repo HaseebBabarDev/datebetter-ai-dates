@@ -149,6 +149,7 @@ const CAREER_OPTIONS = [
   { value: "senior", label: "Senior/Manager" },
   { value: "executive", label: "Executive" },
   { value: "entrepreneur", label: "Entrepreneur" },
+  { value: "creative", label: "Creative/Content Creator" },
   { value: "athlete", label: "Professional Athlete" },
   { value: "freelance", label: "Freelance" },
   { value: "between_jobs", label: "Between Jobs" },
