@@ -175,17 +175,15 @@ export const ScheduleCompatibilityAlert: React.FC<ScheduleCompatibilityAlertProp
   return (
     <div
       className={cn(
-        "rounded-xl border p-4",
+        "rounded-lg border p-3",
         bg,
         border,
         className
       )}
     >
-      <div className="flex items-center gap-2.5 mb-2">
-        <div className={cn("p-1.5 rounded-full", bg)}>
-          <Icon className={cn("w-4 h-4", text)} />
-        </div>
-        <p className={cn("text-sm font-semibold", text)}>
+      <div className="flex items-center gap-2 mb-1.5">
+        <Icon className={cn("w-4 h-4", text)} />
+        <p className={cn("text-xs font-semibold", text)}>
           {level === "conflict"
             ? "Schedule Conflict"
             : level === "warning"
@@ -193,16 +191,16 @@ export const ScheduleCompatibilityAlert: React.FC<ScheduleCompatibilityAlertProp
             : "Schedule Compatible"}
         </p>
       </div>
-      <p className="text-sm text-muted-foreground mb-3">{message}</p>
-      <div className="flex items-center gap-3">
-        <div className="flex-1 bg-background/60 rounded-lg px-3 py-2 text-center">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">You</p>
-          <p className="text-xs font-medium text-foreground">{formatScheduleLabel(userSchedule!)}</p>
-        </div>
-        <div className="flex-1 bg-background/60 rounded-lg px-3 py-2 text-center">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Them</p>
-          <p className="text-xs font-medium text-foreground">{formatScheduleLabel(candidateSchedule!)}</p>
-        </div>
+      <p className="text-xs text-muted-foreground mb-2">{message}</p>
+      <div className="flex items-center gap-2 text-[11px]">
+        <span className="bg-background/60 rounded px-2 py-1">
+          <span className="text-muted-foreground">You:</span>{" "}
+          <span className="font-medium">{formatScheduleLabel(userSchedule!)}</span>
+        </span>
+        <span className="bg-background/60 rounded px-2 py-1">
+          <span className="text-muted-foreground">Them:</span>{" "}
+          <span className="font-medium">{formatScheduleLabel(candidateSchedule!)}</span>
+        </span>
       </div>
     </div>
   );
