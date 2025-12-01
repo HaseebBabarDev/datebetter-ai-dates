@@ -232,12 +232,53 @@ const CandidateDetail = () => {
   const [endReason, setEndReason] = useState("");
   const [endingRelationship, setEndingRelationship] = useState(false);
   
+  // Calculate profile completeness
+  const calculateProfileCompleteness = (c: Candidate) => {
+    const PROFILE_FIELDS = [
+      { key: "age", weight: 2 },
+      { key: "gender_identity", weight: 1 },
+      { key: "pronouns", weight: 1 },
+      { key: "height", weight: 1 },
+      { key: "country", weight: 1 },
+      { key: "city", weight: 1 },
+      { key: "distance_approximation", weight: 1 },
+      { key: "their_schedule_flexibility", weight: 1 },
+      { key: "their_religion", weight: 2 },
+      { key: "their_politics", weight: 2 },
+      { key: "their_relationship_status", weight: 2 },
+      { key: "their_relationship_goal", weight: 2 },
+      { key: "their_kids_desire", weight: 2 },
+      { key: "their_kids_status", weight: 1 },
+      { key: "their_attachment_style", weight: 2 },
+      { key: "their_career_stage", weight: 1 },
+      { key: "their_education_level", weight: 1 },
+      { key: "their_social_style", weight: 1 },
+      { key: "their_drinking", weight: 1 },
+      { key: "their_smoking", weight: 1 },
+      { key: "their_exercise", weight: 1 },
+    ];
+    let filledWeight = 0;
+    let totalWeight = 0;
+    PROFILE_FIELDS.forEach(field => {
+      totalWeight += field.weight;
+      const value = (c as any)[field.key];
+      if (value !== null && value !== undefined && value !== "") {
+        filledWeight += field.weight;
+      }
+    });
+    return Math.round((filledWeight / totalWeight) * 100);
+  };
+  
   // Check if this is a new candidate from navigation state
   useEffect(() => {
     const state = location.state as { isNewCandidate?: boolean; isFirstCandidate?: boolean } | null;
-    if (state?.isNewCandidate) {
-      setShowNewCandidateDialog(true);
-      setIsFirstCandidate(state?.isFirstCandidate || false);
+    if (state?.isNewCandidate && candidate) {
+      const completeness = calculateProfileCompleteness(candidate);
+      // Only show dialog if profile is incomplete (less than 80%)
+      if (completeness < 80) {
+        setShowNewCandidateDialog(true);
+        setIsFirstCandidate(state?.isFirstCandidate || false);
+      }
       // Clear the state so it doesn't show again on refresh
       window.history.replaceState({}, document.title);
       // Refetch after a short delay to get the calculated score
@@ -245,7 +286,7 @@ const CandidateDetail = () => {
         fetchData();
       }, 1500);
     }
-  }, [location.state]);
+  }, [location.state, candidate]);
 
   // Handle showing rating dialog after new candidate dialog closes
   const handleNewCandidateDialogClose = (open: boolean) => {
