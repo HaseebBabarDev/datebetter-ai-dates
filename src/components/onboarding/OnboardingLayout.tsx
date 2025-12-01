@@ -55,19 +55,19 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-4 top-4 text-primary-foreground hover:bg-primary-foreground/10"
+              className="absolute left-4 top-4 text-foreground hover:bg-foreground/10"
               onClick={prevStep}
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
           )}
           {title && (
-            <h1 className="text-2xl md:text-3xl font-bold text-primary-foreground mb-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
               {title}
             </h1>
           )}
           {subtitle && (
-            <p className="text-primary-foreground/80 text-sm md:text-base">
+            <p className="text-muted-foreground text-sm md:text-base">
               {subtitle}
             </p>
           )}
