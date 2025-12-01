@@ -143,7 +143,7 @@ const Patterns = () => {
       const commonGreenFlags = Object.entries(greenFlagCounts)
         .map(([flag, count]) => ({ flag, count }))
         .sort((a, b) => b.count - a.count)
-        .slice(0, 5);
+        .slice(0, 6);
 
       // Status distribution
       const statusCounts: Record<string, number> = {};
@@ -223,7 +223,7 @@ const Patterns = () => {
       const meetingSources = Object.entries(sourceCounts)
         .map(([source, count]) => ({ source, count }))
         .sort((a, b) => b.count - a.count)
-        .slice(0, 5);
+        .slice(0, 6);
 
       // Date type success rates (average feeling per type)
       const dateTypeStats: Record<string, { total: number; count: number }> = {};
@@ -243,7 +243,7 @@ const Patterns = () => {
           count,
         }))
         .sort((a, b) => b.avgFeeling - a.avgFeeling)
-        .slice(0, 5);
+        .slice(0, 6);
 
       // No Contact Metrics
       const candidatesWhoStartedNC = candidates.filter(
