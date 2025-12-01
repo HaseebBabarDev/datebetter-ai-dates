@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { OptionCard } from "../OptionCard";
 import { SliderInput } from "../SliderInput";
-import { Lock } from "lucide-react";
+import { Lock, Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const intimacyOptions = [
   { value: "exclusive", label: "Only in exclusive relationships" },
@@ -29,14 +35,40 @@ const SafetyIntimacyScreen = () => {
             <OptionCard key={o.value} selected={data.intimacyComfort === o.value} onClick={() => updateData({ intimacyComfort: o.value })} title={o.label} />
           ))}
         </div>
-        <div className="space-y-2">
-          <SliderInput label="Red flag detection sensitivity:" value={data.redFlagSensitivity || 5} onChange={(v) => updateData({ redFlagSensitivity: v })} min={1} max={10} leftLabel="Low" rightLabel="High" />
-          <p className="text-xs text-muted-foreground">Higher = stricter filtering of concerning behaviors</p>
-        </div>
-        <div className="space-y-2">
-          <SliderInput label="Love bombing alerts:" value={data.loveBombingSensitivity || 5} onChange={(v) => updateData({ loveBombingSensitivity: v })} min={1} max={10} leftLabel="Low" rightLabel="High" />
-          <p className="text-xs text-muted-foreground">Higher = more alerts for excessive early affection</p>
-        </div>
+        <TooltipProvider>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <SliderInput label="Red flag detection sensitivity:" value={data.redFlagSensitivity || 5} onChange={(v) => updateData({ redFlagSensitivity: v })} min={1} max={10} leftLabel="Low" rightLabel="High" className="flex-1" />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" className="p-1 rounded-full hover:bg-muted transition-colors">
+                    <Info className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="max-w-xs">
+                  <p className="text-sm">Controls how sensitive the app is to detecting potential red flags like inconsistent stories, boundary violations, or manipulative behaviors. Higher = more alerts for subtle warning signs.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <p className="text-xs text-muted-foreground">Higher = stricter filtering of concerning behaviors</p>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <SliderInput label="Love bombing alerts:" value={data.loveBombingSensitivity || 5} onChange={(v) => updateData({ loveBombingSensitivity: v })} min={1} max={10} leftLabel="Low" rightLabel="High" className="flex-1" />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" className="p-1 rounded-full hover:bg-muted transition-colors">
+                    <Info className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="max-w-xs">
+                  <p className="text-sm">Love bombing is when someone overwhelms you with affection, gifts, or attention very early on. This can be a manipulation tactic. Higher sensitivity = alerts for excessive early intensity.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <p className="text-xs text-muted-foreground">Higher = more alerts for excessive early affection</p>
+          </div>
+        </TooltipProvider>
         <Button onClick={nextStep} disabled={!data.intimacyComfort} className="w-full" size="lg">Complete Setup</Button>
       </div>
     </OnboardingLayout>
