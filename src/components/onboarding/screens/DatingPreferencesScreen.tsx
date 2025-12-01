@@ -69,7 +69,7 @@ const DatingPreferencesScreen = () => {
         {/* Interested In */}
         <div className="space-y-2">
           <Label className="text-sm">I'm interested in dating:</Label>
-          <p className="text-xs text-muted-foreground">Select all that apply</p>
+          <p className="text-xs text-muted-foreground">Select top 2</p>
           <div className="grid grid-cols-2 gap-2">
             {interestedInOptions.map((option) => (
               <MultiSelectOption
