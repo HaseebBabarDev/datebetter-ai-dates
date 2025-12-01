@@ -36,7 +36,7 @@ const DatingMotivationScreen = () => {
       <div className="space-y-6 animate-fade-in">
         {/* Primary Motivation */}
         <div className="space-y-3">
-          <Label className="text-base">What's driving your dating life right now? (select all that apply)</Label>
+          <Label className="text-base">What's driving your dating life right now? (select top 2)</Label>
           <div className="space-y-2">
             {motivationOptions.map((option) => (
               <OptionCard
