@@ -19,9 +19,10 @@ const CommunicationScreen = () => {
 
   return (
     <OnboardingLayout title="Communication Style" subtitle="How do you connect?">
-      <div className="space-y-6 animate-fade-in">
-        <div className="space-y-3">
-          <Label>How do you communicate?</Label>
+      <div className="space-y-4 animate-fade-in">
+        <div className="space-y-2">
+          <Label className="text-sm">How do you communicate?</Label>
+          <div className="space-y-1.5">
           {commOptions.map((o) => (
             <OptionCard 
               key={o.value} 
@@ -32,6 +33,7 @@ const CommunicationScreen = () => {
               compact
             />
           ))}
+          </div>
         </div>
         <Button onClick={nextStep} disabled={!data.communicationStyle} className="w-full" size="lg">Continue</Button>
       </div>

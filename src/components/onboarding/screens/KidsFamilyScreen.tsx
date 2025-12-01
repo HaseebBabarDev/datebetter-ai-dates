@@ -25,18 +25,22 @@ const KidsFamilyScreen = () => {
 
   return (
     <OnboardingLayout title="Kids & Family Planning" subtitle="Important for compatibility">
-      <div className="space-y-6 animate-fade-in">
-        <div className="space-y-3">
-          <Label>Do you have children?</Label>
+      <div className="space-y-4 animate-fade-in">
+        <div className="space-y-2">
+          <Label className="text-sm">Do you have children?</Label>
+          <div className="space-y-1.5">
           {kidsStatusOptions.map((o) => (
-            <OptionCard key={o.value} selected={data.kidsStatus === o.value} onClick={() => updateData({ kidsStatus: o.value })} title={o.label} />
+            <OptionCard key={o.value} selected={data.kidsStatus === o.value} onClick={() => updateData({ kidsStatus: o.value })} title={o.label} compact />
           ))}
+          </div>
         </div>
-        <div className="space-y-3">
-          <Label>Do you want (more) children?</Label>
+        <div className="space-y-2">
+          <Label className="text-sm">Do you want (more) children?</Label>
+          <div className="space-y-1.5">
           {kidsDesireOptions.map((o) => (
-            <OptionCard key={o.value} selected={data.kidsDesire === o.value} onClick={() => updateData({ kidsDesire: o.value })} title={o.label} />
+            <OptionCard key={o.value} selected={data.kidsDesire === o.value} onClick={() => updateData({ kidsDesire: o.value })} title={o.label} compact />
           ))}
+          </div>
         </div>
         <Button onClick={nextStep} disabled={!isValid} className="w-full" size="lg">Continue</Button>
       </div>

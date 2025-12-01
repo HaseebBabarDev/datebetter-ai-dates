@@ -23,12 +23,14 @@ const FaithValuesScreen = () => {
 
   return (
     <OnboardingLayout title="Faith & Values" subtitle="Your spiritual beliefs">
-      <div className="space-y-6 animate-fade-in">
-        <div className="space-y-3">
-          <Label>Your religious/spiritual beliefs:</Label>
+      <div className="space-y-4 animate-fade-in">
+        <div className="space-y-2">
+          <Label className="text-sm">Your religious/spiritual beliefs:</Label>
+          <div className="space-y-1.5">
           {religionOptions.map((o) => (
-            <OptionCard key={o.value} selected={data.religion === o.value} onClick={() => updateData({ religion: o.value })} title={o.label} />
+            <OptionCard key={o.value} selected={data.religion === o.value} onClick={() => updateData({ religion: o.value })} title={o.label} compact />
           ))}
+          </div>
         </div>
         <SliderInput label="How important is faith alignment?" value={data.faithImportance || 3} onChange={(v) => updateData({ faithImportance: v })} min={1} max={5} leftLabel="Not important" rightLabel="Must share faith" />
         <Button onClick={nextStep} disabled={!data.religion} className="w-full" size="lg">Continue</Button>

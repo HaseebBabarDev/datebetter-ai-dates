@@ -19,12 +19,14 @@ const PoliticsScreen = () => {
 
   return (
     <OnboardingLayout title="Politics & Social Values" subtitle="Your worldview">
-      <div className="space-y-6 animate-fade-in">
-        <div className="space-y-3">
-          <Label>Your political views:</Label>
+      <div className="space-y-4 animate-fade-in">
+        <div className="space-y-2">
+          <Label className="text-sm">Your political views:</Label>
+          <div className="space-y-1.5">
           {politicsOptions.map((o) => (
-            <OptionCard key={o.value} selected={data.politics === o.value} onClick={() => updateData({ politics: o.value })} title={o.label} />
+            <OptionCard key={o.value} selected={data.politics === o.value} onClick={() => updateData({ politics: o.value })} title={o.label} compact />
           ))}
+          </div>
         </div>
         <SliderInput label="How important is political alignment?" value={data.politicsImportance || 3} onChange={(v) => updateData({ politicsImportance: v })} min={1} max={5} leftLabel="Not important" rightLabel="Very important" />
         <Button onClick={nextStep} disabled={!data.politics} className="w-full" size="lg">Continue</Button>
