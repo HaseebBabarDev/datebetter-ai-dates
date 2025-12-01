@@ -323,7 +323,7 @@ const AddCandidate = () => {
     }
 
     if (age && parseInt(age) < 18) {
-      toast.error("Age must be 18 or older");
+      toast.error("Age must be older than 18");
       return;
     }
 
