@@ -186,10 +186,10 @@ const CareerScreen = () => {
               </Select>
               
               {showIncomeWarning && (
-                <div className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg animate-fade-in">
-                  <TrendingUp className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                  <p className="text-xs text-amber-700 dark:text-amber-400">
-                    <span className="font-medium">Shooting for the top 1%!</span> Men earning $250k+ are rare. This may significantly limit your matches—but hey, dream big! 💫
+                <div className="flex items-start gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg animate-fade-in">
+                  <TrendingUp className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <p className="text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">DEVI says:</span> Your standards are valid. Men earning $250K+ are less common, so you may see fewer qualified candidates, but we're optimizing for quality over quantity.
                   </p>
                 </div>
               )}
