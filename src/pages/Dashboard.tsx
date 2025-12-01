@@ -46,6 +46,8 @@ import heroCouple from "@/assets/hero-couple.jpeg";
 import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
 import { FreeUpgradeBanner } from "@/components/subscription/FreeUpgradeBanner";
 import { DailyLoggingCTA } from "@/components/dashboard/DailyLoggingCTA";
+import { DeviCard } from "@/components/dashboard/DeviCard";
+import { ReferralCard } from "@/components/dashboard/ReferralCard";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -750,6 +752,8 @@ const Dashboard = () => {
               <UpgradeNudge />
               <FreeUpgradeBanner />
               <DailyLoggingCTA interactions={interactions} candidates={candidates} />
+              <DeviCard />
+              <ReferralCard />
               <Button
                 variant="outline"
                 onClick={() => navigate("/patterns")}
