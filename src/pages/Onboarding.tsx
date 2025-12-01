@@ -44,7 +44,7 @@ const Onboarding = () => {
             Meet <span className="font-semibold text-primary">D.E.V.I.</span> — your Dating Evaluation & Vetting Intelligence
           </p>
           <p className="text-xs md:text-sm text-muted-foreground/80 max-w-xl mx-auto">
-            Let's set up your personalized AI dating coach
+            Let's set up your personalized AI assistant
           </p>
         </div>
 
