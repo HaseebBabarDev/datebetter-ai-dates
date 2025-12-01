@@ -27,12 +27,16 @@ import {
   HeartHandshake,
   HeartCrack,
   Home,
+  Ban,
+  Shield,
 } from "lucide-react";
 import { toast } from "sonner";
 
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
 type AdviceTracking = Tables<"advice_tracking">;
+
+type NoContactProgress = Tables<"no_contact_progress">;
 
 interface PatternStats {
   totalCandidates: number;
@@ -60,6 +64,14 @@ interface PatternStats {
     activeWithAcceptedAdvice: number;
     endedWithDeclinedAdvice: number;
   };
+  noContactMetrics: {
+    totalStarted: number;
+    currentlyActive: number;
+    completedJourneys: number;
+    totalHooverAttempts: number;
+    timesBrokeNC: number;
+    avgDaysCompleted: number;
+  };
 }
 
 const Patterns = () => {
@@ -76,15 +88,17 @@ const Patterns = () => {
 
   const fetchPatternData = async () => {
     try {
-      const [candidatesRes, interactionsRes, adviceRes] = await Promise.all([
+      const [candidatesRes, interactionsRes, adviceRes, ncProgressRes] = await Promise.all([
         supabase.from("candidates").select("*").eq("user_id", user!.id),
         supabase.from("interactions").select("*").eq("user_id", user!.id),
         supabase.from("advice_tracking").select("*").eq("user_id", user!.id),
+        supabase.from("no_contact_progress").select("*").eq("user_id", user!.id),
       ]);
 
       const candidates = candidatesRes.data || [];
       const interactions = interactionsRes.data || [];
       const advice = adviceRes.data || [];
+      const ncProgress = ncProgressRes.data || [];
 
       // Calculate stats
       const activeCandidates = candidates.filter(
@@ -228,6 +242,31 @@ const Patterns = () => {
         .sort((a, b) => b.avgFeeling - a.avgFeeling)
         .slice(0, 5);
 
+      // No Contact Metrics
+      const candidatesWhoStartedNC = candidates.filter(
+        (c) => c.no_contact_start_date !== null
+      );
+      const currentlyActiveNC = candidates.filter(
+        (c) => c.no_contact_active === true
+      );
+      const completedJourneys = candidates.filter(
+        (c) => c.no_contact_day && c.no_contact_day >= 30
+      );
+      const totalHooverAttempts = ncProgress.filter((p) => p.hoover_attempt === true).length;
+      const timesBrokeNC = ncProgress.filter((p) => p.broke_nc === true).length;
+      
+      // Calculate avg days completed for those who started NC
+      const daysPerCandidate: Record<string, number> = {};
+      ncProgress.forEach((p) => {
+        if (!daysPerCandidate[p.candidate_id] || p.day_number > daysPerCandidate[p.candidate_id]) {
+          daysPerCandidate[p.candidate_id] = p.day_number;
+        }
+      });
+      const allDays = Object.values(daysPerCandidate);
+      const avgDaysCompleted = allDays.length
+        ? Math.round(allDays.reduce((sum, d) => sum + d, 0) / allDays.length)
+        : 0;
+
       setStats({
         totalCandidates: candidates.length,
         activeCandidates: activeCandidates.length,
@@ -253,6 +292,14 @@ const Patterns = () => {
           ended: endedRelationships.length,
           activeWithAcceptedAdvice,
           endedWithDeclinedAdvice,
+        },
+        noContactMetrics: {
+          totalStarted: candidatesWhoStartedNC.length,
+          currentlyActive: currentlyActiveNC.length,
+          completedJourneys: completedJourneys.length,
+          totalHooverAttempts,
+          timesBrokeNC,
+          avgDaysCompleted,
         },
       });
     } catch (error) {
@@ -665,6 +712,74 @@ const Patterns = () => {
                           {stats.relationshipOutcomes.endedWithDeclinedAdvice} ended relationship{stats.relationshipOutcomes.endedWithDeclinedAdvice > 1 ? 's' : ''} ignored advice
                         </p>
                       )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* No Contact Metrics */}
+            {stats.noContactMetrics.totalStarted > 0 && (
+              <Card className="border-purple-500/30 bg-purple-500/5">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-purple-500" />
+                    No Contact Journey
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-xs text-muted-foreground">
+                    Tracking your healing boundaries
+                  </p>
+                  
+                  {/* Main stats */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="p-3 bg-purple-500/10 rounded-lg text-center">
+                      <Ban className="w-4 h-4 mx-auto mb-1 text-purple-500" />
+                      <div className="text-lg font-bold text-purple-600">{stats.noContactMetrics.totalStarted}</div>
+                      <div className="text-xs text-muted-foreground">Started</div>
+                    </div>
+                    <div className="p-3 bg-amber-500/10 rounded-lg text-center">
+                      <Clock className="w-4 h-4 mx-auto mb-1 text-amber-500" />
+                      <div className="text-lg font-bold text-amber-600">{stats.noContactMetrics.currentlyActive}</div>
+                      <div className="text-xs text-muted-foreground">Active</div>
+                    </div>
+                    <div className="p-3 bg-green-500/10 rounded-lg text-center">
+                      <Trophy className="w-4 h-4 mx-auto mb-1 text-green-500" />
+                      <div className="text-lg font-bold text-green-600">{stats.noContactMetrics.completedJourneys}</div>
+                      <div className="text-xs text-muted-foreground">Completed</div>
+                    </div>
+                  </div>
+
+                  {/* Secondary stats */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-3 bg-muted rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Hoover Attempts</span>
+                        <span className="text-sm font-bold">{stats.noContactMetrics.totalHooverAttempts}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">Times they tried to contact you</p>
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Broke NC</span>
+                        <span className="text-sm font-bold text-red-500">{stats.noContactMetrics.timesBrokeNC}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">Times you broke no contact</p>
+                    </div>
+                  </div>
+
+                  {/* Avg days insight */}
+                  {stats.noContactMetrics.avgDaysCompleted > 0 && (
+                    <div className="p-3 bg-primary/5 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-primary">Average Days Completed</span>
+                        <span className="text-lg font-bold text-primary">{stats.noContactMetrics.avgDaysCompleted}/30</span>
+                      </div>
+                      <Progress 
+                        value={(stats.noContactMetrics.avgDaysCompleted / 30) * 100} 
+                        className="h-2 mt-2" 
+                      />
                     </div>
                   )}
                 </CardContent>
