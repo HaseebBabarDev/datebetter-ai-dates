@@ -134,9 +134,9 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
       {/* D.E.V.I. Analyze Button */}
       <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 overflow-hidden">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-0.5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-medium text-sm">D.E.V.I. Flag Detection</p>
                 {remainingUpdates > 0 && (
                   <TooltipProvider>
@@ -144,7 +144,7 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
                       <TooltipTrigger asChild>
                         <Badge 
                           variant="secondary" 
-                          className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary border-primary/20 cursor-help animate-fade-in"
+                          className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary border-primary/20 cursor-help shrink-0"
                         >
                           {remainingUpdates} left
                         </Badge>
@@ -156,7 +156,7 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
                   </TooltipProvider>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mt-1">
                 Analyzes interactions to detect behavioral patterns
               </p>
             </div>
@@ -167,7 +167,7 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
                     onClick={detectFlags}
                     disabled={analyzing || !canUseUpdate(candidate.id)}
                     size="sm"
-                    className="gap-2"
+                    className="gap-2 shrink-0"
                   >
                     {analyzing ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
