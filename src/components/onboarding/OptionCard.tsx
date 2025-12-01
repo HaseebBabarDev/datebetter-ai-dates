@@ -29,9 +29,9 @@ export const OptionCard: React.FC<OptionCardProps> = ({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "w-full rounded-lg border text-left transition-all duration-150",
+        "w-full rounded-lg border transition-all duration-150",
         "hover:border-primary/50",
-        compact ? "px-3 py-2 min-h-[52px] flex items-center" : "px-3 py-2",
+        compact ? "px-3 py-2 min-h-[52px] flex items-center justify-center text-center" : "px-3 py-2 text-left",
         selected
           ? "border-primary bg-primary/5"
           : "border-border bg-card",
@@ -41,7 +41,8 @@ export const OptionCard: React.FC<OptionCardProps> = ({
     >
       <div className={cn(
         "flex gap-2",
-        description && !compact ? "items-start" : "items-center"
+        description && !compact ? "items-start" : "items-center",
+        compact && "justify-center w-full"
       )}>
         {icon && (
           <div className={cn(
