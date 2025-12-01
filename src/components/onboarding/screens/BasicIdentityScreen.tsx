@@ -48,12 +48,12 @@ const pronounOptions = [
 ];
 
 const heightOptions = [
-  { value: "under_5ft", label: "Under 5'0\" (152 cm)" },
-  { value: "5ft_5ft3", label: "5'0\" - 5'3\" (152-160 cm)" },
-  { value: "5ft4_5ft6", label: "5'4\" - 5'6\" (163-168 cm)" },
-  { value: "5ft7_5ft9", label: "5'7\" - 5'9\" (170-175 cm)" },
-  { value: "5ft10_6ft", label: "5'10\" - 6'0\" (178-183 cm)" },
-  { value: "over_6ft", label: "Over 6'0\" (183+ cm)" },
+  { value: "under_5ft", label: "Under 5'0\"", subtitle: "152 cm" },
+  { value: "5ft_5ft3", label: "5'0\" - 5'3\"", subtitle: "152-160 cm" },
+  { value: "5ft4_5ft6", label: "5'4\" - 5'6\"", subtitle: "163-168 cm" },
+  { value: "5ft7_5ft9", label: "5'7\" - 5'9\"", subtitle: "170-175 cm" },
+  { value: "5ft10_6ft", label: "5'10\" - 6'0\"", subtitle: "178-183 cm" },
+  { value: "over_6ft", label: "Over 6'0\"", subtitle: "183+ cm" },
 ];
 
 const bodyTypeOptions = [

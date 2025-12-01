@@ -22,10 +22,10 @@ import {
 } from "@/components/ui/accordion";
 
 const transitionOptions = [
-  { value: "pre", label: "Pre-transition" },
-  { value: "early", label: "Early transition (0-2 years)" },
-  { value: "established", label: "Established (2+ years)" },
-  { value: "not_medical", label: "Not medically transitioning" },
+  { value: "pre", label: "Pre-transition", subtitle: "" },
+  { value: "early", label: "Early transition", subtitle: "0-2 years" },
+  { value: "established", label: "Established", subtitle: "2+ years" },
+  { value: "not_medical", label: "Not medically transitioning", subtitle: "" },
 ];
 
 const hormoneOptions = [
@@ -69,6 +69,7 @@ const HormoneCycleScreen = () => {
                     selected={data.transitionStage === option.value}
                     onClick={() => updateData({ transitionStage: option.value })}
                     title={option.label}
+                    subtitle={option.subtitle}
                     compact
                   />
                 ))}

@@ -14,11 +14,11 @@ const socialOptions = [
 ];
 
 const activityOptions = [
-  { value: "sedentary", label: "Sedentary (little exercise)" },
-  { value: "light", label: "Light (1-2x/week)" },
-  { value: "moderate", label: "Moderate (3-4x/week)" },
-  { value: "active", label: "Active (5+/week)" },
-  { value: "very_active", label: "Very active (daily)" },
+  { value: "sedentary", label: "Sedentary", subtitle: "little exercise" },
+  { value: "light", label: "Light", subtitle: "1-2x/week" },
+  { value: "moderate", label: "Moderate", subtitle: "3-4x/week" },
+  { value: "active", label: "Active", subtitle: "5+/week" },
+  { value: "very_active", label: "Very active", subtitle: "daily" },
 ];
 
 const SocialActivityScreen = () => {
@@ -52,6 +52,7 @@ const SocialActivityScreen = () => {
                 selected={data.activityLevel === o.value} 
                 onClick={() => updateData({ activityLevel: o.value })} 
                 title={o.label}
+                subtitle={o.subtitle}
                 compact
               />
             ))}
