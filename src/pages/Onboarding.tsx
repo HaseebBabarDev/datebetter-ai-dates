@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Brain, Shield, TrendingUp, ArrowLeft } from "lucide-react";
+import { Brain, Shield, TrendingUp, ArrowLeft, Sparkles } from "lucide-react";
 
 const Onboarding = () => {
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ const Onboarding = () => {
             Your Journey to Better Dating Starts Here
           </h2>
           <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto mb-2">
-            Meet our AI — <span className="font-semibold text-primary">D.E.V.I.</span>
+            Meet our AI — <Sparkles className="inline w-4 h-4 md:w-5 md:h-5 text-primary" /> <span className="font-semibold text-primary">D.E.V.I.</span>
           </p>
           <p className="text-xs md:text-sm text-muted-foreground/80 max-w-xl mx-auto">
             Your Dating Evaluation & Vetting Intelligence personalized AI assistant
