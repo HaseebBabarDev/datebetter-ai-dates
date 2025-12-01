@@ -58,20 +58,23 @@ const MentalHealthScreen = () => {
 
         <div className="space-y-3">
           <Label>Do you identify as neurodivergent?</Label>
-          {neurodivergentOptions.map((o) => (
-            <OptionCard
-              key={o.value}
-              selected={data.isNeurodivergent === o.value}
-              onClick={() => updateData({ isNeurodivergent: o.value })}
-              title={o.label}
-            />
-          ))}
+          <div className="grid grid-cols-2 gap-2">
+            {neurodivergentOptions.map((o) => (
+              <OptionCard
+                key={o.value}
+                selected={data.isNeurodivergent === o.value}
+                onClick={() => updateData({ isNeurodivergent: o.value })}
+                title={o.label}
+                compact
+              />
+            ))}
+          </div>
         </div>
 
         {(data.isNeurodivergent === "yes" || data.isNeurodivergent === "exploring") && (
           <div className="space-y-3">
             <Label>Which applies to you? (Select all)</Label>
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
               {neurodivergenceTypes.map((type) => (
                 <MultiSelectOption
                   key={type}
@@ -86,14 +89,17 @@ const MentalHealthScreen = () => {
 
         <div className="space-y-3">
           <Label>How open are you about mental health?</Label>
-          {opennessOptions.map((o) => (
-            <OptionCard
-              key={o.value}
-              selected={data.mentalHealthOpenness === o.value}
-              onClick={() => updateData({ mentalHealthOpenness: o.value })}
-              title={o.label}
-            />
-          ))}
+          <div className="grid grid-cols-2 gap-2">
+            {opennessOptions.map((o) => (
+              <OptionCard
+                key={o.value}
+                selected={data.mentalHealthOpenness === o.value}
+                onClick={() => updateData({ mentalHealthOpenness: o.value })}
+                title={o.label}
+                compact
+              />
+            ))}
+          </div>
         </div>
 
         <SliderInput

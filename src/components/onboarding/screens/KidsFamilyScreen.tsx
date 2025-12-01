@@ -28,7 +28,7 @@ const KidsFamilyScreen = () => {
       <div className="space-y-4 animate-fade-in">
         <div className="space-y-2">
           <Label className="text-sm">Do you have children?</Label>
-          <div className="space-y-1.5">
+          <div className="grid grid-cols-2 gap-2">
           {kidsStatusOptions.map((o) => (
             <OptionCard key={o.value} selected={data.kidsStatus === o.value} onClick={() => updateData({ kidsStatus: o.value })} title={o.label} compact />
           ))}
@@ -36,7 +36,7 @@ const KidsFamilyScreen = () => {
         </div>
         <div className="space-y-2">
           <Label className="text-sm">Do you want (more) children?</Label>
-          <div className="space-y-1.5">
+          <div className="grid grid-cols-2 gap-2">
           {kidsDesireOptions.map((o) => (
             <OptionCard key={o.value} selected={data.kidsDesire === o.value} onClick={() => updateData({ kidsDesire: o.value })} title={o.label} compact />
           ))}
