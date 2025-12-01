@@ -62,13 +62,14 @@ const HormoneCycleScreen = () => {
             
             <div className="space-y-3">
               <Label>Your transition timeline:</Label>
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
                 {transitionOptions.map((option) => (
                   <OptionCard
                     key={option.value}
                     selected={data.transitionStage === option.value}
                     onClick={() => updateData({ transitionStage: option.value })}
                     title={option.label}
+                    compact
                   />
                 ))}
               </div>
@@ -76,13 +77,14 @@ const HormoneCycleScreen = () => {
 
             <div className="space-y-3">
               <Label>Current hormone profile:</Label>
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
                 {hormoneOptions.map((option) => (
                   <OptionCard
                     key={option.value}
                     selected={data.hormoneProfile === option.value}
                     onClick={() => updateData({ hormoneProfile: option.value })}
                     title={option.label}
+                    compact
                   />
                 ))}
               </div>
