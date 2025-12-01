@@ -26,11 +26,14 @@ const Splash = () => {
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-8">
         {/* Logo */}
-        <img 
-          src={logo} 
-          alt="dateBetter logo" 
-          className="w-20 h-20 rounded-full mb-4 shadow-lg"
-        />
+        <div className="relative mb-4">
+          <div className="absolute inset-0 w-24 h-24 rounded-full bg-primary/30 blur-xl animate-pulse" />
+          <img 
+            src={logo} 
+            alt="dateBetter logo" 
+            className="relative w-24 h-24 rounded-full shadow-xl ring-2 ring-primary/40 ring-offset-2 ring-offset-background/50"
+          />
+        </div>
 
         {/* Logo Text */}
         <div className="text-center mb-4">
