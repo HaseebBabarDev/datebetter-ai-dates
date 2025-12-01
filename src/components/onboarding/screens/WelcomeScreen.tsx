@@ -68,7 +68,7 @@ const WelcomeScreen = () => {
         showProgress={false}
         showBack={false}
         headerGradient
-        title="Let's get started!"
+        title="Welcome! Let's get started."
         subtitle="Your dating journey begins here"
       >
         <div className="space-y-4 animate-fade-in relative z-10 -mt-2">
