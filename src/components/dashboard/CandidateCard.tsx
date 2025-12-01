@@ -43,6 +43,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   dating: { label: "Dating", color: "bg-emerald-500/10 text-emerald-600" },
   dating_casually: { label: "Dating Casually", color: "bg-teal-500/10 text-teal-600" },
   getting_serious: { label: "Getting Serious", color: "bg-pink-500/10 text-pink-600" },
+  serious_relationship: { label: "Serious Relationship", color: "bg-rose-500/10 text-rose-600" },
   no_contact: { label: "No Contact", color: "bg-slate-500/10 text-slate-600" },
   archived: { label: "Archived", color: "bg-muted text-muted-foreground" },
 };

@@ -750,6 +750,7 @@ export type Database = {
         | "getting_serious"
         | "no_contact"
         | "archived"
+        | "serious_relationship"
       communication_style:
         | "direct"
         | "diplomatic"
@@ -963,6 +964,7 @@ export const Constants = {
         "getting_serious",
         "no_contact",
         "archived",
+        "serious_relationship",
       ],
       communication_style: [
         "direct",
