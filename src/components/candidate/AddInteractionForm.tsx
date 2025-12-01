@@ -35,6 +35,8 @@ import { SliderInput } from "@/components/onboarding/SliderInput";
 import { Plus, AlertTriangle, Lightbulb, Phone, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { detectCrisisContent, CRISIS_RESOURCES, CrisisDetectionResult } from "@/lib/crisisDetection";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeLimitDialog } from "@/components/subscription/UpgradeLimitDialog";
 
 interface AddInteractionFormProps {
   candidateId: string;
@@ -84,10 +86,12 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   triggerButton,
 }) => {
   const { user } = useAuth();
+  const { canUseUpdate, getRemainingUpdates, incrementUsage, subscription } = useSubscription();
   const [open, setOpen] = useState(false);
   const [showBrokeContactDialog, setShowBrokeContactDialog] = useState(false);
   const [showPendingAdviceDialog, setShowPendingAdviceDialog] = useState(false);
   const [showCrisisDialog, setShowCrisisDialog] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [crisisResult, setCrisisResult] = useState<CrisisDetectionResult | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -147,6 +151,9 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
 
       if (error) throw error;
 
+      // Increment usage tracking
+      await incrementUsage(candidateId);
+      
       toast.success("Interaction logged! Updating compatibility...");
       resetForm();
       setOpen(false);
@@ -176,6 +183,8 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
       setShowPendingAdviceDialog(true);
     } else if (newOpen && isNoContact) {
       setShowBrokeContactDialog(true);
+    } else if (newOpen && !canUseUpdate(candidateId)) {
+      setShowUpgradeDialog(true);
     } else {
       setOpen(newOpen);
     }
@@ -408,6 +417,12 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
         </form>
       </SheetContent>
     </Sheet>
+      <UpgradeLimitDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        limitType="updates"
+        currentPlan={subscription?.plan}
+      />
     </>
   );
 };
