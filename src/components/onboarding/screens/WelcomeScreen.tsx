@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Lock, Clock, X } from "lucide-react";
+import { Lock, Clock, Stars, ShieldCheck, Heart, Sparkles } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -71,72 +71,94 @@ const WelcomeScreen = () => {
         title="Welcome to dateBetter"
         subtitle="Your dating journey starts here"
       >
-        <div className="space-y-8 animate-fade-in relative z-10">
+        <div className="space-y-6 animate-fade-in relative z-10">
+          {/* D.E.V.I. Badge */}
+          <div className="flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-background/80 backdrop-blur-sm border border-primary/30 mx-auto w-fit">
+            <Stars className="w-3 h-3 md:w-4 md:h-4 text-primary" />
+            <span className="text-xs md:text-sm font-medium text-foreground">D.E.V.I.</span>
+            <span className="text-[10px] md:text-xs text-foreground/70">Dating Evaluation & Vetting Intelligence</span>
+          </div>
 
-        {/* Age Verification */}
-        <div className="space-y-4">
-          <Label className="text-base">Please confirm your date of birth</Label>
-          
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <Label className="text-xs text-muted-foreground">Month</Label>
-              <Input
-                type="number"
-                placeholder="MM"
-                min={1}
-                max={12}
-                value={month}
-                onChange={(e) => setMonth(e.target.value)}
-                className="text-center"
-              />
+          {/* Value Props */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-card/40 backdrop-blur-sm border border-border/20">
+              <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-foreground/90 text-sm">AI-powered compatibility scoring</span>
             </div>
-            <div>
-              <Label className="text-xs text-muted-foreground">Day</Label>
-              <Input
-                type="number"
-                placeholder="DD"
-                min={1}
-                max={31}
-                value={day}
-                onChange={(e) => setDay(e.target.value)}
-                className="text-center"
-              />
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-card/40 backdrop-blur-sm border border-border/20">
+              <Heart className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-foreground/90 text-sm">Personalized dating guidance</span>
             </div>
-            <div>
-              <Label className="text-xs text-muted-foreground">Year</Label>
-              <Input
-                type="number"
-                placeholder="YYYY"
-                min={1900}
-                max={new Date().getFullYear()}
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                className="text-center"
-              />
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-card/40 backdrop-blur-sm border border-border/20">
+              <Sparkles className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-foreground/90 text-sm">Red flag detection & pattern recognition</span>
             </div>
           </div>
-        </div>
 
-        {/* Confirmation Checkbox */}
-        <div className="flex items-start gap-3">
-          <Checkbox
-            id="ageConfirm"
-            checked={data.ageConfirmed}
-            onCheckedChange={(checked) => updateData({ ageConfirmed: checked === true })}
-          />
-          <Label htmlFor="ageConfirm" className="text-sm cursor-pointer leading-relaxed">
-            I confirm I am 18 years or older
-          </Label>
-        </div>
+          {/* Age Verification */}
+          <div className="space-y-4">
+            <Label className="text-base font-medium">Please confirm your date of birth</Label>
+            
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">Month</Label>
+                <Input
+                  type="number"
+                  placeholder="MM"
+                  min={1}
+                  max={12}
+                  value={month}
+                  onChange={(e) => setMonth(e.target.value)}
+                  className="text-center"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Day</Label>
+                <Input
+                  type="number"
+                  placeholder="DD"
+                  min={1}
+                  max={31}
+                  value={day}
+                  onChange={(e) => setDay(e.target.value)}
+                  className="text-center"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Year</Label>
+                <Input
+                  type="number"
+                  placeholder="YYYY"
+                  min={1900}
+                  max={new Date().getFullYear()}
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                  className="text-center"
+                />
+              </div>
+            </div>
+          </div>
 
-        {/* Terms */}
-        <p className="text-xs text-muted-foreground text-center">
-          By continuing, you agree to our{" "}
-          <span className="text-primary hover:underline cursor-pointer">Terms</span> &{" "}
-          <span className="text-primary hover:underline cursor-pointer">Privacy Policy</span>
-        </p>
+          {/* Confirmation Checkbox */}
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="ageConfirm"
+              checked={data.ageConfirmed}
+              onCheckedChange={(checked) => updateData({ ageConfirmed: checked === true })}
+            />
+            <Label htmlFor="ageConfirm" className="text-sm cursor-pointer leading-relaxed">
+              I confirm I am 18 years or older
+            </Label>
+          </div>
 
-        {/* Continue Button */}
+          {/* Terms */}
+          <p className="text-xs text-muted-foreground text-center">
+            By continuing, you agree to our{" "}
+            <span className="text-primary hover:underline cursor-pointer">Terms</span> &{" "}
+            <span className="text-primary hover:underline cursor-pointer">Privacy Policy</span>
+          </p>
+
+          {/* Continue Button */}
           <Button
             onClick={handleContinue}
             disabled={!isValid}
