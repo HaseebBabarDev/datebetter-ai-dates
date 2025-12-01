@@ -18,10 +18,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Shield, ChevronDown, TrendingUp, AlertTriangle, Sparkles } from "lucide-react";
+import { RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Shield, ChevronDown, TrendingUp, AlertTriangle, Sparkles, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import logo from "@/assets/logo.jpg";
 
 type Candidate = Tables<"candidates">;
@@ -146,8 +147,11 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   const [showLowScoreWarning, setShowLowScoreWarning] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { canUseUpdate, getRemainingUpdates, incrementUsage, refetch: refetchSubscription } = useSubscription();
 
   const scoreData = candidate.score_breakdown as unknown as ScoreBreakdown | null;
+  const remainingUpdates = getRemainingUpdates(candidate.id);
+  const canRefresh = canUseUpdate(candidate.id);
 
   // Check if advice has already been responded to
   useEffect(() => {
@@ -172,6 +176,17 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   }, [candidate.id, scoreData?.advice, user]);
 
   const calculateScore = async () => {
+    // Check usage limit (first calculation is free, subsequent ones count as updates)
+    const isFirstCalculation = !scoreData;
+    if (!isFirstCalculation && !canRefresh) {
+      toast({
+        title: "Update Limit Reached",
+        description: "Upgrade your plan for more D.E.V.I. updates",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -207,13 +222,21 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       // Reset advice response when new score is calculated
       setAdviceResponse(null);
 
+      // Track usage for refreshes (not first calculation)
+      if (!isFirstCalculation) {
+        await incrementUsage(candidate.id);
+      }
+
+      // Refetch subscription to update remaining count
+      refetchSubscription();
+
       // Show low score warning if compatibility is very low
       if (analysis.overall_score < 35) {
         setShowLowScoreWarning(true);
       } else {
         toast({
           title: "Compatibility Analyzed",
-          description: `Score: ${analysis.overall_score}%`,
+          description: `Score: ${analysis.overall_score}%${!isFirstCalculation ? ` • ${remainingUpdates - 1} updates left` : ""}`,
         });
       }
     } catch (error) {
@@ -387,9 +410,25 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
             <div className={`text-4xl font-bold ${getScoreColor(scoreData.overall_score)}`}>
               {scoreData.overall_score}%
             </div>
-            <Button variant="ghost" size="sm" onClick={calculateScore} disabled={loading} className="h-6 px-2 text-xs">
-              <RefreshCw className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} />
-              Refresh
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={calculateScore} 
+              disabled={loading || !canRefresh} 
+              className="h-6 px-2 text-xs"
+              title={canRefresh ? `${remainingUpdates} updates remaining` : "Upgrade for more updates"}
+            >
+              {canRefresh ? (
+                <>
+                  <RefreshCw className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} />
+                  Refresh ({remainingUpdates})
+                </>
+              ) : (
+                <>
+                  <Lock className="w-3 h-3 mr-1" />
+                  Upgrade
+                </>
+              )}
             </Button>
           </div>
         </div>

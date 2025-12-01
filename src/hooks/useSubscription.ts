@@ -78,26 +78,17 @@ export function useSubscription() {
         });
       }
 
-      // Fetch interactions grouped by candidate to count actual usage
-      const { data: interactions } = await supabase
-        .from("interactions")
-        .select("candidate_id")
+      // Fetch actual usage tracking for D.E.V.I. calculations
+      const { data: usageData } = await supabase
+        .from("usage_tracking")
+        .select("candidate_id, updates_used")
         .eq("user_id", user.id);
 
-      if (interactions) {
-        // Count interactions per candidate
-        const interactionCounts: Record<string, number> = {};
-        interactions.forEach((i) => {
-          interactionCounts[i.candidate_id] = (interactionCounts[i.candidate_id] || 0) + 1;
-        });
-
-        // Convert to usage array
-        const usageFromInteractions = Object.entries(interactionCounts).map(([candidate_id, count]) => ({
-          candidate_id,
-          updates_used: count,
-        }));
-
-        setUsage(usageFromInteractions);
+      if (usageData) {
+        setUsage(usageData.map(u => ({
+          candidate_id: u.candidate_id,
+          updates_used: u.updates_used,
+        })));
       }
 
       // Fetch candidate count
@@ -111,6 +102,42 @@ export function useSubscription() {
       console.error("Error in fetchSubscriptionAndUsage:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const incrementUsage = async (candidateId: string) => {
+    if (!user) return;
+
+    try {
+      // Check if usage record exists
+      const { data: existing } = await supabase
+        .from("usage_tracking")
+        .select("id, updates_used")
+        .eq("user_id", user.id)
+        .eq("candidate_id", candidateId)
+        .maybeSingle();
+
+      if (existing) {
+        // Update existing record
+        await supabase
+          .from("usage_tracking")
+          .update({ updates_used: existing.updates_used + 1 })
+          .eq("id", existing.id);
+      } else {
+        // Create new record (first D.E.V.I. calculation is free, so start at 0)
+        await supabase
+          .from("usage_tracking")
+          .insert({
+            user_id: user.id,
+            candidate_id: candidateId,
+            updates_used: 0, // First calculation is free
+          });
+      }
+
+      // Refetch to update state
+      await fetchSubscriptionAndUsage();
+    } catch (error) {
+      console.error("Error incrementing usage:", error);
     }
   };
 
@@ -141,6 +168,7 @@ export function useSubscription() {
     canAddCandidate,
     canUseUpdate,
     getRemainingUpdates,
+    incrementUsage,
     refetch: fetchSubscriptionAndUsage,
     planLimits: PLAN_LIMITS,
   };
