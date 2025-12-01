@@ -96,24 +96,28 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({ candidates, archiv
 
 const AlertCard: React.FC<{ alert: Alert; onClick?: () => void }> = ({ alert, onClick }) => {
   const styles = {
-    warning: "bg-amber-500/10 border-amber-500/20 text-amber-600",
-    info: "bg-primary/10 border-primary/20 text-primary",
-    success: "bg-emerald-500/10 border-emerald-500/20 text-emerald-600",
-    urgent: "bg-destructive/10 border-destructive/20 text-destructive",
-    advice: "bg-purple-500/10 border-purple-500/20 text-purple-600",
+    warning: { card: "bg-amber-500/10 border-amber-500/20", text: "text-amber-600", icon: "bg-amber-500/20" },
+    info: { card: "bg-primary/10 border-primary/20", text: "text-primary", icon: "bg-primary/20" },
+    success: { card: "bg-emerald-500/10 border-emerald-500/20", text: "text-emerald-600", icon: "bg-emerald-500/20" },
+    urgent: { card: "bg-destructive/10 border-destructive/20", text: "text-destructive", icon: "bg-destructive/20" },
+    advice: { card: "bg-purple-500/10 border-purple-500/20", text: "text-purple-600", icon: "bg-purple-500/20" },
   };
+
+  const style = styles[alert.type];
 
   return (
     <button 
       onClick={onClick}
       disabled={!onClick}
-      className={`w-full rounded-xl p-3 border ${styles[alert.type]} text-left transition-all ${onClick ? "hover:scale-[1.02] cursor-pointer" : ""}`}
+      className={`w-full rounded-xl p-3 border ${style.card} text-left transition-all ${onClick ? "hover:scale-[1.02] cursor-pointer" : ""}`}
     >
-      <div className="flex items-start gap-3">
-        <div className="shrink-0 mt-0.5">{alert.icon}</div>
+      <div className="flex items-center gap-3">
+        <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${style.icon} ${style.text}`}>
+          {alert.icon}
+        </div>
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm">{alert.title}</p>
-          <p className="text-xs opacity-80 mt-0.5">{alert.message}</p>
+          <p className={`font-medium text-sm ${style.text}`}>{alert.title}</p>
+          <p className="text-xs text-muted-foreground">{alert.message}</p>
         </div>
       </div>
     </button>
@@ -187,8 +191,8 @@ function generateAlerts(
       id: "red-flags",
       type: "warning",
       icon: <AlertTriangle className="w-4 h-4" />,
-      title: "Red Flag Alert",
-      message: `${redFlagCandidates[0].nickname} has ${flagCount} red flags logged`,
+      title: `${flagCount} red flag${flagCount !== 1 ? 's' : ''}`,
+      message: `${redFlagCandidates[0].nickname} — Review concerns before proceeding`,
       candidateId: redFlagCandidates[0].id,
     });
   }
