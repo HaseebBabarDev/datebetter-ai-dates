@@ -73,6 +73,7 @@ export interface OnboardingData {
   careerStage?: string;
   ambitionLevel?: number;
   financialImportance?: number;
+  incomeRange?: string;
   
   // Screen 10: Lifestyle
   distancePreference?: string;

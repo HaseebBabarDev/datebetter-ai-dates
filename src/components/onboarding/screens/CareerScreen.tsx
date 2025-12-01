@@ -41,6 +41,17 @@ const educationOptions = [
   { value: "trade_school", label: "Trade/Vocational school" },
 ];
 
+const incomeOptions = [
+  { value: "under_25k", label: "Under $25,000" },
+  { value: "25k_50k", label: "$25,000 - $50,000" },
+  { value: "50k_75k", label: "$50,000 - $75,000" },
+  { value: "75k_100k", label: "$75,000 - $100,000" },
+  { value: "100k_150k", label: "$100,000 - $150,000" },
+  { value: "150k_250k", label: "$150,000 - $250,000" },
+  { value: "250k_plus", label: "$250,000+" },
+  { value: "prefer_not_say", label: "Prefer not to say" },
+];
+
 const CareerScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
   const [showPopup, setShowPopup] = useState(false);
@@ -90,6 +101,24 @@ const CareerScreen = () => {
               </SelectTrigger>
               <SelectContent>
                 {educationOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm">Income range:</Label>
+            <Select
+              value={data.incomeRange}
+              onValueChange={(value) => updateData({ incomeRange: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select income range" />
+              </SelectTrigger>
+              <SelectContent>
+                {incomeOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
