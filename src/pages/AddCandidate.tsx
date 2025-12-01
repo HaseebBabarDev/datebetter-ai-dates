@@ -518,6 +518,12 @@ const AddCandidate = () => {
                         onChange={(e) => setAge(e.target.value)}
                         min={18}
                         max={99}
+                        onInvalid={(e) => {
+                          e.currentTarget.setCustomValidity("Age must be older than 18");
+                        }}
+                        onInput={(e) => {
+                          e.currentTarget.setCustomValidity("");
+                        }}
                       />
                     </div>
                     <div className="space-y-2">
