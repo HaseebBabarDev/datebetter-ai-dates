@@ -21,7 +21,7 @@ const DatingMotivationScreen = () => {
     const current = data.datingMotivation || [];
     if (current.includes(value)) {
       updateData({ datingMotivation: current.filter(v => v !== value) });
-    } else {
+    } else if (current.length < 2) {
       updateData({ datingMotivation: [...current, value] });
     }
   };
