@@ -416,12 +416,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
             <div className={`text-4xl font-bold leading-none ${getScoreColor(scoreData.overall_score)}`}>
               {scoreData.overall_score}%
             </div>
-            <div className="flex items-center justify-end gap-2 mt-1">
-              {canRefresh && (
-                <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">
-                  {remainingUpdates} updates
-                </span>
-              )}
+            <div className="flex items-center justify-end mt-1">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -545,6 +540,15 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
             onAccept={() => respondToAdvice(true)}
             onDecline={() => respondToAdvice(false)}
           />
+        )}
+
+        {/* Updates remaining badge */}
+        {canRefresh && (
+          <div className="flex justify-center">
+            <span className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
+              {remainingUpdates} updates remaining
+            </span>
+          </div>
         )}
 
         {candidate.last_score_update && (
