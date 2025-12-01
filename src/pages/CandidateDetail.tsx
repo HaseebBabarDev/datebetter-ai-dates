@@ -675,6 +675,7 @@ const CandidateDetail = () => {
             <ScheduleCompatibilityAlert
               userSchedule={userProfile.schedule_flexibility}
               candidateSchedule={(candidate as any).their_schedule_flexibility}
+              distance={candidate.distance_approximation}
               variant="full"
             />
             <CompatibilityScore
