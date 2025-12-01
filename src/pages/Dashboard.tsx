@@ -703,7 +703,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-semibold text-foreground">
-                {profile?.name ? `Hello, ${profile.name}` : "Hello Beautiful"}
+                {profile?.name ? `Hello ${profile.name}!` : "Hello!"}
               </h1>
             </div>
             <div className="flex items-center gap-1">
@@ -1172,8 +1172,8 @@ const Dashboard = () => {
   );
 };
 
-function getGreeting(): string {
-  return "Hello Beautiful,";
+function getGreeting(name?: string): string {
+  return name ? `Hello ${name}!` : "Hello!";
 }
 
 export default Dashboard;
