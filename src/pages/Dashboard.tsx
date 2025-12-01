@@ -13,6 +13,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Plus,
   Settings,
@@ -765,15 +766,6 @@ const Dashboard = () => {
             {(() => {
               const alerts: { key: string; icon: React.ReactNode; label: string; sub?: string; color: string; onClick?: () => void }[] = [];
               
-              // D.E.V.I. badge
-              alerts.push({
-                key: "devi",
-                icon: <Sparkles className="w-3 h-3" />,
-                label: "D.E.V.I.",
-                color: "bg-primary/20 text-primary border-primary/30",
-                onClick: () => navigate("/devi"),
-              });
-
               // Cycle Setup CTA - only show if not completed onboarding (they haven't consciously skipped it yet)
               if (profile?.track_cycle && !profile?.last_period_date && !profile?.onboarding_completed) {
                 alerts.push({
@@ -914,10 +906,20 @@ const Dashboard = () => {
                   <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-primary" />
                     Recent Activity
-                    <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-medium">
-                      <Sparkles className="w-3 h-3" />
-                      D.E.V.I.
-                    </span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-medium cursor-help">
+                            <Sparkles className="w-3 h-3" />
+                            D.E.V.I.
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="font-medium">Dating Evaluation & Vetting Intelligence</p>
+                          <p className="text-xs text-muted-foreground">AI-powered insights for your dating journey</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </h3>
                 </div>
                 <div className="p-3 space-y-2">
