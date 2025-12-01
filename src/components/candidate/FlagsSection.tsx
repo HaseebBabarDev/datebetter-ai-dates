@@ -110,24 +110,6 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Updates remaining badge */}
-      {remainingUpdates > 0 && (
-        <div className="flex justify-end">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="outline" className="text-xs cursor-help">
-                  {remainingUpdates} update{remainingUpdates !== 1 ? 's' : ''} remaining
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Analyze also counts toward updates</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      )}
-
       {/* Hoover attempts tracker */}
       {hooverCount > 0 && (
         <Card className="border-amber-500/20 bg-gradient-to-r from-amber-50 to-amber-100/50 dark:from-amber-950/20 dark:to-amber-900/10">
@@ -150,12 +132,31 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
       )}
 
       {/* D.E.V.I. Analyze Button */}
-      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
+      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 overflow-hidden">
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
-              <p className="font-medium text-sm">D.E.V.I. Flag Detection</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <div className="flex items-center gap-2 mb-0.5">
+                <p className="font-medium text-sm">D.E.V.I. Flag Detection</p>
+                {remainingUpdates > 0 && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge 
+                          variant="secondary" 
+                          className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary border-primary/20 cursor-help animate-fade-in"
+                        >
+                          {remainingUpdates} left
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Analyze uses 1 update from your plan</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
                 Analyzes interactions to detect behavioral patterns
               </p>
             </div>
