@@ -642,11 +642,11 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                 <Button
                   size="sm"
                   className="bg-green-600 hover:bg-green-700"
-                  onClick={async () => {
+                  onClick={() => {
                     setShowLowScoreWarning(false);
-                    await respondToAdvice(true);
+                    // Use setTimeout to ensure dialog closes first
+                    setTimeout(() => respondToAdvice(true), 100);
                   }}
-                  disabled={respondingToAdvice}
                 >
                   <Check className="w-4 h-4 mr-1" />
                   Accept Advice
@@ -654,11 +654,10 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={async () => {
+                  onClick={() => {
                     setShowLowScoreWarning(false);
-                    await saveAdviceResponse(false);
+                    setTimeout(() => saveAdviceResponse(false), 100);
                   }}
-                  disabled={respondingToAdvice}
                 >
                   <X className="w-4 h-4 mr-1" />
                   Decline
