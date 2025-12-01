@@ -109,7 +109,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         <div 
           key={displayStep}
           className={cn(
-            "container max-w-lg mx-auto px-6 py-8 transition-all duration-300 ease-out",
+            "container max-w-lg mx-auto px-6 py-4 transition-all duration-300 ease-out",
             isVisible 
               ? "opacity-100 translate-x-0" 
               : "opacity-0 translate-x-4"
