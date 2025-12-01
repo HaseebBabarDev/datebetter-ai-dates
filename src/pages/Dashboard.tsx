@@ -35,6 +35,7 @@ import {
   XCircle,
   RefreshCw,
   Lightbulb,
+  Bot,
 } from "lucide-react";
 import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
@@ -46,7 +47,6 @@ import heroCouple from "@/assets/hero-couple.jpeg";
 import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
 import { FreeUpgradeBanner } from "@/components/subscription/FreeUpgradeBanner";
 import { DailyLoggingCTA } from "@/components/dashboard/DailyLoggingCTA";
-import { DeviCard } from "@/components/dashboard/DeviCard";
 import { ReferralCard } from "@/components/dashboard/ReferralCard";
 
 type Profile = Tables<"profiles">;
@@ -752,7 +752,6 @@ const Dashboard = () => {
               <UpgradeNudge />
               <FreeUpgradeBanner />
               <DailyLoggingCTA interactions={interactions} candidates={candidates} />
-              <DeviCard />
               <ReferralCard />
               <Button
                 variant="outline"
@@ -768,6 +767,16 @@ const Dashboard = () => {
             {(() => {
               const alerts: { key: string; icon: React.ReactNode; label: string; sub?: string; color: string; onClick?: () => void }[] = [];
               
+              // D.E.V.I. AI Coach badge
+              alerts.push({
+                key: "devi",
+                icon: <Bot className="w-3 h-3" />,
+                label: "D.E.V.I.",
+                sub: "AI Coach",
+                color: "bg-primary/20 text-primary border-primary/30",
+                onClick: () => navigate("/devi"),
+              });
+
               // Cycle Setup CTA - only show if not completed onboarding (they haven't consciously skipped it yet)
               if (profile?.track_cycle && !profile?.last_period_date && !profile?.onboarding_completed) {
                 alerts.push({
