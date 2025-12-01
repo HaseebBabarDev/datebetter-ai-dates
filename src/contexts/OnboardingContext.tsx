@@ -210,6 +210,9 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
             careerStage: profile.career_stage || undefined,
             ambitionLevel: profile.ambition_level || undefined,
             financialImportance: profile.financial_importance || undefined,
+            incomeRange: (profile as any).income_range || undefined,
+            preferredEducationLevel: (profile as any).preferred_education_level || undefined,
+            preferredIncomeRange: (profile as any).preferred_income_range || undefined,
             distancePreference: profile.distance_preference || undefined,
             livingSituation: profile.living_situation || undefined,
             openToMoving: profile.open_to_moving || undefined,
@@ -267,9 +270,108 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     setData(prev => ({ ...prev, ...updates }));
   }, []);
 
+  // Save progress to database
+  const saveProgress = useCallback(async (stepNum: number) => {
+    if (!user) return;
+    
+    try {
+      await supabase.from("profiles").update({
+        onboarding_step: stepNum,
+        // Save all current data
+        name: data.name,
+        birth_date: data.birthDate,
+        country: data.country,
+        city: data.city,
+        state: data.state,
+        gender_identity: data.genderIdentity as any,
+        pronouns: data.pronouns as any,
+        custom_pronouns: data.customPronouns,
+        height: data.height,
+        body_type: data.bodyType,
+        sexual_orientation: data.sexualOrientation as any,
+        orientation_custom: data.orientationCustom,
+        interested_in: data.interestedIn,
+        match_specificity: data.matchSpecificity,
+        is_trans: data.isTrans,
+        transition_stage: data.transitionStage,
+        hormone_profile: data.hormoneProfile,
+        lgbtq_connection: data.lgbtqConnection,
+        track_cycle: data.trackCycle,
+        last_period_date: data.lastPeriodDate,
+        cycle_length: data.cycleLength,
+        cycle_regularity: data.cycleRegularity as any,
+        dating_motivation: data.datingMotivation,
+        relationship_status: data.relationshipStatus as any,
+        relationship_goal: data.relationshipGoal as any,
+        relationship_structure: data.relationshipStructure as any,
+        monogamy_required: data.monogamyRequired,
+        exclusivity_before_intimacy: data.exclusivityBeforeIntimacy,
+        kids_status: data.kidsStatus as any,
+        kids_desire: data.kidsDesire as any,
+        kids_timeline: data.kidsTimeline,
+        marriage_before_kids: data.marriageBeforeKids,
+        open_to_single_parenthood: data.openToSingleParenthood,
+        religion: data.religion as any,
+        religion_practice_level: data.religionPracticeLevel,
+        faith_importance: data.faithImportance,
+        faith_requirements: data.faithRequirements,
+        politics: data.politics as any,
+        politics_importance: data.politicsImportance,
+        political_dealbreakers: data.politicalDealbreakers,
+        education_level: data.educationLevel,
+        education_matters: data.educationMatters,
+        career_stage: data.careerStage,
+        ambition_level: data.ambitionLevel,
+        financial_importance: data.financialImportance,
+        income_range: data.incomeRange,
+        preferred_education_level: data.preferredEducationLevel,
+        preferred_income_range: data.preferredIncomeRange,
+        distance_preference: data.distancePreference,
+        living_situation: data.livingSituation,
+        open_to_moving: data.openToMoving,
+        social_style: data.socialStyle as any,
+        work_schedule_type: data.workScheduleType,
+        flexibility_rating: data.flexibilityRating,
+        activity_level: data.activityLevel,
+        schedule_flexibility: data.scheduleFlexibility,
+        attraction_importance: data.attractionImportance,
+        preferred_age_min: data.preferredAgeMin,
+        preferred_age_max: data.preferredAgeMax,
+        height_preference: data.heightPreference,
+        chemistry_factors: data.chemistryFactors,
+        communication_style: data.communicationStyle as any,
+        response_time_preference: data.responseTimePreference,
+        conflict_style: data.conflictStyle,
+        love_languages: data.loveLanguages,
+        attachment_style: data.attachmentStyle as any,
+        longest_relationship: data.longestRelationship,
+        time_since_last_relationship: data.timeSinceLastRelationship,
+        pattern_recognition: data.patternRecognition,
+        dealbreakers: data.dealbreakers,
+        safety_priorities: data.safetyPriorities,
+        boundary_strength: data.boundaryStrength,
+        is_neurodivergent: data.isNeurodivergent,
+        neurodivergence_types: data.neurodivergenceTypes,
+        mental_health_openness: data.mentalHealthOpenness,
+        mental_health_importance: data.mentalHealthImportance,
+        in_therapy: data.inTherapy,
+        intimacy_comfort: data.intimacyComfort,
+        safety_requirements: data.safetyRequirements,
+        post_intimacy_tendency: data.postIntimacyTendency,
+        red_flag_sensitivity: data.redFlagSensitivity,
+        love_bombing_sensitivity: data.loveBombingSensitivity,
+        behavioral_monitoring: data.behavioralMonitoring,
+      }).eq("user_id", user.id);
+    } catch (error) {
+      console.error("Error saving progress:", error);
+    }
+  }, [user, data]);
+
   const nextStep = useCallback(() => {
-    setCurrentStep(prev => Math.min(prev + 1, totalSteps - 1));
-  }, [totalSteps]);
+    const newStep = Math.min(currentStep + 1, totalSteps - 1);
+    setCurrentStep(newStep);
+    saveProgress(newStep);
+  }, [currentStep, totalSteps, saveProgress]);
 
   const prevStep = useCallback(() => {
     setCurrentStep(prev => Math.max(prev - 1, 0));
