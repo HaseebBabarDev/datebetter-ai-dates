@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Flower2, Moon, Lock, Sparkles, Heart, Stars } from "lucide-react";
+import { Moon, Lock, Sparkles, Heart, Stars } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 
 const Splash = () => {

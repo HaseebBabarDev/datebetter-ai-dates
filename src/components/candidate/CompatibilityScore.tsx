@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Flower2, RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Shield, ChevronDown, TrendingUp, AlertTriangle, Sparkles } from "lucide-react";
+import { RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Shield, ChevronDown, TrendingUp, AlertTriangle, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -247,7 +247,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
           <div className="relative flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Flower2 className="w-6 h-6 text-primary" />
+              <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <div>
               <h3 className="font-semibold text-foreground">D.E.V.I. Compatibility</h3>
@@ -265,7 +265,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
               </>
             ) : (
               <>
-                <Flower2 className="w-4 h-4 mr-2" />
+                <Sparkles className="w-4 h-4 mr-2" />
                 Calculate Compatibility
               </>
             )}
@@ -291,7 +291,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
         <div className="relative flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Flower2 className="w-6 h-6 text-primary" />
+              <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <div>
               <h3 className="font-semibold text-foreground">Compatibility</h3>
@@ -397,7 +397,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
             <div className="flex items-center gap-2 mb-3">
               <img 
                 src={logo} 
-                alt="DEVI" 
+                alt="D.E.V.I." 
                 className="w-7 h-7 rounded-full object-cover ring-1 ring-primary/20"
               />
               <span className="text-xs font-semibold text-primary flex items-center gap-1">
@@ -505,7 +505,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                   <div className="p-3 rounded-lg bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/10">
                     <div className="flex items-start gap-2 mb-2">
                       <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                      <p className="text-sm font-medium text-primary">DEVI Advice</p>
+                      <p className="text-sm font-medium text-primary">D.E.V.I. Advice</p>
                     </div>
                     <p className="text-sm text-foreground">{scoreData.advice}</p>
                   </div>

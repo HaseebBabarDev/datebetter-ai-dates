@@ -3,7 +3,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, CheckCircle, Flower2, Loader2 } from "lucide-react";
+import { AlertTriangle, CheckCircle, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -97,7 +97,7 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
               {analyzing ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Flower2 className="w-4 h-4" />
+                <Sparkles className="w-4 h-4" />
               )}
               {analyzing ? "Analyzing..." : "Analyze"}
             </Button>
