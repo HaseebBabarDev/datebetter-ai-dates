@@ -71,34 +71,34 @@ const WelcomeScreen = () => {
         title="Welcome! Let's get started."
         subtitle="Your dating journey begins here"
       >
-        <div className="space-y-3 animate-fade-in relative z-10">
+        <div className="space-y-4 animate-fade-in relative z-10">
           {/* Welcome Heading */}
-          <div className="text-center">
-            <h1 className="text-2xl md:text-3xl font-poppins font-bold text-foreground">
+          <div className="text-center mb-1">
+            <h1 className="text-xl md:text-2xl font-poppins font-bold text-foreground">
               Let's Get Started!
             </h1>
           </div>
 
           {/* D.E.V.I. Badge */}
-          <div className="flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-background/80 backdrop-blur-sm border border-primary/30 mx-auto w-fit">
-            <Stars className="w-3 h-3 md:w-4 md:h-4 text-primary" />
-            <span className="text-xs md:text-sm font-medium text-foreground">D.E.V.I.</span>
-            <span className="text-[10px] md:text-xs text-foreground/70">Dating Evaluation & Vetting Intelligence</span>
+          <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-background/80 backdrop-blur-sm border border-primary/30 mx-auto w-fit">
+            <Stars className="w-3 h-3 text-primary" />
+            <span className="text-xs font-medium text-foreground">D.E.V.I.</span>
+            <span className="text-[10px] text-foreground/70">Dating Evaluation & Vetting Intelligence</span>
           </div>
 
-          {/* Onboarding Info */}
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-card/40 backdrop-blur-sm border border-border/20">
-              <Clock className="w-4 h-4 text-primary shrink-0" />
-              <span className="text-foreground/90 text-sm">10-15 min to complete</span>
+          {/* Onboarding Info - Compact */}
+          <div className="flex flex-wrap justify-center gap-2 text-xs">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card/50 backdrop-blur-sm border border-border/30">
+              <Clock className="w-3 h-3 text-primary shrink-0" />
+              <span className="text-foreground/80">10-15 min</span>
             </div>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-card/40 backdrop-blur-sm border border-border/20">
-              <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
-              <span className="text-foreground/90 text-sm">Your answers stay private & secure</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card/50 backdrop-blur-sm border border-border/30">
+              <ShieldCheck className="w-3 h-3 text-primary shrink-0" />
+              <span className="text-foreground/80">Private & secure</span>
             </div>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-card/40 backdrop-blur-sm border border-border/20">
-              <Sparkles className="w-4 h-4 text-primary shrink-0" />
-              <span className="text-foreground/90 text-sm">Helps D.E.V.I. personalize your experience</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card/50 backdrop-blur-sm border border-border/30">
+              <Sparkles className="w-3 h-3 text-primary shrink-0" />
+              <span className="text-foreground/80">Personalized</span>
             </div>
           </div>
 
