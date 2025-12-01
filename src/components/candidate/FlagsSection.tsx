@@ -25,7 +25,7 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
   candidate,
   onUpdate,
 }) => {
-  const { getRemainingUpdates, incrementUsage, canUseUpdate } = useSubscription();
+  const { getRemainingUpdates, incrementUsage, canUseUpdate, refetch } = useSubscription();
   const remainingUpdates = getRemainingUpdates(candidate.id);
   const [hooverCount, setHooverCount] = useState(0);
 
@@ -89,6 +89,7 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
       
       // Increment usage count
       await incrementUsage(candidate.id);
+      await refetch();
       
       // Update local state through parent
       await onUpdate({
@@ -158,19 +159,28 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
                 Analyzes interactions to detect behavioral patterns
               </p>
             </div>
-            <Button
-              onClick={detectFlags}
-              disabled={analyzing}
-              size="sm"
-              className="gap-2"
-            >
-              {analyzing ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Sparkles className="w-4 h-4" />
-              )}
-              {analyzing ? "Analyzing..." : "Analyze"}
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={detectFlags}
+                    disabled={analyzing || !canUseUpdate(candidate.id)}
+                    size="sm"
+                    className="gap-2"
+                  >
+                    {analyzing ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4" />
+                    )}
+                    {analyzing ? "Analyzing..." : "Analyze"}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Uses 1 update from your plan</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </CardContent>
       </Card>
