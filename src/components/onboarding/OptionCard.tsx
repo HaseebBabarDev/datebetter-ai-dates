@@ -31,73 +31,58 @@ export const OptionCard: React.FC<OptionCardProps> = ({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "w-full rounded-lg border transition-all duration-150 relative",
-        "hover:border-primary/50",
-        compact ? "px-3 py-1.5 min-h-[44px] flex items-center justify-center text-center" : "px-3 py-2 text-left",
+        "w-full rounded-xl border transition-all duration-150 relative",
+        "hover:border-primary/40",
+        compact ? "px-2.5 py-2 min-h-[38px] flex items-center text-left" : "px-3 py-2 text-left",
         selected
-          ? "border-primary bg-primary/5"
-          : "border-border bg-card",
+          ? "border-primary/60 bg-primary/5"
+          : "border-border/60 bg-card",
         disabled && "opacity-50 cursor-not-allowed",
         className
       )}
     >
       <div className={cn(
-        "flex gap-2",
-        description && !compact ? "items-start" : "items-center",
-        compact && "justify-center w-full"
+        "flex gap-2 items-center w-full",
+        description && !compact && "items-start"
       )}>
         {icon && (
           <div className={cn(
-            "rounded flex items-center justify-center shrink-0",
-            compact ? "w-5 h-5" : "w-8 h-8",
-            selected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+            "rounded-md flex items-center justify-center shrink-0",
+            compact ? "w-7 h-7" : "w-8 h-8",
+            selected ? "bg-primary text-primary-foreground" : "bg-muted/60 text-muted-foreground"
           )}>
             {React.isValidElement(icon) 
               ? React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
                   className: cn(
                     (icon as React.ReactElement<{ className?: string }>).props.className,
-                    compact ? "w-3 h-3" : "w-4 h-4"
+                    compact ? "w-3.5 h-3.5" : "w-4 h-4"
                   )
                 })
               : icon
             }
           </div>
         )}
-        <div className={cn("min-w-0", compact && !icon ? "flex-none" : "flex-1")}>
-          <div className={cn(
-            "flex gap-2",
-            compact ? "flex-col items-center" : "items-start justify-between"
+        <div className="flex-1 min-w-0">
+          <span className={cn(
+            "text-xs font-medium leading-tight block",
+            selected ? "text-primary" : "text-foreground"
           )}>
-            <div className={compact ? "text-center" : "flex-1"}>
-              <span className={cn(
-                "text-xs font-medium leading-tight block",
-                selected ? "text-primary" : "text-foreground"
-              )}>
-                {title}
-              </span>
-              {subtitle && compact && (
-                <span className="text-[10px] text-muted-foreground leading-tight block">
-                  {subtitle}
-                </span>
-              )}
-              {description && !compact && (
-                <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight text-left">
-                  {description}
-                </p>
-              )}
-            </div>
-            {selected && !compact && (
-              <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <Check className="w-3 h-3 text-primary" />
-              </div>
-            )}
-          </div>
+            {title}
+          </span>
+          {subtitle && compact && (
+            <span className="text-[10px] text-muted-foreground leading-tight block">
+              {subtitle}
+            </span>
+          )}
+          {description && !compact && (
+            <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
+              {description}
+            </p>
+          )}
         </div>
-      {selected && compact && (
-        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-          <Check className="w-3 h-3 text-primary" />
-        </div>
-      )}
+        {selected && (
+          <Check className="w-3.5 h-3.5 text-primary shrink-0" />
+        )}
       </div>
     </button>
   );
