@@ -36,7 +36,7 @@ const DatingPreferencesScreen = () => {
       const filtered = current.filter((v) => v !== "all");
       if (filtered.includes(value)) {
         updateData({ interestedIn: filtered.filter((v) => v !== value) });
-      } else {
+      } else if (filtered.length < 2) {
         updateData({ interestedIn: [...filtered, value] });
       }
     }
