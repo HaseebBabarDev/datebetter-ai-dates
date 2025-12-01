@@ -26,7 +26,7 @@ const FaithValuesScreen = () => {
       <div className="space-y-4 animate-fade-in">
         <div className="space-y-2">
           <Label className="text-sm">Your religious/spiritual beliefs:</Label>
-          <div className="space-y-1.5">
+          <div className="grid grid-cols-2 gap-2">
           {religionOptions.map((o) => (
             <OptionCard key={o.value} selected={data.religion === o.value} onClick={() => updateData({ religion: o.value })} title={o.label} compact />
           ))}

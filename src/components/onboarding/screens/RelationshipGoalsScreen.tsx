@@ -44,7 +44,7 @@ const RelationshipGoalsScreen = () => {
         {/* Current Relationship Status */}
         <div className="space-y-2">
           <Label className="text-sm">What's your current relationship status?</Label>
-          <div className="space-y-1.5">
+          <div className="grid grid-cols-2 gap-2">
             {statusOptions.map((option) => (
               <OptionCard
                 key={option.value}
@@ -52,7 +52,6 @@ const RelationshipGoalsScreen = () => {
                 onClick={() => updateData({ relationshipStatus: option.value })}
                 icon={<option.icon className="w-4 h-4" />}
                 title={option.label}
-                description={option.description}
                 compact
               />
             ))}
@@ -62,7 +61,7 @@ const RelationshipGoalsScreen = () => {
         {/* Primary Goal */}
         <div className="space-y-2">
           <Label className="text-sm">What are you looking for?</Label>
-          <div className="space-y-1.5">
+          <div className="grid grid-cols-2 gap-2">
             {goalOptions.map((option) => (
               <OptionCard
                 key={option.value}
@@ -70,7 +69,6 @@ const RelationshipGoalsScreen = () => {
                 onClick={() => updateData({ relationshipGoal: option.value })}
                 icon={<option.icon className="w-4 h-4" />}
                 title={option.label}
-                description={option.description}
                 compact
               />
             ))}
@@ -80,14 +78,13 @@ const RelationshipGoalsScreen = () => {
         {/* Relationship Structure */}
         <div className="space-y-2">
           <Label className="text-sm">Your ideal relationship structure:</Label>
-          <div className="space-y-1.5">
+          <div className="grid grid-cols-2 gap-2">
             {structureOptions.map((option) => (
               <OptionCard
                 key={option.value}
                 selected={data.relationshipStructure === option.value}
                 onClick={() => updateData({ relationshipStructure: option.value })}
                 title={option.label}
-                description={option.description}
                 compact
               />
             ))}

@@ -45,14 +45,17 @@ const SocialActivityScreen = () => {
 
         <div className="space-y-3">
           <Label>Your activity level:</Label>
-          {activityOptions.map((o) => (
-            <OptionCard 
-              key={o.value} 
-              selected={data.activityLevel === o.value} 
-              onClick={() => updateData({ activityLevel: o.value })} 
-              title={o.label} 
-            />
-          ))}
+          <div className="grid grid-cols-2 gap-2">
+            {activityOptions.map((o) => (
+              <OptionCard 
+                key={o.value} 
+                selected={data.activityLevel === o.value} 
+                onClick={() => updateData({ activityLevel: o.value })} 
+                title={o.label}
+                compact
+              />
+            ))}
+          </div>
         </div>
 
         <Button onClick={nextStep} disabled={!data.socialStyle || !data.activityLevel} className="w-full" size="lg">

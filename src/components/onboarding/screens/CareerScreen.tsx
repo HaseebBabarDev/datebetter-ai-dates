@@ -100,7 +100,7 @@ const CareerScreen = () => {
         <div className="space-y-4 animate-fade-in">
           <div className="space-y-2">
             <Label className="text-sm">Career status:</Label>
-            <div className="space-y-1.5">
+            <div className="grid grid-cols-2 gap-2">
             {careerOptions.map((o) => (
               <OptionCard key={o.value} selected={data.careerStage === o.value} onClick={() => updateData({ careerStage: o.value })} title={o.label} compact />
             ))}

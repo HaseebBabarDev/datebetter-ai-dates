@@ -22,7 +22,7 @@ const CommunicationScreen = () => {
       <div className="space-y-4 animate-fade-in">
         <div className="space-y-2">
           <Label className="text-sm">How do you communicate?</Label>
-          <div className="space-y-1.5">
+          <div className="grid grid-cols-2 gap-2">
           {commOptions.map((o) => (
             <OptionCard 
               key={o.value} 

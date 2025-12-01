@@ -124,13 +124,14 @@ const BasicIdentityScreen = () => {
         {/* Gender Identity */}
         <div className="space-y-3">
           <Label>I identify as:</Label>
-          <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
             {genderOptions.map((option) => (
               <OptionCard
                 key={option.value}
                 selected={data.genderIdentity === option.value}
                 onClick={() => updateData({ genderIdentity: option.value })}
                 title={option.label}
+                compact
               />
             ))}
           </div>

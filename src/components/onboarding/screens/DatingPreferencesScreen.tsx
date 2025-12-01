@@ -53,7 +53,7 @@ const DatingPreferencesScreen = () => {
         {/* Sexual Orientation */}
         <div className="space-y-2">
           <Label className="text-sm">I identify as:</Label>
-          <div className="space-y-1.5">
+          <div className="grid grid-cols-2 gap-2">
             {orientationOptions.map((option) => (
               <OptionCard
                 key={option.value}
