@@ -157,11 +157,11 @@ serve(async (req) => {
       const positiveGutFeelings = ["happy", "excited", "hopeful", "content", "loved", "secure"];
       
       // Critical red flags that should tank the score (deal-breakers)
-      const criticalRedFlags = ["seeing someone else", "cheating", "cheated", "other woman", "other guy", "married", "has a girlfriend", "has a boyfriend", "lied about", "abusive", "hit me", "threatened"];
+      const criticalRedFlags = ["seeing someone else", "cheating", "cheated", "other woman", "other guy", "married", "has a girlfriend", "has a boyfriend", "lied about", "abusive", "hit me", "threatened", "wants to end", "end things", "break up", "breaking up", "over between us", "done with", "leave me alone", "leave it alone", "don't contact", "stop contacting"];
       // Serious red flags
-      const seriousRedFlags = ["ghosted", "ignored", "blocked", "disappeared", "breadcrumbing", "love bombing"];
+      const seriousRedFlags = ["ghosted", "ignored", "blocked", "disappeared", "breadcrumbing", "love bombing", "not interested", "just friends", "moving on", "need space", "taking a break"];
       // Moderate red flags
-      const moderateRedFlags = ["distant", "cold", "switched up", "hot and cold", "inconsistent", "didn't answer", "didn't respond"];
+      const moderateRedFlags = ["distant", "cold", "switched up", "hot and cold", "inconsistent", "didn't answer", "didn't respond", "bummed", "confused", "pointless", "idk what to do"];
       
       interactions.forEach((i: any) => {
         const feeling = i.overall_feeling || 3;
@@ -522,19 +522,24 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
 });
 
 // Calculate deterministic base scores from profile matching
+// HARSHER SCORING: Start at 40 instead of 50, require positive evidence to go up
 function calculateBaseScores(profile: any, candidate: any) {
-  let valuesScore = 50;
-  let lifestyleScore = 50;
-  let emotionalScore = 50;
-  let futureGoalsScore = 50;
+  let valuesScore = 40;
+  let lifestyleScore = 40;
+  let emotionalScore = 40;
+  let futureGoalsScore = 40;
   
-  // Values alignment (religion, politics)
+  // Values alignment (religion, politics) - HARSHER for mismatches
   if (profile.religion && candidate.their_religion) {
     if (profile.religion === candidate.their_religion) {
       valuesScore += 25;
     } else if (profile.faith_importance >= 4) {
-      valuesScore -= 20;
+      valuesScore -= 30; // Harsher penalty
+    } else if (profile.faith_importance >= 3) {
+      valuesScore -= 15;
     }
+  } else if (profile.faith_importance >= 4 && !candidate.their_religion) {
+    valuesScore -= 15; // Unknown religion when it matters
   }
   
   if (profile.politics && candidate.their_politics) {
@@ -544,7 +549,23 @@ function calculateBaseScores(profile: any, candidate: any) {
     const diff = Math.abs(userIdx - candIdx);
     if (diff === 0) valuesScore += 20;
     else if (diff === 1) valuesScore += 10;
-    else if (diff >= 3 && profile.politics_importance >= 4) valuesScore -= 20;
+    else if (diff >= 3 && profile.politics_importance >= 4) valuesScore -= 30; // Harsher
+    else if (diff >= 2) valuesScore -= 15;
+  } else if (profile.politics_importance >= 4 && !candidate.their_politics) {
+    valuesScore -= 15; // Unknown politics when it matters
+  }
+  
+  // Income/Financial compatibility - NEW
+  const userPreferredIncome = (profile as any).preferred_income_range;
+  const candCareerStage = candidate.their_career_stage;
+  if (userPreferredIncome && userPreferredIncome !== "no_preference") {
+    const highIncomePrefs = ["250k_plus", "250k_500k", "over_500k", "150k_250k"];
+    const lowIncomeStages = ["student", "entry_level", "between", "between_jobs"];
+    
+    if (highIncomePrefs.includes(userPreferredIncome) && lowIncomeStages.includes(candCareerStage)) {
+      lifestyleScore -= 25; // Big gap between income expectations
+      futureGoalsScore -= 15;
+    }
   }
   
   // Relationship status compatibility
@@ -629,22 +650,31 @@ function calculateBaseScores(profile: any, candidate: any) {
     }
   }
   
-  // Distance compatibility
-  if (candidate.distance_approximation && profile.distance_preference) {
-    const distanceScore: Record<string, number> = {
-      same_city: 20,
-      regional: 10,
-      far: -5,
-      long_distance: -15
-    };
-    const distPref = profile.distance_preference;
+  // Distance compatibility - MUCH HARSHER
+  if (candidate.distance_approximation) {
     const candDist = candidate.distance_approximation;
+    const distPref = profile.distance_preference;
     
-    // If user is okay with long distance, don't penalize
-    if (distPref === "ldr" || distPref === "relocate") {
+    // If user wants nearby but candidate is far/long distance, heavy penalty
+    if (distPref && distPref !== "ldr" && distPref !== "relocate" && distPref !== "long_distance") {
+      if (candDist === "long_distance" || candDist === "different_country" || candDist === "different_state") {
+        lifestyleScore -= 35; // HARSH penalty for long distance when user wants local
+        futureGoalsScore -= 20; // Also impacts future goals
+      } else if (candDist === "different_city" || candDist === "2_plus_hours" || candDist === "1_2_hours") {
+        lifestyleScore -= 20;
+      } else if (candDist === "30_60_min") {
+        lifestyleScore -= 10;
+      } else if (candDist === "same_city" || candDist === "nearby" || candDist === "under_30_min") {
+        lifestyleScore += 15;
+      }
+    } else if (distPref === "ldr" || distPref === "relocate" || distPref === "long_distance") {
+      // User is okay with long distance
       lifestyleScore += 10;
     } else {
-      lifestyleScore += (distanceScore[candDist] || 0);
+      // Default: still penalize long distance moderately
+      if (candDist === "long_distance" || candDist === "different_country") {
+        lifestyleScore -= 25;
+      }
     }
   }
   
