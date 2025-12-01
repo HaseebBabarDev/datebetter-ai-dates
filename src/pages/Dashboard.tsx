@@ -323,7 +323,15 @@ const Dashboard = () => {
       "future faking", "soulmate", "never felt this way", "falling for me",
       "wants to have kids", "wants kids with me", "hes falling", "he's falling",
       "she's falling", "shes falling", "love you already", "marry me",
-      "move in together", "intense", "overwhelming"
+      "move in together", "intense", "overwhelming",
+      // Over-promising / actions don't match words
+      "promised but", "says but doesn't", "said but didn't", "all talk", 
+      "empty promises", "keeps promising", "never follows through", "talks big",
+      "can't afford", "couldn't afford", "no money for", "broke but",
+      "overpromising", "over promising", "too soon", "way too fast",
+      "only been", "just met", "barely know", "week and already",
+      "days and already", "planning our future", "talking about marriage",
+      "talking about kids", "talking about moving", "words don't match"
     ];
     
     candidates.forEach((candidate) => {
