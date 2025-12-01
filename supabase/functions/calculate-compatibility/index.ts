@@ -151,6 +151,7 @@ serve(async (req) => {
     let hasBlockedPattern = false;
     let hasObsessiveContactPattern = false; // User keeps contacting after being ghosted/blocked
     let hasCandidateHarassment = false; // Candidate obsessively contacts/stalks user
+    let hasDiscriminatoryBehavior = false; // Fat shaming, racism, degrading remarks
     let shouldEndRelationship = false; // When true, score will be capped very low
     
     if (interactions && interactions.length > 0) {
@@ -175,6 +176,28 @@ serve(async (req) => {
       // Critical red flags that should tank the score (deal-breakers)
       const criticalRedFlags = ["seeing someone else", "cheating", "cheated", "other woman", "other guy", "married", "has a girlfriend", "has a boyfriend", "lied about", "abusive", "hit me", "threatened", "wants to end", "end things", "break up", "breaking up", "over between us", "done with", "leave me alone", "leave it alone", "don't contact", "stop contacting"];
       
+      // Discriminatory, degrading, and abusive remarks - INSTANT DEAL-BREAKERS
+      const discriminatoryPhrases = [
+        // Fat shaming
+        "called me fat", "said i was fat", "fat shaming", "fat shamed", "too fat", "lose weight",
+        "you're fat", "you're overweight", "disgusting body", "gross body", "need to diet",
+        "let yourself go", "gained weight", "too heavy", "whale", "pig", "cow",
+        // Racial discrimination
+        "racist", "racial slur", "called me a", "n word", "the n word", "racial remark",
+        "because of my race", "my skin color", "your people", "you people", "go back to",
+        "don't date your kind", "your kind", "ethnic slur",
+        // General degrading/derogatory
+        "degrading", "degraded me", "derogatory", "belittled", "humiliated", "humiliating",
+        "called me stupid", "called me dumb", "called me ugly", "you're ugly", "you're disgusting",
+        "worthless", "pathetic", "piece of", "trash", "garbage", "useless",
+        "no one will want you", "no one else will", "lucky to have me", "can't do better",
+        "put me down", "puts me down", "insults me", "insulted me", "mocked me", "mocking",
+        "made fun of", "laughed at me", "ridiculed", "shamed me", "body shamed",
+        // Slurs and hate speech
+        "slur", "hate speech", "bigot", "sexist", "misogynist", "misogyny",
+        "homophobic", "transphobic", "ableist", "xenophobic"
+      ];
+      
       // Serious red flags
       const seriousRedFlags = ["ignored", "disappeared", "breadcrumbing", "not interested", "just friends", "moving on", "need space", "taking a break", "stopped responding", "went silent", "radio silence"];
       
@@ -192,7 +215,7 @@ serve(async (req) => {
       
       // Love bombing detection phrases (overpromising)
       const loveBombingPhrases = [
-        "want to take care of", "want to provide", "want a family", "wants kids with me", 
+        "want to take care of", "want to provide", "want a family", "wants kids with me",
         "marry me", "move in together", "soulmate", "never felt this way", "meant to be",
         "planning our future", "talking about marriage", "talking about kids",
         "want to give you everything", "i'll take care of everything", "future together",
@@ -251,6 +274,14 @@ serve(async (req) => {
         shouldEndRelationship = true;
         interactionSentiment -= 60;
         console.log("DETECTED: Candidate harassment/stalking - RELATIONSHIP SHOULD END IMMEDIATELY");
+      }
+      
+      // 3c. Discriminatory/degrading behavior detection
+      hasDiscriminatoryBehavior = discriminatoryPhrases.some(phrase => combinedNotes.includes(phrase));
+      if (hasDiscriminatoryBehavior) {
+        shouldEndRelationship = true;
+        interactionSentiment -= 70; // Severe penalty - this is unacceptable
+        console.log("DETECTED: Discriminatory/degrading behavior - RELATIONSHIP SHOULD END IMMEDIATELY");
       }
       
       // 4. Love bombing detection
@@ -504,6 +535,7 @@ INTERACTION ANALYSIS:
 - BLOCKED DETECTED: ${hasBlockedPattern ? "YES - User has been blocked" : "No"}
 - OBSESSIVE CONTACT (by user): ${hasObsessiveContactPattern ? "YES - User keeps contacting after being ghosted/blocked" : "No"}
 - HARASSMENT/STALKING (by candidate): ${hasCandidateHarassment ? "YES - Candidate is obsessively contacting/stalking the user" : "No"}
+- DISCRIMINATORY/DEGRADING BEHAVIOR: ${hasDiscriminatoryBehavior ? "YES - Fat shaming, racism, degrading/derogatory remarks detected" : "No"}
 - LOVE BOMBING DETECTED: ${hasLoveBombingPattern ? "YES - Actions don't match words (overpromising)" : "No"}
 - POST-INTIMACY DROP-OFF: ${hasPostIntimacyDropOff ? "YES - Behavior changed negatively after intimacy" : "No"}
 
@@ -527,8 +559,9 @@ CRITICAL SCORING RULES - YOU MUST FOLLOW THESE:
 9. ${hasBlockedPattern ? "**BLOCKED**: Being blocked is a CLEAR signal the relationship is over. There is nothing to salvage. Advise the user to accept this and focus on healing." : ""}
 10. ${hasObsessiveContactPattern ? "**OBSESSIVE CONTACT WARNING**: The user appears to be repeatedly contacting someone who has ghosted/blocked them. This is unhealthy behavior. Gently but firmly advise them to STOP contacting this person immediately and work on themselves." : ""}
 11. ${hasCandidateHarassment ? "**HARASSMENT/STALKING ALERT**: The candidate is showing dangerous obsessive behavior (repeatedly contacting, showing up uninvited, stalking, threatening). This is a SAFETY CONCERN. Advise the user to block them everywhere, document incidents, and consider involving authorities if threats continue. This is NON-NEGOTIABLE - they must cut ALL contact." : ""}
-12. ${hasLoveBombingPattern ? "**LOVE BOMBING**: When someone makes big promises (providing, family, taking care of you) but their situation doesn't support it, this is manipulation. Their words don't match their ability to deliver. Advise ending this relationship." : ""}
-13. ${hasPostIntimacyDropOff ? "**POST-INTIMACY DROP-OFF**: The candidate's behavior changed negatively AFTER intimacy. This is a classic pattern of someone who was only interested in sex. Tell the user this person showed their true intentions and they deserve better." : ""}
+12. ${hasDiscriminatoryBehavior ? "**DISCRIMINATORY/DEGRADING BEHAVIOR**: The candidate has made fat shaming, racist, degrading, or derogatory remarks. This is VERBAL/EMOTIONAL ABUSE. No one deserves to be treated this way. Tell the user firmly that this behavior is UNACCEPTABLE and will only get worse. They must end this relationship immediately. Remind them of their worth and that they deserve someone who respects and values them." : ""}
+13. ${hasLoveBombingPattern ? "**LOVE BOMBING**: When someone makes big promises (providing, family, taking care of you) but their situation doesn't support it, this is manipulation. Their words don't match their ability to deliver. Advise ending this relationship." : ""}
+14. ${hasPostIntimacyDropOff ? "**POST-INTIMACY DROP-OFF**: The candidate's behavior changed negatively AFTER intimacy. This is a classic pattern of someone who was only interested in sex. Tell the user this person showed their true intentions and they deserve better." : ""}
 
 WRITING STYLE FOR ADVICE - IMPORTANT:
 - CRITICAL: Your advice MUST directly reference the most recent interaction content. If they mentioned vacation, talk about that. If they had a fight, address that.
