@@ -15,12 +15,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail } from "lucide-react";
+import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { Badge } from "@/components/ui/badge";
 
 type Profile = Tables<"profiles">;
+type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more";
+
+const PLAN_LIMITS: Record<SubscriptionPlan, { candidates: number; updates: number }> = {
+  free: { candidates: 1, updates: 1 },
+  new_to_dating: { candidates: 3, updates: 5 },
+  dating_often: { candidates: 7, updates: 12 },
+  dating_more: { candidates: 12, updates: 20 },
+
+};
+
+const PLAN_DISPLAY: Record<SubscriptionPlan, { name: string; price: string }> = {
+  free: { name: "Free", price: "$0" },
+  new_to_dating: { name: "New to Dating", price: "$9.99" },
+  dating_often: { name: "Dating Often", price: "$19.99" },
+  dating_more: { name: "Dating More", price: "$29.99" },
+};
 
 const GENDER_OPTIONS = [
   { value: "woman_cis", label: "Woman" },
@@ -78,6 +94,8 @@ const Settings = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState<SubscriptionPlan>("free");
+  const [changingPlan, setChangingPlan] = useState<SubscriptionPlan | null>(null);
 
   // Account form state
   const [name, setName] = useState("");
@@ -91,8 +109,74 @@ const Settings = () => {
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchSubscription();
     }
   }, [user]);
+
+  const fetchSubscription = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_subscriptions")
+        .select("*")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (data) {
+        setCurrentPlan(data.plan as SubscriptionPlan);
+      }
+    } catch (error) {
+      console.error("Error fetching subscription:", error);
+    }
+  };
+
+  const handleChangePlan = async (newPlan: SubscriptionPlan) => {
+    if (newPlan === currentPlan) return;
+    
+    setChangingPlan(newPlan);
+    try {
+      const limits = PLAN_LIMITS[newPlan];
+      
+      // Check if subscription exists
+      const { data: existing } = await supabase
+        .from("user_subscriptions")
+        .select("id")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from("user_subscriptions")
+          .update({
+            plan: newPlan,
+            candidates_limit: limits.candidates,
+            updates_per_candidate: limits.updates,
+          })
+          .eq("user_id", user!.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("user_subscriptions")
+          .insert({
+            user_id: user!.id,
+            plan: newPlan,
+            candidates_limit: limits.candidates,
+            updates_per_candidate: limits.updates,
+          });
+
+        if (error) throw error;
+      }
+
+      setCurrentPlan(newPlan);
+      toast.success(`Upgraded to ${PLAN_DISPLAY[newPlan].name}!`);
+    } catch (error) {
+      console.error("Error changing plan:", error);
+      toast.error("Failed to change plan");
+    } finally {
+      setChangingPlan(null);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -340,19 +424,25 @@ const Settings = () => {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-muted-foreground">Current Plan</span>
-                  <Badge variant="secondary" className="bg-primary/10 text-primary">Trial</Badge>
+                  <Badge variant="secondary" className="bg-primary/10 text-primary">
+                    {currentPlan === "free" ? "Trial" : "Active"}
+                  </Badge>
                 </div>
-                <h3 className="text-xl font-bold">Free</h3>
-                <p className="text-sm text-muted-foreground">1 candidate score & 1 update included</p>
+                <h3 className="text-xl font-bold">{PLAN_DISPLAY[currentPlan].name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {PLAN_LIMITS[currentPlan].candidates} candidate{PLAN_LIMITS[currentPlan].candidates > 1 ? "s" : ""} • {PLAN_LIMITS[currentPlan].updates} update{PLAN_LIMITS[currentPlan].updates > 1 ? "s" : ""} each
+                </p>
               </CardContent>
             </Card>
 
             {/* Plans */}
             <div className="space-y-3">
-              <h4 className="font-medium text-sm text-muted-foreground">Upgrade for more candidates & updates</h4>
+              <h4 className="font-medium text-sm text-muted-foreground">
+                {currentPlan === "free" ? "Upgrade for more candidates & updates" : "Change your plan"}
+              </h4>
               
               {/* New to Dating Plan */}
-              <Card className="cursor-pointer hover:border-primary/50 transition-colors">
+              <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "new_to_dating" ? "border-primary bg-primary/5" : ""}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -378,14 +468,25 @@ const Settings = () => {
                       <span>AI compatibility scoring</span>
                     </div>
                   </div>
-                  <Button className="w-full mt-4" variant="outline">
-                    Upgrade to New to Dating
+                  <Button 
+                    className="w-full mt-4" 
+                    variant={currentPlan === "new_to_dating" ? "secondary" : "outline"}
+                    disabled={currentPlan === "new_to_dating" || changingPlan !== null}
+                    onClick={() => handleChangePlan("new_to_dating")}
+                  >
+                    {changingPlan === "new_to_dating" ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Upgrading...</>
+                    ) : currentPlan === "new_to_dating" ? (
+                      <><Check className="w-4 h-4 mr-2" />Current Plan</>
+                    ) : (
+                      "Upgrade to New to Dating"
+                    )}
                   </Button>
                 </CardContent>
               </Card>
 
               {/* Dating Often Plan */}
-              <Card className="cursor-pointer hover:border-primary/50 transition-colors border-primary/30 relative overflow-hidden">
+              <Card className={`cursor-pointer hover:border-primary/50 transition-colors relative overflow-hidden ${currentPlan === "dating_often" ? "border-primary bg-primary/5" : "border-primary/30"}`}>
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-bl">
                   Best Value
                 </div>
@@ -414,14 +515,25 @@ const Settings = () => {
                       <span>AI compatibility scoring</span>
                     </div>
                   </div>
-                  <Button className="w-full mt-4">
-                    Upgrade to Dating Often
+                  <Button 
+                    className="w-full mt-4"
+                    variant={currentPlan === "dating_often" ? "secondary" : "default"}
+                    disabled={currentPlan === "dating_often" || changingPlan !== null}
+                    onClick={() => handleChangePlan("dating_often")}
+                  >
+                    {changingPlan === "dating_often" ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Upgrading...</>
+                    ) : currentPlan === "dating_often" ? (
+                      <><Check className="w-4 h-4 mr-2" />Current Plan</>
+                    ) : (
+                      "Upgrade to Dating Often"
+                    )}
                   </Button>
                 </CardContent>
               </Card>
 
               {/* Dating More Plan */}
-              <Card className="cursor-pointer hover:border-primary/50 transition-colors">
+              <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "dating_more" ? "border-primary bg-primary/5" : ""}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -447,8 +559,19 @@ const Settings = () => {
                       <span>AI compatibility scoring</span>
                     </div>
                   </div>
-                  <Button className="w-full mt-4" variant="outline">
-                    Upgrade to Dating More
+                  <Button 
+                    className="w-full mt-4" 
+                    variant={currentPlan === "dating_more" ? "secondary" : "outline"}
+                    disabled={currentPlan === "dating_more" || changingPlan !== null}
+                    onClick={() => handleChangePlan("dating_more")}
+                  >
+                    {changingPlan === "dating_more" ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Upgrading...</>
+                    ) : currentPlan === "dating_more" ? (
+                      <><Check className="w-4 h-4 mr-2" />Current Plan</>
+                    ) : (
+                      "Upgrade to Dating More"
+                    )}
                   </Button>
                 </CardContent>
               </Card>
