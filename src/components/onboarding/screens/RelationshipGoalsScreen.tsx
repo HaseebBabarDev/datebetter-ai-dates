@@ -9,6 +9,7 @@ import { Heart, Coffee, Sparkles, Diamond, HelpCircle, User, Users, HeartCrack, 
 
 const statusOptions = [
   { value: "single", label: "Single", description: "Not currently in a relationship", icon: User },
+  { value: "in_relationship", label: "In a Relationship", description: "Currently dating someone", icon: Heart },
   { value: "married", label: "Married", description: "Currently married", icon: Users },
   { value: "recently_divorced", label: "Recently Divorced", description: "Recently ended a marriage", icon: HeartCrack },
   { value: "ethical_non_monogamy", label: "Ethical Non-Monogamy", description: "In an open/poly relationship", icon: Infinity },
