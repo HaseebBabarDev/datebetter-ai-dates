@@ -43,6 +43,7 @@ import { LogInteractionDialog } from "@/components/dashboard/LogInteractionDialo
 import { useTour, DASHBOARD_TOUR_STEPS } from "@/components/tour";
 import { differenceInDays, addDays, format } from "date-fns";
 import heroCouple from "@/assets/hero-couple.jpeg";
+import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -744,6 +745,7 @@ const Dashboard = () => {
                   <LogInteractionDialog candidates={candidates} compact />
                 </div>
               </div>
+              <UpgradeNudge />
               <Button
                 variant="outline"
                 onClick={() => navigate("/patterns")}
