@@ -162,13 +162,14 @@ const HormoneCycleScreen = () => {
 
             <div className="space-y-3">
               <Label>Regularity:</Label>
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
                 {regularityOptions.map((option) => (
                   <OptionCard
                     key={option.value}
                     selected={data.cycleRegularity === option.value}
                     onClick={() => updateData({ cycleRegularity: option.value })}
                     title={option.label}
+                    compact
                   />
                 ))}
               </div>
