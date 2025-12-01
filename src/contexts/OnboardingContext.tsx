@@ -279,27 +279,34 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     setCurrentStep(Math.min(Math.max(step, 0), totalSteps - 1));
   }, [totalSteps]);
 
+  // Step validation - matches Setup.tsx screens array order:
+  // 0: WelcomeScreen, 1: BasicIdentityScreen, 2: DatingPreferencesScreen, 
+  // 3: HormoneCycleScreen, 4: DatingMotivationScreen, 5: RelationshipGoalsScreen,
+  // 6: KidsFamilyScreen, 7: FaithValuesScreen, 8: PoliticsScreen, 9: CareerScreen,
+  // 10: LocationScheduleScreen, 11: SocialActivityScreen, 12: PhysicalPreferencesScreen,
+  // 13: CommunicationScreen, 14: PastPatternsScreen, 15: BoundariesScreen,
+  // 16: MentalHealthScreen, 17: SafetyIntimacyScreen, 18: CompletionScreen
   const isStepComplete = useCallback((step: number): boolean => {
     switch (step) {
-      case 0: return !!data.birthDate && !!data.ageConfirmed;
-      case 1: return !!data.termsAccepted && !!data.privacyAccepted;
-      case 2: return !!data.name && !!data.genderIdentity;
-      case 3: return !!data.sexualOrientation && (data.interestedIn?.length ?? 0) > 0;
-      case 4: return true; // Hormone/Cycle optional
-      case 5: return (data.datingMotivation?.length ?? 0) > 0; // Dating Motivation
-      case 6: return !!data.relationshipGoal;
-      case 7: return !!data.kidsStatus && !!data.kidsDesire;
-      case 8: return !!data.religion;
-      case 9: return !!data.politics;
-      case 10: return !!data.careerStage;
-      case 11: return !!data.distancePreference;
-      case 12: return true; // Social/Activity optional
-      case 13: return (data.attractionImportance ?? 0) > 0;
-      case 14: return !!data.communicationStyle;
-      case 15: return !!data.attachmentStyle;
-      case 16: return (data.dealbreakers?.length ?? 0) > 0;
-      case 17: return true; // Mental health optional
-      case 18: return !!data.intimacyComfort;
+      case 0: return !!data.birthDate && !!data.ageConfirmed; // WelcomeScreen
+      case 1: return !!data.name && !!data.genderIdentity; // BasicIdentityScreen
+      case 2: return !!data.sexualOrientation && (data.interestedIn?.length ?? 0) > 0; // DatingPreferencesScreen
+      case 3: return true; // HormoneCycleScreen - optional
+      case 4: return (data.datingMotivation?.length ?? 0) > 0; // DatingMotivationScreen
+      case 5: return !!data.relationshipGoal; // RelationshipGoalsScreen
+      case 6: return !!data.kidsStatus && !!data.kidsDesire; // KidsFamilyScreen
+      case 7: return !!data.religion; // FaithValuesScreen
+      case 8: return !!data.politics; // PoliticsScreen
+      case 9: return !!data.careerStage; // CareerScreen
+      case 10: return !!data.distancePreference; // LocationScheduleScreen
+      case 11: return true; // SocialActivityScreen - optional
+      case 12: return (data.attractionImportance ?? 0) > 0; // PhysicalPreferencesScreen
+      case 13: return !!data.communicationStyle; // CommunicationScreen
+      case 14: return !!data.attachmentStyle; // PastPatternsScreen
+      case 15: return (data.dealbreakers?.length ?? 0) > 0; // BoundariesScreen
+      case 16: return true; // MentalHealthScreen - optional
+      case 17: return !!data.intimacyComfort; // SafetyIntimacyScreen
+      case 18: return true; // CompletionScreen
       default: return false;
     }
   }, [data]);
