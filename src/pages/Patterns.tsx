@@ -130,7 +130,7 @@ const Patterns = () => {
       const commonRedFlags = Object.entries(redFlagCounts)
         .map(([flag, count]) => ({ flag, count }))
         .sort((a, b) => b.count - a.count)
-        .slice(0, 5);
+        .slice(0, 6);
 
       // Green flags frequency
       const greenFlagCounts: Record<string, number> = {};
