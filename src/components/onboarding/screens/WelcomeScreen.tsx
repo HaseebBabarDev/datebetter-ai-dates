@@ -71,7 +71,7 @@ const WelcomeScreen = () => {
         title="Welcome! Let's get started."
         subtitle="Your dating journey begins here"
       >
-        <div className="space-y-4 animate-fade-in relative z-10">
+        <div className="space-y-3 animate-fade-in relative z-10">
           {/* Welcome Heading */}
           <div className="text-center">
             <h1 className="text-2xl md:text-3xl font-poppins font-bold text-foreground">
