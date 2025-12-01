@@ -91,9 +91,9 @@ export const OptionCard: React.FC<OptionCardProps> = ({
             )}
           </div>
         </div>
-        {selected && compact && (
-          <Check className="w-3.5 h-3.5 text-primary shrink-0 absolute top-1 right-1" />
-        )}
+      {selected && compact && (
+        <Check className="w-3 h-3 text-primary shrink-0 absolute top-1.5 right-1.5" />
+      )}
       </div>
     </button>
   );
