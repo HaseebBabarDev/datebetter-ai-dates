@@ -31,7 +31,7 @@ const Splash = () => {
           <img 
             src={logo} 
             alt="dateBetter logo" 
-            className="relative w-24 h-24 rounded-full shadow-xl ring-2 ring-primary/40 ring-offset-2 ring-offset-background/50"
+            className="relative w-24 h-24 rounded-full shadow-xl ring-2 ring-primary/40 ring-offset-2 ring-offset-background/50 object-cover"
           />
         </div>
 
