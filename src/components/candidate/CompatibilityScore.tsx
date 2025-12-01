@@ -18,10 +18,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Flower2, RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Lightbulb, Shield, ChevronDown, TrendingUp, AlertTriangle, Sparkles } from "lucide-react";
+import { Flower2, RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Shield, ChevronDown, TrendingUp, AlertTriangle, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import logo from "@/assets/logo.jpg";
 
 type Candidate = Tables<"candidates">;
 type AdviceTracking = Tables<"advice_tracking">;
@@ -393,14 +394,20 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
         {/* AI Advice */}
         {scoreData.advice && (
           <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/10">
-            <div className="flex items-start gap-3 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <Lightbulb className="w-4 h-4 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs font-medium text-primary mb-1">D.E.V.I. Advice</p>
-                <p className="text-sm text-foreground">{scoreData.advice}</p>
-              </div>
+            <div className="flex items-center gap-2 mb-3">
+              <img 
+                src={logo} 
+                alt="DEVI" 
+                className="w-7 h-7 rounded-full object-cover ring-1 ring-primary/20"
+              />
+              <span className="text-xs font-semibold text-primary flex items-center gap-1">
+                D.E.V.I. Advice
+                <Sparkles className="w-3 h-3" />
+              </span>
+            </div>
+            
+            <div className="max-h-32 overflow-y-auto mb-3 pr-1 scrollbar-thin">
+              <p className="text-sm text-foreground leading-relaxed">{scoreData.advice}</p>
             </div>
             
             {adviceResponse ? (
@@ -497,8 +504,8 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                 {scoreData?.advice && (
                   <div className="p-3 rounded-lg bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/10">
                     <div className="flex items-start gap-2 mb-2">
-                      <Lightbulb className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                      <p className="text-sm font-medium text-primary">AI Advice</p>
+                      <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                      <p className="text-sm font-medium text-primary">DEVI Advice</p>
                     </div>
                     <p className="text-sm text-foreground">{scoreData.advice}</p>
                   </div>
