@@ -1,4 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+
+// Helper to render markdown-style bold (*text*) as actual bold
+const renderWithBold = (text: string): React.ReactNode => {
+  const parts = text.split(/\*([^*]+)\*/g);
+  return parts.map((part, i) => 
+    i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+  );
+};
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -477,7 +485,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-amber-600 mb-0.5">Watch for</p>
-                  <p className="text-sm text-foreground">{firstConcern}</p>
+                  <p className="text-sm text-foreground">{renderWithBold(firstConcern)}</p>
                 </div>
               </div>
             )}
@@ -488,7 +496,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-green-600 mb-0.5">Strength</p>
-                  <p className="text-sm text-foreground">{firstStrength}</p>
+                  <p className="text-sm text-foreground">{renderWithBold(firstStrength)}</p>
                 </div>
               </div>
             )}
@@ -512,7 +520,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-green-600 mb-0.5">Strength</p>
-                    <p className="text-sm text-foreground">{strength}</p>
+                    <p className="text-sm text-foreground">{renderWithBold(strength)}</p>
                   </div>
                 </div>
               ))}
@@ -523,7 +531,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-amber-600 mb-0.5">Watch for</p>
-                    <p className="text-sm text-foreground">{concern}</p>
+                    <p className="text-sm text-foreground">{renderWithBold(concern)}</p>
                   </div>
                 </div>
               ))}
