@@ -62,7 +62,8 @@ const Settings = () => {
 
   // Account form state
   const [name, setName] = useState("");
-  const [location, setLocation] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
   const [genderIdentity, setGenderIdentity] = useState("");
   const [pronouns, setPronouns] = useState("");
   const [sexualOrientation, setSexualOrientation] = useState("");
@@ -85,7 +86,8 @@ const Settings = () => {
       if (data) {
         setProfile(data);
         setName(data.name || "");
-        setLocation(data.location || "");
+        setCity(data.city || "");
+        setState(data.state || "");
         setGenderIdentity(data.gender_identity || "");
         setPronouns(data.pronouns || "");
         setSexualOrientation(data.sexual_orientation || "");
@@ -104,7 +106,8 @@ const Settings = () => {
         .from("profiles")
         .update({
           name,
-          location,
+          city,
+          state,
           gender_identity: (genderIdentity || null) as Enums<"gender_identity"> | null,
           pronouns: (pronouns || null) as Enums<"pronouns"> | null,
           sexual_orientation: (sexualOrientation || null) as Enums<"sexual_orientation"> | null,
@@ -181,23 +184,32 @@ const Settings = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your name"
+                  />
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
+                    <Label htmlFor="city">City</Label>
                     <Input
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Your name"
+                      id="city"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="City"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
+                    <Label htmlFor="state">State</Label>
                     <Input
-                      id="location"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      placeholder="City, State"
+                      id="state"
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      placeholder="State"
                     />
                   </div>
                 </div>
