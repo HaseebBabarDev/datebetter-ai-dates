@@ -27,6 +27,7 @@ const careerOptions = [
   { value: "established", label: "Established", subtitle: "5-15 years" },
   { value: "senior", label: "Senior/Executive", subtitle: "15+ years" },
   { value: "entrepreneur", label: "Entrepreneur", subtitle: "" },
+  { value: "creator", label: "Content Creator", subtitle: "Creative" },
   { value: "athlete", label: "Pro Athlete", subtitle: "" },
   { value: "between", label: "Between jobs", subtitle: "" },
 ];
