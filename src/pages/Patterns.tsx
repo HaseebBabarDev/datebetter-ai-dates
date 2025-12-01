@@ -436,13 +436,13 @@ const Patterns = () => {
                     Patterns you keep encountering — be aware of these
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {stats.commonRedFlags.map(({ flag, count }) => (
+                    {stats.commonRedFlags.map(({ flag }) => (
                       <Badge
                         key={flag}
                         variant="secondary"
                         className="bg-destructive/10 text-destructive"
                       >
-                        {flag} ({count})
+                        {flag}
                       </Badge>
                     ))}
                   </div>
@@ -464,9 +464,9 @@ const Patterns = () => {
                     Green flags you've noticed — keep looking for these
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {stats.commonGreenFlags.map(({ flag, count }) => (
+                    {stats.commonGreenFlags.map(({ flag }) => (
                       <Badge key={flag} variant="secondary" className="bg-green-500/10 text-green-600">
-                        {flag} ({count})
+                        {flag}
                       </Badge>
                     ))}
                   </div>
