@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 interface ScheduleCompatibilityAlertProps {
   userSchedule?: string | null;
   candidateSchedule?: string | null;
+  distance?: string | null;
   variant?: "compact" | "full";
   className?: string;
 }
@@ -35,17 +36,37 @@ const RIGID_SCHEDULES = ["office_9_5", "shift_work", "on_call", "overnight"];
 
 type CompatibilityLevel = "great" | "good" | "warning" | "conflict";
 
+const LONG_DISTANCE_VALUES = ["long_distance", "different_city", "different_state", "different_country"];
+const FAR_DISTANCE_VALUES = ["30_60_min", "1_2_hours", "2_plus_hours", ...LONG_DISTANCE_VALUES];
+
 function getScheduleCompatibility(
   userSchedule?: string | null,
-  candidateSchedule?: string | null
+  candidateSchedule?: string | null,
+  distance?: string | null
 ): { level: CompatibilityLevel; message: string } | null {
   if (!userSchedule || !candidateSchedule) return null;
 
   const userFlex = FLEXIBLE_SCHEDULES.includes(userSchedule);
   const candFlex = FLEXIBLE_SCHEDULES.includes(candidateSchedule);
+  const isLongDistance = distance && LONG_DISTANCE_VALUES.includes(distance);
+  const isFarAway = distance && FAR_DISTANCE_VALUES.includes(distance);
+
+  // Long distance with rigid schedules is very challenging
+  if (isLongDistance && !userFlex && !candFlex) {
+    return {
+      level: "conflict",
+      message: "Long distance + rigid schedules may limit quality time",
+    };
+  }
 
   // Both flexible - great match
   if (userFlex && candFlex) {
+    if (isLongDistance) {
+      return {
+        level: "good",
+        message: "Flexible schedules help with long distance",
+      };
+    }
     return {
       level: "great",
       message: "Schedule match! Both have flexible schedules",
@@ -55,6 +76,12 @@ function getScheduleCompatibility(
   // One flexible - good, can accommodate
   if (userFlex !== candFlex) {
     const flexPerson = userFlex ? "Your" : "Their";
+    if (isFarAway) {
+      return {
+        level: "warning",
+        message: `Distance + mixed schedules - ${flexPerson.toLowerCase()} flexibility helps`,
+      };
+    }
     return {
       level: "good",
       message: `${flexPerson} flexible schedule can accommodate`,
@@ -68,13 +95,21 @@ function getScheduleCompatibility(
     if (otherSchedule !== "overnight") {
       return {
         level: "conflict",
-        message: "Schedule conflict: Overnight vs daytime may be challenging",
+        message: isFarAway 
+          ? "Overnight vs daytime + distance is very challenging"
+          : "Schedule conflict: Overnight vs daytime may be challenging",
       };
     }
   }
 
   // Same rigid schedule - actually good
   if (userSchedule === candidateSchedule) {
+    if (isFarAway) {
+      return {
+        level: "warning",
+        message: `Same schedules but distance may limit meetups`,
+      };
+    }
     return {
       level: "good",
       message: `Similar schedules: Both ${formatScheduleLabel(userSchedule)}`,
@@ -87,8 +122,10 @@ function getScheduleCompatibility(
     (userSchedule === "office_9_5" && candidateSchedule === "on_call")
   ) {
     return {
-      level: "warning",
-      message: "On-call may disrupt regular office schedule",
+      level: isFarAway ? "conflict" : "warning",
+      message: isFarAway 
+        ? "On-call + distance makes planning difficult"
+        : "On-call may disrupt regular office schedule",
     };
   }
 
@@ -97,25 +134,30 @@ function getScheduleCompatibility(
     (userSchedule === "office_9_5" && candidateSchedule === "shift_work")
   ) {
     return {
-      level: "warning",
-      message: "Shift work may not align with regular hours",
+      level: isFarAway ? "conflict" : "warning",
+      message: isFarAway
+        ? "Shift work + distance limits availability"
+        : "Shift work may not align with regular hours",
     };
   }
 
   // Default for other rigid combinations
   return {
-    level: "warning",
-    message: "Different work schedules - may need planning",
+    level: isFarAway ? "conflict" : "warning",
+    message: isFarAway
+      ? "Different schedules + distance needs careful planning"
+      : "Different work schedules - may need planning",
   };
 }
 
 export const ScheduleCompatibilityAlert: React.FC<ScheduleCompatibilityAlertProps> = ({
   userSchedule,
   candidateSchedule,
+  distance,
   variant = "compact",
   className,
 }) => {
-  const compatibility = getScheduleCompatibility(userSchedule, candidateSchedule);
+  const compatibility = getScheduleCompatibility(userSchedule, candidateSchedule, distance);
 
   if (!compatibility) return null;
 

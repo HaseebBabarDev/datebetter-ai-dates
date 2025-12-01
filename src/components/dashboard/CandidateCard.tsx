@@ -274,6 +274,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
             <ScheduleCompatibilityAlert
               userSchedule={userSchedule}
               candidateSchedule={(candidate as any).their_schedule_flexibility}
+              distance={candidate.distance_approximation}
               variant="compact"
             />
           </div>
