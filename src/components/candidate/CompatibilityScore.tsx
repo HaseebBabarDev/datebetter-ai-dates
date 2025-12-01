@@ -57,7 +57,7 @@ const AdviceSection: React.FC<{
   onDecline: () => void;
 }> = ({ advice, adviceResponse, respondingToAdvice, onAccept, onDecline }) => {
   const [expanded, setExpanded] = useState(false);
-  const isLong = advice.length > 200;
+  const isLong = advice.length > 350;
   
   return (
     <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/10">
@@ -74,7 +74,7 @@ const AdviceSection: React.FC<{
       </div>
       
       <div className="mb-3">
-        <p className={`text-sm text-foreground leading-relaxed ${!expanded && isLong ? "line-clamp-4" : ""}`}>
+        <p className={`text-sm text-foreground leading-relaxed ${!expanded && isLong ? "line-clamp-6" : ""}`}>
           {advice}
         </p>
         {isLong && (
