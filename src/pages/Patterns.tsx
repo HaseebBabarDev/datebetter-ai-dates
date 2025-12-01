@@ -177,7 +177,7 @@ const Patterns = () => {
         : 0;
 
       // Relationship outcomes - active vs ended
-      const activeStatuses = ['just_matched', 'texting', 'planning_date', 'dating', 'dating_casually', 'getting_serious'];
+      const activeStatuses = ['just_matched', 'texting', 'planning_date', 'dating', 'dating_casually', 'getting_serious', 'serious_relationship'];
       const endedStatuses = ['no_contact', 'archived'];
       const activeRelationships = candidates.filter((c) => activeStatuses.includes(c.status || ''));
       const endedRelationships = candidates.filter((c) => endedStatuses.includes(c.status || ''));
