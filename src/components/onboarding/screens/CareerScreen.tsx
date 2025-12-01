@@ -60,7 +60,7 @@ const CareerScreen = () => {
             </div>
             <DialogTitle className="text-xl">Halfway there!</DialogTitle>
             <DialogDescription className="text-base">
-              8/17 steps complete. You're making great progress!
+              You're making great progress!
             </DialogDescription>
           </DialogHeader>
           <Button onClick={() => setShowPopup(false)} className="w-full mt-2">
