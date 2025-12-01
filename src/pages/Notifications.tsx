@@ -194,7 +194,7 @@ const Notifications = () => {
       case "advice":
         return "bg-purple-500/10 text-purple-600 border-purple-500/20";
       case "warning":
-        return "bg-amber-500/10 text-amber-600 border-amber-500/20";
+        return "bg-amber-500/20 text-amber-600 border-amber-500/30";
       case "success":
         return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
       case "urgent":
@@ -211,7 +211,7 @@ const Notifications = () => {
       case "oxytocin": return "bg-pink-500/20";
       case "no-contact": return "bg-slate-500/20";
       case "advice": return "bg-purple-500/20";
-      case "warning": return "bg-amber-500/20";
+      case "warning": return "bg-amber-500/30";
       case "success": return "bg-emerald-500/20";
       case "urgent": return "bg-destructive/20";
       case "low-score": return "bg-orange-500/20";
