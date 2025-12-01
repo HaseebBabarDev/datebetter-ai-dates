@@ -9,15 +9,14 @@ interface DashboardHeaderProps {
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userName }) => {
   const navigate = useNavigate();
-  const greeting = getGreeting();
+  const greeting = getGreeting(userName);
 
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4 py-4 max-w-lg">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">{greeting}</p>
-            <h1 className="text-xl font-semibold text-foreground">{userName}</h1>
+            <h1 className="text-xl font-semibold text-foreground">{greeting}</h1>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={() => navigate("/patterns")}>
@@ -46,6 +45,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userName }) =>
   );
 };
 
-function getGreeting(): string {
-  return "Hello Beautiful,";
+function getGreeting(name: string): string {
+  return `Hello ${name || "there"}!`;
 }
