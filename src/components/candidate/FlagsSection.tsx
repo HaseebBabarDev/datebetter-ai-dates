@@ -49,7 +49,7 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
         return;
       }
       if (response.status === 402) {
-        toast.error("AI credits exhausted. Please add funds.");
+        toast.error("D.E.V.I. credits exhausted. Please add funds.");
         return;
       }
 
@@ -78,14 +78,14 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* AI Analyze Button */}
+      {/* D.E.V.I. Analyze Button */}
       <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
-              <p className="font-medium text-sm">Auto-detect Flags</p>
+              <p className="font-medium text-sm">D.E.V.I. Flag Detection</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                AI analyzes interactions to detect behavioral patterns
+                Analyzes interactions to detect behavioral patterns
               </p>
             </div>
             <Button

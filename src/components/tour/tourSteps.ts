@@ -42,7 +42,7 @@ export const CANDIDATE_DETAIL_TOUR_STEPS: TourStep[] = [
   },
   {
     target: "[data-tour='insights-tab']",
-    title: "AI Insights",
+    title: "D.E.V.I. Insights",
     description: "Get personalized compatibility scores and advice based on your interactions and preferences.",
     placement: "bottom",
   },
@@ -55,7 +55,7 @@ export const CANDIDATE_DETAIL_TOUR_STEPS: TourStep[] = [
   {
     target: "[data-tour='flags-tab']",
     title: "Red & Green Flags",
-    description: "Our AI analyzes your interactions and notes to automatically detect red flags (warning signs) and green flags (positive indicators). Stay informed about potential issues early.",
+    description: "D.E.V.I. analyzes your interactions and notes to automatically detect red flags (warning signs) and green flags (positive indicators). Stay informed about potential issues early.",
     placement: "bottom",
   },
   {

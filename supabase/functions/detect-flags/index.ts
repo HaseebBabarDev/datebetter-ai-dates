@@ -93,7 +93,7 @@ Only flag behaviors you can reasonably infer from the data. Be specific but conc
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a relationship pattern analyst. Detect behavioral red and green flags from dating interactions. Be specific and evidence-based." },
+          { role: "system", content: "You are D.E.V.I. (Dating Evaluation & Vetting Intelligence), a relationship pattern analyst. Detect behavioral red and green flags from dating interactions. Be specific and evidence-based." },
           { role: "user", content: prompt }
         ],
         tools: [

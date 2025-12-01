@@ -249,12 +249,12 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
               <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">AI Compatibility</h3>
-              <p className="text-xs text-muted-foreground">Powered by AI analysis</p>
+              <h3 className="font-semibold text-foreground">D.E.V.I. Compatibility</h3>
+              <p className="text-xs text-muted-foreground">Dating Evaluation & Vetting Intelligence</p>
             </div>
           </div>
           <p className="text-sm text-muted-foreground mb-4">
-            Get an AI-powered analysis of your compatibility based on your preferences and what you know about {candidate.nickname}.
+            Get a D.E.V.I.-powered analysis of your compatibility based on your preferences and what you know about {candidate.nickname}.
           </p>
           <Button onClick={calculateScore} disabled={loading} className="w-full">
             {loading ? (
@@ -294,7 +294,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
             </div>
             <div>
               <h3 className="font-semibold text-foreground">Compatibility</h3>
-              <p className="text-xs text-muted-foreground">AI-powered analysis</p>
+              <p className="text-xs text-muted-foreground">D.E.V.I.-powered analysis</p>
             </div>
           </div>
           <div className="text-right">
@@ -398,7 +398,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                 <Lightbulb className="w-4 h-4 text-primary" />
               </div>
               <div className="flex-1">
-                <p className="text-xs font-medium text-primary mb-1">AI Advice</p>
+                <p className="text-xs font-medium text-primary mb-1">D.E.V.I. Advice</p>
                 <p className="text-sm text-foreground">{scoreData.advice}</p>
               </div>
             </div>
