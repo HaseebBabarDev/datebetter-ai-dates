@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban, Home, XCircle, RefreshCw } from "lucide-react";
+import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban, Home, XCircle, RefreshCw, AlertTriangle } from "lucide-react";
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
 import { FlagsSection } from "@/components/candidate/FlagsSection";
@@ -45,6 +45,14 @@ interface ScoreBreakdown {
   advice?: string;
 }
 
+// Love bombing detection phrases
+const LOVE_BOMBING_PHRASES = [
+  "too good to be true", "already said i love you", "wants to move in", 
+  "moving too fast", "constant texting", "showering with gifts", 
+  "overwhelming affection", "soulmate", "never felt this way",
+  "we're meant to be", "perfect match"
+];
+
 const CandidateDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -60,7 +68,40 @@ const CandidateDetail = () => {
   const initialTab = (location.state as { tab?: string })?.tab;
   const [activeTab, setActiveTab] = useState<string | undefined>(initialTab);
 
-  // Start tour for new users on candidate detail
+  // Love bombing detection
+  const loveBombingAlert = useMemo(() => {
+    if (!candidate || !interactions) return null;
+    
+    // Check candidate notes for love bombing language
+    const candidateNotes = (candidate.notes || "").toLowerCase();
+    const hasLoveBombingInCandidateNotes = LOVE_BOMBING_PHRASES.some(phrase => candidateNotes.includes(phrase));
+    
+    if (hasLoveBombingInCandidateNotes) {
+      return { reason: "Love bombing signs in notes" };
+    }
+    
+    // Check interaction notes
+    const notesText = interactions.map(i => (i.notes || "").toLowerCase()).join(" ");
+    const hasLoveBombingLanguage = LOVE_BOMBING_PHRASES.some(phrase => notesText.includes(phrase));
+    
+    if (hasLoveBombingLanguage) {
+      return { reason: "Love bombing language detected" };
+    }
+    
+    // Check for rapid escalation (e.g., 5+ interactions in first 2 weeks)
+    if (interactions.length >= 5 && candidate.first_contact_date) {
+      const firstContact = new Date(candidate.first_contact_date);
+      const twoWeeksLater = new Date(firstContact.getTime() + 14 * 24 * 60 * 60 * 1000);
+      const earlyInteractions = interactions.filter(i => 
+        i.interaction_date && new Date(i.interaction_date) <= twoWeeksLater
+      );
+      if (earlyInteractions.length >= 5) {
+        return { reason: "Rapid escalation pattern detected" };
+      }
+    }
+    
+    return null;
+  }, [candidate, interactions]);
   useEffect(() => {
     if (!loading && candidate && !hasCompletedTour("candidate-detail")) {
       const timer = setTimeout(() => {
@@ -437,9 +478,26 @@ const CandidateDetail = () => {
           </Button>
           <div className="flex-1">
             <h1 className="font-semibold text-foreground">{candidate.nickname}</h1>
-            <p className="text-xs text-muted-foreground capitalize">
-              {candidate.status?.replace("_", " ")}
-            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-xs text-muted-foreground capitalize">
+                {candidate.status?.replace("_", " ")}
+              </p>
+              {loveBombingAlert && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge variant="outline" className="text-xs bg-orange-500/20 text-orange-600 border-orange-300 gap-1">
+                        <AlertTriangle className="w-3 h-3" />
+                        Love bombing?
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs">{loveBombingAlert.reason}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
           </div>
           <Button 
             variant="ghost" 
