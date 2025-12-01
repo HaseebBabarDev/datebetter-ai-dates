@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Brain, Moon, Lock, Sparkles, Heart } from "lucide-react";
+import { Flower2, Moon, Lock, Sparkles, Heart } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 
 const Splash = () => {
@@ -49,17 +49,17 @@ const Splash = () => {
         
         {/* D.E.V.I. Badge */}
         <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
-          <Brain className="w-4 h-4 text-primary" />
+          <Flower2 className="w-4 h-4 text-primary" />
           <span className="text-xs font-medium text-primary">Powered by D.E.V.I.</span>
           <span className="text-xs text-muted-foreground">Dating Evaluation & Vetting Intelligence</span>
         </div>
 
         {/* Features */}
         <div className="w-full max-w-sm space-y-2 mb-8">
-          <FeatureItem icon={Sparkles} text="D.E.V.I. scores every candidate for you" />
+          <FeatureItem icon={Flower2} text="D.E.V.I. scores every candidate for you" />
           <FeatureItem icon={Moon} text="Cycle-aware dating guidance" />
           <FeatureItem icon={Lock} text="Your privacy is completely protected" />
-          <FeatureItem icon={Brain} text="D.E.V.I. detects red flags & patterns automatically" />
+          <FeatureItem icon={Flower2} text="D.E.V.I. detects red flags & patterns automatically" />
           <FeatureItem icon={Heart} text="Built for women, by women" />
         </div>
 

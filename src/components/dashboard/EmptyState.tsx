@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Heart, Plus, Sparkles } from "lucide-react";
+import { Heart, Plus, Flower2 } from "lucide-react";
 import { AddCandidateForm } from "./AddCandidateForm";
 
 interface EmptyStateProps {
@@ -35,7 +35,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onCandidateAdded }) => {
         />
         
         <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-          <Sparkles className="w-3 h-3" />
+          <Flower2 className="w-3 h-3" />
           D.E.V.I.-powered compatibility scoring included
         </p>
       </div>
