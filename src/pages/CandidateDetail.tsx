@@ -15,6 +15,7 @@ import { ProfileCompleteness } from "@/components/candidate/ProfileCompleteness"
 import { AppRatingDialog, shouldShowRatingDialog } from "@/components/candidate/AppRatingDialog";
 import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
 import { useTour, CANDIDATE_DETAIL_TOUR_STEPS } from "@/components/tour";
 import {
   AlertDialog,
@@ -543,6 +544,7 @@ const CandidateDetail = () => {
         {/* Active relationship actions */}
         {!candidate.no_contact_active && candidate.status !== "archived" && (
           <div className="space-y-2">
+            <UpgradeNudge candidateId={candidate.id} />
             <div data-tour="quick-log">
               <AddInteractionForm
                 candidateId={candidate.id}
