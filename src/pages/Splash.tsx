@@ -37,13 +37,13 @@ const Splash = () => {
           <h1 className="font-poppins text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2 tracking-tight">
             dateBetter
           </h1>
-          <p className="font-inter text-lg md:text-xl text-foreground/90 font-light tracking-wide">
+          <p className="font-inter text-lg md:text-xl text-foreground font-medium tracking-wide drop-shadow-md">
             Data for Dating
           </p>
         </div>
 
         {/* Tagline */}
-        <p className="font-inter text-center text-foreground/80 text-sm md:text-base mb-2 max-w-sm font-light">
+        <p className="font-inter text-center text-foreground text-sm md:text-base mb-2 max-w-sm font-medium drop-shadow-md">
           AI-backed app helping women select better partners
         </p>
         
