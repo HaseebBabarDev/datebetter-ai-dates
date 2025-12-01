@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { SelfWorthReminder } from "./SelfWorthReminder";
 
 // Helper to render markdown-style bold (*text*) as actual bold
 const renderWithBold = (text: string): React.ReactNode => {
@@ -549,6 +550,13 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
             onDecline={() => respondToAdvice(false)}
           />
         )}
+
+        {/* Self-Worth Reminder for abusive patterns */}
+        <SelfWorthReminder 
+          advice={scoreData.advice}
+          concerns={scoreData.concerns}
+          score={scoreData.overall_score}
+        />
 
         {/* Updates remaining badge */}
         {canRefresh && (
