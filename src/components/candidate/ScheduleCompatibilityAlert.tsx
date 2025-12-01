@@ -18,6 +18,16 @@ const SCHEDULE_LABELS: Record<string, string> = {
   overnight: "Overnight",
   student: "Student",
   self_employed: "Self-Employed",
+  frequent_traveler: "Frequent Traveler",
+};
+
+// Fallback formatter for unlisted values
+const formatScheduleLabel = (value: string): string => {
+  if (SCHEDULE_LABELS[value]) return SCHEDULE_LABELS[value];
+  return value
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 };
 
 const FLEXIBLE_SCHEDULES = ["remote_flexible", "hybrid", "self_employed", "student"];
@@ -67,7 +77,7 @@ function getScheduleCompatibility(
   if (userSchedule === candidateSchedule) {
     return {
       level: "good",
-      message: `Similar schedules: Both ${SCHEDULE_LABELS[userSchedule] || userSchedule}`,
+      message: `Similar schedules: Both ${formatScheduleLabel(userSchedule)}`,
     };
   }
 
@@ -182,9 +192,9 @@ export const ScheduleCompatibilityAlert: React.FC<ScheduleCompatibilityAlertProp
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">{message}</p>
         <div className="flex gap-2 mt-2 text-xs text-muted-foreground">
-          <span>You: {SCHEDULE_LABELS[userSchedule!] || userSchedule}</span>
+          <span>You: {formatScheduleLabel(userSchedule!)}</span>
           <span>•</span>
-          <span>Them: {SCHEDULE_LABELS[candidateSchedule!] || candidateSchedule}</span>
+          <span>Them: {formatScheduleLabel(candidateSchedule!)}</span>
         </div>
       </div>
     </div>
