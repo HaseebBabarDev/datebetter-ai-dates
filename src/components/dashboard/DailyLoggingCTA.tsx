@@ -60,31 +60,27 @@ export function DailyLoggingCTA({ interactions, candidates }: DailyLoggingCTAPro
     <>
       <Card className={`border ${completed ? 'border-green-500/30 bg-green-500/5' : 'border-accent/30 bg-accent/5'}`}>
         <CardContent className="p-3">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-full ${completed ? 'bg-green-500/20' : 'bg-accent/20'}`}>
-                {completed ? (
-                  <CheckCircle2 className="w-4 h-4 text-green-600" />
-                ) : (
-                  <ClipboardCheck className="w-4 h-4 text-accent-foreground" />
-                )}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-foreground">
-                    {completed ? "Daily goal reached!" : "Log your interactions"}
-                  </span>
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${completed ? 'bg-green-500/20 text-green-600' : 'bg-accent/20 text-accent-foreground'}`}>
-                    {progress}/{goal} today
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {completed 
-                    ? "Great job tracking your dating journey" 
-                    : "2x daily logging improves AI insights"}
-                </p>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-full shrink-0 ${completed ? 'bg-green-500/20' : 'bg-accent/20'}`}>
+              {completed ? (
+                <CheckCircle2 className="w-4 h-4 text-green-600" />
+              ) : (
+                <ClipboardCheck className="w-4 h-4 text-accent-foreground" />
+              )}
             </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground">
+                {completed ? "Daily goal reached!" : "Log your interactions"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {completed 
+                  ? "Great job tracking your dating journey" 
+                  : "2x daily logging improves AI insights"}
+              </p>
+            </div>
+            <span className={`text-xs px-2 py-1 rounded-full shrink-0 ${completed ? 'bg-green-500/20 text-green-600' : 'bg-accent/20 text-accent-foreground'}`}>
+              {progress}/{goal} today
+            </span>
             {!completed && (
               <Button
                 size="sm"
