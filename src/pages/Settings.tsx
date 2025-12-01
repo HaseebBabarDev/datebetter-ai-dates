@@ -409,9 +409,6 @@ const Settings = () => {
               </Card>
             </div>
 
-            <p className="text-xs text-center text-muted-foreground pt-2">
-              All plans include unlimited candidate entries. Updates reset monthly.
-            </p>
           </TabsContent>
         </Tabs>
       </main>
