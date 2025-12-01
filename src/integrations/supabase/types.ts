@@ -435,6 +435,7 @@ export type Database = {
           hormone_profile: string | null
           id: string
           in_therapy: boolean | null
+          income_range: string | null
           interested_in: string[] | null
           intimacy_comfort: string | null
           is_neurodivergent: string | null
@@ -468,6 +469,8 @@ export type Database = {
           post_intimacy_tendency: string | null
           preferred_age_max: number | null
           preferred_age_min: number | null
+          preferred_education_level: string | null
+          preferred_income_range: string | null
           pronouns: Database["public"]["Enums"]["pronouns"] | null
           red_flag_sensitivity: number | null
           relationship_goal:
@@ -546,6 +549,7 @@ export type Database = {
           hormone_profile?: string | null
           id?: string
           in_therapy?: boolean | null
+          income_range?: string | null
           interested_in?: string[] | null
           intimacy_comfort?: string | null
           is_neurodivergent?: string | null
@@ -579,6 +583,8 @@ export type Database = {
           post_intimacy_tendency?: string | null
           preferred_age_max?: number | null
           preferred_age_min?: number | null
+          preferred_education_level?: string | null
+          preferred_income_range?: string | null
           pronouns?: Database["public"]["Enums"]["pronouns"] | null
           red_flag_sensitivity?: number | null
           relationship_goal?:
@@ -657,6 +663,7 @@ export type Database = {
           hormone_profile?: string | null
           id?: string
           in_therapy?: boolean | null
+          income_range?: string | null
           interested_in?: string[] | null
           intimacy_comfort?: string | null
           is_neurodivergent?: string | null
@@ -690,6 +697,8 @@ export type Database = {
           post_intimacy_tendency?: string | null
           preferred_age_max?: number | null
           preferred_age_min?: number | null
+          preferred_education_level?: string | null
+          preferred_income_range?: string | null
           pronouns?: Database["public"]["Enums"]["pronouns"] | null
           red_flag_sensitivity?: number | null
           relationship_goal?:
