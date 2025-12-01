@@ -39,10 +39,10 @@ const APP_OPTIONS = [
 ];
 
 const GENDER_OPTIONS: { value: Enums<"gender_identity">; label: string }[] = [
-  { value: "woman_cis", label: "Woman" },
-  { value: "woman_trans", label: "Woman (Trans)" },
   { value: "man_cis", label: "Man" },
   { value: "man_trans", label: "Man (Trans)" },
+  { value: "woman_cis", label: "Woman" },
+  { value: "woman_trans", label: "Woman (Trans)" },
   { value: "non_binary", label: "Non-Binary" },
   { value: "gender_fluid", label: "Gender Fluid" },
   { value: "self_describe", label: "Other" },
