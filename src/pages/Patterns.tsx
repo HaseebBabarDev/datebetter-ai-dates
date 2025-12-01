@@ -790,7 +790,7 @@ const Patterns = () => {
                       <div className="grid grid-cols-2 gap-2">
                         <div className="p-3 bg-muted rounded-lg">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">Hoover Attempts</span>
+                            <span className="text-xs text-muted-foreground">Contact Attempts Rejected</span>
                             <span className="text-sm font-bold">{stats.noContactMetrics.totalHooverAttempts}</span>
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">Times they tried to contact you</p>
@@ -859,7 +859,7 @@ const Patterns = () => {
                                 }}
                                 formatter={(value: number, name: string) => [
                                   value, 
-                                  name === 'reached' ? 'People Reached' : 'Hoover Attempts'
+                                  name === 'reached' ? 'People Reached' : 'Contact Attempts Rejected'
                                 ]}
                                 labelFormatter={(label) => `Day ${label}`}
                               />

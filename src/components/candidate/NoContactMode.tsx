@@ -167,10 +167,10 @@ export const NoContactMode: React.FC<NoContactModeProps> = ({
         });
       }
 
-      toast.success("Hoover attempt recorded. Stay strong! 🛡️");
+      toast.success("Contact attempt rejected. Stay strong! 🛡️");
       fetchProgress();
     } catch (error) {
-      toast.error("Failed to record hoover");
+      toast.error("Failed to record contact attempt");
     } finally {
       setLoading(false);
     }
@@ -349,8 +349,8 @@ export const NoContactMode: React.FC<NoContactModeProps> = ({
               YOU DID IT!
             </h3>
             <p className="text-muted-foreground">
-              30 days of choosing yourself. You survived {hooverCount} hoover
-              attempts and came out stronger.
+              30 days of choosing yourself. You rejected {hooverCount} contact
+              attempt{hooverCount !== 1 ? 's' : ''} and came out stronger.
             </p>
           </div>
 
@@ -361,7 +361,7 @@ export const NoContactMode: React.FC<NoContactModeProps> = ({
             </div>
             <div className="p-3 bg-muted rounded-lg">
               <div className="text-2xl font-bold">{hooverCount}</div>
-              <div className="text-xs text-muted-foreground">Hoovers Survived</div>
+              <div className="text-xs text-muted-foreground">Attempts Rejected</div>
             </div>
             <div className="p-3 bg-green-500/10 rounded-lg">
               <div className="text-2xl font-bold text-green-600">100%</div>
@@ -437,7 +437,7 @@ export const NoContactMode: React.FC<NoContactModeProps> = ({
               <Phone className="w-4 h-4 text-muted-foreground" />
               <span className="font-semibold">{hooverCount}</span>
             </div>
-            <div className="text-xs text-muted-foreground">Hoovers Survived</div>
+            <div className="text-xs text-muted-foreground">Attempts Rejected</div>
           </div>
         </div>
 
@@ -450,7 +450,7 @@ export const NoContactMode: React.FC<NoContactModeProps> = ({
             disabled={loading}
           >
             <MessageCircle className="w-4 h-4" />
-            They Tried to Contact Me (Hoover)
+            They Tried to Contact Me
           </Button>
 
           <AlertDialog>
@@ -506,7 +506,7 @@ export const NoContactMode: React.FC<NoContactModeProps> = ({
                   }`}
                   title={
                     hadHoover
-                      ? `Day ${dayNum} - Survived hoover!`
+                      ? `Day ${dayNum} - Rejected contact!`
                       : isCompleted
                       ? `Day ${dayNum} - Complete`
                       : `Day ${dayNum}`

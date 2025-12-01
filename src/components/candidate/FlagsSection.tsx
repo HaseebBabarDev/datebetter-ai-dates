@@ -27,19 +27,19 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
 }) => {
   const { getRemainingUpdates, incrementUsage, canUseUpdate, refetch } = useSubscription();
   const remainingUpdates = getRemainingUpdates(candidate.id);
-  const [hooverCount, setHooverCount] = useState(0);
+  const [contactAttemptCount, setContactAttemptCount] = useState(0);
 
   useEffect(() => {
-    const fetchHooverCount = async () => {
+    const fetchContactAttemptCount = async () => {
       const { data } = await supabase
         .from("no_contact_progress")
         .select("hoover_attempt")
         .eq("candidate_id", candidate.id)
         .eq("hoover_attempt", true);
       
-      setHooverCount(data?.length || 0);
+      setContactAttemptCount(data?.length || 0);
     };
-    fetchHooverCount();
+    fetchContactAttemptCount();
   }, [candidate.id]);
   const [analyzing, setAnalyzing] = useState(false);
 
@@ -110,8 +110,8 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Hoover attempts tracker */}
-      {hooverCount > 0 && (
+      {/* Contact attempts rejected tracker */}
+      {contactAttemptCount > 0 && (
         <Card className="border-amber-500/20 bg-gradient-to-r from-amber-50 to-amber-100/50 dark:from-amber-950/20 dark:to-amber-900/10">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -120,7 +120,7 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
               </div>
               <div>
                 <p className="font-semibold text-amber-700 dark:text-amber-400">
-                  {hooverCount} Hoover{hooverCount !== 1 ? 's' : ''} Survived
+                  {contactAttemptCount} Contact Attempt{contactAttemptCount !== 1 ? 's' : ''} Rejected
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Times they tried to contact you during NC
