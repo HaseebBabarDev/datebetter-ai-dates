@@ -766,12 +766,11 @@ const Dashboard = () => {
             {(() => {
               const alerts: { key: string; icon: React.ReactNode; label: string; sub?: string; color: string; onClick?: () => void }[] = [];
               
-              // D.E.V.I. AI Coach badge
+              // D.E.V.I. badge
               alerts.push({
                 key: "devi",
                 icon: <Bot className="w-3 h-3" />,
                 label: "D.E.V.I.",
-                sub: "AI Coach",
                 color: "bg-primary/20 text-primary border-primary/30",
                 onClick: () => navigate("/devi"),
               });
@@ -916,6 +915,10 @@ const Dashboard = () => {
                   <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-primary" />
                     Recent Activity
+                    <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-medium">
+                      <Bot className="w-3 h-3" />
+                      D.E.V.I.
+                    </span>
                   </h3>
                 </div>
                 <div className="p-3 space-y-2">
