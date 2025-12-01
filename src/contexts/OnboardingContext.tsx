@@ -55,6 +55,7 @@ export interface OnboardingData {
   kidsTimeline?: string;
   marriageBeforeKids?: boolean;
   openToSingleParenthood?: boolean;
+  familyPriorities?: string[];
   
   // Screen 7: Faith
   religion?: string;
