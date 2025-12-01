@@ -74,13 +74,13 @@ const BasicIdentityScreen = () => {
       title="Basic Identity"
       subtitle="Let's get to know you"
     >
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         {/* Location Section */}
-        <div className="space-y-4">
-          <Label className="text-base font-medium">Where are you based?</Label>
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Where are you based?</Label>
           
           <div className="space-y-2">
-            <Label htmlFor="country">Country</Label>
+            <Label htmlFor="country" className="text-xs">Country</Label>
             <Select
               value={data.country}
               onValueChange={(value) => updateData({ country: value })}

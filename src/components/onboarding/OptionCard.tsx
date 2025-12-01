@@ -31,7 +31,7 @@ export const OptionCard: React.FC<OptionCardProps> = ({
       className={cn(
         "w-full rounded-xl border-2 text-left transition-all duration-200",
         "hover:border-primary/50 hover:shadow-card",
-        compact ? "p-2.5" : "p-4",
+        compact ? "p-2" : "p-3",
         selected
           ? "border-primary bg-primary-very-light shadow-card"
           : "border-border bg-card",

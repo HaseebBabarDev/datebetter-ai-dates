@@ -39,45 +39,47 @@ const RelationshipGoalsScreen = () => {
       title="Relationship Goals"
       subtitle="What are you looking for?"
     >
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         {/* Current Relationship Status */}
-        <div className="space-y-3">
-          <Label className="text-base">What's your current relationship status?</Label>
-          <div className="space-y-2">
+        <div className="space-y-2">
+          <Label className="text-sm">What's your current relationship status?</Label>
+          <div className="space-y-1.5">
             {statusOptions.map((option) => (
               <OptionCard
                 key={option.value}
                 selected={data.relationshipStatus === option.value}
                 onClick={() => updateData({ relationshipStatus: option.value })}
-                icon={<option.icon className="w-5 h-5" />}
+                icon={<option.icon className="w-4 h-4" />}
                 title={option.label}
                 description={option.description}
+                compact
               />
             ))}
           </div>
         </div>
 
         {/* Primary Goal */}
-        <div className="space-y-3">
-          <Label className="text-base">What are you looking for?</Label>
-          <div className="space-y-2">
+        <div className="space-y-2">
+          <Label className="text-sm">What are you looking for?</Label>
+          <div className="space-y-1.5">
             {goalOptions.map((option) => (
               <OptionCard
                 key={option.value}
                 selected={data.relationshipGoal === option.value}
                 onClick={() => updateData({ relationshipGoal: option.value })}
-                icon={<option.icon className="w-5 h-5" />}
+                icon={<option.icon className="w-4 h-4" />}
                 title={option.label}
                 description={option.description}
+                compact
               />
             ))}
           </div>
         </div>
 
         {/* Relationship Structure */}
-        <div className="space-y-3">
-          <Label className="text-base">Your ideal relationship structure:</Label>
-          <div className="space-y-2">
+        <div className="space-y-2">
+          <Label className="text-sm">Your ideal relationship structure:</Label>
+          <div className="space-y-1.5">
             {structureOptions.map((option) => (
               <OptionCard
                 key={option.value}
@@ -85,13 +87,14 @@ const RelationshipGoalsScreen = () => {
                 onClick={() => updateData({ relationshipStructure: option.value })}
                 title={option.label}
                 description={option.description}
+                compact
               />
             ))}
           </div>
         </div>
 
         {/* Non-negotiables */}
-        <div className="space-y-4 p-4 rounded-xl bg-muted/50 border border-border">
+        <div className="space-y-3 p-3 rounded-xl bg-muted/50 border border-border">
           <h3 className="font-medium">Non-Negotiables</h3>
           
           {data.relationshipStructure === "monogamous" && (

@@ -70,15 +70,17 @@ const CareerScreen = () => {
       </Dialog>
 
       <OnboardingLayout title="Career & Education" subtitle="Your professional life">
-        <div className="space-y-6 animate-fade-in">
-          <div className="space-y-3">
-            <Label>Career status:</Label>
+        <div className="space-y-4 animate-fade-in">
+          <div className="space-y-2">
+            <Label className="text-sm">Career status:</Label>
+            <div className="space-y-1.5">
             {careerOptions.map((o) => (
-              <OptionCard key={o.value} selected={data.careerStage === o.value} onClick={() => updateData({ careerStage: o.value })} title={o.label} />
+              <OptionCard key={o.value} selected={data.careerStage === o.value} onClick={() => updateData({ careerStage: o.value })} title={o.label} compact />
             ))}
+            </div>
           </div>
           <div className="space-y-2">
-            <Label>Education level:</Label>
+            <Label className="text-sm">Education level:</Label>
             <Select
               value={data.educationLevel}
               onValueChange={(value) => updateData({ educationLevel: value })}

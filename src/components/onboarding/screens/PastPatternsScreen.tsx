@@ -17,12 +17,14 @@ const PastPatternsScreen = () => {
 
   return (
     <OnboardingLayout title="Past Patterns & Attachment" subtitle="Understanding your relationship style">
-      <div className="space-y-6 animate-fade-in">
-        <div className="space-y-3">
-          <Label>In relationships, I tend to be:</Label>
+      <div className="space-y-4 animate-fade-in">
+        <div className="space-y-2">
+          <Label className="text-sm">In relationships, I tend to be:</Label>
+          <div className="space-y-1.5">
           {attachmentOptions.map((o) => (
-            <OptionCard key={o.value} selected={data.attachmentStyle === o.value} onClick={() => updateData({ attachmentStyle: o.value })} title={o.label} description={o.description} />
+            <OptionCard key={o.value} selected={data.attachmentStyle === o.value} onClick={() => updateData({ attachmentStyle: o.value })} title={o.label} description={o.description} compact />
           ))}
+          </div>
         </div>
         <Button onClick={nextStep} disabled={!data.attachmentStyle} className="w-full" size="lg">Continue</Button>
       </div>

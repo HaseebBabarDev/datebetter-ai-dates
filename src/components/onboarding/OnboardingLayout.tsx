@@ -73,25 +73,25 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
           )}
         </header>
       ) : (
-        <header className="px-6 py-4 flex items-center justify-between border-b border-border/50">
-          <div className="flex items-center gap-4">
+        <header className="px-4 py-2 flex items-center justify-between border-b border-border/50">
+          <div className="flex items-center gap-3">
             {showBack && currentStep > 0 && (
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-foreground"
+                className="text-foreground h-8 w-8"
                 onClick={prevStep}
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-4 h-4" />
               </Button>
             )}
-            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <h1 className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               dateBetter
             </h1>
           </div>
           {showProgress && currentStep > 0 && (
-            <span className="text-sm text-muted-foreground">
-              Step {currentStep} of {totalSteps - 1}
+            <span className="text-xs text-muted-foreground">
+              {currentStep}/{totalSteps - 1}
             </span>
           )}
         </header>
@@ -99,8 +99,8 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
 
       {/* Progress Bar */}
       {showProgress && currentStep > 0 && (
-        <div className="px-6 py-2">
-          <Progress value={progress} className="h-1.5 transition-all duration-300" />
+        <div className="px-4 py-1">
+          <Progress value={progress} className="h-1 transition-all duration-300" />
         </div>
       )}
 
@@ -109,17 +109,17 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         <div 
           key={displayStep}
           className={cn(
-            "container max-w-lg mx-auto px-6 py-2 transition-all duration-300 ease-out",
+            "container max-w-lg mx-auto px-4 py-3 transition-all duration-300 ease-out",
             isVisible 
               ? "opacity-100 translate-x-0" 
               : "opacity-0 translate-x-4"
           )}
         >
           {!headerGradient && title && (
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-2">{title}</h2>
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-foreground mb-1">{title}</h2>
               {subtitle && (
-                <p className="text-muted-foreground">{subtitle}</p>
+                <p className="text-muted-foreground text-sm">{subtitle}</p>
               )}
             </div>
           )}

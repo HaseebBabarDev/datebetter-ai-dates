@@ -49,26 +49,27 @@ const DatingPreferencesScreen = () => {
       title="Dating Preferences"
       subtitle="Who are you looking to date?"
     >
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         {/* Sexual Orientation */}
-        <div className="space-y-3">
-          <Label>I identify as:</Label>
-          <div className="space-y-2">
+        <div className="space-y-2">
+          <Label className="text-sm">I identify as:</Label>
+          <div className="space-y-1.5">
             {orientationOptions.map((option) => (
               <OptionCard
                 key={option.value}
                 selected={data.sexualOrientation === option.value}
                 onClick={() => updateData({ sexualOrientation: option.value })}
                 title={option.label}
+                compact
               />
             ))}
           </div>
         </div>
 
         {/* Interested In */}
-        <div className="space-y-3">
-          <Label>I'm interested in dating:</Label>
-          <p className="text-sm text-muted-foreground">Select all that apply</p>
+        <div className="space-y-2">
+          <Label className="text-sm">I'm interested in dating:</Label>
+          <p className="text-xs text-muted-foreground">Select all that apply</p>
           <div className="grid grid-cols-2 gap-2">
             {interestedInOptions.map((option) => (
               <MultiSelectOption
