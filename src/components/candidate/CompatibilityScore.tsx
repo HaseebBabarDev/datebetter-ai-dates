@@ -398,22 +398,22 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   const hasMoreInsights = remainingStrengths.length > 0 || remainingConcerns.length > 0;
 
   return (
-    <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
+    <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
       {/* Score Header */}
-      <div className="relative p-6 pb-4">
+      <div className="relative p-6 pb-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
-        <div className="relative flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+        <div className="relative flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0 flex-shrink">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
               <Sparkles className="w-6 h-6 text-primary" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h3 className="font-semibold text-foreground">Compatibility</h3>
               <p className="text-xs text-muted-foreground">D.E.V.I.-powered analysis</p>
             </div>
           </div>
-          <div className="text-right">
-            <div className={`text-4xl font-bold ${getScoreColor(scoreData.overall_score)}`}>
+          <div className="text-right flex-shrink-0">
+            <div className={`text-4xl font-bold leading-none ${getScoreColor(scoreData.overall_score)}`}>
               {scoreData.overall_score}%
             </div>
             <div className="flex items-center justify-end gap-2 mt-1">
