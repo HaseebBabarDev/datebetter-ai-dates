@@ -19,6 +19,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Shield, ChevronDown, TrendingUp, AlertTriangle, Sparkles, Lock } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -410,26 +416,41 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
             <div className={`text-4xl font-bold ${getScoreColor(scoreData.overall_score)}`}>
               {scoreData.overall_score}%
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={calculateScore} 
-              disabled={loading || !canRefresh} 
-              className="h-6 px-2 text-xs"
-              title={canRefresh ? `${remainingUpdates} updates remaining` : "Upgrade for more updates"}
-            >
-              {canRefresh ? (
-                <>
-                  <RefreshCw className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} />
-                  Refresh ({remainingUpdates})
-                </>
-              ) : (
-                <>
-                  <Lock className="w-3 h-3 mr-1" />
-                  Upgrade
-                </>
+            <div className="flex items-center justify-end gap-2 mt-1">
+              {canRefresh && (
+                <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">
+                  {remainingUpdates} updates
+                </span>
               )}
-            </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={calculateScore} 
+                      disabled={loading || !canRefresh} 
+                      className="h-6 px-2 text-xs"
+                    >
+                      {canRefresh ? (
+                        <>
+                          <RefreshCw className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} />
+                          Refresh
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="w-3 h-3 mr-1" />
+                          Upgrade
+                        </>
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p className="text-xs">Refresh counts as a candidate update</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
         </div>
       </div>
