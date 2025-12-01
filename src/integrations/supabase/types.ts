@@ -732,6 +732,74 @@ export type Database = {
         }
         Relationships: []
       }
+      usage_tracking: {
+        Row: {
+          candidate_id: string
+          created_at: string
+          id: string
+          last_reset_at: string
+          updated_at: string
+          updates_used: number
+          user_id: string
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string
+          id?: string
+          last_reset_at?: string
+          updated_at?: string
+          updates_used?: number
+          user_id: string
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string
+          id?: string
+          last_reset_at?: string
+          updated_at?: string
+          updates_used?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_tracking_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_subscriptions: {
+        Row: {
+          candidates_limit: number
+          created_at: string
+          id: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          updated_at: string
+          updates_per_candidate: number
+          user_id: string
+        }
+        Insert: {
+          candidates_limit?: number
+          created_at?: string
+          id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          updated_at?: string
+          updates_per_candidate?: number
+          user_id: string
+        }
+        Update: {
+          candidates_limit?: number
+          created_at?: string
+          id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          updated_at?: string
+          updates_per_candidate?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -827,6 +895,11 @@ export type Database = {
         | "social_butterfly"
         | "balanced"
         | "mood_dependent"
+      subscription_plan:
+        | "free"
+        | "new_to_dating"
+        | "dating_often"
+        | "dating_more"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1050,6 +1123,12 @@ export const Constants = {
         "social_butterfly",
         "balanced",
         "mood_dependent",
+      ],
+      subscription_plan: [
+        "free",
+        "new_to_dating",
+        "dating_often",
+        "dating_more",
       ],
     },
   },

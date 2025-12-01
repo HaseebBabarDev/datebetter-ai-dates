@@ -30,6 +30,8 @@ import {
 import { SliderInput } from "@/components/onboarding/SliderInput";
 import { Plus, User, MapPin, Church, Heart, Briefcase, Sparkles, Brain } from "lucide-react";
 import { toast } from "sonner";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeLimitDialog } from "@/components/subscription/UpgradeLimitDialog";
 
 const DEFAULT_GENDER_KEY = "candidate_default_gender_identity";
 
@@ -174,7 +176,9 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   trigger,
 }) => {
   const { user } = useAuth();
+  const { canAddCandidate, subscription, refetch } = useSubscription();
   const [open, setOpen] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Basic Info
@@ -336,6 +340,7 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
       resetForm();
       setOpen(false);
       onSuccess();
+      refetch(); // Refresh subscription data
     } catch (error) {
       console.error("Error adding candidate:", error);
       toast.error("Failed to add candidate");
@@ -344,8 +349,23 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
     }
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen && !canAddCandidate()) {
+      setShowUpgradeDialog(true);
+    } else {
+      setOpen(newOpen);
+    }
+  };
+
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <>
+      <UpgradeLimitDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        limitType="candidates"
+        currentPlan={subscription?.plan}
+      />
+      <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
         {trigger || (
           <Button className="gap-2">
@@ -756,5 +776,6 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
         </form>
       </SheetContent>
     </Sheet>
+    </>
   );
 };
