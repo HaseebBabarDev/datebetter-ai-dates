@@ -7,6 +7,7 @@ interface OptionCardProps {
   onClick: () => void;
   icon?: React.ReactNode;
   title: string;
+  subtitle?: string;
   description?: string;
   disabled?: boolean;
   className?: string;
@@ -18,6 +19,7 @@ export const OptionCard: React.FC<OptionCardProps> = ({
   onClick,
   icon,
   title,
+  subtitle,
   description,
   disabled = false,
   className,
@@ -29,9 +31,9 @@ export const OptionCard: React.FC<OptionCardProps> = ({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "w-full rounded-lg border transition-all duration-150",
+        "w-full rounded-lg border transition-all duration-150 relative",
         "hover:border-primary/50",
-        compact ? "px-3 py-2 min-h-[52px] flex items-center justify-center text-center" : "px-3 py-2 text-left",
+        compact ? "px-3 py-1.5 min-h-[44px] flex items-center justify-center text-center" : "px-3 py-2 text-left",
         selected
           ? "border-primary bg-primary/5"
           : "border-border bg-card",
@@ -61,26 +63,37 @@ export const OptionCard: React.FC<OptionCardProps> = ({
             }
           </div>
         )}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex-1">
+        <div className={cn("min-w-0", compact && !icon ? "flex-none" : "flex-1")}>
+          <div className={cn(
+            "flex gap-2",
+            compact ? "flex-col items-center" : "items-start justify-between"
+          )}>
+            <div className={compact ? "text-center" : "flex-1"}>
               <span className={cn(
                 "text-xs font-medium leading-tight block",
                 selected ? "text-primary" : "text-foreground"
               )}>
                 {title}
               </span>
+              {subtitle && compact && (
+                <span className="text-[10px] text-muted-foreground leading-tight block">
+                  {subtitle}
+                </span>
+              )}
               {description && !compact && (
                 <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight text-left">
                   {description}
                 </p>
               )}
             </div>
-            {selected && (
+            {selected && !compact && (
               <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
             )}
           </div>
         </div>
+        {selected && compact && (
+          <Check className="w-3.5 h-3.5 text-primary shrink-0 absolute top-1 right-1" />
+        )}
       </div>
     </button>
   );

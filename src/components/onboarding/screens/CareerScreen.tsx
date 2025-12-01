@@ -22,13 +22,13 @@ import {
 import { PartyPopper } from "lucide-react";
 
 const careerOptions = [
-  { value: "student", label: "Student" },
-  { value: "early", label: "Early career (0-5 years)" },
-  { value: "established", label: "Established (5-15 years)" },
-  { value: "senior", label: "Senior/Executive (15+ years)" },
-  { value: "entrepreneur", label: "Entrepreneur" },
-  { value: "athlete", label: "Professional Athlete" },
-  { value: "between", label: "Between opportunities" },
+  { value: "student", label: "Student", subtitle: "" },
+  { value: "early", label: "Early career", subtitle: "0-5 years" },
+  { value: "established", label: "Established", subtitle: "5-15 years" },
+  { value: "senior", label: "Senior/Executive", subtitle: "15+ years" },
+  { value: "entrepreneur", label: "Entrepreneur", subtitle: "" },
+  { value: "athlete", label: "Pro Athlete", subtitle: "" },
+  { value: "between", label: "Between jobs", subtitle: "" },
 ];
 
 const educationOptions = [
@@ -102,7 +102,7 @@ const CareerScreen = () => {
             <Label className="text-sm">Career status:</Label>
             <div className="grid grid-cols-2 gap-2">
             {careerOptions.map((o) => (
-              <OptionCard key={o.value} selected={data.careerStage === o.value} onClick={() => updateData({ careerStage: o.value })} title={o.label} compact />
+              <OptionCard key={o.value} selected={data.careerStage === o.value} onClick={() => updateData({ careerStage: o.value })} title={o.label} subtitle={o.subtitle} compact />
             ))}
             </div>
           </div>
