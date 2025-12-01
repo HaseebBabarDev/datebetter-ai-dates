@@ -146,7 +146,7 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
                           variant="secondary" 
                           className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary border-primary/20 cursor-help shrink-0"
                         >
-                          {remainingUpdates} left
+                          {remainingUpdates} Updates Left
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent>
