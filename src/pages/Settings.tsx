@@ -295,27 +295,24 @@ const Settings = () => {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-muted-foreground">Current Plan</span>
-                  <Badge variant="secondary" className="bg-primary/10 text-primary">Active</Badge>
+                  <Badge variant="secondary" className="bg-primary/10 text-primary">Trial</Badge>
                 </div>
-                <h3 className="text-xl font-bold">Free Plan</h3>
-                <p className="text-sm text-muted-foreground">2 candidate entries & updates included</p>
+                <h3 className="text-xl font-bold">Free</h3>
+                <p className="text-sm text-muted-foreground">1 candidate score & 1 update included</p>
               </CardContent>
             </Card>
 
             {/* Plans */}
             <div className="space-y-3">
-              <h4 className="font-medium text-sm text-muted-foreground">Upgrade for more updates</h4>
+              <h4 className="font-medium text-sm text-muted-foreground">Upgrade for more candidates & updates</h4>
               
-              {/* Starter Plan */}
+              {/* New to Dating Plan */}
               <Card className="cursor-pointer hover:border-primary/50 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-semibold">Starter</h4>
-                        <Badge variant="outline" className="text-xs">Popular</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">7 candidate updates/month</p>
+                      <h4 className="font-semibold">New to Dating</h4>
+                      <p className="text-sm text-muted-foreground">3 candidates • 5 updates each</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold">$9.99</p>
@@ -325,19 +322,19 @@ const Settings = () => {
                   <div className="mt-3 pt-3 border-t space-y-1.5">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Check className="w-4 h-4 text-green-500" />
-                      <span>7 candidate profile updates</span>
+                      <span>3 candidate profiles</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>5 updates per candidate</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Check className="w-4 h-4 text-green-500" />
                       <span>AI compatibility scoring</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>Flag detection</span>
-                    </div>
                   </div>
                   <Button className="w-full mt-4" variant="outline">
-                    Upgrade to Starter
+                    Upgrade to New to Dating
                   </Button>
                 </CardContent>
               </Card>
@@ -351,25 +348,25 @@ const Settings = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <h4 className="font-semibold">Dating Often</h4>
-                      <p className="text-sm text-muted-foreground">15 candidate updates/month</p>
+                      <p className="text-sm text-muted-foreground">7 candidates • 12 updates each</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold">$15.99</p>
+                      <p className="text-xl font-bold">$19.99</p>
                       <p className="text-xs text-muted-foreground">/month</p>
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t space-y-1.5">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Check className="w-4 h-4 text-green-500" />
-                      <span>15 candidate profile updates</span>
+                      <span>7 candidate profiles</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>12 updates per candidate</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Check className="w-4 h-4 text-green-500" />
                       <span>AI compatibility scoring</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>Flag detection</span>
                     </div>
                   </div>
                   <Button className="w-full mt-4">
@@ -384,25 +381,25 @@ const Settings = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <h4 className="font-semibold">Dating More</h4>
-                      <p className="text-sm text-muted-foreground">100 candidate updates/month</p>
+                      <p className="text-sm text-muted-foreground">12 candidates • 20 updates each</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold">$39.99</p>
+                      <p className="text-xl font-bold">$29.99</p>
                       <p className="text-xs text-muted-foreground">/month</p>
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t space-y-1.5">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Check className="w-4 h-4 text-green-500" />
-                      <span>100 candidate profile updates</span>
+                      <span>12 candidate profiles</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>20 updates per candidate</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Check className="w-4 h-4 text-green-500" />
                       <span>AI compatibility scoring</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>Flag detection</span>
                     </div>
                   </div>
                   <Button className="w-full mt-4" variant="outline">
