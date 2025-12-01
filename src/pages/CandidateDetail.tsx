@@ -50,7 +50,15 @@ const LOVE_BOMBING_PHRASES = [
   "too good to be true", "already said i love you", "wants to move in", 
   "moving too fast", "constant texting", "showering with gifts", 
   "overwhelming affection", "soulmate", "never felt this way",
-  "we're meant to be", "perfect match"
+  "we're meant to be", "perfect match", "future faking",
+  // Over-promising / actions don't match words
+  "promised but", "says but doesn't", "said but didn't", "all talk", 
+  "empty promises", "keeps promising", "never follows through", "talks big",
+  "can't afford", "couldn't afford", "no money for", "broke but",
+  "overpromising", "over promising", "too soon", "way too fast",
+  "only been", "just met", "barely know", "week and already",
+  "days and already", "planning our future", "talking about marriage",
+  "talking about kids", "talking about moving", "words don't match"
 ];
 
 const CandidateDetail = () => {
