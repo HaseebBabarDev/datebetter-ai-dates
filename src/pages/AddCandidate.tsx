@@ -49,8 +49,8 @@ const GENDER_OPTIONS: { value: Enums<"gender_identity">; label: string }[] = [
 ];
 
 const PRONOUN_OPTIONS: { value: Enums<"pronouns">; label: string }[] = [
-  { value: "she_her", label: "She/Her" },
   { value: "he_him", label: "He/Him" },
+  { value: "she_her", label: "She/Her" },
   { value: "they_them", label: "They/Them" },
   { value: "other", label: "Other" },
 ];
