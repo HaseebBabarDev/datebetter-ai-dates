@@ -1,11 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, CheckCircle, Sparkles, Loader2 } from "lucide-react";
+import { AlertTriangle, CheckCircle, Sparkles, Loader2, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useSubscription } from "@/hooks/useSubscription";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Candidate = Tables<"candidates">;
 
@@ -18,12 +25,33 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
   candidate,
   onUpdate,
 }) => {
+  const { getRemainingUpdates, incrementUsage, canUseUpdate } = useSubscription();
+  const remainingUpdates = getRemainingUpdates(candidate.id);
+  const [hooverCount, setHooverCount] = useState(0);
+
+  useEffect(() => {
+    const fetchHooverCount = async () => {
+      const { data } = await supabase
+        .from("no_contact_progress")
+        .select("hoover_attempt")
+        .eq("candidate_id", candidate.id)
+        .eq("hoover_attempt", true);
+      
+      setHooverCount(data?.length || 0);
+    };
+    fetchHooverCount();
+  }, [candidate.id]);
   const [analyzing, setAnalyzing] = useState(false);
 
   const redFlags = (candidate.red_flags as string[]) || [];
   const greenFlags = (candidate.green_flags as string[]) || [];
 
   const detectFlags = async () => {
+    if (!canUseUpdate(candidate.id)) {
+      toast.error("No updates remaining for this candidate");
+      return;
+    }
+
     setAnalyzing(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -59,6 +87,9 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
 
       const flags = await response.json();
       
+      // Increment usage count
+      await incrementUsage(candidate.id);
+      
       // Update local state through parent
       await onUpdate({
         red_flags: flags.red_flags || [],
@@ -78,6 +109,45 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Updates remaining badge */}
+      {remainingUpdates > 0 && (
+        <div className="flex justify-end">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="outline" className="text-xs cursor-help">
+                  {remainingUpdates} update{remainingUpdates !== 1 ? 's' : ''} remaining
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Analyze also counts toward updates</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      )}
+
+      {/* Hoover attempts tracker */}
+      {hooverCount > 0 && (
+        <Card className="border-amber-500/20 bg-gradient-to-r from-amber-50 to-amber-100/50 dark:from-amber-950/20 dark:to-amber-900/10">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <Phone className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-amber-700 dark:text-amber-400">
+                  {hooverCount} Hoover{hooverCount !== 1 ? 's' : ''} Survived
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Times they tried to contact you during NC
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* D.E.V.I. Analyze Button */}
       <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
         <CardContent className="p-4">
