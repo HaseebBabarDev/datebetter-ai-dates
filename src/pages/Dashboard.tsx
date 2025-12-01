@@ -44,6 +44,7 @@ import { useTour, DASHBOARD_TOUR_STEPS } from "@/components/tour";
 import { differenceInDays, addDays, format } from "date-fns";
 import heroCouple from "@/assets/hero-couple.jpeg";
 import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
+import { FreeUpgradeBanner } from "@/components/subscription/FreeUpgradeBanner";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -746,6 +747,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <UpgradeNudge />
+              <FreeUpgradeBanner />
               <Button
                 variant="outline"
                 onClick={() => navigate("/patterns")}
