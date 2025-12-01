@@ -1099,14 +1099,14 @@ const Dashboard = () => {
                           onClick={() => navigate(`/candidate/${item.candidate!.id}`)}
                           className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors ${styles.bg}`}
                         >
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${styles.iconBg} ${styles.text}`}>
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${styles.iconBg} ${styles.text}`}>
                             {getNotifIcon()}
                           </div>
-                          <div className="flex-1 text-left">
+                          <div className="flex-1 text-left min-w-0">
                             <p className={`text-sm font-medium ${styles.text}`}>{item.notification.title}</p>
                             <p className="text-xs text-muted-foreground truncate">{item.notification.message}</p>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                          <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
                         </button>
                       );
                     }
