@@ -636,9 +636,9 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row flex-wrap gap-2 justify-start sm:justify-start">
+          <AlertDialogFooter className="flex-col items-center gap-2 sm:flex-col">
             {scoreData?.advice && !adviceResponse && (
-              <>
+              <div className="flex gap-2 w-full justify-center">
                 <Button
                   size="sm"
                   className="bg-green-600 hover:bg-green-700"
@@ -663,21 +663,23 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                   <X className="w-4 h-4 mr-1" />
                   Decline
                 </Button>
-              </>
+              </div>
             )}
-            <AlertDialogCancel className="mt-0">Close</AlertDialogCancel>
-            {onStartNoContact && (
-              <AlertDialogAction 
-                onClick={() => {
-                  setShowLowScoreWarning(false);
-                  if (onStartNoContact) onStartNoContact();
-                }}
-                className="bg-primary"
-              >
-                <Shield className="w-4 h-4 mr-2" />
-                Start No Contact
-              </AlertDialogAction>
-            )}
+            <div className="flex gap-2 w-full justify-center">
+              <AlertDialogCancel className="mt-0">Close</AlertDialogCancel>
+              {onStartNoContact && (
+                <AlertDialogAction 
+                  onClick={() => {
+                    setShowLowScoreWarning(false);
+                    if (onStartNoContact) onStartNoContact();
+                  }}
+                  className="bg-primary"
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  Start No Contact
+                </AlertDialogAction>
+              )}
+            </div>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
