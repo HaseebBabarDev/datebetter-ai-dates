@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Lock, Clock, Stars, ShieldCheck, Heart, Sparkles } from "lucide-react";
+import { Lock, Clock, Stars, ShieldCheck, Sparkles } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -71,7 +71,7 @@ const WelcomeScreen = () => {
         title="Welcome to dateBetter"
         subtitle="Your dating journey starts here"
       >
-        <div className="space-y-6 animate-fade-in relative z-10">
+        <div className="space-y-4 animate-fade-in relative z-10">
           {/* D.E.V.I. Badge */}
           <div className="flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-background/80 backdrop-blur-sm border border-primary/30 mx-auto w-fit">
             <Stars className="w-3 h-3 md:w-4 md:h-4 text-primary" />
@@ -79,19 +79,19 @@ const WelcomeScreen = () => {
             <span className="text-[10px] md:text-xs text-foreground/70">Dating Evaluation & Vetting Intelligence</span>
           </div>
 
-          {/* Value Props */}
-          <div className="space-y-2">
+          {/* Onboarding Info */}
+          <div className="space-y-1.5">
             <div className="flex items-center gap-2 p-2 rounded-lg bg-card/40 backdrop-blur-sm border border-border/20">
-              <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
-              <span className="text-foreground/90 text-sm">AI-powered compatibility scoring</span>
+              <Clock className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-foreground/90 text-sm">10-15 min to complete</span>
             </div>
             <div className="flex items-center gap-2 p-2 rounded-lg bg-card/40 backdrop-blur-sm border border-border/20">
-              <Heart className="w-4 h-4 text-primary shrink-0" />
-              <span className="text-foreground/90 text-sm">Personalized dating guidance</span>
+              <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-foreground/90 text-sm">Your answers stay private & secure</span>
             </div>
             <div className="flex items-center gap-2 p-2 rounded-lg bg-card/40 backdrop-blur-sm border border-border/20">
               <Sparkles className="w-4 h-4 text-primary shrink-0" />
-              <span className="text-foreground/90 text-sm">Red flag detection & pattern recognition</span>
+              <span className="text-foreground/90 text-sm">Helps D.E.V.I. personalize your experience</span>
             </div>
           </div>
 
