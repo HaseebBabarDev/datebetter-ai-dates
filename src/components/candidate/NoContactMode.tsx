@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,9 +31,11 @@ import {
   XCircle,
   AlertTriangle,
   Sparkles,
+  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { differenceInDays } from "date-fns";
+import { useSubscription } from "@/hooks/useSubscription";
 
 type Candidate = Tables<"candidates">;
 type NoContactProgress = Tables<"no_contact_progress">;
@@ -80,9 +83,13 @@ export const NoContactMode: React.FC<NoContactModeProps> = ({
   onUpdate,
 }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { subscription } = useSubscription();
   const [progress, setProgress] = useState<NoContactProgress[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentDay, setCurrentDay] = useState(0);
+
+  const isFreePlan = subscription?.plan === "free";
 
   useEffect(() => {
     if (candidate.no_contact_active && user) {
@@ -236,6 +243,44 @@ export const NoContactMode: React.FC<NoContactModeProps> = ({
 
   // Not in No Contact Mode
   if (!candidate.no_contact_active) {
+    // Show locked state for free users
+    if (isFreePlan) {
+      return (
+        <Card className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-10 flex items-center justify-center">
+            <div className="text-center p-6">
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
+                <Lock className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <h3 className="font-semibold mb-1">Unlock No Contact Mode</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Get 30 days of guided healing support with a paid plan
+              </p>
+              <Button onClick={() => navigate("/settings?tab=billing")}>
+                Upgrade to Unlock
+              </Button>
+            </div>
+          </div>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              No Contact Mode
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 opacity-50">
+            <p className="text-sm text-muted-foreground">
+              Need to create distance? No Contact Mode will guide you through 30 days
+              of healing with daily messages, progress tracking, and support.
+            </p>
+            <Button className="w-full gap-2" disabled>
+              <Shield className="w-4 h-4" />
+              Start No Contact Mode
+            </Button>
+          </CardContent>
+        </Card>
+      );
+    }
+
     return (
       <Card>
         <CardHeader>

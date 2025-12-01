@@ -32,7 +32,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { SliderInput } from "@/components/onboarding/SliderInput";
-import { Plus, AlertTriangle, Lightbulb, Phone, Heart } from "lucide-react";
+import { Plus, AlertTriangle, Lightbulb, Phone, Heart, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { detectCrisisContent, CRISIS_RESOURCES, CrisisDetectionResult } from "@/lib/crisisDetection";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -298,11 +298,25 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
 
       <Sheet open={open} onOpenChange={handleOpenChange}>
         <SheetTrigger asChild>
-          {triggerButton || (
-            <Button className="w-full gap-2">
-              <Plus className="h-4 w-4" />
-              Log Interaction
-            </Button>
+          {triggerButton ? (
+            canUseUpdate(candidateId) ? triggerButton : (
+              <Button className="w-full gap-2" variant="outline">
+                <Lock className="h-4 w-4" />
+                Upgrade to Log More
+              </Button>
+            )
+          ) : (
+            canUseUpdate(candidateId) ? (
+              <Button className="w-full gap-2">
+                <Plus className="h-4 w-4" />
+                Log Interaction
+              </Button>
+            ) : (
+              <Button className="w-full gap-2" variant="outline">
+                <Lock className="h-4 w-4" />
+                Upgrade to Log More
+              </Button>
+            )
           )}
         </SheetTrigger>
       <SheetContent className="overflow-y-auto">
