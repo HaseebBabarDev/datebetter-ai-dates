@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { PartyPopper } from "lucide-react";
+import { PartyPopper, TrendingUp } from "lucide-react";
 
 const careerOptions = [
   { value: "student", label: "Student", subtitle: "" },
@@ -77,6 +77,12 @@ const CareerScreen = () => {
     const timer = setTimeout(() => setShowPopup(true), 300);
     return () => clearTimeout(timer);
   }, []);
+
+  // Check if user earns less than 100k but wants partner earning 250k+
+  const lowIncomeRanges = ["under_25k", "25k_50k", "50k_75k", "75k_100k"];
+  const userEarnsUnder100k = data.incomeRange && lowIncomeRanges.includes(data.incomeRange);
+  const wantsTop1Percent = data.preferredIncomeRange === "250k_plus";
+  const showIncomeWarning = userEarnsUnder100k && wantsTop1Percent;
 
   return (
     <>
@@ -178,6 +184,15 @@ const CareerScreen = () => {
                   ))}
                 </SelectContent>
               </Select>
+              
+              {showIncomeWarning && (
+                <div className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg animate-fade-in">
+                  <TrendingUp className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                  <p className="text-xs text-amber-700 dark:text-amber-400">
+                    <span className="font-medium">Shooting for the top 1%!</span> Men earning $250k+ are rare. This may significantly limit your matches—but hey, dream big! 💫
+                  </p>
+                </div>
+              )}
             </div>
           </div>
           <Button onClick={nextStep} disabled={!data.careerStage || !data.educationLevel} className="w-full" size="lg">Continue</Button>
