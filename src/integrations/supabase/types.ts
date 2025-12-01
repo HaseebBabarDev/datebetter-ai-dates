@@ -416,6 +416,7 @@ export type Database = {
             | Database["public"]["Enums"]["cycle_regularity"]
             | null
           dating_history_text: string | null
+          dating_motivation: string[] | null
           dating_patterns: Json | null
           dealbreakers: Json | null
           distance_preference: string | null
@@ -493,6 +494,7 @@ export type Database = {
           track_cycle: boolean | null
           transition_stage: string | null
           trauma_experiences: Json | null
+          typical_partner_type: string | null
           updated_at: string | null
           user_id: string
           work_schedule_type: string | null
@@ -523,6 +525,7 @@ export type Database = {
             | Database["public"]["Enums"]["cycle_regularity"]
             | null
           dating_history_text?: string | null
+          dating_motivation?: string[] | null
           dating_patterns?: Json | null
           dealbreakers?: Json | null
           distance_preference?: string | null
@@ -602,6 +605,7 @@ export type Database = {
           track_cycle?: boolean | null
           transition_stage?: string | null
           trauma_experiences?: Json | null
+          typical_partner_type?: string | null
           updated_at?: string | null
           user_id: string
           work_schedule_type?: string | null
@@ -632,6 +636,7 @@ export type Database = {
             | Database["public"]["Enums"]["cycle_regularity"]
             | null
           dating_history_text?: string | null
+          dating_motivation?: string[] | null
           dating_patterns?: Json | null
           dealbreakers?: Json | null
           distance_preference?: string | null
@@ -711,6 +716,7 @@ export type Database = {
           track_cycle?: boolean | null
           transition_stage?: string | null
           trauma_experiences?: Json | null
+          typical_partner_type?: string | null
           updated_at?: string | null
           user_id?: string
           work_schedule_type?: string | null
