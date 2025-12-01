@@ -56,10 +56,10 @@ const Splash = () => {
 
         {/* Features */}
         <div className="w-full max-w-sm space-y-2 mb-8">
-          <FeatureItem icon={Flower2} text="D.E.V.I. scores every candidate for you" />
+          <FeatureItem icon={Stars} text="Our AI scores every candidate for you" />
           <FeatureItem icon={Moon} text="Cycle-aware dating guidance" />
           <FeatureItem icon={Lock} text="Your privacy is completely protected" />
-          <FeatureItem icon={Flower2} text="D.E.V.I. detects red flags & patterns automatically" />
+          <FeatureItem icon={Stars} text="AI detects red flags & patterns automatically" />
           <FeatureItem icon={Heart} text="Built for women, by women" />
         </div>
 
