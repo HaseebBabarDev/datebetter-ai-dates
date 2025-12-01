@@ -41,10 +41,10 @@ const Onboarding = () => {
             Your Journey to Better Dating Starts Here
           </h2>
           <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto mb-2">
-            Meet <span className="font-semibold text-primary">D.E.V.I.</span> — your Dating Evaluation & Vetting Intelligence
+            Meet our AI — <span className="font-semibold text-primary">D.E.V.I.</span>
           </p>
           <p className="text-xs md:text-sm text-muted-foreground/80 max-w-xl mx-auto">
-            Let's set up your personalized AI assistant
+            Your Dating Evaluation & Vetting Intelligence personalized AI assistant
           </p>
         </div>
 
