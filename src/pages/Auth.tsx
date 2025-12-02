@@ -15,6 +15,7 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const { signIn, signUp } = useAuth();
   const [isSignUp, setIsSignUp] = useState(searchParams.get("mode") === "signup");
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
@@ -49,8 +50,43 @@ const Auth = () => {
     return profile;
   };
 
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      toast({ title: "Please enter your email address", variant: "destructive" });
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?mode=reset`,
+      });
+      
+      if (error) {
+        toast({ title: error.message, variant: "destructive" });
+      } else {
+        toast({ 
+          title: "Password reset email sent!",
+          description: "Check your inbox for the reset link."
+        });
+        setIsForgotPassword(false);
+      }
+    } catch (error) {
+      toast({ title: "An error occurred", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isForgotPassword) {
+      return handlePasswordReset(e);
+    }
     
     if (isSignUp) {
       if (password !== confirmPassword) {
@@ -128,12 +164,14 @@ const Auth = () => {
         <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold mb-2">
-              {isSignUp ? "Create Your Account" : "Welcome Back"}
+              {isForgotPassword ? "Reset Password" : isSignUp ? "Create Your Account" : "Welcome Back"}
             </h2>
             <p className="text-muted-foreground">
-              {isSignUp 
-                ? "Start your journey to better dating" 
-                : "Sign in to continue your journey"}
+              {isForgotPassword
+                ? "Enter your email to receive a password reset link"
+                : isSignUp 
+                  ? "Start your journey to better dating" 
+                  : "Sign in to continue your journey"}
             </p>
           </div>
 
@@ -156,49 +194,62 @@ const Auth = () => {
           </div>
 
           {/* Password */}
-          <div className="space-y-2">
-            <Label htmlFor="password">
-              {isSignUp ? "Create strong password" : "Password"}
-            </Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 pr-10"
-                required
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
+          {!isForgotPassword && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">
+                  {isSignUp ? "Create strong password" : "Password"}
+                </Label>
+                {!isSignUp && (
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotPassword(true)}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+              
+              {isSignUp && password.length > 0 && (
+                <>
+                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full transition-all duration-300 ${
+                        strength < 50 ? "bg-destructive" : strength < 75 ? "bg-caution-foreground" : "bg-success"
+                      }`}
+                      style={{ width: `${strength}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Password strength: <span className="font-medium">{label}</span>
+                  </p>
+                </>
+              )}
             </div>
-            
-            {isSignUp && password.length > 0 && (
-              <>
-                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full transition-all duration-300 ${
-                      strength < 50 ? "bg-destructive" : strength < 75 ? "bg-caution-foreground" : "bg-success"
-                    }`}
-                    style={{ width: `${strength}%` }}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Password strength: <span className="font-medium">{label}</span>
-                </p>
-              </>
-            )}
-          </div>
+          )}
 
           {/* Confirm Password (Sign Up only) */}
-          {isSignUp && (
+          {isSignUp && !isForgotPassword && (
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm password</Label>
               <div className="relative">
@@ -220,7 +271,7 @@ const Auth = () => {
           )}
 
           {/* Checkboxes (Sign Up only) */}
-          {isSignUp && (
+          {isSignUp && !isForgotPassword && (
             <div className="space-y-3">
               <div className="flex items-start gap-3">
                 <Checkbox
@@ -252,21 +303,34 @@ const Auth = () => {
             size="lg"
             disabled={loading}
           >
-            {loading ? "Please wait..." : isSignUp ? "Create Account" : "Sign In"}
+            {loading ? "Please wait..." : isForgotPassword ? "Send Reset Link" : isSignUp ? "Create Account" : "Sign In"}
           </Button>
         </form>
 
         {/* Toggle Sign In/Up */}
-        <p className="text-center mt-6 text-sm text-muted-foreground">
-          {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-          <button
-            type="button"
-            className="text-primary font-medium hover:underline"
-            onClick={() => setIsSignUp(!isSignUp)}
-          >
-            {isSignUp ? "Sign in" : "Sign up"}
-          </button>
-        </p>
+        {!isForgotPassword ? (
+          <p className="text-center mt-6 text-sm text-muted-foreground">
+            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+            <button
+              type="button"
+              className="text-primary font-medium hover:underline"
+              onClick={() => setIsSignUp(!isSignUp)}
+            >
+              {isSignUp ? "Sign in" : "Sign up"}
+            </button>
+          </p>
+        ) : (
+          <p className="text-center mt-6 text-sm text-muted-foreground">
+            Remember your password?{" "}
+            <button
+              type="button"
+              className="text-primary font-medium hover:underline"
+              onClick={() => setIsForgotPassword(false)}
+            >
+              Back to sign in
+            </button>
+          </p>
+        )}
         </div>
       </main>
     </div>
