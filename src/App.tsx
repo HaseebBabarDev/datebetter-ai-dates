@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import ListStudio from "./pages/ListStudio";
 import StudioDetail from "./pages/StudioDetail";
 import OwnerDashboard from "./pages/OwnerDashboard";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/list-studio" element={<ListStudio />} />
               <Route path="/studio/:id" element={<StudioDetail />} />
               <Route path="/owner-dashboard" element={<OwnerDashboard />} />
+              <Route path="/admin" element={<Admin />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
