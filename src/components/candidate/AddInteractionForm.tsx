@@ -236,31 +236,29 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
               <Shield className="w-5 h-5 text-primary" />
               Your Secrets Are Safe With Us
             </AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-4">
-                <p className="text-foreground">
-                  Everything you share here is <strong>completely private</strong> and encrypted.
-                </p>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary">•</span>
-                    Your notes and feelings are only visible to you
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary">•</span>
-                    We never share your data with anyone
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary">•</span>
-                    Be honest — raw data leads to better insights
-                  </li>
-                </ul>
-                <p className="text-sm text-muted-foreground">
-                  This is your safe space to reflect on your dating journey.
-                </p>
-              </div>
+            <AlertDialogDescription>
+              Everything you share here is completely private and encrypted.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="space-y-3 py-2">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start gap-2">
+                <span className="text-primary">•</span>
+                Your notes and feelings are only visible to you
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary">•</span>
+                We never share your data with anyone
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary">•</span>
+                Be honest — raw data leads to better insights
+              </li>
+            </ul>
+            <p className="text-sm text-muted-foreground">
+              This is your safe space to reflect on your dating journey.
+            </p>
+          </div>
           <AlertDialogFooter>
             <AlertDialogAction onClick={handlePrivacyAcknowledged}>
               I Understand, Let's Go
