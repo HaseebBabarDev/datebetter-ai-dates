@@ -1119,6 +1119,7 @@ export type Database = {
           created_at: string
           id: string
           plan: Database["public"]["Enums"]["subscription_plan"]
+          trial_ends_at: string | null
           updated_at: string
           updates_per_candidate: number
           user_id: string
@@ -1128,6 +1129,7 @@ export type Database = {
           created_at?: string
           id?: string
           plan?: Database["public"]["Enums"]["subscription_plan"]
+          trial_ends_at?: string | null
           updated_at?: string
           updates_per_candidate?: number
           user_id: string
@@ -1137,6 +1139,7 @@ export type Database = {
           created_at?: string
           id?: string
           plan?: Database["public"]["Enums"]["subscription_plan"]
+          trial_ends_at?: string | null
           updated_at?: string
           updates_per_candidate?: number
           user_id?: string

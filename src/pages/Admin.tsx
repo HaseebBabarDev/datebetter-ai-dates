@@ -14,8 +14,17 @@ import {
   Users, 
   UserCog,
   Home,
-  UserPlus
+  UserPlus,
+  Trash2,
+  Calendar
 } from "lucide-react";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Admin = () => {
   const { user, loading: authLoading } = useAuth();
@@ -27,6 +36,8 @@ const Admin = () => {
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
   const [togglingRole, setTogglingRole] = useState<string | null>(null);
   const [creatingUser, setCreatingUser] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<string | null>(null);
+  const [managingSubscription, setManagingSubscription] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -76,9 +87,17 @@ const Admin = () => {
 
       const adminUserIds = new Set(roles?.map(r => r.user_id) || []);
       
+      // Fetch subscriptions
+      const { data: subscriptions } = await supabase
+        .from("user_subscriptions")
+        .select("user_id, plan, trial_ends_at");
+
+      const subscriptionsMap = new Map(subscriptions?.map(s => [s.user_id, s]) || []);
+      
       const usersWithRoles = profiles?.map(p => ({
         ...p,
-        isAdmin: adminUserIds.has(p.user_id)
+        isAdmin: adminUserIds.has(p.user_id),
+        subscription: subscriptionsMap.get(p.user_id)
       })) || [];
 
       setAllUsers(usersWithRoles);
@@ -237,6 +256,90 @@ const Admin = () => {
     }
   };
 
+  const handleSetTrial = async (userId: string, days: number) => {
+    setManagingSubscription(userId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-manage-subscription`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ targetUserId: userId, trialDays: days }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to set trial");
+      }
+
+      toast.success(result.message);
+      fetchAllUsers();
+    } catch (error) {
+      console.error("Error setting trial:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to set trial");
+    } finally {
+      setManagingSubscription(null);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (userId === user?.id) {
+      toast.error("Cannot delete your own account");
+      return;
+    }
+
+    const confirmed = confirm(`Are you sure you want to permanently delete ${userName || 'this user'}? This action cannot be undone.`);
+    if (!confirmed) return;
+
+    setDeletingUser(userId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-delete-user`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ targetUserId: userId }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to delete user");
+      }
+
+      toast.success("User deleted successfully");
+      fetchAllUsers();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete user");
+    } finally {
+      setDeletingUser(null);
+    }
+  };
+
   if (authLoading || checkingAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -387,8 +490,8 @@ const Admin = () => {
                     key={userProfile.user_id}
                     className="flex items-center justify-between gap-3 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                   >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                  <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <p className="font-medium text-sm truncate">
                           {userProfile.name || "Unnamed User"}
                         </p>
@@ -401,45 +504,86 @@ const Admin = () => {
                         {userProfile.user_id === user?.id && (
                           <Badge variant="outline" className="text-xs">You</Badge>
                         )}
+                        {userProfile.subscription && (
+                          <Badge variant="outline" className="text-xs capitalize">
+                            {userProfile.subscription.plan}
+                          </Badge>
+                        )}
+                        {userProfile.subscription?.trial_ends_at && new Date(userProfile.subscription.trial_ends_at) > new Date() && (
+                          <Badge variant="secondary" className="bg-accent/10 text-accent-foreground text-xs">
+                            <Calendar className="w-3 h-3 mr-1" />
+                            Trial: {Math.ceil((new Date(userProfile.subscription.trial_ends_at).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}d left
+                          </Badge>
+                        )}
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        User ID: {userProfile.user_id}
-                      </p>
                       <p className="text-xs text-muted-foreground">
                         Joined: {new Date(userProfile.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant={userProfile.isAdmin ? "destructive" : "default"}
-                        onClick={() => handleToggleAdminRole(userProfile.user_id, userProfile.isAdmin)}
-                        disabled={togglingRole === userProfile.user_id || userProfile.user_id === user?.id}
-                      >
-                        {togglingRole === userProfile.user_id ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <Select
+                          disabled={managingSubscription === userProfile.user_id}
+                          onValueChange={(value) => handleSetTrial(userProfile.user_id, parseInt(value))}
+                        >
+                          <SelectTrigger className="w-[140px] h-8">
+                            <SelectValue placeholder="Set Trial" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="30">30 Days Trial</SelectItem>
+                            <SelectItem value="60">60 Days Trial</SelectItem>
+                            <SelectItem value="90">90 Days Trial</SelectItem>
+                            <SelectItem value="0">Remove Trial</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {managingSubscription === userProfile.user_id && (
                           <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <>
-                            <Shield className="w-4 h-4 mr-1" />
-                            {userProfile.isAdmin ? "Revoke" : "Grant"}
-                          </>
                         )}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleResetPassword(userProfile.user_id)}
-                        disabled={resettingPassword === userProfile.user_id}
-                      >
-                        {resettingPassword === userProfile.user_id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <>
-                            <Key className="w-4 h-4 mr-1" />
-                            Reset
-                          </>
-                        )}
-                      </Button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant={userProfile.isAdmin ? "destructive" : "default"}
+                          onClick={() => handleToggleAdminRole(userProfile.user_id, userProfile.isAdmin)}
+                          disabled={togglingRole === userProfile.user_id || userProfile.user_id === user?.id}
+                        >
+                          {togglingRole === userProfile.user_id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <Shield className="w-4 h-4 mr-1" />
+                              {userProfile.isAdmin ? "Revoke" : "Grant"}
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleResetPassword(userProfile.user_id)}
+                          disabled={resettingPassword === userProfile.user_id}
+                        >
+                          {resettingPassword === userProfile.user_id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <Key className="w-4 h-4 mr-1" />
+                              Reset
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDeleteUser(userProfile.user_id, userProfile.name)}
+                          disabled={deletingUser === userProfile.user_id || userProfile.user_id === user?.id}
+                        >
+                          {deletingUser === userProfile.user_id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
