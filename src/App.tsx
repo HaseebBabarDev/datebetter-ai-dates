@@ -17,10 +17,6 @@ import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 import Devi from "./pages/Devi";
 import NotFound from "./pages/NotFound";
-import ListStudio from "./pages/ListStudio";
-import StudioDetail from "./pages/StudioDetail";
-import OwnerDashboard from "./pages/OwnerDashboard";
-import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -45,10 +41,6 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/devi" element={<Devi />} />
-              <Route path="/list-studio" element={<ListStudio />} />
-              <Route path="/studio/:id" element={<StudioDetail />} />
-              <Route path="/owner-dashboard" element={<OwnerDashboard />} />
-              <Route path="/admin" element={<Admin />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

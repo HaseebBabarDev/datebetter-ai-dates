@@ -23,8 +23,6 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [resetEmailSent, setResetEmailSent] = useState(false);
 
   const getPasswordStrength = () => {
     if (password.length === 0) return { strength: 0, label: "" };
@@ -49,36 +47,6 @@ const Auth = () => {
       .single();
     
     return profile;
-  };
-
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email) {
-      toast({ title: "Please enter your email address", variant: "destructive" });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth?reset=true`,
-      });
-
-      if (error) {
-        toast({ title: error.message, variant: "destructive" });
-      } else {
-        setResetEmailSent(true);
-        toast({ 
-          title: "Password reset email sent", 
-          description: "Check your inbox for a password reset link" 
-        });
-      }
-    } catch (error) {
-      toast({ title: "An error occurred", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,19 +75,10 @@ const Auth = () => {
         : await signIn(email, password);
       
       if (error) {
-        // Provide more helpful error messages
-        let errorMessage = error.message;
-        
-        if (error.message.includes("Invalid login credentials")) {
-          errorMessage = "Invalid email or password. After multiple failed attempts, your account may be temporarily locked for security. Try resetting your password or wait an hour before trying again.";
-        } else if (error.message.includes("Email rate limit exceeded")) {
-          errorMessage = "Too many attempts. Please wait a few minutes before trying again.";
-        } else if (error.message.includes("already registered")) {
-          errorMessage = "Account already exists. Please sign in.";
-        }
-        
         toast({ 
-          title: errorMessage,
+          title: error.message.includes("already registered") 
+            ? "Account already exists. Please sign in."
+            : error.message,
           variant: "destructive" 
         });
       } else {
@@ -169,70 +128,16 @@ const Auth = () => {
         <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold mb-2">
-              {showForgotPassword 
-                ? "Reset Password" 
-                : isSignUp 
-                  ? "Create Your Account" 
-                  : "Welcome Back"}
+              {isSignUp ? "Create Your Account" : "Welcome Back"}
             </h2>
             <p className="text-muted-foreground">
-              {showForgotPassword
-                ? "Enter your email to receive a password reset link"
-                : isSignUp 
-                  ? "Start your journey to better dating" 
-                  : "Sign in to continue your journey"}
+              {isSignUp 
+                ? "Start your journey to better dating" 
+                : "Sign in to continue your journey"}
             </p>
           </div>
 
-        {showForgotPassword ? (
-          <form onSubmit={handleForgotPassword} className="space-y-6">
-            {resetEmailSent && (
-              <div className="p-4 bg-success/10 border border-success rounded-lg">
-                <p className="text-sm text-success">
-                  Password reset email sent! Check your inbox.
-                </p>
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <Label htmlFor="reset-email">Email address</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  id="reset-email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-primary/90"
-              size="lg"
-              disabled={loading}
-            >
-              {loading ? "Sending..." : "Send Reset Link"}
-            </Button>
-
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full"
-              onClick={() => {
-                setShowForgotPassword(false);
-                setResetEmailSent(false);
-              }}
-            >
-              Back to Sign In
-            </Button>
-          </form>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email */}
           <div className="space-y-2">
             <Label htmlFor="email">Email address</Label>
@@ -350,36 +255,18 @@ const Auth = () => {
             {loading ? "Please wait..." : isSignUp ? "Create Account" : "Sign In"}
           </Button>
         </form>
-        )}
 
-        {!showForgotPassword && (
-          <>
-            {/* Forgot Password Link */}
-            {!isSignUp && (
-              <div className="text-center mt-4">
-                <button
-                  type="button"
-                  className="text-sm text-primary hover:underline"
-                  onClick={() => setShowForgotPassword(true)}
-                >
-                  Forgot password?
-                </button>
-              </div>
-            )}
-
-            {/* Toggle Sign In/Up */}
-            <p className="text-center mt-6 text-sm text-muted-foreground">
-              {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-              <button
-                type="button"
-                className="text-primary font-medium hover:underline"
-                onClick={() => setIsSignUp(!isSignUp)}
-              >
-                {isSignUp ? "Sign in" : "Sign up"}
-              </button>
-            </p>
-          </>
-        )}
+        {/* Toggle Sign In/Up */}
+        <p className="text-center mt-6 text-sm text-muted-foreground">
+          {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+          <button
+            type="button"
+            className="text-primary font-medium hover:underline"
+            onClick={() => setIsSignUp(!isSignUp)}
+          >
+            {isSignUp ? "Sign in" : "Sign up"}
+          </button>
+        </p>
         </div>
       </main>
     </div>
