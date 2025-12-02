@@ -100,6 +100,7 @@ const Settings = () => {
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
+  const [togglingRole, setTogglingRole] = useState<string | null>(null);
 
   // Account form state
   const [name, setName] = useState("");
@@ -145,12 +146,76 @@ const Settings = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setAllUsers(profiles || []);
+
+      // Fetch admin roles for all users
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("user_id, role")
+        .eq("role", "admin");
+
+      const adminUserIds = new Set(roles?.map(r => r.user_id) || []);
+      
+      const usersWithRoles = profiles?.map(p => ({
+        ...p,
+        isAdmin: adminUserIds.has(p.user_id)
+      })) || [];
+
+      setAllUsers(usersWithRoles);
     } catch (error) {
       console.error("Error fetching users:", error);
       toast.error("Failed to load users");
     } finally {
       setLoadingUsers(false);
+    }
+  };
+
+  const handleToggleAdminRole = async (userId: string, currentlyAdmin: boolean) => {
+    if (userId === user?.id) {
+      toast.error("Cannot modify your own admin role");
+      return;
+    }
+
+    const action = currentlyAdmin ? "remove" : "add";
+    const confirmMessage = currentlyAdmin 
+      ? "Are you sure you want to remove admin access from this user?"
+      : "Are you sure you want to grant admin access to this user?";
+
+    if (!confirm(confirmMessage)) return;
+
+    setTogglingRole(userId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-user-role`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ targetUserId: userId, action }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to update role");
+      }
+
+      toast.success(result.message);
+      fetchAllUsers(); // Refresh the list
+    } catch (error) {
+      console.error("Error toggling admin role:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update role");
+    } finally {
+      setTogglingRole(null);
     }
   };
 
@@ -533,31 +598,59 @@ const Settings = () => {
                       {allUsers.map((userProfile) => (
                         <div 
                           key={userProfile.user_id}
-                          className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                          className="flex items-center justify-between gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                         >
-                          <div className="flex-1">
-                            <p className="font-medium text-sm">
-                              {userProfile.name || "Unnamed User"}
-                            </p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-sm truncate">
+                                {userProfile.name || "Unnamed User"}
+                              </p>
+                              {userProfile.isAdmin && (
+                                <Badge variant="secondary" className="bg-primary/10 text-primary text-xs">
+                                  <Shield className="w-3 h-3 mr-1" />
+                                  Admin
+                                </Badge>
+                              )}
+                              {userProfile.user_id === user?.id && (
+                                <Badge variant="outline" className="text-xs">You</Badge>
+                              )}
+                            </div>
                             <p className="text-xs text-muted-foreground">
                               ID: {userProfile.user_id.slice(0, 8)}...
                             </p>
                           </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleResetPassword(userProfile.user_id)}
-                            disabled={resettingPassword === userProfile.user_id}
-                          >
-                            {resettingPassword === userProfile.user_id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <>
-                                <Key className="w-4 h-4 mr-1" />
-                                Reset Password
-                              </>
-                            )}
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant={userProfile.isAdmin ? "destructive" : "default"}
+                              onClick={() => handleToggleAdminRole(userProfile.user_id, userProfile.isAdmin)}
+                              disabled={togglingRole === userProfile.user_id || userProfile.user_id === user?.id}
+                            >
+                              {togglingRole === userProfile.user_id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <Shield className="w-4 h-4 mr-1" />
+                                  {userProfile.isAdmin ? "Revoke" : "Grant"}
+                                </>
+                              )}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleResetPassword(userProfile.user_id)}
+                              disabled={resettingPassword === userProfile.user_id}
+                            >
+                              {resettingPassword === userProfile.user_id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <Key className="w-4 h-4 mr-1" />
+                                  Reset
+                                </>
+                              )}
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
