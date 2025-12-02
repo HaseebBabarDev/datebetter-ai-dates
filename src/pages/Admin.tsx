@@ -218,90 +218,122 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container py-6 flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate("/dashboard")}
+            className="hover:bg-primary/10"
+          >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div className="flex items-center gap-2">
-            <Shield className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-bold">Admin Panel</h1>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Shield className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                Admin Control Center
+              </h1>
+              <p className="text-sm text-muted-foreground">Manage users, subscriptions & analytics</p>
+            </div>
           </div>
         </div>
       </header>
 
       <main className="container max-w-7xl py-8">
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-background/60 backdrop-blur-sm border shadow-sm">
+            <TabsTrigger 
+              value="analytics" 
+              className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-3"
+            >
               <BarChart3 className="w-4 h-4" />
-              Analytics
+              <span className="hidden sm:inline">Analytics</span>
             </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="users" 
+              className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-3"
+            >
               <Users className="w-4 h-4" />
-              Users
+              <span className="hidden sm:inline">Users</span>
             </TabsTrigger>
-            <TabsTrigger value="subscriptions" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="subscriptions" 
+              className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-3"
+            >
               <CreditCard className="w-4 h-4" />
-              Subscriptions
+              <span className="hidden sm:inline">Plans</span>
             </TabsTrigger>
-            <TabsTrigger value="password" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="password" 
+              className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-3"
+            >
               <Key className="w-4 h-4" />
-              Reset Password
+              <span className="hidden sm:inline">Password</span>
             </TabsTrigger>
           </TabsList>
 
           {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-4">
+          <TabsContent value="analytics" className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
+              <Card className="border-l-4 border-l-primary bg-gradient-to-br from-primary/5 to-transparent hover:shadow-lg transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-foreground">Total Users</CardTitle>
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Users className="h-5 w-5 text-primary" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalUsers}</div>
-                  <p className="text-xs text-muted-foreground">
-                    +{stats.recentSignups} in last 7 days
+                  <div className="text-3xl font-bold text-foreground">{stats.totalUsers}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    <span className="text-primary font-medium">+{stats.recentSignups}</span> in last 7 days
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-l-4 border-l-secondary bg-gradient-to-br from-secondary/5 to-transparent hover:shadow-lg transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Candidates</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-foreground">Total Candidates</CardTitle>
+                  <div className="p-2 rounded-lg bg-secondary/10">
+                    <Users className="h-5 w-5 text-secondary" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalCandidates}</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-3xl font-bold text-foreground">{stats.totalCandidates}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Across all users
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-l-4 border-l-accent bg-gradient-to-br from-accent/5 to-transparent hover:shadow-lg transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Free Users</CardTitle>
-                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-foreground">Free Users</CardTitle>
+                  <div className="p-2 rounded-lg bg-accent/10">
+                    <CreditCard className="h-5 w-5 text-accent" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.activeSubscriptions.free}</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-3xl font-bold text-foreground">{stats.activeSubscriptions.free}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Free plan subscribers
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-l-4 border-l-primary bg-gradient-to-br from-primary/10 to-transparent hover:shadow-lg transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Paid Users</CardTitle>
-                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-foreground">Paid Users</CardTitle>
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.activeSubscriptions.paid}</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-3xl font-bold text-foreground">{stats.activeSubscriptions.paid}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Premium subscribers
                   </p>
                 </CardContent>
@@ -311,9 +343,12 @@ const Admin = () => {
 
           {/* Users Tab */}
           <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <CardTitle>User Management</CardTitle>
+            <Card className="shadow-lg border-t-4 border-t-primary">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-primary" />
+                  User Management
+                </CardTitle>
                 <CardDescription>View and manage all registered users</CardDescription>
               </CardHeader>
               <CardContent>
@@ -367,9 +402,12 @@ const Admin = () => {
 
           {/* Subscriptions Tab */}
           <TabsContent value="subscriptions">
-            <Card>
-              <CardHeader>
-                <CardTitle>Subscription Management</CardTitle>
+            <Card className="shadow-lg border-t-4 border-t-secondary">
+              <CardHeader className="bg-gradient-to-r from-secondary/5 to-transparent">
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-secondary" />
+                  Subscription Management
+                </CardTitle>
                 <CardDescription>Manage user subscription plans and limits</CardDescription>
               </CardHeader>
               <CardContent>
@@ -436,10 +474,10 @@ const Admin = () => {
 
           {/* Password Reset Tab */}
           <TabsContent value="password">
-            <Card>
-              <CardHeader>
+            <Card className="shadow-lg border-t-4 border-t-destructive">
+              <CardHeader className="bg-gradient-to-r from-destructive/5 to-transparent">
                 <CardTitle className="flex items-center gap-2">
-                  <Key className="w-5 h-5" />
+                  <Key className="w-5 h-5 text-destructive" />
                   Reset User Password
                 </CardTitle>
                 <CardDescription>
@@ -482,13 +520,20 @@ const Admin = () => {
                     </p>
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={resetting}>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-destructive hover:bg-destructive/90" 
+                    disabled={resetting}
+                  >
                     {resetting ? "Resetting..." : "Reset Password"}
                   </Button>
                 </form>
 
-                <div className="mt-6 p-4 bg-muted rounded-lg">
-                  <h3 className="font-semibold mb-2">Development Note</h3>
+                <div className="mt-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-amber-600" />
+                    Development Note
+                  </h3>
                   <p className="text-sm text-muted-foreground">
                     To grant admin access to a user, manually insert a record in the user_roles
                     table in your backend with role='admin' and the user's ID.
