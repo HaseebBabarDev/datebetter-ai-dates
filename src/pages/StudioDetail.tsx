@@ -37,8 +37,9 @@ export default function StudioDetail() {
     if (!id) return;
 
     try {
+      // Use public view to avoid exposing owner_user_id
       const { data: studioData, error: studioError } = await supabase
-        .from("studios")
+        .from("studios_public")
         .select("*")
         .eq("id", id)
         .single();

@@ -762,6 +762,13 @@ export type Database = {
             referencedRelation: "studios"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "studio_availability_patterns_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       studio_bookings: {
@@ -812,6 +819,13 @@ export type Database = {
             referencedRelation: "studios"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "studio_bookings_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       studio_date_overrides: {
@@ -847,6 +861,13 @@ export type Database = {
             referencedRelation: "studios"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "studio_date_overrides_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       studio_images: {
@@ -877,6 +898,13 @@ export type Database = {
             columns: ["studio_id"]
             isOneToOne: false
             referencedRelation: "studios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "studio_images_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios_public"
             referencedColumns: ["id"]
           },
         ]
@@ -924,6 +952,13 @@ export type Database = {
             referencedRelation: "studios"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "studio_reviews_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       studio_time_slots: {
@@ -963,6 +998,13 @@ export type Database = {
             columns: ["studio_id"]
             isOneToOne: false
             referencedRelation: "studios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "studio_time_slots_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1082,7 +1124,48 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      studios_public: {
+        Row: {
+          amenities: Json | null
+          area_sqm: number | null
+          base_hourly_rate: number | null
+          cover_image: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          size: string | null
+          status: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amenities?: Json | null
+          area_sqm?: number | null
+          base_hourly_rate?: number | null
+          cover_image?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          size?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amenities?: Json | null
+          area_sqm?: number | null
+          base_hourly_rate?: number | null
+          cover_image?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          size?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
