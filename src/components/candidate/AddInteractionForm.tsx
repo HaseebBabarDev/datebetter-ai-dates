@@ -326,8 +326,8 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
           <SheetDescription>
             Record a date, call, or hangout
           </SheetDescription>
-          <Badge variant="secondary" className="mt-3 text-xs py-1.5">
-            💝 Honesty is key - This is a judgment-free zone. Share exactly what you feel, no need to be perfect.
+          <Badge variant="outline" className="mt-3 text-xs py-1.5 border-accent/30 bg-accent/5 text-foreground">
+            Honesty is key - This is a judgment-free zone. Share exactly what you feel, no need to be perfect.
           </Badge>
         </SheetHeader>
 
