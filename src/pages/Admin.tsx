@@ -13,7 +13,8 @@ import {
   ArrowLeft, 
   Users, 
   UserCog,
-  Home
+  Home,
+  UserPlus
 } from "lucide-react";
 
 const Admin = () => {
@@ -25,6 +26,7 @@ const Admin = () => {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
   const [togglingRole, setTogglingRole] = useState<string | null>(null);
+  const [creatingUser, setCreatingUser] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -135,6 +137,57 @@ const Admin = () => {
       toast.error(error instanceof Error ? error.message : "Failed to update role");
     } finally {
       setTogglingRole(null);
+    }
+  };
+
+  const handleCreateUser = async () => {
+    const email = prompt("Enter user email:");
+    if (!email) return;
+    
+    const password = prompt("Enter password for this user (minimum 6 characters):");
+    if (!password) return;
+    
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    
+    const name = prompt("Enter user name (optional):");
+
+    setCreatingUser(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-create-user`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ email, password, name: name || null }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to create user");
+      }
+
+      toast.success(`User created successfully: ${email}`);
+      fetchAllUsers(); // Refresh user list
+    } catch (error) {
+      console.error("Error creating user:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to create user");
+    } finally {
+      setCreatingUser(false);
     }
   };
 
@@ -307,7 +360,21 @@ const Admin = () => {
                 <Users className="w-5 h-5 text-primary" />
                 User Management
               </CardTitle>
-              {loadingUsers && <Loader2 className="w-4 h-4 animate-spin" />}
+              <div className="flex items-center gap-2">
+                {loadingUsers && <Loader2 className="w-4 h-4 animate-spin" />}
+                <Button 
+                  size="sm" 
+                  onClick={handleCreateUser}
+                  disabled={creatingUser}
+                >
+                  {creatingUser ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : (
+                    <UserPlus className="w-4 h-4 mr-2" />
+                  )}
+                  Create User
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
