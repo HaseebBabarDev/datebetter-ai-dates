@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Sheet,
   SheetContent,
@@ -325,6 +326,9 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
           <SheetDescription>
             Record a date, call, or hangout
           </SheetDescription>
+          <Badge variant="secondary" className="mt-3 text-xs py-1.5">
+            💝 Honesty is key - This is a judgment-free zone. Share exactly what you feel, no need to be perfect.
+          </Badge>
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
