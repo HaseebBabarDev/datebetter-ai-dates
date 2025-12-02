@@ -578,6 +578,26 @@ const Settings = () => {
 
           {isAdmin && (
             <TabsContent value="admin" className="space-y-4">
+              {/* Quick Access to Admin Portal */}
+              <Card className="border-primary/20 bg-primary/5">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold flex items-center gap-2 mb-1">
+                        <Shield className="w-5 h-5 text-primary" />
+                        Admin Portal
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Access the full admin dashboard with user management and controls
+                      </p>
+                    </div>
+                    <Button onClick={() => navigate("/admin")}>
+                      Open Portal
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
