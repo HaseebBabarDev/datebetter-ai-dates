@@ -33,7 +33,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { SliderInput } from "@/components/onboarding/SliderInput";
-import { Plus, AlertTriangle, Lightbulb, Phone, Heart, Lock } from "lucide-react";
+import { Plus, AlertTriangle, Lightbulb, Phone, Heart, Lock, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { detectCrisisContent, CRISIS_RESOURCES, CrisisDetectionResult } from "@/lib/crisisDetection";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -93,8 +93,11 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   const [showPendingAdviceDialog, setShowPendingAdviceDialog] = useState(false);
   const [showCrisisDialog, setShowCrisisDialog] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showPrivacyDialog, setShowPrivacyDialog] = useState(false);
   const [crisisResult, setCrisisResult] = useState<CrisisDetectionResult | null>(null);
   const [loading, setLoading] = useState(false);
+  
+  const PRIVACY_ACKNOWLEDGED_KEY = "devi_interaction_privacy_acknowledged";
 
   const [interactionType, setInteractionType] = useState<Enums<"interaction_type">>(defaultType);
   const [interactionDate, setInteractionDate] = useState(
@@ -180,6 +183,14 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   };
 
   const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      const hasAcknowledgedPrivacy = localStorage.getItem(PRIVACY_ACKNOWLEDGED_KEY);
+      if (!hasAcknowledgedPrivacy) {
+        setShowPrivacyDialog(true);
+        return;
+      }
+    }
+    
     if (newOpen && hasPendingAdvice) {
       setShowPendingAdviceDialog(true);
     } else if (newOpen && isNoContact) {
@@ -188,6 +199,22 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
       setShowUpgradeDialog(true);
     } else {
       setOpen(newOpen);
+    }
+  };
+
+  const handlePrivacyAcknowledged = () => {
+    localStorage.setItem(PRIVACY_ACKNOWLEDGED_KEY, "true");
+    setShowPrivacyDialog(false);
+    
+    // Continue with the normal flow
+    if (hasPendingAdvice) {
+      setShowPendingAdviceDialog(true);
+    } else if (isNoContact) {
+      setShowBrokeContactDialog(true);
+    } else if (!canUseUpdate(candidateId)) {
+      setShowUpgradeDialog(true);
+    } else {
+      setOpen(true);
     }
   };
 
@@ -201,6 +228,47 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
 
   return (
     <>
+      {/* First-time Privacy Reassurance Dialog */}
+      <AlertDialog open={showPrivacyDialog} onOpenChange={setShowPrivacyDialog}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-primary" />
+              Your Secrets Are Safe With Us
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4">
+                <p className="text-foreground">
+                  Everything you share here is <strong>completely private</strong> and encrypted.
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">•</span>
+                    Your notes and feelings are only visible to you
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">•</span>
+                    We never share your data with anyone
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">•</span>
+                    Be honest — raw data leads to better insights
+                  </li>
+                </ul>
+                <p className="text-sm text-muted-foreground">
+                  This is your safe space to reflect on your dating journey.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handlePrivacyAcknowledged}>
+              I Understand, Let's Go
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <AlertDialog open={showPendingAdviceDialog} onOpenChange={setShowPendingAdviceDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
