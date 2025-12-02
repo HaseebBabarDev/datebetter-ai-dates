@@ -17,6 +17,7 @@ import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 import Devi from "./pages/Devi";
 import Admin from "./pages/Admin";
+import TestSetup from "./pages/TestSetup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/devi" element={<Devi />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/test-setup" element={<TestSetup />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
