@@ -16,8 +16,10 @@ import {
   Home,
   UserPlus,
   Trash2,
-  Calendar
+  Calendar,
+  DollarSign
 } from "lucide-react";
+import { RevenueAnalytics } from "@/components/admin/RevenueAnalytics";
 import { 
   Select,
   SelectContent,
@@ -453,6 +455,11 @@ const Admin = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Revenue Analytics */}
+        <div className="mb-8">
+          <RevenueAnalytics />
         </div>
 
         {/* User Management */}
