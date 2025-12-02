@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2 } from "lucide-react";
+import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key } from "lucide-react";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { Badge } from "@/components/ui/badge";
@@ -96,6 +96,10 @@ const Settings = () => {
   const [saving, setSaving] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<SubscriptionPlan>("free");
   const [changingPlan, setChangingPlan] = useState<SubscriptionPlan | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState<string | null>(null);
 
   // Account form state
   const [name, setName] = useState("");
@@ -110,8 +114,91 @@ const Settings = () => {
     if (user) {
       fetchProfile();
       fetchSubscription();
+      checkAdminStatus();
     }
   }, [user]);
+
+  const checkAdminStatus = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user!.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (!error && data) {
+        setIsAdmin(true);
+        fetchAllUsers();
+      }
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+    }
+  };
+
+  const fetchAllUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("user_id, name, created_at")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setAllUsers(profiles || []);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      toast.error("Failed to load users");
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const handleResetPassword = async (userId: string) => {
+    const newPassword = prompt("Enter new password for this user (minimum 6 characters):");
+    
+    if (!newPassword) return;
+    
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    setResettingPassword(userId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-reset-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ userId, newPassword }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to reset password");
+      }
+
+      toast.success("Password reset successfully");
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to reset password");
+    } finally {
+      setResettingPassword(null);
+    }
+  };
 
   const fetchSubscription = async () => {
     try {
@@ -265,7 +352,7 @@ const Settings = () => {
 
       <main className="container mx-auto px-4 py-6 max-w-lg">
         <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'} mb-4`}>
             <TabsTrigger value="account" className="gap-1.5 text-xs sm:text-sm">
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">Account</span>
@@ -278,6 +365,12 @@ const Settings = () => {
               <CreditCard className="w-4 h-4" />
               <span className="hidden sm:inline">Billing</span>
             </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="admin" className="gap-1.5 text-xs sm:text-sm">
+                <Shield className="w-4 h-4" />
+                <span className="hidden sm:inline">Admin</span>
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="account" className="space-y-4">
@@ -417,6 +510,62 @@ const Settings = () => {
           <TabsContent value="preferences">
             <ProfilePreferencesEditor defaultSection={section} />
           </TabsContent>
+
+          {isAdmin && (
+            <TabsContent value="admin" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-primary" />
+                    Admin Controls
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b">
+                    <h4 className="font-medium">User Management</h4>
+                    {loadingUsers && <Loader2 className="w-4 h-4 animate-spin" />}
+                  </div>
+                  
+                  {allUsers.length === 0 && !loadingUsers ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No users found</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {allUsers.map((userProfile) => (
+                        <div 
+                          key={userProfile.user_id}
+                          className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                        >
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">
+                              {userProfile.name || "Unnamed User"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              ID: {userProfile.user_id.slice(0, 8)}...
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleResetPassword(userProfile.user_id)}
+                            disabled={resettingPassword === userProfile.user_id}
+                          >
+                            {resettingPassword === userProfile.user_id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <>
+                                <Key className="w-4 h-4 mr-1" />
+                                Reset Password
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
 
           <TabsContent value="billing" className="space-y-4">
             {/* Current Plan */}
