@@ -23,49 +23,69 @@ serve(async (req) => {
       }
     );
 
-    // Get request body
-    const { email, password, name } = await req.json();
+    // Create the test user
+    const email = "spiritualbutsassy@gmail.com";
+    const password = "Miamigirl24*";
+    const name = "Spiritual";
 
-    if (!email || !password) {
+    console.log(`Creating test user: ${email}`);
+
+    // Check if user already exists
+    const { data: existingUsers } = await supabaseClient.auth.admin.listUsers();
+    const userExists = existingUsers?.users.find(u => u.email === email);
+
+    if (userExists) {
+      console.log("User already exists, updating password");
+      
+      // Update password if user exists
+      const { error: updateError } = await supabaseClient.auth.admin.updateUserById(
+        userExists.id,
+        { password }
+      );
+
+      if (updateError) {
+        throw updateError;
+      }
+
       return new Response(
-        JSON.stringify({ error: "email and password are required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ 
+          success: true, 
+          message: "Test user password updated successfully",
+          email,
+          userId: userExists.id
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Create the user using service role
+    // Create new user
     const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
       user_metadata: {
-        name: name || null
+        name
       }
     });
 
     if (createError) {
-      return new Response(
-        JSON.stringify({ error: createError.message }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      throw createError;
     }
 
-    console.log("User created successfully:", newUser.user?.id);
+    console.log("Test user created successfully:", newUser.user?.id);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "User created successfully",
-        user: {
-          id: newUser.user?.id,
-          email: newUser.user?.email
-        }
+        message: "Test user created successfully",
+        email,
+        userId: newUser.user?.id
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "An unknown error occurred";
-    console.error("Error in admin-create-user:", message);
+    console.error("Error in setup-test-user:", message);
     return new Response(
       JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
