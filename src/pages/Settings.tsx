@@ -440,23 +440,23 @@ const Settings = () => {
 
       <main className="container mx-auto px-4 py-4 sm:py-6 max-w-lg space-y-4">
         <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'} mb-4`}>
-            <TabsTrigger value="account" className="gap-1.5 text-xs sm:text-sm">
-              <User className="w-4 h-4" />
-              <span className="hidden sm:inline">Account</span>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'} mb-4 h-auto p-1`}>
+            <TabsTrigger value="account" className="flex items-center gap-1 py-2.5 px-1 min-w-0">
+              <User className="w-4 h-4 shrink-0" />
+              <span className="truncate text-[11px] sm:text-sm">Account</span>
             </TabsTrigger>
-            <TabsTrigger value="preferences" className="gap-1.5 text-xs sm:text-sm">
-              <Settings2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Preferences</span>
+            <TabsTrigger value="preferences" className="flex items-center gap-1 py-2.5 px-1 min-w-0">
+              <Settings2 className="w-4 h-4 shrink-0" />
+              <span className="truncate text-[11px] sm:text-sm">Prefs</span>
             </TabsTrigger>
-            <TabsTrigger value="billing" className="gap-1.5 text-xs sm:text-sm">
-              <CreditCard className="w-4 h-4" />
-              <span className="hidden sm:inline">Billing</span>
+            <TabsTrigger value="billing" className="flex items-center gap-1 py-2.5 px-1 min-w-0">
+              <CreditCard className="w-4 h-4 shrink-0" />
+              <span className="truncate text-[11px] sm:text-sm">Billing</span>
             </TabsTrigger>
             {isAdmin && (
-              <TabsTrigger value="admin" className="gap-1.5 text-xs sm:text-sm">
-                <Shield className="w-4 h-4" />
-                <span className="hidden sm:inline">Admin</span>
+              <TabsTrigger value="admin" className="flex items-center gap-1 py-2.5 px-1 min-w-0">
+                <Shield className="w-4 h-4 shrink-0" />
+                <span className="truncate text-[11px] sm:text-sm">Admin</span>
               </TabsTrigger>
             )}
           </TabsList>

@@ -391,9 +391,9 @@ const Patterns = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <header className="sticky top-0 bg-background/95 backdrop-blur border-b border-border z-10">
+      <header className="sticky top-0 bg-background/95 backdrop-blur border-b border-border z-10 safe-area-top">
         <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="w-5 h-5" />
@@ -401,16 +401,16 @@ const Patterns = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
             <Home className="w-5 h-5" />
           </Button>
-          <div className="flex-1">
-            <h1 className="font-semibold text-foreground">Dating Patterns</h1>
-            <p className="text-xs text-muted-foreground">Insights from your journey</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="font-semibold text-foreground truncate">Dating Patterns</h1>
+            <p className="text-xs text-muted-foreground truncate">Insights from your journey</p>
           </div>
           {stats && stats.totalCandidates > 0 && (
             <Button variant="ghost" size="icon" onClick={shareToInstagram}>
               <Share2 className="w-5 h-5" />
             </Button>
           )}
-          <BarChart3 className="w-5 h-5 text-primary" />
+          <BarChart3 className="w-5 h-5 text-primary shrink-0" />
         </div>
       </header>
 
