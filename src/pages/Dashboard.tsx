@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,6 +48,8 @@ import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
 import { FreeUpgradeBanner } from "@/components/subscription/FreeUpgradeBanner";
 import { DailyLoggingCTA } from "@/components/dashboard/DailyLoggingCTA";
 import { ReferralCard } from "@/components/dashboard/ReferralCard";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/PullToRefresh";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -171,7 +173,7 @@ const Dashboard = () => {
     }
   }, [user]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [profileRes, candidatesRes, interactionsRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", user!.id).single(),
@@ -187,7 +189,13 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  // Pull to refresh
+  const { containerRef, isRefreshing, pullDistance } = usePullToRefresh({
+    onRefresh: fetchData,
+    threshold: 80,
+  });
 
   // Calculate cycle phase alerts
   const cycleAlerts = useMemo(() => {
@@ -699,9 +707,15 @@ const Dashboard = () => {
   ).length;
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-background">
+    <div 
+      ref={containerRef}
+      className="min-h-screen relative overflow-auto bg-background"
+    >
+      {/* Pull to Refresh Indicator */}
+      <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} />
+      
       {/* Hero Background Image */}
-      <div className="fixed inset-0 z-0">
+      <div className="fixed inset-0 z-0 pointer-events-none">
         <img 
           src={heroCouple} 
           alt="" 
@@ -734,7 +748,7 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="relative z-10 container mx-auto px-4 py-4 max-w-lg pb-20">
+      <main className="relative z-10 container mx-auto px-4 py-4 max-w-lg pb-24">
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setQualityFilter(null); }} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4 bg-muted/50 backdrop-blur-sm border border-border">
             <TabsTrigger value="home" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground">Home</TabsTrigger>
