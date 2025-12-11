@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key } from "lucide-react";
+import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { Badge } from "@/components/ui/badge";
@@ -681,6 +681,78 @@ const Settings = () => {
           )}
 
           <TabsContent value="billing" className="space-y-4">
+            {/* Legal & App Info Section */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  Legal & Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1">
+                <button
+                  onClick={() => navigate("/privacy-policy")}
+                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <Shield className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm">Privacy Policy</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+                <button
+                  onClick={() => navigate("/terms")}
+                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm">Terms & Conditions</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+                <button
+                  onClick={() => navigate("/about")}
+                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <Info className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm">About dateBetter</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+                <button
+                  onClick={() => navigate("/support")}
+                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm">Support & Contact</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+                <button
+                  onClick={() => navigate("/clear-data")}
+                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <Trash2 className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm">Clear Data & Privacy</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+                <button
+                  onClick={() => navigate("/app-version")}
+                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <Smartphone className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm">App Version</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </CardContent>
+            </Card>
+
             {/* Current Plan */}
             <Card className="border-primary/20 bg-primary/5">
               <CardContent className="pt-6">
