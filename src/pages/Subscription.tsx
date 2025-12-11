@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Crown, Sparkles, Heart, ArrowLeft, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { PaymentSheet } from "@/components/subscription/PaymentSheet";
 
 const SUBSCRIPTION_PLANS = [
   {
@@ -101,8 +102,10 @@ export default function Subscription() {
   const { user } = useAuth();
   const { subscription, refetch } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<typeof SUBSCRIPTION_PLANS[0] | null>(null);
 
-  const handleSelectPlan = async (planId: string) => {
+  const handleSelectPlan = (planId: string) => {
     if (!user) {
       toast.error("Please sign in first");
       navigate("/auth");
@@ -119,24 +122,32 @@ export default function Subscription() {
       return;
     }
 
-    setLoading(planId);
+    const plan = SUBSCRIPTION_PLANS.find(p => p.id === planId);
+    if (plan) {
+      setSelectedPlan(plan);
+      setPaymentOpen(true);
+    }
+  };
+
+  const handlePaymentSuccess = async () => {
+    if (!selectedPlan || !user) return;
+
+    setLoading(selectedPlan.id);
 
     try {
-      // For demo purposes, we'll just update the subscription directly
-      // In production, this would integrate with Stripe checkout
       const planLimits: Record<string, { candidates: number; updates: number }> = {
         new_to_dating: { candidates: 3, updates: 5 },
         dating_often: { candidates: 7, updates: 12 },
         dating_more: { candidates: 12, updates: 20 },
       };
 
-      const limits = planLimits[planId];
+      const limits = planLimits[selectedPlan.id];
 
       if (limits) {
         const { error } = await supabase
           .from("user_subscriptions")
           .update({
-            plan: planId as "free" | "new_to_dating" | "dating_often" | "dating_more",
+            plan: selectedPlan.id as "free" | "new_to_dating" | "dating_often" | "dating_more",
             candidates_limit: limits.candidates,
             updates_per_candidate: limits.updates,
           })
@@ -144,7 +155,6 @@ export default function Subscription() {
 
         if (error) throw error;
 
-        toast.success(`Upgraded to ${SUBSCRIPTION_PLANS.find(p => p.id === planId)?.name}!`);
         refetch();
         navigate("/dashboard");
       }
@@ -159,10 +169,10 @@ export default function Subscription() {
   const currentPlan = subscription?.plan || "free";
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container max-w-5xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background pb-24">
+      <div className="container max-w-5xl mx-auto px-4 py-6 sm:py-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <Button
             variant="ghost"
             size="sm"
@@ -172,16 +182,16 @@ export default function Subscription() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
             Choose Your Plan
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm sm:text-base">
             Unlock more candidates, deeper insights, and smarter dating decisions.
           </p>
         </div>
 
         {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {SUBSCRIPTION_PLANS.map((plan) => {
             const Icon = plan.icon;
             const isCurrentPlan = currentPlan === plan.id;
@@ -196,14 +206,14 @@ export default function Subscription() {
               >
                 {plan.popular && (
                   <div className="absolute top-0 right-0">
-                    <Badge className="rounded-none rounded-bl-lg bg-primary text-primary-foreground">
+                    <Badge className="rounded-none rounded-bl-lg bg-primary text-primary-foreground text-xs">
                       Most Popular
                     </Badge>
                   </div>
                 )}
                 {isCurrentPlan && (
                   <div className="absolute top-0 left-0">
-                    <Badge variant="secondary" className="rounded-none rounded-br-lg">
+                    <Badge variant="secondary" className="rounded-none rounded-br-lg text-xs">
                       Current Plan
                     </Badge>
                   </div>
@@ -212,27 +222,27 @@ export default function Subscription() {
                 <CardHeader className={`${plan.color} pb-4`}>
                   <div className="flex items-center gap-2 mb-2">
                     <Icon className={`w-5 h-5 ${plan.textColor}`} />
-                    <CardTitle className="text-lg">{plan.name}</CardTitle>
+                    <CardTitle className="text-base sm:text-lg">{plan.name}</CardTitle>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold">{plan.price}</span>
+                    <span className="text-2xl sm:text-3xl font-bold">{plan.price}</span>
                     {isPaidPlan && (
-                      <span className="text-sm text-muted-foreground">/month</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground">/month</span>
                     )}
                   </div>
-                  <CardDescription>{plan.description}</CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">{plan.description}</CardDescription>
                 </CardHeader>
 
                 <CardContent className="pt-4">
-                  <ul className="space-y-2 mb-6">
+                  <ul className="space-y-2 mb-4 sm:mb-6">
                     {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm">
+                      <li key={idx} className="flex items-start gap-2 text-xs sm:text-sm">
                         <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                         <span>{feature}</span>
                       </li>
                     ))}
                     {plan.limitations.map((limitation, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <li key={idx} className="flex items-start gap-2 text-xs sm:text-sm text-muted-foreground">
                         <span className="w-4 h-4 mt-0.5 flex-shrink-0 text-center">—</span>
                         <span>{limitation}</span>
                       </li>
@@ -240,7 +250,7 @@ export default function Subscription() {
                   </ul>
 
                   <Button
-                    className="w-full"
+                    className="w-full text-sm"
                     variant={plan.popular ? "default" : "outline"}
                     disabled={isCurrentPlan || loading !== null}
                     onClick={() => handleSelectPlan(plan.id)}
@@ -262,14 +272,26 @@ export default function Subscription() {
         </div>
 
         {/* Footer Note */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="mt-6 sm:mt-8 text-center">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             All plans include cycle tracking, hormone-aware insights, and basic pattern detection.
-            <br />
+            <br className="hidden sm:block" />
+            <span className="sm:hidden"> </span>
             Upgrade anytime to unlock more candidates and deeper AI analysis.
           </p>
         </div>
       </div>
+
+      {/* Payment Sheet */}
+      {selectedPlan && (
+        <PaymentSheet
+          open={paymentOpen}
+          onOpenChange={setPaymentOpen}
+          planName={selectedPlan.name}
+          price={selectedPlan.price}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
+      )}
     </div>
   );
 }

@@ -21,8 +21,8 @@ export function BottomNavigation() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border safe-area-bottom">
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div className="flex items-center justify-around h-14 sm:h-16 max-w-lg mx-auto px-2">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path || 
@@ -33,7 +33,7 @@ export function BottomNavigation() {
               key={item.path}
               onClick={() => navigate(item.path)}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-[64px] transition-all duration-200 active:scale-95",
+                "flex flex-col items-center justify-center gap-0.5 flex-1 h-full min-w-[56px] transition-all duration-200 active:scale-95",
                 isActive ? "text-primary" : "text-muted-foreground"
               )}
               style={{ WebkitTapHighlightColor: "transparent" }}
