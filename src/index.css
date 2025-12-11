@@ -114,7 +114,9 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground text-xs;
+    @apply bg-background text-foreground;
+    font-size: 14px;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-tap-highlight-color: transparent;
@@ -128,14 +130,19 @@ All colors MUST be HSL.
     padding-right: env(safe-area-inset-right);
   }
 
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  /* iOS Touch Targets */
-  button, a, [role="button"] {
+  /* iOS Touch Targets - minimum 44px but allow smaller icons */
+  button:not(.icon-only), 
+  a:not(.icon-only), 
+  [role="button"]:not(.icon-only) {
     min-height: 44px;
-    min-width: 44px;
   }
 
   /* Smooth scrolling for iOS */
@@ -144,20 +151,20 @@ All colors MUST be HSL.
     scroll-behavior: smooth;
   }
 
-  /* Headings keep larger sizes */
+  /* Responsive headings */
   h1 {
-    @apply text-2xl;
+    @apply text-xl sm:text-2xl;
   }
   h2 {
-    @apply text-xl;
+    @apply text-lg sm:text-xl;
   }
   h3 {
-    @apply text-lg;
+    @apply text-base sm:text-lg;
   }
 
-  /* Base text is 12px */
-  p, span, label, div {
-    font-size: 0.75rem;
+  /* Responsive text defaults */
+  p, span, label {
+    @apply text-sm;
   }
 
   /* Preserve button text sizes */

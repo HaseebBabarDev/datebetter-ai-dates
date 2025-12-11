@@ -19,6 +19,8 @@ import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Ma
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { Badge } from "@/components/ui/badge";
+import { PaymentSheet } from "@/components/subscription/PaymentSheet";
+import { NotificationSettings } from "@/components/settings/NotificationSettings";
 
 type Profile = Tables<"profiles">;
 type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more";
@@ -101,6 +103,8 @@ const Settings = () => {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
   const [togglingRole, setTogglingRole] = useState<string | null>(null);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [selectedPlanForPayment, setSelectedPlanForPayment] = useState<SubscriptionPlan | null>(null);
 
   // Account form state
   const [name, setName] = useState("");
@@ -285,6 +289,18 @@ const Settings = () => {
   const handleChangePlan = async (newPlan: SubscriptionPlan) => {
     if (newPlan === currentPlan) return;
     
+    // For paid plans, show payment sheet first
+    if (newPlan !== "free") {
+      setSelectedPlanForPayment(newPlan);
+      setPaymentOpen(true);
+      return;
+    }
+    
+    // For downgrade to free
+    await processUpgrade(newPlan);
+  };
+
+  const processUpgrade = async (newPlan: SubscriptionPlan) => {
     setChangingPlan(newPlan);
     try {
       const limits = PLAN_LIMITS[newPlan];
@@ -327,6 +343,13 @@ const Settings = () => {
       toast.error("Failed to change plan");
     } finally {
       setChangingPlan(null);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    if (selectedPlanForPayment) {
+      processUpgrade(selectedPlanForPayment);
+      setSelectedPlanForPayment(null);
     }
   };
 
@@ -400,22 +423,22 @@ const Settings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
-        <div className="container mx-auto px-4 py-4 max-w-lg">
+    <div className="min-h-screen bg-background pb-24">
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border safe-area-top">
+        <div className="container mx-auto px-4 py-3 sm:py-4 max-w-lg">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="shrink-0">
               <Home className="w-5 h-5" />
             </Button>
-            <h1 className="text-xl font-semibold">Settings</h1>
+            <h1 className="text-lg sm:text-xl font-semibold truncate">Settings</h1>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 max-w-lg">
+      <main className="container mx-auto px-4 py-4 sm:py-6 max-w-lg space-y-4">
         <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'} mb-4`}>
             <TabsTrigger value="account" className="gap-1.5 text-xs sm:text-sm">
@@ -914,6 +937,17 @@ const Settings = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Payment Sheet */}
+      {selectedPlanForPayment && (
+        <PaymentSheet
+          open={paymentOpen}
+          onOpenChange={setPaymentOpen}
+          planName={PLAN_DISPLAY[selectedPlanForPayment].name}
+          price={PLAN_DISPLAY[selectedPlanForPayment].price}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
+      )}
     </div>
   );
 };
