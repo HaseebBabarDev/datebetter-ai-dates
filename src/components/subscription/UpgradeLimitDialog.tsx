@@ -50,9 +50,9 @@ export function UpgradeLimitDialog({
 }: UpgradeLimitDialogProps) {
   const navigate = useNavigate();
 
-  const handleUpgrade = (planId: string) => {
+  const handleUpgrade = () => {
     onOpenChange(false);
-    navigate("/settings?tab=billing");
+    navigate("/subscription");
   };
 
   const availablePlans = PLAN_OPTIONS.filter((plan) => {
@@ -112,7 +112,7 @@ export function UpgradeLimitDialog({
                 </div>
               </div>
               <Button
-                onClick={() => handleUpgrade(plan.id)}
+                onClick={handleUpgrade}
                 className="w-full"
                 variant={plan.recommended ? "default" : "outline"}
                 size="sm"

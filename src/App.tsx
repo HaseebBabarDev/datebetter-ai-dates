@@ -18,6 +18,7 @@ import Notifications from "./pages/Notifications";
 import Devi from "./pages/Devi";
 import Admin from "./pages/Admin";
 import TestSetup from "./pages/TestSetup";
+import Subscription from "./pages/Subscription";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="/devi" element={<Devi />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/test-setup" element={<TestSetup />} />
+              <Route path="/subscription" element={<Subscription />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

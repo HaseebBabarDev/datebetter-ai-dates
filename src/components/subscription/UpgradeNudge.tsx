@@ -39,7 +39,7 @@ export function UpgradeNudge({ candidateId, onDismiss }: UpgradeNudgeProps) {
           size="sm"
           variant="default"
           className="text-xs h-7"
-          onClick={() => navigate("/settings?tab=billing")}
+          onClick={() => navigate("/subscription")}
         >
           Upgrade
         </Button>

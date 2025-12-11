@@ -41,7 +41,7 @@ export function FreeUpgradeBanner() {
             <Button
               size="sm"
               className="mt-3 gap-1.5"
-              onClick={() => navigate("/settings?tab=billing")}
+              onClick={() => navigate("/subscription")}
             >
               <Sparkles className="w-3.5 h-3.5" />
               View Plans
