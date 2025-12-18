@@ -377,48 +377,48 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
     ].sort((a, b) => b.score - a.score);
 
     return (
-      <div className="flex items-center gap-4">
-        {/* Score list */}
-        <div className="flex-1 space-y-2">
-          {scores.map((item, index) => (
-            <div key={item.label} className="flex items-center gap-3">
-              <div 
-                className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-medium"
-                style={{ borderColor: item.color, color: item.color }}
-              >
-                {index + 1}
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-muted-foreground">{item.label}</p>
-                <p className="text-sm font-bold" style={{ color: item.color }}>{item.score}%</p>
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        {/* Rainbow arc SVG */}
-        <div className="relative w-28 h-20">
-          <svg viewBox="0 0 120 70" className="w-full h-full">
+      <div className="flex items-center gap-6">
+        {/* Rainbow arc SVG - now larger and on the left */}
+        <div className="relative w-32 h-24 flex-shrink-0">
+          <svg viewBox="0 0 140 80" className="w-full h-full">
             {scores.map((item, index) => {
-              const radius = 55 - index * 12;
-              const strokeWidth = 10;
+              const radius = 65 - index * 14;
+              const strokeWidth = 12;
               const circumference = Math.PI * radius;
               const progress = (item.score / 100) * circumference;
               
               return (
                 <path
                   key={item.label}
-                  d={`M ${60 - radius} 60 A ${radius} ${radius} 0 0 1 ${60 + radius} 60`}
+                  d={`M ${70 - radius} 70 A ${radius} ${radius} 0 0 1 ${70 + radius} 70`}
                   fill="none"
                   stroke={item.color}
                   strokeWidth={strokeWidth}
                   strokeLinecap="round"
                   strokeDasharray={`${progress} ${circumference}`}
-                  opacity={0.9}
+                  className="drop-shadow-sm"
                 />
               );
             })}
           </svg>
+        </div>
+        
+        {/* Score list - now on the right */}
+        <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-2">
+          {scores.map((item, index) => (
+            <div key={item.label} className="flex items-center gap-2">
+              <div 
+                className="w-6 h-6 rounded-full border-2 flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+                style={{ borderColor: item.color, color: item.color }}
+              >
+                {index + 1}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] text-muted-foreground truncate">{item.label}</p>
+                <p className="text-sm font-bold leading-none" style={{ color: item.color }}>{item.score}%</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
