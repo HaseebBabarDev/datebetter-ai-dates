@@ -3,6 +3,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface OnboardingData {
+  // Quick start mode flag
+  quickStartMode?: boolean;
+  
   // Screen 0: Welcome & Age
   birthDate?: string;
   ageConfirmed?: boolean;

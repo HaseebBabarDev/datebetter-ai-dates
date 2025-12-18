@@ -55,13 +55,15 @@ const WelcomeScreen = () => {
   };
 
   const handleQuickStart = () => {
-    // Quick start - just get essential info then go to completion
-    // This will skip to step 5 (RelationshipGoalsScreen) which is essential
+    // Quick start mode - mark it and proceed
+    updateData({ quickStartMode: true });
     setShowIntakeChoice(false);
     nextStep();
   };
 
   const handleDetailedSetup = () => {
+    // Full detailed setup
+    updateData({ quickStartMode: false });
     // Full detailed setup
     setShowIntakeChoice(false);
     nextStep();
