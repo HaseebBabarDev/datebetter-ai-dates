@@ -15,6 +15,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -91,6 +98,7 @@ const Devi = () => {
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [profilesLoading, setProfilesLoading] = useState(true);
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -169,7 +177,7 @@ const Devi = () => {
       return;
     }
     if (!profilesComplete) {
-      toast.error("Complete both profiles to upload screenshots");
+      setShowProfileDialog(true);
       return;
     }
     if (fileInputRef.current) {
@@ -473,44 +481,80 @@ const Devi = () => {
         </div>
       </div>
 
-      {/* Profile Completeness Warning */}
-      {selectedCandidate && !profilesComplete && !profilesLoading && (
-        <div className="border-b border-border bg-amber-500/10">
-          <div className="container mx-auto px-4 py-3 max-w-lg">
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
-                Complete profiles to unlock screenshot analysis
-              </p>
-              <div className="flex flex-col gap-1.5">
+      {/* Profile Completeness Dialog */}
+      <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              Complete Profiles to Unlock
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              To get the best analysis of screenshots, complete both your profile and {selectedCandidate?.nickname}'s profile.
+            </p>
+            
+            <div className="space-y-3">
+              {/* Your Profile */}
+              <div className="p-3 rounded-lg border border-border bg-muted/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Your Profile</span>
+                  </div>
+                  <span className={`text-sm font-medium ${userProfileCompleteness >= 70 ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {userProfileCompleteness}%
+                  </span>
+                </div>
+                <Progress value={userProfileCompleteness} className="h-1.5" />
                 {userProfileCompleteness < 70 && (
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    className="h-7 justify-start gap-2 text-xs hover:bg-amber-500/20"
-                    onClick={() => navigate("/settings", { state: { tab: "profile" } })}
+                    className="w-full mt-2 gap-2"
+                    onClick={() => {
+                      setShowProfileDialog(false);
+                      navigate("/settings", { state: { tab: "profile" } });
+                    }}
                   >
-                    <User className="w-3 h-3" />
-                    Your profile ({userProfileCompleteness}%)
-                    <ArrowRight className="w-3 h-3 ml-auto" />
+                    Complete Profile
+                    <ArrowRight className="w-4 h-4" />
                   </Button>
                 )}
-                {candidateCompleteness < 70 && (
+              </div>
+
+              {/* Candidate Profile */}
+              <div className="p-3 rounded-lg border border-border bg-muted/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">{selectedCandidate?.nickname}'s Profile</span>
+                  </div>
+                  <span className={`text-sm font-medium ${candidateCompleteness >= 70 ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {candidateCompleteness}%
+                  </span>
+                </div>
+                <Progress value={candidateCompleteness} className="h-1.5" />
+                {candidateCompleteness < 70 && selectedCandidate && (
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    className="h-7 justify-start gap-2 text-xs hover:bg-amber-500/20"
-                    onClick={() => navigate(`/add-candidate?edit=${selectedCandidate.id}`)}
+                    className="w-full mt-2 gap-2"
+                    onClick={() => {
+                      setShowProfileDialog(false);
+                      navigate(`/add-candidate?edit=${selectedCandidate.id}`);
+                    }}
                   >
-                    <Users className="w-3 h-3" />
-                    {selectedCandidate.nickname}'s profile ({candidateCompleteness}%)
-                    <ArrowRight className="w-3 h-3 ml-auto" />
+                    Complete Profile
+                    <ArrowRight className="w-4 h-4" />
                   </Button>
                 )}
               </div>
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">
