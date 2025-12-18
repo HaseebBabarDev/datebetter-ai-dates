@@ -36,6 +36,7 @@ import {
   XCircle,
   RefreshCw,
   Lightbulb,
+  ChevronDown,
 } from "lucide-react";
 import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
@@ -100,6 +101,7 @@ const Dashboard = () => {
   const [qualityFilter, setQualityFilter] = useState<"good" | "bad" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [reopeningId, setReopeningId] = useState<string | null>(null);
+  const [showAllActivity, setShowAllActivity] = useState(false);
 
   const handleReopenRelationship = async (candidateId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -966,7 +968,7 @@ const Dashboard = () => {
                   {recap.recentActivity.length === 0 && (
                     <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
                   )}
-                  {recap.recentActivity.map((item, idx) => {
+                  {(showAllActivity ? recap.recentActivity : recap.recentActivity.slice(0, 5)).map((item, idx) => {
                     if (item.type === "matched") {
                       return (
                         <button
@@ -1145,6 +1147,17 @@ const Dashboard = () => {
 
                     return null;
                   })}
+                  
+                  {/* See More / See Less Button */}
+                  {recap.recentActivity.length > 5 && (
+                    <button
+                      onClick={() => setShowAllActivity(!showAllActivity)}
+                      className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                    >
+                      <ChevronDown className={`w-4 h-4 transition-transform ${showAllActivity ? 'rotate-180' : ''}`} />
+                      {showAllActivity ? 'See Less' : `See ${recap.recentActivity.length - 5} More`}
+                    </button>
+                  )}
                 </div>
               </div>
             )}
