@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Tables, Enums } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,12 +16,17 @@ import {
   Calendar,
   Heart,
   Phone,
+  Sparkles,
+  User,
+  ChevronDown,
 } from "lucide-react";
 
 type Interaction = Tables<"interactions">;
+type DeviMessage = Tables<"devi_messages">;
 
 interface InteractionHistoryProps {
   interactions: Interaction[];
+  deviMessages?: DeviMessage[];
 }
 
 const INTERACTION_ICONS: Record<Enums<"interaction_type">, React.ReactNode> = {
@@ -65,10 +70,37 @@ const getFeelingEmoji = (feeling: number | null) => {
   return "😞";
 };
 
+type TimelineItem = 
+  | { type: "interaction"; data: Interaction; date: Date }
+  | { type: "devi_user"; data: DeviMessage; date: Date }
+  | { type: "devi_assistant"; data: DeviMessage; date: Date };
+
 export const InteractionHistory: React.FC<InteractionHistoryProps> = ({
   interactions,
+  deviMessages = [],
 }) => {
-  if (interactions.length === 0) {
+  const [showAll, setShowAll] = useState(false);
+
+  // Combine interactions and D.E.V.I. messages into a unified timeline
+  const timelineItems: TimelineItem[] = [
+    ...interactions.map((interaction): TimelineItem => ({
+      type: "interaction",
+      data: interaction,
+      date: interaction.interaction_date 
+        ? new Date(interaction.interaction_date) 
+        : new Date(interaction.created_at || Date.now()),
+    })),
+    ...deviMessages.map((msg): TimelineItem => ({
+      type: msg.role === "user" ? "devi_user" : "devi_assistant",
+      data: msg,
+      date: new Date(msg.created_at),
+    })),
+  ].sort((a, b) => b.date.getTime() - a.date.getTime());
+
+  const displayedItems = showAll ? timelineItems : timelineItems.slice(0, 5);
+  const hasMore = timelineItems.length > 5;
+
+  if (timelineItems.length === 0) {
     return (
       <Card>
         <CardContent className="py-8 text-center">
@@ -83,54 +115,114 @@ export const InteractionHistory: React.FC<InteractionHistoryProps> = ({
 
   return (
     <div className="space-y-3">
-      {interactions.map((interaction) => (
-        <Card key={interaction.id}>
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                  {INTERACTION_ICONS[interaction.interaction_type]}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">
-                      {INTERACTION_LABELS[interaction.interaction_type]}
-                    </span>
-                    <span className="text-lg">
-                      {getFeelingEmoji(interaction.overall_feeling)}
-                    </span>
+      {displayedItems.map((item, index) => {
+        if (item.type === "interaction") {
+          const interaction = item.data as Interaction;
+          return (
+            <Card key={`interaction-${interaction.id}`}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                      {INTERACTION_ICONS[interaction.interaction_type]}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">
+                          {INTERACTION_LABELS[interaction.interaction_type]}
+                        </span>
+                        <span className="text-lg">
+                          {getFeelingEmoji(interaction.overall_feeling)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {interaction.interaction_date
+                          ? new Date(interaction.interaction_date).toLocaleDateString()
+                          : "No date"}
+                        {interaction.duration && ` · ${interaction.duration}`}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {interaction.interaction_date
-                      ? new Date(interaction.interaction_date).toLocaleDateString()
-                      : "No date"}
-                    {interaction.duration && ` · ${interaction.duration}`}
+                  {interaction.who_initiated && (
+                    <Badge variant="outline" className="text-xs">
+                      {interaction.who_initiated === "me" ? "I initiated" : "They initiated"}
+                    </Badge>
+                  )}
+                </div>
+
+                {interaction.notes && (
+                  <p className="text-sm text-muted-foreground mt-3 pl-13">
+                    {interaction.notes}
                   </p>
+                )}
+
+                {interaction.gut_feeling && (
+                  <div className="mt-3 pl-13">
+                    <Badge variant="secondary" className="text-xs">
+                      Gut: {interaction.gut_feeling}
+                    </Badge>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        }
+
+        // D.E.V.I. messages
+        const msg = item.data as DeviMessage;
+        const isUser = item.type === "devi_user";
+
+        return (
+          <Card 
+            key={`devi-${msg.id}`} 
+            className={isUser ? "border-primary/20 bg-primary/5" : "border-accent/20 bg-accent/5"}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  isUser ? "bg-primary/10 text-primary" : "bg-accent/20 text-accent-foreground"
+                }`}>
+                  {isUser ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium text-sm">
+                      {isUser ? "You asked D.E.V.I." : "D.E.V.I. advice"}
+                    </span>
+                    <Badge variant="outline" className="text-xs">
+                      {isUser ? "Question" : "Advice"}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    {item.date.toLocaleDateString()} · {item.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                  <p className="text-sm text-foreground whitespace-pre-wrap line-clamp-4">
+                    {msg.content}
+                  </p>
+                  {msg.image_url && (
+                    <div className="mt-2">
+                      <Badge variant="secondary" className="text-xs">
+                        📷 Image attached
+                      </Badge>
+                    </div>
+                  )}
                 </div>
               </div>
-              {interaction.who_initiated && (
-                <Badge variant="outline" className="text-xs">
-                  {interaction.who_initiated === "me" ? "I initiated" : "They initiated"}
-                </Badge>
-              )}
-            </div>
+            </CardContent>
+          </Card>
+        );
+      })}
 
-            {interaction.notes && (
-              <p className="text-sm text-muted-foreground mt-3 pl-13">
-                {interaction.notes}
-              </p>
-            )}
-
-            {interaction.gut_feeling && (
-              <div className="mt-3 pl-13">
-                <Badge variant="secondary" className="text-xs">
-                  Gut: {interaction.gut_feeling}
-                </Badge>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      ))}
+      {/* See More / See Less Button */}
+      {hasMore && (
+        <button
+          onClick={() => setShowAll(!showAll)}
+          className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors"
+        >
+          <ChevronDown className={`w-4 h-4 transition-transform ${showAll ? 'rotate-180' : ''}`} />
+          {showAll ? 'See Less' : `See ${timelineItems.length - 5} More`}
+        </button>
+      )}
     </div>
   );
 };
