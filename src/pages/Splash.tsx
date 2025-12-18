@@ -84,21 +84,21 @@ const Splash = () => {
           <h1 className="font-poppins text-4xl sm:text-5xl md:text-7xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent mb-1 tracking-tight drop-shadow-lg">
             dateBetter
           </h1>
-          <p className="font-poppins text-base sm:text-lg md:text-xl text-white font-medium tracking-wide drop-shadow-lg">
+          <p className="font-poppins text-base sm:text-lg md:text-xl text-white font-semibold tracking-wide drop-shadow-lg">
             Data for Dating
           </p>
         </div>
 
         {/* Tagline */}
-        <p className="font-poppins text-center text-white/90 text-sm mb-3 max-w-xs sm:max-w-sm font-medium drop-shadow-lg">
+        <p className="font-poppins text-center text-white/90 text-sm mb-3 max-w-xs sm:max-w-sm font-semibold drop-shadow-lg">
           AI-backed app helping women select better partners
         </p>
         
         {/* D.E.V.I. Badge */}
         <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-black/30 backdrop-blur-md border border-white/20 mb-5 shadow-[var(--shadow-soft)]">
           <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
-          <span className="text-xs sm:text-sm font-semibold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">D.E.V.I.</span>
-          <span className="text-[10px] sm:text-xs text-white/80">Dating Evaluation & Vetting Intelligence</span>
+          <span className="text-xs sm:text-sm font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">D.E.V.I.</span>
+          <span className="text-[10px] sm:text-xs text-white font-semibold">Dating Evaluation & Vetting Intelligence</span>
         </div>
 
         {/* Features */}
@@ -140,7 +140,7 @@ const FeatureItem: React.FC<{ icon: React.ElementType; text: string }> = ({ icon
     <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
       <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
     </div>
-    <span className="font-inter text-white/90 text-xs sm:text-sm">{text}</span>
+    <span className="font-inter text-white font-semibold text-xs sm:text-sm drop-shadow-md">{text}</span>
   </div>
 );
 
