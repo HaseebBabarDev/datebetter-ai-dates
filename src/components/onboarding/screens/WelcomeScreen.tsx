@@ -215,30 +215,54 @@ const WelcomeScreen = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Intake Choice Modal - Modern Design */}
+        {/* Intake Choice Modal - Mobile optimized */}
         <Dialog open={showIntakeChoice} onOpenChange={setShowIntakeChoice}>
-          <DialogContent className="border-primary/20 max-w-sm p-0 overflow-hidden">
-            <div className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-6">
-              <DialogHeader className="space-y-3">
+          <DialogContent className="w-[calc(100%-2rem)] max-w-sm mx-auto border-primary/20 p-0 overflow-hidden rounded-2xl">
+            <div className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-5">
+              <DialogHeader className="space-y-2">
                 <div className="flex justify-center">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center">
-                    <Sparkles className="w-7 h-7 text-primary" />
+                  <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-primary" />
                   </div>
                 </div>
-                <DialogTitle className="text-center text-xl">
+                <DialogTitle className="text-center text-lg">
                   How would you like to set up?
                 </DialogTitle>
-                <DialogDescription className="text-center text-sm">
+                <DialogDescription className="text-center text-xs">
                   Choose your path - you can always add more details later
                 </DialogDescription>
               </DialogHeader>
             </div>
             
-            <div className="p-4 space-y-3">
+            <div className="p-4 space-y-2.5">
+              {/* Full Setup Option - Recommended */}
+              <button
+                onClick={handleDetailedSetup}
+                className="w-full p-3.5 rounded-xl bg-[image:var(--gradient-hero)] shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all group text-left"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                    <Layers className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-white">Full Setup</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20 text-white font-medium">
+                        Recommended
+                      </span>
+                    </div>
+                    <p className="text-xs text-white/80 mt-0.5">
+                      Most accurate AI scoring & personalized insights
+                    </p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-white/70 group-hover:text-white transition-colors shrink-0 mt-2.5" />
+                </div>
+              </button>
+
               {/* Quick Start Option */}
               <button
                 onClick={handleQuickStart}
-                className="w-full p-4 rounded-xl border border-border/50 bg-card hover:bg-accent/50 hover:border-primary/30 transition-all group text-left"
+                className="w-full p-3.5 rounded-xl border border-border/50 bg-card hover:bg-accent/50 hover:border-primary/30 transition-all group text-left"
               >
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
@@ -247,38 +271,19 @@ const WelcomeScreen = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-foreground">Quick Start</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-medium">
-                        Recommended
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                        2 min
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Basic essentials only. Get started in under 2 minutes.
+                      Get AI scoring right away—refine accuracy later
                     </p>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-3" />
+                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-2.5" />
                 </div>
               </button>
 
-              {/* Detailed Setup Option */}
-              <button
-                onClick={handleDetailedSetup}
-                className="w-full p-4 rounded-xl border border-border/50 bg-card hover:bg-accent/50 hover:border-primary/30 transition-all group text-left"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-secondary/30 flex items-center justify-center shrink-0 group-hover:bg-secondary/50 transition-colors">
-                    <Layers className="w-5 h-5 text-foreground" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="font-semibold text-foreground">Full Setup</span>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Give D.E.V.I. more details for smarter, personalized insights.
-                    </p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-3" />
-                </div>
-              </button>
-
-              <p className="text-[11px] text-muted-foreground text-center pt-2">
+              <p className="text-[10px] text-muted-foreground text-center pt-1">
                 Your data is encrypted and never shared
               </p>
             </div>
