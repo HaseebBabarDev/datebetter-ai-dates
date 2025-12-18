@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -100,6 +100,7 @@ const Devi = () => {
   const [profilesLoading, setProfilesLoading] = useState(true);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [interactions, setInteractions] = useState<any[]>([]);
+  const [isUpdatingScore, setIsUpdatingScore] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -242,6 +243,52 @@ const Devi = () => {
     
     // Reset the input
     e.target.value = '';
+  };
+
+  const handleUpdateScore = async () => {
+    if (!selectedCandidate || isUpdatingScore) return;
+    
+    setIsUpdatingScore(true);
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please sign in");
+        return;
+      }
+
+      const response = await supabase.functions.invoke("calculate-compatibility", {
+        body: { candidateId: selectedCandidate.id },
+      });
+
+      if (response.error) throw response.error;
+
+      const result = response.data;
+      
+      // Update local state with new score
+      setSelectedCandidate(prev => prev ? {
+        ...prev,
+        compatibility_score: result.score,
+        score_breakdown: result.breakdown,
+        red_flags: result.breakdown?.red_flags || prev.red_flags,
+        green_flags: result.breakdown?.green_flags || prev.green_flags,
+      } : null);
+
+      // Add a message about the score update
+      const scoreMessage: Message = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: `✨ Done! I've updated ${selectedCandidate.nickname}'s compatibility score.\n\n**New Score: ${result.score}%**\n\n${result.breakdown?.advice || "The score reflects the latest information we discussed."}\n\nWant me to break down what changed?`,
+      };
+      setMessages(prev => [...prev, scoreMessage]);
+
+      toast.success(`Score updated: ${result.score}%`);
+    } catch (error) {
+      console.error("Error updating score:", error);
+      toast.error("Failed to update score");
+    } finally {
+      setIsUpdatingScore(false);
+    }
   };
 
   const sendMessage = async () => {
@@ -514,6 +561,24 @@ const Devi = () => {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+            )}
+            
+            {/* Update Score Button */}
+            {selectedCandidate && messages.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 ml-auto"
+                onClick={handleUpdateScore}
+                disabled={isUpdatingScore}
+              >
+                {isUpdatingScore ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-3.5 h-3.5" />
+                )}
+                <span className="text-xs">Update Score</span>
+              </Button>
             )}
           </div>
         </div>
