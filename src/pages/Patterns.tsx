@@ -323,7 +323,7 @@ const Patterns = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-[image:var(--gradient-page)]">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -391,34 +391,55 @@ const Patterns = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-[image:var(--gradient-page)] pb-24">
       {/* Header */}
-      <header className="sticky top-0 bg-background/95 backdrop-blur border-b border-border z-10 safe-area-top">
-        <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+      <header className="sticky top-0 bg-[image:var(--gradient-header)] backdrop-blur-xl border-b border-border/50 z-10 safe-area-top">
+        <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate(-1)}
+            className="rounded-xl hover:bg-primary/10"
+          >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate("/dashboard")}
+            className="rounded-xl hover:bg-primary/10"
+          >
             <Home className="w-5 h-5" />
           </Button>
-          <div className="flex-1 min-w-0">
-            <h1 className="font-semibold text-foreground truncate">Dating Patterns</h1>
-            <p className="text-xs text-muted-foreground truncate">Insights from your journey</p>
+          <div className="flex-1 min-w-0 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
+              <BarChart3 className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="font-semibold text-foreground truncate">Dating Patterns</h1>
+              <p className="text-xs text-muted-foreground truncate">Insights from your journey</p>
+            </div>
           </div>
           {stats && stats.totalCandidates > 0 && (
-            <Button variant="ghost" size="icon" onClick={shareToInstagram}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={shareToInstagram}
+              className="rounded-xl hover:bg-primary/10"
+            >
               <Share2 className="w-5 h-5" />
             </Button>
           )}
-          <BarChart3 className="w-5 h-5 text-primary shrink-0" />
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-4 max-w-lg">
         {!stats || stats.totalCandidates === 0 ? (
-          <Card>
+          <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
             <CardContent className="py-12 text-center">
-              <PieChart className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-muted flex items-center justify-center mb-4">
+                <PieChart className="w-8 h-8 text-muted-foreground" />
+              </div>
               <h3 className="font-medium text-foreground mb-2">No Data Yet</h3>
               <p className="text-sm text-muted-foreground">
                 Start adding candidates and logging interactions to see your dating patterns.
@@ -427,11 +448,11 @@ const Patterns = () => {
           </Card>
         ) : (
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-4">
-              <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
-              <TabsTrigger value="dating" className="text-xs">Dating</TabsTrigger>
-              <TabsTrigger value="insights" className="text-xs">Insights</TabsTrigger>
-              <TabsTrigger value="nocontact" className="text-xs">No Contact</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4 mb-4 h-auto p-1 bg-muted/50 backdrop-blur-sm">
+              <TabsTrigger value="overview" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Overview</TabsTrigger>
+              <TabsTrigger value="dating" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Dating</TabsTrigger>
+              <TabsTrigger value="insights" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Insights</TabsTrigger>
+              <TabsTrigger value="nocontact" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">No Contact</TabsTrigger>
             </TabsList>
 
             {/* Overview Tab */}
