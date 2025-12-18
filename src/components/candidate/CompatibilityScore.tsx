@@ -159,7 +159,6 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   const [adviceResponse, setAdviceResponse] = useState<AdviceTracking | null>(null);
   const [respondingToAdvice, setRespondingToAdvice] = useState(false);
   const [showNoContactDialog, setShowNoContactDialog] = useState(false);
-  const [showLowScoreWarning, setShowLowScoreWarning] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
   const { canUseUpdate, getRemainingUpdates, incrementUsage, refetch: refetchSubscription } = useSubscription();
@@ -245,15 +244,12 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       // Refetch subscription to update remaining count
       refetchSubscription();
 
-      // Show low score warning if compatibility is very low
-      if (analysis.overall_score < 35) {
-        setShowLowScoreWarning(true);
-      } else {
-        toast({
-          title: "Compatibility Analyzed",
-          description: `Score: ${analysis.overall_score}%${!isFirstCalculation ? ` • ${remainingUpdates - 1} updates left` : ""}`,
-        });
-      }
+      // Show toast with result
+      toast({
+        title: analysis.overall_score < 35 ? "Low Compatibility" : "Compatibility Analyzed",
+        description: `Score: ${analysis.overall_score}%${!isFirstCalculation ? ` • ${remainingUpdates - 1} updates left` : ""}`,
+        variant: analysis.overall_score < 35 ? "destructive" : "default",
+      });
     } catch (error) {
       console.error("Error calculating compatibility:", error);
       toast({
@@ -603,90 +599,6 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
             <AlertDialogAction onClick={handleStartNoContact}>
               Start No Contact
             </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Low Score Warning Dialog */}
-      <AlertDialog open={showLowScoreWarning} onOpenChange={setShowLowScoreWarning}>
-        <AlertDialogContent className="max-w-[95vw] sm:max-w-[520px]">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-              <AlertTriangle className="w-5 h-5" />
-              Low Compatibility Warning
-            </AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-3">
-                <p>
-                  Your compatibility with <strong>{candidate.nickname}</strong> is only{" "}
-                  <span className="font-bold text-destructive">{scoreData?.overall_score}%</span>.
-                </p>
-                
-                {/* Show AI Advice if available */}
-                {scoreData?.advice && (
-                  <div className="p-3 rounded-lg bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/10">
-                    <div className="flex items-start gap-2 mb-2">
-                      <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                      <p className="text-sm font-medium text-primary">D.E.V.I. Advice</p>
-                    </div>
-                    <p className="text-sm text-foreground">{scoreData.advice}</p>
-                  </div>
-                )}
-                
-                <div className="bg-muted/50 rounded-lg p-3 text-sm">
-                  <p className="font-medium mb-1">Consider:</p>
-                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Starting No Contact mode to gain clarity</li>
-                    <li>Reflecting on recurring patterns</li>
-                    <li>Prioritizing your emotional wellbeing</li>
-                  </ul>
-                </div>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col items-center gap-2 sm:flex-col">
-            {scoreData?.advice && !adviceResponse && (
-              <div className="flex gap-2 w-full justify-center">
-                <Button
-                  size="sm"
-                  className="bg-green-600 hover:bg-green-700"
-                  onClick={() => {
-                    setShowLowScoreWarning(false);
-                    // Use setTimeout to ensure dialog closes first
-                    setTimeout(() => respondToAdvice(true), 100);
-                  }}
-                >
-                  <Check className="w-4 h-4 mr-1" />
-                  Accept Advice
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setShowLowScoreWarning(false);
-                    setTimeout(() => saveAdviceResponse(false), 100);
-                  }}
-                >
-                  <X className="w-4 h-4 mr-1" />
-                  Decline
-                </Button>
-              </div>
-            )}
-            <div className="flex gap-2 w-full justify-center">
-              <AlertDialogCancel className="mt-0">Close</AlertDialogCancel>
-              {onStartNoContact && (
-                <AlertDialogAction 
-                  onClick={() => {
-                    setShowLowScoreWarning(false);
-                    if (onStartNoContact) onStartNoContact();
-                  }}
-                  className="bg-primary"
-                >
-                  <Shield className="w-4 h-4 mr-2" />
-                  Start No Contact
-                </AlertDialogAction>
-              )}
-            </div>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
