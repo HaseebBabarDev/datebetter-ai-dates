@@ -709,7 +709,7 @@ const Dashboard = () => {
   return (
     <div 
       ref={containerRef}
-      className="min-h-screen relative overflow-auto bg-background"
+      className="min-h-screen relative overflow-auto bg-[image:var(--gradient-page)]"
     >
       {/* Pull to Refresh Indicator */}
       <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} />
@@ -719,28 +719,45 @@ const Dashboard = () => {
         <img 
           src={heroCouple} 
           alt="" 
-          className="w-full h-full object-cover object-top opacity-50"
+          className="w-full h-full object-cover object-top opacity-40"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background" />
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-border bg-background/80">
+      <header className="sticky top-0 z-50 bg-[image:var(--gradient-header)] backdrop-blur-xl border-b border-border/50">
         <div className="container mx-auto px-4 py-4 max-w-lg">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-semibold text-foreground">
-                {profile?.name ? `Hello ${profile.name}!` : "Hello!"}
-              </h1>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[image:var(--gradient-hero)] flex items-center justify-center shadow-[var(--shadow-soft)]">
+                <Heart className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold text-foreground">
+                  {profile?.name ? `Hi, ${profile.name}` : "Hello!"}
+                </h1>
+                <p className="text-xs text-muted-foreground">{greeting}</p>
+              </div>
             </div>
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="relative text-foreground hover:bg-primary/10" onClick={() => navigate("/notifications")}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="relative text-foreground hover:bg-primary/10 rounded-xl" 
+                onClick={() => navigate("/notifications")}
+              >
                 <Bell className="w-5 h-5" />
                 {(oxytocinAlerts.length > 0 || loveBombingAlerts.length > 0 || postIntimacyDropAlerts.length > 0 || candidates.filter(c => c.no_contact_active).length > 0 || cycleAlerts) && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full animate-pulse" />
                 )}
               </Button>
-              <Button data-tour="settings" variant="ghost" size="icon" className="text-foreground hover:bg-primary/10" onClick={() => navigate("/settings")}>
+              <Button 
+                data-tour="settings" 
+                variant="ghost" 
+                size="icon" 
+                className="text-foreground hover:bg-primary/10 rounded-xl" 
+                onClick={() => navigate("/settings")}
+              >
                 <Settings className="w-5 h-5" />
               </Button>
             </div>
