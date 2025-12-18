@@ -423,7 +423,7 @@ const Devi = () => {
               <Sparkles className="w-8 h-8 text-muted-foreground" />
             </div>
             <h2 className="text-xl font-semibold">Unlock D.E.V.I. Chat</h2>
-            <p className="text-muted-foreground">Upgrade to chat with your AI dating coach and get personalized advice.</p>
+            <p className="text-muted-foreground">Upgrade to chat with your AI assistant and get personalized advice.</p>
             <Button className="bg-[image:var(--gradient-hero)]" onClick={() => navigate("/settings?tab=billing")}>
               <Sparkles className="w-4 h-4 mr-2" />
               Upgrade to Unlock
@@ -452,7 +452,7 @@ const Devi = () => {
               </div>
               <div>
                 <h1 className="font-semibold text-foreground">D.E.V.I.</h1>
-                <p className="text-xs text-muted-foreground">Your AI dating coach</p>
+                <p className="text-xs text-muted-foreground">Your AI assistant</p>
               </div>
             </div>
           </div>

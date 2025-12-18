@@ -28,7 +28,7 @@ export const AskDeviCTA: React.FC<AskDeviCTAProps> = ({ candidateName, candidate
           </div>
           <div>
             <h3 className="font-semibold text-primary-foreground">Ask D.E.V.I.</h3>
-            <p className="text-xs text-primary-foreground/80">Your AI dating coach</p>
+            <p className="text-xs text-primary-foreground/80">Your AI assistant</p>
           </div>
         </div>
       </div>
