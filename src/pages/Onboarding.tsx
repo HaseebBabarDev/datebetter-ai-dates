@@ -142,7 +142,7 @@ const Onboarding = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                     <h3 className="font-semibold text-white">Full Onboarding</h3>
-                    <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-semibold whitespace-nowrap">10-15 MIN</span>
+                    <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-semibold whitespace-nowrap">8 MIN</span>
                   </div>
                   <p className="text-xs text-white/80">Most accurate AI scoring & personalized insights</p>
                 </div>
