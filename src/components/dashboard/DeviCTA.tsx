@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles, MessageCircle, Lock, ChevronRight } from "lucide-react";
+import { Sparkles, Lock, ChevronRight, Camera, Instagram, Heart } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 
 export const DeviCTA = () => {
@@ -9,6 +9,12 @@ export const DeviCTA = () => {
   const { subscription } = useSubscription();
   
   const isPaidPlan = subscription?.plan && subscription.plan !== "free";
+
+  const uploadFeatures = [
+    { icon: Camera, label: "Text Screenshots" },
+    { icon: Instagram, label: "IG Profiles" },
+    { icon: Heart, label: "Dating Profiles" },
+  ];
 
   return (
     <Card className="overflow-hidden border-border bg-gradient-to-br from-primary/10 via-accent/5 to-background">
@@ -30,27 +36,27 @@ export const DeviCTA = () => {
             <p className="text-sm text-muted-foreground mt-1">
               Your AI assistant for navigating the dating world with confidence.
             </p>
-            <ul className="mt-2 space-y-1">
-              <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                <MessageCircle className="w-3 h-3 text-primary" />
-                <span>Get personalized advice based on your profile</span>
-              </li>
-              <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                <MessageCircle className="w-3 h-3 text-primary" />
-                <span>Analyze conversations & decode mixed signals</span>
-              </li>
-              <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                <MessageCircle className="w-3 h-3 text-primary" />
-                <span>Red flag detection & pattern insights</span>
-              </li>
-            </ul>
+            
+            {/* Upload Feature Icons */}
+            <div className="flex items-center gap-2 mt-3">
+              {uploadFeatures.map((feature) => (
+                <div 
+                  key={feature.label}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-muted/50 border border-border"
+                >
+                  <feature.icon className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs text-muted-foreground">{feature.label}</span>
+                </div>
+              ))}
+            </div>
+
             <Button
               onClick={() => isPaidPlan ? navigate("/devi") : navigate("/settings?tab=billing")}
               className={`mt-3 w-full h-9 gap-2 ${isPaidPlan ? "bg-primary hover:bg-primary/90" : "bg-muted hover:bg-muted/80 text-muted-foreground"}`}
             >
               {isPaidPlan ? (
                 <>
-                  <MessageCircle className="w-4 h-4" />
+                  <Sparkles className="w-4 h-4" />
                   Chat with D.E.V.I.
                 </>
               ) : (
