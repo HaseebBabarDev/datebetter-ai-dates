@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { OnboardingProvider, useOnboarding } from "@/contexts/OnboardingContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 // Import all screens
@@ -26,10 +26,31 @@ import MentalHealthScreen from "@/components/onboarding/screens/MentalHealthScre
 import SafetyIntimacyScreen from "@/components/onboarding/screens/SafetyIntimacyScreen";
 import CompletionScreen from "@/components/onboarding/screens/CompletionScreen";
 
-const SetupContent = () => {
-  const { currentStep, loading, data } = useOnboarding();
+interface SetupContentProps {
+  setupMode?: string | null;
+}
 
-  if (loading) {
+const SetupContent = ({ setupMode }: SetupContentProps) => {
+  const { currentStep, loading, data, updateData, nextStep } = useOnboarding();
+  const [initialized, setInitialized] = useState(false);
+
+  // Handle setup mode from URL params - skip WelcomeScreen if already chosen
+  useEffect(() => {
+    if (!loading && !initialized && currentStep === 0 && setupMode) {
+      if (setupMode === "quick") {
+        updateData({ quickStartMode: true, ageConfirmed: true });
+        nextStep();
+      } else if (setupMode === "full") {
+        updateData({ quickStartMode: false, ageConfirmed: true });
+        nextStep();
+      }
+      setInitialized(true);
+    } else if (!loading && !initialized) {
+      setInitialized(true);
+    }
+  }, [loading, initialized, currentStep, setupMode, updateData, nextStep]);
+
+  if (loading || (!initialized && setupMode)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
@@ -122,9 +143,12 @@ const Setup = () => {
     return <Navigate to="/auth" replace />;
   }
 
+  const [searchParams] = useSearchParams();
+  const setupMode = searchParams.get("setup");
+
   return (
     <OnboardingProvider>
-      <SetupContent />
+      <SetupContent setupMode={setupMode} />
     </OnboardingProvider>
   );
 };

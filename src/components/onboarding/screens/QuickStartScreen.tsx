@@ -66,6 +66,11 @@ const QuickStartScreen = () => {
     }
   };
 
+  const handleContinueFullSetup = () => {
+    // Switch to full setup mode and continue to next step
+    updateData({ quickStartMode: false });
+  };
+
   const canProceed = () => {
     if (step === 1) return !!data.name && data.name.length >= 2;
     if (step === 2) return !!data.relationshipGoal;
@@ -217,18 +222,28 @@ const QuickStartScreen = () => {
           )}
         </Button>
 
-        {/* Skip to full setup */}
-        {step === 1 && (
+        {/* Option to continue full setup at end, or switch at step 1 */}
+        {step === 3 ? (
+          <p className="text-center text-xs text-muted-foreground">
+            Want more accurate AI scoring?{" "}
+            <button
+              onClick={handleContinueFullSetup}
+              className="text-primary font-semibold hover:underline"
+            >
+              Continue with full setup
+            </button>
+          </p>
+        ) : step === 1 ? (
           <p className="text-center text-xs text-muted-foreground">
             Want more personalized insights?{" "}
             <button
-              onClick={() => updateData({ quickStartMode: false })}
+              onClick={handleContinueFullSetup}
               className="text-primary hover:underline"
             >
               Complete full setup instead
             </button>
           </p>
-        )}
+        ) : null}
       </div>
     </OnboardingLayout>
   );
