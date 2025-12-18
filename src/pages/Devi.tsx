@@ -853,12 +853,21 @@ const Devi = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
-              Complete Requirements to Unlock
+              No Fluff. Just Real Advice.
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              To chat with D.E.V.I. and upload screenshots, complete your profile and log at least one interaction with {selectedCandidate?.nickname || "your candidate"}.
+            <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+              <p className="text-sm text-foreground font-medium">
+                Unlike other apps, D.E.V.I. doesn't guess or give generic tips.
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                We use your actual data, patterns, and history to give you real, personalized advice backed by logic — not vibes.
+              </p>
+            </div>
+            
+            <p className="text-xs text-muted-foreground text-center">
+              Complete these to unlock D.E.V.I.:
             </p>
             
             <div className="space-y-3">
