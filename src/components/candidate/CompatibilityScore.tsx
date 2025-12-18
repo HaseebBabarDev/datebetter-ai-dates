@@ -370,51 +370,50 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
     if (!breakdown) return null;
 
     const scores = [
-      { label: "Values", score: breakdown.values_alignment, color: "hsl(var(--primary))" },
-      { label: "Lifestyle", score: breakdown.lifestyle_compatibility, color: "#f97316" },
-      { label: "Emotional", score: breakdown.emotional_compatibility, color: "#a855f7" },
-      { label: "Chemistry", score: breakdown.chemistry_score, color: "#fbbf24" },
+      { label: "Values", score: breakdown.values_alignment, color: "#f97316" },
+      { label: "Lifestyle", score: breakdown.lifestyle_compatibility, color: "#fdba74" },
+      { label: "Emotional", score: breakdown.emotional_compatibility, color: "#c4b5fd" },
+      { label: "Chemistry", score: breakdown.chemistry_score, color: "#fcd34d" },
     ].sort((a, b) => b.score - a.score);
 
     return (
-      <div className="flex items-center gap-5">
+      <div className="flex items-center">
         {/* Score list - left side */}
-        <div className="flex-1 space-y-3">
+        <div className="flex-1 space-y-4">
           {scores.map((item, index) => (
             <div key={item.label} className="flex items-center gap-3">
               <div 
-                className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold flex-shrink-0"
+                className="w-10 h-10 rounded-full border flex items-center justify-center text-base font-normal flex-shrink-0"
                 style={{ borderColor: item.color, color: item.color }}
               >
                 {index + 1}
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm text-muted-foreground">{item.label}</p>
-                <p className="text-base font-bold" style={{ color: item.color }}>{item.score}%</p>
+              <div>
+                <p className="text-sm text-muted-foreground leading-tight">{item.label}</p>
+                <p className="text-xl font-bold text-foreground">{item.score}%</p>
               </div>
             </div>
           ))}
         </div>
         
-        {/* Sideways rainbow arc SVG - right side */}
-        <div className="relative w-20 h-32 flex-shrink-0">
-          <svg viewBox="0 0 60 120" className="w-full h-full">
+        {/* Sideways rainbow arc SVG - right side, curves right */}
+        <div className="relative w-28 h-40 flex-shrink-0 -mr-4">
+          <svg viewBox="0 0 80 160" className="w-full h-full">
             {scores.map((item, index) => {
-              const radius = 50 - index * 11;
-              const strokeWidth = 9;
+              const radius = 70 - index * 16;
+              const strokeWidth = 14;
               const circumference = Math.PI * radius;
               const progress = (item.score / 100) * circumference;
               
               return (
                 <path
                   key={item.label}
-                  d={`M 10 ${60 - radius} A ${radius} ${radius} 0 0 1 10 ${60 + radius}`}
+                  d={`M 80 ${80 - radius} A ${radius} ${radius} 0 0 0 80 ${80 + radius}`}
                   fill="none"
                   stroke={item.color}
                   strokeWidth={strokeWidth}
                   strokeLinecap="round"
                   strokeDasharray={`${progress} ${circumference}`}
-                  className="drop-shadow-sm"
                 />
               );
             })}
