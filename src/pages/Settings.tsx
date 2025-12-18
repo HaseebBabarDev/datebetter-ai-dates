@@ -423,15 +423,15 @@ const Settings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[image:var(--gradient-page)] pb-24">
-      <header className="sticky top-0 z-50 bg-[image:var(--gradient-header)] backdrop-blur-xl border-b border-border/50 safe-area-top">
-        <div className="container mx-auto px-4 py-3 sm:py-4 max-w-lg">
-          <div className="flex items-center gap-3">
+    <div className="min-h-[100dvh] bg-[image:var(--gradient-page)] pb-24">
+      <header className="sticky top-0 z-50 bg-[image:var(--gradient-header)] backdrop-blur-xl border-b border-border/50 pt-safe-top">
+        <div className="px-4 py-3 max-w-lg mx-auto">
+          <div className="flex items-center gap-2">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => navigate(-1)} 
-              className="shrink-0 rounded-xl hover:bg-primary/10"
+              className="shrink-0 rounded-xl hover:bg-primary/10 h-9 w-9"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -439,7 +439,7 @@ const Settings = () => {
               variant="ghost" 
               size="icon" 
               onClick={() => navigate("/dashboard")} 
-              className="shrink-0 rounded-xl hover:bg-primary/10"
+              className="shrink-0 rounded-xl hover:bg-primary/10 h-9 w-9"
             >
               <Home className="w-5 h-5" />
             </Button>
@@ -447,13 +447,13 @@ const Settings = () => {
               <div className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center">
                 <Settings2 className="w-4 h-4 text-primary-foreground" />
               </div>
-              <h1 className="text-lg sm:text-xl font-semibold truncate">Settings</h1>
+              <h1 className="text-lg font-semibold truncate">Settings</h1>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-4 sm:py-6 max-w-lg space-y-4">
+      <main className="px-4 py-4 max-w-lg mx-auto space-y-4">
         <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'} mb-4 h-auto p-1 bg-muted/50 backdrop-blur-sm`}>
             <TabsTrigger value="account" className="flex items-center gap-1.5 py-2.5 px-2 min-w-0 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">

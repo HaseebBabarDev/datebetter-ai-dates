@@ -47,45 +47,45 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   }, []);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-[100dvh] bg-background flex flex-col">
       {/* Header */}
       {headerGradient ? (
-        <header className="bg-[image:var(--gradient-header)] px-6 py-3 text-center">
+        <header className="bg-[image:var(--gradient-header)] px-4 py-3 pt-safe-top text-center relative">
           {showBack && currentStep > 0 && (
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-4 top-4 text-foreground hover:bg-foreground/10"
+              className="absolute left-3 top-3 text-foreground hover:bg-foreground/10 h-9 w-9"
               onClick={prevStep}
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
           )}
           {title && (
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1">
               {title}
             </h1>
           )}
           {subtitle && (
-            <p className="text-muted-foreground text-sm md:text-base">
+            <p className="text-muted-foreground text-xs sm:text-sm md:text-base">
               {subtitle}
             </p>
           )}
         </header>
       ) : (
-        <header className="px-4 py-2 flex items-center justify-between border-b border-border/50">
-          <div className="flex items-center gap-3">
+        <header className="px-4 py-2 pt-safe-top flex items-center justify-between border-b border-border/50">
+          <div className="flex items-center gap-2">
             {showBack && currentStep > 0 && (
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-foreground h-8 w-8"
+                className="text-foreground h-9 w-9"
                 onClick={prevStep}
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
             )}
-            <h1 className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <h1 className="text-base sm:text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               dateBetter
             </h1>
           </div>
@@ -105,21 +105,21 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       )}
 
       {/* Content with transition */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto pb-safe-bottom">
         <div 
           key={displayStep}
           className={cn(
-            "container max-w-lg mx-auto px-4 py-3 transition-all duration-300 ease-out",
+            "max-w-lg mx-auto px-4 py-3 transition-all duration-300 ease-out",
             isVisible 
               ? "opacity-100 translate-x-0" 
               : "opacity-0 translate-x-4"
           )}
         >
           {!headerGradient && title && (
-            <div className="mb-4">
-              <h2 className="text-xl font-bold text-foreground mb-1">{title}</h2>
+            <div className="mb-3">
+              <h2 className="text-lg sm:text-xl font-bold text-foreground mb-0.5">{title}</h2>
               {subtitle && (
-                <p className="text-muted-foreground text-sm">{subtitle}</p>
+                <p className="text-muted-foreground text-xs sm:text-sm">{subtitle}</p>
               )}
             </div>
           )}

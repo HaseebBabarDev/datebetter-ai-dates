@@ -323,7 +323,7 @@ const Patterns = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[image:var(--gradient-page)]">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-[image:var(--gradient-page)]">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -391,15 +391,15 @@ const Patterns = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[image:var(--gradient-page)] pb-24">
+    <div className="min-h-[100dvh] bg-[image:var(--gradient-page)] pb-24">
       {/* Header */}
-      <header className="sticky top-0 bg-[image:var(--gradient-header)] backdrop-blur-xl border-b border-border/50 z-10 safe-area-top">
-        <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-3">
+      <header className="sticky top-0 bg-[image:var(--gradient-header)] backdrop-blur-xl border-b border-border/50 z-10 pt-safe-top">
+        <div className="px-4 py-3 max-w-lg mx-auto flex items-center gap-2">
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={() => navigate(-1)}
-            className="rounded-xl hover:bg-primary/10"
+            className="rounded-xl hover:bg-primary/10 h-9 w-9"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
@@ -407,7 +407,7 @@ const Patterns = () => {
             variant="ghost" 
             size="icon" 
             onClick={() => navigate("/dashboard")}
-            className="rounded-xl hover:bg-primary/10"
+            className="rounded-xl hover:bg-primary/10 h-9 w-9"
           >
             <Home className="w-5 h-5" />
           </Button>
@@ -416,7 +416,7 @@ const Patterns = () => {
               <BarChart3 className="w-4 h-4 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="font-semibold text-foreground truncate">Dating Patterns</h1>
+              <h1 className="font-semibold text-foreground text-base truncate">Dating Patterns</h1>
               <p className="text-xs text-muted-foreground truncate">Insights from your journey</p>
             </div>
           </div>
@@ -425,7 +425,7 @@ const Patterns = () => {
               variant="ghost" 
               size="icon" 
               onClick={shareToInstagram}
-              className="rounded-xl hover:bg-primary/10"
+              className="rounded-xl hover:bg-primary/10 h-9 w-9"
             >
               <Share2 className="w-5 h-5" />
             </Button>
@@ -433,7 +433,7 @@ const Patterns = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-4 max-w-lg">
+      <main className="px-4 py-3 max-w-lg mx-auto">
         {!stats || stats.totalCandidates === 0 ? (
           <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
             <CardContent className="py-12 text-center">
