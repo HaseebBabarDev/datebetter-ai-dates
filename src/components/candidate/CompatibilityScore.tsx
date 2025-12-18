@@ -380,18 +380,18 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
     return (
       <div className="flex items-center gap-4">
         {/* Score list - left side */}
-        <div className="flex-1 space-y-2.5">
+        <div className="flex-1 space-y-2">
           {scores.map((item, index) => (
-            <div key={item.label} className="flex items-center gap-3">
+            <div key={item.label} className="flex items-center gap-2.5">
               <div 
-                className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-light flex-shrink-0"
+                className="w-7 h-7 rounded-full border-[1.5px] flex items-center justify-center text-xs font-light flex-shrink-0"
                 style={{ borderColor: item.color, color: item.color }}
               >
                 {index + 1}
               </div>
               <div>
-                <p className="text-xs text-muted-foreground tracking-wide">{item.label}</p>
-                <p className="text-base font-semibold text-foreground">{item.score}%</p>
+                <p className="text-[10px] text-muted-foreground tracking-wide">{item.label}</p>
+                <p className="text-sm font-semibold text-foreground">{item.score}%</p>
               </div>
             </div>
           ))}
