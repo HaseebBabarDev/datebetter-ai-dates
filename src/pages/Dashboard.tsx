@@ -47,6 +47,7 @@ import heroCouple from "@/assets/hero-couple.jpeg";
 import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
 import { FreeUpgradeBanner } from "@/components/subscription/FreeUpgradeBanner";
 import { DailyLoggingCTA } from "@/components/dashboard/DailyLoggingCTA";
+import { DeviCTA } from "@/components/dashboard/DeviCTA";
 import { ReferralCard } from "@/components/dashboard/ReferralCard";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefresh";
@@ -791,6 +792,7 @@ const Dashboard = () => {
               <UpgradeNudge />
               <FreeUpgradeBanner />
               <DailyLoggingCTA interactions={interactions} candidates={candidates} />
+              <DeviCTA />
               <Button
                 variant="outline"
                 onClick={() => navigate("/patterns")}
