@@ -61,10 +61,50 @@ const QUICK_PROMPTS = [
 
 const EXAMPLE_QUESTIONS = [
   "Why isn't he texting me back?",
-  "Is this a red flag or am I overreacting?",
+  "Is this a red flag?",
   "How do I bring up exclusivity?",
-  "He said he's not ready for a relationship but...",
 ];
+
+const MAX_MESSAGE_LENGTH = 400;
+
+// Message bubble with truncation for long messages
+const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = message.role === 'assistant' && message.content.length > MAX_MESSAGE_LENGTH;
+  const displayContent = isLong && !expanded 
+    ? message.content.slice(0, MAX_MESSAGE_LENGTH) + "..." 
+    : message.content;
+
+  return (
+    <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+      <div
+        className={`max-w-[85%] rounded-2xl p-3 ${
+          message.role === 'user'
+            ? 'bg-primary text-primary-foreground rounded-br-md'
+            : 'bg-muted rounded-bl-md'
+        }`}
+      >
+        {message.imageData && (
+          <img 
+            src={message.imageData} 
+            alt="Uploaded" 
+            className="max-w-full rounded-lg mb-2 max-h-48 object-cover"
+          />
+        )}
+        <p className="text-sm whitespace-pre-wrap">{displayContent}</p>
+        {isLong && (
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="text-xs text-primary mt-2 flex items-center gap-1 hover:underline"
+          >
+            {expanded ? "Show less" : "Continue reading"}
+            <ChevronDown className={`w-3 h-3 transition-transform ${expanded ? "rotate-180" : ""}`} />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const USER_PROFILE_FIELDS = [
   { key: "relationship_goal", weight: 2 },
@@ -935,105 +975,63 @@ const Devi = () => {
       <div className="flex-1 overflow-y-auto min-h-0">
         <div className="container mx-auto px-4 py-4 max-w-lg space-y-4">
           {messages.length === 0 ? (
-            <div className="py-8 space-y-6">
-              {/* Welcome */}
-              <div className="text-center space-y-2">
-                <div className="w-16 h-16 mx-auto rounded-2xl bg-[image:var(--gradient-hero)] flex items-center justify-center shadow-lg">
-                  <Sparkles className="w-8 h-8 text-primary-foreground" />
-                </div>
-                <h2 className="text-lg font-semibold">Hey! I'm D.E.V.I. 💜</h2>
+            <div className="py-6 space-y-5">
+              {/* Minimal Welcome */}
+              <div className="text-center space-y-1">
                 <p className="text-sm text-muted-foreground">
                   {selectedCandidate 
-                    ? `Ask me anything about ${selectedCandidate.nickname}, or upload a screenshot for analysis.`
-                    : "Select a candidate above to get started with personalized advice."}
+                    ? `What's on your mind about ${selectedCandidate.nickname}?`
+                    : "Select someone above to get started"}
                 </p>
               </div>
 
-              {/* Quick Upload Buttons - only show if profiles complete */}
+              {/* Quick prompts - compact */}
               {selectedCandidate && canChat && (
-                <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center">Upload for Analysis</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {QUICK_PROMPTS.map((prompt) => (
-                      <button
-                        key={prompt.type}
-                        onClick={() => handleImageUpload(prompt.type)}
-                        className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors"
-                      >
-                        <prompt.icon className="w-5 h-5 text-primary" />
-                        <span className="text-xs font-medium text-center">{prompt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Show locked state for screenshots */}
-              {selectedCandidate && !canChat && (
-                <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center">Upload for Analysis</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {QUICK_PROMPTS.map((prompt) => (
-                      <button
-                        key={prompt.type}
-                        onClick={() => setShowProfileDialog(true)}
-                        className="relative flex flex-col items-center gap-2 p-3 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors group"
-                      >
-                        <div className="relative">
-                          <prompt.icon className="w-5 h-5 text-muted-foreground" />
-                          <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-muted border border-border flex items-center justify-center">
-                            <Lock className="w-2 h-2 text-muted-foreground" />
-                          </div>
-                        </div>
-                        <span className="text-xs font-medium text-center text-muted-foreground">{prompt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                  <p className="text-xs text-center text-muted-foreground">
-                    Complete both profiles to unlock
-                  </p>
-                </div>
-              )}
-
-              {/* Example Questions */}
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center">Or ask me something</p>
                 <div className="flex flex-wrap gap-2 justify-center">
-                  {EXAMPLE_QUESTIONS.map((q, i) => (
+                  {EXAMPLE_QUESTIONS.slice(0, 3).map((q, i) => (
                     <button
                       key={i}
                       onClick={() => setInput(q)}
-                      className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                      className="text-xs px-3 py-2 rounded-full bg-muted hover:bg-muted/80 text-foreground transition-colors"
                     >
                       {q}
                     </button>
                   ))}
                 </div>
-              </div>
+              )}
+
+              {/* Upload options - minimal */}
+              {selectedCandidate && canChat && (
+                <div className="flex justify-center gap-3">
+                  {QUICK_PROMPTS.map((prompt) => (
+                    <button
+                      key={prompt.type}
+                      onClick={() => handleImageUpload(prompt.type)}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-full border border-border hover:bg-muted/50 transition-colors"
+                    >
+                      <prompt.icon className="w-4 h-4 text-primary" />
+                      <span className="text-xs">{prompt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              {/* Locked state */}
+              {selectedCandidate && !canChat && (
+                <div className="text-center">
+                  <button
+                    onClick={() => setShowProfileDialog(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border text-sm text-muted-foreground hover:bg-muted/50 transition-colors"
+                  >
+                    <Lock className="w-4 h-4" />
+                    Complete profile to unlock
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[85%] rounded-2xl p-3 ${
-                    msg.role === 'user'
-                      ? 'bg-primary text-primary-foreground rounded-br-md'
-                      : 'bg-muted rounded-bl-md'
-                  }`}
-                >
-                  {msg.imageData && (
-                    <img 
-                      src={msg.imageData} 
-                      alt="Uploaded" 
-                      className="max-w-full rounded-lg mb-2 max-h-48 object-cover"
-                    />
-                  )}
-                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                </div>
-              </div>
+              <MessageBubble key={msg.id} message={msg} />
             ))
           )}
           {isLoading && messages[messages.length - 1]?.role === 'user' && (
