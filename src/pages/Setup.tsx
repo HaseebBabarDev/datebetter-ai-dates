@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 // Import all screens
 import WelcomeScreen from "@/components/onboarding/screens/WelcomeScreen";
+import QuickStartScreen from "@/components/onboarding/screens/QuickStartScreen";
 import BasicIdentityScreen from "@/components/onboarding/screens/BasicIdentityScreen";
 import DatingPreferencesScreen from "@/components/onboarding/screens/DatingPreferencesScreen";
 import HormoneCycleScreen from "@/components/onboarding/screens/HormoneCycleScreen";
@@ -26,7 +27,7 @@ import SafetyIntimacyScreen from "@/components/onboarding/screens/SafetyIntimacy
 import CompletionScreen from "@/components/onboarding/screens/CompletionScreen";
 
 const SetupContent = () => {
-  const { currentStep, loading } = useOnboarding();
+  const { currentStep, loading, data } = useOnboarding();
 
   if (loading) {
     return (
@@ -37,6 +38,11 @@ const SetupContent = () => {
         </div>
       </div>
     );
+  }
+
+  // If quick start mode is enabled and we're past the welcome screen, show QuickStartScreen
+  if (data.quickStartMode && currentStep === 1) {
+    return <QuickStartScreen />;
   }
 
   const screens = [
