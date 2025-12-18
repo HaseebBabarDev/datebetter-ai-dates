@@ -465,21 +465,6 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       </div>
 
       <CardContent className="space-y-4 pt-0">
-        {/* Compact Breakdown */}
-        {scoreData.breakdown && (
-          <div className="grid grid-cols-4 gap-1.5">
-            {breakdownItems.map(({ key, label, icon: Icon }) => {
-              const score = scoreData.breakdown?.[key as keyof typeof scoreData.breakdown] ?? 0;
-              return (
-                <div key={key} className="text-center py-2 px-1 rounded-lg bg-muted/30">
-                  <Icon className={`w-4 h-4 mx-auto mb-1 ${getScoreColor(score)}`} />
-                  <div className={`text-sm font-bold leading-none ${getScoreColor(score)}`}>{score}%</div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5 truncate">{label}</div>
-                </div>
-              );
-            })}
-          </div>
-        )}
 
         {/* Key Insights - 1 Concern + 1 Strength */}
         {(firstStrength || firstConcern) && (
