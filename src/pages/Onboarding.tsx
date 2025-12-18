@@ -104,9 +104,9 @@ const Onboarding = () => {
 
       {/* Setup Options Dialog */}
       <Dialog open={showSetupDialog} onOpenChange={setShowSetupDialog}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
+        <DialogContent className="w-[calc(100%-2rem)] max-w-sm mx-auto rounded-2xl p-4">
           <DialogHeader>
-            <DialogTitle className="text-center text-xl">Choose Your Setup</DialogTitle>
+            <DialogTitle className="text-center text-lg">Choose Your Setup</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-3 pt-2">
