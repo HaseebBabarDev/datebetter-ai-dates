@@ -124,7 +124,7 @@ const Onboarding = () => {
                     <h3 className="font-semibold text-foreground">Quick Setup</h3>
                     <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold">2 MIN</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Just the essentials—start tracking candidates right away</p>
+                  <p className="text-xs text-muted-foreground">Get AI scoring right away—refine accuracy later</p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
               </div>
@@ -144,7 +144,7 @@ const Onboarding = () => {
                     <h3 className="font-semibold text-white">Full Onboarding</h3>
                     <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-semibold">10-15 MIN</span>
                   </div>
-                  <p className="text-xs text-white/80">Unlock personalized AI scoring & deeper insights</p>
+                  <p className="text-xs text-white/80">Most accurate AI scoring & personalized insights</p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
               </div>
