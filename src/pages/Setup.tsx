@@ -94,7 +94,10 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
 const Setup = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [checkingStatus, setCheckingStatus] = useState(true);
+  
+  const setupMode = searchParams.get("setup");
 
   useEffect(() => {
     const checkOnboardingStatus = async () => {
@@ -142,9 +145,6 @@ const Setup = () => {
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
-
-  const [searchParams] = useSearchParams();
-  const setupMode = searchParams.get("setup");
 
   return (
     <OnboardingProvider>
