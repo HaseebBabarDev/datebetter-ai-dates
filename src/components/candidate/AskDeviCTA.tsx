@@ -5,6 +5,7 @@ import { Sparkles, MessageCircle, Camera, Instagram, Heart, ArrowRight } from "l
 
 interface AskDeviCTAProps {
   candidateName?: string;
+  candidateId?: string;
 }
 
 const EXAMPLE_QUESTIONS = [
@@ -14,7 +15,7 @@ const EXAMPLE_QUESTIONS = [
   "Should I bring up exclusivity?",
 ];
 
-export const AskDeviCTA: React.FC<AskDeviCTAProps> = ({ candidateName }) => {
+export const AskDeviCTA: React.FC<AskDeviCTAProps> = ({ candidateName, candidateId }) => {
   const navigate = useNavigate();
 
   return (
@@ -73,7 +74,7 @@ export const AskDeviCTA: React.FC<AskDeviCTAProps> = ({ candidateName }) => {
         {/* CTA Button */}
         <Button
           className="w-full gap-2 bg-[image:var(--gradient-hero)] hover:opacity-90"
-          onClick={() => navigate("/devi", { state: { candidateName } })}
+          onClick={() => navigate("/devi", { state: { candidateName, candidateId } })}
         >
           <MessageCircle className="w-4 h-4" />
           Chat with D.E.V.I.
