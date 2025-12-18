@@ -19,6 +19,7 @@ import { AddInteractionForm } from "@/components/candidate/AddInteractionForm";
 import { NoContactMode } from "@/components/candidate/NoContactMode";
 import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
 import { ProfileCompleteness } from "@/components/candidate/ProfileCompleteness";
+import { ProfileCompletenessNudge } from "@/components/candidate/ProfileCompletenessNudge";
 import { AppRatingDialog, shouldShowRatingDialog } from "@/components/candidate/AppRatingDialog";
 import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -738,6 +739,7 @@ const CandidateDetail = () => {
           </TabsList>
 
           <TabsContent value="profile" className="mt-4 space-y-4">
+            <ProfileCompletenessNudge candidate={candidate} />
             <ScheduleCompatibilityAlert
               userSchedule={userProfile.schedule_flexibility}
               candidateSchedule={(candidate as any).their_schedule_flexibility}
