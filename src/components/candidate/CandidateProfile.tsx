@@ -368,41 +368,6 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
           </CardContent>
         </Card>
       )}
-
-      {/* Chemistry Ratings */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Chemistry Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[
-              { label: "Overall Chemistry", value: candidate.overall_chemistry || 3 },
-              { label: "Physical Attraction", value: candidate.physical_attraction || 3 },
-              { label: "Intellectual Connection", value: candidate.intellectual_connection || 3 },
-              { label: "Humor Compatibility", value: candidate.humor_compatibility || 3 },
-              { label: "Energy Match", value: candidate.energy_match || 3 },
-            ].map(({ label, value }) => (
-              <div key={label} className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{label}</span>
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <div
-                        key={i}
-                        className={`w-1.5 h-4 rounded-full ${
-                          i <= value ? "bg-primary" : "bg-muted"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="font-medium text-sm w-6">{value}/5</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </>
   );
 
