@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -597,15 +597,21 @@ const Devi = () => {
               {selectedCandidate && !profilesComplete && (
                 <div className="space-y-2">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center">Upload for Analysis</p>
-                  <div className="grid grid-cols-3 gap-2 opacity-50">
+                  <div className="grid grid-cols-3 gap-2">
                     {QUICK_PROMPTS.map((prompt) => (
-                      <div
+                      <button
                         key={prompt.type}
-                        className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border bg-card cursor-not-allowed"
+                        onClick={() => setShowProfileDialog(true)}
+                        className="relative flex flex-col items-center gap-2 p-3 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors group"
                       >
-                        <prompt.icon className="w-5 h-5 text-muted-foreground" />
+                        <div className="relative">
+                          <prompt.icon className="w-5 h-5 text-muted-foreground" />
+                          <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-muted border border-border flex items-center justify-center">
+                            <Lock className="w-2 h-2 text-muted-foreground" />
+                          </div>
+                        </div>
                         <span className="text-xs font-medium text-center text-muted-foreground">{prompt.label}</span>
-                      </div>
+                      </button>
                     ))}
                   </div>
                   <p className="text-xs text-center text-muted-foreground">
