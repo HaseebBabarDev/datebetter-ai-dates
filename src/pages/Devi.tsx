@@ -138,11 +138,11 @@ const Devi = () => {
   const userProfileCompleteness = userProfile 
     ? calculateCompleteness(userProfile as unknown as Record<string, unknown>, USER_PROFILE_FIELDS)
     : 0;
-  const candidateCompleteness = selectedCandidate
-    ? calculateCompleteness(selectedCandidate as unknown as Record<string, unknown>, CANDIDATE_PROFILE_FIELDS)
-    : 0;
   
-  const profilesComplete = userProfileCompleteness >= 70 && candidateCompleteness >= 70;
+  // Check if user has full profile and at least one interaction
+  const hasFullProfile = userProfileCompleteness === 100;
+  const hasInteractions = interactions.length > 0;
+  const canChat = hasFullProfile && hasInteractions;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -359,7 +359,7 @@ const Devi = () => {
       toast.error("Please select a candidate first");
       return;
     }
-    if (!profilesComplete) {
+    if (!canChat) {
       setShowProfileDialog(true);
       return;
     }
@@ -461,7 +461,7 @@ const Devi = () => {
       toast.error("Please select a candidate first");
       return;
     }
-    if (!profilesComplete) {
+    if (!canChat) {
       setShowProfileDialog(true);
       return;
     }
@@ -847,18 +847,18 @@ const Devi = () => {
         </div>
       </div>
 
-      {/* Profile Completeness Dialog */}
+      {/* Requirements Dialog */}
       <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
-              Complete Profiles to Unlock
+              Complete Requirements to Unlock
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              To get the best analysis of screenshots, complete both your profile and {selectedCandidate?.nickname}'s profile.
+              To chat with D.E.V.I. and upload screenshots, complete your profile and log at least one interaction with {selectedCandidate?.nickname || "your candidate"}.
             </p>
             
             <div className="space-y-3">
@@ -869,12 +869,12 @@ const Devi = () => {
                     <User className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm font-medium">Your Profile</span>
                   </div>
-                  <span className={`text-sm font-medium ${userProfileCompleteness >= 70 ? 'text-primary' : 'text-muted-foreground'}`}>
+                  <span className={`text-sm font-medium ${hasFullProfile ? 'text-primary' : 'text-muted-foreground'}`}>
                     {userProfileCompleteness}%
                   </span>
                 </div>
                 <Progress value={userProfileCompleteness} className="h-1.5" />
-                {userProfileCompleteness < 70 && (
+                {!hasFullProfile && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -890,29 +890,29 @@ const Devi = () => {
                 )}
               </div>
 
-              {/* Candidate Profile */}
+              {/* Logged Interaction */}
               <div className="p-3 rounded-lg border border-border bg-muted/30 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">{selectedCandidate?.nickname}'s Profile</span>
+                    <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Logged Interaction</span>
                   </div>
-                  <span className={`text-sm font-medium ${candidateCompleteness >= 70 ? 'text-primary' : 'text-muted-foreground'}`}>
-                    {candidateCompleteness}%
+                  <span className={`text-sm font-medium ${hasInteractions ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {hasInteractions ? `${interactions.length} logged` : "None"}
                   </span>
                 </div>
-                <Progress value={candidateCompleteness} className="h-1.5" />
-                {candidateCompleteness < 70 && selectedCandidate && (
+                <Progress value={hasInteractions ? 100 : 0} className="h-1.5" />
+                {!hasInteractions && selectedCandidate && (
                   <Button
                     variant="outline"
                     size="sm"
                     className="w-full mt-2 gap-2"
                     onClick={() => {
                       setShowProfileDialog(false);
-                      navigate(`/add-candidate?edit=${selectedCandidate.id}`);
+                      navigate(`/candidate/${selectedCandidate.id}`);
                     }}
                   >
-                    Complete Profile
+                    Log an Interaction
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 )}
@@ -941,7 +941,7 @@ const Devi = () => {
               </div>
 
               {/* Quick Upload Buttons - only show if profiles complete */}
-              {selectedCandidate && profilesComplete && (
+              {selectedCandidate && canChat && (
                 <div className="space-y-2">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center">Upload for Analysis</p>
                   <div className="grid grid-cols-3 gap-2">
@@ -960,7 +960,7 @@ const Devi = () => {
               )}
               
               {/* Show locked state for screenshots */}
-              {selectedCandidate && !profilesComplete && (
+              {selectedCandidate && !canChat && (
                 <div className="space-y-2">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center">Upload for Analysis</p>
                   <div className="grid grid-cols-3 gap-2">
@@ -1058,14 +1058,14 @@ const Devi = () => {
             </div>
           )}
           
-          {/* Show locked state if profiles not complete */}
-          {selectedCandidate && !profilesComplete ? (
+          {/* Show locked state if requirements not met */}
+          {selectedCandidate && !canChat ? (
             <button
               onClick={() => setShowProfileDialog(true)}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-border bg-muted/50 text-muted-foreground hover:bg-muted transition-colors"
             >
               <Lock className="w-4 h-4" />
-              <span className="text-sm">Complete profiles to unlock chat</span>
+              <span className="text-sm">Complete profile & log interaction to unlock</span>
             </button>
           ) : !selectedCandidate ? (
             <div className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-border bg-muted/50 text-muted-foreground">
