@@ -753,7 +753,7 @@ const CandidateDetail = () => {
               onStartNoContact={handleStartNoContact}
               onAdviceResponded={checkPendingAdvice}
             />
-            <AskDeviCTA candidateName={candidate.nickname} />
+            <AskDeviCTA candidateName={candidate.nickname} candidateId={candidate.id} />
             <CandidateProfile
               candidate={candidate}
               userId={user!.id}

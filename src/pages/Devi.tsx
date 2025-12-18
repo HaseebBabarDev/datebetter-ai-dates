@@ -4,10 +4,20 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2 } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Tables } from "@/integrations/supabase/types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+type Candidate = Tables<"candidates">;
+type Profile = Tables<"profiles">;
 
 interface Message {
   id: string;
@@ -15,6 +25,7 @@ interface Message {
   content: string;
   imageData?: string;
   imageType?: string;
+  candidateId?: string;
 }
 
 const QUICK_PROMPTS = [
@@ -30,6 +41,43 @@ const EXAMPLE_QUESTIONS = [
   "He said he's not ready for a relationship but...",
 ];
 
+const USER_PROFILE_FIELDS = [
+  { key: "relationship_goal", weight: 2 },
+  { key: "religion", weight: 2 },
+  { key: "politics", weight: 2 },
+  { key: "kids_desire", weight: 2 },
+  { key: "attachment_style", weight: 2 },
+  { key: "gender_identity", weight: 1 },
+  { key: "birth_date", weight: 1 },
+  { key: "country", weight: 1 },
+  { key: "city", weight: 1 },
+];
+
+const CANDIDATE_PROFILE_FIELDS = [
+  { key: "age", weight: 2 },
+  { key: "their_religion", weight: 2 },
+  { key: "their_politics", weight: 2 },
+  { key: "their_relationship_goal", weight: 2 },
+  { key: "their_kids_desire", weight: 2 },
+  { key: "their_attachment_style", weight: 2 },
+  { key: "gender_identity", weight: 1 },
+];
+
+const calculateCompleteness = (data: Record<string, unknown>, fields: { key: string; weight: number }[]) => {
+  let filledWeight = 0;
+  let totalWeight = 0;
+  
+  fields.forEach(field => {
+    totalWeight += field.weight;
+    const value = data[field.key];
+    if (value !== null && value !== undefined && value !== "") {
+      filledWeight += field.weight;
+    }
+  });
+  
+  return Math.round((filledWeight / totalWeight) * 100);
+};
+
 const Devi = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -39,25 +87,91 @@ const Devi = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [pendingImage, setPendingImage] = useState<{ data: string; type: string } | null>(null);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
+  const [profilesLoading, setProfilesLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const isFree = subscription?.plan === "free";
-  const candidateName = (location.state as { candidateName?: string })?.candidateName;
+  const candidateIdFromState = (location.state as { candidateId?: string })?.candidateId;
+  const candidateNameFromState = (location.state as { candidateName?: string })?.candidateName;
+
+  // Calculate profile completeness
+  const userProfileCompleteness = userProfile 
+    ? calculateCompleteness(userProfile as unknown as Record<string, unknown>, USER_PROFILE_FIELDS)
+    : 0;
+  const candidateCompleteness = selectedCandidate
+    ? calculateCompleteness(selectedCandidate as unknown as Record<string, unknown>, CANDIDATE_PROFILE_FIELDS)
+    : 0;
+  
+  const profilesComplete = userProfileCompleteness >= 70 && candidateCompleteness >= 70;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Fetch candidates and user profile
   useEffect(() => {
-    if (candidateName && messages.length === 0) {
-      setInput(`I want to ask about ${candidateName}...`);
+    const fetchData = async () => {
+      if (!user) return;
+      
+      setProfilesLoading(true);
+      
+      // Fetch candidates
+      const { data: candidatesData } = await supabase
+        .from("candidates")
+        .select("*")
+        .eq("user_id", user.id)
+        .neq("status", "archived")
+        .order("updated_at", { ascending: false });
+      
+      if (candidatesData) {
+        setCandidates(candidatesData);
+        // Auto-select if coming from candidate page
+        if (candidateIdFromState) {
+          const found = candidatesData.find(c => c.id === candidateIdFromState);
+          if (found) setSelectedCandidate(found);
+        } else if (candidatesData.length === 1) {
+          setSelectedCandidate(candidatesData[0]);
+        }
+      }
+      
+      // Fetch user profile
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+      
+      if (profileData) {
+        setUserProfile(profileData);
+      }
+      
+      setProfilesLoading(false);
+    };
+
+    fetchData();
+  }, [user, candidateIdFromState]);
+
+  useEffect(() => {
+    if (candidateNameFromState && messages.length === 0) {
+      setInput(`I want to ask about ${candidateNameFromState}...`);
       textareaRef.current?.focus();
     }
-  }, [candidateName]);
+  }, [candidateNameFromState]);
 
   const handleImageUpload = (type: string) => {
+    if (!selectedCandidate) {
+      toast.error("Please select a candidate first");
+      return;
+    }
+    if (!profilesComplete) {
+      toast.error("Complete both profiles to upload screenshots");
+      return;
+    }
     if (fileInputRef.current) {
       fileInputRef.current.setAttribute('data-type', type);
       fileInputRef.current.click();
@@ -88,7 +202,7 @@ const Devi = () => {
       // Set a default prompt based on image type
       const prompt = QUICK_PROMPTS.find(p => p.type === imageType);
       if (prompt && !input) {
-        setInput(prompt.prompt);
+        setInput(prompt.prompt + (selectedCandidate ? ` for ${selectedCandidate.nickname}` : ''));
       }
     };
     reader.readAsDataURL(file);
@@ -299,6 +413,105 @@ const Devi = () => {
         </div>
       </header>
 
+      {/* Candidate Selector Bar */}
+      <div className="border-b border-border bg-muted/30">
+        <div className="container mx-auto px-4 py-2 max-w-lg">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground shrink-0">Talking about:</span>
+            {profilesLoading ? (
+              <div className="h-8 w-32 bg-muted rounded-lg animate-pulse" />
+            ) : candidates.length === 0 ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-2"
+                onClick={() => navigate("/add-candidate")}
+              >
+                <Users className="w-4 h-4" />
+                Add a candidate first
+              </Button>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 gap-2">
+                    {selectedCandidate ? (
+                      <>
+                        <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                          <span className="text-xs font-medium">{selectedCandidate.nickname.charAt(0)}</span>
+                        </div>
+                        {selectedCandidate.nickname}
+                      </>
+                    ) : (
+                      <>
+                        <Users className="w-4 h-4" />
+                        Select candidate
+                      </>
+                    )}
+                    <ChevronDown className="w-4 h-4 ml-auto" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  {candidates.map((c) => (
+                    <DropdownMenuItem
+                      key={c.id}
+                      onClick={() => setSelectedCandidate(c)}
+                      className="gap-2"
+                    >
+                      <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                        <span className="text-xs font-medium">{c.nickname.charAt(0)}</span>
+                      </div>
+                      {c.nickname}
+                      {selectedCandidate?.id === c.id && (
+                        <Check className="w-4 h-4 ml-auto text-primary" />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Profile Completeness Warning */}
+      {selectedCandidate && !profilesComplete && !profilesLoading && (
+        <div className="border-b border-border bg-amber-500/10">
+          <div className="container mx-auto px-4 py-3 max-w-lg">
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
+                Complete profiles to unlock screenshot analysis
+              </p>
+              <div className="flex flex-col gap-1.5">
+                {userProfileCompleteness < 70 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 justify-start gap-2 text-xs hover:bg-amber-500/20"
+                    onClick={() => navigate("/settings", { state: { tab: "profile" } })}
+                  >
+                    <User className="w-3 h-3" />
+                    Your profile ({userProfileCompleteness}%)
+                    <ArrowRight className="w-3 h-3 ml-auto" />
+                  </Button>
+                )}
+                {candidateCompleteness < 70 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 justify-start gap-2 text-xs hover:bg-amber-500/20"
+                    onClick={() => navigate(`/add-candidate?edit=${selectedCandidate.id}`)}
+                  >
+                    <Users className="w-3 h-3" />
+                    {selectedCandidate.nickname}'s profile ({candidateCompleteness}%)
+                    <ArrowRight className="w-3 h-3 ml-auto" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">
         <div className="container mx-auto px-4 py-4 max-w-lg space-y-4">
@@ -311,26 +524,51 @@ const Devi = () => {
                 </div>
                 <h2 className="text-lg font-semibold">Hey! I'm D.E.V.I. 💜</h2>
                 <p className="text-sm text-muted-foreground">
-                  Your AI dating coach. Ask me anything about dating, or upload a screenshot for analysis.
+                  {selectedCandidate 
+                    ? `Ask me anything about ${selectedCandidate.nickname}, or upload a screenshot for analysis.`
+                    : "Select a candidate above to get started with personalized advice."}
                 </p>
               </div>
 
-              {/* Quick Upload Buttons */}
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center">Upload for Analysis</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {QUICK_PROMPTS.map((prompt) => (
-                    <button
-                      key={prompt.type}
-                      onClick={() => handleImageUpload(prompt.type)}
-                      className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors"
-                    >
-                      <prompt.icon className="w-5 h-5 text-primary" />
-                      <span className="text-xs font-medium text-center">{prompt.label}</span>
-                    </button>
-                  ))}
+              {/* Quick Upload Buttons - only show if profiles complete */}
+              {selectedCandidate && profilesComplete && (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center">Upload for Analysis</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {QUICK_PROMPTS.map((prompt) => (
+                      <button
+                        key={prompt.type}
+                        onClick={() => handleImageUpload(prompt.type)}
+                        className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors"
+                      >
+                        <prompt.icon className="w-5 h-5 text-primary" />
+                        <span className="text-xs font-medium text-center">{prompt.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+              
+              {/* Show locked state for screenshots */}
+              {selectedCandidate && !profilesComplete && (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center">Upload for Analysis</p>
+                  <div className="grid grid-cols-3 gap-2 opacity-50">
+                    {QUICK_PROMPTS.map((prompt) => (
+                      <div
+                        key={prompt.type}
+                        className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border bg-card cursor-not-allowed"
+                      >
+                        <prompt.icon className="w-5 h-5 text-muted-foreground" />
+                        <span className="text-xs font-medium text-center text-muted-foreground">{prompt.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Complete both profiles to unlock
+                  </p>
+                </div>
+              )}
 
               {/* Example Questions */}
               <div className="space-y-2">
