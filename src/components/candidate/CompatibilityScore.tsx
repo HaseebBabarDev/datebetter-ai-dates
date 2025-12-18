@@ -358,11 +358,71 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   };
 
   const breakdownItems = [
-    { key: "values_alignment", label: "Values", icon: Heart },
-    { key: "lifestyle_compatibility", label: "Lifestyle", icon: Users },
-    { key: "emotional_compatibility", label: "Emotional", icon: Brain },
-    { key: "chemistry_score", label: "Chemistry", icon: Zap },
+    { key: "values_alignment", label: "Values", color: "hsl(var(--primary))" },
+    { key: "lifestyle_compatibility", label: "Lifestyle", color: "#f97316" },
+    { key: "emotional_compatibility", label: "Emotional", color: "#a855f7" },
+    { key: "chemistry_score", label: "Chemistry", color: "#fbbf24" },
   ];
+
+  // Rainbow Arc Component
+  const RainbowArc = () => {
+    const breakdown = scoreData?.breakdown;
+    if (!breakdown) return null;
+
+    const scores = [
+      { label: "Values", score: breakdown.values_alignment, color: "hsl(var(--primary))" },
+      { label: "Lifestyle", score: breakdown.lifestyle_compatibility, color: "#f97316" },
+      { label: "Emotional", score: breakdown.emotional_compatibility, color: "#a855f7" },
+      { label: "Chemistry", score: breakdown.chemistry_score, color: "#fbbf24" },
+    ].sort((a, b) => b.score - a.score);
+
+    return (
+      <div className="flex items-center gap-4">
+        {/* Score list */}
+        <div className="flex-1 space-y-2">
+          {scores.map((item, index) => (
+            <div key={item.label} className="flex items-center gap-3">
+              <div 
+                className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-medium"
+                style={{ borderColor: item.color, color: item.color }}
+              >
+                {index + 1}
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">{item.label}</p>
+                <p className="text-sm font-bold" style={{ color: item.color }}>{item.score}%</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Rainbow arc SVG */}
+        <div className="relative w-28 h-20">
+          <svg viewBox="0 0 120 70" className="w-full h-full">
+            {scores.map((item, index) => {
+              const radius = 55 - index * 12;
+              const strokeWidth = 10;
+              const circumference = Math.PI * radius;
+              const progress = (item.score / 100) * circumference;
+              
+              return (
+                <path
+                  key={item.label}
+                  d={`M ${60 - radius} 60 A ${radius} ${radius} 0 0 1 ${60 + radius} 60`}
+                  fill="none"
+                  stroke={item.color}
+                  strokeWidth={strokeWidth}
+                  strokeLinecap="round"
+                  strokeDasharray={`${progress} ${circumference}`}
+                  opacity={0.9}
+                />
+              );
+            })}
+          </svg>
+        </div>
+      </div>
+    );
+  };
 
   if (!scoreData) {
     return (
@@ -410,61 +470,63 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
       {/* Score Header */}
-      <div className="relative p-6 pb-4 overflow-hidden">
+      <div className="relative p-5 pb-3 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
-        <div className="relative flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0 flex-shrink">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-6 h-6 text-primary" />
+        <div className="relative">
+          {/* Title row */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold text-foreground">Compatibility Score</h3>
             </div>
-            <div className="min-w-0">
-              <h3 className="font-semibold text-foreground">Compatibility</h3>
-              <p className="text-xs text-muted-foreground">D.E.V.I.-powered analysis</p>
-            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={calculateScore} 
+                    disabled={loading || !canRefresh} 
+                    className="h-7 px-2 text-xs"
+                  >
+                    {canRefresh ? (
+                      <>
+                        <RefreshCw className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} />
+                        Refresh
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-3 h-3 mr-1" />
+                        Upgrade
+                      </>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p className="text-xs">Refresh counts as a candidate update</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-          <div className="text-right flex-shrink-0">
+
+          {/* Overall Score */}
+          <div className="text-center mb-4">
             <div 
-              className={`text-4xl font-bold leading-none transition-all duration-300 ${getScoreColor(scoreData.overall_score)} ${
+              className={`text-5xl font-bold leading-none transition-all duration-300 ${getScoreColor(scoreData.overall_score)} ${
                 scoreJustUpdated ? 'animate-scale-in scale-110' : ''
               }`}
             >
               {scoreData.overall_score}%
             </div>
-            <div className="flex items-center justify-end mt-1">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={calculateScore} 
-                      disabled={loading || !canRefresh} 
-                      className="h-6 px-2 text-xs"
-                    >
-                      {canRefresh ? (
-                        <>
-                          <RefreshCw className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} />
-                          Refresh
-                        </>
-                      ) : (
-                        <>
-                          <Lock className="w-3 h-3 mr-1" />
-                          Upgrade
-                        </>
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom">
-                    <p className="text-xs">Refresh counts as a candidate update</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+            <p className="text-xs text-muted-foreground mt-1">Overall Compatibility</p>
           </div>
+
+          {/* Rainbow Arc Breakdown */}
+          {scoreData.breakdown && <RainbowArc />}
         </div>
       </div>
 
-      <CardContent className="space-y-4 pt-0">
+      <CardContent className="space-y-4 pt-2">
 
         {/* Key Insights - 1 Concern + 1 Strength */}
         {(firstStrength || firstConcern) && (
