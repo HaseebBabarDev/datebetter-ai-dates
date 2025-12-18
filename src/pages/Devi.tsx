@@ -673,7 +673,7 @@ const Devi = () => {
       </div>
 
       {/* Input */}
-      <div className="sticky bottom-0 bg-background border-t border-border safe-area-bottom">
+      <div className="sticky bottom-16 bg-background border-t border-border pb-2">
         <div className="container mx-auto px-4 py-3 max-w-lg">
           {/* Pending Image Preview */}
           {pendingImage && (
