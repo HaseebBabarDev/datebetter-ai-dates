@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, UserPlus, Sparkles, Heart, Pencil, User, Brain, Zap, Home } from "lucide-react";
+import { ArrowLeft, UserPlus, Sparkles, Heart, Pencil, User, Brain, Zap, Home, Clock, Layers, ArrowRight } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SliderInput } from "@/components/onboarding/SliderInput";
 import { toast } from "sonner";
@@ -205,6 +205,7 @@ const AddCandidate = () => {
   const [loading, setLoading] = useState(false);
   const [fetchingCandidate, setFetchingCandidate] = useState(isEditMode);
   const [activeTab, setActiveTab] = useState("basics");
+  const [candidateMode, setCandidateMode] = useState<"quick" | "full" | null>(isEditMode ? "full" : null);
   const TABS = ["basics", "about", "chemistry"] as const;
 
   // Basic Info
@@ -455,7 +456,15 @@ const AddCandidate = () => {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 bg-background/95 backdrop-blur border-b border-border z-10">
         <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => isEditMode ? navigate(`/candidate/${editId}`) : navigate(-1)}>
+          <Button variant="ghost" size="icon" onClick={() => {
+            if (candidateMode && !isEditMode) {
+              setCandidateMode(null);
+            } else if (isEditMode) {
+              navigate(`/candidate/${editId}`);
+            } else {
+              navigate(-1);
+            }
+          }}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
@@ -463,10 +472,10 @@ const AddCandidate = () => {
           </Button>
           <div className="flex-1">
             <h1 className="font-semibold text-foreground">
-              {isEditMode ? "Edit Candidate" : "Add New Candidate"}
+              {isEditMode ? "Edit Candidate" : candidateMode === "quick" ? "Quick Add" : candidateMode === "full" ? "Full Profile" : "Add New Candidate"}
             </h1>
             <p className="text-xs text-muted-foreground">
-              {isEditMode ? "Update their info" : "Start tracking someone new"}
+              {isEditMode ? "Update their info" : candidateMode === "quick" ? "Get a score in 30 seconds" : candidateMode === "full" ? "For more accurate AI insights" : "Start tracking someone new"}
             </p>
           </div>
           {isEditMode ? <Pencil className="w-5 h-5 text-primary" /> : <UserPlus className="w-5 h-5 text-primary" />}
@@ -474,22 +483,192 @@ const AddCandidate = () => {
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-lg">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="basics" className="gap-1 text-xs">
-                <User className="w-3.5 h-3.5" />
-                Basics
-              </TabsTrigger>
-              <TabsTrigger value="about" className="gap-1 text-xs">
-                <Brain className="w-3.5 h-3.5" />
-                About
-              </TabsTrigger>
-              <TabsTrigger value="chemistry" className="gap-1 text-xs">
-                <Zap className="w-3.5 h-3.5" />
-                Chemistry
-              </TabsTrigger>
-            </TabsList>
+        {/* Mode Selection */}
+        {!candidateMode && !isEditMode && (
+          <div className="space-y-4 animate-fade-in">
+            <div className="text-center mb-6">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <Sparkles className="w-7 h-7 text-primary" />
+              </div>
+              <h2 className="text-xl font-semibold mb-1">How much do you know?</h2>
+              <p className="text-sm text-muted-foreground">More details = more accurate AI scoring</p>
+            </div>
+
+            {/* Full Profile Option - Recommended */}
+            <button
+              type="button"
+              onClick={() => setCandidateMode("full")}
+              className="w-full p-4 rounded-xl bg-[image:var(--gradient-hero)] shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all group text-left"
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                  <Layers className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-white">Full Profile</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20 text-white font-medium">
+                      Recommended
+                    </span>
+                  </div>
+                  <p className="text-xs text-white/80 mt-0.5">
+                    Most accurate compatibility score & personalized advice
+                  </p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-white/70 group-hover:text-white transition-colors shrink-0 mt-3" />
+              </div>
+            </button>
+
+            {/* Quick Add Option */}
+            <button
+              type="button"
+              onClick={() => setCandidateMode("quick")}
+              className="w-full p-4 rounded-xl border border-border/50 bg-card hover:bg-accent/50 hover:border-primary/30 transition-all group text-left"
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                  <Clock className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">Quick Add</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                      30 sec
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Just the basics—get a quick score now, refine later
+                  </p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-3" />
+              </div>
+            </button>
+
+            <p className="text-[10px] text-muted-foreground text-center pt-2">
+              You can always add more details later
+            </p>
+          </div>
+        )}
+
+        {/* Quick Add Form */}
+        {candidateMode === "quick" && (
+          <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-primary" />
+                  Quick Add
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="nickname">Nickname *</Label>
+                  <Input
+                    id="nickname"
+                    placeholder="What do you call them?"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    maxLength={50}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="age">Age</Label>
+                    <Input
+                      id="age"
+                      type="number"
+                      placeholder="Their age"
+                      value={age}
+                      onChange={(e) => setAge(e.target.value)}
+                      min={18}
+                      max={99}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Status</Label>
+                    <Select value={status} onValueChange={(v) => setStatus(v as Enums<"candidate_status">)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="just_matched">Just Matched</SelectItem>
+                        <SelectItem value="texting">Texting</SelectItem>
+                        <SelectItem value="planning_date">Planning Date</SelectItem>
+                        <SelectItem value="dating_casually">Dating Casually</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>What are they looking for?</Label>
+                  <Select value={theirRelationshipGoal} onValueChange={setTheirRelationshipGoal}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select goal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {RELATIONSHIP_GOAL_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Button
+              type="submit"
+              className="w-full py-6 bg-[image:var(--gradient-hero)] hover:opacity-90"
+              disabled={loading || !nickname.trim()}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                  Calculating score...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  Get Score
+                  <Sparkles className="w-4 h-4" />
+                </span>
+              )}
+            </Button>
+
+            <p className="text-center text-xs text-muted-foreground">
+              Want more accurate scoring?{" "}
+              <button
+                type="button"
+                onClick={() => setCandidateMode("full")}
+                className="text-primary font-semibold hover:underline"
+              >
+                Add full profile instead
+              </button>
+            </p>
+          </form>
+        )}
+
+        {/* Full Form */}
+        {candidateMode === "full" && (
+          <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="basics" className="gap-1 text-xs">
+                  <User className="w-3.5 h-3.5" />
+                  Basics
+                </TabsTrigger>
+                <TabsTrigger value="about" className="gap-1 text-xs">
+                  <Brain className="w-3.5 h-3.5" />
+                  About
+                </TabsTrigger>
+                <TabsTrigger value="chemistry" className="gap-1 text-xs">
+                  <Zap className="w-3.5 h-3.5" />
+                  Chemistry
+                </TabsTrigger>
+              </TabsList>
 
             <TabsContent value="basics" className="mt-4 space-y-4">
               <Card>
@@ -1028,7 +1207,8 @@ const AddCandidate = () => {
               {isEditMode ? "More details = better compatibility insights" : "More details = better AI compatibility analysis"}
             </p>
           </div>
-        </form>
+          </form>
+        )}
       </main>
     </div>
   );
