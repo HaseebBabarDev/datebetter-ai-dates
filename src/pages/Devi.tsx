@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2 } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -21,7 +21,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { format } from "date-fns";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -33,6 +42,15 @@ interface Message {
   imageData?: string;
   imageType?: string;
   candidateId?: string;
+}
+
+interface Conversation {
+  id: string;
+  candidate_id: string | null;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+  is_active: boolean;
 }
 
 const QUICK_PROMPTS = [
@@ -101,6 +119,13 @@ const Devi = () => {
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [interactions, setInteractions] = useState<any[]>([]);
   const [isUpdatingScore, setIsUpdatingScore] = useState(false);
+  
+  // Conversation state
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [conversationsLoading, setConversationsLoading] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -166,6 +191,28 @@ const Devi = () => {
     fetchData();
   }, [user, candidateIdFromState]);
 
+  // Fetch conversations
+  useEffect(() => {
+    const fetchConversations = async () => {
+      if (!user) return;
+      
+      setConversationsLoading(true);
+      const { data } = await supabase
+        .from("devi_conversations")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false })
+        .limit(50);
+      
+      if (data) {
+        setConversations(data as Conversation[]);
+      }
+      setConversationsLoading(false);
+    };
+
+    fetchConversations();
+  }, [user]);
+
   // Fetch interactions when candidate changes
   useEffect(() => {
     const fetchInteractions = async () => {
@@ -196,6 +243,116 @@ const Devi = () => {
       textareaRef.current?.focus();
     }
   }, [candidateNameFromState]);
+
+  // Load messages when conversation changes
+  const loadConversation = useCallback(async (conversationId: string) => {
+    if (!user) return;
+    
+    const { data: messagesData } = await supabase
+      .from("devi_messages")
+      .select("*")
+      .eq("conversation_id", conversationId)
+      .order("created_at", { ascending: true });
+    
+    if (messagesData) {
+      setMessages(messagesData.map(m => ({
+        id: m.id,
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+        imageData: m.image_url || undefined,
+      })));
+    }
+    
+    // Get conversation to set candidate
+    const { data: convData } = await supabase
+      .from("devi_conversations")
+      .select("*")
+      .eq("id", conversationId)
+      .single();
+    
+    if (convData?.candidate_id) {
+      const candidate = candidates.find(c => c.id === convData.candidate_id);
+      if (candidate) setSelectedCandidate(candidate);
+    }
+    
+    setCurrentConversationId(conversationId);
+    setHistoryOpen(false);
+  }, [user, candidates]);
+
+  // Save message to database
+  const saveMessage = useCallback(async (
+    conversationId: string, 
+    message: Message,
+    imageUrl?: string
+  ) => {
+    if (!user) return;
+    
+    await supabase.from("devi_messages").insert({
+      conversation_id: conversationId,
+      user_id: user.id,
+      role: message.role,
+      content: message.content,
+      image_url: imageUrl || null,
+    });
+    
+    // Update conversation timestamp
+    await supabase
+      .from("devi_conversations")
+      .update({ updated_at: new Date().toISOString() })
+      .eq("id", conversationId);
+  }, [user]);
+
+  // Create new conversation
+  const createConversation = useCallback(async (firstMessage: string) => {
+    if (!user) return null;
+    
+    const title = firstMessage.slice(0, 50) + (firstMessage.length > 50 ? "..." : "");
+    
+    const { data, error } = await supabase
+      .from("devi_conversations")
+      .insert({
+        user_id: user.id,
+        candidate_id: selectedCandidate?.id || null,
+        title,
+        is_active: true,
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("Error creating conversation:", error);
+      return null;
+    }
+    
+    setConversations(prev => [data as Conversation, ...prev]);
+    setCurrentConversationId(data.id);
+    return data.id;
+  }, [user, selectedCandidate]);
+
+  // Start new chat
+  const startNewChat = useCallback(() => {
+    setMessages([]);
+    setCurrentConversationId(null);
+    setHistoryOpen(false);
+  }, []);
+
+  // Delete conversation
+  const deleteConversation = useCallback(async (conversationId: string) => {
+    if (!user) return;
+    
+    await supabase
+      .from("devi_conversations")
+      .delete()
+      .eq("id", conversationId);
+    
+    setConversations(prev => prev.filter(c => c.id !== conversationId));
+    
+    if (currentConversationId === conversationId) {
+      startNewChat();
+    }
+    
+    toast.success("Conversation deleted");
+  }, [user, currentConversationId, startNewChat]);
 
   const handleImageUpload = (type: string) => {
     if (!selectedCandidate) {
@@ -281,6 +438,11 @@ const Devi = () => {
         content: `✨ Done! I've updated ${selectedCandidate.nickname}'s compatibility score.\n\n**New Score: ${result.score}%**\n\n${result.breakdown?.advice || "The score reflects the latest information we discussed."}\n\nWant me to break down what changed?`,
       };
       setMessages(prev => [...prev, scoreMessage]);
+      
+      // Save score message to conversation
+      if (currentConversationId) {
+        await saveMessage(currentConversationId, scoreMessage);
+      }
 
       toast.success(`Score updated: ${result.score}%`);
     } catch (error) {
@@ -316,6 +478,20 @@ const Devi = () => {
     setInput("");
     setPendingImage(null);
     setIsLoading(true);
+
+    // Create or use existing conversation
+    let convId = currentConversationId;
+    if (!convId) {
+      convId = await createConversation(userMessage.content);
+      if (!convId) {
+        toast.error("Failed to create conversation");
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // Save user message
+    await saveMessage(convId, userMessage, userMessage.imageData);
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -399,6 +575,15 @@ const Devi = () => {
             }
           }
         }
+      }
+
+      // Save assistant message after streaming completes
+      if (assistantContent && convId) {
+        await saveMessage(convId, {
+          id: assistantId,
+          role: 'assistant',
+          content: assistantContent,
+        });
       }
 
     } catch (error) {
@@ -486,22 +671,100 @@ const Devi = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border safe-area-top">
         <div className="container mx-auto px-4 py-3 max-w-lg">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-xl">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-xl shrink-0">
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="rounded-xl">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="rounded-xl shrink-0">
               <Home className="w-5 h-5" />
             </Button>
-            <div className="flex items-center gap-2 flex-1">
-              <div className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
                 <Sparkles className="w-4 h-4 text-primary-foreground" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <h1 className="font-semibold text-foreground">D.E.V.I.</h1>
-                <p className="text-xs text-muted-foreground">Your AI assistant</p>
+                <p className="text-xs text-muted-foreground truncate">Your AI assistant</p>
               </div>
             </div>
+            
+            {/* New Chat Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={startNewChat}
+              className="rounded-xl shrink-0"
+              title="New Chat"
+            >
+              <Plus className="w-5 h-5" />
+            </Button>
+            
+            {/* Chat History Sheet */}
+            <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-xl shrink-0" title="Chat History">
+                  <MessageSquare className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80 p-0">
+                <SheetHeader className="p-4 border-b border-border">
+                  <SheetTitle className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    Chat History
+                  </SheetTitle>
+                </SheetHeader>
+                <ScrollArea className="h-[calc(100vh-80px)]">
+                  <div className="p-2 space-y-1">
+                    {conversationsLoading ? (
+                      <div className="p-4 text-center text-muted-foreground text-sm">
+                        <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
+                        Loading...
+                      </div>
+                    ) : conversations.length === 0 ? (
+                      <div className="p-4 text-center text-muted-foreground text-sm">
+                        No conversations yet
+                      </div>
+                    ) : (
+                      conversations.map((conv) => {
+                        const candidate = candidates.find(c => c.id === conv.candidate_id);
+                        return (
+                          <div
+                            key={conv.id}
+                            className={`group flex items-start gap-2 p-3 rounded-lg cursor-pointer hover:bg-muted transition-colors ${
+                              currentConversationId === conv.id ? 'bg-muted' : ''
+                            }`}
+                            onClick={() => loadConversation(conv.id)}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{conv.title || "New conversation"}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {candidate && (
+                                  <span className="text-xs text-primary truncate">{candidate.nickname}</span>
+                                )}
+                                <span className="text-xs text-muted-foreground">
+                                  {format(new Date(conv.updated_at), "MMM d")}
+                                </span>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteConversation(conv.id);
+                              }}
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
+                            </Button>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </ScrollArea>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
