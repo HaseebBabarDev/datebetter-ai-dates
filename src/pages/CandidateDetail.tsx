@@ -753,7 +753,6 @@ const CandidateDetail = () => {
               onStartNoContact={handleStartNoContact}
               onAdviceResponded={checkPendingAdvice}
             />
-            <ProfileCompleteness candidate={candidate} />
             <AskDeviCTA candidateName={candidate.nickname} />
             <CandidateProfile
               candidate={candidate}
