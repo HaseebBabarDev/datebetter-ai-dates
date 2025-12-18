@@ -364,9 +364,10 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
     { key: "chemistry_score", label: "Chemistry", color: "#fbbf24" },
   ];
 
-  // Rainbow Arc Component - Feminine pink/purple palette
+  // Rainbow Arc Component - Feminine pink/purple palette with interactivity
   const RainbowArc = () => {
     const breakdown = scoreData?.breakdown;
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     if (!breakdown) return null;
 
     // Feminine pink/purple color palette
@@ -378,58 +379,89 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
     ].sort((a, b) => b.score - a.score);
 
     return (
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         {/* Score list - left side */}
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 space-y-1.5">
           {scores.map((item, index) => (
-            <div key={item.label} className="flex items-center gap-2.5">
+            <div 
+              key={item.label} 
+              className={`flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-200 ${
+                hoveredIndex === index ? 'bg-muted/50 scale-[1.02]' : ''
+              }`}
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
               <div 
-                className="w-7 h-7 rounded-full border-[1.5px] flex items-center justify-center text-xs font-light flex-shrink-0"
-                style={{ borderColor: item.color, color: item.color }}
+                className="w-6 h-6 rounded-full border-[1.5px] flex items-center justify-center text-[10px] font-light flex-shrink-0 transition-transform duration-200"
+                style={{ 
+                  borderColor: item.color, 
+                  color: item.color,
+                  transform: hoveredIndex === index ? 'scale(1.1)' : 'scale(1)'
+                }}
               >
                 {index + 1}
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground tracking-wide">{item.label}</p>
-                <p className="text-sm font-semibold text-foreground">{item.score}%</p>
+                <p className="text-[9px] text-muted-foreground tracking-wide leading-tight">{item.label}</p>
+                <p className="text-xs font-semibold text-foreground leading-tight">{item.score}%</p>
               </div>
             </div>
           ))}
         </div>
         
-        {/* Rainbow arc - curves right like reference image */}
-        <div className="relative w-28 h-40 flex-shrink-0">
-          <svg viewBox="0 0 100 140" className="w-full h-full">
+        {/* Rainbow arc - curves right, full visibility */}
+        <div className="relative w-24 h-32 flex-shrink-0 overflow-visible">
+          <svg viewBox="-5 0 95 140" className="w-full h-full overflow-visible">
             {scores.map((item, index) => {
-              const baseRadius = 75;
-              const radius = baseRadius - index * 16;
-              const strokeWidth = 12;
+              const baseRadius = 60;
+              const radius = baseRadius - index * 13;
+              const strokeWidth = 10;
               const circumference = Math.PI * radius;
               const progress = (item.score / 100) * circumference;
-              const centerX = 10;
+              const centerX = 5;
               const centerY = 70;
+              const isHovered = hoveredIndex === index;
               
               return (
-                <g key={item.label}>
+                <g 
+                  key={item.label}
+                  className="cursor-pointer"
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
                   {/* Background track */}
                   <path
                     d={`M ${centerX} ${centerY - radius} A ${radius} ${radius} 0 0 1 ${centerX} ${centerY + radius}`}
                     fill="none"
                     stroke={item.color}
-                    strokeWidth={strokeWidth}
+                    strokeWidth={isHovered ? strokeWidth + 2 : strokeWidth}
                     strokeLinecap="round"
                     opacity={0.15}
+                    className="transition-all duration-200"
                   />
                   {/* Progress arc */}
                   <path
                     d={`M ${centerX} ${centerY - radius} A ${radius} ${radius} 0 0 1 ${centerX} ${centerY + radius}`}
                     fill="none"
                     stroke={item.color}
-                    strokeWidth={strokeWidth}
+                    strokeWidth={isHovered ? strokeWidth + 2 : strokeWidth}
                     strokeLinecap="round"
                     strokeDasharray={`${progress} ${circumference}`}
-                    className="transition-all duration-700 ease-out"
+                    className="transition-all duration-300 ease-out"
+                    style={{
+                      filter: isHovered ? `drop-shadow(0 0 6px ${item.color})` : 'none'
+                    }}
                   />
+                  {/* End dot indicator */}
+                  {item.score > 5 && (
+                    <circle
+                      cx={centerX + Math.sin((item.score / 100) * Math.PI) * radius}
+                      cy={centerY - radius + (1 - Math.cos((item.score / 100) * Math.PI)) * radius}
+                      r={isHovered ? 4 : 3}
+                      fill={item.color}
+                      className="transition-all duration-200"
+                    />
+                  )}
                 </g>
               );
             })}
