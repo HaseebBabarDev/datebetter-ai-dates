@@ -792,7 +792,6 @@ const Dashboard = () => {
               <UpgradeNudge />
               <FreeUpgradeBanner />
               <DailyLoggingCTA interactions={interactions} candidates={candidates} />
-              <DeviCTA />
               <Button
                 variant="outline"
                 onClick={() => navigate("/patterns")}
@@ -1163,6 +1162,9 @@ const Dashboard = () => {
                 </Button>
               </div>
             )}
+
+            {/* D.E.V.I. CTA */}
+            <DeviCTA />
 
             {/* Referral CTA at bottom */}
             <ReferralCard />
