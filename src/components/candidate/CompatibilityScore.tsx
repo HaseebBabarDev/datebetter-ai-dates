@@ -364,66 +364,71 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
     { key: "chemistry_score", label: "Chemistry", color: "#fbbf24" },
   ];
 
-  // Rainbow Arc Component
+  // Rainbow Arc Component - Feminine pink/purple palette
   const RainbowArc = () => {
     const breakdown = scoreData?.breakdown;
     if (!breakdown) return null;
 
+    // Feminine pink/purple color palette
     const scores = [
-      { label: "Chemistry", score: breakdown.chemistry_score, color: "#fbbf24" },
-      { label: "Values", score: breakdown.values_alignment, color: "#fb923c" },
-      { label: "Emotional", score: breakdown.emotional_compatibility, color: "#c4b5fd" },
-      { label: "Lifestyle", score: breakdown.lifestyle_compatibility, color: "#fdba74" },
+      { label: "Chemistry", score: breakdown.chemistry_score, color: "#f472b6" },      // Pink 400
+      { label: "Values", score: breakdown.values_alignment, color: "#fb923c" },        // Orange 400
+      { label: "Emotional", score: breakdown.emotional_compatibility, color: "#c4b5fd" }, // Violet 300
+      { label: "Lifestyle", score: breakdown.lifestyle_compatibility, color: "#fda4af" }, // Rose 300
     ].sort((a, b) => b.score - a.score);
 
     return (
-      <div className="flex items-center">
-        {/* Score list - left side, refined typography */}
-        <div className="flex-1 space-y-3">
+      <div className="flex items-center gap-4">
+        {/* Score list - left side */}
+        <div className="flex-1 space-y-2.5">
           {scores.map((item, index) => (
             <div key={item.label} className="flex items-center gap-3">
               <div 
-                className="w-9 h-9 rounded-full border flex items-center justify-center text-sm font-light flex-shrink-0"
+                className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-light flex-shrink-0"
                 style={{ borderColor: item.color, color: item.color }}
               >
                 {index + 1}
               </div>
               <div>
                 <p className="text-xs text-muted-foreground tracking-wide">{item.label}</p>
-                <p className="text-lg font-semibold text-foreground">{item.score}%</p>
+                <p className="text-base font-semibold text-foreground">{item.score}%</p>
               </div>
             </div>
           ))}
         </div>
         
-        {/* Flipped rainbow arc - curves left, modern feminine style */}
-        <div className="relative w-24 h-36 flex-shrink-0">
-          <svg viewBox="0 0 70 140" className="w-full h-full">
+        {/* Rainbow arc - curves right like reference image */}
+        <div className="relative w-28 h-40 flex-shrink-0">
+          <svg viewBox="0 0 100 140" className="w-full h-full">
             {scores.map((item, index) => {
-              const radius = 60 - index * 14;
-              const strokeWidth = 10;
+              const baseRadius = 75;
+              const radius = baseRadius - index * 16;
+              const strokeWidth = 12;
               const circumference = Math.PI * radius;
               const progress = (item.score / 100) * circumference;
-              const centerX = 70;
+              const centerX = 10;
               const centerY = 70;
               
               return (
                 <g key={item.label}>
+                  {/* Background track */}
                   <path
-                    d={`M ${centerX} ${centerY - radius} A ${radius} ${radius} 0 0 0 ${centerX} ${centerY + radius}`}
+                    d={`M ${centerX} ${centerY - radius} A ${radius} ${radius} 0 0 1 ${centerX} ${centerY + radius}`}
+                    fill="none"
+                    stroke={item.color}
+                    strokeWidth={strokeWidth}
+                    strokeLinecap="round"
+                    opacity={0.15}
+                  />
+                  {/* Progress arc */}
+                  <path
+                    d={`M ${centerX} ${centerY - radius} A ${radius} ${radius} 0 0 1 ${centerX} ${centerY + radius}`}
                     fill="none"
                     stroke={item.color}
                     strokeWidth={strokeWidth}
                     strokeLinecap="round"
                     strokeDasharray={`${progress} ${circumference}`}
-                  />
-                  {/* Decorative dot at end */}
-                  <circle
-                    cx={centerX - 4}
-                    cy={centerY + radius}
-                    r={4}
-                    fill={item.color}
-                    opacity={item.score > 0 ? 1 : 0}
+                    className="transition-all duration-700 ease-out"
                   />
                 </g>
               );
