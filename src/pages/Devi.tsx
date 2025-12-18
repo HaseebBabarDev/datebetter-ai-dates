@@ -99,6 +99,7 @@ const Devi = () => {
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [profilesLoading, setProfilesLoading] = useState(true);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [interactions, setInteractions] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -164,6 +165,30 @@ const Devi = () => {
     fetchData();
   }, [user, candidateIdFromState]);
 
+  // Fetch interactions when candidate changes
+  useEffect(() => {
+    const fetchInteractions = async () => {
+      if (!user || !selectedCandidate) {
+        setInteractions([]);
+        return;
+      }
+      
+      const { data } = await supabase
+        .from("interactions")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("candidate_id", selectedCandidate.id)
+        .order("interaction_date", { ascending: false })
+        .limit(20);
+      
+      if (data) {
+        setInteractions(data);
+      }
+    };
+
+    fetchInteractions();
+  }, [user, selectedCandidate]);
+
   useEffect(() => {
     if (candidateNameFromState && messages.length === 0) {
       setInput(`I want to ask about ${candidateNameFromState}...`);
@@ -221,6 +246,16 @@ const Devi = () => {
 
   const sendMessage = async () => {
     if ((!input.trim() && !pendingImage) || isLoading) return;
+    
+    // Require candidate selection and profile completion
+    if (!selectedCandidate) {
+      toast.error("Please select a candidate first");
+      return;
+    }
+    if (!profilesComplete) {
+      setShowProfileDialog(true);
+      return;
+    }
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
@@ -264,6 +299,9 @@ const Devi = () => {
             messages: apiMessages,
             imageData: userMessage.imageData,
             imageType: userMessage.imageType,
+            userProfile,
+            candidateProfile: selectedCandidate,
+            interactions,
           }),
         }
       );
@@ -692,39 +730,55 @@ const Devi = () => {
             </div>
           )}
           
-          <div className="flex gap-2 items-end">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleImageUpload('general')}
-              className="shrink-0"
-              disabled={isLoading}
+          {/* Show locked state if profiles not complete */}
+          {selectedCandidate && !profilesComplete ? (
+            <button
+              onClick={() => setShowProfileDialog(true)}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-border bg-muted/50 text-muted-foreground hover:bg-muted transition-colors"
             >
-              <ImagePlus className="w-5 h-5" />
-            </Button>
-            <Textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask D.E.V.I. anything..."
-              className="min-h-[44px] max-h-32 resize-none"
-              rows={1}
-              disabled={isLoading}
-            />
-            <Button
-              size="icon"
-              onClick={sendMessage}
-              disabled={(!input.trim() && !pendingImage) || isLoading}
-              className="shrink-0 bg-[image:var(--gradient-hero)]"
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
-              )}
-            </Button>
-          </div>
+              <Lock className="w-4 h-4" />
+              <span className="text-sm">Complete profiles to unlock chat</span>
+            </button>
+          ) : !selectedCandidate ? (
+            <div className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-border bg-muted/50 text-muted-foreground">
+              <Users className="w-4 h-4" />
+              <span className="text-sm">Select a candidate to start chatting</span>
+            </div>
+          ) : (
+            <div className="flex gap-2 items-end">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleImageUpload('general')}
+                className="shrink-0"
+                disabled={isLoading}
+              >
+                <ImagePlus className="w-5 h-5" />
+              </Button>
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={`Ask about ${selectedCandidate.nickname}...`}
+                className="min-h-[44px] max-h-32 resize-none"
+                rows={1}
+                disabled={isLoading}
+              />
+              <Button
+                size="icon"
+                onClick={sendMessage}
+                disabled={(!input.trim() && !pendingImage) || isLoading}
+                className="shrink-0 bg-[image:var(--gradient-hero)]"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
