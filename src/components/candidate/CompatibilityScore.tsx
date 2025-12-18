@@ -159,6 +159,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   const [adviceResponse, setAdviceResponse] = useState<AdviceTracking | null>(null);
   const [respondingToAdvice, setRespondingToAdvice] = useState(false);
   const [showNoContactDialog, setShowNoContactDialog] = useState(false);
+  const [scoreJustUpdated, setScoreJustUpdated] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
   const { canUseUpdate, getRemainingUpdates, incrementUsage, refetch: refetchSubscription } = useSubscription();
@@ -232,6 +233,10 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
         score_breakdown: analysis,
         last_score_update: new Date().toISOString(),
       });
+
+      // Trigger score animation
+      setScoreJustUpdated(true);
+      setTimeout(() => setScoreJustUpdated(false), 1000);
 
       // Reset advice response when new score is calculated
       setAdviceResponse(null);
@@ -418,7 +423,11 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
             </div>
           </div>
           <div className="text-right flex-shrink-0">
-            <div className={`text-4xl font-bold leading-none ${getScoreColor(scoreData.overall_score)}`}>
+            <div 
+              className={`text-4xl font-bold leading-none transition-all duration-300 ${getScoreColor(scoreData.overall_score)} ${
+                scoreJustUpdated ? 'animate-scale-in scale-110' : ''
+              }`}
+            >
               {scoreData.overall_score}%
             </div>
             <div className="flex items-center justify-end mt-1">
