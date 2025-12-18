@@ -2,7 +2,51 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Moon, Lock, Sparkles, Heart, Stars, ArrowRight } from "lucide-react";
-import logo from "@/assets/logo.jpg";
+
+const ModernLogo = () => (
+  <div className="relative w-24 h-24 sm:w-28 sm:h-28">
+    {/* Glow effect */}
+    <div className="absolute inset-0 rounded-3xl bg-[image:var(--gradient-hero)] blur-2xl opacity-50 animate-pulse" />
+    
+    {/* Main logo container */}
+    <div className="relative w-full h-full rounded-3xl bg-[image:var(--gradient-hero)] shadow-[var(--shadow-elegant)] flex items-center justify-center overflow-hidden">
+      {/* Background pattern */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-white/40" />
+        <div className="absolute top-4 right-3 w-2 h-2 rounded-full bg-white/30" />
+        <div className="absolute bottom-3 left-4 w-2 h-2 rounded-full bg-white/30" />
+        <div className="absolute bottom-5 right-2 w-1.5 h-1.5 rounded-full bg-white/40" />
+      </div>
+      
+      {/* Heart with chart line */}
+      <svg viewBox="0 0 64 64" className="w-14 h-14 sm:w-16 sm:h-16 relative z-10">
+        {/* Heart shape */}
+        <path 
+          d="M32 56 C16 44 8 34 8 24 C8 16 14 10 22 10 C26 10 30 12 32 16 C34 12 38 10 42 10 C50 10 56 16 56 24 C56 34 48 44 32 56Z" 
+          fill="white" 
+          fillOpacity="0.95"
+        />
+        {/* Data line through heart */}
+        <path 
+          d="M12 32 L22 32 L26 24 L30 38 L34 28 L38 34 L42 30 L52 30" 
+          stroke="url(#lineGradient)" 
+          strokeWidth="2.5" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          fill="none"
+        />
+        {/* Gradient definition */}
+        <defs>
+          <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="hsl(340, 75%, 55%)" />
+            <stop offset="50%" stopColor="hsl(320, 70%, 58%)" />
+            <stop offset="100%" stopColor="hsl(280, 60%, 60%)" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+  </div>
+);
 
 const Splash = () => {
   const navigate = useNavigate();
@@ -30,14 +74,9 @@ const Splash = () => {
 
       {/* Content */}
       <div className="relative z-10 min-h-[100dvh] flex flex-col items-center justify-center px-5 py-6 pt-safe-top pb-safe-bottom">
-        {/* Logo */}
-        <div className="relative mb-5">
-          <div className="absolute inset-0 w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-[image:var(--gradient-hero)] blur-2xl opacity-60 animate-pulse" />
-          <img 
-            src={logo} 
-            alt="dateBetter logo" 
-            className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl shadow-[var(--shadow-elegant)] ring-2 ring-primary/30 ring-offset-4 ring-offset-background/50 object-cover"
-          />
+        {/* Modern Logo */}
+        <div className="mb-5">
+          <ModernLogo />
         </div>
 
         {/* Logo Text */}
