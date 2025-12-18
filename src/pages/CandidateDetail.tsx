@@ -42,6 +42,7 @@ import { Edit, Info } from "lucide-react";
 
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
+type DeviMessage = Tables<"devi_messages">;
 
 interface ScoreBreakdown {
   advice?: string;
@@ -72,6 +73,7 @@ const CandidateDetail = () => {
   const { getRemainingUpdates, subscription } = useSubscription();
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
+  const [deviMessages, setDeviMessages] = useState<DeviMessage[]>([]);
   const [userProfile, setUserProfile] = useState<{ schedule_flexibility?: string | null }>({});
   const [loading, setLoading] = useState(true);
   const [hasPendingAdvice, setHasPendingAdvice] = useState(false);
@@ -186,12 +188,32 @@ const CandidateDetail = () => {
       if (candidateRes.data) setCandidate(candidateRes.data);
       if (interactionsRes.data) setInteractions(interactionsRes.data);
       if (profileRes.data) setUserProfile(profileRes.data);
+
+      // Fetch D.E.V.I. messages for this candidate
+      const { data: conversations } = await supabase
+        .from("devi_conversations")
+        .select("id")
+        .eq("candidate_id", id!)
+        .eq("user_id", user!.id);
+
+      if (conversations && conversations.length > 0) {
+        const conversationIds = conversations.map(c => c.id);
+        const { data: messages } = await supabase
+          .from("devi_messages")
+          .select("*")
+          .in("conversation_id", conversationIds)
+          .eq("user_id", user!.id)
+          .order("created_at", { ascending: false });
+
+        if (messages) setDeviMessages(messages);
+      }
     } catch (error) {
       console.error("Error fetching candidate:", error);
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleUpdateCandidate = async (updates: Partial<Candidate>) => {
     if (!candidate) return;
@@ -803,7 +825,7 @@ const CandidateDetail = () => {
                 }
               />
             </div>
-            <InteractionHistory interactions={interactions} />
+            <InteractionHistory interactions={interactions} deviMessages={deviMessages} />
           </TabsContent>
 
           <TabsContent value="flags" className="mt-4">
