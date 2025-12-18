@@ -231,16 +231,22 @@ const Devi = () => {
     fetchData();
   }, [user, candidateIdFromState]);
 
-  // Fetch conversations
+  // Fetch conversations (last 30 days only)
   useEffect(() => {
     const fetchConversations = async () => {
       if (!user) return;
       
       setConversationsLoading(true);
+      
+      // Only fetch conversations from the last 30 days
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
       const { data } = await supabase
         .from("devi_conversations")
         .select("*")
         .eq("user_id", user.id)
+        .gte("updated_at", thirtyDaysAgo.toISOString())
         .order("updated_at", { ascending: false })
         .limit(50);
       
