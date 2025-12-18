@@ -31,24 +31,24 @@ interface SetupContentProps {
 }
 
 const SetupContent = ({ setupMode }: SetupContentProps) => {
-  const { currentStep, loading, data, updateData, nextStep } = useOnboarding();
+  const { currentStep, loading, data, updateData, goToStep } = useOnboarding();
   const [initialized, setInitialized] = useState(false);
 
   // Handle setup mode from URL params - skip WelcomeScreen if already chosen
   useEffect(() => {
     if (!loading && !initialized && currentStep === 0 && setupMode) {
       if (setupMode === "quick") {
-        updateData({ quickStartMode: true, ageConfirmed: true });
-        nextStep();
+        updateData({ quickStartMode: true });
+        goToStep(1);
       } else if (setupMode === "full") {
-        updateData({ quickStartMode: false, ageConfirmed: true });
-        nextStep();
+        updateData({ quickStartMode: false });
+        goToStep(1);
       }
       setInitialized(true);
     } else if (!loading && !initialized) {
       setInitialized(true);
     }
-  }, [loading, initialized, currentStep, setupMode, updateData, nextStep]);
+  }, [loading, initialized, currentStep, setupMode, updateData, goToStep]);
 
   if (loading || (!initialized && setupMode)) {
     return (

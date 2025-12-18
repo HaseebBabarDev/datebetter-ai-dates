@@ -13,6 +13,7 @@ import authBg from "@/assets/auth-bg.jpg";
 const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const setupMode = searchParams.get("setup");
   const { signIn, signUp } = useAuth();
   const [isSignUp, setIsSignUp] = useState(searchParams.get("mode") === "signup");
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -132,7 +133,10 @@ const Auth = () => {
             }
           }
         }
-        navigate("/setup");
+
+        // Preserve chosen setup path if provided in the URL
+        const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
+        navigate(`/setup${setupQuery}`);
       }
     } catch (error) {
       toast({ title: "An error occurred", variant: "destructive" });
