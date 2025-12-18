@@ -20,6 +20,7 @@ import { NoContactMode } from "@/components/candidate/NoContactMode";
 import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
 import { ProfileCompleteness } from "@/components/candidate/ProfileCompleteness";
 import { ProfileCompletenessNudge } from "@/components/candidate/ProfileCompletenessNudge";
+import { AskDeviCTA } from "@/components/candidate/AskDeviCTA";
 import { AppRatingDialog, shouldShowRatingDialog } from "@/components/candidate/AppRatingDialog";
 import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -753,6 +754,7 @@ const CandidateDetail = () => {
               onAdviceResponded={checkPendingAdvice}
             />
             <ProfileCompleteness candidate={candidate} />
+            <AskDeviCTA candidateName={candidate.nickname} />
             <CandidateProfile
               candidate={candidate}
               userId={user!.id}
