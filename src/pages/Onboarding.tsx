@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Brain, Shield, TrendingUp, ArrowLeft, Sparkles } from "lucide-react";
+import { Brain, Shield, TrendingUp, ArrowLeft, Sparkles, Zap, Clock, ChevronRight } from "lucide-react";
 
 const Onboarding = () => {
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ const Onboarding = () => {
     {
       icon: Brain,
       title: "Get Smart Insights",
-      description: "Setup takes 10-15 minutes but creates your personalized scoring system—worth every minute",
+      description: "Your personalized scoring system helps you make better dating decisions",
     },
     {
       icon: Shield,
@@ -41,7 +41,7 @@ const Onboarding = () => {
       </header>
 
       <main className="px-4 py-3 md:py-8 max-w-6xl mx-auto pb-safe-bottom">
-        <div className="text-center mb-5 md:mb-12">
+        <div className="text-center mb-5 md:mb-10">
           <h2 className="text-xl sm:text-2xl md:text-5xl font-bold mb-2 md:mb-4">
             Your Journey to Better Dating Starts Here
           </h2>
@@ -53,7 +53,7 @@ const Onboarding = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-10">
+        <div className="grid md:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-8">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
@@ -76,17 +76,62 @@ const Onboarding = () => {
           })}
         </div>
 
-        <div className="text-center">
-          <Button
-            variant="hero"
-            size="lg"
-            onClick={() => navigate("/auth?mode=signup")}
-            className="font-semibold w-full md:w-auto h-12"
+        {/* Setup Options */}
+        <div className="max-w-lg mx-auto space-y-3 mb-6">
+          <p className="text-center text-sm text-muted-foreground mb-4">Choose your setup experience</p>
+          
+          {/* Quick Setup Option */}
+          <button
+            onClick={() => navigate("/auth?mode=signup&setup=quick")}
+            className="w-full p-4 rounded-2xl bg-[image:var(--gradient-glass)] backdrop-blur-sm border-2 border-primary/30 hover:border-primary/60 hover:shadow-[var(--shadow-soft)] transition-all duration-300 text-left group"
           >
-            Continue Setup
-            <Sparkles className="w-4 h-4 ml-1" />
-          </Button>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                <Zap className="w-6 h-6 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <h3 className="font-semibold text-foreground">Quick Setup</h3>
+                  <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold">2 MIN</span>
+                </div>
+                <p className="text-xs text-muted-foreground">Just the essentials—start tracking candidates right away</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </div>
+          </button>
+
+          {/* Full Onboarding Option */}
+          <button
+            onClick={() => navigate("/auth?mode=signup&setup=full")}
+            className="w-full p-4 rounded-2xl bg-[image:var(--gradient-hero)] shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all duration-300 text-left group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                <Clock className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <h3 className="font-semibold text-white">Full Onboarding</h3>
+                  <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-semibold">10-15 MIN</span>
+                </div>
+                <p className="text-xs text-white/80">Unlock personalized AI scoring & deeper insights</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
+            </div>
+            <div className="mt-2 ml-15 pl-15">
+              <span className="text-[10px] text-white/60 flex items-center gap-1 ml-[60px]">
+                <Sparkles className="w-3 h-3" /> Recommended for best results
+              </span>
+            </div>
+          </button>
         </div>
+
+        <p className="text-center text-xs text-muted-foreground">
+          Already have an account?{" "}
+          <button onClick={() => navigate("/auth")} className="text-primary font-semibold hover:underline">
+            Sign in
+          </button>
+        </p>
       </main>
     </div>
   );
