@@ -706,18 +706,22 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
       analysis.breakdown.emotional_compatibility = adjustedEmotionalScore;
     }
 
-    // Update candidate with compatibility score
-    const { error: updateError } = await supabase
-      .from("candidates")
-      .update({
-        compatibility_score: analysis.overall_score,
-        score_breakdown: analysis,
-        last_score_update: new Date().toISOString(),
-      })
-      .eq("id", candidateId);
+    // Only update if we have a valid score
+    if (analysis.overall_score !== undefined && analysis.overall_score !== null) {
+      const { error: updateError } = await supabase
+        .from("candidates")
+        .update({
+          compatibility_score: analysis.overall_score,
+          score_breakdown: analysis,
+          last_score_update: new Date().toISOString(),
+        })
+        .eq("id", candidateId);
 
-    if (updateError) {
-      console.error("Update error:", updateError);
+      if (updateError) {
+        console.error("Update error:", updateError);
+      }
+    } else {
+      console.log("Score is undefined, keeping existing score");
     }
 
     return new Response(JSON.stringify(analysis), {
