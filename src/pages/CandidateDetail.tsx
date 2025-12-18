@@ -23,6 +23,7 @@ import { ProfileCompletenessNudge } from "@/components/candidate/ProfileComplete
 import { AskDeviCTA } from "@/components/candidate/AskDeviCTA";
 import { AppRatingDialog, shouldShowRatingDialog } from "@/components/candidate/AppRatingDialog";
 import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
+import { SuccessfulRelationshipCTA, checkSuccessfulRelationship } from "@/components/candidate/SuccessfulRelationshipCTA";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -77,6 +78,7 @@ const CandidateDetail = () => {
   const [userProfile, setUserProfile] = useState<{ schedule_flexibility?: string | null }>({});
   const [loading, setLoading] = useState(true);
   const [hasPendingAdvice, setHasPendingAdvice] = useState(false);
+  const [successfulRelationship, setSuccessfulRelationship] = useState<{ show: boolean; interactionDays: number }>({ show: false, interactionDays: 0 });
   const initialTab = (location.state as { tab?: string })?.tab;
   const [activeTab, setActiveTab] = useState<string | undefined>(initialTab);
 
@@ -127,8 +129,29 @@ const CandidateDetail = () => {
     if (user && id) {
       fetchData();
       checkPendingAdvice();
+      checkSuccessfulRelationshipStatus();
     }
   }, [user, id]);
+
+  const checkSuccessfulRelationshipStatus = async () => {
+    if (!user || !id) return;
+    
+    // Get candidate's compatibility score first
+    const { data: candidateData } = await supabase
+      .from("candidates")
+      .select("compatibility_score")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    
+    const result = await checkSuccessfulRelationship(
+      id,
+      user.id,
+      candidateData?.compatibility_score ?? null
+    );
+    
+    setSuccessfulRelationship(result);
+  };
 
   const checkPendingAdvice = async () => {
     if (!user || !id) return;
@@ -640,6 +663,17 @@ const CandidateDetail = () => {
           </div>
         )}
 
+        {/* Successful Relationship CTA */}
+        {successfulRelationship.show && candidate.compatibility_score && candidate.status !== "archived" && (
+          <SuccessfulRelationshipCTA
+            candidateId={candidate.id}
+            candidateName={candidate.nickname}
+            compatibilityScore={candidate.compatibility_score}
+            interactionDays={successfulRelationship.interactionDays}
+            onAcknowledged={() => setSuccessfulRelationship({ show: false, interactionDays: 0 })}
+          />
+        )}
+
         {/* Active relationship actions */}
         {!candidate.no_contact_active && candidate.status !== "archived" && (
           <div className="space-y-2">
@@ -647,7 +681,7 @@ const CandidateDetail = () => {
             <div data-tour="quick-log">
               <AddInteractionForm
                 candidateId={candidate.id}
-                onSuccess={() => { fetchData(); checkPendingAdvice(); }}
+                onSuccess={() => { fetchData(); checkPendingAdvice(); checkSuccessfulRelationshipStatus(); }}
                 onRescore={handleRescore}
                 isNoContact={candidate.no_contact_active || false}
                 onBrokeContact={handleBrokeContact}
