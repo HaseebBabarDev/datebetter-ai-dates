@@ -435,7 +435,7 @@ const Devi = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border safe-area-top">
         <div className="container mx-auto px-4 py-3 max-w-lg">
@@ -595,7 +595,7 @@ const Devi = () => {
       </Dialog>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         <div className="container mx-auto px-4 py-4 max-w-lg space-y-4">
           {messages.length === 0 ? (
             <div className="py-8 space-y-6">
@@ -711,7 +711,7 @@ const Devi = () => {
       </div>
 
       {/* Input */}
-      <div className="sticky bottom-16 bg-background border-t border-border pb-2">
+      <div className="shrink-0 bg-background border-t border-border pb-16 safe-area-bottom">
         <div className="container mx-auto px-4 py-3 max-w-lg">
           {/* Pending Image Preview */}
           {pendingImage && (
