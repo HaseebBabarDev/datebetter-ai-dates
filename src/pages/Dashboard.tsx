@@ -685,7 +685,7 @@ const Dashboard = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Loading your dashboard...</p>
@@ -709,7 +709,7 @@ const Dashboard = () => {
   return (
     <div 
       ref={containerRef}
-      className="min-h-screen relative overflow-auto bg-[image:var(--gradient-page)]"
+      className="min-h-[100dvh] relative overflow-auto bg-[image:var(--gradient-page)]"
     >
       {/* Pull to Refresh Indicator */}
       <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} />
@@ -725,25 +725,25 @@ const Dashboard = () => {
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-[image:var(--gradient-header)] backdrop-blur-xl border-b border-border/50">
-        <div className="container mx-auto px-4 py-4 max-w-lg">
+      <header className="sticky top-0 z-50 bg-[image:var(--gradient-header)] backdrop-blur-xl border-b border-border/50 pt-safe-top">
+        <div className="px-4 py-3 max-w-lg mx-auto">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[image:var(--gradient-hero)] flex items-center justify-center shadow-[var(--shadow-soft)]">
-                <Heart className="w-5 h-5 text-primary-foreground" />
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center shadow-[var(--shadow-soft)]">
+                <Heart className="w-4 h-4 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-foreground">
+                <h1 className="text-base font-semibold text-foreground leading-tight">
                   {profile?.name ? `Hi, ${profile.name}` : "Hello!"}
                 </h1>
                 <p className="text-xs text-muted-foreground">{greeting}</p>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="relative text-foreground hover:bg-primary/10 rounded-xl" 
+                className="relative text-foreground hover:bg-primary/10 rounded-xl h-9 w-9" 
                 onClick={() => navigate("/notifications")}
               >
                 <Bell className="w-5 h-5" />
@@ -755,7 +755,7 @@ const Dashboard = () => {
                 data-tour="settings" 
                 variant="ghost" 
                 size="icon" 
-                className="text-foreground hover:bg-primary/10 rounded-xl" 
+                className="text-foreground hover:bg-primary/10 rounded-xl h-9 w-9" 
                 onClick={() => navigate("/settings")}
               >
                 <Settings className="w-5 h-5" />
@@ -765,7 +765,7 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="relative z-10 container mx-auto px-4 py-4 max-w-lg pb-24">
+      <main className="relative z-10 px-4 py-3 max-w-lg mx-auto pb-24">
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setQualityFilter(null); }} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4 bg-muted/50 backdrop-blur-sm border border-border">
             <TabsTrigger value="home" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground">Home</TabsTrigger>

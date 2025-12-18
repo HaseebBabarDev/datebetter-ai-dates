@@ -156,6 +156,18 @@ All colors MUST be HSL.
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  .pt-safe-top {
+    padding-top: max(env(safe-area-inset-top), 0.5rem);
+  }
+
+  .pb-safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+  }
+
+  .mb-safe-bottom {
+    margin-bottom: env(safe-area-inset-bottom);
+  }
+
   /* iOS Touch Targets - minimum 44px but allow smaller icons */
   button:not(.icon-only), 
   a:not(.icon-only), 

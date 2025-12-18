@@ -146,7 +146,7 @@ const Auth = () => {
     : email && password;
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-[100dvh] relative overflow-hidden">
       {/* Background with gradient overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -156,17 +156,17 @@ const Auth = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
       </div>
 
-      {/* Decorative elements */}
-      <div className="absolute top-20 right-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl" />
-      <div className="absolute bottom-40 left-10 w-40 h-40 rounded-full bg-secondary/10 blur-3xl" />
+      {/* Decorative elements - hidden on small screens */}
+      <div className="hidden sm:block absolute top-20 right-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl" />
+      <div className="hidden sm:block absolute bottom-40 left-10 w-40 h-40 rounded-full bg-secondary/10 blur-3xl" />
 
       {/* Header */}
-      <header className="relative z-10 px-4 py-4 flex items-center gap-3 safe-area-top">
+      <header className="relative z-10 px-4 pt-safe-top py-3 flex items-center gap-3">
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={() => navigate("/")} 
-          className="bg-background/60 backdrop-blur-md border border-border/50 hover:bg-background/80 rounded-xl"
+          className="bg-background/60 backdrop-blur-md border border-border/50 hover:bg-background/80 rounded-xl h-10 w-10"
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
@@ -180,7 +180,7 @@ const Auth = () => {
         </div>
       </header>
 
-      <main className="relative z-10 container max-w-md mx-auto px-4 py-6">
+      <main className="relative z-10 flex-1 px-4 pb-safe-bottom pb-4 max-w-md mx-auto w-full">
         {/* Glass card */}
         <div className="bg-[image:var(--gradient-glass)] backdrop-blur-xl rounded-3xl p-6 shadow-[var(--shadow-elegant)] border border-border/30">
           
