@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { OptionCard } from "../OptionCard";
 import { SliderInput } from "../SliderInput";
+import { Users } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -79,6 +80,25 @@ const CareerScreen = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Check dating pool impact based on income preference
+  const getPoolData = (incomeRange: string | undefined) => {
+    switch (incomeRange) {
+      case "250k_plus":
+        return { percent: 1, label: "Top 1%", shrink: 99 };
+      case "150k_250k":
+        return { percent: 6, label: "Top 6%", shrink: 94 };
+      case "100k_150k":
+        return { percent: 15, label: "Top 15%", shrink: 85 };
+      case "75k_100k":
+        return { percent: 30, label: "Top 30%", shrink: 70 };
+      default:
+        return null;
+    }
+  };
+  
+  const poolData = getPoolData(data.preferredIncomeRange);
+  const showPoolWarning = poolData && data.preferredIncomeRange && !["no_preference", "under_25k", "25k_50k", "50k_75k"].includes(data.preferredIncomeRange);
+  
   // Check if user earns less than 100k but wants partner earning 250k+
   const lowIncomeRanges = ["under_25k", "25k_50k", "50k_75k", "75k_100k"];
   const userEarnsUnder100k = data.incomeRange && lowIncomeRanges.includes(data.incomeRange);
@@ -186,6 +206,45 @@ const CareerScreen = () => {
                 </SelectContent>
               </Select>
               
+              {showPoolWarning && poolData && (
+                <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg animate-fade-in space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-amber-600" />
+                    <span className="text-xs font-semibold text-amber-700">Dating Pool Impact</span>
+                  </div>
+                  
+                  {/* Visual pool representation */}
+                  <div className="relative h-8 bg-muted/50 rounded-full overflow-hidden">
+                    {/* Full pool background */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="flex gap-0.5">
+                        {Array.from({ length: 20 }).map((_, i) => (
+                          <div 
+                            key={i} 
+                            className={`w-1.5 h-4 rounded-full transition-all duration-500 ${
+                              i < Math.ceil(20 * (poolData.percent / 100)) 
+                                ? 'bg-primary' 
+                                : 'bg-muted-foreground/20'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">
+                      <span className="font-bold text-foreground">{poolData.percent}%</span> of men earn this
+                    </span>
+                    <span className="text-amber-600 font-medium">{poolData.label}</span>
+                  </div>
+                  
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    This filters out {poolData.shrink}% of potential matches. Consider if income is a dealbreaker or a preference.
+                  </p>
+                </div>
+              )}
+
               {showIncomeWarning && (
                 <div className="flex items-start gap-2.5 p-3 bg-primary/5 border border-primary/20 rounded-lg animate-fade-in">
                   <img 
