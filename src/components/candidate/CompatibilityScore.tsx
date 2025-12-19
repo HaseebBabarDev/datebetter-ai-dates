@@ -208,19 +208,19 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
         body: { candidateId: candidate.id },
       });
 
-      // Handle errors or undefined response - treat as "no change"
+      // Handle errors or undefined response - no change, no prompts
       if (fnError || !data || data?.error) {
-        const errorMessage = fnError?.message || data?.error || "";
-        const isAuthError = errorMessage.includes("401") || errorMessage.includes("Session expired") || errorMessage.includes("Unauthorized");
-        
-        toast({
-          title: scoreData ? "Score Remains the Same" : "Unable to Calculate",
-          description: isAuthError 
-            ? "Please refresh the page and try again." 
-            : scoreData 
-              ? "Your current score and advice remain valid."
-              : "Please try again later.",
-        });
+        if (scoreData) {
+          toast({
+            title: "Score Unchanged",
+            description: "Unable to refresh at this time.",
+          });
+        } else {
+          toast({
+            title: "Unable to Calculate",
+            description: "Please try again later.",
+          });
+        }
         return;
       }
 
@@ -255,18 +255,16 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       });
     } catch (error) {
       console.error("Error calculating compatibility:", error);
-      const errorMsg = error instanceof Error ? error.message : "Failed to calculate compatibility";
-      
-      // For any error, if we have existing score, show "remains the same"
+      // Silent fail if score exists - no prompts needed
       if (scoreData) {
         toast({
-          title: "Score Remains the Same",
-          description: "Unable to update at this time. Your current score is still valid.",
+          title: "Score Unchanged",
+          description: "Unable to refresh at this time.",
         });
       } else {
         toast({
-          title: "Unable to Calculate",
-          description: errorMsg,
+          title: "Unable to Calculate", 
+          description: "Please try again later.",
           variant: "destructive",
         });
       }
