@@ -1257,56 +1257,57 @@ const Devi = () => {
       <div className="flex-1 overflow-y-auto min-h-0">
         <div className="container mx-auto px-4 py-4 max-w-lg space-y-4">
           {messages.length === 0 ? (
-            <div className="py-6 space-y-5">
-              {/* Minimal Welcome */}
-              <div className="text-center space-y-1">
-                <p className="text-sm text-muted-foreground">
-                  {selectedCandidate 
-                    ? `What's on your mind about ${selectedCandidate.nickname}?`
-                    : "Select someone above to get started"}
-                </p>
+            <div className="py-4">
+              {/* Single welcome bubble - feels like a chat */}
+              <div className="flex items-start gap-2 mb-4">
+                <div className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
+                  <Sparkles className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <div className="bg-muted rounded-2xl rounded-bl-md p-3 max-w-[85%]">
+                  <p className="text-sm">
+                    {selectedCandidate 
+                      ? `Hey! 👋 What's going on with ${selectedCandidate.nickname}?`
+                      : "Hey babe! 👋 Pick who we're talking about and spill the tea ☕"}
+                  </p>
+                </div>
               </div>
 
-              {/* Quick prompts - compact */}
+              {/* Quick prompts as tappable suggestions */}
               {selectedCandidate && canChat && (
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {EXAMPLE_QUESTIONS.slice(0, 3).map((q, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setInput(q)}
-                      className="text-xs px-3 py-2 rounded-full bg-muted hover:bg-muted/80 text-foreground transition-colors"
-                    >
-                      {q}
-                    </button>
-                  ))}
+                <div className="pl-10 space-y-2">
+                  <p className="text-xs text-muted-foreground mb-2">Try asking:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {EXAMPLE_QUESTIONS.map((q, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setInput(q)}
+                        className="text-xs px-3 py-1.5 rounded-full border border-primary/30 text-primary bg-primary/5 hover:bg-primary/10 transition-colors"
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  {/* Upload hint - very subtle */}
+                  <button
+                    onClick={() => handleImageUpload('text_screenshot')}
+                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 mt-3"
+                  >
+                    <Camera className="w-3 h-3" />
+                    or send a screenshot
+                  </button>
                 </div>
               )}
 
-              {/* Upload options - minimal */}
-              {selectedCandidate && canChat && (
-                <div className="flex justify-center gap-3">
-                  {QUICK_PROMPTS.map((prompt) => (
-                    <button
-                      key={prompt.type}
-                      onClick={() => handleImageUpload(prompt.type)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-full border border-border hover:bg-muted/50 transition-colors"
-                    >
-                      <prompt.icon className="w-4 h-4 text-primary" />
-                      <span className="text-xs">{prompt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-              
-              {/* Locked state */}
+              {/* Locked state - inline */}
               {selectedCandidate && !canChat && (
-                <div className="text-center">
+                <div className="pl-10">
                   <button
                     onClick={() => setShowProfileDialog(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border text-sm text-muted-foreground hover:bg-muted/50 transition-colors"
+                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
                   >
-                    <Lock className="w-4 h-4" />
-                    Complete profile to unlock
+                    <Lock className="w-3 h-3" />
+                    Complete profile to unlock chat
                   </button>
                 </div>
               )}
