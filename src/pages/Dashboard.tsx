@@ -768,50 +768,57 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="relative z-10 px-4 py-3 max-w-lg mx-auto pb-24">
+      <main className="relative z-10 px-4 py-4 max-w-lg mx-auto pb-24">
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setQualityFilter(null); }} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4 bg-muted/50 backdrop-blur-sm border border-border">
-            <TabsTrigger value="home" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground">Home</TabsTrigger>
-            <TabsTrigger value="manage" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground">Manage Candidates</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-5 h-12 p-1 bg-background/80 backdrop-blur-md rounded-2xl border border-border/50 shadow-sm">
+            <TabsTrigger 
+              value="home" 
+              className="rounded-xl h-full text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+            >
+              Home
+            </TabsTrigger>
+            <TabsTrigger 
+              value="manage" 
+              className="rounded-xl h-full text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+            >
+              Manage
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="home" className="space-y-4 mt-0">
-            {/* Quick Actions */}
-            <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  data-tour="add-candidate"
-                  onClick={() => navigate("/add-candidate")}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 gap-2 font-semibold shadow-lg shadow-primary/30"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span className="text-sm font-medium">Add Candidate</span>
-                </Button>
-                <div data-tour="log-interaction">
-                  <LogInteractionDialog candidates={candidates} compact />
-                </div>
+          <TabsContent value="home" className="space-y-4 mt-0 animate-fade-in">
+            {/* Quick Actions Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                data-tour="add-candidate"
+                onClick={() => navigate("/add-candidate")}
+                className="h-14 flex-col gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl shadow-lg shadow-primary/25 transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
+              >
+                <Plus className="w-5 h-5" />
+                <span className="text-xs font-medium">Add Candidate</span>
+              </Button>
+              <div data-tour="log-interaction" className="h-14">
+                <LogInteractionDialog candidates={candidates} compact />
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  onClick={() => navigate("/devi")}
-                  className="w-full bg-accent hover:bg-accent/90 text-accent-foreground h-12 gap-2 font-semibold shadow-lg shadow-accent/30"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  <span className="text-sm font-medium">Ask D.E.V.I.</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => navigate("/patterns")}
-                  className="w-full h-12 gap-2 border-border text-foreground hover:bg-primary/10"
-                >
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="text-sm">View Patterns</span>
-                </Button>
-              </div>
-              <UpgradeNudge />
-              <FreeUpgradeBanner />
-              <DailyLoggingCTA interactions={interactions} candidates={candidates} />
+              <Button
+                onClick={() => navigate("/devi")}
+                className="h-14 flex-col gap-1.5 bg-gradient-to-br from-secondary to-primary text-primary-foreground rounded-2xl shadow-lg shadow-secondary/25 transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
+              >
+                <Sparkles className="w-5 h-5" />
+                <span className="text-xs font-medium">Ask D.E.V.I.</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/patterns")}
+                className="h-14 flex-col gap-1.5 rounded-2xl border-border/60 bg-background/60 backdrop-blur-sm text-foreground hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 hover:scale-[1.02]"
+              >
+                <TrendingUp className="w-5 h-5" />
+                <span className="text-xs font-medium">View Patterns</span>
+              </Button>
             </div>
+
+            <UpgradeNudge />
+            <FreeUpgradeBanner />
+            <DailyLoggingCTA interactions={interactions} candidates={candidates} />
 
             {/* Alerts */}
             {(() => {
