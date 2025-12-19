@@ -318,7 +318,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Looking For</Label>
                 <Select
@@ -374,7 +374,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Current Status</Label>
                 <Select
@@ -489,7 +489,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Education Level</Label>
                 <Select
@@ -545,7 +545,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Country</Label>
                 <Select
@@ -569,7 +569,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Social Style</Label>
                 <Select
@@ -625,7 +625,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Preferred Age Min</Label>
                 <Input
@@ -711,7 +711,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Longest Relationship</Label>
                 <Select
