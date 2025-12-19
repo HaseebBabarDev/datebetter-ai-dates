@@ -24,6 +24,7 @@ import {
 import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
+import { ProfilePhotoUpload } from "@/components/settings/ProfilePhotoUpload";
 import { Badge } from "@/components/ui/badge";
 import { PaymentSheet } from "@/components/subscription/PaymentSheet";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
@@ -116,6 +117,7 @@ const Settings = () => {
 
   // Account form state
   const [name, setName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [birthDate, setBirthDate] = useState<Date | undefined>(undefined);
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
@@ -374,6 +376,7 @@ const Settings = () => {
       if (data) {
         setProfile(data);
         setName(data.name || "");
+        setAvatarUrl(data.avatar_url || null);
         if (data.birth_date) {
           setBirthDate(parse(data.birth_date, "yyyy-MM-dd", new Date()));
         }
@@ -499,6 +502,12 @@ const Settings = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 px-4 pb-4">
+                <ProfilePhotoUpload
+                  userId={user.id}
+                  currentPhotoUrl={avatarUrl}
+                  userName={name}
+                  onPhotoUpdated={setAvatarUrl}
+                />
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   <div className="space-y-1">
                     <Label htmlFor="name" className="text-xs font-medium">Name</Label>
