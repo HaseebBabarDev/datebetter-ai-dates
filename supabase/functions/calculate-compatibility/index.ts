@@ -728,6 +728,97 @@ DATING CONTEXT CONSIDERATIONS - Factor these into your analysis:
 - For straight men dating women: understand that women often face different safety concerns, move at different paces, and may communicate differently. Help him understand these dynamics without being preachy.
 - For straight women dating men: understand unique challenges like safety vetting, reading mixed signals, and navigating modern dating expectations
 
+HETEROSEXUAL MALE SCORING MATRIX (for straight/bi men dating women):
+
+1. UNDERSTANDING WOMEN'S PERSPECTIVE - Help him see her side:
+   - Women prioritize safety - meeting in public, telling friends, etc. = Normal (+0)
+   - She wants to take things slow = Healthy boundary (+10 if he respects it)
+   - He pressures for faster progression = -30 (boundary violation)
+   - He gets frustrated by her caution = -20 (lacks empathy)
+   - He understands and accommodates her pace = +20 (emotionally intelligent)
+
+2. COMMUNICATION STYLE COMPATIBILITY:
+   - She prefers calls, he only texts = -15 (communication mismatch)
+   - She needs more emotional expression, he's stoic = -20 (emotional availability gap)
+   - He dismisses her feelings as "dramatic" = -40 (invalidation pattern)
+   - He actively listens and validates = +25 (emotionally mature)
+   - He shares feelings openly = +20 (vulnerability positive)
+
+3. INITIATIVE & EFFORT RED FLAGS:
+   - He never plans dates, always "whatever you want" = -25 (low effort)
+   - He only texts late night = -35 (booty call pattern)
+   - He cancels frequently = -30 (unreliable)
+   - He plans thoughtful dates = +20 (high effort)
+   - He follows through on plans = +15 (reliable)
+   - He remembers details she mentioned = +15 (attentive)
+
+4. FINANCIAL DYNAMICS:
+   - He expects her to always pay = -20 (imbalanced)
+   - He's stingy on dates but brags about spending on himself = -30 (selfish)
+   - He offers to pay but respects if she wants to split = +15 (balanced)
+   - He uses money to control or impress excessively = -25 (manipulation)
+   - He's transparent about financial situation = +10 (honest)
+
+5. RESPECT & BOUNDARIES:
+   - He pushes physical boundaries = -50 (CONSENT ISSUE)
+   - He sulks when she says no to anything = -35 (manipulation)
+   - He respects her "no" without guilt-tripping = +25 (healthy)
+   - He asks for consent explicitly = +20 (respectful)
+   - He pressures for exclusivity too fast = -20 (rushing)
+   - He respects her need for space = +15 (secure attachment)
+
+6. EX & JEALOUSY PATTERNS:
+   - He trash-talks all his exes = -30 (pattern of blame)
+   - He's still entangled with an ex = -40 (unavailable)
+   - He gets jealous of her male friends = -25 (insecurity/control)
+   - He checks her phone or social media = -50 (controlling behavior)
+   - He speaks neutrally about past relationships = +10 (maturity)
+   - He's comfortable with her having male friends = +15 (secure)
+
+7. LIFE STAGE & GOALS ALIGNMENT:
+   - He's not over his party phase, she wants stability = -35 (maturity mismatch)
+   - He's vague about the future = -20 (avoidance)
+   - He has clear goals aligned with hers = +25 (compatible vision)
+   - He's actively working on himself = +20 (growth mindset)
+   - He expects her to fit into his life with no compromise = -30 (inflexible)
+
+8. RED FLAGS SPECIFIC TO HETERO MALE BEHAVIOR:
+   - "I'm not like other guys" = -15 (performative)
+   - Negging or backhanded compliments = -40 (manipulation)
+   - "You're so mature for your age" (age gap) = -35 (grooming language)
+   - Love bombing (excessive gifts/attention early) = -45 (manipulation tactic)
+   - Hot and cold behavior = -35 (emotional unavailability)
+   - "My ex was crazy" (about multiple exes) = -30 (red flag pattern)
+   - "I don't do labels" when she wants commitment = -40 (avoidance)
+   - Criticizes her appearance = -45 (negging/control)
+   - Compares her to other women = -35 (disrespectful)
+   - Gets angry when she doesn't respond fast = -40 (controlling)
+
+9. POSITIVE INDICATORS FOR HETERO MEN:
+   - Introduces her to friends/family = +25 (investment)
+   - Makes her feel safe = +30 (security)
+   - Supports her goals and ambitions = +25 (partner energy)
+   - Takes accountability for mistakes = +20 (maturity)
+   - Consistent communication patterns = +20 (reliability)
+   - Shows interest in her life beyond romance = +15 (genuine interest)
+   - Handles rejection/conflict gracefully = +25 (emotional regulation)
+
+10. INTIMACY & PHYSICAL EXPECTATIONS:
+    - Pressures for intimacy before she's ready = -50 (BOUNDARY VIOLATION)
+    - Gets upset about waiting = -30 (entitlement)
+    - Respects her timeline completely = +25 (respect)
+    - Focuses on her pleasure, not just his = +20 (considerate)
+    - Uses intimacy as reward/punishment = -40 (manipulation)
+    - Open communication about intimacy = +20 (healthy)
+
+11. LONG-TERM VIABILITY SIGNALS:
+    - He sees partnership as 50/50 = +25 (equality)
+    - He expects traditional gender roles rigidly = -20 to +10 (depends on her preference)
+    - He's willing to do domestic tasks = +15 (partnership)
+    - He respects her career ambitions = +20 (supportive)
+    - He wants kids on similar timeline = +25 (aligned)
+    - He dismisses her career for "future family" = -35 (outdated/controlling)
+
 MLM (MEN LOVING MEN) SPECIFIC SCORING MATRIX:
 1. GAY MEN DATING GAY MEN - Core Match Quality:
    - Gay man + Gay man = Perfect match (+25 baseline)
