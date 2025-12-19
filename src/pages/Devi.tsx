@@ -336,11 +336,14 @@ const Devi = () => {
   // Auto-load most recent conversation for selected candidate
   useEffect(() => {
     const loadCandidateConversation = async () => {
-      if (!user || !selectedCandidate) return;
+      if (!user || !selectedCandidate || conversationsLoading) return;
       
-      // Skip if we already loaded for this candidate
-      if (lastLoadedCandidateRef.current === selectedCandidate.id) return;
-      lastLoadedCandidateRef.current = selectedCandidate.id;
+      // Create a unique key combining candidate + conversation state
+      const stateKey = `${selectedCandidate.id}-${conversations.length}`;
+      
+      // Skip if we already loaded for this exact state
+      if (lastLoadedCandidateRef.current === stateKey) return;
+      lastLoadedCandidateRef.current = stateKey;
       
       // Find most recent conversation for this candidate
       const candidateConv = conversations.find(c => c.candidate_id === selectedCandidate.id);
@@ -353,15 +356,19 @@ const Devi = () => {
           .eq("conversation_id", candidateConv.id)
           .order("created_at", { ascending: true });
         
-        if (messagesData) {
+        if (messagesData && messagesData.length > 0) {
           setMessages(messagesData.map(m => ({
             id: m.id,
             role: m.role as 'user' | 'assistant',
             content: m.content,
             imageData: m.image_url || undefined,
           })));
+          setCurrentConversationId(candidateConv.id);
+        } else {
+          // Conversation exists but no messages, start fresh
+          setMessages([]);
+          setCurrentConversationId(null);
         }
-        setCurrentConversationId(candidateConv.id);
       } else {
         // No existing conversation, start fresh
         setMessages([]);
@@ -370,7 +377,7 @@ const Devi = () => {
     };
     
     loadCandidateConversation();
-  }, [selectedCandidate?.id, user, conversations]);
+  }, [selectedCandidate?.id, user, conversations, conversationsLoading]);
 
   useEffect(() => {
     if (candidateNameFromState && messages.length === 0 && !currentConversationId) {
