@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useParams, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -353,6 +353,9 @@ const CandidateDetail = () => {
   const [showReopenDialog, setShowReopenDialog] = useState(false);
   const [endReason, setEndReason] = useState("");
   const [endingRelationship, setEndingRelationship] = useState(false);
+
+  // Prevent new-candidate dialogs from reopening due to persistent router state
+  const hasHandledNewCandidateFlowRef = useRef(false);
   
   // Calculate profile completeness
   const calculateProfileCompleteness = (c: Candidate) => {
@@ -394,21 +397,26 @@ const CandidateDetail = () => {
   // Check if this is a new candidate from navigation state
   useEffect(() => {
     const state = location.state as { isNewCandidate?: boolean; isFirstCandidate?: boolean } | null;
-    if (state?.isNewCandidate && candidate) {
-      const completeness = calculateProfileCompleteness(candidate);
-      // Only show dialog if profile is incomplete (less than 80%)
-      if (completeness < 80) {
-        setShowNewCandidateDialog(true);
-        setIsFirstCandidate(state?.isFirstCandidate || false);
-      }
-      // Clear the state so it doesn't show again on refresh
-      window.history.replaceState({}, document.title);
-      // Refetch after a short delay to get the calculated score
-      setTimeout(() => {
-        fetchData();
-      }, 1500);
+
+    if (!state?.isNewCandidate || !candidate) return;
+    if (hasHandledNewCandidateFlowRef.current) return;
+    hasHandledNewCandidateFlowRef.current = true;
+
+    const completeness = calculateProfileCompleteness(candidate);
+    // Only show dialog if profile is incomplete (less than 80%)
+    if (completeness < 80) {
+      setShowNewCandidateDialog(true);
+      setIsFirstCandidate(!!state?.isFirstCandidate);
     }
-  }, [location.state, candidate]);
+
+    // Clear router state so it doesn't retrigger on re-renders / refetches
+    navigate(location.pathname, { replace: true, state: null });
+
+    // Refetch after a short delay to get the calculated score
+    setTimeout(() => {
+      fetchData();
+    }, 1500);
+  }, [location.state, candidate, navigate, location.pathname]);
 
   // Handle showing rating dialog after new candidate dialog closes
   const handleNewCandidateDialogClose = (open: boolean) => {
