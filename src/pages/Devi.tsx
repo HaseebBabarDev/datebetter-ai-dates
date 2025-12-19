@@ -9,6 +9,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Tables } from "@/integrations/supabase/types";
+import { useTour, DEVI_TOUR_STEPS } from "@/components/tour";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -180,6 +181,7 @@ const Devi = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { subscription } = useSubscription();
+  const { startTour, hasCompletedTour } = useTour();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -209,6 +211,16 @@ const Devi = () => {
   
   const isFree = subscription?.plan === "free";
   const candidateIdFromState = (location.state as { candidateId?: string })?.candidateId;
+
+  // Start tour for new users
+  useEffect(() => {
+    if (!profilesLoading && !isFree && !hasCompletedTour("devi")) {
+      const timer = setTimeout(() => {
+        startTour("devi", DEVI_TOUR_STEPS);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [profilesLoading, isFree, startTour, hasCompletedTour]);
   const candidateNameFromState = (location.state as { candidateName?: string })?.candidateName;
 
   // Calculate profile completeness
@@ -969,7 +981,7 @@ const Devi = () => {
             {/* Chat History Sheet */}
             <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-xl shrink-0" title="Chat History">
+                <Button variant="ghost" size="icon" className="rounded-xl shrink-0" title="Chat History" data-tour="devi-history">
                   <MessageSquare className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
@@ -1056,7 +1068,7 @@ const Devi = () => {
             ) : (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 gap-2">
+                  <Button variant="outline" size="sm" className="h-8 gap-2" data-tour="devi-candidate-select">
                     {selectedCandidate ? (
                       <>
                         <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
@@ -1364,13 +1376,14 @@ const Devi = () => {
               <span className="text-sm">Select a candidate to start chatting</span>
             </div>
           ) : (
-            <div className="flex gap-2 items-end">
+            <div className="flex gap-2 items-end" data-tour="devi-input">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => handleImageUpload('general')}
                 className="shrink-0"
                 disabled={isLoading}
+                data-tour="devi-image-upload"
               >
                 <ImagePlus className="w-5 h-5" />
               </Button>
