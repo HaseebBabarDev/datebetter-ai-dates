@@ -217,7 +217,7 @@ const Community = () => {
             {/* City Filter */}
             <div className="flex items-center gap-2">
               <div className="flex-1">
-                <Select value={selectedCity} onValueChange={setSelectedCity}>
+                <Select value={selectedCity || "all"} onValueChange={(v) => setSelectedCity(v === "all" ? "" : v)}>
                   <SelectTrigger className="h-9">
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -225,7 +225,7 @@ const Community = () => {
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All cities</SelectItem>
+                    <SelectItem value="all">All cities</SelectItem>
                     {MAJOR_CITIES.map((city) => (
                       <SelectItem key={city} value={city}>
                         {city}
