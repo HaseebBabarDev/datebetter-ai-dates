@@ -434,7 +434,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
           <svg viewBox="-5 0 95 140" className="w-full h-full overflow-visible">
             {scores.map((item, index) => {
               const baseRadius = 60;
-              const radius = baseRadius - index * 13;
+              const radius = baseRadius - index * 11;
               const strokeWidth = 10;
               const circumference = Math.PI * radius;
               const progress = (item.score / 100) * circumference;
