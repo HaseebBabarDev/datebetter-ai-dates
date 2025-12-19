@@ -489,91 +489,96 @@ const Settings = () => {
             )}
           </TabsList>
 
-          <TabsContent value="account" className="space-y-4">
+          <TabsContent value="account" className="space-y-3">
             {/* Profile Section */}
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <User className="w-5 h-5 text-primary" />
+              <CardHeader className="pb-2 pt-4 px-4">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <User className="w-4 h-4 text-primary" />
                   Identity & Basics
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Your name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Birth Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !birthDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {birthDate ? format(birthDate, "MMM d, yyyy") : <span>Select your birthday</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={birthDate}
-                        onSelect={setBirthDate}
-                        disabled={(date) => date > new Date() || date < new Date("1920-01-01")}
-                        initialFocus
-                        className="pointer-events-auto"
-                        captionLayout="dropdown-buttons"
-                        fromYear={1920}
-                        toYear={new Date().getFullYear()}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="space-y-2">
-                  <Label>Country</Label>
-                  <Select value={country} onValueChange={setCountry}>
-                    <SelectTrigger><SelectValue placeholder="Select country..." /></SelectTrigger>
-                    <SelectContent>
-                      {COUNTRY_OPTIONS.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
+              <CardContent className="space-y-3 px-4 pb-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="name" className="text-xs">Name</Label>
                     <Input
-                      id="city"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      placeholder="City"
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Your name"
+                      className="h-9"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="state">State</Label>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Birth Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal h-9 text-xs",
+                            !birthDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                          {birthDate ? format(birthDate, "MMM d, yyyy") : <span>Birthday</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={birthDate}
+                          onSelect={setBirthDate}
+                          disabled={(date) => date > new Date() || date < new Date("1920-01-01")}
+                          initialFocus
+                          className="pointer-events-auto"
+                          captionLayout="dropdown-buttons"
+                          fromYear={1920}
+                          toYear={new Date().getFullYear()}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Country</Label>
+                    <Select value={country} onValueChange={setCountry}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Country" /></SelectTrigger>
+                      <SelectContent>
+                        {COUNTRY_OPTIONS.map(opt => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="state" className="text-xs">State</Label>
                     <Input
                       id="state"
                       value={state}
                       onChange={(e) => setState(e.target.value)}
                       placeholder="State"
+                      className="h-9"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="city" className="text-xs">City</Label>
+                    <Input
+                      id="city"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="City"
+                      className="h-9"
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>Gender Identity</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Gender</Label>
                     <Select value={genderIdentity} onValueChange={setGenderIdentity}>
-                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent>
                         {GENDER_OPTIONS.map(opt => (
                           <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
@@ -581,10 +586,10 @@ const Settings = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Pronouns</Label>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Pronouns</Label>
                     <Select value={pronouns} onValueChange={setPronouns}>
-                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent>
                         {PRONOUN_OPTIONS.map(opt => (
                           <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
@@ -592,63 +597,62 @@ const Settings = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Orientation</Label>
+                    <Select value={sexualOrientation} onValueChange={setSexualOrientation}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectContent>
+                        {ORIENTATION_OPTIONS.map(opt => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Sexual Orientation</Label>
-                  <Select value={sexualOrientation} onValueChange={setSexualOrientation}>
-                    <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                    <SelectContent>
-                      {ORIENTATION_OPTIONS.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <p className="text-xs text-muted-foreground pt-2 border-t">
+                <p className="text-[10px] text-muted-foreground pt-1 border-t">
                   {user.email}
                 </p>
               </CardContent>
             </Card>
 
-            {/* Save Button */}
-            <Button 
-              onClick={handleSaveAccount} 
-              className="w-full" 
-              disabled={saving}
-            >
-              {saving ? "Saving..." : "Save Changes"}
-            </Button>
-
-            {/* Sign Out */}
-            <Button
-              variant="outline"
-              onClick={handleSignOut}
-              className="w-full text-destructive hover:text-destructive"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </Button>
+            {/* Save & Sign Out */}
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleSaveAccount} 
+                className="flex-1 h-9" 
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleSignOut}
+                className="text-destructive hover:text-destructive h-9 px-3"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
 
             {/* Delete Account */}
             <Card className="border-destructive/20 bg-destructive/5">
-              <CardContent className="pt-6 space-y-3">
-                <div className="flex items-center gap-2">
-                  <Trash2 className="w-5 h-5 text-destructive" />
-                  <h3 className="font-semibold text-destructive">Delete Account</h3>
+              <CardContent className="py-3 px-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Trash2 className="w-4 h-4 text-destructive shrink-0" />
+                    <span className="text-xs text-muted-foreground truncate">Delete account & all data</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive h-7 text-xs shrink-0"
+                    onClick={() => {
+                      window.location.href = `mailto:support@datebetterapp.com?subject=Account Deletion Request&body=Hi, I would like to delete my account.%0D%0A%0D%0AEmail: ${user?.email}%0D%0A%0D%0APlease confirm once my account has been deleted.`;
+                    }}
+                  >
+                    <Mail className="w-3 h-3 mr-1" />
+                    Request
+                  </Button>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Want to delete your account? Your plan will be downgraded to Free and all your data will be permanently removed.
-                </p>
-                <Button
-                  variant="outline"
-                  className="w-full border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                  onClick={() => {
-                    window.location.href = `mailto:support@datebetterapp.com?subject=Account Deletion Request&body=Hi, I would like to delete my account.%0D%0A%0D%0AEmail: ${user?.email}%0D%0A%0D%0APlease confirm once my account has been deleted.`;
-                  }}
-                >
-                  <Mail className="w-4 h-4 mr-2" />
-                  Request Account Deletion
-                </Button>
               </CardContent>
             </Card>
           </TabsContent>
