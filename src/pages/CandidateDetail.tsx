@@ -79,19 +79,38 @@ const CandidateDetail = () => {
   const initialTab = (location.state as { tab?: string })?.tab;
   const [activeTab, setActiveTab] = useState<string | undefined>(initialTab);
 
-  // Clean up any stale scroll locks on mount/unmount
+  // Clean up any stale scroll locks on mount/unmount and tab changes
   useEffect(() => {
-    // Remove any lingering scroll lock from dialogs
-    document.body.removeAttribute('data-scroll-locked');
-    document.body.style.overflow = '';
-    document.body.style.paddingRight = '';
-    
-    return () => {
+    const cleanupScrollLocks = () => {
       document.body.removeAttribute('data-scroll-locked');
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.documentElement.style.overflow = '';
     };
-  }, []);
+    
+    cleanupScrollLocks();
+    
+    // Also clean up on any tab change
+    const observer = new MutationObserver(() => {
+      if (document.body.hasAttribute('data-scroll-locked')) {
+        // If scroll is locked but no dialogs are open, clean it up
+        const openDialogs = document.querySelectorAll('[role="dialog"]');
+        if (openDialogs.length === 0) {
+          cleanupScrollLocks();
+        }
+      }
+    });
+    
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-scroll-locked', 'style'] });
+    
+    return () => {
+      observer.disconnect();
+      cleanupScrollLocks();
+    };
+  }, [activeTab]);
   const loveBombingAlert = useMemo(() => {
     if (!candidate || !interactions) return null;
     
