@@ -791,17 +791,26 @@ const Dashboard = () => {
                   <LogInteractionDialog candidates={candidates} compact />
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  onClick={() => navigate("/devi")}
+                  className="w-full bg-accent hover:bg-accent/90 text-accent-foreground h-12 gap-2 font-semibold shadow-lg shadow-accent/30"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span className="text-sm font-medium">Ask D.E.V.I.</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/patterns")}
+                  className="w-full h-12 gap-2 border-border text-foreground hover:bg-primary/10"
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="text-sm">View Patterns</span>
+                </Button>
+              </div>
               <UpgradeNudge />
               <FreeUpgradeBanner />
               <DailyLoggingCTA interactions={interactions} candidates={candidates} />
-              <Button
-                variant="outline"
-                onClick={() => navigate("/patterns")}
-                className="w-full h-10 gap-2 border-border text-foreground hover:bg-primary/10"
-              >
-                <TrendingUp className="w-4 h-4" />
-                <span className="text-sm">View Patterns</span>
-              </Button>
             </div>
 
             {/* Alerts */}
