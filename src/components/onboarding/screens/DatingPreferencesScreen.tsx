@@ -15,7 +15,6 @@ const orientationOptions = [
   { value: "queer", label: "Queer" },
   { value: "asexual", label: "Asexual spectrum" },
   { value: "no_label", label: "Prefer not to label" },
-  { value: "self_describe", label: "Prefer to self-describe" },
 ];
 
 const interestedInOptions = [
