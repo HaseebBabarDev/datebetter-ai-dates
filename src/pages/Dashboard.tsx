@@ -785,34 +785,34 @@ const Dashboard = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="home" className="space-y-5 mt-0 animate-fade-in">
+          <TabsContent value="home" className="space-y-3 mt-0 animate-fade-in">
             {/* Quick Actions Grid */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-4 gap-2">
               <Button
                 data-tour="add-candidate"
                 onClick={() => navigate("/add-candidate")}
-                className="h-16 flex-col gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl shadow-md transition-all duration-200 active:scale-[0.98]"
+                className="h-12 flex-col gap-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-sm transition-all duration-200 active:scale-[0.98] px-1"
               >
-                <Plus className="w-5 h-5" />
-                <span className="text-xs font-medium">Add Candidate</span>
+                <Plus className="w-4 h-4" />
+                <span className="text-[10px] font-medium">Add</span>
               </Button>
-              <div data-tour="log-interaction" className="h-16">
+              <div data-tour="log-interaction" className="h-12">
                 <LogInteractionDialog candidates={candidates} compact />
               </div>
               <Button
                 onClick={() => navigate("/devi")}
-                className="h-16 flex-col gap-2 bg-gradient-to-br from-secondary to-primary text-primary-foreground rounded-2xl shadow-md transition-all duration-200 active:scale-[0.98]"
+                className="h-12 flex-col gap-1 bg-gradient-to-br from-secondary to-primary text-primary-foreground rounded-xl shadow-sm transition-all duration-200 active:scale-[0.98] px-1"
               >
-                <Sparkles className="w-5 h-5" />
-                <span className="text-xs font-medium">Ask D.E.V.I.</span>
+                <Sparkles className="w-4 h-4" />
+                <span className="text-[10px] font-medium">D.E.V.I.</span>
               </Button>
               <Button
                 variant="outline"
                 onClick={() => navigate("/patterns")}
-                className="h-16 flex-col gap-2 rounded-2xl border-border bg-card text-foreground hover:bg-muted/50 transition-all duration-200 active:scale-[0.98]"
+                className="h-12 flex-col gap-1 rounded-xl border-border bg-card text-foreground hover:bg-muted/50 transition-all duration-200 active:scale-[0.98] px-1"
               >
-                <TrendingUp className="w-5 h-5 text-primary" />
-                <span className="text-xs font-medium">View Patterns</span>
+                <TrendingUp className="w-4 h-4 text-primary" />
+                <span className="text-[10px] font-medium">Patterns</span>
               </Button>
             </div>
 
@@ -933,27 +933,27 @@ const Dashboard = () => {
             })()}
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               <button 
-                className="rounded-2xl p-4 bg-card border border-border text-center transition-all duration-200 active:scale-[0.98] hover:bg-muted/30" 
+                className="rounded-xl p-3 bg-card border border-border text-center transition-all duration-200 active:scale-[0.98]" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter(null); }}
               >
-                <div className="text-2xl font-bold text-primary">{activeCandidateCount}</div>
-                <div className="text-xs text-muted-foreground mt-1">Active</div>
+                <div className="text-xl font-bold text-primary">{activeCandidateCount}</div>
+                <div className="text-[10px] text-muted-foreground">Active</div>
               </button>
               <button 
-                className="rounded-2xl p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-center transition-all duration-200 active:scale-[0.98] hover:bg-emerald-100 dark:hover:bg-emerald-900/40" 
+                className="rounded-xl p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-center transition-all duration-200 active:scale-[0.98]" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter("good"); }}
               >
-                <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{recap.goodCandidates.length}</div>
-                <div className="text-xs text-muted-foreground mt-1">Good Vibes</div>
+                <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{recap.goodCandidates.length}</div>
+                <div className="text-[10px] text-muted-foreground">Good Vibes</div>
               </button>
               <button 
-                className="rounded-2xl p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-center transition-all duration-200 active:scale-[0.98] hover:bg-rose-100 dark:hover:bg-rose-900/40" 
+                className="rounded-xl p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-center transition-all duration-200 active:scale-[0.98]" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter("bad"); }}
               >
-                <div className="text-2xl font-bold text-rose-600 dark:text-rose-400">{recap.badCandidates.length}</div>
-                <div className="text-xs text-muted-foreground mt-1">Watch Out</div>
+                <div className="text-xl font-bold text-rose-600 dark:text-rose-400">{recap.badCandidates.length}</div>
+                <div className="text-[10px] text-muted-foreground">Watch Out</div>
               </button>
             </div>
 

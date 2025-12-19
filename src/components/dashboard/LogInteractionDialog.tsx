@@ -41,11 +41,11 @@ export const LogInteractionDialog = ({ candidates, compact = false }: LogInterac
         {compact ? (
           <Button 
             variant="outline" 
-            className="w-full h-full flex-col gap-2 rounded-2xl border-border bg-card hover:bg-muted/50 transition-all duration-200 active:scale-[0.98]"
+            className="w-full h-full flex-col gap-1 rounded-xl border-border bg-card hover:bg-muted/50 transition-all duration-200 active:scale-[0.98] px-1"
             disabled={hasNoCandidates}
           >
-            <Clock className="w-5 h-5 text-primary" />
-            <span className="text-xs font-medium">Log Interaction</span>
+            <Clock className="w-4 h-4 text-primary" />
+            <span className="text-[10px] font-medium">Log</span>
           </Button>
         ) : (
           <Button variant="outline" className="w-full" disabled={hasNoCandidates}>
