@@ -107,8 +107,8 @@ const App = () => (
           <ErrorBoundary>
             <Toaster />
             <Sonner />
-            <TourOverlay />
             <BrowserRouter>
+              <TourOverlay />
               <AppContent />
             </BrowserRouter>
           </ErrorBoundary>
