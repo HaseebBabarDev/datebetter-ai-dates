@@ -626,29 +626,48 @@ const Devi = () => {
 
       const result = response.data;
       
-      // Update local state with new score
-      setSelectedCandidate(prev => prev ? {
-        ...prev,
-        compatibility_score: result.score,
-        score_breakdown: result.breakdown,
-        red_flags: result.breakdown?.red_flags || prev.red_flags,
-        green_flags: result.breakdown?.green_flags || prev.green_flags,
-      } : null);
-
-      // Add a message about the score update
-      const scoreMessage: Message = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: `✨ Done! I've updated ${selectedCandidate.nickname}'s compatibility score.\n\n**New Score: ${result.score}%**\n\n${result.breakdown?.advice || "The score reflects the latest information we discussed."}\n\nWant me to break down what changed?`,
-      };
-      setMessages(prev => [...prev, scoreMessage]);
+      // Check if score was actually calculated
+      const hasNewScore = result?.score !== undefined && result?.score !== null;
       
-      // Save score message to conversation
-      if (currentConversationId) {
-        await saveMessage(currentConversationId, scoreMessage);
-      }
+      if (hasNewScore) {
+        // Update local state with new score
+        setSelectedCandidate(prev => prev ? {
+          ...prev,
+          compatibility_score: result.score,
+          score_breakdown: result.breakdown,
+          red_flags: result.breakdown?.red_flags || prev.red_flags,
+          green_flags: result.breakdown?.green_flags || prev.green_flags,
+        } : null);
 
-      toast.success(`Score updated: ${result.score}%`);
+        // Add a message about the score update
+        const scoreMessage: Message = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: `✨ Done! I've updated ${selectedCandidate.nickname}'s compatibility score.\n\n**New Score: ${result.score}%**\n\n${result.breakdown?.advice || "The score reflects the latest information we discussed."}\n\nWant me to break down what changed?`,
+        };
+        setMessages(prev => [...prev, scoreMessage]);
+        
+        // Save score message to conversation
+        if (currentConversationId) {
+          await saveMessage(currentConversationId, scoreMessage);
+        }
+
+        toast.success(`Score updated: ${result.score}%`);
+      } else {
+        // No change to score
+        const noChangeMessage: Message = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: `I checked ${selectedCandidate.nickname}'s compatibility score, but there's no change based on current information.\n\nWant to add more details about them so I can refine the score?`,
+        };
+        setMessages(prev => [...prev, noChangeMessage]);
+        
+        if (currentConversationId) {
+          await saveMessage(currentConversationId, noChangeMessage);
+        }
+
+        toast.info("No change to score");
+      }
     } catch (error) {
       console.error("Error updating score:", error);
       toast.error("Failed to update score");
