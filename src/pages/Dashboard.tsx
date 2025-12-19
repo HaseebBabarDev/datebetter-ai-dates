@@ -770,16 +770,16 @@ const Dashboard = () => {
 
       <main className="relative z-10 px-4 py-4 max-w-lg mx-auto pb-24">
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setQualityFilter(null); }} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-5 h-12 p-1 bg-background/80 backdrop-blur-md rounded-2xl border border-border/50 shadow-sm">
+          <TabsList className="w-full grid grid-cols-2 gap-1 mb-5 h-12 p-1 bg-background/80 backdrop-blur-md rounded-2xl border border-border/50 shadow-sm">
             <TabsTrigger 
               value="home" 
-              className="rounded-xl h-full text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+              className="rounded-xl text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
             >
               Home
             </TabsTrigger>
             <TabsTrigger 
               value="manage" 
-              className="rounded-xl h-full text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+              className="rounded-xl text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
             >
               Manage
             </TabsTrigger>
