@@ -79,7 +79,19 @@ const CandidateDetail = () => {
   const initialTab = (location.state as { tab?: string })?.tab;
   const [activeTab, setActiveTab] = useState<string | undefined>(initialTab);
 
-  // Love bombing detection
+  // Clean up any stale scroll locks on mount/unmount
+  useEffect(() => {
+    // Remove any lingering scroll lock from dialogs
+    document.body.removeAttribute('data-scroll-locked');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    
+    return () => {
+      document.body.removeAttribute('data-scroll-locked');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, []);
   const loveBombingAlert = useMemo(() => {
     if (!candidate || !interactions) return null;
     
@@ -525,7 +537,7 @@ const CandidateDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur border-b border-border z-10">
         <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-2">
