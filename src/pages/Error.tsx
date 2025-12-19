@@ -1,5 +1,4 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw, Home, Mail } from "lucide-react";
 import logo from "@/assets/logo.jpg";
@@ -10,8 +9,6 @@ interface ErrorPageProps {
 }
 
 export default function ErrorPage({ error, resetError }: ErrorPageProps) {
-  const navigate = useNavigate();
-
   const handleRetry = () => {
     if (resetError) {
       resetError();
@@ -21,7 +18,11 @@ export default function ErrorPage({ error, resetError }: ErrorPageProps) {
   };
 
   const handleGoHome = () => {
-    navigate("/dashboard");
+    window.location.href = "/dashboard";
+  };
+
+  const handleSupport = () => {
+    window.location.href = "/support";
   };
 
   return (
@@ -77,7 +78,7 @@ export default function ErrorPage({ error, resetError }: ErrorPageProps) {
         </Button>
 
         <Button 
-          onClick={() => navigate("/support")}
+          onClick={handleSupport}
           variant="ghost"
           className="w-full gap-2 min-h-[44px]"
         >
