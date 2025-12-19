@@ -542,7 +542,7 @@ const Settings = () => {
                           disabled={(date) => date > new Date() || date < new Date("1920-01-01")}
                           initialFocus
                           className="pointer-events-auto"
-                          captionLayout="dropdown-buttons"
+                          captionLayout="dropdown"
                           fromYear={1920}
                           toYear={new Date().getFullYear()}
                         />
