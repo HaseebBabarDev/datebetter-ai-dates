@@ -67,7 +67,40 @@ const bodyTypeOptions = [
 const BasicIdentityScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
-  const isValid = data.name && data.genderIdentity && data.country && data.pronouns;
+  // Parse existing birthDate if available
+  const [month, setMonth] = React.useState(() => {
+    if (data.birthDate) {
+      const parts = data.birthDate.split('-');
+      return parts[1] || "";
+    }
+    return "";
+  });
+  const [day, setDay] = React.useState(() => {
+    if (data.birthDate) {
+      const parts = data.birthDate.split('-');
+      return parts[2] || "";
+    }
+    return "";
+  });
+  const [year, setYear] = React.useState(() => {
+    if (data.birthDate) {
+      const parts = data.birthDate.split('-');
+      return parts[0] || "";
+    }
+    return "";
+  });
+
+  // Update birthDate when date fields change
+  React.useEffect(() => {
+    if (month && day && year && year.length === 4) {
+      updateData({
+        birthDate: `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`,
+      });
+    }
+  }, [month, day, year]);
+
+  const hasBirthDate = data.birthDate && data.birthDate.length === 10;
+  const isValid = data.name && data.genderIdentity && data.country && data.pronouns && hasBirthDate;
 
   return (
     <OnboardingLayout
@@ -75,6 +108,49 @@ const BasicIdentityScreen = () => {
       subtitle="Let's get to know you"
     >
       <div className="space-y-4 animate-fade-in">
+        {/* Date of Birth Section */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Date of Birth</Label>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <Label className="text-xs text-muted-foreground">Month</Label>
+              <Input
+                type="number"
+                placeholder="MM"
+                min={1}
+                max={12}
+                value={month}
+                onChange={(e) => setMonth(e.target.value)}
+                className="text-center"
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Day</Label>
+              <Input
+                type="number"
+                placeholder="DD"
+                min={1}
+                max={31}
+                value={day}
+                onChange={(e) => setDay(e.target.value)}
+                className="text-center"
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Year</Label>
+              <Input
+                type="number"
+                placeholder="YYYY"
+                min={1900}
+                max={new Date().getFullYear()}
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                className="text-center"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Name Section */}
         <div className="space-y-2">
           <Label htmlFor="name" className="text-sm font-medium">What should we call you?</Label>
