@@ -657,6 +657,7 @@ export type Database = {
             | Database["public"]["Enums"]["attachment_style"]
             | null
           attraction_importance: number | null
+          avatar_url: string | null
           behavioral_monitoring: number | null
           birth_date: string | null
           body_type: string | null
@@ -771,6 +772,7 @@ export type Database = {
             | Database["public"]["Enums"]["attachment_style"]
             | null
           attraction_importance?: number | null
+          avatar_url?: string | null
           behavioral_monitoring?: number | null
           birth_date?: string | null
           body_type?: string | null
@@ -887,6 +889,7 @@ export type Database = {
             | Database["public"]["Enums"]["attachment_style"]
             | null
           attraction_importance?: number | null
+          avatar_url?: string | null
           behavioral_monitoring?: number | null
           birth_date?: string | null
           body_type?: string | null
