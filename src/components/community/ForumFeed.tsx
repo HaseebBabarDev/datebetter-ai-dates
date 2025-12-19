@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, MessageCircle, MoreHorizontal, Flag, Send, MapPin } from "lucide-react";
+import { Heart, MessageCircle, MoreHorizontal, Flag, Send, MapPin, Pin, Sparkles } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import {
@@ -229,15 +229,27 @@ export function ForumFeed({ category, searchQuery, currentScreenName, cityFilter
   return (
     <>
       <div className="space-y-4">
-        {posts.map((post) => (
+        {posts.map((post) => {
+          const isSuccessStory = post.category === "success_stories";
+          return (
           <Card 
             key={post.id} 
-            className="cursor-pointer hover:border-primary/50 transition-colors"
+            className={`cursor-pointer hover:border-primary/50 transition-colors ${
+              isSuccessStory 
+                ? "border-green-500/40 bg-gradient-to-br from-green-500/5 to-transparent ring-1 ring-green-500/20" 
+                : ""
+            }`}
             onClick={() => setSelectedPost(post)}
           >
             <CardHeader className="pb-2 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
+                  {isSuccessStory && (
+                    <Badge className="bg-green-500/20 text-green-600 border-green-500/30 gap-1">
+                      <Sparkles className="h-3 w-3" />
+                      Featured
+                    </Badge>
+                  )}
                   <Badge 
                     variant="outline" 
                     className={CATEGORY_COLORS[post.category]}
@@ -335,7 +347,8 @@ export function ForumFeed({ category, searchQuery, currentScreenName, cityFilter
               </div>
             </CardContent>
           </Card>
-        ))}
+        );
+        })}
       </div>
 
       {/* Post Detail Sheet */}
