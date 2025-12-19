@@ -9,6 +9,7 @@ interface OnboardingLayoutProps {
   children: React.ReactNode;
   showProgress?: boolean;
   showBack?: boolean;
+  onBack?: () => void;
   title?: string;
   subtitle?: string;
   headerGradient?: boolean;
@@ -18,6 +19,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   children,
   showProgress = true,
   showBack = true,
+  onBack,
   title,
   subtitle,
   headerGradient = false,
@@ -26,6 +28,8 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   const progress = ((currentStep + 1) / totalSteps) * 100;
   const [isVisible, setIsVisible] = useState(false);
   const [displayStep, setDisplayStep] = useState(currentStep);
+
+  const handleBack = onBack || prevStep;
 
   useEffect(() => {
     // Fade out
@@ -51,12 +55,12 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       {/* Header */}
       {headerGradient ? (
         <header className="bg-[image:var(--gradient-header)] px-4 py-3 pt-safe-top text-center relative">
-          {showBack && currentStep > 0 && (
+          {showBack && (onBack || currentStep > 0) && (
             <Button
               variant="ghost"
               size="icon"
               className="absolute left-3 top-3 text-foreground hover:bg-foreground/10 h-9 w-9"
-              onClick={prevStep}
+              onClick={handleBack}
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -75,12 +79,12 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       ) : (
         <header className="px-4 py-2 pt-safe-top flex items-center justify-between border-b border-border/50">
           <div className="flex items-center gap-2">
-            {showBack && currentStep > 0 && (
+            {showBack && (onBack || currentStep > 0) && (
               <Button
                 variant="ghost"
                 size="icon"
                 className="text-foreground h-9 w-9"
-                onClick={prevStep}
+                onClick={handleBack}
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
