@@ -5,6 +5,12 @@ import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -1377,16 +1383,25 @@ const Devi = () => {
             </div>
           ) : (
             <div className="flex gap-2 items-end" data-tour="devi-input">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleImageUpload('general')}
-                className="shrink-0"
-                disabled={isLoading}
-                data-tour="devi-image-upload"
-              >
-                <ImagePlus className="w-5 h-5" />
-              </Button>
+              <TooltipProvider delayDuration={400}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleImageUpload('general')}
+                      className="shrink-0"
+                      disabled={isLoading}
+                      data-tour="devi-image-upload"
+                    >
+                      <ImagePlus className="w-5 h-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p className="text-xs">Upload text screenshots or dating profiles for analysis</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <Textarea
                 ref={textareaRef}
                 value={input}
@@ -1397,18 +1412,27 @@ const Devi = () => {
                 rows={1}
                 disabled={isLoading}
               />
-              <Button
-                size="icon"
-                onClick={() => sendMessage()}
-                disabled={(!input.trim() && !pendingImage) || isLoading}
-                className="shrink-0 bg-[image:var(--gradient-hero)]"
-              >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Send className="w-5 h-5" />
-                )}
-              </Button>
+              <TooltipProvider delayDuration={400}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
+                      onClick={() => sendMessage()}
+                      disabled={(!input.trim() && !pendingImage) || isLoading}
+                      className="shrink-0 bg-[image:var(--gradient-hero)]"
+                    >
+                      {isLoading ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Send className="w-5 h-5" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p className="text-xs">Send your message to D.E.V.I.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           )}
         </div>

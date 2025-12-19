@@ -829,26 +829,61 @@ const CandidateDetail = () => {
 
         <Tabs value={defaultTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5 h-auto p-1">
-            <TabsTrigger data-tour="insights-tab" value="profile" className="flex-col gap-0.5 py-2 px-1">
-              <Sparkles className="w-4 h-4" />
-              <span className="text-[10px] font-medium">Insights</span>
-            </TabsTrigger>
-            <TabsTrigger value="overview" className="flex-col gap-0.5 py-2 px-1">
-              <User className="w-4 h-4" />
-              <span className="text-[10px] font-medium">Overview</span>
-            </TabsTrigger>
-            <TabsTrigger data-tour="history-tab" value="interactions" className="flex-col gap-0.5 py-2 px-1">
-              <Clock className="w-4 h-4" />
-              <span className="text-[10px] font-medium">History</span>
-            </TabsTrigger>
-            <TabsTrigger data-tour="flags-tab" value="flags" className="flex-col gap-0.5 py-2 px-1">
-              <Flag className="w-4 h-4" />
-              <span className="text-[10px] font-medium">Flags</span>
-            </TabsTrigger>
-            <TabsTrigger data-tour="nc-tab" value="no-contact" className={`flex-col gap-0.5 py-2 px-1 ${candidate.no_contact_active ? "text-primary" : ""}`}>
-              <Ban className="w-4 h-4" />
-              <span className="text-[10px] font-medium">NC</span>
-            </TabsTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger data-tour="insights-tab" value="profile" className="flex-col gap-0.5 py-2 px-1">
+                  <Sparkles className="w-4 h-4" />
+                  <span className="text-[10px] font-medium">Insights</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-[180px]">
+                <p className="text-xs">Compatibility score & AI-powered advice</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger value="overview" className="flex-col gap-0.5 py-2 px-1">
+                  <User className="w-4 h-4" />
+                  <span className="text-[10px] font-medium">Overview</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-[180px]">
+                <p className="text-xs">Their profile details & your notes</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger data-tour="history-tab" value="interactions" className="flex-col gap-0.5 py-2 px-1">
+                  <Clock className="w-4 h-4" />
+                  <span className="text-[10px] font-medium">History</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-[180px]">
+                <p className="text-xs">Timeline of all your dates & interactions</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger data-tour="flags-tab" value="flags" className="flex-col gap-0.5 py-2 px-1">
+                  <Flag className="w-4 h-4" />
+                  <span className="text-[10px] font-medium">Flags</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-[180px]">
+                <p className="text-xs">AI-detected red & green flags</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger data-tour="nc-tab" value="no-contact" className={`flex-col gap-0.5 py-2 px-1 ${candidate.no_contact_active ? "text-primary" : ""}`}>
+                  <Ban className="w-4 h-4" />
+                  <span className="text-[10px] font-medium">NC</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-[180px]">
+                <p className="text-xs">No Contact mode for healing & moving on</p>
+              </TooltipContent>
+            </Tooltip>
           </TabsList>
 
           <TabsContent value="profile" className="mt-4">
