@@ -229,6 +229,8 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       }
 
       const analysis = data;
+      const previousScore = analysis.previous_score;
+      const scoreChanged = analysis.score_changed;
       
       onUpdate({
         compatibility_score: analysis.overall_score,
@@ -251,10 +253,18 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       // Refetch subscription to update remaining count
       refetchSubscription();
 
-      // Show toast with result
+      // Show toast with result - include score change info
+      const changeInfo = previousScore !== null && previousScore !== undefined 
+        ? scoreChanged 
+          ? analysis.overall_score > previousScore 
+            ? ` (+${analysis.overall_score - previousScore} from ${previousScore}%)`
+            : ` (${analysis.overall_score - previousScore} from ${previousScore}%)`
+          : " (no change)"
+        : "";
+      
       toast({
         title: analysis.overall_score < 35 ? "Low Compatibility" : "Compatibility Analyzed",
-        description: `Score: ${analysis.overall_score}%${!isFirstCalculation ? ` • ${remainingUpdates - 1} updates left` : ""}`,
+        description: `Score: ${analysis.overall_score}%${changeInfo}${!isFirstCalculation ? ` • ${remainingUpdates - 1} updates left` : ""}`,
         variant: analysis.overall_score < 35 ? "destructive" : "default",
       });
     } catch (error) {

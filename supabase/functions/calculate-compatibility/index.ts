@@ -603,9 +603,9 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-flash-lite",
         messages: [
-          { role: "system", content: "You are D.E.V.I. (Dating Evaluation & Vetting Intelligence), a warm, direct relationship coach - like a supportive best friend who tells it like it is. Write in natural, conversational language. Never use technical terms, underscores, or robotic phrasing. Use the provided sentiment-adjusted scores as your foundation. NEVER increase the score above the sentiment-adjusted score when there are negative interactions." },
+          { role: "system", content: "You are D.E.V.I., a warm relationship coach. Be conversational and direct. Use provided sentiment-adjusted scores as your foundation. NEVER increase the score above the sentiment-adjusted score when there are negative interactions. Keep responses concise." },
           { role: "user", content: prompt }
         ],
         tools: [
@@ -713,6 +713,9 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
       analysis.breakdown.emotional_compatibility = adjustedEmotionalScore;
     }
 
+    // Track previous score for comparison
+    const previousScore = candidate.compatibility_score;
+
     // Only update if we have a valid score
     if (analysis.overall_score !== undefined && analysis.overall_score !== null) {
       const { error: updateError } = await supabase
@@ -731,7 +734,12 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
       console.log("Score is undefined, keeping existing score");
     }
 
-    return new Response(JSON.stringify(analysis), {
+    // Include previous score in response for UI to show change
+    return new Response(JSON.stringify({
+      ...analysis,
+      previous_score: previousScore,
+      score_changed: previousScore !== analysis.overall_score
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
