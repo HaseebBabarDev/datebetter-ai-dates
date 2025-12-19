@@ -201,9 +201,16 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="font-semibold text-foreground truncate">
-              {candidate.nickname}
-            </h3>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h3 className="font-semibold text-foreground truncate">
+                {candidate.nickname}
+              </h3>
+              {(candidate as any).zodiac_sign && zodiacConfig[(candidate as any).zodiac_sign] && (
+                <span className="text-sm shrink-0" title={zodiacConfig[(candidate as any).zodiac_sign].label}>
+                  {zodiacConfig[(candidate as any).zodiac_sign].emoji}
+                </span>
+              )}
+            </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
           </div>
 
@@ -219,11 +226,6 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
             )}
             {candidate.age && (
               <span className="text-xs text-muted-foreground">{candidate.age}y</span>
-            )}
-            {(candidate as any).zodiac_sign && zodiacConfig[(candidate as any).zodiac_sign] && (
-              <span className="text-xs px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
-                {zodiacConfig[(candidate as any).zodiac_sign].emoji}
-              </span>
             )}
             {(candidate as any).distance_approximation && distanceConfig[(candidate as any).distance_approximation] && (() => {
               const config = distanceConfig[(candidate as any).distance_approximation];
