@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, RotateCcw } from "lucide-react";
+import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, RotateCcw, Gift, Copy, Share2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { ProfilePhotoUpload } from "@/components/settings/ProfilePhotoUpload";
@@ -109,6 +109,8 @@ const Settings = () => {
   const [togglingRole, setTogglingRole] = useState<string | null>(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [selectedPlanForPayment, setSelectedPlanForPayment] = useState<SubscriptionPlan | null>(null);
+  const [referralStats, setReferralStats] = useState<{ total: number; converted: number; trialEarned: boolean }>({ total: 0, converted: 0, trialEarned: false });
+  const [copiedReferral, setCopiedReferral] = useState(false);
 
   // Account form state
   const [name, setName] = useState("");
@@ -127,8 +129,58 @@ const Settings = () => {
       fetchProfile();
       fetchSubscription();
       checkAdminStatus();
+      fetchReferralStats();
     }
   }, [user]);
+
+  const fetchReferralStats = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("referrals")
+        .select("*")
+        .eq("referrer_id", user!.id);
+
+      if (error) throw error;
+
+      const total = data?.length || 0;
+      const converted = data?.filter(r => r.status === "converted").length || 0;
+      const trialEarned = data?.some(r => r.trial_granted) || false;
+
+      setReferralStats({ total, converted, trialEarned });
+    } catch (error) {
+      console.error("Error fetching referral stats:", error);
+    }
+  };
+
+  const referralCode = user?.id ? `DEVI-${user.id.slice(0, 6).toUpperCase()}` : "DEVI-FRIEND";
+  const referralLink = `${window.location.origin}/auth?ref=${referralCode}`;
+
+  const handleCopyReferral = async () => {
+    try {
+      await navigator.clipboard.writeText(referralLink);
+      setCopiedReferral(true);
+      toast.success("Referral link copied!");
+      setTimeout(() => setCopiedReferral(false), 2000);
+    } catch {
+      toast.error("Failed to copy link");
+    }
+  };
+
+  const handleShareReferral = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Date Better with D.E.V.I.",
+          text: "I'm using D.E.V.I. to date smarter. Sign up for a paid plan and we both get 1 month free!",
+          url: referralLink,
+        });
+      } catch (err) {
+        handleCopyReferral();
+      }
+    } else {
+      handleCopyReferral();
+    }
+  };
 
   // Start tour for new users
   useEffect(() => {
@@ -926,6 +978,74 @@ const Settings = () => {
                 <p className="text-sm text-muted-foreground">
                   {PLAN_LIMITS[currentPlan].candidates} candidate{PLAN_LIMITS[currentPlan].candidates > 1 ? "s" : ""} • {PLAN_LIMITS[currentPlan].updates} update{PLAN_LIMITS[currentPlan].updates > 1 ? "s" : ""} each
                 </p>
+              </CardContent>
+            </Card>
+
+            {/* Referral Section */}
+            <Card className="border-accent/30 bg-gradient-to-r from-accent/5 to-primary/5">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Gift className="w-5 h-5 text-primary" />
+                  Refer a Friend
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Share your unique code! When friends sign up for a paid plan, you both get 1 month free.
+                </p>
+                
+                {/* Referral Code Display */}
+                <div className="p-4 rounded-xl bg-background border border-border">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs text-muted-foreground mb-1">Your referral code</p>
+                      <p className="font-mono font-bold text-lg text-primary truncate">{referralCode}</p>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={handleCopyReferral}
+                        className="h-9 px-3"
+                      >
+                        {copiedReferral ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleShareReferral}
+                        className="h-9 px-3"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Referral Stats */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg bg-background/50 border border-border/50 text-center">
+                    <div className="flex items-center justify-center gap-1.5 mb-1">
+                      <Users className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-2xl font-bold">{referralStats.total}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Friends referred</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-background/50 border border-border/50 text-center">
+                    <div className="flex items-center justify-center gap-1.5 mb-1">
+                      <Gift className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-2xl font-bold">{referralStats.converted}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Converted</p>
+                  </div>
+                </div>
+
+                {referralStats.trialEarned && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/20">
+                    <Check className="w-4 h-4 text-success" />
+                    <p className="text-sm text-success">You've earned free trial time from referrals!</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
