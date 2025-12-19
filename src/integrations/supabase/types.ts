@@ -510,10 +510,12 @@ export type Database = {
       forum_posts: {
         Row: {
           category: Database["public"]["Enums"]["forum_category"]
+          city_tag: string | null
           comments_count: number | null
           content: string
           created_at: string | null
           id: string
+          image_url: string | null
           is_approved: boolean | null
           likes_count: number | null
           moderation_reason: string | null
@@ -524,10 +526,12 @@ export type Database = {
         }
         Insert: {
           category: Database["public"]["Enums"]["forum_category"]
+          city_tag?: string | null
           comments_count?: number | null
           content: string
           created_at?: string | null
           id?: string
+          image_url?: string | null
           is_approved?: boolean | null
           likes_count?: number | null
           moderation_reason?: string | null
@@ -538,10 +542,12 @@ export type Database = {
         }
         Update: {
           category?: Database["public"]["Enums"]["forum_category"]
+          city_tag?: string | null
           comments_count?: number | null
           content?: string
           created_at?: string | null
           id?: string
+          image_url?: string | null
           is_approved?: boolean | null
           likes_count?: number | null
           moderation_reason?: string | null
