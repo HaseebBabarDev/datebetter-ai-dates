@@ -175,29 +175,37 @@ export const InteractionHistory: React.FC<InteractionHistoryProps> = ({
         return (
           <Card 
             key={`devi-${msg.id}`} 
-            className={isUser ? "border-primary/20 bg-primary/5" : "border-accent/20 bg-accent/5"}
+            className={isUser 
+              ? "border-muted bg-muted/30" 
+              : "border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10"
+            }
           >
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  isUser ? "bg-primary/10 text-primary" : "bg-accent/20 text-accent-foreground"
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                  isUser 
+                    ? "bg-muted text-muted-foreground" 
+                    : "bg-primary/20 text-primary"
                 }`}>
                   {isUser ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-sm">
-                      {isUser ? "You asked D.E.V.I." : "D.E.V.I. advice"}
+                    <span className={`font-medium text-sm ${!isUser && "text-primary"}`}>
+                      {isUser ? "Your question" : "D.E.V.I. AI Response"}
                     </span>
-                    <Badge variant="outline" className="text-xs">
-                      {isUser ? "Question" : "Advice"}
+                    <Badge 
+                      variant={isUser ? "secondary" : "default"} 
+                      className={`text-xs ${!isUser && "bg-primary/20 text-primary hover:bg-primary/30"}`}
+                    >
+                      {isUser ? "Question" : "AI Advice"}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">
                     {item.date.toLocaleDateString()} · {item.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
-                  <p className="text-sm text-foreground whitespace-pre-wrap line-clamp-4">
-                    {msg.content}
+                  <p className={`text-sm whitespace-pre-wrap ${isUser ? "text-muted-foreground line-clamp-2" : "text-foreground"}`}>
+                    {isUser ? msg.content : msg.content.slice(0, 500)}{!isUser && msg.content.length > 500 && "..."}
                   </p>
                   {msg.image_url && (
                     <div className="mt-2">
