@@ -300,8 +300,8 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   const respondToAdvice = async (accepted: boolean) => {
     if (!scoreData?.advice || !user) return;
     
-    // Offer no contact mode when score is 37% or less for any advice response
-    if (scoreData.overall_score <= 37) {
+    // Offer no contact mode when score is 10% or less for any advice response
+    if (scoreData.overall_score <= 10) {
       setShowNoContactDialog(true);
       return;
     }
