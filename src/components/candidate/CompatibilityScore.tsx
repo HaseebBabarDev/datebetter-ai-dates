@@ -204,29 +204,15 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
 
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error("Not authenticated");
+      const { data, error: fnError } = await supabase.functions.invoke("calculate-compatibility", {
+        body: { candidateId: candidate.id },
+      });
+
+      if (fnError) {
+        throw new Error(fnError.message || "Failed to calculate");
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calculate-compatibility`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ candidateId: candidate.id }),
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to calculate");
-      }
-
-      const analysis = await response.json();
+      const analysis = data;
       
       onUpdate({
         compatibility_score: analysis.overall_score,

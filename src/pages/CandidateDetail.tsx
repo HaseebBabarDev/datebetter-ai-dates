@@ -301,38 +301,23 @@ const CandidateDetail = () => {
     if (!candidate) return;
 
     try {
-      // Refresh session to ensure we have a valid token
-      const { data: { session }, error: sessionError } = await supabase.auth.refreshSession();
-      if (sessionError || !session) {
-        toast.error("Session expired. Please log in again.");
-        return;
-      }
-
       // Run compatibility scoring and flag detection in parallel
-      const [compatResponse] = await Promise.all([
-        fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calculate-compatibility`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.access_token}`,
-            },
-            body: JSON.stringify({ candidateId: candidate.id }),
-          }
-        ),
+      const [compatResult] = await Promise.all([
+        supabase.functions.invoke("calculate-compatibility", {
+          body: { candidateId: candidate.id },
+        }),
         handleDetectFlags(),
       ]);
 
-      if (!compatResponse.ok) {
-        if (compatResponse.status === 401 || compatResponse.status === 403) {
+      if (compatResult.error) {
+        if (compatResult.error.message?.includes("Unauthorized")) {
           toast.error("Session expired. Please log in again.");
           return;
         }
         throw new Error("Failed to recalculate");
       }
 
-      const analysis = await compatResponse.json();
+      const analysis = compatResult.data;
       
       setCandidate(prev => prev ? {
         ...prev,
