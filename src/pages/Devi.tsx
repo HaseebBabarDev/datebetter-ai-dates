@@ -621,12 +621,14 @@ const Devi = () => {
       if (!reader) throw new Error("No response body");
 
       const decoder = new TextDecoder();
-      let assistantContent = "";
-      const assistantId = crypto.randomUUID();
       let textBuffer = "";
+      
+      // Track multiple message bubbles
+      const messageIds: string[] = [crypto.randomUUID()];
+      const messageContents: string[] = [""];
 
-      // Add empty assistant message
-      setMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
+      // Add first empty assistant message
+      setMessages(prev => [...prev, { id: messageIds[0], role: 'assistant', content: '' }]);
 
       while (true) {
         const { done, value } = await reader.read();
@@ -651,11 +653,46 @@ const Devi = () => {
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content;
             if (content) {
-              assistantContent += content;
+              const currentIdx = messageContents.length - 1;
+              messageContents[currentIdx] += content;
+              
+              // Check if we should split into a new bubble (on double newline)
+              const currentContent = messageContents[currentIdx];
+              const splitIndex = currentContent.indexOf('\n\n');
+              
+              if (splitIndex !== -1 && currentContent.length > splitIndex + 2) {
+                // Split the content
+                const beforeSplit = currentContent.slice(0, splitIndex).trim();
+                const afterSplit = currentContent.slice(splitIndex + 2).trim();
+                
+                if (beforeSplit && afterSplit) {
+                  messageContents[currentIdx] = beforeSplit;
+                  
+                  // Create new bubble
+                  const newId = crypto.randomUUID();
+                  messageIds.push(newId);
+                  messageContents.push(afterSplit);
+                  
+                  // Update UI with finalized first bubble and new bubble
+                  setMessages(prev => {
+                    const updated = prev.map(m => 
+                      m.id === messageIds[currentIdx] 
+                        ? { ...m, content: beforeSplit }
+                        : m
+                    );
+                    return [...updated, { id: newId, role: 'assistant' as const, content: afterSplit }];
+                  });
+                  continue;
+                }
+              }
+              
+              // Update current bubble
+              const latestId = messageIds[messageIds.length - 1];
+              const latestContent = messageContents[messageContents.length - 1];
               setMessages(prev => 
                 prev.map(m => 
-                  m.id === assistantId 
-                    ? { ...m, content: assistantContent }
+                  m.id === latestId 
+                    ? { ...m, content: latestContent }
                     : m
                 )
               );
@@ -668,13 +705,17 @@ const Devi = () => {
         }
       }
 
-      // Save assistant message after streaming completes
-      if (assistantContent && convId) {
-        await saveMessage(convId, {
-          id: assistantId,
-          role: 'assistant',
-          content: assistantContent,
-        });
+      // Save all assistant messages after streaming completes
+      if (convId) {
+        for (let i = 0; i < messageIds.length; i++) {
+          if (messageContents[i]) {
+            await saveMessage(convId, {
+              id: messageIds[i],
+              role: 'assistant',
+              content: messageContents[i],
+            });
+          }
+        }
       }
 
     } catch (error) {
