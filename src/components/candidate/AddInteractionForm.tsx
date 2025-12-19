@@ -431,7 +431,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Date</Label>
                 <Popover>
@@ -439,12 +439,14 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal",
+                        "w-full justify-start text-left font-normal text-sm",
                         !interactionDate && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {interactionDate ? format(interactionDate, "MMM d, yyyy") : <span>Pick a date</span>}
+                      <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                      <span className="truncate">
+                        {interactionDate ? format(interactionDate, "MMM d, yyyy") : "Pick a date"}
+                      </span>
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -462,7 +464,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
               <div className="space-y-2">
                 <Label>Duration</Label>
                 <Select value={duration} onValueChange={setDuration}>
-                  <SelectTrigger>
+                  <SelectTrigger className="text-sm">
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>
                   <SelectContent>
