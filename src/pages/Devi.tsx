@@ -65,18 +65,31 @@ const EXAMPLE_QUESTIONS = [
   "How do I bring up exclusivity?",
 ];
 
+const QUICK_REPLIES = [
+  "Tell me more",
+  "What should I do?",
+  "Is this a red flag?",
+];
+
 const MAX_MESSAGE_LENGTH = 400;
 
 // Message bubble with truncation for long messages
-const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
+const MessageBubble: React.FC<{ 
+  message: Message; 
+  isLast?: boolean;
+  onQuickReply?: (reply: string) => void;
+  isLoading?: boolean;
+}> = ({ message, isLast, onQuickReply, isLoading }) => {
   const [expanded, setExpanded] = useState(false);
   const isLong = message.role === 'assistant' && message.content.length > MAX_MESSAGE_LENGTH;
   const displayContent = isLong && !expanded 
     ? message.content.slice(0, MAX_MESSAGE_LENGTH) + "..." 
     : message.content;
 
+  const showQuickReplies = message.role === 'assistant' && isLast && !isLoading && onQuickReply;
+
   return (
-    <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
       <div
         className={`max-w-[85%] rounded-2xl p-3 ${
           message.role === 'user'
@@ -102,6 +115,19 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
           </button>
         )}
       </div>
+      {showQuickReplies && (
+        <div className="flex flex-wrap gap-2 mt-2">
+          {QUICK_REPLIES.map((reply) => (
+            <button
+              key={reply}
+              onClick={() => onQuickReply(reply)}
+              className="px-3 py-1.5 text-xs font-medium rounded-full border border-primary/30 text-primary bg-primary/5 hover:bg-primary/10 transition-colors"
+            >
+              {reply}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -508,8 +534,9 @@ const Devi = () => {
     }
   };
 
-  const sendMessage = async () => {
-    if ((!input.trim() && !pendingImage) || isLoading) return;
+  const sendMessage = async (messageText?: string) => {
+    const textToSend = messageText || input.trim();
+    if ((!textToSend && !pendingImage) || isLoading) return;
     
     // Require candidate selection and profile completion
     if (!selectedCandidate) {
@@ -524,7 +551,7 @@ const Devi = () => {
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: 'user',
-      content: input.trim() || (pendingImage ? getImagePrompt(pendingImage.type) : ''),
+      content: textToSend || (pendingImage ? getImagePrompt(pendingImage.type) : ''),
       imageData: pendingImage?.data,
       imageType: pendingImage?.type,
     };
@@ -1060,8 +1087,14 @@ const Devi = () => {
               )}
             </div>
           ) : (
-            messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} />
+            messages.map((msg, index) => (
+              <MessageBubble 
+                key={msg.id} 
+                message={msg} 
+                isLast={index === messages.length - 1}
+                onQuickReply={(reply) => sendMessage(reply)}
+                isLoading={isLoading}
+              />
             ))
           )}
           {isLoading && messages[messages.length - 1]?.role === 'user' && (
@@ -1134,7 +1167,7 @@ const Devi = () => {
               />
               <Button
                 size="icon"
-                onClick={sendMessage}
+                onClick={() => sendMessage()}
                 disabled={(!input.trim() && !pendingImage) || isLoading}
                 className="shrink-0 bg-[image:var(--gradient-hero)]"
               >
