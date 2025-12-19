@@ -17,7 +17,9 @@ import {
   UserPlus,
   Trash2,
   Calendar,
-  MessageSquareOff
+  MessageSquareOff,
+  Gift,
+  CheckCircle2
 } from "lucide-react";
 import { RevenueAnalytics } from "@/components/admin/RevenueAnalytics";
 import { 
@@ -41,12 +43,100 @@ const Admin = () => {
   const [deletingUser, setDeletingUser] = useState<string | null>(null);
   const [managingSubscription, setManagingSubscription] = useState<string | null>(null);
   const [removingFromCommunity, setRemovingFromCommunity] = useState<string | null>(null);
+  const [referrals, setReferrals] = useState<any[]>([]);
+  const [loadingReferrals, setLoadingReferrals] = useState(false);
+  const [grantingTrial, setGrantingTrial] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
       checkAdminStatus();
     }
   }, [user]);
+
+  const fetchReferrals = async () => {
+    setLoadingReferrals(true);
+    try {
+      const { data, error } = await supabase
+        .from("referrals")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Get profiles for referrers and referred users
+      const userIds = new Set<string>();
+      data?.forEach(r => {
+        userIds.add(r.referrer_id);
+        if (r.referred_id) userIds.add(r.referred_id);
+      });
+
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, name")
+        .in("user_id", Array.from(userIds));
+
+      const profilesMap = new Map(profiles?.map(p => [p.user_id, p.name]) || []);
+
+      const enrichedReferrals = data?.map(r => ({
+        ...r,
+        referrer_name: profilesMap.get(r.referrer_id) || "Unknown",
+        referred_name: r.referred_id ? profilesMap.get(r.referred_id) || "Unknown" : null
+      })) || [];
+
+      setReferrals(enrichedReferrals);
+    } catch (error) {
+      console.error("Error fetching referrals:", error);
+      toast.error("Failed to load referrals");
+    } finally {
+      setLoadingReferrals(false);
+    }
+  };
+
+  const handleGrantReferralTrial = async (referralId: string, referrerId: string) => {
+    setGrantingTrial(referralId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
+      }
+
+      // Grant 30-day trial to referrer
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-manage-subscription`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ targetUserId: referrerId, trialDays: 30 }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to grant trial");
+      }
+
+      // Mark referral as trial granted
+      await supabase
+        .from("referrals")
+        .update({ trial_granted: true })
+        .eq("id", referralId);
+
+      toast.success("1 month free trial granted to referrer!");
+      fetchReferrals();
+      fetchAllUsers();
+    } catch (error) {
+      console.error("Error granting trial:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to grant trial");
+    } finally {
+      setGrantingTrial(null);
+    }
+  };
 
   const checkAdminStatus = async () => {
     setCheckingAdmin(true);
@@ -61,6 +151,7 @@ const Admin = () => {
       if (!error && data) {
         setIsAdmin(true);
         fetchAllUsers();
+        fetchReferrals();
       } else {
         setIsAdmin(false);
       }
@@ -514,6 +605,80 @@ const Admin = () => {
         <div className="mb-8">
           <RevenueAnalytics />
         </div>
+
+        {/* Referrals Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Gift className="w-5 h-5 text-primary" />
+                Referrals
+              </CardTitle>
+              {loadingReferrals && <Loader2 className="w-4 h-4 animate-spin" />}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {referrals.length === 0 && !loadingReferrals ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No referrals yet</p>
+            ) : (
+              <div className="space-y-3">
+                {referrals.map((referral) => (
+                  <div 
+                    key={referral.id}
+                    className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <p className="font-medium text-sm">
+                            {referral.referrer_name} → {referral.referred_name || "Pending"}
+                          </p>
+                          <Badge 
+                            variant={referral.status === "converted" ? "default" : "secondary"}
+                            className={`text-xs ${referral.status === "converted" ? "bg-success/10 text-success" : ""}`}
+                          >
+                            {referral.status}
+                          </Badge>
+                          {referral.trial_granted && (
+                            <Badge variant="secondary" className="bg-primary/10 text-primary text-xs">
+                              <CheckCircle2 className="w-3 h-3 mr-1" />
+                              Trial Granted
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Code: {referral.referral_code}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Created: {new Date(referral.created_at).toLocaleDateString()}
+                          {referral.converted_at && ` • Converted: ${new Date(referral.converted_at).toLocaleDateString()}`}
+                        </p>
+                      </div>
+                      {referral.status === "converted" && !referral.trial_granted && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleGrantReferralTrial(referral.id, referral.referrer_id)}
+                          disabled={grantingTrial === referral.id}
+                          className="text-xs"
+                        >
+                          {grantingTrial === referral.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <>
+                              <Gift className="w-3 h-3 mr-1" />
+                              Grant Trial
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* User Management */}
         <Card>

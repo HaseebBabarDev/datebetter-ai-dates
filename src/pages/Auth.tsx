@@ -14,8 +14,9 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const setupMode = searchParams.get("setup");
+  const referralCode = searchParams.get("ref");
   const { signIn, signUp } = useAuth();
-  const [isSignUp, setIsSignUp] = useState(searchParams.get("mode") === "signup");
+  const [isSignUp, setIsSignUp] = useState(searchParams.get("mode") === "signup" || !!referralCode);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -121,6 +122,33 @@ const Auth = () => {
         });
       } else {
         toast({ title: isSignUp ? "Account created! Welcome to dateBetter" : "Welcome back!" });
+        
+        // If this was a referral signup, record the referral
+        if (isSignUp && referralCode) {
+          const { data: { user: newUser } } = await supabase.auth.getUser();
+          if (newUser) {
+            // Extract referrer user id from the code (format: DEVI-XXXXXX)
+            const referrerIdPrefix = referralCode.replace("DEVI-", "").toLowerCase();
+            
+            // Find the referrer
+            const { data: referrers } = await supabase
+              .from("profiles")
+              .select("user_id")
+              .ilike("user_id", `${referrerIdPrefix}%`)
+              .limit(1);
+            
+            if (referrers && referrers.length > 0) {
+              // Record the referral
+              await supabase.from("referrals").insert({
+                referrer_id: referrers[0].user_id,
+                referred_id: newUser.id,
+                referral_code: referralCode,
+                status: "converted",
+                converted_at: new Date().toISOString()
+              });
+            }
+          }
+        }
         
         // Check onboarding status for returning users
         if (!isSignUp) {
