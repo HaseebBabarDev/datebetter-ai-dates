@@ -288,7 +288,11 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
   
   const [openSections, setOpenSections] = useState<string[]>(defaultSection ? [defaultSection] : ["relationship"]);
 
-  const goToNextSection = useCallback((currentSection: string) => {
+  const goToNextSection = useCallback((currentSection: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     const currentIndex = SECTION_ORDER.indexOf(currentSection);
     if (currentIndex < SECTION_ORDER.length - 1) {
       const nextSection = SECTION_ORDER[currentIndex + 1];
@@ -382,7 +386,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 onCheckedChange={(v) => updateField("exclusivity_before_intimacy", v)}
               />
             </div>
-            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("relationship")}>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("relationship", e)}>
               Next
             </Button>
           </AccordionContent>
@@ -434,7 +438,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 onCheckedChange={(v) => updateField("marriage_before_kids", v)}
               />
             </div>
-            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("kids")}>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("kids", e)}>
               Next
             </Button>
           </AccordionContent>
@@ -470,7 +474,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Not important"
               rightLabel="Very important"
             />
-            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("faith")}>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("faith", e)}>
               Next
             </Button>
           </AccordionContent>
@@ -506,7 +510,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Not important"
               rightLabel="Very important"
             />
-            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("politics")}>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("politics", e)}>
               Next
             </Button>
           </AccordionContent>
@@ -565,7 +569,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Not important"
               rightLabel="Very important"
             />
-            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("career")}>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("career", e)}>
               Next
             </Button>
           </AccordionContent>
@@ -648,7 +652,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Rigid"
               rightLabel="Very flexible"
             />
-            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("lifestyle")}>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("lifestyle", e)}>
               Next
             </Button>
           </AccordionContent>
@@ -695,7 +699,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Not important"
               rightLabel="Very important"
             />
-            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("physical")}>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("physical", e)}>
               Next
             </Button>
           </AccordionContent>
@@ -731,7 +735,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Quick replies"
               rightLabel="Take your time"
             />
-            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("communication")}>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("communication", e)}>
               Next
             </Button>
           </AccordionContent>
@@ -790,7 +794,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 </Select>
               </div>
             </div>
-            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("attachment")}>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("attachment", e)}>
               Next
             </Button>
           </AccordionContent>
@@ -826,7 +830,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Not concerned"
               rightLabel="Very cautious"
             />
-            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("boundaries")}>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("boundaries", e)}>
               Next
             </Button>
           </AccordionContent>
