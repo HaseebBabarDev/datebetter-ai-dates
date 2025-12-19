@@ -325,12 +325,54 @@ const Devi = () => {
     fetchInteractions();
   }, [user, selectedCandidate]);
 
+  // Track which candidate we last loaded conversation for
+  const lastLoadedCandidateRef = useRef<string | null>(null);
+
+  // Auto-load most recent conversation for selected candidate
   useEffect(() => {
-    if (candidateNameFromState && messages.length === 0) {
+    const loadCandidateConversation = async () => {
+      if (!user || !selectedCandidate) return;
+      
+      // Skip if we already loaded for this candidate
+      if (lastLoadedCandidateRef.current === selectedCandidate.id) return;
+      lastLoadedCandidateRef.current = selectedCandidate.id;
+      
+      // Find most recent conversation for this candidate
+      const candidateConv = conversations.find(c => c.candidate_id === selectedCandidate.id);
+      
+      if (candidateConv) {
+        // Load the existing conversation
+        const { data: messagesData } = await supabase
+          .from("devi_messages")
+          .select("*")
+          .eq("conversation_id", candidateConv.id)
+          .order("created_at", { ascending: true });
+        
+        if (messagesData) {
+          setMessages(messagesData.map(m => ({
+            id: m.id,
+            role: m.role as 'user' | 'assistant',
+            content: m.content,
+            imageData: m.image_url || undefined,
+          })));
+        }
+        setCurrentConversationId(candidateConv.id);
+      } else {
+        // No existing conversation, start fresh
+        setMessages([]);
+        setCurrentConversationId(null);
+      }
+    };
+    
+    loadCandidateConversation();
+  }, [selectedCandidate?.id, user, conversations]);
+
+  useEffect(() => {
+    if (candidateNameFromState && messages.length === 0 && !currentConversationId) {
       setInput(`I want to ask about ${candidateNameFromState}...`);
       textareaRef.current?.focus();
     }
-  }, [candidateNameFromState]);
+  }, [candidateNameFromState, currentConversationId]);
 
   // Load messages when conversation changes
   const loadConversation = useCallback(async (conversationId: string) => {
@@ -422,6 +464,7 @@ const Devi = () => {
     setMessages([]);
     setCurrentConversationId(null);
     setHistoryOpen(false);
+    lastLoadedCandidateRef.current = null; // Reset so new conversation can be created
   }, []);
 
   // Delete conversation
