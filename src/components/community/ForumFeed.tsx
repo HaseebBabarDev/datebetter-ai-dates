@@ -29,7 +29,6 @@ interface ForumPost {
   created_at: string;
   screen_name?: string;
   has_liked?: boolean;
-  image_url?: string | null;
   city_tag?: string | null;
 }
 
@@ -123,7 +122,6 @@ export function ForumFeed({ category, searchQuery, currentScreenName, cityFilter
         category: post.category as ForumCategory,
         screen_name: screenNameMap.get(post.user_id) || "anonymous",
         has_liked: likedPostIds.has(post.id),
-        image_url: (post as any).image_url || null,
         city_tag: (post as any).city_tag || null,
       }));
 
@@ -307,13 +305,6 @@ export function ForumFeed({ category, searchQuery, currentScreenName, cityFilter
             </CardHeader>
 
             <CardContent className="pt-0 space-y-3">
-              {post.image_url && (
-                <img
-                  src={post.image_url}
-                  alt="Post image"
-                  className="w-full h-48 object-cover rounded-lg"
-                />
-              )}
               <p className="text-sm text-muted-foreground line-clamp-3">
                 {post.content}
               </p>
