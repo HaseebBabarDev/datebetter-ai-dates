@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.devi-chat]
 verify_jwt = true
+
+[functions.notify-referrer]
+verify_jwt = false
