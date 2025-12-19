@@ -520,13 +520,23 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Gut feeling (one word)</Label>
-              <Input
-                placeholder="e.g., excited, uncertain, comfortable"
-                value={gutFeeling}
-                onChange={(e) => setGutFeeling(e.target.value)}
-                maxLength={30}
-              />
+              <Label>Gut feeling</Label>
+              <Select value={gutFeeling} onValueChange={setGutFeeling}>
+                <SelectTrigger>
+                  <SelectValue placeholder="How did your gut feel?" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="excited">Excited</SelectItem>
+                  <SelectItem value="hopeful">Hopeful</SelectItem>
+                  <SelectItem value="comfortable">Comfortable</SelectItem>
+                  <SelectItem value="curious">Curious</SelectItem>
+                  <SelectItem value="neutral">Neutral</SelectItem>
+                  <SelectItem value="uncertain">Uncertain</SelectItem>
+                  <SelectItem value="anxious">Anxious</SelectItem>
+                  <SelectItem value="disappointed">Disappointed</SelectItem>
+                  <SelectItem value="off">Something felt off</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
