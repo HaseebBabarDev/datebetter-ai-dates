@@ -87,6 +87,69 @@ function isMissing(value: unknown): boolean {
   return false;
 }
 
+function normalizeTextValue(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const v = value.trim();
+  return v ? v : null;
+}
+
+function enforceEducationConsistency(analysis: any, profile: any, candidate: any) {
+  const userEduRaw = normalizeTextValue(profile?.education_level);
+  const userPrefEduRaw = normalizeTextValue((profile as any)?.preferred_education_level);
+  const candEduRaw = normalizeTextValue(candidate?.their_education_level);
+
+  // If we don't know the candidate's education, we can't validate claims about it.
+  if (!candEduRaw) return;
+
+  const userEduKey = userEduRaw?.toLowerCase() || null;
+  const userPrefEduKey = userPrefEduRaw?.toLowerCase() || null;
+  const candEduKey = candEduRaw.toLowerCase();
+
+  const mismatchWithUserEdu = !!(userEduKey && candEduKey && userEduKey !== candEduKey);
+  const mismatchWithPreference = !!(userPrefEduKey && candEduKey && userPrefEduKey !== candEduKey);
+  if (!mismatchWithUserEdu && !mismatchWithPreference) return;
+
+  const userEduFriendly = userEduRaw ? formatEnumValue(userEduRaw) : null;
+  const userPrefEduFriendly = userPrefEduRaw ? formatEnumValue(userPrefEduRaw) : null;
+  const candEduFriendly = formatEnumValue(candEduRaw);
+
+  const eduRegex = /(doctorate|phd|master'?s|bachelor'?s|associate|some\s+college|college|degree|university|graduate|post[-\s]?grad)/i;
+  const bothRegex = /\byou\s+both\b/i;
+
+  if (Array.isArray(analysis?.strengths)) {
+    const before = analysis.strengths.length;
+    analysis.strengths = analysis.strengths.filter((s: unknown) => {
+      if (typeof s !== "string") return true;
+      // Remove only the problematic education claims that say "you both".
+      return !(eduRegex.test(s) && bothRegex.test(s));
+    });
+
+    const removed = before - analysis.strengths.length;
+    if (removed > 0) {
+      analysis.strengths.unshift("You’re clear about your standards around education and long-term stability.");
+    }
+  }
+
+  if (Array.isArray(analysis?.concerns)) {
+    const alreadyMentionsEducation = analysis.concerns.some(
+      (c: unknown) => typeof c === "string" && c.toLowerCase().includes("education")
+    );
+
+    if (!alreadyMentionsEducation) {
+      let concern: string | null = null;
+
+      if (userPrefEduFriendly && mismatchWithPreference) {
+        concern = `Education alignment may be a mismatch: you prefer a partner with ${userPrefEduFriendly}, but ${candidate.nickname} has ${candEduFriendly}.`;
+      } else if (userEduFriendly && mismatchWithUserEdu) {
+        concern = `Education alignment may be a mismatch: you have ${userEduFriendly}, and ${candidate.nickname} has ${candEduFriendly}.`;
+      }
+
+      if (concern) analysis.concerns.unshift(concern);
+    }
+  }
+}
+
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -549,6 +612,12 @@ ${motivationContext}
 - Activity Level: ${formatEnumValue(profile.activity_level)}
 - Education Level: ${formatEnumValue(profile.education_level)}
 - Preferred Partner Education: ${formatEnumValue((profile as any).preferred_education_level) || "No preference"}
+  
+  EDUCATION FACTS (do not mix these up):
+  - You have: ${formatEnumValue(profile.education_level)}
+  - You prefer a partner with: ${formatEnumValue((profile as any).preferred_education_level) || "No preference"}
+  - ${candidate.nickname} has: ${formatEnumValue(candidate.their_education_level)}
+  IMPORTANT: Your preference is NOT the candidate's education.
 - Height Preference for partner: ${profile.height_preference || "No preference"}
 - Schedule Flexibility: ${formatEnumValue(profile.schedule_flexibility)}
 - Distance Preference: ${formatEnumValue(profile.distance_preference)}
@@ -769,6 +838,9 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
         };
       }
     }
+
+    // Guardrail: fix common "you both" claims that contradict the actual profile data.
+    enforceEducationConsistency(analysis, profile, candidate);
 
     // ENFORCE SCORE LIMITS: If there are negative interactions, cap the score
     if (negativeCount > 0 && analysis.overall_score > sentimentAdjustedOverall) {
