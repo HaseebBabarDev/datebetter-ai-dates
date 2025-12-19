@@ -959,15 +959,15 @@ const Dashboard = () => {
 
             {/* Candidate Recap */}
             {candidates.length > 0 && (
-              <div className="rounded-xl bg-card/80 backdrop-blur-sm border border-border overflow-hidden">
-                <div className="px-4 py-3 border-b border-border">
+              <div className="rounded-2xl bg-card border border-border overflow-hidden">
+                <div className="px-4 py-3 bg-[image:var(--gradient-subtle)] border-b border-border/50">
                   <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-primary" />
                     Recent Activity
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-medium cursor-help">
+                          <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 text-primary font-medium cursor-help">
                             <Sparkles className="w-3 h-3" />
                             D.E.V.I.
                           </span>
