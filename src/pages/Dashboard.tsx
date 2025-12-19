@@ -788,32 +788,59 @@ const Dashboard = () => {
           <TabsContent value="home" className="space-y-3 mt-0 animate-fade-in">
             {/* Quick Actions Grid */}
             <div className="grid grid-cols-2 gap-2">
-              <Button
-                data-tour="add-candidate"
-                onClick={() => navigate("/add-candidate")}
-                className="h-11 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-sm transition-all duration-200 active:scale-[0.98]"
-              >
-                <Plus className="w-4 h-4" />
-                <span className="text-xs font-medium">Add Candidate</span>
-              </Button>
+              <TooltipProvider delayDuration={400}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      data-tour="add-candidate"
+                      onClick={() => navigate("/add-candidate")}
+                      className="h-11 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-sm transition-all duration-200 active:scale-[0.98]"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span className="text-xs font-medium">Add Candidate</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-[200px]">
+                    <p className="text-xs">Start tracking someone new you're dating or considering</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <div data-tour="log-interaction" className="h-11">
                 <LogInteractionDialog candidates={candidates} compact />
               </div>
-              <Button
-                onClick={() => navigate("/devi")}
-                className="h-11 gap-2 bg-gradient-to-br from-secondary to-primary text-primary-foreground rounded-xl shadow-sm transition-all duration-200 active:scale-[0.98]"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span className="text-xs font-medium">Ask D.E.V.I.</span>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate("/patterns")}
-                className="h-11 gap-2 rounded-xl border-border bg-card text-foreground hover:bg-muted/50 transition-all duration-200 active:scale-[0.98]"
-              >
-                <TrendingUp className="w-4 h-4 text-primary" />
-                <span className="text-xs font-medium">View Patterns</span>
-              </Button>
+              <TooltipProvider delayDuration={400}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={() => navigate("/devi")}
+                      className="h-11 gap-2 bg-gradient-to-br from-secondary to-primary text-primary-foreground rounded-xl shadow-sm transition-all duration-200 active:scale-[0.98]"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      <span className="text-xs font-medium">Ask D.E.V.I.</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-[200px]">
+                    <p className="text-xs">Get personalized dating advice from your AI coach</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider delayDuration={400}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate("/patterns")}
+                      className="h-11 gap-2 rounded-xl border-border bg-card text-foreground hover:bg-muted/50 transition-all duration-200 active:scale-[0.98]"
+                    >
+                      <TrendingUp className="w-4 h-4 text-primary" />
+                      <span className="text-xs font-medium">View Patterns</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-[200px]">
+                    <p className="text-xs">Discover trends in your dating behaviors and preferences</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
 
             <UpgradeNudge />

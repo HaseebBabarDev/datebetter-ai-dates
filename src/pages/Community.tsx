@@ -6,6 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MessageCircle, Users, Plus, Search, MapPin, X } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { ForumFeed } from "@/components/community/ForumFeed";
 import { DirectMessages } from "@/components/community/DirectMessages";
@@ -159,31 +165,58 @@ const Community = () => {
               <p className="text-xs text-muted-foreground">@{screenName}</p>
             </div>
           </div>
-          <Button onClick={handleCreatePost} size="sm" className="gap-1.5" data-tour="community-post">
-            <Plus className="h-4 w-4" />
-            Post
-          </Button>
+          <TooltipProvider delayDuration={400}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={handleCreatePost} size="sm" className="gap-1.5" data-tour="community-post">
+                  <Plus className="h-4 w-4" />
+                  Post
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p className="text-xs">Share your dating story or ask for advice</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="px-4">
           <TabsList className="w-full bg-muted/50">
-            <TabsTrigger value="forum" className="flex-1 gap-1.5" data-tour="community-forum">
-              <Users className="h-4 w-4" />
-              Forum
-            </TabsTrigger>
-            <TabsTrigger value="messages" className="flex-1 gap-1.5 relative" data-tour="community-messages">
-              <MessageCircle className="h-4 w-4" />
-              Messages
-              {unreadCount > 0 && (
-                <Badge 
-                  variant="destructive" 
-                  className="absolute -top-1 -right-1 h-5 min-w-5 px-1 text-[10px]"
-                >
-                  {unreadCount}
-                </Badge>
-              )}
-            </TabsTrigger>
+            <TooltipProvider delayDuration={400}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger value="forum" className="flex-1 gap-1.5" data-tour="community-forum">
+                    <Users className="h-4 w-4" />
+                    Forum
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p className="text-xs">Browse community posts & discussions</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider delayDuration={400}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger value="messages" className="flex-1 gap-1.5 relative" data-tour="community-messages">
+                    <MessageCircle className="h-4 w-4" />
+                    Messages
+                    {unreadCount > 0 && (
+                      <Badge 
+                        variant="destructive" 
+                        className="absolute -top-1 -right-1 h-5 min-w-5 px-1 text-[10px]"
+                      >
+                        {unreadCount}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p className="text-xs">Private conversations with community members</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </TabsList>
         </Tabs>
       </header>
