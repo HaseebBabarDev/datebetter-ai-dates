@@ -209,7 +209,29 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       });
 
       if (fnError) {
+        // Check if it's an auth error (401)
+        const errorMessage = fnError.message || "";
+        if (errorMessage.includes("401") || errorMessage.includes("Session expired") || errorMessage.includes("Unauthorized")) {
+          // For auth errors, show friendly message and keep existing score
+          toast({
+            title: scoreData ? "Score Remains the Same" : "Unable to Calculate",
+            description: "Please refresh the page and try again.",
+          });
+          return;
+        }
         throw new Error(fnError.message || "Failed to calculate");
+      }
+
+      // Check if data contains an error response
+      if (data?.error) {
+        if (data.error.includes("Session expired") || data.error.includes("Unauthorized")) {
+          toast({
+            title: scoreData ? "Score Remains the Same" : "Unable to Calculate",
+            description: "Please refresh the page and try again.",
+          });
+          return;
+        }
+        throw new Error(data.error);
       }
 
       const analysis = data;
@@ -243,11 +265,21 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       });
     } catch (error) {
       console.error("Error calculating compatibility:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to calculate compatibility",
-        variant: "destructive",
-      });
+      const errorMsg = error instanceof Error ? error.message : "Failed to calculate compatibility";
+      
+      // For any error, if we have existing score, show "remains the same"
+      if (scoreData) {
+        toast({
+          title: "Score Remains the Same",
+          description: "Unable to update at this time. Your current score is still valid.",
+        });
+      } else {
+        toast({
+          title: "Unable to Calculate",
+          description: errorMsg,
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
