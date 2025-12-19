@@ -80,6 +80,19 @@ export const InteractionHistory: React.FC<InteractionHistoryProps> = ({
   deviMessages = [],
 }) => {
   const [showAll, setShowAll] = useState(false);
+  const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
+
+  const toggleExpanded = (id: string) => {
+    setExpandedMessages(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   // Combine interactions and D.E.V.I. messages into a unified timeline
   const timelineItems: TimelineItem[] = [
@@ -204,9 +217,27 @@ export const InteractionHistory: React.FC<InteractionHistoryProps> = ({
                   <p className="text-xs text-muted-foreground mb-2">
                     {item.date.toLocaleDateString()} · {item.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
-                  <p className={`text-sm whitespace-pre-wrap ${isUser ? "text-muted-foreground line-clamp-2" : "text-foreground"}`}>
-                    {isUser ? msg.content : msg.content.slice(0, 500)}{!isUser && msg.content.length > 500 && "..."}
-                  </p>
+                  {isUser ? (
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {msg.content}
+                    </p>
+                  ) : (
+                    <>
+                      <p className={`text-sm whitespace-pre-wrap ${
+                        expandedMessages.has(msg.id) ? "" : "line-clamp-4"
+                      }`}>
+                        {msg.content}
+                      </p>
+                      {msg.content.length > 200 && (
+                        <button
+                          onClick={() => toggleExpanded(msg.id)}
+                          className="mt-2 text-xs font-medium text-primary hover:underline"
+                        >
+                          {expandedMessages.has(msg.id) ? "Show less" : "Read full response"}
+                        </button>
+                      )}
+                    </>
+                  )}
                   {msg.image_url && (
                     <div className="mt-2">
                       <Badge variant="secondary" className="text-xs">
