@@ -768,9 +768,8 @@ const Devi = () => {
       // Single message bubble with cumulative content
       const assistantMessageId = crypto.randomUUID();
       let fullContent = "";
-
-      // Add empty assistant message
-      setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: '' }]);
+      let displayedContent = "";
+      let messageAdded = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -797,20 +796,51 @@ const Devi = () => {
             if (content) {
               fullContent += content;
               
-              // Update the single bubble with cumulative content
-              setMessages(prev => 
-                prev.map(m => 
-                  m.id === assistantMessageId 
-                    ? { ...m, content: fullContent }
-                    : m
-                )
-              );
+              // Only display up to the last complete word (ends with space, punctuation, or newline)
+              const lastWordBoundary = fullContent.search(/[\s.,!?:;\n][^\s.,!?:;\n]*$/);
+              const contentToDisplay = lastWordBoundary > 0 
+                ? fullContent.slice(0, lastWordBoundary + 1)
+                : "";
+              
+              // Only update UI if we have new complete words to show
+              if (contentToDisplay.length > displayedContent.length) {
+                displayedContent = contentToDisplay;
+                
+                if (!messageAdded) {
+                  // Add the message bubble on first displayable content
+                  messageAdded = true;
+                  setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: displayedContent }]);
+                } else {
+                  setMessages(prev => 
+                    prev.map(m => 
+                      m.id === assistantMessageId 
+                        ? { ...m, content: displayedContent }
+                        : m
+                    )
+                  );
+                }
+              }
             }
           } catch {
             // Partial JSON - put back and wait for more data
             textBuffer = line + '\n' + textBuffer;
             break;
           }
+        }
+      }
+
+      // Display any remaining content after stream ends
+      if (fullContent !== displayedContent) {
+        if (!messageAdded) {
+          setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: fullContent }]);
+        } else {
+          setMessages(prev => 
+            prev.map(m => 
+              m.id === assistantMessageId 
+                ? { ...m, content: fullContent }
+                : m
+            )
+          );
         }
       }
 
