@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -149,9 +149,15 @@ const OnboardingContext = createContext<OnboardingContextType | undefined>(undef
 export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [data, setData] = useState<OnboardingData>({});
+  const dataRef = useRef<OnboardingData>(data);
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(true);
   const totalSteps = 19; // 0-18 (added Dating Motivation screen)
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
 
   // Load existing profile data on mount
   useEffect(() => {
@@ -272,105 +278,111 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   }, [user]);
 
   const updateData = useCallback((updates: Partial<OnboardingData>) => {
-    setData(prev => ({ ...prev, ...updates }));
+    setData(prev => {
+      const newData = { ...prev, ...updates };
+      dataRef.current = newData; // Update ref immediately for saveProgress
+      return newData;
+    });
   }, []);
 
   // Save progress to database
   const saveProgress = useCallback(async (stepNum: number) => {
     if (!user) return;
     
+    const currentData = dataRef.current;
+    
     try {
       await supabase.from("profiles").update({
         onboarding_step: stepNum,
-        // Save all current data
-        name: data.name,
-        birth_date: data.birthDate,
-        country: data.country,
-        city: data.city,
-        state: data.state,
-        gender_identity: data.genderIdentity as any,
-        pronouns: data.pronouns as any,
-        custom_pronouns: data.customPronouns,
-        height: data.height,
-        body_type: data.bodyType,
-        sexual_orientation: data.sexualOrientation as any,
-        orientation_custom: data.orientationCustom,
-        interested_in: data.interestedIn,
-        match_specificity: data.matchSpecificity,
-        is_trans: data.isTrans,
-        transition_stage: data.transitionStage,
-        hormone_profile: data.hormoneProfile,
-        lgbtq_connection: data.lgbtqConnection,
-        track_cycle: data.trackCycle,
-        last_period_date: data.lastPeriodDate,
-        cycle_length: data.cycleLength,
-        cycle_regularity: data.cycleRegularity as any,
-        dating_motivation: data.datingMotivation,
-        relationship_status: data.relationshipStatus as any,
-        relationship_goal: data.relationshipGoal as any,
-        relationship_structure: data.relationshipStructure as any,
-        monogamy_required: data.monogamyRequired,
-        exclusivity_before_intimacy: data.exclusivityBeforeIntimacy,
-        kids_status: data.kidsStatus as any,
-        kids_desire: data.kidsDesire as any,
-        kids_timeline: data.kidsTimeline,
-        marriage_before_kids: data.marriageBeforeKids,
-        open_to_single_parenthood: data.openToSingleParenthood,
-        religion: data.religion as any,
-        religion_practice_level: data.religionPracticeLevel,
-        faith_importance: data.faithImportance,
-        faith_requirements: data.faithRequirements,
-        politics: data.politics as any,
-        politics_importance: data.politicsImportance,
-        political_dealbreakers: data.politicalDealbreakers,
-        education_level: data.educationLevel,
-        education_matters: data.educationMatters,
-        career_stage: data.careerStage,
-        ambition_level: data.ambitionLevel,
-        financial_importance: data.financialImportance,
-        income_range: data.incomeRange,
-        preferred_education_level: data.preferredEducationLevel,
-        preferred_income_range: data.preferredIncomeRange,
-        distance_preference: data.distancePreference,
-        living_situation: data.livingSituation,
-        open_to_moving: data.openToMoving,
-        social_style: data.socialStyle as any,
-        work_schedule_type: data.workScheduleType,
-        flexibility_rating: data.flexibilityRating,
-        activity_level: data.activityLevel,
-        schedule_flexibility: data.scheduleFlexibility,
-        attraction_importance: data.attractionImportance,
-        preferred_age_min: data.preferredAgeMin,
-        preferred_age_max: data.preferredAgeMax,
-        height_preference: data.heightPreference,
-        chemistry_factors: data.chemistryFactors,
-        communication_style: data.communicationStyle as any,
-        response_time_preference: data.responseTimePreference,
-        conflict_style: data.conflictStyle,
-        love_languages: data.loveLanguages,
-        attachment_style: data.attachmentStyle as any,
-        longest_relationship: data.longestRelationship,
-        time_since_last_relationship: data.timeSinceLastRelationship,
-        pattern_recognition: data.patternRecognition,
-        dealbreakers: data.dealbreakers,
-        safety_priorities: data.safetyPriorities,
-        boundary_strength: data.boundaryStrength,
-        is_neurodivergent: data.isNeurodivergent,
-        neurodivergence_types: data.neurodivergenceTypes,
-        mental_health_openness: data.mentalHealthOpenness,
-        mental_health_importance: data.mentalHealthImportance,
-        in_therapy: data.inTherapy,
-        intimacy_comfort: data.intimacyComfort,
-        safety_requirements: data.safetyRequirements,
-        post_intimacy_tendency: data.postIntimacyTendency,
-        red_flag_sensitivity: data.redFlagSensitivity,
-        love_bombing_sensitivity: data.loveBombingSensitivity,
-        behavioral_monitoring: data.behavioralMonitoring,
+        // Save all current data using ref for latest values
+        name: currentData.name,
+        birth_date: currentData.birthDate,
+        country: currentData.country,
+        city: currentData.city,
+        state: currentData.state,
+        gender_identity: currentData.genderIdentity as any,
+        pronouns: currentData.pronouns as any,
+        custom_pronouns: currentData.customPronouns,
+        height: currentData.height,
+        body_type: currentData.bodyType,
+        sexual_orientation: currentData.sexualOrientation as any,
+        orientation_custom: currentData.orientationCustom,
+        interested_in: currentData.interestedIn,
+        match_specificity: currentData.matchSpecificity,
+        is_trans: currentData.isTrans,
+        transition_stage: currentData.transitionStage,
+        hormone_profile: currentData.hormoneProfile,
+        lgbtq_connection: currentData.lgbtqConnection,
+        track_cycle: currentData.trackCycle,
+        last_period_date: currentData.lastPeriodDate,
+        cycle_length: currentData.cycleLength,
+        cycle_regularity: currentData.cycleRegularity as any,
+        dating_motivation: currentData.datingMotivation,
+        relationship_status: currentData.relationshipStatus as any,
+        relationship_goal: currentData.relationshipGoal as any,
+        relationship_structure: currentData.relationshipStructure as any,
+        monogamy_required: currentData.monogamyRequired,
+        exclusivity_before_intimacy: currentData.exclusivityBeforeIntimacy,
+        kids_status: currentData.kidsStatus as any,
+        kids_desire: currentData.kidsDesire as any,
+        kids_timeline: currentData.kidsTimeline,
+        marriage_before_kids: currentData.marriageBeforeKids,
+        open_to_single_parenthood: currentData.openToSingleParenthood,
+        religion: currentData.religion as any,
+        religion_practice_level: currentData.religionPracticeLevel,
+        faith_importance: currentData.faithImportance,
+        faith_requirements: currentData.faithRequirements,
+        politics: currentData.politics as any,
+        politics_importance: currentData.politicsImportance,
+        political_dealbreakers: currentData.politicalDealbreakers,
+        education_level: currentData.educationLevel,
+        education_matters: currentData.educationMatters,
+        career_stage: currentData.careerStage,
+        ambition_level: currentData.ambitionLevel,
+        financial_importance: currentData.financialImportance,
+        income_range: currentData.incomeRange,
+        preferred_education_level: currentData.preferredEducationLevel,
+        preferred_income_range: currentData.preferredIncomeRange,
+        distance_preference: currentData.distancePreference,
+        living_situation: currentData.livingSituation,
+        open_to_moving: currentData.openToMoving,
+        social_style: currentData.socialStyle as any,
+        work_schedule_type: currentData.workScheduleType,
+        flexibility_rating: currentData.flexibilityRating,
+        activity_level: currentData.activityLevel,
+        schedule_flexibility: currentData.scheduleFlexibility,
+        attraction_importance: currentData.attractionImportance,
+        preferred_age_min: currentData.preferredAgeMin,
+        preferred_age_max: currentData.preferredAgeMax,
+        height_preference: currentData.heightPreference,
+        chemistry_factors: currentData.chemistryFactors,
+        communication_style: currentData.communicationStyle as any,
+        response_time_preference: currentData.responseTimePreference,
+        conflict_style: currentData.conflictStyle,
+        love_languages: currentData.loveLanguages,
+        attachment_style: currentData.attachmentStyle as any,
+        longest_relationship: currentData.longestRelationship,
+        time_since_last_relationship: currentData.timeSinceLastRelationship,
+        pattern_recognition: currentData.patternRecognition,
+        dealbreakers: currentData.dealbreakers,
+        safety_priorities: currentData.safetyPriorities,
+        boundary_strength: currentData.boundaryStrength,
+        is_neurodivergent: currentData.isNeurodivergent,
+        neurodivergence_types: currentData.neurodivergenceTypes,
+        mental_health_openness: currentData.mentalHealthOpenness,
+        mental_health_importance: currentData.mentalHealthImportance,
+        in_therapy: currentData.inTherapy,
+        intimacy_comfort: currentData.intimacyComfort,
+        safety_requirements: currentData.safetyRequirements,
+        post_intimacy_tendency: currentData.postIntimacyTendency,
+        red_flag_sensitivity: currentData.redFlagSensitivity,
+        love_bombing_sensitivity: currentData.loveBombingSensitivity,
+        behavioral_monitoring: currentData.behavioralMonitoring,
       }).eq("user_id", user.id);
     } catch (error) {
       console.error("Error saving progress:", error);
     }
-  }, [user, data]);
+  }, [user]);
 
   const nextStep = useCallback(() => {
     const newStep = Math.min(currentStep + 1, totalSteps - 1);
