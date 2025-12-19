@@ -91,7 +91,7 @@ const Splash = () => {
 
         {/* Tagline */}
         <p className="font-poppins text-center text-white/90 text-sm mb-3 max-w-xs sm:max-w-sm font-semibold drop-shadow-lg">
-          AI-backed app helping women select better partners
+          AI-backed app helping you select better partners
         </p>
         
         {/* D.E.V.I. Badge */}
@@ -105,12 +105,12 @@ const Splash = () => {
         <div className="w-full max-w-xs sm:max-w-sm space-y-2 mb-5">
           <FeatureItem icon={Sparkles} text="AI scores candidates & detects red flags" />
           <FeatureItem icon={MessageCircle} text="Chat with D.E.V.I. for personalized advice" />
-          <FeatureItem icon={Users} text="Join a private community of women" />
+          <FeatureItem icon={Users} text="Join a private community" />
         </div>
         
         {/* Footer */}
         <div className="flex items-center justify-center gap-3 mb-4 px-4 py-2 rounded-full bg-black/40 backdrop-blur-sm">
-          <span className="text-xs text-white font-semibold drop-shadow-md">By women, for women</span>
+          <span className="text-xs text-white font-semibold drop-shadow-md">Female-built</span>
           <span className="w-1 h-1 rounded-full bg-white/60" />
           <span className="text-xs text-white font-semibold drop-shadow-md">100% private</span>
         </div>

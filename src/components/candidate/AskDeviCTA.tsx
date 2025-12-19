@@ -36,7 +36,7 @@ export const AskDeviCTA: React.FC<AskDeviCTAProps> = ({ candidateName, candidate
       {/* Content */}
       <div className="p-4 space-y-4">
         <p className="text-sm text-muted-foreground">
-          Got dating questions? Women everywhere are asking AI for relationship advice. 
+          Got dating questions? People everywhere are asking AI for relationship advice. 
           D.E.V.I. is trained specifically for dating — ask anything!
         </p>
 
