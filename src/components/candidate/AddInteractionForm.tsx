@@ -39,7 +39,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { SliderInput } from "@/components/onboarding/SliderInput";
-import { Plus, AlertTriangle, Lightbulb, Phone, Heart, Lock, Shield, CalendarIcon } from "lucide-react";
+import { Plus, AlertTriangle, Lightbulb, Phone, Heart, Lock, Shield, CalendarIcon, Flame } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { detectCrisisContent, CRISIS_RESOURCES, CrisisDetectionResult } from "@/lib/crisisDetection";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -58,8 +59,7 @@ interface AddInteractionFormProps {
   triggerButton?: React.ReactNode;
 }
 
-const INTERACTION_TYPES: { value: Enums<"interaction_type">; label: string; highlight?: boolean }[] = [
-  { value: "intimate", label: "💕 Intimate", highlight: true },
+const INTERACTION_TYPES: { value: Enums<"interaction_type">; label: string }[] = [
   { value: "coffee", label: "Coffee Date" },
   { value: "dinner", label: "Dinner" },
   { value: "drinks", label: "Drinks" },
@@ -107,13 +107,14 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   
   const PRIVACY_ACKNOWLEDGED_KEY = "devi_interaction_privacy_acknowledged";
 
-  const [interactionType, setInteractionType] = useState<Enums<"interaction_type">>(defaultType);
+  const [interactionType, setInteractionType] = useState<Enums<"interaction_type">>(defaultType === "intimate" ? "home_hangout" : defaultType);
   const [interactionDate, setInteractionDate] = useState<Date>(new Date());
   const [duration, setDuration] = useState("");
   const [whoInitiated, setWhoInitiated] = useState("");
   const [overallFeeling, setOverallFeeling] = useState(3);
   const [gutFeeling, setGutFeeling] = useState("");
   const [notes, setNotes] = useState("");
+  const [wasIntimate, setWasIntimate] = useState(defaultType === "intimate");
 
   const resetForm = () => {
     setInteractionType("coffee");
@@ -123,6 +124,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
     setOverallFeeling(3);
     setGutFeeling("");
     setNotes("");
+    setWasIntimate(false);
   };
 
   const handleSubmit = async (e: React.FormEvent, skipCrisisCheck = false) => {
@@ -150,7 +152,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
       const { error } = await supabase.from("interactions").insert({
         user_id: user.id,
         candidate_id: candidateId,
-        interaction_type: interactionType,
+        interaction_type: wasIntimate ? "intimate" : interactionType,
         interaction_date: format(interactionDate, "yyyy-MM-dd"),
         duration: duration || null,
         who_initiated: whoInitiated || null,
@@ -422,13 +424,26 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
                     <SelectItem 
                       key={type.value} 
                       value={type.value}
-                      className={type.highlight ? "text-pink-600 font-medium" : ""}
                     >
                       {type.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="flex items-center justify-between p-3 rounded-lg border border-pink-200 bg-pink-50/50 dark:border-pink-900/30 dark:bg-pink-950/20">
+              <div className="flex items-center gap-2">
+                <Flame className="w-4 h-4 text-pink-500" />
+                <Label htmlFor="intimate-toggle" className="text-sm font-medium cursor-pointer">
+                  Intimacy occurred
+                </Label>
+              </div>
+              <Switch
+                id="intimate-toggle"
+                checked={wasIntimate}
+                onCheckedChange={setWasIntimate}
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
