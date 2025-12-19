@@ -650,6 +650,9 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 <span>18</span>
                 <span>99</span>
               </div>
+              <Button variant="default" size="sm" className="w-full mt-2">
+                Next
+              </Button>
             </div>
             <SliderInput
               label="Physical Attraction Importance"
