@@ -109,10 +109,10 @@ const Splash = () => {
         </div>
         
         {/* Footer */}
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <span className="text-xs text-white/80 font-medium">By women, for women</span>
-          <span className="w-1 h-1 rounded-full bg-white/40" />
-          <span className="text-xs text-white/80 font-medium">100% private</span>
+        <div className="flex items-center justify-center gap-3 mb-4 px-4 py-2 rounded-full bg-black/40 backdrop-blur-sm">
+          <span className="text-xs text-white font-semibold drop-shadow-md">By women, for women</span>
+          <span className="w-1 h-1 rounded-full bg-white/60" />
+          <span className="text-xs text-white font-semibold drop-shadow-md">100% private</span>
         </div>
 
         {/* Buttons */}
@@ -129,7 +129,7 @@ const Splash = () => {
           <Button
             onClick={() => navigate("/auth")}
             variant="outline"
-            className="w-full border-white/30 text-white hover:bg-white/10 font-poppins font-medium backdrop-blur-sm h-12"
+            className="w-full border-white/50 bg-black/30 text-white hover:bg-white/20 font-poppins font-semibold backdrop-blur-sm h-12 drop-shadow-md"
             size="lg"
           >
             Login
