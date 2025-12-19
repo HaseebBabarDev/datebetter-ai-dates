@@ -27,7 +27,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Shield, ChevronDown, TrendingUp, AlertTriangle, Sparkles, Lock } from "lucide-react";
+import { RefreshCw, Heart, Brain, Zap, Target, Users, Check, X, Shield, ChevronDown, TrendingUp, AlertTriangle, Sparkles, Lock, MessageCircle, ArrowRight, Calendar, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   Tooltip,
   TooltipContent,
@@ -62,6 +63,7 @@ interface CompatibilityScoreProps {
   onUpdate: (updates: Partial<Candidate>) => void;
   onStartNoContact?: () => void;
   onAdviceResponded?: () => void;
+  userSchedule?: string | null;
 }
 
 // Advice Section with Read More
@@ -154,6 +156,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   onUpdate,
   onStartNoContact,
   onAdviceResponded,
+  userSchedule,
 }) => {
   const [loading, setLoading] = useState(false);
   const [adviceResponse, setAdviceResponse] = useState<AdviceTracking | null>(null);
@@ -162,6 +165,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   const [scoreJustUpdated, setScoreJustUpdated] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { canUseUpdate, getRemainingUpdates, incrementUsage, refetch: refetchSubscription } = useSubscription();
 
   const scoreData = candidate.score_breakdown as unknown as ScoreBreakdown | null;
@@ -662,6 +666,50 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
           concerns={scoreData.concerns}
           score={scoreData.overall_score}
         />
+
+        {/* Schedule Compatibility Alert */}
+        {userSchedule && (candidate as any).their_schedule_flexibility && userSchedule !== (candidate as any).their_schedule_flexibility && (
+          <div className="flex items-start gap-3 p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+              <Calendar className="w-4 h-4 text-blue-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-blue-600 mb-0.5">Schedule Note</p>
+              <p className="text-sm text-foreground">Different schedule preferences may need coordination</p>
+            </div>
+          </div>
+        )}
+
+        {/* Continue Prompts Section */}
+        <div className="pt-2 border-t border-border space-y-2">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Continue</p>
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-auto py-2 px-3 flex flex-col items-start gap-1 text-left"
+              onClick={() => navigate("/devi", { state: { candidateName: candidate.nickname, candidateId: candidate.id } })}
+            >
+              <div className="flex items-center gap-1.5">
+                <MessageCircle className="w-3.5 h-3.5 text-primary" />
+                <span className="text-xs font-medium">Ask D.E.V.I.</span>
+              </div>
+              <span className="text-[10px] text-muted-foreground leading-tight">Get dating advice</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-auto py-2 px-3 flex flex-col items-start gap-1 text-left"
+              onClick={() => navigate(`/add-candidate?edit=${candidate.id}`)}
+            >
+              <div className="flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-primary" />
+                <span className="text-xs font-medium">Add Details</span>
+              </div>
+              <span className="text-[10px] text-muted-foreground leading-tight">Improve accuracy</span>
+            </Button>
+          </div>
+        </div>
 
         {/* Updates remaining badge */}
         {canRefresh && (

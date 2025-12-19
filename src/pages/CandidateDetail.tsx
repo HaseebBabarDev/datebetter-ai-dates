@@ -19,10 +19,7 @@ import { AddInteractionForm } from "@/components/candidate/AddInteractionForm";
 import { NoContactMode } from "@/components/candidate/NoContactMode";
 import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
 import { ProfileCompleteness } from "@/components/candidate/ProfileCompleteness";
-import { ProfileCompletenessNudge } from "@/components/candidate/ProfileCompletenessNudge";
-import { AskDeviCTA } from "@/components/candidate/AskDeviCTA";
 import { AppRatingDialog, shouldShowRatingDialog } from "@/components/candidate/AppRatingDialog";
-import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
 import { SuccessfulRelationshipCTA, checkSuccessfulRelationship } from "@/components/candidate/SuccessfulRelationshipCTA";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
@@ -798,26 +795,13 @@ const CandidateDetail = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile" className="mt-4 space-y-4">
-            <ProfileCompletenessNudge candidate={candidate} />
-            <ScheduleCompatibilityAlert
-              userSchedule={userProfile.schedule_flexibility}
-              candidateSchedule={(candidate as any).their_schedule_flexibility}
-              distance={candidate.distance_approximation}
-              variant="full"
-            />
+          <TabsContent value="profile" className="mt-4">
             <CompatibilityScore
               candidate={candidate}
               onUpdate={(updates) => setCandidate({ ...candidate, ...updates })}
               onStartNoContact={handleStartNoContact}
               onAdviceResponded={checkPendingAdvice}
-            />
-            <AskDeviCTA candidateName={candidate.nickname} candidateId={candidate.id} />
-            <CandidateProfile
-              candidate={candidate}
-              userId={user!.id}
-              onUpdate={handleUpdateCandidate}
-              showDetailsOnly
+              userSchedule={userProfile.schedule_flexibility}
             />
           </TabsContent>
 
