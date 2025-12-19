@@ -783,6 +783,7 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
 
     // Track previous score for comparison
     const previousScore = candidate.compatibility_score;
+    const scoreChanged = previousScore !== analysis.overall_score;
 
     // Only update if we have a valid score
     if (analysis.overall_score !== undefined && analysis.overall_score !== null) {
@@ -798,6 +799,30 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
       if (updateError) {
         console.error("Update error:", updateError);
       }
+
+      // Log an interaction to record this score update
+      if (scoreChanged && previousScore !== null && previousScore !== undefined) {
+        const changeDirection = analysis.overall_score > previousScore ? "increased" : "decreased";
+        const changeAmount = Math.abs(analysis.overall_score - previousScore);
+        
+        const { error: interactionError } = await supabase
+          .from("interactions")
+          .insert({
+            candidate_id: candidateId,
+            user_id: candidate.user_id,
+            interaction_type: "texting", // Using texting as a neutral interaction type
+            interaction_date: new Date().toISOString().split("T")[0],
+            notes: `D.E.V.I. Score Update: ${previousScore}% → ${analysis.overall_score}% (${changeDirection} by ${changeAmount} points)`,
+            gut_feeling: analysis.overall_score >= 70 ? "hopeful" : analysis.overall_score >= 40 ? "curious" : "cautious",
+            overall_feeling: analysis.overall_score >= 70 ? 4 : analysis.overall_score >= 40 ? 3 : 2,
+          });
+
+        if (interactionError) {
+          console.error("Failed to log score update interaction:", interactionError);
+        } else {
+          console.log(`Logged score update interaction: ${previousScore}% → ${analysis.overall_score}%`);
+        }
+      }
     } else {
       console.log("Score is undefined, keeping existing score");
     }
@@ -806,7 +831,7 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
     return new Response(JSON.stringify({
       ...analysis,
       previous_score: previousScore,
-      score_changed: previousScore !== analysis.overall_score
+      score_changed: scoreChanged
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
