@@ -15,12 +15,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { Badge } from "@/components/ui/badge";
 import { PaymentSheet } from "@/components/subscription/PaymentSheet";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
+import { format, parse } from "date-fns";
+import { cn } from "@/lib/utils";
 
 type Profile = Tables<"profiles">;
 type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more";
@@ -108,6 +116,7 @@ const Settings = () => {
 
   // Account form state
   const [name, setName] = useState("");
+  const [birthDate, setBirthDate] = useState<Date | undefined>(undefined);
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [country, setCountry] = useState("");
@@ -365,6 +374,9 @@ const Settings = () => {
       if (data) {
         setProfile(data);
         setName(data.name || "");
+        if (data.birth_date) {
+          setBirthDate(parse(data.birth_date, "yyyy-MM-dd", new Date()));
+        }
         setCity(data.city || "");
         setState(data.state || "");
         setCountry(data.country || "");
@@ -386,6 +398,7 @@ const Settings = () => {
         .from("profiles")
         .update({
           name,
+          birth_date: birthDate ? format(birthDate, "yyyy-MM-dd") : null,
           city,
           state,
           country,
@@ -494,6 +507,36 @@ const Settings = () => {
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Your name"
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label>Birth Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !birthDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {birthDate ? format(birthDate, "MMM d, yyyy") : <span>Select your birthday</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={birthDate}
+                        onSelect={setBirthDate}
+                        disabled={(date) => date > new Date() || date < new Date("1920-01-01")}
+                        initialFocus
+                        className="pointer-events-auto"
+                        captionLayout="dropdown-buttons"
+                        fromYear={1920}
+                        toYear={new Date().getFullYear()}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="space-y-2">
                   <Label>Country</Label>
