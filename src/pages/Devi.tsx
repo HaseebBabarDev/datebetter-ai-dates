@@ -273,15 +273,22 @@ const Devi = () => {
       
       setConversationsLoading(true);
       
-      // Only fetch conversations from the last 30 days
+      // Calculate 30 days ago
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       
+      // Clean up old conversations (older than 30 days)
+      await supabase
+        .from("devi_conversations")
+        .delete()
+        .eq("user_id", user.id)
+        .lt("updated_at", thirtyDaysAgo.toISOString());
+      
+      // Fetch remaining conversations
       const { data } = await supabase
         .from("devi_conversations")
         .select("*")
         .eq("user_id", user.id)
-        .gte("updated_at", thirtyDaysAgo.toISOString())
         .order("updated_at", { ascending: false })
         .limit(50);
       
