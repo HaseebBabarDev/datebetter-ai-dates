@@ -556,7 +556,18 @@ const CandidateDetail = () => {
             <Home className="w-5 h-5" />
           </Button>
           <div className="flex-1">
-            <h1 className="font-semibold text-foreground">{candidate.nickname}</h1>
+            <div className="flex items-center gap-1.5">
+              <h1 className="font-semibold text-foreground">{candidate.nickname}</h1>
+              {(candidate as any).zodiac_sign && (
+                <span className="text-base" title={(candidate as any).zodiac_sign}>
+                  {({
+                    aries: "♈", taurus: "♉", gemini: "♊", cancer: "♋",
+                    leo: "♌", virgo: "♍", libra: "♎", scorpio: "♏",
+                    sagittarius: "♐", capricorn: "♑", aquarius: "♒", pisces: "♓"
+                  } as Record<string, string>)[(candidate as any).zodiac_sign] || ""}
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2 flex-wrap">
               <p className="text-xs text-muted-foreground capitalize">
                 {candidate.status?.replace("_", " ")}
