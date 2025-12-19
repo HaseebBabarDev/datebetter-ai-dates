@@ -252,12 +252,12 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
                 <MapPin className="h-3.5 w-3.5" />
                 City Tag (optional)
               </Label>
-              <Select value={cityTag} onValueChange={setCityTag}>
+              <Select value={cityTag || "none"} onValueChange={(v) => setCityTag(v === "none" ? "" : v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Add a city tag" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No city tag</SelectItem>
+                  <SelectItem value="none">No city tag</SelectItem>
                   {MAJOR_CITIES.map((city) => (
                     <SelectItem key={city} value={city}>
                       {city}
