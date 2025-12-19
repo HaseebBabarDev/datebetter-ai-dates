@@ -76,6 +76,17 @@ function formatEnumValue(value: string | null | undefined): string {
   return value.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
+function isMissing(value: unknown): boolean {
+  if (value === null || value === undefined) return true;
+  if (typeof value === "number") return !Number.isFinite(value);
+  if (typeof value === "string") {
+    const v = value.trim().toLowerCase();
+    return v === "" || v === "not specified";
+  }
+  if (Array.isArray(value)) return value.length === 0;
+  return false;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -412,7 +423,52 @@ serve(async (req) => {
     // Build the prompt for AI analysis
     const datingMotivation = (profile as any).dating_motivation || [];
     const isLookingForLove = datingMotivation.includes("love");
-    
+
+    const missingCandidateFields = [
+      { label: "Location", value: `${candidate.city || ""}${candidate.country || ""}` },
+      { label: "Relationship Status", value: candidate.their_relationship_status },
+      { label: "Relationship Goal", value: candidate.their_relationship_goal },
+      { label: "Religion", value: candidate.their_religion },
+      { label: "Politics", value: candidate.their_politics },
+      { label: "Kids Status", value: candidate.their_kids_status },
+      { label: "Kids Desire", value: candidate.their_kids_desire },
+      { label: "Attachment Style", value: candidate.their_attachment_style },
+      { label: "Ambition Level", value: candidate.their_ambition_level },
+      { label: "Career Stage", value: candidate.their_career_stage },
+      { label: "Education Level", value: candidate.their_education_level },
+      { label: "Exercise Habits", value: candidate.their_exercise },
+      { label: "Schedule Flexibility", value: candidate.their_schedule_flexibility },
+    ]
+      .filter((f) => isMissing(f.value))
+      .map((f) => f.label);
+
+    const missingUserFields = [
+      { label: "Location", value: `${profile.city || ""}${profile.state || ""}${profile.country || ""}` },
+      { label: "Religion", value: profile.religion },
+      { label: "Politics", value: profile.politics },
+      { label: "Kids Status", value: profile.kids_status },
+      { label: "Kids Desire", value: profile.kids_desire },
+      { label: "Attachment Style", value: profile.attachment_style },
+      { label: "Ambition Level", value: profile.ambition_level },
+      { label: "Career Stage", value: profile.career_stage },
+      { label: "Education Level", value: profile.education_level },
+      { label: "Schedule Flexibility", value: profile.schedule_flexibility },
+      { label: "Income Range", value: (profile as any).income_range },
+      { label: "Preferred Partner Income", value: (profile as any).preferred_income_range },
+    ]
+      .filter((f) => isMissing(f.value))
+      .map((f) => f.label);
+
+    const dataAvailabilityBlock = `
+DATA AVAILABILITY (do NOT assume missing info matches):
+- Candidate fields missing/unknown: ${missingCandidateFields.length ? missingCandidateFields.join(", ") : "None"}
+- Your fields missing/unknown: ${missingUserFields.length ? missingUserFields.join(", ") : "None"}
+
+LANGUAGE RULE (MUST FOLLOW):
+- ONLY say "you both" when you have explicit info for BOTH of you about that exact point.
+- If candidate info is missing, write "You ..." and/or "Unknown whether ${candidate.nickname} ...". Never assume similarity.
+`;
+
     // Detect high-profile partner from candidate data
     const careerStage = (candidate.their_career_stage || "").toLowerCase();
     const notes = (candidate.notes || "").toLowerCase();
@@ -515,6 +571,7 @@ CANDIDATE PROFILE (${candidate.nickname}):
 - Education Level: ${formatEnumValue(candidate.their_education_level)}
 - Exercise Habits: ${formatEnumValue(candidate.their_exercise)}
 - Schedule Flexibility: ${formatEnumValue(candidate.their_schedule_flexibility)}
+${dataAvailabilityBlock}
 
 CHEMISTRY RATINGS (1-5):
 - Physical Attraction: ${candidate.physical_attraction || 3}
@@ -616,7 +673,7 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
       body: JSON.stringify({
         model: "google/gemini-2.5-flash-lite",
         messages: [
-          { role: "system", content: "You are D.E.V.I., a warm relationship coach. Be conversational and direct. Use provided sentiment-adjusted scores as your foundation. NEVER increase the score above the sentiment-adjusted score when there are negative interactions. Keep responses concise." },
+          { role: "system", content: "You are D.E.V.I., a warm relationship coach. Be conversational and direct. Use provided sentiment-adjusted scores as your foundation. NEVER increase the score above the sentiment-adjusted score when there are negative interactions. Only say 'you both' when BOTH profiles have explicit info for that point; otherwise say 'You...' or 'Unknown whether...'. Keep responses concise." },
           { role: "user", content: prompt }
         ],
         tools: [
@@ -646,12 +703,12 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
                   strengths: {
                     type: "array",
                     items: { type: "string" },
-                    description: "List of 2-4 relationship strengths"
+                    description: `List of 2-4 strengths. ONLY say "you both" when BOTH profiles have explicit data for that point. If candidate data is missing, write "You ..." and/or "Unknown whether ${candidate.nickname} ...".`
                   },
                   concerns: {
                     type: "array",
                     items: { type: "string" },
-                    description: "List of 2-4 concerns or red flags"
+                    description: `List of 2-4 concerns or red flags. ONLY say "you both" when BOTH profiles have explicit data for that point. If candidate data is missing, frame as "Unknown whether ${candidate.nickname} ..." rather than assuming similarity.`
                   },
                   advice: {
                     type: "string",
