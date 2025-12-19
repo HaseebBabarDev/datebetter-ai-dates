@@ -193,6 +193,21 @@ const SCHEDULE_OPTIONS = [
   { value: "self_employed", label: "Self-Employed" },
 ];
 
+const ZODIAC_OPTIONS = [
+  { value: "aries", label: "♈ Aries" },
+  { value: "taurus", label: "♉ Taurus" },
+  { value: "gemini", label: "♊ Gemini" },
+  { value: "cancer", label: "♋ Cancer" },
+  { value: "leo", label: "♌ Leo" },
+  { value: "virgo", label: "♍ Virgo" },
+  { value: "libra", label: "♎ Libra" },
+  { value: "scorpio", label: "♏ Scorpio" },
+  { value: "sagittarius", label: "♐ Sagittarius" },
+  { value: "capricorn", label: "♑ Capricorn" },
+  { value: "aquarius", label: "♒ Aquarius" },
+  { value: "pisces", label: "♓ Pisces" },
+];
+
 type Candidate = Tables<"candidates">;
 
 const AddCandidate = () => {
@@ -222,6 +237,7 @@ const AddCandidate = () => {
   const [city, setCity] = useState("");
   const [distanceApprox, setDistanceApprox] = useState("");
   const [theirSchedule, setTheirSchedule] = useState("");
+  const [zodiacSign, setZodiacSign] = useState("");
 
   // About Them
   const [theirReligion, setTheirReligion] = useState("");
@@ -280,6 +296,7 @@ const AddCandidate = () => {
         setCity((data as any).city || "");
         setDistanceApprox((data as any).distance_approximation || "");
         setTheirSchedule((data as any).their_schedule_flexibility || "");
+        setZodiacSign((data as any).zodiac_sign || "");
         setTheirReligion(data.their_religion || "");
         setTheirPolitics(data.their_politics || "");
         setTheirRelationshipStatus((data as any).their_relationship_status || "");
@@ -346,6 +363,7 @@ const AddCandidate = () => {
         city: city || null,
         distance_approximation: distanceApprox || null,
         their_schedule_flexibility: theirSchedule || null,
+        zodiac_sign: zodiacSign || null,
         their_religion: theirReligion || null,
         their_politics: theirPolitics || null,
         their_relationship_status: theirRelationshipStatus || null,
@@ -820,18 +838,33 @@ const AddCandidate = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>Height</Label>
-                    <Select value={height} onValueChange={setHeight}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {HEIGHT_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Height</Label>
+                      <Select value={height} onValueChange={setHeight}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {HEIGHT_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Zodiac Sign</Label>
+                      <Select value={zodiacSign} onValueChange={setZodiacSign}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ZODIAC_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
