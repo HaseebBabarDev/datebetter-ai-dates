@@ -455,23 +455,23 @@ const Settings = () => {
 
       <main className="px-4 py-4 max-w-lg mx-auto space-y-4">
         <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'} mb-4 h-auto p-1 bg-muted/50 backdrop-blur-sm`}>
-            <TabsTrigger value="account" className="flex items-center gap-1.5 py-2.5 px-2 min-w-0 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+          <TabsList className="flex w-full mb-4 h-auto p-1 bg-muted/50 backdrop-blur-sm overflow-x-auto scrollbar-hide gap-1">
+            <TabsTrigger value="account" className="flex items-center gap-1.5 py-2.5 px-3 min-w-fit rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0">
               <User className="w-4 h-4 shrink-0" />
-              <span className="truncate text-[11px] sm:text-sm">Account</span>
+              <span className="text-[11px] sm:text-sm">Account</span>
             </TabsTrigger>
-            <TabsTrigger value="preferences" className="flex items-center gap-1.5 py-2.5 px-2 min-w-0 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger value="preferences" className="flex items-center gap-1.5 py-2.5 px-3 min-w-fit rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0">
               <Settings2 className="w-4 h-4 shrink-0" />
-              <span className="truncate text-[11px] sm:text-sm">Prefs</span>
+              <span className="text-[11px] sm:text-sm">Prefs</span>
             </TabsTrigger>
-            <TabsTrigger value="billing" className="flex items-center gap-1.5 py-2.5 px-2 min-w-0 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger value="billing" className="flex items-center gap-1.5 py-2.5 px-3 min-w-fit rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0">
               <CreditCard className="w-4 h-4 shrink-0" />
-              <span className="truncate text-[11px] sm:text-sm">Billing</span>
+              <span className="text-[11px] sm:text-sm">Billing</span>
             </TabsTrigger>
             {isAdmin && (
-              <TabsTrigger value="admin" className="flex items-center gap-1.5 py-2.5 px-2 min-w-0 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <TabsTrigger value="admin" className="flex items-center gap-1.5 py-2.5 px-3 min-w-fit rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0">
                 <Shield className="w-4 h-4 shrink-0" />
-                <span className="truncate text-[11px] sm:text-sm">Admin</span>
+                <span className="text-[11px] sm:text-sm">Admin</span>
               </TabsTrigger>
             )}
           </TabsList>
