@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2 } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -197,6 +197,11 @@ const Devi = () => {
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [conversationsLoading, setConversationsLoading] = useState(true);
   const [historyOpen, setHistoryOpen] = useState(false);
+  
+  // Conversation choice dialog state
+  const [showConversationChoice, setShowConversationChoice] = useState(false);
+  const [pendingCandidateSelection, setPendingCandidateSelection] = useState<Candidate | null>(null);
+  const [existingConversationForChoice, setExistingConversationForChoice] = useState<Conversation | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -466,6 +471,67 @@ const Devi = () => {
     setHistoryOpen(false);
     lastLoadedCandidateRef.current = null; // Reset so new conversation can be created
   }, []);
+
+  // Handle candidate selection with conversation choice
+  const handleCandidateSelect = useCallback((candidate: Candidate) => {
+    // Check if there's an existing conversation for this candidate
+    const existingConv = conversations.find(c => c.candidate_id === candidate.id);
+    
+    if (existingConv && candidate.id !== selectedCandidate?.id) {
+      // Show choice dialog
+      setPendingCandidateSelection(candidate);
+      setExistingConversationForChoice(existingConv);
+      setShowConversationChoice(true);
+    } else {
+      // No existing conversation, just select
+      setSelectedCandidate(candidate);
+    }
+  }, [conversations, selectedCandidate]);
+
+  // Continue existing conversation
+  const handleContinueConversation = useCallback(async () => {
+    if (!pendingCandidateSelection || !existingConversationForChoice) return;
+    
+    setSelectedCandidate(pendingCandidateSelection);
+    lastLoadedCandidateRef.current = pendingCandidateSelection.id;
+    
+    // Load the existing conversation
+    const { data: messagesData } = await supabase
+      .from("devi_messages")
+      .select("*")
+      .eq("conversation_id", existingConversationForChoice.id)
+      .order("created_at", { ascending: true });
+    
+    if (messagesData) {
+      setMessages(messagesData.map(m => ({
+        id: m.id,
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+        imageData: m.image_url || undefined,
+      })));
+    }
+    setCurrentConversationId(existingConversationForChoice.id);
+    
+    // Reset dialog state
+    setShowConversationChoice(false);
+    setPendingCandidateSelection(null);
+    setExistingConversationForChoice(null);
+  }, [pendingCandidateSelection, existingConversationForChoice]);
+
+  // Start new conversation for candidate
+  const handleStartNewConversation = useCallback(() => {
+    if (!pendingCandidateSelection) return;
+    
+    setSelectedCandidate(pendingCandidateSelection);
+    lastLoadedCandidateRef.current = pendingCandidateSelection.id;
+    setMessages([]);
+    setCurrentConversationId(null);
+    
+    // Reset dialog state
+    setShowConversationChoice(false);
+    setPendingCandidateSelection(null);
+    setExistingConversationForChoice(null);
+  }, [pendingCandidateSelection]);
 
   // Delete conversation
   const deleteConversation = useCallback(async (conversationId: string) => {
@@ -989,21 +1055,27 @@ const Devi = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-48">
-                  {candidates.map((c) => (
-                    <DropdownMenuItem
-                      key={c.id}
-                      onClick={() => setSelectedCandidate(c)}
-                      className="gap-2"
-                    >
-                      <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
-                        <span className="text-xs font-medium">{c.nickname.charAt(0)}</span>
-                      </div>
-                      {c.nickname}
-                      {selectedCandidate?.id === c.id && (
-                        <Check className="w-4 h-4 ml-auto text-primary" />
-                      )}
-                    </DropdownMenuItem>
-                  ))}
+                  {candidates.map((c) => {
+                    const hasConversation = conversations.some(conv => conv.candidate_id === c.id);
+                    return (
+                      <DropdownMenuItem
+                        key={c.id}
+                        onClick={() => handleCandidateSelect(c)}
+                        className="gap-2"
+                      >
+                        <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                          <span className="text-xs font-medium">{c.nickname.charAt(0)}</span>
+                        </div>
+                        <span className="flex-1">{c.nickname}</span>
+                        {hasConversation && (
+                          <MessageCircle className="w-3 h-3 text-muted-foreground" />
+                        )}
+                        {selectedCandidate?.id === c.id && (
+                          <Check className="w-4 h-4 text-primary" />
+                        )}
+                      </DropdownMenuItem>
+                    );
+                  })}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -1028,6 +1100,42 @@ const Devi = () => {
           </div>
         </div>
       </div>
+
+      {/* Conversation Choice Dialog */}
+      <Dialog open={showConversationChoice} onOpenChange={setShowConversationChoice}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-primary" />
+              Continue or Start Fresh?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              You have an existing conversation with {pendingCandidateSelection?.nickname}. What would you like to do?
+            </p>
+            
+            <div className="space-y-2">
+              <Button
+                className="w-full gap-2 justify-start"
+                onClick={handleContinueConversation}
+              >
+                <History className="w-4 h-4" />
+                Continue conversation
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="w-full gap-2 justify-start"
+                onClick={handleStartNewConversation}
+              >
+                <Plus className="w-4 h-4" />
+                Start new chat
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Requirements Dialog */}
       <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
