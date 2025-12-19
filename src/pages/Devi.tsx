@@ -107,40 +107,46 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
 };
 
 const USER_PROFILE_FIELDS = [
-  { key: "relationship_goal", weight: 2 },
-  { key: "religion", weight: 2 },
-  { key: "politics", weight: 2 },
-  { key: "kids_desire", weight: 2 },
-  { key: "attachment_style", weight: 2 },
-  { key: "gender_identity", weight: 1 },
-  { key: "birth_date", weight: 1 },
-  { key: "country", weight: 1 },
-  { key: "city", weight: 1 },
+  { key: "relationship_goal", weight: 2, label: "Relationship Goal" },
+  { key: "religion", weight: 2, label: "Religion" },
+  { key: "politics", weight: 2, label: "Politics" },
+  { key: "kids_desire", weight: 2, label: "Kids Preference" },
+  { key: "attachment_style", weight: 2, label: "Attachment Style" },
+  { key: "gender_identity", weight: 1, label: "Gender" },
+  { key: "birth_date", weight: 1, label: "Birth Date" },
+  { key: "country", weight: 1, label: "Country" },
+  { key: "city", weight: 1, label: "City" },
 ];
 
 const CANDIDATE_PROFILE_FIELDS = [
-  { key: "age", weight: 2 },
-  { key: "their_religion", weight: 2 },
-  { key: "their_politics", weight: 2 },
-  { key: "their_relationship_goal", weight: 2 },
-  { key: "their_kids_desire", weight: 2 },
-  { key: "their_attachment_style", weight: 2 },
-  { key: "gender_identity", weight: 1 },
+  { key: "age", weight: 2, label: "Age" },
+  { key: "their_religion", weight: 2, label: "Religion" },
+  { key: "their_politics", weight: 2, label: "Politics" },
+  { key: "their_relationship_goal", weight: 2, label: "Relationship Goal" },
+  { key: "their_kids_desire", weight: 2, label: "Kids Preference" },
+  { key: "their_attachment_style", weight: 2, label: "Attachment Style" },
+  { key: "gender_identity", weight: 1, label: "Gender" },
 ];
 
-const calculateCompleteness = (data: Record<string, unknown>, fields: { key: string; weight: number }[]) => {
+const calculateCompleteness = (data: Record<string, unknown>, fields: { key: string; weight: number; label: string }[]) => {
   let filledWeight = 0;
   let totalWeight = 0;
+  const missingFields: string[] = [];
   
   fields.forEach(field => {
     totalWeight += field.weight;
     const value = data[field.key];
     if (value !== null && value !== undefined && value !== "") {
       filledWeight += field.weight;
+    } else {
+      missingFields.push(field.label);
     }
   });
   
-  return Math.round((filledWeight / totalWeight) * 100);
+  return {
+    percentage: Math.round((filledWeight / totalWeight) * 100),
+    missingFields,
+  };
 };
 
 const Devi = () => {
@@ -175,9 +181,12 @@ const Devi = () => {
   const candidateNameFromState = (location.state as { candidateName?: string })?.candidateName;
 
   // Calculate profile completeness
-  const userProfileCompleteness = userProfile 
+  const profileCompletenessResult = userProfile 
     ? calculateCompleteness(userProfile as unknown as Record<string, unknown>, USER_PROFILE_FIELDS)
-    : 0;
+    : { percentage: 0, missingFields: USER_PROFILE_FIELDS.map(f => f.label) };
+  
+  const userProfileCompleteness = profileCompletenessResult.percentage;
+  const missingProfileFields = profileCompletenessResult.missingFields;
   
   // Check if user has full profile and at least one interaction
   const hasFullProfile = userProfileCompleteness === 100;
@@ -929,6 +938,12 @@ const Devi = () => {
                   </span>
                 </div>
                 <Progress value={userProfileCompleteness} className="h-1.5" />
+                {!hasFullProfile && missingProfileFields.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    Missing: {missingProfileFields.slice(0, 3).join(", ")}
+                    {missingProfileFields.length > 3 && ` +${missingProfileFields.length - 3} more`}
+                  </p>
+                )}
                 {!hasFullProfile && (
                   <Button
                     variant="outline"
