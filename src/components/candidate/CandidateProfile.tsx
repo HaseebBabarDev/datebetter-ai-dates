@@ -90,6 +90,21 @@ const ATTACHMENT_STYLE_OPTIONS: { value: Enums<"attachment_style">; label: strin
   { value: "disorganized", label: "Disorganized" },
 ];
 
+const ZODIAC_OPTIONS: { value: string; label: string; emoji: string }[] = [
+  { value: "aries", label: "Aries", emoji: "♈" },
+  { value: "taurus", label: "Taurus", emoji: "♉" },
+  { value: "gemini", label: "Gemini", emoji: "♊" },
+  { value: "cancer", label: "Cancer", emoji: "♋" },
+  { value: "leo", label: "Leo", emoji: "♌" },
+  { value: "virgo", label: "Virgo", emoji: "♍" },
+  { value: "libra", label: "Libra", emoji: "♎" },
+  { value: "scorpio", label: "Scorpio", emoji: "♏" },
+  { value: "sagittarius", label: "Sagittarius", emoji: "♐" },
+  { value: "capricorn", label: "Capricorn", emoji: "♑" },
+  { value: "aquarius", label: "Aquarius", emoji: "♒" },
+  { value: "pisces", label: "Pisces", emoji: "♓" },
+];
+
 export const CandidateProfile: React.FC<CandidateProfileProps> = ({
   candidate,
   userId,
@@ -152,6 +167,14 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
               {candidate.pronouns && (
                 <Badge variant="secondary">{formatLabel(candidate.pronouns, PRONOUN_OPTIONS)}</Badge>
               )}
+              {(candidate as any).zodiac_sign && (() => {
+                const zodiac = ZODIAC_OPTIONS.find(z => z.value === (candidate as any).zodiac_sign);
+                return zodiac ? (
+                  <Badge variant="secondary" className="gap-1">
+                    {zodiac.emoji} {zodiac.label}
+                  </Badge>
+                ) : null;
+              })()}
               {candidate.met_via && (
                 <Badge variant="secondary" className="gap-1">
                   <MapPin className="w-3 h-3" />

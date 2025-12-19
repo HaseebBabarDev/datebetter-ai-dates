@@ -161,6 +161,7 @@ export type Database = {
           their_social_style: string | null
           updated_at: string | null
           user_id: string
+          zodiac_sign: string | null
         }
         Insert: {
           age?: number | null
@@ -225,6 +226,7 @@ export type Database = {
           their_social_style?: string | null
           updated_at?: string | null
           user_id: string
+          zodiac_sign?: string | null
         }
         Update: {
           age?: number | null
@@ -289,6 +291,7 @@ export type Database = {
           their_social_style?: string | null
           updated_at?: string | null
           user_id?: string
+          zodiac_sign?: string | null
         }
         Relationships: []
       }
