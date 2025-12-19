@@ -37,7 +37,7 @@ const genderOptions = [
   { value: "woman_trans", label: "Woman (transgender)" },
   { value: "non_binary", label: "Non-binary" },
   { value: "gender_fluid", label: "Gender-fluid" },
-  { value: "self_describe", label: "Prefer to self-describe" },
+  { value: "man_cis", label: "Man" },
 ];
 
 const pronounOptions = [
