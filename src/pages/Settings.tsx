@@ -499,30 +499,30 @@ const Settings = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 px-4 pb-4">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label htmlFor="name" className="text-xs">Name</Label>
+                    <Label htmlFor="name" className="text-xs font-medium">Name</Label>
                     <Input
                       id="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Your name"
-                      className="h-9"
+                      className="h-9 text-sm"
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">Birth Date</Label>
+                    <Label className="text-xs font-medium">Birthday</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full justify-start text-left font-normal h-9 text-xs",
+                            "w-full justify-start text-left font-normal h-9 text-sm px-3",
                             !birthDate && "text-muted-foreground"
                           )}
                         >
-                          <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
-                          {birthDate ? format(birthDate, "MMM d, yyyy") : <span>Birthday</span>}
+                          <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                          <span className="truncate">{birthDate ? format(birthDate, "MMM d, yyyy") : "Select"}</span>
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -541,11 +541,11 @@ const Settings = () => {
                     </Popover>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-xs">Country</Label>
+                    <Label className="text-xs font-medium">Country</Label>
                     <Select value={country} onValueChange={setCountry}>
-                      <SelectTrigger className="h-9"><SelectValue placeholder="Country" /></SelectTrigger>
+                      <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent>
                         {COUNTRY_OPTIONS.map(opt => (
                           <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
@@ -554,31 +554,31 @@ const Settings = () => {
                     </Select>
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="state" className="text-xs">State</Label>
+                    <Label htmlFor="state" className="text-xs font-medium">State</Label>
                     <Input
                       id="state"
                       value={state}
                       onChange={(e) => setState(e.target.value)}
                       placeholder="State"
-                      className="h-9"
+                      className="h-9 text-sm"
                     />
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label htmlFor="city" className="text-xs">City</Label>
+                    <Label htmlFor="city" className="text-xs font-medium">City</Label>
                     <Input
                       id="city"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       placeholder="City"
-                      className="h-9"
+                      className="h-9 text-sm"
                     />
                   </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-xs">Gender</Label>
+                    <Label className="text-xs font-medium">Gender</Label>
                     <Select value={genderIdentity} onValueChange={setGenderIdentity}>
-                      <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent>
                         {GENDER_OPTIONS.map(opt => (
                           <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
@@ -586,10 +586,12 @@ const Settings = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-xs">Pronouns</Label>
+                    <Label className="text-xs font-medium">Pronouns</Label>
                     <Select value={pronouns} onValueChange={setPronouns}>
-                      <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent>
                         {PRONOUN_OPTIONS.map(opt => (
                           <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
@@ -598,9 +600,9 @@ const Settings = () => {
                     </Select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">Orientation</Label>
+                    <Label className="text-xs font-medium">Orientation</Label>
                     <Select value={sexualOrientation} onValueChange={setSexualOrientation}>
-                      <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent>
                         {ORIENTATION_OPTIONS.map(opt => (
                           <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
@@ -609,7 +611,7 @@ const Settings = () => {
                     </Select>
                   </div>
                 </div>
-                <p className="text-[10px] text-muted-foreground pt-1 border-t">
+                <p className="text-xs text-muted-foreground pt-2 border-t">
                   {user.email}
                 </p>
               </CardContent>
