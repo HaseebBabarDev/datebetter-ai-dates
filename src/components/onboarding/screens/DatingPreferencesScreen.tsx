@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { OptionCard } from "../OptionCard";
 import { MultiSelectOption } from "../MultiSelectOption";
 import { SliderInput } from "../SliderInput";
+import { Input } from "@/components/ui/input";
 
 const orientationOptions = [
   { value: "straight", label: "Straight/Heterosexual" },
@@ -39,6 +40,13 @@ const DatingPreferencesScreen = () => {
       } else if (filtered.length < 2) {
         updateData({ interestedIn: [...filtered, value] });
       }
+    }
+  };
+
+  const handleAgeChange = (field: 'preferredAgeMin' | 'preferredAgeMax', value: string) => {
+    const numValue = value === '' ? undefined : parseInt(value, 10);
+    if (numValue === undefined || (numValue >= 18 && numValue <= 99)) {
+      updateData({ [field]: numValue });
     }
   };
 
@@ -80,6 +88,37 @@ const DatingPreferencesScreen = () => {
               />
             ))}
           </div>
+        </div>
+
+        {/* Preferred Age Range */}
+        <div className="space-y-2">
+          <Label className="text-sm">Preferred age range:</Label>
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <Input
+                type="number"
+                placeholder="Min (18+)"
+                min={18}
+                max={99}
+                value={data.preferredAgeMin ?? ''}
+                onChange={(e) => handleAgeChange('preferredAgeMin', e.target.value)}
+                className="text-center"
+              />
+            </div>
+            <span className="text-muted-foreground">to</span>
+            <div className="flex-1">
+              <Input
+                type="number"
+                placeholder="Max"
+                min={18}
+                max={99}
+                value={data.preferredAgeMax ?? ''}
+                onChange={(e) => handleAgeChange('preferredAgeMax', e.target.value)}
+                className="text-center"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">Leave blank for no preference</p>
         </div>
 
         {/* Match Specificity */}
