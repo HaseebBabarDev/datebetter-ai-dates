@@ -526,9 +526,9 @@ const Settings = () => {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-xs font-medium">Month</Label>
+                    <Label className="text-xs font-medium">Birth Month</Label>
                     <Select 
                       value={birthDate ? String(birthDate.getMonth() + 1) : ""} 
                       onValueChange={(month) => {
@@ -546,7 +546,7 @@ const Settings = () => {
                     </Select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs font-medium">Day</Label>
+                    <Label className="text-xs font-medium">Birth Day</Label>
                     <Select 
                       value={birthDate ? String(birthDate.getDate()) : ""} 
                       onValueChange={(day) => {
@@ -563,8 +563,10 @@ const Settings = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-xs font-medium">Year</Label>
+                    <Label className="text-xs font-medium">Birth Year</Label>
                     <Select 
                       value={birthDate ? String(birthDate.getFullYear()) : ""} 
                       onValueChange={(year) => {
@@ -581,8 +583,6 @@ const Settings = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
                   <div className="space-y-1">
                     <Label className="text-xs font-medium">Country</Label>
                     <Select value={country} onValueChange={setCountry}>
@@ -594,6 +594,8 @@ const Settings = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
                     <Label htmlFor="state" className="text-xs font-medium">State</Label>
                     <Input
@@ -615,7 +617,7 @@ const Settings = () => {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
                     <Label className="text-xs font-medium">Gender</Label>
                     <Select value={genderIdentity} onValueChange={setGenderIdentity}>
@@ -638,6 +640,8 @@ const Settings = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
                     <Label className="text-xs font-medium">Orientation</Label>
                     <Select value={sexualOrientation} onValueChange={setSexualOrientation}>
