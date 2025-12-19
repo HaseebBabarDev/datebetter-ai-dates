@@ -258,8 +258,12 @@ const CandidateDetail = () => {
     if (!candidate) return;
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      // Refresh session to ensure we have a valid token
+      const { data: { session }, error: sessionError } = await supabase.auth.refreshSession();
+      if (sessionError || !session) {
+        console.log("Session expired or invalid, skipping flag detection");
+        return;
+      }
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/detect-flags`,
@@ -273,7 +277,13 @@ const CandidateDetail = () => {
         }
       );
 
-      if (!response.ok) return;
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          console.log("Unauthorized - session may have expired");
+          return;
+        }
+        return;
+      }
 
       const flags = await response.json();
       
@@ -291,8 +301,12 @@ const CandidateDetail = () => {
     if (!candidate) return;
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      // Refresh session to ensure we have a valid token
+      const { data: { session }, error: sessionError } = await supabase.auth.refreshSession();
+      if (sessionError || !session) {
+        toast.error("Session expired. Please log in again.");
+        return;
+      }
 
       // Run compatibility scoring and flag detection in parallel
       const [compatResponse] = await Promise.all([
@@ -311,6 +325,10 @@ const CandidateDetail = () => {
       ]);
 
       if (!compatResponse.ok) {
+        if (compatResponse.status === 401 || compatResponse.status === 403) {
+          toast.error("Session expired. Please log in again.");
+          return;
+        }
         throw new Error("Failed to recalculate");
       }
 
