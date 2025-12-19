@@ -7,6 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Sheet,
   SheetContent,
@@ -33,11 +39,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { SliderInput } from "@/components/onboarding/SliderInput";
-import { Plus, AlertTriangle, Lightbulb, Phone, Heart, Lock, Shield } from "lucide-react";
+import { Plus, AlertTriangle, Lightbulb, Phone, Heart, Lock, Shield, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { detectCrisisContent, CRISIS_RESOURCES, CrisisDetectionResult } from "@/lib/crisisDetection";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeLimitDialog } from "@/components/subscription/UpgradeLimitDialog";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface AddInteractionFormProps {
   candidateId: string;
@@ -100,9 +108,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   const PRIVACY_ACKNOWLEDGED_KEY = "devi_interaction_privacy_acknowledged";
 
   const [interactionType, setInteractionType] = useState<Enums<"interaction_type">>(defaultType);
-  const [interactionDate, setInteractionDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [interactionDate, setInteractionDate] = useState<Date>(new Date());
   const [duration, setDuration] = useState("");
   const [whoInitiated, setWhoInitiated] = useState("");
   const [overallFeeling, setOverallFeeling] = useState(3);
@@ -111,7 +117,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
 
   const resetForm = () => {
     setInteractionType("coffee");
-    setInteractionDate(new Date().toISOString().split("T")[0]);
+    setInteractionDate(new Date());
     setDuration("");
     setWhoInitiated("");
     setOverallFeeling(3);
@@ -145,7 +151,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
         user_id: user.id,
         candidate_id: candidateId,
         interaction_type: interactionType,
-        interaction_date: interactionDate,
+        interaction_date: format(interactionDate, "yyyy-MM-dd"),
         duration: duration || null,
         who_initiated: whoInitiated || null,
         overall_feeling: overallFeeling,
@@ -428,12 +434,30 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Date</Label>
-                <Input
-                  type="date"
-                  value={interactionDate}
-                  onChange={(e) => setInteractionDate(e.target.value)}
-                  max={new Date().toISOString().split("T")[0]}
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !interactionDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {interactionDate ? format(interactionDate, "MMM d, yyyy") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={interactionDate}
+                      onSelect={(date) => date && setInteractionDate(date)}
+                      disabled={(date) => date > new Date()}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="space-y-2">
                 <Label>Duration</Label>
