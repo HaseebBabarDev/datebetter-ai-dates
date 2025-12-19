@@ -184,6 +184,7 @@ const CandidateDetail = () => {
   };
 
   const fetchData = async () => {
+    console.log("Fetching candidate data for id:", id, "user:", user?.id);
     try {
       const [candidateRes, interactionsRes, profileRes] = await Promise.all([
         supabase
@@ -204,6 +205,9 @@ const CandidateDetail = () => {
           .eq("user_id", user!.id)
           .single(),
       ]);
+
+      console.log("Candidate response:", candidateRes);
+      console.log("Interactions response:", interactionsRes);
 
       if (candidateRes.data) setCandidate(candidateRes.data);
       if (interactionsRes.data) setInteractions(interactionsRes.data);
