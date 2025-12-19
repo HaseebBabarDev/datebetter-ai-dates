@@ -564,7 +564,10 @@ const CandidateDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
+    <div
+      className="h-[100dvh] bg-background overflow-auto pb-24"
+      style={{ overscrollBehavior: "contain" }}
+    >
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur border-b border-border z-10">
         <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-2">
