@@ -32,6 +32,7 @@ import Offline from "./pages/Offline";
 import ErrorPage from "./pages/Error";
 import ClearData from "./pages/ClearData";
 import AppVersion from "./pages/AppVersion";
+import Community from "./pages/Community";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -88,6 +89,7 @@ function AppContent() {
             <Route path="/error" element={<ErrorPage />} />
             <Route path="/clear-data" element={<ClearData />} />
             <Route path="/app-version" element={<AppVersion />} />
+            <Route path="/community" element={<Community />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <BottomNavigation />
