@@ -627,7 +627,6 @@ const CandidateDetail = () => {
               <AlertDialogFooter className="flex-col sm:flex-row gap-2">
                 <AlertDialogAction 
                   className="w-full sm:w-auto"
-                  onClick={() => handleNewCandidateDialogClose(false)}
                 >
                   Got It
                 </AlertDialogAction>
@@ -635,7 +634,7 @@ const CandidateDetail = () => {
                   variant="outline"
                   className="w-full sm:w-auto gap-2"
                   onClick={() => {
-                    handleNewCandidateDialogClose(false);
+                    setShowNewCandidateDialog(false);
                     navigate(`/add-candidate?edit=${candidate.id}`);
                   }}
                 >
