@@ -787,32 +787,32 @@ const Dashboard = () => {
 
           <TabsContent value="home" className="space-y-3 mt-0 animate-fade-in">
             {/* Quick Actions Grid */}
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 data-tour="add-candidate"
                 onClick={() => navigate("/add-candidate")}
-                className="h-12 flex-col gap-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-sm transition-all duration-200 active:scale-[0.98] px-1"
+                className="h-11 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-sm transition-all duration-200 active:scale-[0.98]"
               >
                 <Plus className="w-4 h-4" />
-                <span className="text-[10px] font-medium">Add</span>
+                <span className="text-xs font-medium">Add Candidate</span>
               </Button>
-              <div data-tour="log-interaction" className="h-12">
+              <div data-tour="log-interaction" className="h-11">
                 <LogInteractionDialog candidates={candidates} compact />
               </div>
               <Button
                 onClick={() => navigate("/devi")}
-                className="h-12 flex-col gap-1 bg-gradient-to-br from-secondary to-primary text-primary-foreground rounded-xl shadow-sm transition-all duration-200 active:scale-[0.98] px-1"
+                className="h-11 gap-2 bg-gradient-to-br from-secondary to-primary text-primary-foreground rounded-xl shadow-sm transition-all duration-200 active:scale-[0.98]"
               >
                 <Sparkles className="w-4 h-4" />
-                <span className="text-[10px] font-medium">D.E.V.I.</span>
+                <span className="text-xs font-medium">Ask D.E.V.I.</span>
               </Button>
               <Button
                 variant="outline"
                 onClick={() => navigate("/patterns")}
-                className="h-12 flex-col gap-1 rounded-xl border-border bg-card text-foreground hover:bg-muted/50 transition-all duration-200 active:scale-[0.98] px-1"
+                className="h-11 gap-2 rounded-xl border-border bg-card text-foreground hover:bg-muted/50 transition-all duration-200 active:scale-[0.98]"
               >
                 <TrendingUp className="w-4 h-4 text-primary" />
-                <span className="text-[10px] font-medium">Patterns</span>
+                <span className="text-xs font-medium">View Patterns</span>
               </Button>
             </div>
 
