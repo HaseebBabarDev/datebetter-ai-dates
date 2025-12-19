@@ -16,16 +16,18 @@ import {
   Ban,
   ChevronRight,
   Sparkles,
-  Home
+  Home,
+  Gift
 } from "lucide-react";
 import { differenceInDays } from "date-fns";
 
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
+type Referral = Tables<"referrals">;
 
 interface Notification {
   id: string;
-  type: "warning" | "info" | "success" | "urgent" | "advice" | "oxytocin" | "no-contact" | "low-score";
+  type: "warning" | "info" | "success" | "urgent" | "advice" | "oxytocin" | "no-contact" | "low-score" | "referral";
   icon: React.ReactNode;
   title: string;
   message: string;
@@ -38,6 +40,7 @@ const Notifications = () => {
   const navigate = useNavigate();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
+  const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,14 +51,16 @@ const Notifications = () => {
 
   const fetchData = async () => {
     try {
-      const [candidatesRes, interactionsRes, adviceRes] = await Promise.all([
+      const [candidatesRes, interactionsRes, adviceRes, referralsRes] = await Promise.all([
         supabase.from("candidates").select("*").eq("user_id", user!.id),
         supabase.from("interactions").select("*").eq("user_id", user!.id).order("interaction_date", { ascending: false }).limit(50),
         supabase.from("advice_tracking").select("*").eq("user_id", user!.id),
+        supabase.from("referrals").select("*").eq("referrer_id", user!.id).eq("status", "converted").order("converted_at", { ascending: false }),
       ]);
 
       if (candidatesRes.data) setCandidates(candidatesRes.data);
       if (interactionsRes.data) setInteractions(interactionsRes.data);
+      if (referralsRes.data) setReferrals(referralsRes.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -66,6 +71,21 @@ const Notifications = () => {
   const notifications = useMemo(() => {
     const notifs: Notification[] = [];
     const today = new Date();
+
+    // Referral notifications
+    referrals.forEach((ref) => {
+      const daysSince = ref.converted_at ? differenceInDays(today, new Date(ref.converted_at)) : 0;
+      if (daysSince <= 7) {
+        notifs.push({
+          id: `referral-${ref.id}`,
+          type: "referral",
+          icon: <Gift className="w-4 h-4" />,
+          title: "Friend signed up!",
+          message: ref.trial_granted ? "You earned a free trial!" : "Your referral worked!",
+          time: daysSince === 0 ? "Today" : `${daysSince}d ago`,
+        });
+      }
+    });
 
     // Oxytocin alerts (recent intimacy)
     const intimateInteractions = interactions.filter((i) => i.interaction_type === "intimate");
@@ -171,7 +191,7 @@ const Notifications = () => {
     });
 
     return notifs;
-  }, [candidates, interactions]);
+  }, [candidates, interactions, referrals]);
 
   if (authLoading || loading) {
     return (
@@ -201,6 +221,8 @@ const Notifications = () => {
         return "bg-destructive/10 text-destructive border-destructive/20";
       case "low-score":
         return "bg-orange-500/10 text-orange-600 border-orange-500/20";
+      case "referral":
+        return "bg-green-500/10 text-green-600 border-green-500/20";
       default:
         return "bg-primary/10 text-primary border-primary/20";
     }
@@ -215,6 +237,7 @@ const Notifications = () => {
       case "success": return "bg-emerald-500/20";
       case "urgent": return "bg-destructive/20";
       case "low-score": return "bg-orange-500/20";
+      case "referral": return "bg-green-500/20";
       default: return "bg-primary/20";
     }
   };

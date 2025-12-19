@@ -146,6 +146,14 @@ const Auth = () => {
                 status: "converted",
                 converted_at: new Date().toISOString()
               });
+              
+              // Notify the referrer via edge function
+              await supabase.functions.invoke("notify-referrer", {
+                body: { 
+                  referrerId: referrers[0].user_id, 
+                  referredId: newUser.id 
+                }
+              });
             }
           }
         }
