@@ -368,6 +368,190 @@ export type Database = {
           },
         ]
       }
+      direct_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          moderation_status: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          moderation_status?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          moderation_status?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
+      forum_comment_likes: {
+        Row: {
+          comment_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_comment_likes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "forum_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_approved: boolean | null
+          likes_count: number | null
+          moderation_status: string | null
+          parent_comment_id: string | null
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          likes_count?: number | null
+          moderation_status?: string | null
+          parent_comment_id?: string | null
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          likes_count?: number | null
+          moderation_status?: string | null
+          parent_comment_id?: string | null
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "forum_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "forum_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_post_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "forum_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_posts: {
+        Row: {
+          category: Database["public"]["Enums"]["forum_category"]
+          comments_count: number | null
+          content: string
+          created_at: string | null
+          id: string
+          is_approved: boolean | null
+          likes_count: number | null
+          moderation_reason: string | null
+          moderation_status: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["forum_category"]
+          comments_count?: number | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          likes_count?: number | null
+          moderation_reason?: string | null
+          moderation_status?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["forum_category"]
+          comments_count?: number | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          likes_count?: number | null
+          moderation_reason?: string | null
+          moderation_status?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       interactions: {
         Row: {
           ai_analysis: Json | null
@@ -564,6 +748,8 @@ export type Database = {
           safety_priorities: Json | null
           safety_requirements: Json | null
           schedule_flexibility: string | null
+          screen_name: string | null
+          screen_name_set_at: string | null
           sexual_orientation:
             | Database["public"]["Enums"]["sexual_orientation"]
             | null
@@ -678,6 +864,8 @@ export type Database = {
           safety_priorities?: Json | null
           safety_requirements?: Json | null
           schedule_flexibility?: string | null
+          screen_name?: string | null
+          screen_name_set_at?: string | null
           sexual_orientation?:
             | Database["public"]["Enums"]["sexual_orientation"]
             | null
@@ -792,6 +980,8 @@ export type Database = {
           safety_priorities?: Json | null
           safety_requirements?: Json | null
           schedule_flexibility?: string | null
+          screen_name?: string | null
+          screen_name_set_at?: string | null
           sexual_orientation?:
             | Database["public"]["Enums"]["sexual_orientation"]
             | null
@@ -1168,6 +1358,27 @@ export type Database = {
           },
         ]
       }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string | null
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string | null
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -1302,6 +1513,11 @@ export type Database = {
         | "pcos_endo"
         | "perimenopause"
         | "not_applicable"
+      forum_category:
+        | "dating_advice"
+        | "red_flag_warnings"
+        | "success_stories"
+        | "self_care_healing"
       gender_identity:
         | "woman_cis"
         | "woman_trans"
@@ -1524,6 +1740,12 @@ export const Constants = {
         "pcos_endo",
         "perimenopause",
         "not_applicable",
+      ],
+      forum_category: [
+        "dating_advice",
+        "red_flag_warnings",
+        "success_stories",
+        "self_care_healing",
       ],
       gender_identity: [
         "woman_cis",

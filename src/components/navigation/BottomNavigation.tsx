@@ -1,11 +1,11 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, BarChart2, Settings, Heart, Sparkles } from "lucide-react";
+import { Home, BarChart2, Settings, Sparkles, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { path: "/dashboard", label: "Home", icon: Home },
-  { path: "/patterns", label: "Patterns", icon: BarChart2 },
+  { path: "/community", label: "Community", icon: Users },
   { path: "/devi", label: "D.E.V.I.", icon: Sparkles },
   { path: "/settings", label: "Settings", icon: Settings },
 ];
