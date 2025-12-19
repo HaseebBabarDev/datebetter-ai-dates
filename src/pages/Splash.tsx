@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Moon, Lock, Sparkles, Heart, Stars, ArrowRight } from "lucide-react";
+import { Users, MessageCircle, Sparkles, Stars, ArrowRight } from "lucide-react";
 
 const ModernLogo = () => (
   <div className="relative w-24 h-24 sm:w-28 sm:h-28">
@@ -102,13 +102,17 @@ const Splash = () => {
         </div>
 
         {/* Features */}
-        <div className="w-full max-w-xs sm:max-w-sm space-y-2 mb-6">
-          <FeatureItem icon={Stars} text="Our AI scores every candidate for you" />
-          <FeatureItem icon={Moon} text="Cycle-aware dating guidance" />
-          <FeatureItem icon={Lock} text="Your privacy is completely protected" />
-          <FeatureItem icon={Sparkles} text="AI detects red flags & patterns automatically" />
-          <FeatureItem icon={Heart} text="Built for women, by women" />
+        <div className="w-full max-w-xs sm:max-w-sm space-y-2 mb-5">
+          <FeatureItem icon={Stars} text="AI scores every candidate for you" />
+          <FeatureItem icon={Sparkles} text="Detects red flags & patterns automatically" />
+          <FeatureItem icon={Users} text="Private community of women dating smarter" />
+          <FeatureItem icon={MessageCircle} text="Chat with D.E.V.I. anytime for advice" />
         </div>
+        
+        {/* Footnotes */}
+        <p className="text-[10px] sm:text-xs text-white/60 text-center mb-4 max-w-xs">
+          Built for women, by women · Your privacy is completely protected
+        </p>
 
         {/* Buttons */}
         <div className="w-full max-w-xs sm:max-w-sm space-y-2.5">
