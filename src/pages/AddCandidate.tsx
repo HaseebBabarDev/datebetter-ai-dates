@@ -591,20 +591,81 @@ const AddCandidate = () => {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Height</Label>
+                    <Select value={height} onValueChange={setHeight}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select height" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {HEIGHT_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Relationship Status</Label>
+                    <Select value={theirRelationshipStatus} onValueChange={setTheirRelationshipStatus}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {RELATIONSHIP_STATUS_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Profession</Label>
+                    <Select value={theirCareerStage} onValueChange={setTheirCareerStage}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Career stage" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CAREER_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>What are they looking for?</Label>
+                    <Select value={theirRelationshipGoal} onValueChange={setTheirRelationshipGoal}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select goal" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {RELATIONSHIP_GOAL_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <Label>What are they looking for?</Label>
-                  <Select value={theirRelationshipGoal} onValueChange={setTheirRelationshipGoal}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select goal" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {RELATIONSHIP_GOAL_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label>Ambition Level: {theirAmbitionLevel}/5</Label>
+                  <SliderInput
+                    label=""
+                    value={theirAmbitionLevel}
+                    onChange={setTheirAmbitionLevel}
+                    min={1}
+                    max={5}
+                  />
                 </div>
               </CardContent>
             </Card>
