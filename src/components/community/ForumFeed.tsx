@@ -137,6 +137,13 @@ export function ForumFeed({ category, searchQuery, currentScreenName, cityFilter
         );
       }
 
+      // Sort: success_stories first, then by created_at desc
+      enrichedPosts.sort((a, b) => {
+        if (a.category === "success_stories" && b.category !== "success_stories") return -1;
+        if (a.category !== "success_stories" && b.category === "success_stories") return 1;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+
       setPosts(enrichedPosts);
     } catch (error) {
       console.error("Error fetching posts:", error);
