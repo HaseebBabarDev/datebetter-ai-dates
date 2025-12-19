@@ -5,12 +5,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MessageCircle, Users, Plus, Search } from "lucide-react";
+import { ArrowLeft, MessageCircle, Users, Plus, Search, MapPin, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ForumFeed } from "@/components/community/ForumFeed";
 import { DirectMessages } from "@/components/community/DirectMessages";
 import { CreatePostDialog } from "@/components/community/CreatePostDialog";
 import { ScreenNameSetup } from "@/components/community/ScreenNameSetup";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 
 type ForumCategory = "dating_advice" | "red_flag_warnings" | "success_stories" | "self_care_healing";
@@ -22,11 +29,21 @@ const CATEGORY_LABELS: Record<ForumCategory, string> = {
   self_care_healing: "Self-Care",
 };
 
+const MAJOR_CITIES = [
+  "New York", "Los Angeles", "Chicago", "Houston", "Phoenix",
+  "Philadelphia", "San Antonio", "San Diego", "Dallas", "San Jose",
+  "Austin", "Seattle", "Denver", "Boston", "Miami",
+  "Atlanta", "San Francisco", "Nashville", "Portland", "Las Vegas",
+  "London", "Toronto", "Vancouver", "Sydney", "Melbourne",
+  "Other"
+];
+
 const Community = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("forum");
   const [selectedCategory, setSelectedCategory] = useState<ForumCategory | "all">("all");
+  const [selectedCity, setSelectedCity] = useState<string>("");
   const [screenName, setScreenName] = useState<string | null>(null);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showScreenNameSetup, setShowScreenNameSetup] = useState(false);
@@ -197,11 +214,44 @@ const Community = () => {
               ))}
             </div>
 
+            {/* City Filter */}
+            <div className="flex items-center gap-2">
+              <div className="flex-1">
+                <Select value={selectedCity} onValueChange={setSelectedCity}>
+                  <SelectTrigger className="h-9">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <SelectValue placeholder="Filter by city" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All cities</SelectItem>
+                    {MAJOR_CITIES.map((city) => (
+                      <SelectItem key={city} value={city}>
+                        {city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {selectedCity && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 shrink-0"
+                  onClick={() => setSelectedCity("")}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+
             {/* Forum Feed */}
             <ForumFeed 
               category={selectedCategory === "all" ? undefined : selectedCategory}
               searchQuery={searchQuery}
               currentScreenName={screenName!}
+              cityFilter={selectedCity || undefined}
             />
           </div>
         )}

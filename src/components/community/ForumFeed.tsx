@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, MessageCircle, MoreHorizontal, Flag, Send } from "lucide-react";
+import { Heart, MessageCircle, MoreHorizontal, Flag, Send, MapPin } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import {
@@ -29,12 +29,15 @@ interface ForumPost {
   created_at: string;
   screen_name?: string;
   has_liked?: boolean;
+  image_url?: string | null;
+  city_tag?: string | null;
 }
 
 interface ForumFeedProps {
   category?: ForumCategory;
   searchQuery?: string;
   currentScreenName: string;
+  cityFilter?: string;
 }
 
 const CATEGORY_COLORS: Record<ForumCategory, string> = {
@@ -51,7 +54,7 @@ const CATEGORY_LABELS: Record<ForumCategory, string> = {
   self_care_healing: "Self-Care",
 };
 
-export function ForumFeed({ category, searchQuery, currentScreenName }: ForumFeedProps) {
+export function ForumFeed({ category, searchQuery, currentScreenName, cityFilter }: ForumFeedProps) {
   const { user } = useAuth();
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +63,7 @@ export function ForumFeed({ category, searchQuery, currentScreenName }: ForumFee
 
   useEffect(() => {
     fetchPosts();
-  }, [category, searchQuery]);
+  }, [category, searchQuery, cityFilter]);
 
   const fetchPosts = async () => {
     if (!user) return;
@@ -76,6 +79,10 @@ export function ForumFeed({ category, searchQuery, currentScreenName }: ForumFee
 
       if (category) {
         query = query.eq("category", category);
+      }
+
+      if (cityFilter) {
+        query = query.eq("city_tag", cityFilter);
       }
 
       const { data: postsData, error: postsError } = await query;
@@ -116,6 +123,8 @@ export function ForumFeed({ category, searchQuery, currentScreenName }: ForumFee
         category: post.category as ForumCategory,
         screen_name: screenNameMap.get(post.user_id) || "anonymous",
         has_liked: likedPostIds.has(post.id),
+        image_url: (post as any).image_url || null,
+        city_tag: (post as any).city_tag || null,
       }));
 
       // Filter by search query
@@ -265,12 +274,27 @@ export function ForumFeed({ category, searchQuery, currentScreenName }: ForumFee
               </div>
               
               <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">@{post.screen_name}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground">@{post.screen_name}</p>
+                  {post.city_tag && (
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 gap-0.5">
+                      <MapPin className="h-2.5 w-2.5" />
+                      {post.city_tag}
+                    </Badge>
+                  )}
+                </div>
                 <h3 className="font-medium text-sm leading-tight">{post.title}</h3>
               </div>
             </CardHeader>
 
             <CardContent className="pt-0 space-y-3">
+              {post.image_url && (
+                <img
+                  src={post.image_url}
+                  alt="Post image"
+                  className="w-full h-48 object-cover rounded-lg"
+                />
+              )}
               <p className="text-sm text-muted-foreground line-clamp-3">
                 {post.content}
               </p>
