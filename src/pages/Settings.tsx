@@ -499,7 +499,7 @@ const Settings = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 px-4 pb-4">
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   <div className="space-y-1">
                     <Label htmlFor="name" className="text-xs font-medium">Name</Label>
                     <Input
@@ -540,8 +540,6 @@ const Settings = () => {
                       </PopoverContent>
                     </Popover>
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
                     <Label className="text-xs font-medium">Country</Label>
                     <Select value={country} onValueChange={setCountry}>
@@ -553,6 +551,8 @@ const Settings = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   <div className="space-y-1">
                     <Label htmlFor="state" className="text-xs font-medium">State</Label>
                     <Input
@@ -563,8 +563,6 @@ const Settings = () => {
                       className="h-9 text-sm"
                     />
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
                     <Label htmlFor="city" className="text-xs font-medium">City</Label>
                     <Input
@@ -587,7 +585,7 @@ const Settings = () => {
                     </Select>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   <div className="space-y-1">
                     <Label className="text-xs font-medium">Pronouns</Label>
                     <Select value={pronouns} onValueChange={setPronouns}>
