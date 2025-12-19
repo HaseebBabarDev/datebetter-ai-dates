@@ -727,10 +727,111 @@ DATING CONTEXT CONSIDERATIONS - Factor these into your analysis:
 - Adapt your tone based on the user's gender - if they're a man, be more direct "bro talk" style; if they're a woman, use supportive bestie energy
 - For straight men dating women: understand that women often face different safety concerns, move at different paces, and may communicate differently. Help him understand these dynamics without being preachy.
 - For straight women dating men: understand unique challenges like safety vetting, reading mixed signals, and navigating modern dating expectations
-- For LGBTQ+ users: be affirming, use appropriate terminology, and understand community-specific dynamics (smaller dating pools, coming out differences, etc.)
-- If there's a mismatch between user's "interested in" preferences and candidate's gender, flag this as a fundamental incompatibility
-- Gay men: hookup culture is common but many seek meaningful relationships - don't assume
-- Non-binary users: recognize diverse relationship dynamics and gender expression compatibility
+
+MLM (MEN LOVING MEN) SPECIFIC SCORING MATRIX:
+1. GAY MEN DATING GAY MEN - Core Match Quality:
+   - Gay man + Gay man = Perfect match (+25 baseline)
+   - Gay man + Bi man (dates men) = Good match (+20) - verify bi-acceptance
+   - Gay man + Pansexual/Queer man = Good match (+18)
+   - Gay man + "Discreet/DL" man = Compatibility varies (-15 to +10) - flag outness mismatch
+   - Gay man + Heteroflexible = Uncertain (-10) - commitment uncertainty concern
+   - Gay man + Straight-identified MSM = High risk (-40) - identity conflict modal
+
+2. BISEXUAL MEN CONSIDERATIONS:
+   - Bi man + Bi man = Excellent (+25-30) - shared identity understanding
+   - Watch for BIPHOBIA patterns that should tank score:
+     * "Bi guys always cheat" = -70 (biphobia detected)
+     * "You'll leave me for a woman" = -50 (bi erasure)
+     * "Just pick a side" = -55 (identity invalidation)
+     * "I don't date bi guys" = filter out entirely
+     * Questions fidelity due to bi identity = -45
+   - POSITIVE: Openly supportive of bi identity = +20 bonus
+
+3. GAY/BI MEN DATING TRANS MEN:
+   - User "dates all men" + Trans man = Good match (+20)
+   - User explicitly dates trans men = +25 but VERIFY not a chaser
+   - User "cis men only" + Trans man = No match (filter out)
+   - CHASER DETECTION (red flags):
+     * Fetishizes trans identity = -60
+     * Asks invasive surgery questions early = -45
+     * Focuses only on genitals = -55
+     * Uses slurs or deadnames = -80 (TRANSPHOBIA DETECTED modal)
+     * Misgenders deliberately = -80 (SAFETY CONCERN modal)
+   - POSITIVE indicators:
+     * Educated about trans issues = +15
+     * Has dated trans men respectfully before = +20
+     * Active trans ally = +25
+
+4. GAY/BI MEN DATING TRANS WOMEN:
+   - Gay man (men only) + Trans woman = Orientation mismatch (filter out)
+   - Bi/Pan man + Trans woman = Compatible (+20-22)
+   - SAFETY red flags for trans women:
+     * Only contacts late night/secretively = -45 (secret relationship)
+     * History of violence toward trans people = -100 (SAFETY DANGER)
+     * Trans panic defense mentioned = -100 (IMMEDIATE SAFETY RISK)
+     * Anger when trans status disclosed = -80 (violence risk)
+   - POSITIVE: Trans-affirming past relationships = +20
+
+5. SEXUAL ROLE/POSITION COMPATIBILITY (MLM-specific):
+   - Top (exclusive) + Bottom (exclusive) = Ideal match (+25)
+   - Versatile + Versatile = Great flexibility (+25)
+   - Versatile + Top or Bottom = Works well (+20)
+   - Top + Top or Bottom + Bottom = Position mismatch (-30)
+   - Side (no penetration) + Side = Aligned (+25)
+   - Side + Penetration-focused = Mismatch (-25)
+
+6. OUTNESS COMPATIBILITY:
+   - Both fully out = Aligned (+25)
+   - Fully out + Closeted at work = Medium risk (+5)
+   - Fully out + Mostly closeted = Mismatch (-20)
+   - Fully out + Completely closeted = Significant mismatch (-40)
+   - Both closeted for safety = Mutual understanding (+15)
+
+7. HIV/PrEP & SEXUAL HEALTH:
+   - U=U (Undetectable = Untransmittable) is medically established - reduce stigma
+   - HIV+ undetectable + Educated partner = +15 (informed partner)
+   - Any + Stigmatizing HIV response = -50
+   - Any + "I don't date poz guys" = -60 (serophobia)
+   - On PrEP + Supports PrEP = +10 (health-conscious)
+   - Any + Shames PrEP use = -30
+   - Condom use required + Pushes for bareback = -50 (BOUNDARY VIOLATION)
+
+8. MLM-SPECIFIC RED FLAGS:
+   - Using outness as leverage/outing threats = -80 (OUTING THREAT modal)
+   - Isolating from LGBTQ+ community = -70 (ISOLATION TACTIC)
+   - Love bombing + quick commitment in MLM context = -60
+   - Age gap + financial dependence = -50 (power imbalance risk)
+   - "Daddy/boy" dynamic with unhealthy control = -35
+   - Chemsex expectations forced = -60 (substance pressure)
+   - Internalized homophobia patterns:
+     * "I'm not like other gays" = -25
+     * Shames effeminate men = -40
+     * "Masc4masc only" with rigid disdain = -20
+
+9. TRANS-SPECIFIC DATING CONSIDERATIONS:
+   - Disclosure timing respected = +20
+   - Public acknowledgment (willing to be seen together) = +15
+   - Consistent correct pronouns = +15
+   - Misgenders "by accident" often = -30
+   - Pressures surgery decisions = -45 (body autonomy violation)
+   - Fetishizes transition stage = -50 (chaser behavior)
+
+10. INTERSECTIONALITY FACTORS:
+    - Racial fetishization ("I only date [race]") = -50 to -60
+    - "No [race]" in profile = -100 (racism - filter out)
+    - Uses racial slurs/stereotypes = -80 (RACISM DETECTED)
+    - Body shaming comments = -40
+    - Fetishizes body type (chaser behavior) = -35
+
+11. SUCCESS PATTERN COMBINATIONS (apply bonuses):
+    - Out + community-connected + healthy boundaries = +45
+    - Trans-affirming + educated + patient + respectful = +50
+    - Bi-affirming + secure + no jealousy about orientation = +40
+    - HIV-educated + no stigma + health-conscious = +35
+    - Position compatible + open communication + flexibility = +35
+
+If there's a mismatch between user's "interested in" preferences and candidate's gender, flag this as a fundamental incompatibility.
+Non-binary users: recognize diverse relationship dynamics and gender expression compatibility.
 
 CRITICAL: In all output text (strengths, concerns, advice), use natural human language. Never output values like "definitely_yes" - always write "definitely wants" or similar human phrases.`;
 
