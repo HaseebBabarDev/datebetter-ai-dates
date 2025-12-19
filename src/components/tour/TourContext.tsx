@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 
 export interface TourStep {
   target: string; // CSS selector
@@ -17,6 +17,8 @@ interface TourContextType {
   prevStep: () => void;
   skipTour: () => void;
   hasCompletedTour: (tourId: string) => boolean;
+  resetTour: (tourId: string) => void;
+  resetAllTours: () => void;
 }
 
 const TourContext = createContext<TourContextType | undefined>(undefined);
@@ -52,6 +54,8 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const startTour = useCallback((tourId: string, tourSteps: TourStep[]) => {
     if (hasCompletedTour(tourId)) return;
+    if (tourSteps.length === 0) return;
+    
     setCurrentTourId(tourId);
     setSteps(tourSteps);
     setCurrentStep(0);
@@ -92,6 +96,16 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [currentStep]);
 
+  const resetTour = useCallback((tourId: string) => {
+    const completed = getCompletedTours();
+    const filtered = completed.filter(id => id !== tourId);
+    localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(filtered));
+  }, []);
+
+  const resetAllTours = useCallback(() => {
+    localStorage.removeItem(TOUR_STORAGE_KEY);
+  }, []);
+
   return (
     <TourContext.Provider
       value={{
@@ -104,6 +118,8 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
         prevStep,
         skipTour,
         hasCompletedTour,
+        resetTour,
+        resetAllTours,
       }}
     >
       {children}

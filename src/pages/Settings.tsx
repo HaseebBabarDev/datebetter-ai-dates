@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { PaymentSheet } from "@/components/subscription/PaymentSheet";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { format, parse } from "date-fns";
+import { useTour, SETTINGS_TOUR_STEPS } from "@/components/tour";
 
 type Profile = Tables<"profiles">;
 type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more";
@@ -95,6 +96,7 @@ const Settings = () => {
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get("tab") || "account";
   const section = searchParams.get("section");
+  const { startTour, hasCompletedTour } = useTour();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -127,6 +129,16 @@ const Settings = () => {
       checkAdminStatus();
     }
   }, [user]);
+
+  // Start tour for new users
+  useEffect(() => {
+    if (!loading && profile && !hasCompletedTour("settings")) {
+      const timer = setTimeout(() => {
+        startTour("settings", SETTINGS_TOUR_STEPS);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, profile, startTour, hasCompletedTour]);
 
   const checkAdminStatus = async () => {
     try {
@@ -468,15 +480,15 @@ const Settings = () => {
       <main className="px-4 py-4 max-w-lg mx-auto space-y-4">
         <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="flex w-full mb-4 h-auto p-1 bg-muted/50 backdrop-blur-sm overflow-x-auto scrollbar-hide gap-1">
-            <TabsTrigger value="account" className="flex items-center gap-1.5 py-2.5 px-3 min-w-fit rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0">
+            <TabsTrigger value="account" className="flex items-center gap-1.5 py-2.5 px-3 min-w-fit rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0" data-tour="settings-account">
               <User className="w-4 h-4 shrink-0" />
               <span className="text-[11px] sm:text-sm">Account</span>
             </TabsTrigger>
-            <TabsTrigger value="preferences" className="flex items-center gap-1.5 py-2.5 px-3 min-w-fit rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0">
+            <TabsTrigger value="preferences" className="flex items-center gap-1.5 py-2.5 px-3 min-w-fit rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0" data-tour="settings-preferences">
               <Settings2 className="w-4 h-4 shrink-0" />
               <span className="text-[11px] sm:text-sm">Prefs</span>
             </TabsTrigger>
-            <TabsTrigger value="billing" className="flex items-center gap-1.5 py-2.5 px-3 min-w-fit rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0">
+            <TabsTrigger value="billing" className="flex items-center gap-1.5 py-2.5 px-3 min-w-fit rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0" data-tour="settings-billing">
               <CreditCard className="w-4 h-4 shrink-0" />
               <span className="text-[11px] sm:text-sm">Billing</span>
             </TabsTrigger>

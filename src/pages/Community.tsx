@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useTour, COMMUNITY_TOUR_STEPS } from "@/components/tour";
 
 type ForumCategory = "dating_advice" | "red_flag_warnings" | "success_stories" | "self_care_healing";
 
@@ -41,6 +42,7 @@ const MAJOR_CITIES = [
 const Community = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { startTour, hasCompletedTour } = useTour();
   const [activeTab, setActiveTab] = useState("forum");
   const [selectedCategory, setSelectedCategory] = useState<ForumCategory | "all">("all");
   const [selectedCity, setSelectedCity] = useState<string>("");
@@ -50,6 +52,16 @@ const Community = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Start tour for new users
+  useEffect(() => {
+    if (!loading && screenName && !hasCompletedTour("community")) {
+      const timer = setTimeout(() => {
+        startTour("community", COMMUNITY_TOUR_STEPS);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, screenName, startTour, hasCompletedTour]);
 
   useEffect(() => {
     if (!user) {
@@ -147,7 +159,7 @@ const Community = () => {
               <p className="text-xs text-muted-foreground">@{screenName}</p>
             </div>
           </div>
-          <Button onClick={handleCreatePost} size="sm" className="gap-1.5">
+          <Button onClick={handleCreatePost} size="sm" className="gap-1.5" data-tour="community-post">
             <Plus className="h-4 w-4" />
             Post
           </Button>
@@ -156,11 +168,11 @@ const Community = () => {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="px-4">
           <TabsList className="w-full bg-muted/50">
-            <TabsTrigger value="forum" className="flex-1 gap-1.5">
+            <TabsTrigger value="forum" className="flex-1 gap-1.5" data-tour="community-forum">
               <Users className="h-4 w-4" />
               Forum
             </TabsTrigger>
-            <TabsTrigger value="messages" className="flex-1 gap-1.5 relative">
+            <TabsTrigger value="messages" className="flex-1 gap-1.5 relative" data-tour="community-messages">
               <MessageCircle className="h-4 w-4" />
               Messages
               {unreadCount > 0 && (
