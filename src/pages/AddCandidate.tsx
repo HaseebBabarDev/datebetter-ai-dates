@@ -657,25 +657,31 @@ const AddCandidate = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
-                  <SliderInput
-                    label={`Ambition: ${theirAmbitionLevel}/5`}
-                    value={theirAmbitionLevel}
-                    onChange={setTheirAmbitionLevel}
-                    min={1}
-                    max={5}
-                    showValue={false}
-                    className="space-y-2"
-                  />
-                  <SliderInput
-                    label={`Attraction: ${physicalAttraction}/5`}
-                    value={physicalAttraction}
-                    onChange={setPhysicalAttraction}
-                    min={1}
-                    max={5}
-                    showValue={false}
-                    className="space-y-2"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Ambition: {theirAmbitionLevel}/5</Label>
+                    <SliderInput
+                      label=""
+                      value={theirAmbitionLevel}
+                      onChange={setTheirAmbitionLevel}
+                      min={1}
+                      max={5}
+                      showValue={false}
+                      className="space-y-0"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Attraction: {physicalAttraction}/5</Label>
+                    <SliderInput
+                      label=""
+                      value={physicalAttraction}
+                      onChange={setPhysicalAttraction}
+                      min={1}
+                      max={5}
+                      showValue={false}
+                      className="space-y-0"
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
