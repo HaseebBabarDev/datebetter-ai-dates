@@ -20,6 +20,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Slider } from "@/components/ui/slider";
 import { SliderInput } from "@/components/onboarding/SliderInput";
 import { 
   User, Heart, Users, Baby, Church, Vote, Briefcase, 
@@ -625,24 +626,29 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Preferred Age Min</Label>
-                <Input
-                  type="number"
-                  value={formData.preferred_age_min || ""}
-                  onChange={(e) => updateField("preferred_age_min", parseInt(e.target.value) || null)}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Preferred Age Range</Label>
+                <span className="text-sm text-muted-foreground">
+                  {formData.preferred_age_min || 18} - {formData.preferred_age_max || 65}
+                </span>
+              </div>
+              <div className="px-1">
+                <Slider
+                  value={[formData.preferred_age_min || 18, formData.preferred_age_max || 65]}
                   min={18}
+                  max={99}
+                  step={1}
+                  onValueChange={(values) => {
+                    updateField("preferred_age_min", Math.max(18, values[0]));
+                    updateField("preferred_age_max", Math.max(18, values[1]));
+                  }}
+                  className="w-full"
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Preferred Age Max</Label>
-                <Input
-                  type="number"
-                  value={formData.preferred_age_max || ""}
-                  onChange={(e) => updateField("preferred_age_max", parseInt(e.target.value) || null)}
-                  min={18}
-                />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>18</span>
+                <span>99</span>
               </div>
             </div>
             <SliderInput
