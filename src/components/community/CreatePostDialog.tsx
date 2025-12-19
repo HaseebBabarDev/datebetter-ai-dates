@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -7,6 +7,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, AlertCircle, MapPin } from "lucide-react";
+import { Loader2, AlertCircle, MapPin, Shield, Heart } from "lucide-react";
 import { toast } from "sonner";
 
 type ForumCategory = "dating_advice" | "red_flag_warnings" | "success_stories" | "self_care_healing";
@@ -53,7 +62,35 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
   const [cityTag, setCityTag] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [moderationError, setModerationError] = useState<string | null>(null);
+  const [showFirstPostDisclosure, setShowFirstPostDisclosure] = useState(false);
+  const [hasPostedBefore, setHasPostedBefore] = useState<boolean | null>(null);
 
+  useEffect(() => {
+    if (open && user && hasPostedBefore === null) {
+      checkIfFirstPost();
+    }
+  }, [open, user]);
+
+  const checkIfFirstPost = async () => {
+    if (!user) return;
+    
+    try {
+      const { count, error } = await supabase
+        .from("forum_posts")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id);
+
+      if (!error) {
+        const isFirstPost = count === 0;
+        setHasPostedBefore(!isFirstPost);
+        if (isFirstPost) {
+          setShowFirstPostDisclosure(true);
+        }
+      }
+    } catch (error) {
+      console.error("Error checking post history:", error);
+    }
+  };
   const handleSubmit = async () => {
     if (!user || !category || !title.trim() || !content.trim()) return;
 
@@ -115,22 +152,65 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Create a Post</DialogTitle>
-        </DialogHeader>
+    <>
+      {/* First Post Disclosure Dialog */}
+      <AlertDialog open={showFirstPostDisclosure} onOpenChange={setShowFirstPostDisclosure}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center justify-center mb-4">
+              <div className="p-3 rounded-full bg-primary/10">
+                <Heart className="h-8 w-8 text-primary" />
+              </div>
+            </div>
+            <AlertDialogTitle className="text-center">Welcome to Our Community</AlertDialogTitle>
+            <AlertDialogDescription className="text-center space-y-4">
+              <p className="text-base">
+                This is a <strong>positive, supportive space</strong> for sharing experiences and lifting each other up.
+              </p>
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 text-left">
+                <p className="text-sm text-destructive font-medium mb-2">
+                  Zero Tolerance Policy
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Posting to obtain personal information about others, harass, stalk, or target individuals will result in immediate permanent removal from the community.
+                </p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                By continuing, you agree to keep this space safe and respectful.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-col gap-2">
+            <AlertDialogAction className="w-full">I Understand & Agree</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-        <div className="space-y-4 py-4">
-          {/* Posting as */}
-          <div className="text-sm text-muted-foreground">
-            Posting as <span className="text-foreground font-medium">@{screenName}</span>
-          </div>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create a Post</DialogTitle>
+          </DialogHeader>
 
-          {/* Category */}
-          <div className="space-y-2">
-            <Label>Category</Label>
-            <Select value={category} onValueChange={(v) => setCategory(v as ForumCategory)}>
+          <div className="space-y-4 py-4">
+            {/* Community Guidelines Disclosure */}
+            <div className="flex items-start gap-3 p-3 bg-primary/5 border border-primary/10 rounded-lg">
+              <Shield className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <div className="text-xs text-muted-foreground">
+                <p className="font-medium text-foreground mb-1">Safe Space Guidelines</p>
+                <p>This is a supportive community. Posts seeking personal information about others or intended to harass will result in permanent removal.</p>
+              </div>
+            </div>
+
+            {/* Posting as */}
+            <div className="text-sm text-muted-foreground">
+              Posting as <span className="text-foreground font-medium">@{screenName}</span>
+            </div>
+
+            {/* Category */}
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select value={category} onValueChange={(v) => setCategory(v as ForumCategory)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
@@ -223,11 +303,12 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
             )}
           </Button>
 
-          <p className="text-xs text-center text-muted-foreground">
-            Posts are AI-moderated. Be respectful and supportive.
-          </p>
-        </div>
-      </DialogContent>
-    </Dialog>
+            <p className="text-xs text-center text-muted-foreground">
+              Posts are AI-moderated. Be respectful and supportive.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
