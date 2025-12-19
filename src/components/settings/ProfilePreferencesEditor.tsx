@@ -24,9 +24,11 @@ import { Slider } from "@/components/ui/slider";
 import { SliderInput } from "@/components/onboarding/SliderInput";
 import { 
   User, Heart, Users, Baby, Church, Vote, Briefcase, 
-  MapPin, Sparkles, MessageCircle, Brain, Shield, Lock, Save
+  MapPin, Sparkles, MessageCircle, Brain, Shield, Lock, Save,
+  Target, Stethoscope, Ruler, TrendingDown, DollarSign
 } from "lucide-react";
 import { toast } from "sonner";
+import { MultiSelectOption } from "@/components/onboarding/MultiSelectOption";
 
 type Profile = Tables<"profiles">;
 
@@ -223,6 +225,67 @@ const COUNTRY_OPTIONS = [
   { value: "other", label: "Other" },
 ];
 
+const DATING_MOTIVATION_OPTIONS = [
+  { value: "find_partner", label: "Find a life partner" },
+  { value: "explore", label: "Explore and have fun" },
+  { value: "companionship", label: "Companionship" },
+  { value: "casual", label: "Casual dating" },
+  { value: "not_sure", label: "Not sure yet" },
+];
+
+const INTERESTED_IN_OPTIONS = [
+  { value: "men", label: "Men" },
+  { value: "women", label: "Women" },
+  { value: "non_binary", label: "Non-binary people" },
+  { value: "everyone", label: "Everyone" },
+];
+
+const INCOME_RANGE_OPTIONS = [
+  { value: "no_preference", label: "Prefer not to say" },
+  { value: "under_25k", label: "Under $25k" },
+  { value: "25k_50k", label: "$25k - $50k" },
+  { value: "50k_75k", label: "$50k - $75k" },
+  { value: "75k_100k", label: "$75k - $100k" },
+  { value: "100k_150k", label: "$100k - $150k" },
+  { value: "150k_250k", label: "$150k - $250k" },
+  { value: "250k_plus", label: "$250k+" },
+];
+
+const HEIGHT_PREFERENCE_OPTIONS = [
+  { value: "no_preference", label: "No preference" },
+  { value: "taller_than_me", label: "Taller than me" },
+  { value: "shorter_than_me", label: "Shorter than me" },
+  { value: "similar_height", label: "Similar height to me" },
+];
+
+const CHEMISTRY_OPTIONS = ["Humor", "Intelligence", "Confidence", "Kindness", "Ambition", "Creativity"];
+
+const MENTAL_HEALTH_OPENNESS_OPTIONS = [
+  { value: "very_open", label: "Very open to discussing" },
+  { value: "somewhat_open", label: "Somewhat open" },
+  { value: "private", label: "Prefer to keep private" },
+  { value: "in_therapy", label: "Currently in therapy" },
+];
+
+// Height stats: ~14.5% of US men are 6ft+
+const getHeightPoolImpact = () => ({ percent: 14.5, shrink: 85.5 });
+
+// Income pool data
+const getIncomePoolPercent = (incomeRange: string | undefined) => {
+  switch (incomeRange) {
+    case "250k_plus": return 1;
+    case "150k_250k": return 6;
+    case "100k_150k": return 15;
+    case "75k_100k": return 30;
+    default: return 100;
+  }
+};
+
+// Combined probability
+const getCombinedPool = (heightPercent: number, incomePercent: number) => {
+  return (heightPercent / 100) * (incomePercent / 100) * 100;
+};
+
 interface ProfilePreferencesEditorProps {
   defaultSection?: string | null;
 }
@@ -284,7 +347,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
     }
   };
 
-  const SECTION_ORDER = ["relationship", "kids", "faith", "politics", "career", "lifestyle", "physical", "communication", "attachment", "boundaries", "cycle"];
+  const SECTION_ORDER = ["motivation", "relationship", "partner_prefs", "kids", "faith", "politics", "career", "income", "lifestyle", "physical", "communication", "mental_health", "attachment", "boundaries", "cycle"];
   
   const [openSections, setOpenSections] = useState<string[]>(defaultSection ? [defaultSection] : ["relationship"]);
 
@@ -318,6 +381,40 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
   return (
     <div className="space-y-4">
       <Accordion type="multiple" value={openSections} onValueChange={setOpenSections} className="space-y-2">
+
+        {/* Dating Motivation */}
+        <AccordionItem value="motivation" data-value="motivation" className="border rounded-lg px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-emerald-500" />
+              <span className="font-medium">Dating Motivation</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pb-4">
+            <div className="space-y-2">
+              <Label>What brings you to dating right now?</Label>
+              <div className="grid grid-cols-1 gap-2">
+                {DATING_MOTIVATION_OPTIONS.map((opt) => (
+                  <MultiSelectOption
+                    key={opt.value}
+                    selected={(formData.dating_motivation as string[] || []).includes(opt.value)}
+                    onClick={() => {
+                      const current = (formData.dating_motivation as string[] || []);
+                      const updated = current.includes(opt.value)
+                        ? current.filter(v => v !== opt.value)
+                        : [...current, opt.value];
+                      updateField("dating_motivation", updated);
+                    }}
+                    label={opt.label}
+                  />
+                ))}
+              </div>
+            </div>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("motivation", e)}>
+              Next
+            </Button>
+          </AccordionContent>
+        </AccordionItem>
 
         {/* Relationship Goals */}
         <AccordionItem value="relationship" data-value="relationship" className="border rounded-lg px-4">
@@ -387,6 +484,108 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               />
             </div>
             <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("relationship", e)}>
+              Next
+            </Button>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Partner Preferences */}
+        <AccordionItem value="partner_prefs" data-value="partner_prefs" className="border rounded-lg px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-rose-500" />
+              <span className="font-medium">Who I'm Looking For</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pb-4">
+            <div className="space-y-2">
+              <Label>Interested in</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {INTERESTED_IN_OPTIONS.map((opt) => (
+                  <MultiSelectOption
+                    key={opt.value}
+                    selected={(formData.interested_in as string[] || []).includes(opt.value)}
+                    onClick={() => {
+                      const current = (formData.interested_in as string[] || []);
+                      const updated = current.includes(opt.value)
+                        ? current.filter(v => v !== opt.value)
+                        : [...current, opt.value];
+                      updateField("interested_in", updated);
+                    }}
+                    label={opt.label}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Height Preference</Label>
+              <Select
+                value={formData.height_preference || ""}
+                onValueChange={(v) => updateField("height_preference", v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {HEIGHT_PREFERENCE_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {/* Height Pool Impact Visual */}
+              {formData.height_preference === "taller_than_me" && (
+                <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg animate-fade-in space-y-3 mt-2">
+                  <div className="flex items-center gap-2">
+                    <Ruler className="w-4 h-4 text-amber-600" />
+                    <span className="text-xs font-semibold text-amber-700">Dating Pool Impact</span>
+                  </div>
+                  <div className="relative h-8 bg-muted/50 rounded-full overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="flex gap-0.5">
+                        {Array.from({ length: 20 }).map((_, i) => (
+                          <div 
+                            key={i} 
+                            className={`w-1.5 h-4 rounded-full transition-all duration-500 ${
+                              i < Math.ceil(20 * (14.5 / 100)) 
+                                ? 'bg-primary' 
+                                : 'bg-muted-foreground/20'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">
+                      <span className="font-bold text-foreground">14.5%</span> of men are 6ft+
+                    </span>
+                    <span className="text-amber-600 font-medium">Top 15%</span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    This filters out 85% of potential matches.
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label>What creates chemistry for you?</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {CHEMISTRY_OPTIONS.map((opt) => (
+                  <MultiSelectOption
+                    key={opt}
+                    selected={((formData.chemistry_factors as string[] | null) || []).includes(opt)}
+                    onClick={() => {
+                      const current = ((formData.chemistry_factors as string[] | null) || []);
+                      const updated = current.includes(opt)
+                        ? current.filter(v => v !== opt)
+                        : [...current, opt];
+                      updateField("chemistry_factors", updated);
+                    }}
+                    label={opt}
+                  />
+                ))}
+              </div>
+            </div>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("partner_prefs", e)}>
               Next
             </Button>
           </AccordionContent>
@@ -575,6 +774,119 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
           </AccordionContent>
         </AccordionItem>
 
+        {/* Income Preferences */}
+        <AccordionItem value="income" data-value="income" className="border rounded-lg px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4 text-emerald-500" />
+              <span className="font-medium">Income Preferences</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pb-4">
+            <div className="space-y-2">
+              <Label>Your Income Range</Label>
+              <Select
+                value={formData.income_range || ""}
+                onValueChange={(v) => updateField("income_range", v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {INCOME_RANGE_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Preferred Partner Income</Label>
+              <Select
+                value={formData.preferred_income_range || ""}
+                onValueChange={(v) => updateField("preferred_income_range", v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {INCOME_RANGE_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {/* Income Pool Impact Visual */}
+              {formData.preferred_income_range && !["no_preference", "under_25k", "25k_50k", "50k_75k"].includes(formData.preferred_income_range) && (() => {
+                const incomePercent = getIncomePoolPercent(formData.preferred_income_range);
+                const heightImpact = formData.height_preference === "taller_than_me" ? getHeightPoolImpact() : null;
+                const combinedPool = heightImpact ? getCombinedPool(heightImpact.percent, incomePercent) : null;
+                
+                return (
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg animate-fade-in space-y-3 mt-2">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-amber-600" />
+                      <span className="text-xs font-semibold text-amber-700">Dating Pool Impact</span>
+                    </div>
+                    <div className="relative h-8 bg-muted/50 rounded-full overflow-hidden">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="flex gap-0.5">
+                          {Array.from({ length: 20 }).map((_, i) => (
+                            <div 
+                              key={i} 
+                              className={`w-1.5 h-4 rounded-full transition-all duration-500 ${
+                                i < Math.ceil(20 * (incomePercent / 100)) 
+                                  ? 'bg-primary' 
+                                  : 'bg-muted-foreground/20'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">
+                        <span className="font-bold text-foreground">{incomePercent}%</span> of men earn this
+                      </span>
+                      <span className="text-amber-600 font-medium">Top {incomePercent}%</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      This filters out {100 - incomePercent}% of potential matches.
+                    </p>
+                    
+                    {/* Combined impact with height */}
+                    {combinedPool !== null && (
+                      <div className="mt-2 pt-2 border-t border-amber-500/20 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <TrendingDown className="w-3.5 h-3.5 text-red-500" />
+                          <span className="text-xs font-semibold text-red-600">Combined with Height Preference</span>
+                        </div>
+                        <div className="relative h-6 bg-muted/50 rounded-full overflow-hidden">
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="flex gap-0.5">
+                              {Array.from({ length: 20 }).map((_, i) => (
+                                <div 
+                                  key={i} 
+                                  className={`w-1 h-3 rounded-full transition-all duration-500 ${
+                                    i < Math.max(1, Math.ceil(20 * (combinedPool / 100))) 
+                                      ? 'bg-red-500' 
+                                      : 'bg-muted-foreground/20'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-[11px] text-red-600 font-medium">
+                          Only {combinedPool.toFixed(1)}% of men are both 6ft+ AND earn {formData.preferred_income_range?.replace(/_/g, "-").replace("plus", "+")}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("income", e)}>
+              Next
+            </Button>
+          </AccordionContent>
+        </AccordionItem>
+
         {/* Lifestyle */}
         <AccordionItem value="lifestyle" data-value="lifestyle" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
@@ -736,6 +1048,49 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               rightLabel="Take your time"
             />
             <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("communication", e)}>
+              Next
+            </Button>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Mental Health */}
+        <AccordionItem value="mental_health" data-value="mental_health" className="border rounded-lg px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2">
+              <Stethoscope className="w-4 h-4 text-teal-500" />
+              <span className="font-medium">Mental Health</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pb-4">
+            <div className="space-y-2">
+              <Label>Openness to discussing mental health</Label>
+              <Select
+                value={formData.mental_health_openness || ""}
+                onValueChange={(v) => updateField("mental_health_openness", v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {MENTAL_HEALTH_OPENNESS_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between">
+              <Label>Currently in therapy?</Label>
+              <Switch
+                checked={formData.in_therapy || false}
+                onCheckedChange={(v) => updateField("in_therapy", v)}
+              />
+            </div>
+            <SliderInput
+              label="How important is partner's mental health awareness?"
+              value={formData.mental_health_importance || 3}
+              onChange={(v) => updateField("mental_health_importance", v)}
+              leftLabel="Not important"
+              rightLabel="Very important"
+            />
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("mental_health", e)}>
               Next
             </Button>
           </AccordionContent>
