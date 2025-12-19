@@ -596,6 +596,7 @@ const Devi = () => {
       const decoder = new TextDecoder();
       let assistantContent = "";
       const assistantId = crypto.randomUUID();
+      let textBuffer = "";
 
       // Add empty assistant message
       setMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
@@ -604,30 +605,38 @@ const Devi = () => {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
+        textBuffer += decoder.decode(value, { stream: true });
 
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const jsonStr = line.slice(6).trim();
-            if (jsonStr === '[DONE]') continue;
+        // Process complete lines
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
 
-            try {
-              const parsed = JSON.parse(jsonStr);
-              const content = parsed.choices?.[0]?.delta?.content;
-              if (content) {
-                assistantContent += content;
-                setMessages(prev => 
-                  prev.map(m => 
-                    m.id === assistantId 
-                      ? { ...m, content: assistantContent }
-                      : m
-                  )
-                );
-              }
-            } catch {
-              // Ignore parse errors for partial chunks
+          if (line.endsWith('\r')) line = line.slice(0, -1);
+          if (line.startsWith(':') || line.trim() === '') continue;
+          if (!line.startsWith('data: ')) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === '[DONE]') continue;
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) {
+              assistantContent += content;
+              setMessages(prev => 
+                prev.map(m => 
+                  m.id === assistantId 
+                    ? { ...m, content: assistantContent }
+                    : m
+                )
+              );
             }
+          } catch {
+            // Partial JSON - put back and wait for more data
+            textBuffer = line + '\n' + textBuffer;
+            break;
           }
         }
       }
