@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables, Enums } from "@/integrations/supabase/types";
@@ -284,6 +284,25 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
     }
   };
 
+  const SECTION_ORDER = ["relationship", "kids", "faith", "politics", "career", "lifestyle", "physical", "communication", "attachment", "boundaries", "cycle"];
+  
+  const [openSections, setOpenSections] = useState<string[]>(defaultSection ? [defaultSection] : ["relationship"]);
+
+  const goToNextSection = useCallback((currentSection: string) => {
+    const currentIndex = SECTION_ORDER.indexOf(currentSection);
+    if (currentIndex < SECTION_ORDER.length - 1) {
+      const nextSection = SECTION_ORDER[currentIndex + 1];
+      setOpenSections(prev => {
+        const withoutCurrent = prev.filter(s => s !== currentSection);
+        return [...withoutCurrent, nextSection];
+      });
+      // Scroll to next section after a small delay
+      setTimeout(() => {
+        document.querySelector(`[data-value="${nextSection}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, []);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -294,10 +313,10 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
 
   return (
     <div className="space-y-4">
-      <Accordion type="multiple" defaultValue={defaultSection ? [defaultSection] : ["relationship"]} className="space-y-2">
+      <Accordion type="multiple" value={openSections} onValueChange={setOpenSections} className="space-y-2">
 
         {/* Relationship Goals */}
-        <AccordionItem value="relationship" className="border rounded-lg px-4">
+        <AccordionItem value="relationship" data-value="relationship" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <Heart className="w-4 h-4 text-pink-500" />
@@ -363,11 +382,14 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 onCheckedChange={(v) => updateField("exclusivity_before_intimacy", v)}
               />
             </div>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("relationship")}>
+              Next
+            </Button>
           </AccordionContent>
         </AccordionItem>
 
         {/* Kids & Family */}
-        <AccordionItem value="kids" className="border rounded-lg px-4">
+        <AccordionItem value="kids" data-value="kids" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <Baby className="w-4 h-4 text-purple-500" />
@@ -412,11 +434,14 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 onCheckedChange={(v) => updateField("marriage_before_kids", v)}
               />
             </div>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("kids")}>
+              Next
+            </Button>
           </AccordionContent>
         </AccordionItem>
 
         {/* Faith & Values */}
-        <AccordionItem value="faith" className="border rounded-lg px-4">
+        <AccordionItem value="faith" data-value="faith" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <Church className="w-4 h-4 text-amber-500" />
@@ -445,11 +470,14 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Not important"
               rightLabel="Very important"
             />
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("faith")}>
+              Next
+            </Button>
           </AccordionContent>
         </AccordionItem>
 
         {/* Politics */}
-        <AccordionItem value="politics" className="border rounded-lg px-4">
+        <AccordionItem value="politics" data-value="politics" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <Vote className="w-4 h-4 text-blue-500" />
@@ -478,11 +506,14 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Not important"
               rightLabel="Very important"
             />
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("politics")}>
+              Next
+            </Button>
           </AccordionContent>
         </AccordionItem>
 
         {/* Career */}
-        <AccordionItem value="career" className="border rounded-lg px-4">
+        <AccordionItem value="career" data-value="career" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <Briefcase className="w-4 h-4 text-green-500" />
@@ -534,11 +565,14 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Not important"
               rightLabel="Very important"
             />
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("career")}>
+              Next
+            </Button>
           </AccordionContent>
         </AccordionItem>
 
         {/* Lifestyle */}
-        <AccordionItem value="lifestyle" className="border rounded-lg px-4">
+        <AccordionItem value="lifestyle" data-value="lifestyle" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-orange-500" />
@@ -614,11 +648,14 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Rigid"
               rightLabel="Very flexible"
             />
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("lifestyle")}>
+              Next
+            </Button>
           </AccordionContent>
         </AccordionItem>
 
         {/* Physical Preferences */}
-        <AccordionItem value="physical" className="border rounded-lg px-4">
+        <AccordionItem value="physical" data-value="physical" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-pink-500" />
@@ -650,9 +687,6 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 <span>18</span>
                 <span>99</span>
               </div>
-              <Button variant="default" size="sm" className="w-full mt-2">
-                Next
-              </Button>
             </div>
             <SliderInput
               label="Physical Attraction Importance"
@@ -661,11 +695,14 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Not important"
               rightLabel="Very important"
             />
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("physical")}>
+              Next
+            </Button>
           </AccordionContent>
         </AccordionItem>
 
         {/* Communication */}
-        <AccordionItem value="communication" className="border rounded-lg px-4">
+        <AccordionItem value="communication" data-value="communication" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <MessageCircle className="w-4 h-4 text-cyan-500" />
@@ -694,11 +731,14 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Quick replies"
               rightLabel="Take your time"
             />
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("communication")}>
+              Next
+            </Button>
           </AccordionContent>
         </AccordionItem>
 
         {/* Attachment & Patterns */}
-        <AccordionItem value="attachment" className="border rounded-lg px-4">
+        <AccordionItem value="attachment" data-value="attachment" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <Brain className="w-4 h-4 text-indigo-500" />
@@ -750,11 +790,14 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 </Select>
               </div>
             </div>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("attachment")}>
+              Next
+            </Button>
           </AccordionContent>
         </AccordionItem>
 
         {/* Boundaries */}
-        <AccordionItem value="boundaries" className="border rounded-lg px-4">
+        <AccordionItem value="boundaries" data-value="boundaries" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4 text-red-500" />
@@ -783,11 +826,14 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Not concerned"
               rightLabel="Very cautious"
             />
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => goToNextSection("boundaries")}>
+              Next
+            </Button>
           </AccordionContent>
         </AccordionItem>
 
         {/* Cycle Tracking */}
-        <AccordionItem value="cycle" className="border rounded-lg px-4">
+        <AccordionItem value="cycle" data-value="cycle" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <Lock className="w-4 h-4 text-pink-500" />
