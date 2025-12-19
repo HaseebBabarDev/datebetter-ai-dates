@@ -641,7 +641,7 @@ const AddCandidate = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>What are they looking for?</Label>
+                    <Label>Looking For</Label>
                     <Select value={theirRelationshipGoal} onValueChange={setTheirRelationshipGoal}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select goal" />
