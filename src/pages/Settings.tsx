@@ -118,6 +118,7 @@ const Settings = () => {
   const [genderIdentity, setGenderIdentity] = useState("");
   const [pronouns, setPronouns] = useState("");
   const [sexualOrientation, setSexualOrientation] = useState("");
+  const [screenName, setScreenName] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -379,6 +380,7 @@ const Settings = () => {
         setGenderIdentity(data.gender_identity || "");
         setPronouns(data.pronouns || "");
         setSexualOrientation(data.sexual_orientation || "");
+        setScreenName(data.screen_name || "");
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -394,6 +396,7 @@ const Settings = () => {
         .from("profiles")
         .update({
           name,
+          screen_name: screenName || null,
           birth_date: birthDate ? format(birthDate, "yyyy-MM-dd") : null,
           city,
           state,
@@ -501,7 +504,7 @@ const Settings = () => {
                   userName={name}
                   onPhotoUpdated={setAvatarUrl}
                 />
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
                     <Label htmlFor="name" className="text-xs font-medium">Name</Label>
                     <Input
@@ -513,7 +516,19 @@ const Settings = () => {
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs font-medium">Birth Month</Label>
+                    <Label htmlFor="screenName" className="text-xs font-medium">Screen Name</Label>
+                    <Input
+                      id="screenName"
+                      value={screenName}
+                      onChange={(e) => setScreenName(e.target.value)}
+                      placeholder="Community name"
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium">Month</Label>
                     <Select 
                       value={birthDate ? String(birthDate.getMonth() + 1) : ""} 
                       onValueChange={(month) => {
@@ -531,7 +546,7 @@ const Settings = () => {
                     </Select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs font-medium">Birth Day</Label>
+                    <Label className="text-xs font-medium">Day</Label>
                     <Select 
                       value={birthDate ? String(birthDate.getDate()) : ""} 
                       onValueChange={(day) => {
@@ -549,7 +564,7 @@ const Settings = () => {
                     </Select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs font-medium">Birth Year</Label>
+                    <Label className="text-xs font-medium">Year</Label>
                     <Select 
                       value={birthDate ? String(birthDate.getFullYear()) : ""} 
                       onValueChange={(year) => {
@@ -566,6 +581,8 @@ const Settings = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
                   <div className="space-y-1">
                     <Label className="text-xs font-medium">Country</Label>
                     <Select value={country} onValueChange={setCountry}>
@@ -577,8 +594,6 @@ const Settings = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   <div className="space-y-1">
                     <Label htmlFor="state" className="text-xs font-medium">State</Label>
                     <Input
@@ -599,6 +614,8 @@ const Settings = () => {
                       className="h-9 text-sm"
                     />
                   </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
                   <div className="space-y-1">
                     <Label className="text-xs font-medium">Gender</Label>
                     <Select value={genderIdentity} onValueChange={setGenderIdentity}>
@@ -610,8 +627,6 @@ const Settings = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   <div className="space-y-1">
                     <Label className="text-xs font-medium">Pronouns</Label>
                     <Select value={pronouns} onValueChange={setPronouns}>
@@ -642,22 +657,27 @@ const Settings = () => {
             </Card>
 
             {/* Save & Sign Out */}
-            <div className="flex gap-2">
-              <Button 
-                onClick={handleSaveAccount} 
-                className="flex-1 h-9" 
-                disabled={saving}
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleSignOut}
-                className="text-destructive hover:text-destructive h-9 px-3"
-              >
-                <LogOut className="w-4 h-4" />
-              </Button>
-            </div>
+            <Card>
+              <CardContent className="py-3 px-4">
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleSaveAccount} 
+                    className="flex-1 h-9 text-sm" 
+                    disabled={saving}
+                  >
+                    {saving ? "Saving..." : "Save Changes"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleSignOut}
+                    className="h-9 px-4 text-sm"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Delete Account */}
             <Card className="border-destructive/20 bg-destructive/5">
@@ -665,12 +685,12 @@ const Settings = () => {
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2 min-w-0">
                     <Trash2 className="w-4 h-4 text-destructive shrink-0" />
-                    <span className="text-xs text-muted-foreground truncate">Delete account & all data</span>
+                    <span className="text-xs text-muted-foreground">Delete account</span>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive h-7 text-xs shrink-0"
+                    className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive h-8 text-xs"
                     onClick={() => {
                       window.location.href = `mailto:support@datebetterapp.com?subject=Account Deletion Request&body=Hi, I would like to delete my account.%0D%0A%0D%0AEmail: ${user?.email}%0D%0A%0D%0APlease confirm once my account has been deleted.`;
                     }}
