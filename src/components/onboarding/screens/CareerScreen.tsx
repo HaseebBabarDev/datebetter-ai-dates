@@ -80,6 +80,11 @@ const CareerScreen = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Only show pool impact for users looking for men (women or non-binary interested in men)
+  const isLookingForMen = data.interestedIn?.includes("men") || data.interestedIn?.includes("all");
+  const isMan = data.genderIdentity === "man_cis" || data.genderIdentity === "man_trans";
+  const showPoolVisualizations = isLookingForMen && !isMan;
+
   // Check dating pool impact based on income preference
   const getPoolData = (incomeRange: string | undefined) => {
     switch (incomeRange) {
@@ -97,13 +102,13 @@ const CareerScreen = () => {
   };
   
   const poolData = getPoolData(data.preferredIncomeRange);
-  const showPoolWarning = poolData && data.preferredIncomeRange && !["no_preference", "under_25k", "25k_50k", "50k_75k"].includes(data.preferredIncomeRange);
+  const showPoolWarning = showPoolVisualizations && poolData && data.preferredIncomeRange && !["no_preference", "under_25k", "25k_50k", "50k_75k"].includes(data.preferredIncomeRange);
   
   // Check if user earns less than 100k but wants partner earning 250k+
   const lowIncomeRanges = ["under_25k", "25k_50k", "50k_75k", "75k_100k"];
   const userEarnsUnder100k = data.incomeRange && lowIncomeRanges.includes(data.incomeRange);
   const wantsTop1Percent = data.preferredIncomeRange === "250k_plus";
-  const showIncomeWarning = userEarnsUnder100k && wantsTop1Percent;
+  const showIncomeWarning = showPoolVisualizations && userEarnsUnder100k && wantsTop1Percent;
 
   return (
     <>
