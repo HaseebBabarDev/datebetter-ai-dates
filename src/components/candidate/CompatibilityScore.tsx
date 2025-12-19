@@ -399,7 +399,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
     ].sort((a, b) => b.score - a.score);
 
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-0">
         {/* Score list - left side */}
         <div className="flex-1 space-y-1.5">
           {scores.map((item, index) => (
