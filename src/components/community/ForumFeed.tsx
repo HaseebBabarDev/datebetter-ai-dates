@@ -87,12 +87,16 @@ export function ForumFeed({ category, searchQuery, currentScreenName }: ForumFee
         return;
       }
 
-      // Get user screen names
+      // Get user screen names - only select screen_name field for privacy
       const userIds = [...new Set(postsData.map((p) => p.user_id))];
-      const { data: profilesData } = await supabase
+      const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
         .select("user_id, screen_name")
         .in("user_id", userIds);
+
+      if (profilesError) {
+        console.error("Error fetching screen names:", profilesError);
+      }
 
       const screenNameMap = new Map(
         profilesData?.map((p) => [p.user_id, p.screen_name]) || []
