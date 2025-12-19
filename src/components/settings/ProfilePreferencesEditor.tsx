@@ -144,6 +144,84 @@ const CYCLE_REGULARITY_OPTIONS = [
   { value: "not_applicable", label: "Not applicable" },
 ];
 
+const EDUCATION_LEVEL_OPTIONS = [
+  { value: "high_school", label: "High School" },
+  { value: "some_college", label: "Some College" },
+  { value: "associates", label: "Associate's Degree" },
+  { value: "bachelors", label: "Bachelor's Degree" },
+  { value: "masters", label: "Master's Degree" },
+  { value: "doctorate", label: "Doctorate" },
+  { value: "trade_school", label: "Trade/Vocational" },
+  { value: "other", label: "Other" },
+];
+
+const CAREER_STAGE_OPTIONS = [
+  { value: "student", label: "Student" },
+  { value: "entry_level", label: "Entry Level" },
+  { value: "mid_career", label: "Mid-Career" },
+  { value: "senior", label: "Senior/Executive" },
+  { value: "entrepreneur", label: "Entrepreneur" },
+  { value: "freelance", label: "Freelance/Self-employed" },
+  { value: "between_jobs", label: "Between Jobs" },
+  { value: "retired", label: "Retired" },
+];
+
+const DISTANCE_PREFERENCE_OPTIONS = [
+  { value: "within_10_miles", label: "Within 10 miles" },
+  { value: "within_25_miles", label: "Within 25 miles" },
+  { value: "within_50_miles", label: "Within 50 miles" },
+  { value: "within_100_miles", label: "Within 100 miles" },
+  { value: "same_city", label: "Same city" },
+  { value: "same_state", label: "Same state/region" },
+  { value: "same_country", label: "Same country" },
+  { value: "anywhere", label: "Anywhere" },
+];
+
+const LONGEST_RELATIONSHIP_OPTIONS = [
+  { value: "never", label: "Never been in one" },
+  { value: "less_than_6_months", label: "Less than 6 months" },
+  { value: "6_months_to_1_year", label: "6 months - 1 year" },
+  { value: "1_to_2_years", label: "1-2 years" },
+  { value: "2_to_5_years", label: "2-5 years" },
+  { value: "5_to_10_years", label: "5-10 years" },
+  { value: "more_than_10_years", label: "More than 10 years" },
+];
+
+const TIME_SINCE_LAST_OPTIONS = [
+  { value: "currently_in", label: "Currently in a relationship" },
+  { value: "less_than_3_months", label: "Less than 3 months" },
+  { value: "3_to_6_months", label: "3-6 months" },
+  { value: "6_months_to_1_year", label: "6 months - 1 year" },
+  { value: "1_to_2_years", label: "1-2 years" },
+  { value: "2_to_5_years", label: "2-5 years" },
+  { value: "more_than_5_years", label: "More than 5 years" },
+  { value: "never", label: "Never been in one" },
+];
+
+const COUNTRY_OPTIONS = [
+  { value: "US", label: "United States" },
+  { value: "CA", label: "Canada" },
+  { value: "UK", label: "United Kingdom" },
+  { value: "AU", label: "Australia" },
+  { value: "DE", label: "Germany" },
+  { value: "FR", label: "France" },
+  { value: "ES", label: "Spain" },
+  { value: "IT", label: "Italy" },
+  { value: "NL", label: "Netherlands" },
+  { value: "BR", label: "Brazil" },
+  { value: "MX", label: "Mexico" },
+  { value: "IN", label: "India" },
+  { value: "JP", label: "Japan" },
+  { value: "KR", label: "South Korea" },
+  { value: "SG", label: "Singapore" },
+  { value: "NZ", label: "New Zealand" },
+  { value: "IE", label: "Ireland" },
+  { value: "SE", label: "Sweden" },
+  { value: "NO", label: "Norway" },
+  { value: "DK", label: "Denmark" },
+  { value: "other", label: "Other" },
+];
+
 interface ProfilePreferencesEditorProps {
   defaultSection?: string | null;
 }
@@ -414,19 +492,31 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Education Level</Label>
-                <Input
+                <Select
                   value={formData.education_level || ""}
-                  onChange={(e) => updateField("education_level", e.target.value)}
-                  placeholder="e.g., Bachelor's"
-                />
+                  onValueChange={(v) => updateField("education_level", v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {EDUCATION_LEVEL_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Career Stage</Label>
-                <Input
+                <Select
                   value={formData.career_stage || ""}
-                  onChange={(e) => updateField("career_stage", e.target.value)}
-                  placeholder="e.g., Mid-career"
-                />
+                  onValueChange={(v) => updateField("career_stage", v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {CAREER_STAGE_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <SliderInput
@@ -457,6 +547,30 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
           <AccordionContent className="space-y-4 pb-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
+                <Label>Country</Label>
+                <Select
+                  value={formData.country || ""}
+                  onValueChange={(v) => updateField("country", v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {COUNTRY_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>City</Label>
+                <Input
+                  value={formData.city || ""}
+                  onChange={(e) => updateField("city", e.target.value)}
+                  placeholder="Enter your city"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label>Social Style</Label>
                 <Select
                   value={formData.social_style || ""}
@@ -472,11 +586,17 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               </div>
               <div className="space-y-2">
                 <Label>Distance Preference</Label>
-                <Input
+                <Select
                   value={formData.distance_preference || ""}
-                  onChange={(e) => updateField("distance_preference", e.target.value)}
-                  placeholder="e.g., Within 25 miles"
-                />
+                  onValueChange={(v) => updateField("distance_preference", v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {DISTANCE_PREFERENCE_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="flex items-center justify-between">
@@ -594,19 +714,31 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Longest Relationship</Label>
-                <Input
+                <Select
                   value={formData.longest_relationship || ""}
-                  onChange={(e) => updateField("longest_relationship", e.target.value)}
-                  placeholder="e.g., 3 years"
-                />
+                  onValueChange={(v) => updateField("longest_relationship", v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {LONGEST_RELATIONSHIP_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Time Since Last</Label>
-                <Input
+                <Select
                   value={formData.time_since_last_relationship || ""}
-                  onChange={(e) => updateField("time_since_last_relationship", e.target.value)}
-                  placeholder="e.g., 6 months"
-                />
+                  onValueChange={(v) => updateField("time_since_last_relationship", v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {TIME_SINCE_LAST_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </AccordionContent>
