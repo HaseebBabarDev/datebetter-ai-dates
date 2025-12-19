@@ -25,10 +25,11 @@ import { SliderInput } from "@/components/onboarding/SliderInput";
 import { 
   User, Heart, Users, Baby, Church, Vote, Briefcase, 
   MapPin, Sparkles, MessageCircle, Brain, Shield, Lock, Save,
-  Target, Stethoscope, Ruler, TrendingDown, DollarSign
+  Target, Stethoscope, Ruler, TrendingDown, DollarSign, CheckCircle2, AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { MultiSelectOption } from "@/components/onboarding/MultiSelectOption";
+import { Progress } from "@/components/ui/progress";
 
 type Profile = Tables<"profiles">;
 
@@ -349,7 +350,46 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
 
   const SECTION_ORDER = ["motivation", "relationship", "partner_prefs", "kids", "faith", "politics", "career", "income", "lifestyle", "physical", "communication", "mental_health", "attachment", "boundaries", "cycle"];
   
-  const [openSections, setOpenSections] = useState<string[]>(defaultSection ? [defaultSection] : ["relationship"]);
+  const SECTION_CONFIG: Record<string, { 
+    label: string; 
+    icon: React.ReactNode; 
+    requiredFields: (keyof Profile)[];
+  }> = {
+    motivation: { label: "Dating Motivation", icon: <Target className="w-3.5 h-3.5" />, requiredFields: ["dating_motivation"] },
+    relationship: { label: "Relationship Goals", icon: <Heart className="w-3.5 h-3.5" />, requiredFields: ["relationship_goal", "relationship_structure"] },
+    partner_prefs: { label: "Partner Preferences", icon: <Users className="w-3.5 h-3.5" />, requiredFields: ["interested_in", "height_preference"] },
+    kids: { label: "Kids & Family", icon: <Baby className="w-3.5 h-3.5" />, requiredFields: ["kids_status", "kids_desire"] },
+    faith: { label: "Faith & Values", icon: <Church className="w-3.5 h-3.5" />, requiredFields: ["religion"] },
+    politics: { label: "Politics", icon: <Vote className="w-3.5 h-3.5" />, requiredFields: ["politics"] },
+    career: { label: "Career", icon: <Briefcase className="w-3.5 h-3.5" />, requiredFields: ["education_level", "career_stage"] },
+    income: { label: "Income", icon: <DollarSign className="w-3.5 h-3.5" />, requiredFields: ["income_range"] },
+    lifestyle: { label: "Lifestyle", icon: <MapPin className="w-3.5 h-3.5" />, requiredFields: ["country", "social_style"] },
+    physical: { label: "Physical", icon: <Sparkles className="w-3.5 h-3.5" />, requiredFields: ["preferred_age_min", "preferred_age_max"] },
+    communication: { label: "Communication", icon: <MessageCircle className="w-3.5 h-3.5" />, requiredFields: ["communication_style"] },
+    mental_health: { label: "Mental Health", icon: <Stethoscope className="w-3.5 h-3.5" />, requiredFields: ["mental_health_openness"] },
+    attachment: { label: "Attachment", icon: <Brain className="w-3.5 h-3.5" />, requiredFields: ["attachment_style"] },
+    boundaries: { label: "Boundaries", icon: <Shield className="w-3.5 h-3.5" />, requiredFields: ["boundary_strength"] },
+    cycle: { label: "Cycle", icon: <Lock className="w-3.5 h-3.5" />, requiredFields: [] }, // Optional section
+  };
+
+  const isSectionComplete = useCallback((sectionKey: string): boolean => {
+    const config = SECTION_CONFIG[sectionKey];
+    if (!config || config.requiredFields.length === 0) return true;
+    
+    return config.requiredFields.every(field => {
+      const value = formData[field];
+      if (Array.isArray(value)) return value.length > 0;
+      return value !== null && value !== undefined && value !== "";
+    });
+  }, [formData]);
+
+  const completedSections = SECTION_ORDER.filter(s => isSectionComplete(s));
+  const incompleteSections = SECTION_ORDER.filter(s => !isSectionComplete(s));
+  const completionPercent = Math.round((completedSections.length / SECTION_ORDER.length) * 100);
+  
+  const [openSections, setOpenSections] = useState<string[]>(
+    defaultSection ? [defaultSection] : incompleteSections.length > 0 ? [incompleteSections[0]] : ["relationship"]
+  );
 
   const goToNextSection = useCallback((currentSection: string, e?: React.MouseEvent) => {
     if (e) {
@@ -370,6 +410,13 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
     }
   }, []);
 
+  const jumpToSection = (sectionKey: string) => {
+    setOpenSections([sectionKey]);
+    setTimeout(() => {
+      document.querySelector(`[data-value="${sectionKey}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -380,14 +427,61 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
 
   return (
     <div className="space-y-4">
+      {/* Profile Completeness Indicator */}
+      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {completionPercent === 100 ? (
+                <CheckCircle2 className="w-5 h-5 text-green-500" />
+              ) : (
+                <AlertCircle className="w-5 h-5 text-amber-500" />
+              )}
+              <span className="font-semibold text-sm">
+                {completionPercent === 100 ? "Profile Complete!" : "Profile Completeness"}
+              </span>
+            </div>
+            <span className="text-sm font-bold text-primary">{completionPercent}%</span>
+          </div>
+          
+          <Progress value={completionPercent} className="h-2" />
+          
+          <div className="text-xs text-muted-foreground">
+            {completedSections.length} of {SECTION_ORDER.length} sections completed
+          </div>
+          
+          {incompleteSections.length > 0 && (
+            <div className="pt-2 border-t border-border/50">
+              <p className="text-xs text-muted-foreground mb-2">Incomplete sections:</p>
+              <div className="flex flex-wrap gap-1.5">
+                {incompleteSections.map(sectionKey => {
+                  const config = SECTION_CONFIG[sectionKey];
+                  return (
+                    <button
+                      key={sectionKey}
+                      onClick={() => jumpToSection(sectionKey)}
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-amber-500/10 text-amber-700 rounded-full hover:bg-amber-500/20 transition-colors"
+                    >
+                      {config.icon}
+                      {config.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Accordion type="multiple" value={openSections} onValueChange={setOpenSections} className="space-y-2">
 
         {/* Dating Motivation */}
-        <AccordionItem value="motivation" data-value="motivation" className="border rounded-lg px-4">
+        <AccordionItem value="motivation" data-value="motivation" className={`border rounded-lg px-4 ${isSectionComplete("motivation") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <Target className="w-4 h-4 text-emerald-500" />
               <span className="font-medium">Dating Motivation</span>
+              {isSectionComplete("motivation") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
@@ -417,11 +511,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         </AccordionItem>
 
         {/* Relationship Goals */}
-        <AccordionItem value="relationship" data-value="relationship" className="border rounded-lg px-4">
+        <AccordionItem value="relationship" data-value="relationship" className={`border rounded-lg px-4 ${isSectionComplete("relationship") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <Heart className="w-4 h-4 text-pink-500" />
               <span className="font-medium">Relationship Goals</span>
+              {isSectionComplete("relationship") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
@@ -490,11 +585,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         </AccordionItem>
 
         {/* Partner Preferences */}
-        <AccordionItem value="partner_prefs" data-value="partner_prefs" className="border rounded-lg px-4">
+        <AccordionItem value="partner_prefs" data-value="partner_prefs" className={`border rounded-lg px-4 ${isSectionComplete("partner_prefs") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <Users className="w-4 h-4 text-rose-500" />
               <span className="font-medium">Who I'm Looking For</span>
+              {isSectionComplete("partner_prefs") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
@@ -592,11 +688,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         </AccordionItem>
 
         {/* Kids & Family */}
-        <AccordionItem value="kids" data-value="kids" className="border rounded-lg px-4">
+        <AccordionItem value="kids" data-value="kids" className={`border rounded-lg px-4 ${isSectionComplete("kids") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <Baby className="w-4 h-4 text-purple-500" />
               <span className="font-medium">Kids & Family</span>
+              {isSectionComplete("kids") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
@@ -644,11 +741,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         </AccordionItem>
 
         {/* Faith & Values */}
-        <AccordionItem value="faith" data-value="faith" className="border rounded-lg px-4">
+        <AccordionItem value="faith" data-value="faith" className={`border rounded-lg px-4 ${isSectionComplete("faith") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <Church className="w-4 h-4 text-amber-500" />
               <span className="font-medium">Faith & Values</span>
+              {isSectionComplete("faith") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
@@ -680,11 +778,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         </AccordionItem>
 
         {/* Politics */}
-        <AccordionItem value="politics" data-value="politics" className="border rounded-lg px-4">
+        <AccordionItem value="politics" data-value="politics" className={`border rounded-lg px-4 ${isSectionComplete("politics") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <Vote className="w-4 h-4 text-blue-500" />
               <span className="font-medium">Politics</span>
+              {isSectionComplete("politics") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
@@ -716,11 +815,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         </AccordionItem>
 
         {/* Career */}
-        <AccordionItem value="career" data-value="career" className="border rounded-lg px-4">
+        <AccordionItem value="career" data-value="career" className={`border rounded-lg px-4 ${isSectionComplete("career") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <Briefcase className="w-4 h-4 text-green-500" />
               <span className="font-medium">Career & Education</span>
+              {isSectionComplete("career") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
@@ -775,11 +875,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         </AccordionItem>
 
         {/* Income Preferences */}
-        <AccordionItem value="income" data-value="income" className="border rounded-lg px-4">
+        <AccordionItem value="income" data-value="income" className={`border rounded-lg px-4 ${isSectionComplete("income") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <DollarSign className="w-4 h-4 text-emerald-500" />
               <span className="font-medium">Income Preferences</span>
+              {isSectionComplete("income") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
@@ -888,11 +989,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         </AccordionItem>
 
         {/* Lifestyle */}
-        <AccordionItem value="lifestyle" data-value="lifestyle" className="border rounded-lg px-4">
+        <AccordionItem value="lifestyle" data-value="lifestyle" className={`border rounded-lg px-4 ${isSectionComplete("lifestyle") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <MapPin className="w-4 h-4 text-orange-500" />
               <span className="font-medium">Lifestyle</span>
+              {isSectionComplete("lifestyle") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
@@ -971,11 +1073,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         </AccordionItem>
 
         {/* Physical Preferences */}
-        <AccordionItem value="physical" data-value="physical" className="border rounded-lg px-4">
+        <AccordionItem value="physical" data-value="physical" className={`border rounded-lg px-4 ${isSectionComplete("physical") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <Sparkles className="w-4 h-4 text-pink-500" />
               <span className="font-medium">Physical Preferences</span>
+              {isSectionComplete("physical") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
@@ -1018,11 +1121,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         </AccordionItem>
 
         {/* Communication */}
-        <AccordionItem value="communication" data-value="communication" className="border rounded-lg px-4">
+        <AccordionItem value="communication" data-value="communication" className={`border rounded-lg px-4 ${isSectionComplete("communication") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <MessageCircle className="w-4 h-4 text-cyan-500" />
               <span className="font-medium">Communication Style</span>
+              {isSectionComplete("communication") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
@@ -1054,11 +1158,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         </AccordionItem>
 
         {/* Mental Health */}
-        <AccordionItem value="mental_health" data-value="mental_health" className="border rounded-lg px-4">
+        <AccordionItem value="mental_health" data-value="mental_health" className={`border rounded-lg px-4 ${isSectionComplete("mental_health") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <Stethoscope className="w-4 h-4 text-teal-500" />
               <span className="font-medium">Mental Health</span>
+              {isSectionComplete("mental_health") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
@@ -1097,11 +1202,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         </AccordionItem>
 
         {/* Attachment & Patterns */}
-        <AccordionItem value="attachment" data-value="attachment" className="border rounded-lg px-4">
+        <AccordionItem value="attachment" data-value="attachment" className={`border rounded-lg px-4 ${isSectionComplete("attachment") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <Brain className="w-4 h-4 text-indigo-500" />
               <span className="font-medium">Attachment & Patterns</span>
+              {isSectionComplete("attachment") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
@@ -1156,11 +1262,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         </AccordionItem>
 
         {/* Boundaries */}
-        <AccordionItem value="boundaries" data-value="boundaries" className="border rounded-lg px-4">
+        <AccordionItem value="boundaries" data-value="boundaries" className={`border rounded-lg px-4 ${isSectionComplete("boundaries") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <Shield className="w-4 h-4 text-red-500" />
               <span className="font-medium">Boundaries & Safety</span>
+              {isSectionComplete("boundaries") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
@@ -1192,11 +1299,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         </AccordionItem>
 
         {/* Cycle Tracking */}
-        <AccordionItem value="cycle" data-value="cycle" className="border rounded-lg px-4">
+        <AccordionItem value="cycle" data-value="cycle" className={`border rounded-lg px-4 ${isSectionComplete("cycle") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <Lock className="w-4 h-4 text-pink-500" />
               <span className="font-medium">Hormone Cycle</span>
+              {isSectionComplete("cycle") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
