@@ -208,30 +208,20 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
         body: { candidateId: candidate.id },
       });
 
-      if (fnError) {
-        // Check if it's an auth error (401)
-        const errorMessage = fnError.message || "";
-        if (errorMessage.includes("401") || errorMessage.includes("Session expired") || errorMessage.includes("Unauthorized")) {
-          // For auth errors, show friendly message and keep existing score
-          toast({
-            title: scoreData ? "Score Remains the Same" : "Unable to Calculate",
-            description: "Please refresh the page and try again.",
-          });
-          return;
-        }
-        throw new Error(fnError.message || "Failed to calculate");
-      }
-
-      // Check if data contains an error response
-      if (data?.error) {
-        if (data.error.includes("Session expired") || data.error.includes("Unauthorized")) {
-          toast({
-            title: scoreData ? "Score Remains the Same" : "Unable to Calculate",
-            description: "Please refresh the page and try again.",
-          });
-          return;
-        }
-        throw new Error(data.error);
+      // Handle errors or undefined response - treat as "no change"
+      if (fnError || !data || data?.error) {
+        const errorMessage = fnError?.message || data?.error || "";
+        const isAuthError = errorMessage.includes("401") || errorMessage.includes("Session expired") || errorMessage.includes("Unauthorized");
+        
+        toast({
+          title: scoreData ? "Score Remains the Same" : "Unable to Calculate",
+          description: isAuthError 
+            ? "Please refresh the page and try again." 
+            : scoreData 
+              ? "Your current score and advice remain valid."
+              : "Please try again later.",
+        });
+        return;
       }
 
       const analysis = data;
