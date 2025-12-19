@@ -204,10 +204,10 @@ export default function Support() {
               Reach us directly at:
             </p>
             <a 
-              href="mailto:support@datebetter.app" 
-              className="text-sm text-primary font-medium"
+              href="mailto:support@datebetterapp.com" 
+              className="text-sm text-primary font-medium hover:underline"
             >
-              support@datebetter.app
+              support@datebetterapp.com
             </a>
           </CardContent>
         </Card>
