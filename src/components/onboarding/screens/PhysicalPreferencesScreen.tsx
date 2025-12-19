@@ -44,7 +44,12 @@ const PhysicalPreferencesScreen = () => {
     updateData({ chemistryFactors: current.includes(v) ? current.filter(x => x !== v) : [...current, v] });
   };
 
-  const showHeightImpact = data.heightPreference === "taller_than_me";
+  // Only show pool impact for users looking for men (women or non-binary interested in men)
+  const isLookingForMen = data.interestedIn?.includes("men") || data.interestedIn?.includes("all");
+  const isMan = data.genderIdentity === "man_cis" || data.genderIdentity === "man_trans";
+  const showPoolVisualizations = isLookingForMen && !isMan;
+
+  const showHeightImpact = data.heightPreference === "taller_than_me" && showPoolVisualizations;
   const heightImpact = getHeightPoolImpact();
   const incomePercent = getIncomePoolPercent(data.preferredIncomeRange);
   const hasIncomePreference = incomePercent < 100;
