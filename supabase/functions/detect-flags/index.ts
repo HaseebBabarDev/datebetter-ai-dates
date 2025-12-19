@@ -85,18 +85,22 @@ serve(async (req) => {
 
 CANDIDATE INFO:
 - Nickname: ${candidate.nickname}
-- Status: ${formattedStatus}
+- Current Dating Status: ${formattedStatus}
+- Their Relationship Status: ${candidate.their_relationship_status || "single"}
 - Attachment Style: ${candidate.their_attachment_style || "Unknown"}
+- Relationship Goal: ${candidate.their_relationship_goal || "Not specified"}
 - Notes: ${candidate.notes || "None"}
+
+IMPORTANT: Only flag issues based on ACTUAL BEHAVIOR from the interactions below. Do NOT make assumptions about their relationship status - the "Their Relationship Status" field above is what the user has recorded. If it says "single", trust that information and do NOT flag them as married or in a relationship.
 
 INTERACTION HISTORY (${interactionDetails.length} interactions):
 ${JSON.stringify(interactionDetails, null, 2)}
 
 Based on the interaction patterns and any behavioral indicators, identify:
-1. RED FLAGS: Warning signs like inconsistent communication, love bombing, hot/cold behavior, avoiding commitment talk, controlling behavior, dismissiveness, breadcrumbing, future faking, etc.
+1. RED FLAGS: Warning signs like inconsistent communication, love bombing, hot/cold behavior, avoiding commitment talk, controlling behavior, dismissiveness, breadcrumbing, future faking, etc. Only flag things you can see evidence for in the interactions.
 2. GREEN FLAGS: Positive signs like consistent communication, planning dates ahead, remembering details, respecting boundaries, emotional availability, follow-through, honesty, genuine interest, etc.
 
-Only flag behaviors you can reasonably infer from the data. Be specific but concise.`;
+Only flag behaviors you can reasonably infer from the interaction data. Do NOT flag relationship status unless there is clear behavioral evidence of deception in the notes.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
