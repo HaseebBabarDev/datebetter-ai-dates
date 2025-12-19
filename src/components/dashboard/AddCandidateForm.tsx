@@ -171,6 +171,21 @@ const MENTAL_HEALTH_AWARENESS_OPTIONS = [
   { value: "unknown", label: "Unknown" },
 ];
 
+const ZODIAC_OPTIONS = [
+  { value: "aries", label: "♈ Aries", emoji: "♈" },
+  { value: "taurus", label: "♉ Taurus", emoji: "♉" },
+  { value: "gemini", label: "♊ Gemini", emoji: "♊" },
+  { value: "cancer", label: "♋ Cancer", emoji: "♋" },
+  { value: "leo", label: "♌ Leo", emoji: "♌" },
+  { value: "virgo", label: "♍ Virgo", emoji: "♍" },
+  { value: "libra", label: "♎ Libra", emoji: "♎" },
+  { value: "scorpio", label: "♏ Scorpio", emoji: "♏" },
+  { value: "sagittarius", label: "♐ Sagittarius", emoji: "♐" },
+  { value: "capricorn", label: "♑ Capricorn", emoji: "♑" },
+  { value: "aquarius", label: "♒ Aquarius", emoji: "♒" },
+  { value: "pisces", label: "♓ Pisces", emoji: "♓" },
+];
+
 export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   onSuccess,
   trigger,
@@ -250,6 +265,9 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   const [theirNeurodivergent, setTheirNeurodivergent] = useState("");
   const [theirMentalHealthAwareness, setTheirMentalHealthAwareness] = useState("");
 
+  // Zodiac
+  const [zodiacSign, setZodiacSign] = useState("");
+
   const resetForm = () => {
     setNickname("");
     setAge("");
@@ -285,6 +303,7 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
     setEnergyMatch(3);
     setTheirNeurodivergent("");
     setTheirMentalHealthAwareness("");
+    setZodiacSign("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -331,6 +350,7 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
         energy_match: energyMatch,
         their_neurodivergent: theirNeurodivergent || null,
         their_mental_health_awareness: theirMentalHealthAwareness || null,
+        zodiac_sign: zodiacSign || null,
         first_contact_date: new Date().toISOString().split("T")[0],
       });
 
@@ -451,6 +471,17 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
                   <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
                   <SelectContent>
                     {HEIGHT_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Zodiac Sign</Label>
+                <Select value={zodiacSign} onValueChange={setZodiacSign}>
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {ZODIAC_OPTIONS.map((opt) => (
                       <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                     ))}
                   </SelectContent>

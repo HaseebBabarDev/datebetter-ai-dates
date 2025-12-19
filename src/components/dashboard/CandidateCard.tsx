@@ -55,6 +55,21 @@ const distanceConfig: Record<string, { label: string; icon: typeof MapPin; color
   long_distance: { label: "Long Distance", icon: Globe, color: "text-purple-600 bg-purple-500/10" },
 };
 
+const zodiacConfig: Record<string, { emoji: string; label: string }> = {
+  aries: { emoji: "♈", label: "Aries" },
+  taurus: { emoji: "♉", label: "Taurus" },
+  gemini: { emoji: "♊", label: "Gemini" },
+  cancer: { emoji: "♋", label: "Cancer" },
+  leo: { emoji: "♌", label: "Leo" },
+  virgo: { emoji: "♍", label: "Virgo" },
+  libra: { emoji: "♎", label: "Libra" },
+  scorpio: { emoji: "♏", label: "Scorpio" },
+  sagittarius: { emoji: "♐", label: "Sagittarius" },
+  capricorn: { emoji: "♑", label: "Capricorn" },
+  aquarius: { emoji: "♒", label: "Aquarius" },
+  pisces: { emoji: "♓", label: "Pisces" },
+};
+
 interface NextStepParams {
   status: string | null;
   updatedAt: string | null;
@@ -204,6 +219,11 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
             )}
             {candidate.age && (
               <span className="text-xs text-muted-foreground">{candidate.age}y</span>
+            )}
+            {(candidate as any).zodiac_sign && zodiacConfig[(candidate as any).zodiac_sign] && (
+              <span className="text-xs px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+                {zodiacConfig[(candidate as any).zodiac_sign].emoji}
+              </span>
             )}
             {(candidate as any).distance_approximation && distanceConfig[(candidate as any).distance_approximation] && (() => {
               const config = distanceConfig[(candidate as any).distance_approximation];
