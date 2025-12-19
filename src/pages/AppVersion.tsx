@@ -118,7 +118,7 @@ export default function AppVersion() {
             © 2025 dateBetter. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground">
-            Made with ❤️ for women everywhere
+            Made with ❤️ for daters everywhere
           </p>
         </div>
       </main>

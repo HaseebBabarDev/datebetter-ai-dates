@@ -44,7 +44,7 @@ export default function About() {
               <h3 className="text-base font-semibold text-foreground">Our Mission</h3>
             </div>
             <p className="text-sm text-foreground/80 leading-relaxed">
-              dateBetter is an AI-powered dating companion designed to help women make smarter, safer dating decisions. We combine cutting-edge artificial intelligence with research-backed relationship insights to give you clarity in your dating life.
+              dateBetter is an AI-powered dating companion designed to help you make smarter, safer dating decisions. We combine cutting-edge artificial intelligence with research-backed relationship insights to give you clarity in your dating life.
             </p>
           </CardContent>
         </Card>
@@ -56,8 +56,8 @@ export default function About() {
           <div className="grid gap-3">
             <ValueCard 
               icon={Heart}
-              title="Built for Women, By Women"
-              description="We understand the unique challenges women face in dating. Our app prioritizes your safety, time, and emotional well-being."
+              title="Female-Built"
+              description="Created with an understanding of the unique challenges in modern dating. Our app prioritizes your safety, time, and emotional well-being."
             />
             <ValueCard 
               icon={Shield}
@@ -72,7 +72,7 @@ export default function About() {
             <ValueCard 
               icon={Users}
               title="Community Support"
-              description="We're more than an app – we're building a community of women who support each other in their dating journeys."
+              description="We're more than an app – we're building a supportive community for those navigating their dating journeys."
             />
           </div>
         </section>
@@ -98,7 +98,7 @@ export default function About() {
               <h3 className="text-base font-semibold text-foreground">Our Team</h3>
             </div>
             <p className="text-sm text-foreground/80 leading-relaxed">
-              dateBetter was created by a team of relationship researchers, AI engineers, and women who were tired of the same old dating app experience. We're committed to continuously improving based on your feedback.
+              dateBetter was created by a team of relationship researchers, AI engineers, and people who were tired of the same old dating app experience. We're committed to continuously improving based on your feedback.
             </p>
           </CardContent>
         </Card>
