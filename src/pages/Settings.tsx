@@ -15,13 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, CalendarIcon } from "lucide-react";
+import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { ProfilePhotoUpload } from "@/components/settings/ProfilePhotoUpload";
@@ -29,7 +23,6 @@ import { Badge } from "@/components/ui/badge";
 import { PaymentSheet } from "@/components/subscription/PaymentSheet";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { format, parse } from "date-fns";
-import { cn } from "@/lib/utils";
 
 type Profile = Tables<"profiles">;
 type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more";
@@ -520,34 +513,58 @@ const Settings = () => {
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs font-medium">Birthday</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal h-9 text-sm px-3",
-                            !birthDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-                          <span className="truncate">{birthDate ? format(birthDate, "MMM d, yyyy") : "Select"}</span>
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={birthDate}
-                          onSelect={setBirthDate}
-                          disabled={(date) => date > new Date() || date < new Date("1920-01-01")}
-                          initialFocus
-                          className="pointer-events-auto"
-                          captionLayout="dropdown"
-                          fromYear={1920}
-                          toYear={new Date().getFullYear()}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <Label className="text-xs font-medium">Birth Month</Label>
+                    <Select 
+                      value={birthDate ? String(birthDate.getMonth() + 1) : ""} 
+                      onValueChange={(month) => {
+                        const newDate = birthDate ? new Date(birthDate) : new Date(2000, 0, 1);
+                        newDate.setMonth(parseInt(month) - 1);
+                        setBirthDate(newDate);
+                      }}
+                    >
+                      <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Month" /></SelectTrigger>
+                      <SelectContent>
+                        {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m, i) => (
+                          <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium">Birth Day</Label>
+                    <Select 
+                      value={birthDate ? String(birthDate.getDate()) : ""} 
+                      onValueChange={(day) => {
+                        const newDate = birthDate ? new Date(birthDate) : new Date(2000, 0, 1);
+                        newDate.setDate(parseInt(day));
+                        setBirthDate(newDate);
+                      }}
+                    >
+                      <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Day" /></SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 31 }, (_, i) => (
+                          <SelectItem key={i + 1} value={String(i + 1)}>{i + 1}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium">Birth Year</Label>
+                    <Select 
+                      value={birthDate ? String(birthDate.getFullYear()) : ""} 
+                      onValueChange={(year) => {
+                        const newDate = birthDate ? new Date(birthDate) : new Date(2000, 0, 1);
+                        newDate.setFullYear(parseInt(year));
+                        setBirthDate(newDate);
+                      }}
+                    >
+                      <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Year" /></SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: new Date().getFullYear() - 1920 + 1 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                          <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs font-medium">Country</Label>
