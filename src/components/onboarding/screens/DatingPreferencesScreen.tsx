@@ -9,6 +9,7 @@ import { SliderInput } from "../SliderInput";
 
 const orientationOptions = [
   { value: "straight", label: "Straight/Heterosexual" },
+  { value: "gay", label: "Gay" },
   { value: "lesbian", label: "Lesbian" },
   { value: "bisexual", label: "Bisexual" },
   { value: "pansexual", label: "Pansexual" },

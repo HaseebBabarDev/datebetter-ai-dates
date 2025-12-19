@@ -1588,6 +1588,7 @@ export type Database = {
         | "asexual"
         | "no_label"
         | "self_describe"
+        | "gay"
       social_style:
         | "homebody"
         | "social_butterfly"
@@ -1822,6 +1823,7 @@ export const Constants = {
         "asexual",
         "no_label",
         "self_describe",
+        "gay",
       ],
       social_style: [
         "homebody",
