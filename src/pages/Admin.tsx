@@ -17,7 +17,7 @@ import {
   UserPlus,
   Trash2,
   Calendar,
-  DollarSign
+  MessageSquareOff
 } from "lucide-react";
 import { RevenueAnalytics } from "@/components/admin/RevenueAnalytics";
 import { 
@@ -40,6 +40,7 @@ const Admin = () => {
   const [creatingUser, setCreatingUser] = useState(false);
   const [deletingUser, setDeletingUser] = useState<string | null>(null);
   const [managingSubscription, setManagingSubscription] = useState<string | null>(null);
+  const [removingFromCommunity, setRemovingFromCommunity] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -342,6 +343,58 @@ const Admin = () => {
     }
   };
 
+  const handleRemoveFromCommunity = async (userId: string, userName: string) => {
+    if (userId === user?.id) {
+      toast.error("Cannot remove yourself from community");
+      return;
+    }
+
+    const confirmed = confirm(`Remove ${userName || 'this user'} from community? This will delete all their posts, comments, and messages.`);
+    if (!confirmed) return;
+
+    setRemovingFromCommunity(userId);
+    try {
+      // Delete all forum posts by user
+      const { error: postsError } = await supabase
+        .from("forum_posts")
+        .delete()
+        .eq("user_id", userId);
+
+      if (postsError) throw postsError;
+
+      // Delete all forum comments by user
+      const { error: commentsError } = await supabase
+        .from("forum_comments")
+        .delete()
+        .eq("user_id", userId);
+
+      if (commentsError) throw commentsError;
+
+      // Delete all direct messages sent by user
+      const { error: dmError } = await supabase
+        .from("direct_messages")
+        .delete()
+        .eq("sender_id", userId);
+
+      if (dmError) throw dmError;
+
+      // Clear screen_name to prevent future community access
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ screen_name: null, screen_name_set_at: null })
+        .eq("user_id", userId);
+
+      if (profileError) throw profileError;
+
+      toast.success(`${userName || 'User'} removed from community`);
+    } catch (error) {
+      console.error("Error removing from community:", error);
+      toast.error("Failed to remove user from community");
+    } finally {
+      setRemovingFromCommunity(null);
+    }
+  };
+
   if (authLoading || checkingAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -491,106 +544,132 @@ const Admin = () => {
             {allUsers.length === 0 && !loadingUsers ? (
               <p className="text-sm text-muted-foreground text-center py-8">No users found</p>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {allUsers.map((userProfile) => (
                   <div 
                     key={userProfile.user_id}
-                    className="flex items-center justify-between gap-3 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                    className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                   >
-                  <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <p className="font-medium text-sm truncate">
-                          {userProfile.name || "Unnamed User"}
+                    {/* User Info Row */}
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <p className="font-medium text-sm">
+                            {userProfile.name || "Unnamed User"}
+                          </p>
+                          {userProfile.isAdmin && (
+                            <Badge variant="secondary" className="bg-primary/10 text-primary text-xs">
+                              <Shield className="w-3 h-3 mr-1" />
+                              Admin
+                            </Badge>
+                          )}
+                          {userProfile.user_id === user?.id && (
+                            <Badge variant="outline" className="text-xs">You</Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {userProfile.subscription && (
+                            <Badge variant="outline" className="text-xs capitalize">
+                              {userProfile.subscription.plan}
+                            </Badge>
+                          )}
+                          {userProfile.subscription?.trial_ends_at && new Date(userProfile.subscription.trial_ends_at) > new Date() && (
+                            <Badge variant="secondary" className="bg-accent/10 text-accent-foreground text-xs">
+                              <Calendar className="w-3 h-3 mr-1" />
+                              {Math.ceil((new Date(userProfile.subscription.trial_ends_at).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}d trial
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Joined: {new Date(userProfile.created_at).toLocaleDateString()}
                         </p>
-                        {userProfile.isAdmin && (
-                          <Badge variant="secondary" className="bg-primary/10 text-primary text-xs">
-                            <Shield className="w-3 h-3 mr-1" />
-                            Admin
-                          </Badge>
-                        )}
-                        {userProfile.user_id === user?.id && (
-                          <Badge variant="outline" className="text-xs">You</Badge>
-                        )}
-                        {userProfile.subscription && (
-                          <Badge variant="outline" className="text-xs capitalize">
-                            {userProfile.subscription.plan}
-                          </Badge>
-                        )}
-                        {userProfile.subscription?.trial_ends_at && new Date(userProfile.subscription.trial_ends_at) > new Date() && (
-                          <Badge variant="secondary" className="bg-accent/10 text-accent-foreground text-xs">
-                            <Calendar className="w-3 h-3 mr-1" />
-                            Trial: {Math.ceil((new Date(userProfile.subscription.trial_ends_at).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}d left
-                          </Badge>
-                        )}
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        Joined: {new Date(userProfile.created_at).toLocaleDateString()}
-                      </p>
                     </div>
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center gap-2">
-                        <Select
-                          disabled={managingSubscription === userProfile.user_id}
-                          onValueChange={(value) => handleSetTrial(userProfile.user_id, parseInt(value))}
-                        >
-                          <SelectTrigger className="w-[140px] h-8">
-                            <SelectValue placeholder="Set Trial" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="30">30 Days Trial</SelectItem>
-                            <SelectItem value="60">60 Days Trial</SelectItem>
-                            <SelectItem value="90">90 Days Trial</SelectItem>
-                            <SelectItem value="0">Remove Trial</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {managingSubscription === userProfile.user_id && (
-                          <Loader2 className="w-4 h-4 animate-spin" />
+
+                    {/* Actions Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                      <Select
+                        disabled={managingSubscription === userProfile.user_id}
+                        onValueChange={(value) => handleSetTrial(userProfile.user_id, parseInt(value))}
+                      >
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue placeholder="Trial" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="30">30 Days</SelectItem>
+                          <SelectItem value="60">60 Days</SelectItem>
+                          <SelectItem value="90">90 Days</SelectItem>
+                          <SelectItem value="0">Remove</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      <Button
+                        size="sm"
+                        variant={userProfile.isAdmin ? "destructive" : "default"}
+                        onClick={() => handleToggleAdminRole(userProfile.user_id, userProfile.isAdmin)}
+                        disabled={togglingRole === userProfile.user_id || userProfile.user_id === user?.id}
+                        className="h-9 text-xs"
+                      >
+                        {togglingRole === userProfile.user_id ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <>
+                            <Shield className="w-3 h-3 mr-1" />
+                            {userProfile.isAdmin ? "Revoke" : "Admin"}
+                          </>
                         )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant={userProfile.isAdmin ? "destructive" : "default"}
-                          onClick={() => handleToggleAdminRole(userProfile.user_id, userProfile.isAdmin)}
-                          disabled={togglingRole === userProfile.user_id || userProfile.user_id === user?.id}
-                        >
-                          {togglingRole === userProfile.user_id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <>
-                              <Shield className="w-4 h-4 mr-1" />
-                              {userProfile.isAdmin ? "Revoke" : "Grant"}
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleResetPassword(userProfile.user_id)}
-                          disabled={resettingPassword === userProfile.user_id}
-                        >
-                          {resettingPassword === userProfile.user_id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <>
-                              <Key className="w-4 h-4 mr-1" />
-                              Reset
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDeleteUser(userProfile.user_id, userProfile.name)}
-                          disabled={deletingUser === userProfile.user_id || userProfile.user_id === user?.id}
-                        >
-                          {deletingUser === userProfile.user_id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="w-4 h-4" />
-                          )}
-                        </Button>
-                      </div>
+                      </Button>
+                      
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleResetPassword(userProfile.user_id)}
+                        disabled={resettingPassword === userProfile.user_id}
+                        className="h-9 text-xs"
+                      >
+                        {resettingPassword === userProfile.user_id ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <>
+                            <Key className="w-3 h-3 mr-1" />
+                            Password
+                          </>
+                        )}
+                      </Button>
+                      
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRemoveFromCommunity(userProfile.user_id, userProfile.name)}
+                        disabled={removingFromCommunity === userProfile.user_id || userProfile.user_id === user?.id}
+                        className="h-9 text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200"
+                      >
+                        {removingFromCommunity === userProfile.user_id ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <>
+                            <MessageSquareOff className="w-3 h-3 mr-1" />
+                            Ban
+                          </>
+                        )}
+                      </Button>
+                      
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDeleteUser(userProfile.user_id, userProfile.name)}
+                        disabled={deletingUser === userProfile.user_id || userProfile.user_id === user?.id}
+                        className="h-9 text-xs"
+                      >
+                        {deletingUser === userProfile.user_id ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <>
+                            <Trash2 className="w-3 h-3 mr-1" />
+                            Delete
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
                 ))}
