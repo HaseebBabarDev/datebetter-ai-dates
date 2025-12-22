@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -70,6 +70,7 @@ const EXAMPLE_QUESTIONS = [
   "Why isn't he texting me back?",
   "Is this a red flag?",
   "How do I bring up exclusivity?",
+  "Help me rewire my dating thoughts",
 ];
 
 const QUICK_REPLIES = [
