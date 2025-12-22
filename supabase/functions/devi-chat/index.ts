@@ -108,6 +108,7 @@ Your expertise includes:
 - Helping set healthy boundaries based on their stated boundary strength
 
 When analyzing images/screenshots:
+- CRITICAL FOR TEXT SCREENSHOTS: In most messaging apps, the USER's messages appear on the RIGHT side (usually colored/blue bubbles), and the OTHER PERSON's (candidate's) messages appear on the LEFT side (usually white/gray bubbles). Always interpret screenshots this way unless told otherwise.
 - Give your FIRST IMPRESSION briefly (1-2 paragraphs)
 - Mention 1-2 key things you noticed
 - Ask if they want the full breakdown
@@ -276,7 +277,7 @@ serve(async (req) => {
 function getImagePrompt(imageType?: string): string {
   switch (imageType) {
     case 'text_screenshot':
-      return "Please analyze this text conversation screenshot. Based on what you know about me and this person, look for communication patterns, red flags, green flags, and give me your honest assessment.";
+      return "Please analyze this text conversation screenshot. IMPORTANT: Messages on the RIGHT side (usually blue/colored bubbles) are from ME (the user). Messages on the LEFT side (usually white/gray bubbles) are from the OTHER PERSON I'm dating. Based on what you know about me and this person, look for communication patterns, red flags, green flags, and give me your honest assessment.";
     case 'ig_profile':
       return "Please analyze this Instagram profile. Based on my preferences and dealbreakers, what does it tell you about this person? Look for authenticity, lifestyle alignment with me, and any red or green flags.";
     case 'dating_profile':
