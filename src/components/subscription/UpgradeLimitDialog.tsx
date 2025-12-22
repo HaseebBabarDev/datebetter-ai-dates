@@ -36,9 +36,16 @@ const PLAN_OPTIONS = [
   {
     id: "dating_more",
     name: "Dating More",
-    price: "$39.99",
+    price: "$29.99",
     candidates: 12,
     updates: 20,
+  },
+  {
+    id: "unlimited",
+    name: "Unlimited",
+    price: "$39.99",
+    candidates: "Unlimited",
+    updates: "Unlimited",
   },
 ];
 
@@ -58,7 +65,8 @@ export function UpgradeLimitDialog({
   const availablePlans = PLAN_OPTIONS.filter((plan) => {
     if (currentPlan === "free") return true;
     if (currentPlan === "new_to_dating") return plan.id !== "new_to_dating";
-    if (currentPlan === "dating_often") return plan.id === "dating_more";
+    if (currentPlan === "dating_often") return plan.id === "dating_more" || plan.id === "unlimited";
+    if (currentPlan === "dating_more") return plan.id === "unlimited";
     return false;
   });
 
