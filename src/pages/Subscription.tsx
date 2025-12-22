@@ -78,8 +78,8 @@ const SUBSCRIPTION_PLANS = [
   {
     id: "dating_more",
     name: "Dating More",
-    priceMonthly: 39.99,
-    priceYearly: 383.88, // 20% discount (~$31.99/mo)
+    priceMonthly: 29.99,
+    priceYearly: 287.88, // 20% discount (~$23.99/mo)
     description: "For power users",
     icon: Zap,
     features: [
@@ -90,10 +90,31 @@ const SUBSCRIPTION_PLANS = [
       "Deep pattern analysis",
       "Cycle-aware insights",
       "Priority support",
-      "Early access to new features",
     ],
     limitations: [],
     color: "bg-accent/10",
+    textColor: "text-accent-foreground",
+    popular: false,
+  },
+  {
+    id: "unlimited",
+    name: "Unlimited",
+    priceMonthly: 39.99,
+    priceYearly: 383.88, // 20% discount (~$31.99/mo)
+    description: "No limits, ever",
+    icon: Zap,
+    features: [
+      "Unlimited candidates",
+      "Unlimited interaction logs",
+      "Full AI compatibility scoring",
+      "Advanced red flag detection",
+      "Deep pattern analysis",
+      "Cycle-aware insights",
+      "Priority support",
+      "Early access to new features",
+    ],
+    limitations: [],
+    color: "bg-gradient-to-br from-accent/20 to-primary/20",
     textColor: "text-accent-foreground",
     popular: false,
   },
@@ -166,6 +187,7 @@ export default function Subscription() {
         new_to_dating: { candidates: 3, updates: 5 },
         dating_often: { candidates: 7, updates: 12 },
         dating_more: { candidates: 12, updates: 20 },
+        unlimited: { candidates: 999, updates: 999 },
       };
 
       const limits = planLimits[selectedPlan.id];
@@ -174,7 +196,7 @@ export default function Subscription() {
         const { error } = await supabase
           .from("user_subscriptions")
           .update({
-            plan: selectedPlan.id as "free" | "new_to_dating" | "dating_often" | "dating_more",
+            plan: selectedPlan.id as "free" | "new_to_dating" | "dating_often" | "dating_more" | "unlimited",
             candidates_limit: limits.candidates,
             updates_per_candidate: limits.updates,
           })

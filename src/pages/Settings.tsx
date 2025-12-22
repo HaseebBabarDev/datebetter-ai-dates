@@ -26,21 +26,22 @@ import { format, parse } from "date-fns";
 import { useTour, SETTINGS_TOUR_STEPS } from "@/components/tour";
 
 type Profile = Tables<"profiles">;
-type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more";
+type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more" | "unlimited";
 
 const PLAN_LIMITS: Record<SubscriptionPlan, { candidates: number; updates: number }> = {
   free: { candidates: 1, updates: 1 },
   new_to_dating: { candidates: 3, updates: 5 },
   dating_often: { candidates: 7, updates: 12 },
   dating_more: { candidates: 12, updates: 20 },
-
+  unlimited: { candidates: 999, updates: 999 },
 };
 
 const PLAN_DISPLAY: Record<SubscriptionPlan, { name: string; price: string }> = {
   free: { name: "Free", price: "$0" },
   new_to_dating: { name: "New to Dating", price: "$9.99" },
   dating_often: { name: "Dating Often", price: "$19.99" },
-  dating_more: { name: "Dating More", price: "$39.99" },
+  dating_more: { name: "Dating More", price: "$29.99" },
+  unlimited: { name: "Unlimited", price: "$39.99" },
 };
 
 const GENDER_OPTIONS = [
@@ -1185,6 +1186,50 @@ const Settings = () => {
                       <><Check className="w-4 h-4 mr-2" />Current Plan</>
                     ) : (
                       "Upgrade to Dating More"
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Unlimited Plan */}
+              <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "unlimited" ? "border-primary bg-primary/5" : ""}`}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-semibold">Unlimited</h4>
+                      <p className="text-sm text-muted-foreground">Unlimited candidates • Unlimited updates</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold">$39.99</p>
+                      <p className="text-xs text-muted-foreground">/month</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t space-y-1.5">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>Unlimited candidate profiles</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>Unlimited updates per candidate</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span>Priority support & early access</span>
+                    </div>
+                  </div>
+                  <Button 
+                    className="w-full mt-4" 
+                    variant={currentPlan === "unlimited" ? "secondary" : "default"}
+                    disabled={currentPlan === "unlimited" || changingPlan !== null}
+                    onClick={() => handleChangePlan("unlimited")}
+                  >
+                    {changingPlan === "unlimited" ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Upgrading...</>
+                    ) : currentPlan === "unlimited" ? (
+                      <><Check className="w-4 h-4 mr-2" />Current Plan</>
+                    ) : (
+                      "Upgrade to Unlimited"
                     )}
                   </Button>
                 </CardContent>
