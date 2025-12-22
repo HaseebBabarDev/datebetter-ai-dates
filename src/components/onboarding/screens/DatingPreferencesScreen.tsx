@@ -44,9 +44,21 @@ const DatingPreferencesScreen = () => {
   };
 
   const handleAgeChange = (field: 'preferredAgeMin' | 'preferredAgeMax', value: string) => {
-    const numValue = value === '' ? undefined : parseInt(value, 10);
-    if (numValue === undefined || (numValue >= 18 && numValue <= 99)) {
+    if (value === '') {
+      updateData({ [field]: undefined });
+      return;
+    }
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue)) {
       updateData({ [field]: numValue });
+    }
+  };
+
+  const handleAgeBlur = (field: 'preferredAgeMin' | 'preferredAgeMax') => {
+    const value = field === 'preferredAgeMin' ? data.preferredAgeMin : data.preferredAgeMax;
+    if (value !== undefined) {
+      if (value < 18) updateData({ [field]: 18 });
+      else if (value > 99) updateData({ [field]: 99 });
     }
   };
 
@@ -95,31 +107,33 @@ const DatingPreferencesScreen = () => {
           <Label className="text-sm">Preferred age range:</Label>
           <div className="flex items-center gap-3">
             <div className="flex-1">
-              <Input
-                type="number"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                placeholder="Min (18+)"
-                min={18}
-                max={99}
-                value={data.preferredAgeMin ?? ''}
-                onChange={(e) => handleAgeChange('preferredAgeMin', e.target.value)}
-                className="text-center"
-              />
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="Min (18+)"
+                  min={18}
+                  max={99}
+                  value={data.preferredAgeMin ?? ''}
+                  onChange={(e) => handleAgeChange('preferredAgeMin', e.target.value)}
+                  onBlur={() => handleAgeBlur('preferredAgeMin')}
+                  className="text-center"
+                />
             </div>
             <span className="text-muted-foreground">to</span>
             <div className="flex-1">
-              <Input
-                type="number"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                placeholder="Max"
-                min={18}
-                max={99}
-                value={data.preferredAgeMax ?? ''}
-                onChange={(e) => handleAgeChange('preferredAgeMax', e.target.value)}
-                className="text-center"
-              />
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="Max"
+                  min={18}
+                  max={99}
+                  value={data.preferredAgeMax ?? ''}
+                  onChange={(e) => handleAgeChange('preferredAgeMax', e.target.value)}
+                  onBlur={() => handleAgeBlur('preferredAgeMax')}
+                  className="text-center"
+                />
             </div>
           </div>
           <p className="text-xs text-muted-foreground">Leave blank for no preference</p>
