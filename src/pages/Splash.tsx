@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Users, MessageCircle, Sparkles, ArrowRight } from "lucide-react";
+import { Users, MessageCircle, Sparkles, ArrowRight, Brain } from "lucide-react";
 
 const ModernLogo = () => (
   <div className="relative w-24 h-24 sm:w-28 sm:h-28">
@@ -104,6 +104,7 @@ const Splash = () => {
         {/* Features */}
         <div className="w-full max-w-xs sm:max-w-sm space-y-2 mb-5">
           <FeatureItem icon={Sparkles} text="AI scores candidates & detects red flags" />
+          <FeatureItem icon={Brain} text="Help me rewire my dating thoughts" />
           <FeatureItem icon={MessageCircle} text="Chat with D.E.V.I. for personalized advice" />
           <FeatureItem icon={Users} text="Join a private community" />
         </div>
