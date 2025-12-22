@@ -97,6 +97,8 @@ const DatingPreferencesScreen = () => {
             <div className="flex-1">
               <Input
                 type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="Min (18+)"
                 min={18}
                 max={99}
@@ -109,6 +111,8 @@ const DatingPreferencesScreen = () => {
             <div className="flex-1">
               <Input
                 type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="Max"
                 min={18}
                 max={99}
