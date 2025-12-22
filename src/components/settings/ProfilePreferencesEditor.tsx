@@ -1082,30 +1082,48 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Preferred Age Range</Label>
-                <span className="text-sm text-muted-foreground">
-                  {formData.preferred_age_min || 18} - {formData.preferred_age_max || 65}
-                </span>
+            <div className="space-y-2">
+              <Label>Preferred Age Range</Label>
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="Min (18+)"
+                    min={18}
+                    max={99}
+                    value={formData.preferred_age_min ?? ''}
+                    onChange={(e) => {
+                      const val = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
+                      if (val === undefined || (val >= 18 && val <= 99)) {
+                        updateField("preferred_age_min", val as number | null);
+                      }
+                    }}
+                    className="text-center"
+                  />
+                </div>
+                <span className="text-muted-foreground">to</span>
+                <div className="flex-1">
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="Max"
+                    min={18}
+                    max={99}
+                    value={formData.preferred_age_max ?? ''}
+                    onChange={(e) => {
+                      const val = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
+                      if (val === undefined || (val >= 18 && val <= 99)) {
+                        updateField("preferred_age_max", val as number | null);
+                      }
+                    }}
+                    className="text-center"
+                  />
+                </div>
               </div>
-              <div className="px-1">
-                <Slider
-                  value={[formData.preferred_age_min || 18, formData.preferred_age_max || 65]}
-                  min={18}
-                  max={99}
-                  step={1}
-                  onValueChange={(values) => {
-                    updateField("preferred_age_min", Math.max(18, values[0]));
-                    updateField("preferred_age_max", Math.max(18, values[1]));
-                  }}
-                  className="w-full"
-                />
-              </div>
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>18</span>
-                <span>99</span>
-              </div>
+              <p className="text-xs text-muted-foreground">Leave blank for no preference</p>
             </div>
             <SliderInput
               label="Physical Attraction Importance"
