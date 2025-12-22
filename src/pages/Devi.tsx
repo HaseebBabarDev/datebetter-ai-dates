@@ -76,7 +76,7 @@ const EXAMPLE_QUESTIONS = [
 const QUICK_REPLIES = [
   "Tell me more",
   "What should I do?",
-  "Is this a red flag?",
+  "Help me rewire my thoughts",
 ];
 
 const MAX_MESSAGE_LENGTH = 400;
