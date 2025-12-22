@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain } from "lucide-react";
 import {
   Tooltip,
@@ -193,6 +194,7 @@ const Devi = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [pendingImage, setPendingImage] = useState<{ data: string; type: string } | null>(null);
+  const [textScreenshotRightSide, setTextScreenshotRightSide] = useState<"me" | "them">("me");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
@@ -712,7 +714,7 @@ const Devi = () => {
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: 'user',
-      content: textToSend || (pendingImage ? getImagePrompt(pendingImage.type) : ''),
+      content: textToSend || (pendingImage ? getImagePrompt(pendingImage.type, textScreenshotRightSide) : ''),
       imageData: pendingImage?.data,
       imageType: pendingImage?.type,
     };
@@ -765,6 +767,8 @@ const Devi = () => {
             messages: apiMessages,
             imageData: userMessage.imageData,
             imageType: userMessage.imageType,
+            textScreenshotRightSide:
+              userMessage.imageType === "text_screenshot" ? textScreenshotRightSide : undefined,
             userProfile,
             candidateProfile: selectedCandidate,
             interactions,
@@ -882,13 +886,16 @@ const Devi = () => {
     }
   };
 
-  const getImagePrompt = (type: string): string => {
+  const getImagePrompt = (type: string, rightSide: "me" | "them"): string => {
     switch (type) {
-      case 'text_screenshot':
-        return "Please analyze this text conversation";
-      case 'ig_profile':
+      case "text_screenshot": {
+        const right = rightSide === "them" ? "the other person (candidate)" : "me (the user)";
+        const left = rightSide === "them" ? "me (the user)" : "the other person (candidate)";
+        return `Please analyze this text conversation screenshot. IMPORTANT: In this screenshot, messages on the RIGHT are from ${right}, and messages on the LEFT are from ${left}.`;
+      }
+      case "ig_profile":
         return "Please analyze this Instagram profile";
-      case 'dating_profile':
+      case "dating_profile":
         return "Please analyze this dating profile";
       default:
         return "Please analyze this image";
@@ -1353,18 +1360,39 @@ const Devi = () => {
         <div className="container mx-auto px-4 py-3 max-w-lg">
           {/* Pending Image Preview */}
           {pendingImage && (
-            <div className="mb-2 relative inline-block">
-              <img 
-                src={pendingImage.data} 
-                alt="To upload" 
-                className="h-20 rounded-lg object-cover"
-              />
-              <button
-                onClick={() => setPendingImage(null)}
-                className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            <div className="mb-2">
+              <div className="relative inline-block">
+                <img 
+                  src={pendingImage.data} 
+                  alt="To upload" 
+                  className="h-20 rounded-lg object-cover"
+                />
+                <button
+                  onClick={() => setPendingImage(null)}
+                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {pendingImage.type === "text_screenshot" && (
+                <div className="mt-2">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    In this screenshot, messages on the right are from:
+                  </p>
+                  <ToggleGroup
+                    type="single"
+                    value={textScreenshotRightSide}
+                    onValueChange={(v) => v && setTextScreenshotRightSide(v as "me" | "them")}
+                    variant="outline"
+                    size="sm"
+                    className="justify-start"
+                  >
+                    <ToggleGroupItem value="me">Me</ToggleGroupItem>
+                    <ToggleGroupItem value="them">Them</ToggleGroupItem>
+                  </ToggleGroup>
+                </div>
+              )}
             </div>
           )}
           

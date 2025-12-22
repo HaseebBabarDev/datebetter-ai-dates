@@ -108,7 +108,7 @@ Your expertise includes:
 - Helping set healthy boundaries based on their stated boundary strength
 
 When analyzing images/screenshots:
-- CRITICAL FOR TEXT SCREENSHOTS: In most messaging apps, the USER's messages appear on the RIGHT side (usually colored/blue bubbles), and the OTHER PERSON's (candidate's) messages appear on the LEFT side (usually white/gray bubbles). Always interpret screenshots this way unless told otherwise.
+- CRITICAL FOR TEXT SCREENSHOTS: Use the explicit orientation instruction provided by the user (e.g., "messages on the RIGHT are from me/them"). Do not guess. If no orientation is provided, assume RIGHT = user and LEFT = candidate.
 - Give your FIRST IMPRESSION briefly (1-2 paragraphs)
 - Mention 1-2 key things you noticed
 - Ask if they want the full breakdown
@@ -166,7 +166,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, imageData, imageType, userProfile, candidateProfile, interactions } = await req.json();
+    const { messages, imageData, imageType, textScreenshotRightSide, userProfile, candidateProfile, interactions } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -210,7 +210,7 @@ serve(async (req) => {
         aiMessages[aiMessages.length - 1] = {
           role: 'user',
           content: [
-            { type: 'text', text: lastMessage.content || getImagePrompt(imageType) },
+            { type: 'text', text: lastMessage.content || getImagePrompt(imageType, textScreenshotRightSide) },
             {
               type: 'image_url',
               image_url: { url: imageData }
@@ -274,10 +274,14 @@ serve(async (req) => {
   }
 });
 
-function getImagePrompt(imageType?: string): string {
+function getImagePrompt(imageType?: string, textScreenshotRightSide?: string): string {
   switch (imageType) {
-    case 'text_screenshot':
-      return "Please analyze this text conversation screenshot. IMPORTANT: Messages on the RIGHT side (usually blue/colored bubbles) are from ME (the user). Messages on the LEFT side (usually white/gray bubbles) are from the OTHER PERSON I'm dating. Based on what you know about me and this person, look for communication patterns, red flags, green flags, and give me your honest assessment.";
+    case 'text_screenshot': {
+      const rightIsThem = textScreenshotRightSide === 'them';
+      const right = rightIsThem ? 'the OTHER PERSON (candidate)' : 'ME (the user)';
+      const left = rightIsThem ? 'ME (the user)' : 'the OTHER PERSON (candidate)';
+      return `Please analyze this text conversation screenshot. IMPORTANT: In this screenshot, messages on the RIGHT are from ${right}. Messages on the LEFT are from ${left}. Based on what you know about me and this person, look for communication patterns, red flags, green flags, and give me your honest assessment.`;
+    }
     case 'ig_profile':
       return "Please analyze this Instagram profile. Based on my preferences and dealbreakers, what does it tell you about this person? Look for authenticity, lifestyle alignment with me, and any red or green flags.";
     case 'dating_profile':
