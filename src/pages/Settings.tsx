@@ -40,7 +40,7 @@ const PLAN_DISPLAY: Record<SubscriptionPlan, { name: string; price: string }> = 
   free: { name: "Free", price: "$0" },
   new_to_dating: { name: "New to Dating", price: "$9.99" },
   dating_often: { name: "Dating Often", price: "$19.99" },
-  dating_more: { name: "Dating More", price: "$29.99" },
+  dating_more: { name: "Dating More", price: "$39.99" },
 };
 
 const GENDER_OPTIONS = [

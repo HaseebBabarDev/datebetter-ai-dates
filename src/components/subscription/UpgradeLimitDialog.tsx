@@ -36,7 +36,7 @@ const PLAN_OPTIONS = [
   {
     id: "dating_more",
     name: "Dating More",
-    price: "$29.99",
+    price: "$39.99",
     candidates: 12,
     updates: 20,
   },
