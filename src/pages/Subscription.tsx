@@ -76,8 +76,8 @@ const SUBSCRIPTION_PLANS = [
   {
     id: "dating_more",
     name: "Dating More",
-    price: "$29.99",
-    priceMonthly: 29.99,
+    price: "$39.99",
+    priceMonthly: 39.99,
     description: "For power users",
     icon: Zap,
     features: [
