@@ -5,6 +5,8 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Check, Crown, Sparkles, Heart, ArrowLeft, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,8 +16,8 @@ const SUBSCRIPTION_PLANS = [
   {
     id: "free",
     name: "Free",
-    price: "$0",
     priceMonthly: 0,
+    priceYearly: 0,
     description: "Try it out",
     icon: Heart,
     features: [
@@ -35,8 +37,8 @@ const SUBSCRIPTION_PLANS = [
   {
     id: "new_to_dating",
     name: "New to Dating",
-    price: "$9.99",
     priceMonthly: 9.99,
+    priceYearly: 95.88, // 20% discount (~$7.99/mo)
     description: "Perfect for getting started",
     icon: Sparkles,
     features: [
@@ -55,8 +57,8 @@ const SUBSCRIPTION_PLANS = [
   {
     id: "dating_often",
     name: "Dating Often",
-    price: "$19.99",
     priceMonthly: 19.99,
+    priceYearly: 191.88, // 20% discount (~$15.99/mo)
     description: "Best for active daters",
     icon: Crown,
     features: [
@@ -76,8 +78,8 @@ const SUBSCRIPTION_PLANS = [
   {
     id: "dating_more",
     name: "Dating More",
-    price: "$39.99",
     priceMonthly: 39.99,
+    priceYearly: 383.88, // 20% discount (~$31.99/mo)
     description: "For power users",
     icon: Zap,
     features: [
@@ -104,6 +106,31 @@ export default function Subscription() {
   const [loading, setLoading] = useState<string | null>(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<typeof SUBSCRIPTION_PLANS[0] | null>(null);
+  const [isYearly, setIsYearly] = useState(false);
+
+  const getDisplayPrice = (plan: typeof SUBSCRIPTION_PLANS[0]) => {
+    if (plan.priceMonthly === 0) return "$0";
+    if (isYearly) {
+      const monthlyEquivalent = plan.priceYearly / 12;
+      return `$${monthlyEquivalent.toFixed(2)}`;
+    }
+    return `$${plan.priceMonthly.toFixed(2)}`;
+  };
+
+  const getTotalPrice = (plan: typeof SUBSCRIPTION_PLANS[0]) => {
+    if (plan.priceMonthly === 0) return "$0";
+    if (isYearly) {
+      return `$${plan.priceYearly.toFixed(2)}`;
+    }
+    return `$${plan.priceMonthly.toFixed(2)}`;
+  };
+
+  const getSavingsPercent = (plan: typeof SUBSCRIPTION_PLANS[0]) => {
+    if (plan.priceMonthly === 0) return 0;
+    const yearlyTotal = plan.priceYearly;
+    const monthlyTotal = plan.priceMonthly * 12;
+    return Math.round(((monthlyTotal - yearlyTotal) / monthlyTotal) * 100);
+  };
 
   const handleSelectPlan = (planId: string) => {
     if (!user) {
@@ -190,6 +217,26 @@ export default function Subscription() {
           </p>
         </div>
 
+        {/* Billing Toggle */}
+        <div className="flex items-center justify-center gap-3 mb-6">
+          <Label htmlFor="billing-toggle" className={`text-sm ${!isYearly ? 'font-semibold' : 'text-muted-foreground'}`}>
+            Monthly
+          </Label>
+          <Switch
+            id="billing-toggle"
+            checked={isYearly}
+            onCheckedChange={setIsYearly}
+          />
+          <Label htmlFor="billing-toggle" className={`text-sm ${isYearly ? 'font-semibold' : 'text-muted-foreground'}`}>
+            Yearly
+          </Label>
+          {isYearly && (
+            <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              Save 20%
+            </Badge>
+          )}
+        </div>
+
         {/* Plans Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {SUBSCRIPTION_PLANS.map((plan) => {
@@ -225,11 +272,21 @@ export default function Subscription() {
                     <CardTitle className="text-base sm:text-lg">{plan.name}</CardTitle>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-2xl sm:text-3xl font-bold">{plan.price}</span>
+                    <span className="text-2xl sm:text-3xl font-bold">{getDisplayPrice(plan)}</span>
                     {isPaidPlan && (
                       <span className="text-xs sm:text-sm text-muted-foreground">/month</span>
                     )}
                   </div>
+                  {isPaidPlan && isYearly && (
+                    <p className="text-xs text-muted-foreground">
+                      Billed {getTotalPrice(plan)}/year
+                    </p>
+                  )}
+                  {isPaidPlan && isYearly && getSavingsPercent(plan) > 0 && (
+                    <Badge variant="outline" className="mt-1 text-xs text-green-600 border-green-600">
+                      Save {getSavingsPercent(plan)}%
+                    </Badge>
+                  )}
                   <CardDescription className="text-xs sm:text-sm">{plan.description}</CardDescription>
                 </CardHeader>
 
@@ -287,8 +344,8 @@ export default function Subscription() {
         <PaymentSheet
           open={paymentOpen}
           onOpenChange={setPaymentOpen}
-          planName={selectedPlan.name}
-          price={selectedPlan.price}
+          planName={`${selectedPlan.name}${isYearly ? ' (Yearly)' : ''}`}
+          price={getTotalPrice(selectedPlan)}
           onPaymentSuccess={handlePaymentSuccess}
         />
       )}
