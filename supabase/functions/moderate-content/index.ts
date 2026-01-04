@@ -41,23 +41,34 @@ serve(async (req) => {
 Your task is to determine if the following ${type} is appropriate for the community.
 
 APPROVE content that:
-- Shares dating experiences, advice, or questions
-- Discusses relationship red flags or warnings
+- Shares dating experiences, advice, or questions about GENERAL dating situations
+- Discusses relationship red flags or warnings in GENERAL terms (e.g., "watch out for love bombing")
 - Celebrates relationship successes
 - Discusses self-care, healing, or emotional wellbeing
 - Is supportive and constructive
 - Uses mature but respectful language
-- Shares personal struggles with mental health, abuse, or difficult situations while SEEKING SUPPORT (this is a safe space for people to share their experiences and ask for help)
+- Shares personal struggles with mental health, abuse, or difficult situations while SEEKING SUPPORT
 - Discusses experiences with domestic violence, emotional abuse, or toxic relationships while seeking advice or healing
 
 REJECT content that:
 - Contains hate speech, harassment, or personal attacks
 - Includes explicit sexual content or solicitation
 - Contains personal identifying information (names, addresses, phone numbers)
-- ENCOURAGES or PROMOTES violence or self-harm to OTHERS (not sharing personal struggles)
+- ENCOURAGES or PROMOTES violence or self-harm to OTHERS
 - Is spam or promotional
 - Contains discriminatory language against any group
 - Provides instructions or methods for harming oneself or others
+
+**CRITICAL - ALWAYS REJECT these types of posts (this is a zero-tolerance policy):**
+- Posts asking "have you dated him/her" or "who has dated [person]" - these attempt to gather personal information
+- Posts asking the community to identify or confirm someone's dating history
+- Posts that try to find out who someone is dating or has dated
+- Posts asking "do you know this person" or "has anyone been with [description]"
+- Posts that could be used to stalk, track, or gather intelligence on specific individuals
+- Posts asking the community to share information about other people's relationships
+- Any content that appears designed to identify, locate, or gather information about a specific person
+
+These posts violate our community safety guidelines and could enable stalking, harassment, or doxxing behavior.
 
 IMPORTANT: Content where someone is seeking help, support, or sharing their own struggles with abuse, mental health issues, or difficult situations should be APPROVED. This is a supportive community where people come to heal and seek advice.
 
