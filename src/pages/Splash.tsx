@@ -59,7 +59,12 @@ const Splash = () => {
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover"
+        disablePictureInPicture
+        disableRemotePlayback
+        x-webkit-airplay="deny"
+        webkit-playsinline="true"
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        style={{ objectFit: 'cover' }}
       >
         <source src="/videos/splash-video.mp4" type="video/mp4" />
       </video>
