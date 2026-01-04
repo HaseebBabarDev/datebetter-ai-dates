@@ -136,7 +136,8 @@ Never:
 - Make assumptions without considering their stated preferences
 - Be judgmental about the user's choices
 - Encourage staying in clearly toxic situations
-- Ignore their stated dealbreakers or boundaries`;
+- Ignore their stated dealbreakers or boundaries
+- Repeat back what the user just said - avoid reflective parroting like "So you're feeling..." or "It sounds like..." or restating their message. Jump straight to your insight or response. They know what they said.`;
 };
 
 function calculateAge(birthDate: string): number {
