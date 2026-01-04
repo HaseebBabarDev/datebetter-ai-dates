@@ -349,8 +349,11 @@ const Settings = () => {
         .maybeSingle();
 
       if (error) throw error;
-      if (data) {
-        setCurrentPlan(data.plan as SubscriptionPlan);
+      if (data && data.plan) {
+        // Validate that the plan is a known value
+        const validPlans: SubscriptionPlan[] = ["free", "new_to_dating", "dating_often", "dating_more", "unlimited"];
+        const plan = validPlans.includes(data.plan as SubscriptionPlan) ? data.plan as SubscriptionPlan : "free";
+        setCurrentPlan(plan);
       }
     } catch (error) {
       console.error("Error fetching subscription:", error);
@@ -408,7 +411,7 @@ const Settings = () => {
       }
 
       setCurrentPlan(newPlan);
-      toast.success(`Upgraded to ${PLAN_DISPLAY[newPlan].name}!`);
+      toast.success(`Upgraded to ${PLAN_DISPLAY[newPlan]?.name || newPlan}!`);
     } catch (error) {
       console.error("Error changing plan:", error);
       toast.error("Failed to change plan");
@@ -979,9 +982,9 @@ const Settings = () => {
                     {currentPlan === "free" ? "Trial" : "Active"}
                   </Badge>
                 </div>
-                <h3 className="text-xl font-bold">{PLAN_DISPLAY[currentPlan].name}</h3>
+                <h3 className="text-xl font-bold">{PLAN_DISPLAY[currentPlan]?.name || "Free"}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {PLAN_LIMITS[currentPlan].candidates} candidate{PLAN_LIMITS[currentPlan].candidates > 1 ? "s" : ""} • {PLAN_LIMITS[currentPlan].updates} update{PLAN_LIMITS[currentPlan].updates > 1 ? "s" : ""} each
+                  {PLAN_LIMITS[currentPlan]?.candidates || 1} candidate{(PLAN_LIMITS[currentPlan]?.candidates || 1) > 1 ? "s" : ""} • {PLAN_LIMITS[currentPlan]?.updates || 1} update{(PLAN_LIMITS[currentPlan]?.updates || 1) > 1 ? "s" : ""} each
                 </p>
               </CardContent>
             </Card>
