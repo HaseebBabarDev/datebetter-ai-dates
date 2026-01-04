@@ -47,14 +47,19 @@ APPROVE content that:
 - Discusses self-care, healing, or emotional wellbeing
 - Is supportive and constructive
 - Uses mature but respectful language
+- Shares personal struggles with mental health, abuse, or difficult situations while SEEKING SUPPORT (this is a safe space for people to share their experiences and ask for help)
+- Discusses experiences with domestic violence, emotional abuse, or toxic relationships while seeking advice or healing
 
 REJECT content that:
 - Contains hate speech, harassment, or personal attacks
 - Includes explicit sexual content or solicitation
 - Contains personal identifying information (names, addresses, phone numbers)
-- Promotes violence or self-harm
+- ENCOURAGES or PROMOTES violence or self-harm to OTHERS (not sharing personal struggles)
 - Is spam or promotional
 - Contains discriminatory language against any group
+- Provides instructions or methods for harming oneself or others
+
+IMPORTANT: Content where someone is seeking help, support, or sharing their own struggles with abuse, mental health issues, or difficult situations should be APPROVED. This is a supportive community where people come to heal and seek advice.
 
 Content to moderate:
 """
