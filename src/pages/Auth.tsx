@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,15 @@ import { toast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, Sparkles, Heart, Shield, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import authBg from "@/assets/auth-bg.jpg";
+import { PinSetupDialog } from "@/components/auth/PinSetupDialog";
+import { PinLoginScreen } from "@/components/auth/PinLoginScreen";
 
 const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const setupMode = searchParams.get("setup");
   const referralCode = searchParams.get("ref");
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user } = useAuth();
   const [isSignUp, setIsSignUp] = useState(searchParams.get("mode") === "signup" || !!referralCode);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -26,6 +28,24 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  
+  // PIN-related state
+  const [showPinSetup, setShowPinSetup] = useState(false);
+  const [showPinLogin, setShowPinLogin] = useState(false);
+  const [savedEmail, setSavedEmail] = useState<string | null>(null);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+
+  // Check for saved login on mount
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("datebetter_saved_email");
+    const pinEnabled = localStorage.getItem("datebetter_pin_enabled");
+    const tempSession = sessionStorage.getItem("datebetter_temp_session");
+    
+    if (storedEmail && pinEnabled === "true" && tempSession && !user) {
+      setSavedEmail(storedEmail);
+      setShowPinLogin(true);
+    }
+  }, [user]);
 
   const getPasswordStrength = () => {
     if (password.length === 0) return { strength: 0, label: "", color: "" };
@@ -123,6 +143,9 @@ const Auth = () => {
       } else {
         toast({ title: isSignUp ? "Account created! Welcome to dateBetter" : "Welcome back!" });
         
+        // Save password temporarily for PIN verification (session only)
+        sessionStorage.setItem("datebetter_temp_session", password);
+        
         // If this was a referral signup, record the referral
         if (isSignUp && referralCode) {
           const { data: { user: newUser } } = await supabase.auth.getUser();
@@ -158,21 +181,40 @@ const Auth = () => {
           }
         }
         
-        // Check onboarding status for returning users
-        if (!isSignUp) {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            const profile = await checkOnboardingStatus(user.id);
+        // Check if user already has PIN set up
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (currentUser) {
+          const { data: existingPin } = await supabase
+            .from("user_pins")
+            .select("id")
+            .eq("user_id", currentUser.id)
+            .single();
+          
+          // Check onboarding status for returning users
+          if (!isSignUp) {
+            const profile = await checkOnboardingStatus(currentUser.id);
             if (profile?.onboarding_completed) {
-              navigate("/dashboard");
+              if (!existingPin) {
+                // Offer PIN setup for returning users without PIN
+                setPendingNavigation("/dashboard");
+                setShowPinSetup(true);
+              } else {
+                // Already has PIN, just navigate
+                navigate("/dashboard");
+              }
               return;
             }
           }
+          
+          // For new users or incomplete onboarding, offer PIN setup
+          const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
+          if (!existingPin) {
+            setPendingNavigation(`/setup${setupQuery}`);
+            setShowPinSetup(true);
+          } else {
+            navigate(`/setup${setupQuery}`);
+          }
         }
-
-        // Preserve chosen setup path if provided in the URL
-        const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
-        navigate(`/setup${setupQuery}`);
       }
     } catch (error) {
       toast({ title: "An error occurred", variant: "destructive" });
@@ -181,11 +223,58 @@ const Auth = () => {
     }
   };
 
+  const handlePinSetupComplete = () => {
+    setShowPinSetup(false);
+    if (pendingNavigation) {
+      navigate(pendingNavigation);
+    }
+  };
+
+  const handlePinSetupSkip = () => {
+    setShowPinSetup(false);
+    if (pendingNavigation) {
+      navigate(pendingNavigation);
+    }
+  };
+
+  const handlePinLoginSuccess = async () => {
+    setShowPinLogin(false);
+    // Check onboarding status
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (currentUser) {
+      const profile = await checkOnboardingStatus(currentUser.id);
+      if (profile?.onboarding_completed) {
+        navigate("/dashboard");
+      } else {
+        navigate("/setup");
+      }
+    }
+  };
+
+  const handleSwitchAccount = () => {
+    setShowPinLogin(false);
+    setSavedEmail(null);
+    localStorage.removeItem("datebetter_saved_email");
+    localStorage.removeItem("datebetter_pin_enabled");
+  };
+
   const canSubmit = isSignUp 
     ? email && password && confirmPassword && password === confirmPassword && termsAccepted && privacyAccepted && strength >= 50
     : email && password;
 
+  // Show PIN login screen if saved credentials exist
+  if (showPinLogin && savedEmail) {
+    return (
+      <PinLoginScreen
+        email={savedEmail}
+        onSuccess={handlePinLoginSuccess}
+        onSwitchAccount={handleSwitchAccount}
+      />
+    );
+  }
+
   return (
+    <>
     <div className="min-h-[100dvh] relative overflow-hidden">
       {/* Background with gradient overlay */}
       <div 
@@ -475,6 +564,14 @@ const Auth = () => {
         </div>
       </main>
     </div>
+    
+    <PinSetupDialog
+      open={showPinSetup}
+      onOpenChange={setShowPinSetup}
+      onComplete={handlePinSetupComplete}
+      onSkip={handlePinSetupSkip}
+    />
+    </>
   );
 };
 
