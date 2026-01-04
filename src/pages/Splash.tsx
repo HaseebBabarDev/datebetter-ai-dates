@@ -63,11 +63,18 @@ const Splash = () => {
         disableRemotePlayback
         x-webkit-airplay="deny"
         webkit-playsinline="true"
+        poster="/videos/splash-poster.jpg"
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         style={{ objectFit: 'cover' }}
       >
         <source src="/videos/splash-video.mp4" type="video/mp4" />
       </video>
+      
+      {/* Fallback background image if video fails */}
+      <div 
+        className="absolute inset-0 w-full h-full bg-cover bg-center -z-10"
+        style={{ backgroundImage: `url('/videos/splash-poster.jpg')` }}
+      />
 
       {/* Gradient overlays */}
       <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/30 to-background/90" />
