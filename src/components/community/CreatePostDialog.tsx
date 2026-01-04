@@ -161,7 +161,15 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
     setContent("");
     setCityTag("");
     setModerationError(null);
+    setShowCrisisAlert(false);
   };
+
+  // Reset form when dialog closes
+  useEffect(() => {
+    if (!open) {
+      resetForm();
+    }
+  }, [open]);
 
   return (
     <>
