@@ -39,6 +39,8 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
+import { detectCrisisContent, CrisisDetectionResult } from "@/lib/crisisDetection";
+import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -213,6 +215,10 @@ const Devi = () => {
   const [showConversationChoice, setShowConversationChoice] = useState(false);
   const [pendingCandidateSelection, setPendingCandidateSelection] = useState<Candidate | null>(null);
   const [existingConversationForChoice, setExistingConversationForChoice] = useState<Conversation | null>(null);
+  
+  // Crisis detection state
+  const [showCrisisAlert, setShowCrisisAlert] = useState(false);
+  const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -716,6 +722,14 @@ const Devi = () => {
       return;
     }
 
+    // Check for crisis content in user message
+    const crisisResult = detectCrisisContent(textToSend);
+    if (crisisResult.detected) {
+      setCrisisSeverity(crisisResult.severity);
+      setShowCrisisAlert(true);
+      // Don't block sending - just show the alert
+    }
+
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: 'user',
@@ -1208,6 +1222,13 @@ const Devi = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Crisis Alert Dialog */}
+      <CrisisAlertDialog
+        open={showCrisisAlert}
+        onClose={() => setShowCrisisAlert(false)}
+        severity={crisisSeverity}
+      />
 
       {/* Requirements Dialog */}
       <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
