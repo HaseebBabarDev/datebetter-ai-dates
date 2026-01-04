@@ -707,16 +707,16 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
               <span className="text-[10px] text-muted-foreground leading-tight">Get dating advice</span>
             </Button>
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
-              className="h-auto py-2 px-3 flex flex-col items-start gap-1 text-left"
+              className="h-auto py-2 px-3 flex flex-col items-start gap-1 text-left bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
               onClick={() => navigate(`/add-candidate?edit=${candidate.id}`)}
             >
               <div className="flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-primary" />
+                <User className="w-3.5 h-3.5" />
                 <span className="text-xs font-medium">Add Details</span>
               </div>
-              <span className="text-[10px] text-muted-foreground leading-tight">Improve accuracy</span>
+              <span className="text-[10px] text-primary/70 leading-tight">Improve accuracy</span>
             </Button>
           </div>
         </div>
