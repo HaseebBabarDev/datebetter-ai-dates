@@ -240,10 +240,14 @@ const Devi = () => {
   const userProfileCompleteness = profileCompletenessResult.percentage;
   const missingProfileFields = profileCompletenessResult.missingFields;
   
-  // Check if user has full profile and at least one interaction
+  // Check if user has full profile - for general chat only profile needed, for candidate chat also need interactions
   const hasFullProfile = userProfileCompleteness === 100;
   const hasInteractions = interactions.length > 0;
-  const canChat = hasFullProfile && hasInteractions;
+  const canChatWithCandidate = hasFullProfile && hasInteractions;
+  const canChatGeneral = hasFullProfile; // General chat only needs profile
+  
+  // Mode: "general" = no candidate, "candidate" = specific candidate
+  const chatMode = selectedCandidate ? "candidate" : "general";
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -580,11 +584,12 @@ const Devi = () => {
   }, [user, currentConversationId, startNewChat]);
 
   const handleImageUpload = (type: string) => {
+    // For image analysis, we need a candidate selected
     if (!selectedCandidate) {
-      toast.error("Please select a candidate first");
+      toast.error("Please select a candidate to analyze images");
       return;
     }
-    if (!canChat) {
+    if (!canChatWithCandidate) {
       setShowProfileDialog(true);
       return;
     }
@@ -701,12 +706,12 @@ const Devi = () => {
     const textToSend = messageText || input.trim();
     if ((!textToSend && !pendingImage) || isLoading) return;
     
-    // Require candidate selection and profile completion
-    if (!selectedCandidate) {
-      toast.error("Please select a candidate first");
+    // Check chat requirements based on mode
+    if (chatMode === "candidate" && !canChatWithCandidate) {
+      setShowProfileDialog(true);
       return;
     }
-    if (!canChat) {
+    if (chatMode === "general" && !canChatGeneral) {
       setShowProfileDialog(true);
       return;
     }
@@ -1080,16 +1085,6 @@ const Devi = () => {
             <span className="text-xs text-muted-foreground shrink-0">Talking about:</span>
             {profilesLoading ? (
               <div className="h-8 w-32 bg-muted rounded-lg animate-pulse" />
-            ) : candidates.length === 0 ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-2"
-                onClick={() => navigate("/add-candidate")}
-              >
-                <Users className="w-4 h-4" />
-                Add a candidate first
-              </Button>
             ) : (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -1103,14 +1098,35 @@ const Devi = () => {
                       </>
                     ) : (
                       <>
-                        <Users className="w-4 h-4" />
-                        Select candidate
+                        <Sparkles className="w-4 h-4 text-primary" />
+                        General
                       </>
                     )}
                     <ChevronDown className="w-4 h-4 ml-auto" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-48">
+                  {/* General option - no candidate */}
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSelectedCandidate(null);
+                      setMessages([]);
+                      setCurrentConversationId(null);
+                      lastLoadedCandidateRef.current = null;
+                    }}
+                    className="gap-2"
+                  >
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    <span className="flex-1">General</span>
+                    {!selectedCandidate && (
+                      <Check className="w-4 h-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                  
+                  {candidates.length > 0 && (
+                    <div className="h-px bg-border my-1" />
+                  )}
+                  
                   {candidates.map((c) => {
                     const hasConversation = conversations.some(conv => conv.candidate_id === c.id);
                     return (
@@ -1136,7 +1152,7 @@ const Devi = () => {
               </DropdownMenu>
             )}
             
-            {/* Update Score Button */}
+            {/* Update Score Button - only show for candidate mode */}
             {selectedCandidate && messages.length > 0 && (
               <Button
                 variant="outline"
@@ -1297,13 +1313,13 @@ const Devi = () => {
                   <p className="text-sm">
                     {selectedCandidate 
                       ? `Hey! 👋 What's going on with ${selectedCandidate.nickname}?`
-                      : "Hey babe! 👋 Pick who we're talking about and spill the tea ☕"}
+                      : "Hey babe! 👋 I'm here to help with anything dating-related. Ask me about dating advice, red flags, self-improvement, or select a candidate to discuss someone specific!"}
                   </p>
                 </div>
               </div>
 
-              {/* Quick prompts as tappable suggestions */}
-              {selectedCandidate && canChat && (
+              {/* Quick prompts - show for both general and candidate mode when can chat */}
+              {((chatMode === "general" && canChatGeneral) || (chatMode === "candidate" && canChatWithCandidate)) && (
                 <div className="pl-10 space-y-2">
                   <p className="text-xs text-muted-foreground mb-2">Try asking:</p>
                   <div className="flex flex-wrap gap-2">
@@ -1318,19 +1334,21 @@ const Devi = () => {
                     ))}
                   </div>
                   
-                  {/* Upload hint - very subtle */}
-                  <button
-                    onClick={() => handleImageUpload('text_screenshot')}
-                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 mt-3"
-                  >
-                    <Camera className="w-3 h-3" />
-                    or send a screenshot
-                  </button>
+                  {/* Upload hint - only for candidate mode */}
+                  {selectedCandidate && (
+                    <button
+                      onClick={() => handleImageUpload('text_screenshot')}
+                      className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 mt-3"
+                    >
+                      <Camera className="w-3 h-3" />
+                      or send a screenshot
+                    </button>
+                  )}
                 </div>
               )}
 
               {/* Locked state - inline */}
-              {selectedCandidate && !canChat && (
+              {!hasFullProfile && (
                 <div className="pl-10">
                   <button
                     onClick={() => setShowProfileDialog(true)}
@@ -1408,19 +1426,22 @@ const Devi = () => {
           )}
           
           {/* Show locked state if requirements not met */}
-          {selectedCandidate && !canChat ? (
+          {!hasFullProfile ? (
             <button
               onClick={() => setShowProfileDialog(true)}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-border bg-muted/50 text-muted-foreground hover:bg-muted transition-colors"
             >
               <Lock className="w-4 h-4" />
-              <span className="text-sm">Complete profile & log interaction to unlock</span>
+              <span className="text-sm">Complete profile to unlock chat</span>
             </button>
-          ) : !selectedCandidate ? (
-            <div className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-border bg-muted/50 text-muted-foreground">
-              <Users className="w-4 h-4" />
-              <span className="text-sm">Select a candidate to start chatting</span>
-            </div>
+          ) : chatMode === "candidate" && !canChatWithCandidate ? (
+            <button
+              onClick={() => setShowProfileDialog(true)}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-border bg-muted/50 text-muted-foreground hover:bg-muted transition-colors"
+            >
+              <Lock className="w-4 h-4" />
+              <span className="text-sm">Log an interaction to unlock chat</span>
+            </button>
           ) : (
             <div className="flex gap-2 items-end" data-tour="devi-input">
               <TooltipProvider delayDuration={400}>
