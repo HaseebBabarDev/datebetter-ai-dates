@@ -721,8 +721,8 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
           </div>
         </div>
 
-        {/* Updates remaining badge */}
-        {canRefresh && (
+        {/* Updates remaining badge - only show when 5 or less */}
+        {canRefresh && remainingUpdates !== null && remainingUpdates <= 5 && (
           <div className="flex justify-center">
             <TooltipProvider>
               <Tooltip>
