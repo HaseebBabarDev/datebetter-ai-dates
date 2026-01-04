@@ -689,6 +689,7 @@ export type Database = {
           dating_motivation: string[] | null
           dating_patterns: Json | null
           dealbreakers: Json | null
+          devi_style: string | null
           distance_preference: string | null
           education_level: string | null
           education_matters: boolean | null
@@ -804,6 +805,7 @@ export type Database = {
           dating_motivation?: string[] | null
           dating_patterns?: Json | null
           dealbreakers?: Json | null
+          devi_style?: string | null
           distance_preference?: string | null
           education_level?: string | null
           education_matters?: boolean | null
@@ -921,6 +923,7 @@ export type Database = {
           dating_motivation?: string[] | null
           dating_patterns?: Json | null
           dealbreakers?: Json | null
+          devi_style?: string | null
           distance_preference?: string | null
           education_level?: string | null
           education_matters?: boolean | null

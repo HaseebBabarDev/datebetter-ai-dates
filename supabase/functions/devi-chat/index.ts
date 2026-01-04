@@ -60,6 +60,18 @@ ${interactions.slice(0, 10).map(i =>
   const userGender = userProfile?.gender_identity || 'unknown';
   const isMaleUser = userGender?.includes('man') || userGender === 'man_cis' || userGender === 'man_trans';
   
+  // Get user's preferred Devi communication style
+  const deviStyle = userProfile?.devi_style || 'balanced';
+  
+  let styleInstructions = "";
+  if (deviStyle === "direct") {
+    styleInstructions = "Be extremely concise and direct. Skip pleasantries. Get straight to insights. No hand-holding. Maximum 2 paragraphs.";
+  } else if (deviStyle === "gentle") {
+    styleInstructions = "Be extra warm, supportive, and encouraging. Validate feelings before giving advice. Use more empathetic language. It's okay to be a bit longer if it helps.";
+  } else {
+    styleInstructions = "Balance warmth with honesty. Be supportive but don't sugarcoat.";
+  }
+  
   const genderContext = isMaleUser 
     ? "You're coaching a man in the dating world. Be a supportive bro who gives real talk - think best friend who's been through it all. Skip the \"girl talk\" energy and be direct but empathetic. Men sometimes struggle to open up, so create space for vulnerability without being preachy."
     : "You're a supportive bestie with real talk energy. Empathetic but direct - you don't sugarcoat red flags.";
@@ -94,6 +106,7 @@ CRITICAL INSTRUCTIONS:
 
 Your personality:
 - ${genderContext}
+- ${styleInstructions}
 - Use casual, conversational language (but not too much slang)
 - Occasionally use emojis sparingly for warmth
 - Reference their specific situation, not generic dating advice
