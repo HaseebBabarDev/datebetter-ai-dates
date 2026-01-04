@@ -58,7 +58,7 @@ const DatingPreferencesScreen = () => {
     const value = field === 'preferredAgeMin' ? data.preferredAgeMin : data.preferredAgeMax;
     if (value !== undefined) {
       if (value < 18) updateData({ [field]: 18 });
-      else if (value > 99) updateData({ [field]: 99 });
+      else if (value > 100) updateData({ [field]: 100 });
     }
   };
 
@@ -113,7 +113,7 @@ const DatingPreferencesScreen = () => {
                   pattern="[0-9]*"
                   placeholder="Min (18+)"
                   min={18}
-                  max={99}
+                  max={100}
                   value={data.preferredAgeMin ?? ''}
                   onChange={(e) => handleAgeChange('preferredAgeMin', e.target.value)}
                   onBlur={() => handleAgeBlur('preferredAgeMin')}
@@ -128,7 +128,7 @@ const DatingPreferencesScreen = () => {
                   pattern="[0-9]*"
                   placeholder="Max"
                   min={18}
-                  max={99}
+                  max={100}
                   value={data.preferredAgeMax ?? ''}
                   onChange={(e) => handleAgeChange('preferredAgeMax', e.target.value)}
                   onBlur={() => handleAgeBlur('preferredAgeMax')}

@@ -1092,12 +1092,19 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                     pattern="[0-9]*"
                     placeholder="Min (18+)"
                     min={18}
-                    max={99}
+                    max={100}
                     value={formData.preferred_age_min ?? ''}
                     onChange={(e) => {
                       const val = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
-                      if (val === undefined || (val >= 18 && val <= 99)) {
+                      if (val === undefined || (val >= 18 && val <= 100)) {
                         updateField("preferred_age_min", val as number | null);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const val = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
+                      if (val !== undefined) {
+                        if (val < 18) updateField("preferred_age_min", 18);
+                        else if (val > 100) updateField("preferred_age_min", 100);
                       }
                     }}
                     className="text-center"
@@ -1111,12 +1118,19 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                     pattern="[0-9]*"
                     placeholder="Max"
                     min={18}
-                    max={99}
+                    max={100}
                     value={formData.preferred_age_max ?? ''}
                     onChange={(e) => {
                       const val = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
-                      if (val === undefined || (val >= 18 && val <= 99)) {
+                      if (val === undefined || (val >= 18 && val <= 100)) {
                         updateField("preferred_age_max", val as number | null);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const val = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
+                      if (val !== undefined) {
+                        if (val < 18) updateField("preferred_age_max", 18);
+                        else if (val > 100) updateField("preferred_age_max", 100);
                       }
                     }}
                     className="text-center"
