@@ -30,6 +30,8 @@ import {
   Home,
   Ban,
   Shield,
+  Sparkles,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
@@ -37,8 +39,18 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
 type AdviceTracking = Tables<"advice_tracking">;
+type DeviConversation = Tables<"devi_conversations">;
+type DeviMessage = Tables<"devi_messages">;
 
 type NoContactProgress = Tables<"no_contact_progress">;
+
+interface CandidateDeviStats {
+  candidateId: string;
+  nickname: string;
+  conversationCount: number;
+  messageCount: number;
+  lastChatDate: string | null;
+}
 
 interface PatternStats {
   totalCandidates: number;
@@ -75,6 +87,14 @@ interface PatternStats {
     avgDaysCompleted: number;
   };
   ncTrendData: { day: number; reached: number; hoover: number }[];
+  deviMetrics: {
+    totalConversations: number;
+    totalMessages: number;
+    candidatesWithChats: number;
+    candidatesWithoutChats: number;
+    avgMessagesPerConversation: number;
+  };
+  candidateDeviStats: CandidateDeviStats[];
 }
 
 const Patterns = () => {
@@ -91,17 +111,21 @@ const Patterns = () => {
 
   const fetchPatternData = async () => {
     try {
-      const [candidatesRes, interactionsRes, adviceRes, ncProgressRes] = await Promise.all([
+      const [candidatesRes, interactionsRes, adviceRes, ncProgressRes, deviConversationsRes, deviMessagesRes] = await Promise.all([
         supabase.from("candidates").select("*").eq("user_id", user!.id),
         supabase.from("interactions").select("*").eq("user_id", user!.id),
         supabase.from("advice_tracking").select("*").eq("user_id", user!.id),
         supabase.from("no_contact_progress").select("*").eq("user_id", user!.id),
+        supabase.from("devi_conversations").select("*").eq("user_id", user!.id),
+        supabase.from("devi_messages").select("*").eq("user_id", user!.id),
       ]);
 
       const candidates = candidatesRes.data || [];
       const interactions = interactionsRes.data || [];
       const advice = adviceRes.data || [];
       const ncProgress = ncProgressRes.data || [];
+      const deviConversations = deviConversationsRes.data || [];
+      const deviMessages = deviMessagesRes.data || [];
 
       // Calculate stats
       const activeCandidates = candidates.filter(
@@ -278,6 +302,34 @@ const Patterns = () => {
         ncTrendData.push({ day, reached: reachedThisDay, hoover: hooverOnDay });
       }
 
+      // Devi Engagement Metrics
+      const conversationsWithCandidates = deviConversations.filter((c) => c.candidate_id !== null);
+      const candidateIdsWithChats = new Set(conversationsWithCandidates.map((c) => c.candidate_id));
+      const candidatesWithChats = candidates.filter((c) => candidateIdsWithChats.has(c.id)).length;
+      const candidatesWithoutChats = candidates.length - candidatesWithChats;
+      
+      const avgMessagesPerConversation = deviConversations.length > 0
+        ? Math.round(deviMessages.length / deviConversations.length)
+        : 0;
+
+      // Per-candidate Devi stats
+      const candidateDeviStats: CandidateDeviStats[] = candidates.map((candidate) => {
+        const candidateConversations = deviConversations.filter((c) => c.candidate_id === candidate.id);
+        const conversationIds = new Set(candidateConversations.map((c) => c.id));
+        const candidateMessages = deviMessages.filter((m) => conversationIds.has(m.conversation_id));
+        
+        const lastConversation = candidateConversations
+          .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0];
+
+        return {
+          candidateId: candidate.id,
+          nickname: candidate.nickname,
+          conversationCount: candidateConversations.length,
+          messageCount: candidateMessages.length,
+          lastChatDate: lastConversation?.updated_at || null,
+        };
+      }).sort((a, b) => b.messageCount - a.messageCount);
+
       setStats({
         totalCandidates: candidates.length,
         activeCandidates: activeCandidates.length,
@@ -313,6 +365,14 @@ const Patterns = () => {
           avgDaysCompleted,
         },
         ncTrendData,
+        deviMetrics: {
+          totalConversations: deviConversations.length,
+          totalMessages: deviMessages.length,
+          candidatesWithChats,
+          candidatesWithoutChats,
+          avgMessagesPerConversation,
+        },
+        candidateDeviStats,
       });
     } catch (error) {
       console.error("Error fetching pattern data:", error);
@@ -696,6 +756,96 @@ const Patterns = () => {
 
             {/* Insights Tab */}
             <TabsContent value="insights" className="space-y-4">
+              {/* D.E.V.I. Engagement Overview */}
+              <Card className="border-primary/30 bg-primary/5">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                    D.E.V.I. Engagement
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-3 bg-primary/10 rounded-lg text-center">
+                      <MessageSquare className="w-4 h-4 mx-auto mb-1 text-primary" />
+                      <div className="text-lg font-bold text-primary">{stats.deviMetrics.totalConversations}</div>
+                      <div className="text-xs text-muted-foreground">Conversations</div>
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg text-center">
+                      <MessageCircle className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                      <div className="text-lg font-bold">{stats.deviMetrics.totalMessages}</div>
+                      <div className="text-xs text-muted-foreground">Total Messages</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-3 bg-green-500/10 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">With Devi chats</span>
+                        <span className="text-sm font-bold text-green-600">{stats.deviMetrics.candidatesWithChats}</span>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-amber-500/10 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Missing chats</span>
+                        <span className="text-sm font-bold text-amber-600">{stats.deviMetrics.candidatesWithoutChats}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {stats.deviMetrics.totalConversations > 0 && (
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Avg messages per conversation</span>
+                        <span className="text-sm font-bold">{stats.deviMetrics.avgMessagesPerConversation}</span>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Per-Candidate Devi Stats */}
+              {stats.candidateDeviStats.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Devi Chats by Candidate
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {stats.candidateDeviStats.slice(0, 8).map((candidate) => (
+                      <div 
+                        key={candidate.candidateId} 
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                        onClick={() => navigate(`/candidate/${candidate.candidateId}`)}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className={`w-2 h-2 rounded-full shrink-0 ${candidate.conversationCount > 0 ? 'bg-green-500' : 'bg-amber-400'}`} />
+                          <span className="text-sm truncate">{candidate.nickname}</span>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <div className="text-right">
+                            <span className="text-xs font-medium">{candidate.messageCount}</span>
+                            <span className="text-xs text-muted-foreground ml-1">msgs</span>
+                          </div>
+                          {candidate.lastChatDate && (
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(candidate.lastChatDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                            </span>
+                          )}
+                          {candidate.conversationCount === 0 && (
+                            <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/20">
+                              No chats
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
               {stats.totalAdviceGiven > 0 && (
                 <Card>
                   <CardHeader className="pb-2">
@@ -761,13 +911,13 @@ const Patterns = () => {
                 </Card>
               )}
 
-              {stats.totalAdviceGiven === 0 && (
+              {stats.totalAdviceGiven === 0 && stats.deviMetrics.totalConversations === 0 && (
                 <Card>
                   <CardContent className="py-12 text-center">
-                    <Lightbulb className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="font-medium text-foreground mb-2">No Advice Yet</h3>
+                    <Sparkles className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="font-medium text-foreground mb-2">Start Chatting with D.E.V.I.</h3>
                     <p className="text-sm text-muted-foreground">
-                      AI advice insights will appear here once you start receiving recommendations.
+                      Get personalized dating advice and insights by chatting with D.E.V.I. about your candidates.
                     </p>
                   </CardContent>
                 </Card>
