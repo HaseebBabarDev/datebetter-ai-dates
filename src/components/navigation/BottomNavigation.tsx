@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { path: "/dashboard", label: "Home", icon: Home },
-  { path: "/community", label: "Community", icon: Users },
   { path: "/devi", label: "D.E.V.I.", icon: Sparkles },
+  { path: "/community", label: "Community", icon: Users },
   { path: "/settings", label: "Settings", icon: Settings },
 ];
 
