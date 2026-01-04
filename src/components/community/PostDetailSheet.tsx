@@ -15,6 +15,8 @@ import { Heart, Send, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { detectCrisisContent } from "@/lib/crisisDetection";
+import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
 
 type ForumCategory = "dating_advice" | "red_flag_warnings" | "success_stories" | "self_care_healing";
 
@@ -69,6 +71,8 @@ export function PostDetailSheet({ post, onClose, currentScreenName, onPostUpdate
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [localPost, setLocalPost] = useState<ForumPost | null>(null);
+  const [showCrisisAlert, setShowCrisisAlert] = useState(false);
+  const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
 
   useEffect(() => {
     if (post) {
@@ -198,6 +202,14 @@ export function PostDetailSheet({ post, onClose, currentScreenName, onPostUpdate
   const handleSubmitComment = async () => {
     if (!user || !post || !newComment.trim()) return;
 
+    // Check for crisis content
+    const crisisResult = detectCrisisContent(newComment);
+    if (crisisResult.detected) {
+      setCrisisSeverity(crisisResult.severity);
+      setShowCrisisAlert(true);
+      // Don't block commenting - just show the alert
+    }
+
     setSubmitting(true);
     try {
       // Moderate content
@@ -246,6 +258,13 @@ export function PostDetailSheet({ post, onClose, currentScreenName, onPostUpdate
   if (!localPost) return null;
 
   return (
+    <>
+      {/* Crisis Alert Dialog */}
+      <CrisisAlertDialog
+        open={showCrisisAlert}
+        onClose={() => setShowCrisisAlert(false)}
+        severity={crisisSeverity}
+      />
     <Sheet open={!!post} onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
         <SheetHeader className="pb-4 border-b border-border">
@@ -354,5 +373,6 @@ export function PostDetailSheet({ post, onClose, currentScreenName, onPostUpdate
         </div>
       </SheetContent>
     </Sheet>
+    </>
   );
 }

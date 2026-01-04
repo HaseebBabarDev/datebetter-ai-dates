@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/select";
 import { Loader2, AlertCircle, MapPin, Shield, Heart } from "lucide-react";
 import { toast } from "sonner";
+import { detectCrisisContent } from "@/lib/crisisDetection";
+import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
 
 type ForumCategory = "dating_advice" | "red_flag_warnings" | "success_stories" | "self_care_healing";
 
@@ -64,6 +66,8 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
   const [moderationError, setModerationError] = useState<string | null>(null);
   const [showFirstPostDisclosure, setShowFirstPostDisclosure] = useState(false);
   const [hasPostedBefore, setHasPostedBefore] = useState<boolean | null>(null);
+  const [showCrisisAlert, setShowCrisisAlert] = useState(false);
+  const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
 
   useEffect(() => {
     if (open && user && hasPostedBefore === null) {
@@ -93,6 +97,14 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
   };
   const handleSubmit = async () => {
     if (!user || !category || !title.trim() || !content.trim()) return;
+
+    // Check for crisis content
+    const crisisResult = detectCrisisContent(title + " " + content);
+    if (crisisResult.detected) {
+      setCrisisSeverity(crisisResult.severity);
+      setShowCrisisAlert(true);
+      // Don't block posting - just show the alert
+    }
 
     setIsSubmitting(true);
     setModerationError(null);
@@ -153,6 +165,13 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
 
   return (
     <>
+      {/* Crisis Alert Dialog */}
+      <CrisisAlertDialog
+        open={showCrisisAlert}
+        onClose={() => setShowCrisisAlert(false)}
+        severity={crisisSeverity}
+      />
+
       {/* First Post Disclosure Dialog */}
       <AlertDialog open={showFirstPostDisclosure} onOpenChange={setShowFirstPostDisclosure}>
         <AlertDialogContent className="max-w-md">
