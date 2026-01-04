@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -990,6 +990,17 @@ const Devi = () => {
               title="New Chat"
             >
               <Plus className="w-5 h-5" />
+            </Button>
+            
+            {/* Adjust Tone Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/settings?tab=preferences")}
+              className="rounded-xl shrink-0"
+              title="Adjust Devi's Tone"
+            >
+              <SlidersHorizontal className="w-5 h-5" />
             </Button>
             
             {/* Chat History Sheet */}
