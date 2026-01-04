@@ -41,16 +41,27 @@ export const PinManagement: React.FC<PinManagementProps> = ({ userId }) => {
 
   const checkPinStatus = async () => {
     try {
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
+      
       const { data, error } = await supabase
         .from("user_pins")
         .select("id")
         .eq("user_id", userId)
         .maybeSingle();
 
-      if (error) throw error;
-      setHasPin(!!data);
+      if (error) {
+        console.error("Error checking PIN status:", error);
+        // Don't throw - just set hasPin to false and continue
+        setHasPin(false);
+      } else {
+        setHasPin(!!data);
+      }
     } catch (error) {
       console.error("Error checking PIN status:", error);
+      setHasPin(false);
     } finally {
       setLoading(false);
     }
