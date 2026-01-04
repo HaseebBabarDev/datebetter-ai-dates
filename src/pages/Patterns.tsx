@@ -765,7 +765,7 @@ const Patterns = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <div className="p-3 bg-primary/10 rounded-lg text-center">
                       <MessageSquare className="w-4 h-4 mx-auto mb-1 text-primary" />
                       <div className="text-lg font-bold text-primary">{stats.deviMetrics.totalConversations}</div>
@@ -774,33 +774,14 @@ const Patterns = () => {
                     <div className="p-3 bg-muted rounded-lg text-center">
                       <MessageCircle className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
                       <div className="text-lg font-bold">{stats.deviMetrics.totalMessages}</div>
-                      <div className="text-xs text-muted-foreground">Total Messages</div>
+                      <div className="text-xs text-muted-foreground">Messages</div>
+                    </div>
+                    <div className="p-3 bg-green-500/10 rounded-lg text-center">
+                      <Users className="w-4 h-4 mx-auto mb-1 text-green-600" />
+                      <div className="text-lg font-bold text-green-600">{stats.deviMetrics.candidatesWithChats}</div>
+                      <div className="text-xs text-muted-foreground">Discussed</div>
                     </div>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="p-3 bg-green-500/10 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">With Devi chats</span>
-                        <span className="text-sm font-bold text-green-600">{stats.deviMetrics.candidatesWithChats}</span>
-                      </div>
-                    </div>
-                    <div className="p-3 bg-amber-500/10 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">Missing chats</span>
-                        <span className="text-sm font-bold text-amber-600">{stats.deviMetrics.candidatesWithoutChats}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {stats.deviMetrics.totalConversations > 0 && (
-                    <div className="p-3 bg-muted/50 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">Avg messages per conversation</span>
-                        <span className="text-sm font-bold">{stats.deviMetrics.avgMessagesPerConversation}</span>
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
 
