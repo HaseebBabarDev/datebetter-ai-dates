@@ -19,6 +19,7 @@ import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Ma
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { ProfilePhotoUpload } from "@/components/settings/ProfilePhotoUpload";
+import { PinManagement } from "@/components/settings/PinManagement";
 import { Badge } from "@/components/ui/badge";
 import { PaymentSheet } from "@/components/subscription/PaymentSheet";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
@@ -747,6 +748,9 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* PIN Management */}
+            <PinManagement userId={user.id} />
 
             {/* Delete Account */}
             <Card className="border-destructive/20 bg-destructive/5">
