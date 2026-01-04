@@ -73,7 +73,7 @@ const MentalHealthScreen = () => {
 
         {(data.isNeurodivergent === "yes" || data.isNeurodivergent === "exploring") && (
           <div className="space-y-3">
-            <Label>Which applies to you? (Select all)</Label>
+            <Label className="text-sm font-medium">Which applies to you? (Select all)</Label>
             <div className="grid grid-cols-2 gap-2">
               {neurodivergenceTypes.map((type) => (
                 <MultiSelectOption
