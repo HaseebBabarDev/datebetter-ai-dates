@@ -93,23 +93,33 @@ function normalizeTextValue(value: unknown): string | null {
   return v ? v : null;
 }
 
+// Education level hierarchy (higher index = higher education)
+const EDUCATION_HIERARCHY: Record<string, number> = {
+  "high_school": 1,
+  "some_college": 2,
+  "associates": 3,
+  "bachelors": 4,
+  "masters": 5,
+  "doctorate": 6,
+  "phd": 6,
+};
+
+function getEducationLevel(value: string | null): number {
+  if (!value) return 0;
+  const key = value.toLowerCase().replace(/[^a-z_]/g, "");
+  return EDUCATION_HIERARCHY[key] || 0;
+}
+
 function enforceEducationConsistency(analysis: any, profile: any, candidate: any) {
-  const userEduRaw = normalizeTextValue(profile?.education_level);
   const userPrefEduRaw = normalizeTextValue((profile as any)?.preferred_education_level);
   const candEduRaw = normalizeTextValue(candidate?.their_education_level);
 
   // If we don't know the candidate's education, we can't validate claims about it.
   if (!candEduRaw) return;
 
-  const userEduKey = userEduRaw?.toLowerCase() || null;
-  const userPrefEduKey = userPrefEduRaw?.toLowerCase() || null;
-  const candEduKey = candEduRaw.toLowerCase();
+  const userPrefEduLevel = getEducationLevel(userPrefEduRaw);
+  const candEduLevel = getEducationLevel(candEduRaw);
 
-  const mismatchWithUserEdu = !!(userEduKey && candEduKey && userEduKey !== candEduKey);
-  const mismatchWithPreference = !!(userPrefEduKey && candEduKey && userPrefEduKey !== candEduKey);
-  if (!mismatchWithUserEdu && !mismatchWithPreference) return;
-
-  const userEduFriendly = userEduRaw ? formatEnumValue(userEduRaw) : null;
   const userPrefEduFriendly = userPrefEduRaw ? formatEnumValue(userPrefEduRaw) : null;
   const candEduFriendly = formatEnumValue(candEduRaw);
 
@@ -126,25 +136,21 @@ function enforceEducationConsistency(analysis: any, profile: any, candidate: any
 
     const removed = before - analysis.strengths.length;
     if (removed > 0) {
-      analysis.strengths.unshift("You’re clear about your standards around education and long-term stability.");
+      analysis.strengths.unshift("You're clear about your standards around education and long-term stability.");
     }
   }
 
-  if (Array.isArray(analysis?.concerns)) {
+  // Only flag if candidate's education is LOWER than preference
+  // Higher education than preferred is always acceptable
+  if (Array.isArray(analysis?.concerns) && userPrefEduLevel > 0 && candEduLevel > 0) {
     const alreadyMentionsEducation = analysis.concerns.some(
       (c: unknown) => typeof c === "string" && c.toLowerCase().includes("education")
     );
 
-    if (!alreadyMentionsEducation) {
-      let concern: string | null = null;
-
-      if (userPrefEduFriendly && mismatchWithPreference) {
-        concern = `Education alignment may be a mismatch: you prefer a partner with ${userPrefEduFriendly}, but ${candidate.nickname} has ${candEduFriendly}.`;
-      } else if (userEduFriendly && mismatchWithUserEdu) {
-        concern = `Education alignment may be a mismatch: you have ${userEduFriendly}, and ${candidate.nickname} has ${candEduFriendly}.`;
-      }
-
-      if (concern) analysis.concerns.unshift(concern);
+    // Only add concern if candidate's education is BELOW the user's preference
+    if (!alreadyMentionsEducation && candEduLevel < userPrefEduLevel && userPrefEduFriendly) {
+      const concern = `Education alignment: you prefer a partner with ${userPrefEduFriendly}, but ${candidate.nickname} has ${candEduFriendly}.`;
+      analysis.concerns.unshift(concern);
     }
   }
 }
