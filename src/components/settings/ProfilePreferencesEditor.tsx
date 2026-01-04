@@ -30,6 +30,7 @@ import {
 import { toast } from "sonner";
 import { MultiSelectOption } from "@/components/onboarding/MultiSelectOption";
 import { Progress } from "@/components/ui/progress";
+import { DeviSettings } from "@/components/settings/DeviSettings";
 
 type Profile = Tables<"profiles">;
 
@@ -1386,6 +1387,9 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+
+      {/* D.E.V.I. Settings */}
+      {user && <DeviSettings userId={user.id} />}
 
       <Button onClick={handleSave} className="w-full" disabled={saving}>
         <Save className="w-4 h-4 mr-2" />
