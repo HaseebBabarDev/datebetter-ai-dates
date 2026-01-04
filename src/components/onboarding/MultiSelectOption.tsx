@@ -22,11 +22,11 @@ export const MultiSelectOption: React.FC<MultiSelectOptionProps> = ({
       type="button"
       onClick={onClick}
       className={cn(
-        "px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-200",
-        "hover:border-primary/50",
+        "px-2.5 py-2 rounded-xl border text-xs font-medium transition-all duration-150",
+        "hover:border-primary/40",
         selected
-          ? "border-primary bg-primary-very-light text-primary"
-          : "border-border bg-card text-foreground",
+          ? "border-primary/60 bg-primary/5 text-primary"
+          : "border-border/60 bg-card text-foreground",
         className
       )}
     >
