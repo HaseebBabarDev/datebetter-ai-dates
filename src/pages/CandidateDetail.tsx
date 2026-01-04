@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban, Home, XCircle, RefreshCw, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban, Home, XCircle, RefreshCw, AlertTriangle, Pencil } from "lucide-react";
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
 import { FlagsSection } from "@/components/candidate/FlagsSection";
@@ -611,14 +611,25 @@ const CandidateDetail = () => {
               )}
             </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="text-muted-foreground"
-            onClick={() => setShowAccountabilityDialog(true)}
-          >
-            <Trash2 className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-primary"
+              onClick={() => navigate(`/add-candidate?edit=${candidate.id}`)}
+              title="Edit candidate info"
+            >
+              <Pencil className="w-5 h-5" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-muted-foreground"
+              onClick={() => setShowAccountabilityDialog(true)}
+            >
+              <Trash2 className="w-5 h-5" />
+            </Button>
+          </div>
           <AlertDialog open={showAccountabilityDialog} onOpenChange={setShowAccountabilityDialog}>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -886,7 +897,8 @@ const CandidateDetail = () => {
             </Tooltip>
           </TabsList>
 
-          <TabsContent value="profile" className="mt-4">
+          <TabsContent value="profile" className="mt-4 space-y-4">
+            <ProfileCompleteness candidate={candidate} />
             <CompatibilityScore
               candidate={candidate}
               onUpdate={(updates) => setCandidate({ ...candidate, ...updates })}
