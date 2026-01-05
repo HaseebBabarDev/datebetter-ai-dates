@@ -218,6 +218,11 @@ const Auth = () => {
                 setPendingNavigation("/dashboard");
                 setShowPinSetup(true);
               } else {
+                // User has PIN - save email for quick login next time
+                if (currentUser.email) {
+                  localStorage.setItem("datebetter_saved_email", currentUser.email);
+                  localStorage.setItem("datebetter_pin_enabled", "true");
+                }
                 navigate("/dashboard");
               }
               return;
@@ -228,6 +233,11 @@ const Auth = () => {
               setPendingNavigation(`/setup${setupQuery}`);
               setShowPinSetup(true);
             } else {
+              // User has PIN - save email for quick login next time
+              if (currentUser.email) {
+                localStorage.setItem("datebetter_saved_email", currentUser.email);
+                localStorage.setItem("datebetter_pin_enabled", "true");
+              }
               navigate(`/setup${setupQuery}`);
             }
           }
