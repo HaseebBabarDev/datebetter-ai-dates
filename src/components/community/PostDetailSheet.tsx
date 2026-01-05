@@ -31,6 +31,7 @@ interface ForumPost {
   created_at: string;
   screen_name?: string;
   has_liked?: boolean;
+  image_url?: string | null;
 }
 
 interface Comment {
@@ -284,6 +285,44 @@ export function PostDetailSheet({ post, onClose, currentScreenName, onPostUpdate
           {/* Post Content */}
           <div className="space-y-4 pb-6 border-b border-border">
             <p className="text-sm whitespace-pre-wrap">{localPost.content}</p>
+            
+            {/* Post Images */}
+            {localPost.image_url && (() => {
+              try {
+                const images = JSON.parse(localPost.image_url);
+                if (Array.isArray(images) && images.length > 0) {
+                  return (
+                    <div className={`grid gap-2 ${images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                      {images.map((url: string, idx: number) => (
+                        <div 
+                          key={idx} 
+                          className={`relative overflow-hidden rounded-lg ${images.length === 1 ? 'aspect-video' : 'aspect-square'}`}
+                        >
+                          <img
+                            src={url}
+                            alt={`Post image ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  );
+                }
+              } catch {
+                // Single image URL (backwards compatibility)
+                return (
+                  <div className="relative aspect-video overflow-hidden rounded-lg">
+                    <img
+                      src={localPost.image_url}
+                      alt="Post image"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
             <Button
               variant="ghost"
               size="sm"

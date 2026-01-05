@@ -14,11 +14,12 @@ serve(async (req) => {
   }
 
   try {
-    const { title, content, type } = await req.json();
+    const { title, content, type, images } = await req.json();
 
     const textToModerate = title ? `${title}\n\n${content}` : content;
+    const hasImages = images && Array.isArray(images) && images.length > 0;
 
-    if (!textToModerate || textToModerate.trim().length === 0) {
+    if ((!textToModerate || textToModerate.trim().length === 0) && !hasImages) {
       return new Response(
         JSON.stringify({ approved: true }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -30,6 +31,89 @@ serve(async (req) => {
     
     if (!lovableApiKey) {
       console.log("No LOVABLE_API_KEY found, approving content by default");
+      return new Response(
+        JSON.stringify({ approved: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // If there are images, moderate them first
+    if (hasImages) {
+      console.log(`Moderating ${images.length} images`);
+      
+      const imageContents = images.map((base64: string) => ({
+        type: "image_url",
+        image_url: {
+          url: `data:image/jpeg;base64,${base64}`,
+        },
+      }));
+
+      const imageModPrompt = `You are a content moderator. Analyze these images and determine if they are appropriate for a women's dating community app.
+
+REJECT images that contain:
+- Nudity or sexually explicit content
+- Pornographic or sexually suggestive material
+- Genitalia or exposed private parts
+- Sexual acts or poses
+- Gore, violence, or graphic injuries
+- Hate symbols or offensive imagery
+- Drug use or paraphernalia
+
+APPROVE images that are:
+- Normal photos of people (clothed appropriately)
+- Screenshots of dating app conversations
+- Memes or graphics that are safe for work
+- Nature, food, places, or other benign content
+
+Respond in JSON format only:
+{
+  "approved": true/false,
+  "reason": "Brief explanation if rejected, null if approved"
+}`;
+
+      const imageResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${lovableApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-lite",
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: imageModPrompt },
+                ...imageContents,
+              ],
+            },
+          ],
+          response_format: { type: "json_object" },
+        }),
+      });
+
+      if (imageResponse.ok) {
+        const imageData = await imageResponse.json();
+        const imageResult = JSON.parse(imageData.choices[0].message.content);
+        console.log("Image moderation result:", imageResult);
+        
+        if (!imageResult.approved) {
+          return new Response(
+            JSON.stringify({
+              approved: false,
+              reason: imageResult.reason || "One or more images contain inappropriate content. Please remove them and try again.",
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } else {
+        console.error("Image moderation failed:", await imageResponse.text());
+        // Fail open for image moderation errors
+      }
+    }
+
+    // Now moderate text content if present
+    if (!textToModerate || textToModerate.trim().length === 0) {
       return new Response(
         JSON.stringify({ approved: true }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
