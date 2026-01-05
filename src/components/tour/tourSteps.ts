@@ -14,6 +14,12 @@ export const DASHBOARD_TOUR_STEPS: TourStep[] = [
     placement: "bottom",
   },
   {
+    target: "[data-tour='view-patterns']",
+    title: "View Your Patterns",
+    description: "Discover trends in your dating behaviors. See what types you're drawn to and learn from your relationship history.",
+    placement: "bottom",
+  },
+  {
     target: "[data-tour='cycle-status']",
     title: "Cycle Awareness",
     description: "Track your hormone cycle to understand how it affects your dating decisions. Make clearer choices at the right time.",
