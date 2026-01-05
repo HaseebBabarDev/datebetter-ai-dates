@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import authBg from "@/assets/auth-bg.jpg";
 import { PinSetupDialog } from "@/components/auth/PinSetupDialog";
 import { PinLoginScreen } from "@/components/auth/PinLoginScreen";
+import { PinEnableQuickLoginDialog } from "@/components/auth/PinEnableQuickLoginDialog";
+import { PIN_SESSION_STORAGE_KEY } from "@/lib/pinCrypto";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -32,22 +34,24 @@ const Auth = () => {
   // PIN-related state
   const [showPinSetup, setShowPinSetup] = useState(false);
   const [showPinLogin, setShowPinLogin] = useState(false);
+  const [showEnablePinQuickLogin, setShowEnablePinQuickLogin] = useState(false);
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const [enableQuickLoginUserId, setEnableQuickLoginUserId] = useState<string | null>(null);
   
 
   // Check for saved login on mount
   useEffect(() => {
     const storedEmail = localStorage.getItem("datebetter_saved_email");
     const pinEnabled = localStorage.getItem("datebetter_pin_enabled");
-    const tempSession = sessionStorage.getItem("datebetter_temp_session");
-    
-    if (storedEmail && pinEnabled === "true" && tempSession && !user) {
+    const encryptedSession = localStorage.getItem(PIN_SESSION_STORAGE_KEY);
+
+    if (storedEmail && pinEnabled === "true") {
       setSavedEmail(storedEmail);
-      setShowPinLogin(true);
-    } else if (storedEmail && pinEnabled === "true") {
-      // Show the saved email even without temp session (for PIN quick access button)
-      setSavedEmail(storedEmail);
+      // Only auto-show PIN login if we have an encrypted session on this device
+      if (encryptedSession && !user) {
+        setShowPinLogin(true);
+      }
     }
   }, [user]);
 

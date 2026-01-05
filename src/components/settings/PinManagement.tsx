@@ -5,6 +5,7 @@ import { Lock, Trash2, RefreshCw, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { PinInput } from "@/components/auth/PinInput";
+import { encryptSessionWithPin, PIN_SESSION_STORAGE_KEY } from "@/lib/pinCrypto";
 import {
   Dialog,
   DialogContent,
@@ -83,6 +84,7 @@ export const PinManagement: React.FC<PinManagementProps> = ({ userId }) => {
       // Clear localStorage
       localStorage.removeItem("datebetter_pin_enabled");
       localStorage.removeItem("datebetter_saved_email");
+      localStorage.removeItem(PIN_SESSION_STORAGE_KEY);
       sessionStorage.removeItem("datebetter_temp_session");
 
       setHasPin(false);
@@ -150,10 +152,21 @@ export const PinManagement: React.FC<PinManagementProps> = ({ userId }) => {
       // Update localStorage
       localStorage.setItem("datebetter_pin_enabled", "true");
 
+      // Store encrypted session for PIN quick login on this device
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.access_token && session?.refresh_token) {
+        const encrypted = await encryptSessionWithPin(newPin, {
+          accessToken: session.access_token,
+          refreshToken: session.refresh_token,
+        });
+        localStorage.setItem(PIN_SESSION_STORAGE_KEY, encrypted);
+      }
+
       setHasPin(true);
       setShowResetDialog(false);
       toast.success(existing ? "PIN updated successfully" : "PIN set up successfully");
-    } catch (error) {
       console.error("Error saving PIN:", error);
       toast.error("Failed to save PIN");
     } finally {
