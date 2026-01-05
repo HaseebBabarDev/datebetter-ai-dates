@@ -24,7 +24,7 @@ import { SuccessfulRelationshipCTA, checkSuccessfulRelationship } from "@/compon
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
 import { useSubscription } from "@/hooks/useSubscription";
-import { useTour, CANDIDATE_DETAIL_TOUR_STEPS } from "@/components/tour";
+import { useTour, CANDIDATE_DETAIL_TOUR_STEPS, TourRestartButton } from "@/components/tour";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -612,6 +612,7 @@ const CandidateDetail = () => {
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <TourRestartButton tourId="candidate-detail" tourSteps={CANDIDATE_DETAIL_TOUR_STEPS} />
             <Button 
               variant="ghost" 
               size="icon" 

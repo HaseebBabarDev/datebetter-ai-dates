@@ -16,7 +16,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Tables } from "@/integrations/supabase/types";
-import { useTour, DEVI_TOUR_STEPS } from "@/components/tour";
+import { useTour, DEVI_TOUR_STEPS, TourRestartButton } from "@/components/tour";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1009,6 +1009,9 @@ const Devi = () => {
                 <p className="text-xs text-muted-foreground truncate">Your AI assistant</p>
               </div>
             </div>
+            
+            {/* Tour Restart Button */}
+            <TourRestartButton tourId="devi" tourSteps={DEVI_TOUR_STEPS} />
             
             {/* New Chat Button */}
             <Button

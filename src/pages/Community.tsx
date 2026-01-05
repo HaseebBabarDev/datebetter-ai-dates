@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { useTour, COMMUNITY_TOUR_STEPS } from "@/components/tour";
+import { useTour, COMMUNITY_TOUR_STEPS, TourRestartButton } from "@/components/tour";
 
 type ForumCategory = "dating_advice" | "red_flag_warnings" | "success_stories" | "self_care_healing";
 
@@ -165,19 +165,22 @@ const Community = () => {
               <p className="text-xs text-muted-foreground">@{screenName}</p>
             </div>
           </div>
-          <TooltipProvider delayDuration={400}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={handleCreatePost} size="sm" className="gap-1.5" data-tour="community-post">
-                  <Plus className="h-4 w-4" />
-                  Post
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p className="text-xs">Share your dating story or ask for advice</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div className="flex items-center gap-1">
+            <TourRestartButton tourId="community" tourSteps={COMMUNITY_TOUR_STEPS} />
+            <TooltipProvider delayDuration={400}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button onClick={handleCreatePost} size="sm" className="gap-1.5" data-tour="community-post">
+                    <Plus className="h-4 w-4" />
+                    Post
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p className="text-xs">Share your dating story or ask for advice</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
 
         {/* Tabs */}
