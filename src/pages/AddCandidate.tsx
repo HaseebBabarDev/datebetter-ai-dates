@@ -78,6 +78,7 @@ const POLITICS_OPTIONS: { value: Enums<"politics">; label: string }[] = [
 
 const RELATIONSHIP_GOAL_OPTIONS: { value: Enums<"relationship_goal">; label: string }[] = [
   { value: "casual", label: "Casual" },
+  { value: "situationship", label: "Situationship" },
   { value: "dating", label: "Dating" },
   { value: "serious", label: "Serious Relationship" },
   { value: "marriage", label: "Marriage" },

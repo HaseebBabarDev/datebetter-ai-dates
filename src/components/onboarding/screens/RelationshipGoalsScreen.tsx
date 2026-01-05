@@ -18,7 +18,8 @@ const statusOptions = [
 
 const goalOptions = [
   { value: "casual", label: "Casual dating", icon: Coffee },
-  { value: "dating", label: "Dating", icon: Sparkles },
+  { value: "situationship", label: "Situationship", icon: Sparkles },
+  { value: "dating", label: "Dating", icon: Heart },
   { value: "serious", label: "Serious relationship", icon: Heart },
   { value: "marriage", label: "Marriage-minded", icon: Diamond },
   { value: "unsure", label: "Not sure yet", icon: HelpCircle },

@@ -64,6 +64,7 @@ const ORIENTATION_OPTIONS = [
 
 const RELATIONSHIP_GOAL_OPTIONS = [
   { value: "casual", label: "Casual dating" },
+  { value: "situationship", label: "Situationship" },
   { value: "dating", label: "Dating, open to serious" },
   { value: "serious", label: "Serious relationship" },
   { value: "marriage", label: "Marriage" },
