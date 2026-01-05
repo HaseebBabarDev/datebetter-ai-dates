@@ -57,6 +57,7 @@ const heightOptions = [
 ];
 
 const bodyTypeOptions = [
+  { value: "petite", label: "Petite" },
   { value: "slim", label: "Slim" },
   { value: "athletic", label: "Athletic" },
   { value: "average", label: "Average" },
