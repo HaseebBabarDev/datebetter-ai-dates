@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Mail, Lock, ArrowLeft, Sparkles, Heart, Shield, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, Sparkles, Heart, Shield, CheckCircle2, KeyRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import authBg from "@/assets/auth-bg.jpg";
 import { PinSetupDialog } from "@/components/auth/PinSetupDialog";
@@ -45,6 +45,9 @@ const Auth = () => {
     if (storedEmail && pinEnabled === "true" && tempSession && !user) {
       setSavedEmail(storedEmail);
       setShowPinLogin(true);
+    } else if (storedEmail && pinEnabled === "true") {
+      // Show the saved email even without temp session (for PIN quick access button)
+      setSavedEmail(storedEmail);
     }
   }, [user]);
 
@@ -543,8 +546,29 @@ const Auth = () => {
             </Button>
           </form>
 
+          {/* Quick PIN Sign In for returning users */}
+          {!isSignUp && !isForgotPassword && savedEmail && (
+            <div className="mt-4 pt-4 border-t border-border/30">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-11 rounded-xl"
+                onClick={() => {
+                  setEmail(savedEmail);
+                  setShowPinLogin(true);
+                }}
+              >
+                <KeyRound className="w-4 h-4 mr-2" />
+                Quick sign in with PIN
+              </Button>
+              <p className="text-center text-xs text-muted-foreground mt-2">
+                Signed in before as {savedEmail.split("@")[0]}
+              </p>
+            </div>
+          )}
+
           {/* Toggle Sign In/Up */}
-          <div className="mt-6 pt-4 border-t border-border/30">
+          <div className={`mt-6 pt-4 border-t border-border/30 ${!isSignUp && !isForgotPassword && savedEmail ? 'mt-4 pt-4' : ''}`}>
             {!isForgotPassword ? (
               <p className="text-center text-sm text-muted-foreground">
                 {isSignUp ? "Already have an account?" : "New to dateBetter?"}{" "}

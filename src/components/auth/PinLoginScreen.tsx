@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { PinInput } from "./PinInput";
-import { KeyRound, User, ArrowLeft, Heart } from "lucide-react";
+import { KeyRound, User, ArrowLeft, Heart, Lock, Eye, EyeOff } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import authBg from "@/assets/auth-bg.jpg";
@@ -10,6 +11,7 @@ interface PinLoginScreenProps {
   email: string;
   onSuccess: () => void;
   onSwitchAccount: () => void;
+  onNeedPassword?: () => void;
 }
 
 // Simple hash function for PIN verification
@@ -25,10 +27,14 @@ export const PinLoginScreen: React.FC<PinLoginScreenProps> = ({
   email,
   onSuccess,
   onSwitchAccount,
+  onNeedPassword,
 }) => {
   const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
+  const [needsPassword, setNeedsPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Auto-submit when 4 digits are entered
   useEffect(() => {
@@ -37,32 +43,20 @@ export const PinLoginScreen: React.FC<PinLoginScreenProps> = ({
     }
   }, [pin]);
 
-  const handlePinLogin = async () => {
+  const handlePinLogin = async (passwordToUse?: string) => {
     if (pin.length !== 4) return;
 
     setLoading(true);
     try {
       const pinHash = await hashPin(pin);
-
-      // First, we need to verify the PIN matches
-      // We'll use a temporary sign-in to get the user, then verify PIN
-      // Since we can't query user_pins without being authenticated,
-      // we need a different approach - use edge function or sign in first
-      
-      // For security, we'll prompt for password on PIN failure
-      // and use the session to verify PIN
       
       // Try to sign in with email and use PIN as password verification
-      const savedPassword = sessionStorage.getItem("datebetter_temp_session");
+      const savedPassword = passwordToUse || sessionStorage.getItem("datebetter_temp_session");
       
       if (!savedPassword) {
-        // No cached session, need full login
-        toast({ 
-          title: "Session expired", 
-          description: "Please sign in with your password",
-          variant: "destructive" 
-        });
-        onSwitchAccount();
+        // No cached session, need password
+        setNeedsPassword(true);
+        setLoading(false);
         return;
       }
 
@@ -73,15 +67,22 @@ export const PinLoginScreen: React.FC<PinLoginScreenProps> = ({
       });
 
       if (error) {
-        toast({ 
-          title: "Session expired", 
-          description: "Please sign in with your password",
-          variant: "destructive" 
-        });
+        if (needsPassword) {
+          toast({ 
+            title: "Invalid password", 
+            variant: "destructive" 
+          });
+          setPassword("");
+        } else {
+          setNeedsPassword(true);
+        }
         sessionStorage.removeItem("datebetter_temp_session");
-        onSwitchAccount();
+        setLoading(false);
         return;
       }
+
+      // Save password for future quick logins
+      sessionStorage.setItem("datebetter_temp_session", savedPassword);
 
       // Now verify PIN
       const { data: pinData, error: pinError } = await supabase
@@ -127,6 +128,13 @@ export const PinLoginScreen: React.FC<PinLoginScreenProps> = ({
       setPin("");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password) {
+      handlePinLogin(password);
     }
   };
 
@@ -180,27 +188,66 @@ export const PinLoginScreen: React.FC<PinLoginScreenProps> = ({
           </div>
 
           <div className="space-y-6">
-            <div className="space-y-2">
-              <p className="text-center text-sm text-muted-foreground mb-4">
-                Enter your 4-digit PIN
-              </p>
-              <PinInput 
-                value={pin} 
-                onChange={setPin} 
-                disabled={loading}
-              />
-            </div>
+            {!needsPassword ? (
+              <>
+                <div className="space-y-2">
+                  <p className="text-center text-sm text-muted-foreground mb-4">
+                    Enter your 4-digit PIN
+                  </p>
+                  <PinInput 
+                    value={pin} 
+                    onChange={setPin} 
+                    disabled={loading}
+                  />
+                </div>
 
-            {attempts > 0 && (
-              <p className="text-center text-xs text-destructive">
-                {3 - attempts} attempt{3 - attempts !== 1 ? "s" : ""} remaining
-              </p>
-            )}
+                {attempts > 0 && (
+                  <p className="text-center text-xs text-destructive">
+                    {3 - attempts} attempt{3 - attempts !== 1 ? "s" : ""} remaining
+                  </p>
+                )}
 
-            {loading && (
-              <div className="flex justify-center">
-                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              </div>
+                {loading && (
+                  <div className="flex justify-center">
+                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+              </>
+            ) : (
+              <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                <p className="text-center text-sm text-muted-foreground">
+                  Enter your password to verify
+                </p>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 pr-10 h-12 rounded-xl bg-background/50 border-border/50"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full h-11 rounded-xl bg-[image:var(--gradient-hero)]"
+                  disabled={loading || !password}
+                >
+                  {loading ? (
+                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    "Continue"
+                  )}
+                </Button>
+              </form>
             )}
 
             <Button
