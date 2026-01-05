@@ -46,6 +46,7 @@ const regularityOptions = [
 const HormoneCycleScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
+  const isMale = data.genderIdentity === "man_cis" || data.genderIdentity === "man_trans";
   const showTransSection = data.genderIdentity === "woman_trans" || data.isTrans;
   const showCycleSection = !showTransSection || data.trackCycle;
 
@@ -103,37 +104,39 @@ const HormoneCycleScreen = () => {
           </div>
         )}
 
-        {/* Cycle Tracking Section */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-base">Track your cycle for smarter dating?</Label>
-              <p className="text-sm text-muted-foreground mt-1">
-                Hormone-aware dating guidance
-              </p>
+        {/* Cycle Tracking Section - Hidden for male users */}
+        {!isMale && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-base">Track your cycle for smarter dating?</Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Hormone-aware dating guidance
+                </p>
+              </div>
+              <Switch
+                checked={data.trackCycle}
+                onCheckedChange={(checked) => updateData({ trackCycle: checked })}
+              />
             </div>
-            <Switch
-              checked={data.trackCycle}
-              onCheckedChange={(checked) => updateData({ trackCycle: checked })}
-            />
+
+            <Accordion type="single" collapsible>
+              <AccordionItem value="why" className="border-none">
+                <AccordionTrigger className="text-sm text-primary hover:no-underline py-2">
+                  Why this helps
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground">
+                  Your cycle affects attraction, decision-making, and emotional bonding. 
+                  Tracking helps us time advice and warnings to your hormonal state, 
+                  giving you clearer insights during ovulation (when attraction peaks) 
+                  and PMS (when emotions run high).
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
+        )}
 
-          <Accordion type="single" collapsible>
-            <AccordionItem value="why" className="border-none">
-              <AccordionTrigger className="text-sm text-primary hover:no-underline py-2">
-                Why this helps
-              </AccordionTrigger>
-              <AccordionContent className="text-sm text-muted-foreground">
-                Your cycle affects attraction, decision-making, and emotional bonding. 
-                Tracking helps us time advice and warnings to your hormonal state, 
-                giving you clearer insights during ovulation (when attraction peaks) 
-                and PMS (when emotions run high).
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
-
-        {data.trackCycle && (
+        {!isMale && data.trackCycle && (
           <div className="space-y-4 p-4 rounded-xl bg-muted/50 border border-border animate-fade-in">
             <div className="space-y-2">
               <Label>Last period start date:</Label>
