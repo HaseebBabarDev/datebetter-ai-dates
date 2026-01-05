@@ -167,7 +167,8 @@ export const PinManagement: React.FC<PinManagementProps> = ({ userId }) => {
       setHasPin(true);
       setShowResetDialog(false);
       toast.success(existing ? "PIN updated successfully" : "PIN set up successfully");
-      console.error("Error saving PIN:", error);
+    } catch (err) {
+      console.error("Error saving PIN:", err);
       toast.error("Failed to save PIN");
     } finally {
       setSaving(false);

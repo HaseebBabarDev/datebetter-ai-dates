@@ -269,6 +269,31 @@ const MENTAL_HEALTH_OPENNESS_OPTIONS = [
   { value: "in_therapy", label: "Currently in therapy" },
 ];
 
+const INTIMACY_COMFORT_OPTIONS = [
+  { value: "exclusive", label: "Only in exclusive relationships" },
+  { value: "emotional", label: "After emotional connection forms" },
+  { value: "feels_right", label: "When it feels right" },
+  { value: "casual_safe", label: "Casual is fine with safety" },
+];
+
+const POST_INTIMACY_OPTIONS = [
+  { value: "closer", label: "I feel closer to my partner" },
+  { value: "anxious", label: "I can feel anxious or insecure" },
+  { value: "distant", label: "I sometimes need space" },
+  { value: "normal", label: "It doesn't change much for me" },
+];
+
+const NEURODIVERGENT_OPTIONS = [
+  { value: "no", label: "No" },
+  { value: "yes", label: "Yes" },
+  { value: "exploring", label: "Exploring/unsure" },
+  { value: "prefer_not_say", label: "Prefer not to say" },
+];
+
+const NEURODIVERGENCE_TYPE_OPTIONS = [
+  "ADHD", "Autism/ASD", "Dyslexia", "Anxiety", "Depression", "OCD", "PTSD", "Bipolar", "Other"
+];
+
 // Height stats: ~14.5% of US men are 6ft+
 const getHeightPoolImpact = () => ({ percent: 14.5, shrink: 85.5 });
 
@@ -349,7 +374,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
     }
   };
 
-  const SECTION_ORDER = ["motivation", "relationship", "partner_prefs", "kids", "faith", "politics", "career", "income", "lifestyle", "physical", "communication", "mental_health", "attachment", "boundaries", "cycle"];
+  const SECTION_ORDER = ["motivation", "relationship", "partner_prefs", "kids", "faith", "politics", "career", "income", "lifestyle", "physical", "communication", "mental_health", "neurodivergence", "attachment", "boundaries", "intimacy", "devi", "cycle"];
   
   const SECTION_CONFIG: Record<string, { 
     label: string; 
@@ -368,9 +393,12 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
     physical: { label: "Physical", icon: <Sparkles className="w-3.5 h-3.5" />, requiredFields: ["preferred_age_min", "preferred_age_max"] },
     communication: { label: "Communication", icon: <MessageCircle className="w-3.5 h-3.5" />, requiredFields: ["communication_style"] },
     mental_health: { label: "Mental Health", icon: <Stethoscope className="w-3.5 h-3.5" />, requiredFields: ["mental_health_openness"] },
+    neurodivergence: { label: "Neurodivergence", icon: <Brain className="w-3.5 h-3.5" />, requiredFields: [] },
     attachment: { label: "Attachment", icon: <Brain className="w-3.5 h-3.5" />, requiredFields: ["attachment_style"] },
     boundaries: { label: "Boundaries", icon: <Shield className="w-3.5 h-3.5" />, requiredFields: ["boundary_strength"] },
-    cycle: { label: "Cycle", icon: <Lock className="w-3.5 h-3.5" />, requiredFields: [] }, // Optional section
+    intimacy: { label: "Intimacy & Safety", icon: <Lock className="w-3.5 h-3.5" />, requiredFields: [] },
+    devi: { label: "D.E.V.I. Settings", icon: <Sparkles className="w-3.5 h-3.5" />, requiredFields: [] },
+    cycle: { label: "Hormone Cycle", icon: <Lock className="w-3.5 h-3.5" />, requiredFields: [] },
   };
 
   const isSectionComplete = useCallback((sectionKey: string): boolean => {
@@ -1234,6 +1262,65 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
           </AccordionContent>
         </AccordionItem>
 
+        {/* Neurodivergence */}
+        <AccordionItem value="neurodivergence" data-value="neurodivergence" className={`border rounded-lg px-4 ${isSectionComplete("neurodivergence") ? "border-green-500/30 bg-green-500/5" : ""}`}>
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2 flex-1">
+              <Brain className="w-4 h-4 text-violet-500" />
+              <span className="font-medium">Neurodivergence</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pb-4">
+            <div className="space-y-2">
+              <Label>Are you neurodivergent?</Label>
+              <Select
+                value={formData.is_neurodivergent || ""}
+                onValueChange={(v) => updateField("is_neurodivergent", v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {NEURODIVERGENT_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {(formData.is_neurodivergent === "yes" || formData.is_neurodivergent === "exploring") && (
+              <div className="space-y-2">
+                <Label>Types (select all that apply)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {NEURODIVERGENCE_TYPE_OPTIONS.map(type => {
+                    const currentTypes = (formData.neurodivergence_types as string[] | null) || [];
+                    const isSelected = currentTypes.includes(type);
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => {
+                          const updated = isSelected
+                            ? currentTypes.filter(t => t !== type)
+                            : [...currentTypes, type];
+                          updateField("neurodivergence_types", updated as any);
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                          isSelected 
+                            ? "bg-primary text-primary-foreground border-primary" 
+                            : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50"
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("neurodivergence", e)}>
+              Next
+            </Button>
+          </AccordionContent>
+        </AccordionItem>
+
         {/* Attachment & Patterns */}
         <AccordionItem value="attachment" data-value="attachment" className={`border rounded-lg px-4 ${isSectionComplete("attachment") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
@@ -1331,6 +1418,73 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
           </AccordionContent>
         </AccordionItem>
 
+        {/* Intimacy & Safety */}
+        <AccordionItem value="intimacy" data-value="intimacy" className={`border rounded-lg px-4 ${isSectionComplete("intimacy") ? "border-green-500/30 bg-green-500/5" : ""}`}>
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2 flex-1">
+              <Lock className="w-4 h-4 text-purple-500" />
+              <span className="font-medium">Intimacy & Safety</span>
+              {isSectionComplete("intimacy") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pb-4">
+            <div className="space-y-2">
+              <Label>I'm comfortable with intimacy:</Label>
+              <Select
+                value={formData.intimacy_comfort || ""}
+                onValueChange={(v) => updateField("intimacy_comfort", v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {INTIMACY_COMFORT_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between">
+              <Label>Require exclusivity before intimacy?</Label>
+              <Switch
+                checked={formData.exclusivity_before_intimacy || false}
+                onCheckedChange={(v) => updateField("exclusivity_before_intimacy", v)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>After intimacy, I typically feel:</Label>
+              <Select
+                value={formData.post_intimacy_tendency || ""}
+                onValueChange={(v) => updateField("post_intimacy_tendency", v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {POST_INTIMACY_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("intimacy", e)}>
+              Next
+            </Button>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* D.E.V.I. Settings */}
+        <AccordionItem value="devi" data-value="devi" className={`border rounded-lg px-4 ${isSectionComplete("devi") ? "border-green-500/30 bg-green-500/5" : ""}`}>
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2 flex-1">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="font-medium">D.E.V.I. Settings</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pb-4">
+            {user && <DeviSettings userId={user.id} />}
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("devi", e)}>
+              Next
+            </Button>
+          </AccordionContent>
+        </AccordionItem>
+
         {/* Cycle Tracking */}
         <AccordionItem value="cycle" data-value="cycle" className={`border rounded-lg px-4 ${isSectionComplete("cycle") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
@@ -1387,9 +1541,6 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-
-      {/* D.E.V.I. Settings */}
-      {user && <DeviSettings userId={user.id} />}
 
       <Button onClick={handleSave} className="w-full" disabled={saving}>
         <Save className="w-4 h-4 mr-2" />
