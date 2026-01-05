@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { WinsStats, useDeviWins } from "@/components/devi/WinsStats";
 
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
@@ -102,6 +103,9 @@ const Patterns = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<PatternStats | null>(null);
+  
+  // Devi wins tracking
+  const { wins } = useDeviWins(user?.id);
 
   useEffect(() => {
     if (user) {
@@ -545,6 +549,15 @@ const Patterns = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Wins Stats */}
+              {wins.total > 0 && (
+                <WinsStats
+                  totalWins={wins.total}
+                  thisMonthWins={wins.thisMonth}
+                  winsByType={wins.byType}
+                />
+              )}
 
               <Card>
                 <CardHeader className="pb-2">
