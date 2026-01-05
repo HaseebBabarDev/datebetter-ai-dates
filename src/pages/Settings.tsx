@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { PaymentSheet } from "@/components/subscription/PaymentSheet";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { format, parse } from "date-fns";
-import { useTour, SETTINGS_TOUR_STEPS } from "@/components/tour";
+import { useTour, SETTINGS_TOUR_STEPS, TourRestartButton } from "@/components/tour";
 
 type Profile = Tables<"profiles">;
 type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more" | "unlimited";
@@ -530,6 +530,7 @@ const Settings = () => {
               </div>
               <h1 className="text-lg font-semibold truncate">Settings</h1>
             </div>
+            <TourRestartButton tourId="settings" tourSteps={SETTINGS_TOUR_STEPS} />
           </div>
         </div>
       </header>

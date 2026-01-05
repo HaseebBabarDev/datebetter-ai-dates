@@ -42,7 +42,7 @@ import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
 import { CandidatesList } from "@/components/dashboard/CandidatesList";
 import { LogInteractionDialog } from "@/components/dashboard/LogInteractionDialog";
-import { useTour, DASHBOARD_TOUR_STEPS } from "@/components/tour";
+import { useTour, DASHBOARD_TOUR_STEPS, TourRestartButton } from "@/components/tour";
 import { differenceInDays, addDays, format } from "date-fns";
 import heroCouple from "@/assets/hero-couple.jpeg";
 import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
@@ -748,6 +748,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-0.5">
+              <TourRestartButton tourId="dashboard" tourSteps={DASHBOARD_TOUR_STEPS} />
               <Button 
                 variant="ghost" 
                 size="icon" 
