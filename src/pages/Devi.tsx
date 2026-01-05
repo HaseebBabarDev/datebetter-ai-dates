@@ -1489,7 +1489,7 @@ const Devi = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={`Ask about ${selectedCandidate.nickname}...`}
+                placeholder={selectedCandidate ? `Ask about ${selectedCandidate.nickname}...` : "Ask me anything about dating..."}
                 className="min-h-[44px] max-h-32 resize-none"
                 rows={1}
                 disabled={isLoading}
