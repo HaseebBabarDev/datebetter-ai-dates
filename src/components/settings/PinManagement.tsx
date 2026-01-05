@@ -100,10 +100,13 @@ export const PinManagement: React.FC<PinManagementProps> = ({ userId }) => {
     setShowResetDialog(true);
   };
 
-  const handlePinEntered = (pin: string) => {
+  const handlePinChange = (pin: string) => {
     if (resetStep === "enter") {
       setNewPin(pin);
-      setResetStep("confirm");
+      // Auto-advance to confirm step when 4 digits entered
+      if (pin.length === 4) {
+        setTimeout(() => setResetStep("confirm"), 100);
+      }
     } else {
       setConfirmPin(pin);
     }
@@ -232,7 +235,7 @@ export const PinManagement: React.FC<PinManagementProps> = ({ userId }) => {
           <div className="py-6 space-y-4">
             <PinInput
               value={resetStep === "enter" ? newPin : confirmPin}
-              onChange={handlePinEntered}
+              onChange={handlePinChange}
               disabled={saving}
             />
             {resetStep === "confirm" && canSave && (
