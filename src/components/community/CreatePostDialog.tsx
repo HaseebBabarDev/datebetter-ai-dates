@@ -130,18 +130,24 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
 
     if (validFiles.length === 0) return;
 
-    // Create previews
-    const newPreviews: string[] = [];
-    validFiles.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        newPreviews.push(reader.result as string);
-        if (newPreviews.length === validFiles.length) {
-          setImagePreviews((prev) => [...prev, ...newPreviews]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    // Create previews using Promise.all for proper async handling
+    const readFileAsDataURL = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    };
+
+    Promise.all(validFiles.map(readFileAsDataURL))
+      .then((newPreviews) => {
+        setImagePreviews((prev) => [...prev, ...newPreviews]);
+      })
+      .catch((error) => {
+        console.error("Error reading files:", error);
+        toast.error("Failed to load image previews");
+      });
 
     setSelectedImages((prev) => [...prev, ...validFiles]);
     
