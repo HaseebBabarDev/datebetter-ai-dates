@@ -41,6 +41,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { detectCrisisContent, CrisisDetectionResult } from "@/lib/crisisDetection";
 import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
+import { DeviWinDialog, DeviWinPrompt } from "@/components/devi/DeviWinDialog";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -219,6 +220,9 @@ const Devi = () => {
   // Crisis detection state
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
+  
+  // Win logging state
+  const [showWinDialog, setShowWinDialog] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1392,6 +1396,12 @@ const Devi = () => {
               />
             ))
           )}
+          
+          {/* Win prompt - show after conversation has messages and not loading */}
+          {messages.length >= 2 && !isLoading && messages[messages.length - 1]?.role === 'assistant' && (
+            <DeviWinPrompt onLogWin={() => setShowWinDialog(true)} className="mt-4" />
+          )}
+          
           {isLoading && messages[messages.length - 1]?.role === 'user' && (
             <div className="flex justify-start">
               <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1">
@@ -1527,6 +1537,15 @@ const Devi = () => {
         accept="image/*"
         onChange={onFileChange}
         className="hidden"
+      />
+
+      {/* Win logging dialog */}
+      <DeviWinDialog
+        open={showWinDialog}
+        onOpenChange={setShowWinDialog}
+        userId={user.id}
+        candidateId={selectedCandidate?.id}
+        conversationId={currentConversationId || undefined}
       />
     </div>
   );

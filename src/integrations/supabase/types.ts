@@ -371,6 +371,51 @@ export type Database = {
           },
         ]
       }
+      devi_wins: {
+        Row: {
+          candidate_id: string | null
+          conversation_id: string | null
+          created_at: string
+          id: string
+          journal_note: string | null
+          user_id: string
+          win_type: string
+        }
+        Insert: {
+          candidate_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          journal_note?: string | null
+          user_id: string
+          win_type: string
+        }
+        Update: {
+          candidate_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          journal_note?: string | null
+          user_id?: string
+          win_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devi_wins_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devi_wins_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "devi_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       direct_messages: {
         Row: {
           content: string
