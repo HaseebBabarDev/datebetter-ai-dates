@@ -41,6 +41,12 @@ export const CANDIDATE_DETAIL_TOUR_STEPS: TourStep[] = [
     placement: "bottom",
   },
   {
+    target: "[data-tour='ask-devi-cta']",
+    title: "Ask D.E.V.I.",
+    description: "Got questions about this person? Ask D.E.V.I. for personalized advice based on their profile and your interactions.",
+    placement: "bottom",
+  },
+  {
     target: "[data-tour='insights-tab']",
     title: "Compatibility Insights",
     description: "See your compatibility score and get personalized advice based on your interactions and preferences.",

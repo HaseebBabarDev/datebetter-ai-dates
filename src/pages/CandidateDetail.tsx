@@ -762,6 +762,15 @@ const CandidateDetail = () => {
               />
             </div>
             <Button 
+              data-tour="ask-devi-cta"
+              variant="outline" 
+              className="w-full gap-2 border-primary/30 text-primary hover:bg-primary/10"
+              onClick={() => navigate("/devi", { state: { candidateName: candidate.nickname, candidateId: candidate.id } })}
+            >
+              <Sparkles className="w-4 h-4" />
+              Ask D.E.V.I.
+            </Button>
+            <Button 
               variant="ghost" 
               className="w-full gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               onClick={() => setShowEndRelationshipDialog(true)}
