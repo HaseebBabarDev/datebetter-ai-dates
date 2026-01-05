@@ -12,6 +12,7 @@ import { KeyRound, Shield, ArrowRight, Check } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { encryptSessionWithPin, PIN_SESSION_STORAGE_KEY } from "@/lib/pinCrypto";
 
 interface PinSetupDialogProps {
   open: boolean;
@@ -90,6 +91,19 @@ export const PinSetupDialog: React.FC<PinSetupDialogProps> = ({
         if (error) throw error;
       }
 
+      // Save encrypted session for PIN quick login on this device
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.access_token && session?.refresh_token) {
+        const encrypted = await encryptSessionWithPin(pin, {
+          accessToken: session.access_token,
+          refreshToken: session.refresh_token,
+        });
+        localStorage.setItem(PIN_SESSION_STORAGE_KEY, encrypted);
+      }
+
       // Save email to localStorage for quick login
       if (user.email) {
         localStorage.setItem("datebetter_saved_email", user.email);
@@ -108,6 +122,8 @@ export const PinSetupDialog: React.FC<PinSetupDialogProps> = ({
 
   const handleSkip = () => {
     localStorage.removeItem("datebetter_pin_enabled");
+    localStorage.removeItem("datebetter_saved_email");
+    localStorage.removeItem(PIN_SESSION_STORAGE_KEY);
     onSkip();
   };
 
