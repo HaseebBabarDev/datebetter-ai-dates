@@ -11,14 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import authBg from "@/assets/auth-bg.jpg";
 import { PinSetupDialog } from "@/components/auth/PinSetupDialog";
 import { PinLoginScreen } from "@/components/auth/PinLoginScreen";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -43,9 +35,6 @@ const Auth = () => {
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   
-  // Email verification state
-  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
-  const [verificationEmail, setVerificationEmail] = useState("");
 
   // Check for saved login on mount
   useEffect(() => {
@@ -142,7 +131,6 @@ const Auth = () => {
     
     try {
       if (isSignUp) {
-        // For signup, we need to handle email confirmation
         const { error, data } = await signUp(email, password);
         
         if (error) {
@@ -153,58 +141,50 @@ const Auth = () => {
             variant: "destructive" 
           });
         } else {
-          // Check if email confirmation is required
-          // If user is null or session is null, email confirmation is pending
-          if (!data?.user?.confirmed_at && !data?.session) {
-            setVerificationEmail(email);
-            setShowVerificationDialog(true);
-          } else {
-            // User was auto-confirmed, proceed with normal flow
-            toast({ title: "Account created! Welcome to dateBetter" });
-            sessionStorage.setItem("datebetter_temp_session", password);
+          toast({ title: "Account created! Welcome to dateBetter" });
+          sessionStorage.setItem("datebetter_temp_session", password);
+          
+          // Handle referral
+          if (referralCode && data?.user) {
+            const referrerIdPrefix = referralCode.replace("DEVI-", "").toLowerCase();
+            const { data: referrers } = await supabase
+              .from("profiles")
+              .select("user_id")
+              .ilike("user_id", `${referrerIdPrefix}%`)
+              .limit(1);
             
-            // Handle referral
-            if (referralCode && data?.user) {
-              const referrerIdPrefix = referralCode.replace("DEVI-", "").toLowerCase();
-              const { data: referrers } = await supabase
-                .from("profiles")
-                .select("user_id")
-                .ilike("user_id", `${referrerIdPrefix}%`)
-                .limit(1);
+            if (referrers && referrers.length > 0) {
+              await supabase.from("referrals").insert({
+                referrer_id: referrers[0].user_id,
+                referred_id: data.user.id,
+                referral_code: referralCode,
+                status: "converted",
+                converted_at: new Date().toISOString()
+              });
               
-              if (referrers && referrers.length > 0) {
-                await supabase.from("referrals").insert({
-                  referrer_id: referrers[0].user_id,
-                  referred_id: data.user.id,
-                  referral_code: referralCode,
-                  status: "converted",
-                  converted_at: new Date().toISOString()
-                });
-                
-                await supabase.functions.invoke("notify-referrer", {
-                  body: { 
-                    referrerId: referrers[0].user_id, 
-                    referredId: data.user.id 
-                  }
-                });
-              }
+              await supabase.functions.invoke("notify-referrer", {
+                body: { 
+                  referrerId: referrers[0].user_id, 
+                  referredId: data.user.id 
+                }
+              });
             }
+          }
+          
+          // Continue to PIN setup
+          if (data?.user) {
+            const { data: existingPin } = await supabase
+              .from("user_pins")
+              .select("id")
+              .eq("user_id", data.user.id)
+              .single();
             
-            // Continue to PIN setup
-            if (data?.user) {
-              const { data: existingPin } = await supabase
-                .from("user_pins")
-                .select("id")
-                .eq("user_id", data.user.id)
-                .single();
-              
-              const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
-              if (!existingPin) {
-                setPendingNavigation(`/setup${setupQuery}`);
-                setShowPinSetup(true);
-              } else {
-                navigate(`/setup${setupQuery}`);
-              }
+            const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
+            if (!existingPin) {
+              setPendingNavigation(`/setup${setupQuery}`);
+              setShowPinSetup(true);
+            } else {
+              navigate(`/setup${setupQuery}`);
             }
           }
         }
@@ -213,16 +193,10 @@ const Auth = () => {
         const { error } = await signIn(email, password);
         
         if (error) {
-          // Check if error is about email not confirmed
-          if (error.message.includes("Email not confirmed")) {
-            setVerificationEmail(email);
-            setShowVerificationDialog(true);
-          } else {
-            toast({ 
-              title: error.message,
-              variant: "destructive" 
-            });
-          }
+          toast({ 
+            title: error.message,
+            variant: "destructive" 
+          });
         } else {
           toast({ title: "Welcome back!" });
           sessionStorage.setItem("datebetter_temp_session", password);
@@ -611,59 +585,6 @@ const Auth = () => {
       onComplete={handlePinSetupComplete}
       onSkip={handlePinSetupSkip}
     />
-    
-    {/* Email Verification Dialog */}
-    <AlertDialog open={showVerificationDialog} onOpenChange={setShowVerificationDialog}>
-      <AlertDialogContent className="max-w-md">
-        <AlertDialogHeader>
-          <div className="flex items-center justify-center mb-4">
-            <div className="p-4 rounded-full bg-primary/10">
-              <Mail className="h-10 w-10 text-primary" />
-            </div>
-          </div>
-          <AlertDialogTitle className="text-center text-xl">Check Your Email</AlertDialogTitle>
-          <AlertDialogDescription className="text-center space-y-3">
-            <p className="text-base">
-              We've sent a verification link to:
-            </p>
-            <p className="font-medium text-foreground text-lg">
-              {verificationEmail}
-            </p>
-            <p className="text-sm text-muted-foreground pt-2">
-              Click the link in your email to verify your account and start your dating journey.
-            </p>
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
-          <Button 
-            onClick={() => {
-              setShowVerificationDialog(false);
-              setIsSignUp(false);
-            }}
-            className="w-full"
-          >
-            Got it, I'll check my email
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={async () => {
-              const { error } = await supabase.auth.resend({
-                type: 'signup',
-                email: verificationEmail,
-              });
-              if (error) {
-                toast({ title: error.message, variant: "destructive" });
-              } else {
-                toast({ title: "Verification email resent!" });
-              }
-            }}
-            className="w-full text-muted-foreground"
-          >
-            Resend verification email
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
     </>
   );
 };
