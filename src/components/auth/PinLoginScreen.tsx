@@ -35,11 +35,7 @@ export const PinLoginScreen: React.FC<PinLoginScreenProps> = ({
 
     const encrypted = localStorage.getItem(PIN_SESSION_STORAGE_KEY);
     if (!encrypted) {
-      toast({
-        title: "PIN login not enabled on this device",
-        description: "Sign in with your password once, then enable PIN quick sign-in.",
-        variant: "destructive",
-      });
+      // Silently redirect to password login - no error toast needed
       onSwitchAccount();
       return;
     }
