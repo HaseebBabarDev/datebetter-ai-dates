@@ -59,6 +59,12 @@ export const CANDIDATE_DETAIL_TOUR_STEPS: TourStep[] = [
     placement: "bottom",
   },
   {
+    target: "[data-tour='overview-tab']",
+    title: "Profile Overview",
+    description: "View and edit their profile details, notes, and key information you've gathered about them.",
+    placement: "bottom",
+  },
+  {
     target: "[data-tour='history-tab']",
     title: "Interaction Timeline",
     description: "Review all your logged interactions to track the progression of your connection over time.",
