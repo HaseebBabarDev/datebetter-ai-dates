@@ -52,6 +52,7 @@ import { DeviCTA } from "@/components/dashboard/DeviCTA";
 import { ReferralCard } from "@/components/dashboard/ReferralCard";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefresh";
+import { WinsStats, useDeviWins } from "@/components/devi/WinsStats";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -102,6 +103,9 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [reopeningId, setReopeningId] = useState<string | null>(null);
   const [showAllActivity, setShowAllActivity] = useState(false);
+  
+  // Devi wins tracking
+  const { wins, refetch: refetchWins } = useDeviWins(user?.id);
 
   const handleReopenRelationship = async (candidateId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -1221,6 +1225,15 @@ const Dashboard = () => {
 
             {/* D.E.V.I. CTA */}
             <DeviCTA />
+
+            {/* Wins Stats */}
+            {wins.total > 0 && (
+              <WinsStats
+                totalWins={wins.total}
+                thisMonthWins={wins.thisMonth}
+                winsByType={wins.byType}
+              />
+            )}
 
             {/* Referral CTA at bottom */}
             <ReferralCard />
