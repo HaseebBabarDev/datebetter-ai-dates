@@ -863,7 +863,7 @@ const CandidateDetail = () => {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="overview" className="flex-col gap-0.5 py-2 px-1">
+                <TabsTrigger data-tour="overview-tab" value="overview" className="flex-col gap-0.5 py-2 px-1">
                   <User className="w-4 h-4" />
                   <span className="text-[10px] font-medium">Overview</span>
                 </TabsTrigger>
