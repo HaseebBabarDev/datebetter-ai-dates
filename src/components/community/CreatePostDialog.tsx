@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -27,10 +27,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, AlertCircle, MapPin, Shield, Heart } from "lucide-react";
+import { Loader2, AlertCircle, MapPin, Shield, Heart, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { detectCrisisContent } from "@/lib/crisisDetection";
 import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
+
+const MAX_IMAGES = 4;
 
 type ForumCategory = "dating_advice" | "red_flag_warnings" | "success_stories" | "self_care_healing";
 
@@ -68,6 +70,10 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
   const [hasPostedBefore, setHasPostedBefore] = useState<boolean | null>(null);
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open && user && hasPostedBefore === null) {
@@ -95,6 +101,94 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
       console.error("Error checking post history:", error);
     }
   };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newFiles = Array.from(files);
+    const totalImages = selectedImages.length + newFiles.length;
+
+    if (totalImages > MAX_IMAGES) {
+      toast.error(`You can only upload up to ${MAX_IMAGES} images`);
+      return;
+    }
+
+    // Validate file types and sizes
+    const validFiles: File[] = [];
+    for (const file of newFiles) {
+      if (!file.type.startsWith("image/")) {
+        toast.error(`${file.name} is not an image file`);
+        continue;
+      }
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error(`${file.name} is too large. Max size is 5MB`);
+        continue;
+      }
+      validFiles.push(file);
+    }
+
+    if (validFiles.length === 0) return;
+
+    // Create previews
+    const newPreviews: string[] = [];
+    validFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        newPreviews.push(reader.result as string);
+        if (newPreviews.length === validFiles.length) {
+          setImagePreviews((prev) => [...prev, ...newPreviews]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    setSelectedImages((prev) => [...prev, ...validFiles]);
+    
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadImages = async (): Promise<string[]> => {
+    if (!user || selectedImages.length === 0) return [];
+
+    const uploadedUrls: string[] = [];
+    setUploadingImages(true);
+
+    try {
+      for (const file of selectedImages) {
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("community-photos")
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from("community-photos")
+          .getPublicUrl(fileName);
+
+        uploadedUrls.push(urlData.publicUrl);
+      }
+
+      return uploadedUrls;
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      throw error;
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!user || !category || !title.trim() || !content.trim()) return;
 
@@ -110,7 +204,17 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
     setModerationError(null);
 
     try {
-      // First, moderate the content
+      // Convert images to base64 for moderation
+      const imageBase64Array: string[] = [];
+      for (const preview of imagePreviews) {
+        // Extract base64 data from data URL
+        const base64 = preview.split(",")[1];
+        if (base64) {
+          imageBase64Array.push(base64);
+        }
+      }
+
+      // Moderate content and images together
       const { data: moderationResult, error: moderationError } = await supabase.functions.invoke(
         "moderate-content",
         {
@@ -118,6 +222,7 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
             title: title.trim(),
             content: content.trim(),
             type: "post",
+            images: imageBase64Array,
           },
         }
       );
@@ -131,7 +236,13 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
         return;
       }
 
-      // Create the post
+      // Upload images if any
+      let imageUrls: string[] = [];
+      if (selectedImages.length > 0) {
+        imageUrls = await uploadImages();
+      }
+
+      // Create the post with image URLs (store as JSON string in image_url field)
       const { error } = await supabase.from("forum_posts").insert({
         user_id: user.id,
         category: category as ForumCategory,
@@ -140,6 +251,7 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
         is_approved: true,
         moderation_status: "approved",
         city_tag: cityTag || null,
+        image_url: imageUrls.length > 0 ? JSON.stringify(imageUrls) : null,
       });
 
       if (error) throw error;
@@ -162,6 +274,8 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
     setCityTag("");
     setModerationError(null);
     setShowCrisisAlert(false);
+    setSelectedImages([]);
+    setImagePreviews([]);
   };
 
   // Reset form when dialog closes
@@ -306,6 +420,61 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
             </p>
           </div>
 
+          {/* Image Upload */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">
+              <ImagePlus className="h-3.5 w-3.5" />
+              Photos (optional, up to {MAX_IMAGES})
+            </Label>
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageSelect}
+              className="hidden"
+            />
+
+            {imagePreviews.length > 0 && (
+              <div className="grid grid-cols-2 gap-2">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-border">
+                    <img
+                      src={preview}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-1 right-1 p-1 bg-background/80 rounded-full hover:bg-background"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {selectedImages.length < MAX_IMAGES && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full"
+              >
+                <ImagePlus className="h-4 w-4 mr-2" />
+                {selectedImages.length === 0 ? "Add Photos" : `Add More (${MAX_IMAGES - selectedImages.length} left)`}
+              </Button>
+            )}
+            
+            <p className="text-xs text-muted-foreground">
+              Images are moderated for explicit content.
+            </p>
+          </div>
+
           {/* Moderation Error */}
           {moderationError && (
             <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
@@ -317,13 +486,13 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
           {/* Submit */}
           <Button
             onClick={handleSubmit}
-            disabled={!category || !title.trim() || !content.trim() || isSubmitting}
+            disabled={!category || !title.trim() || !content.trim() || isSubmitting || uploadingImages}
             className="w-full"
           >
-            {isSubmitting ? (
+            {isSubmitting || uploadingImages ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Creating...
+                {uploadingImages ? "Uploading images..." : "Creating..."}
               </>
             ) : (
               "Create Post"

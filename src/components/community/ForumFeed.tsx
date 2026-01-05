@@ -30,6 +30,7 @@ interface ForumPost {
   screen_name?: string;
   has_liked?: boolean;
   city_tag?: string | null;
+  image_url?: string | null;
 }
 
 interface ForumFeedProps {
@@ -123,6 +124,7 @@ export function ForumFeed({ category, searchQuery, currentScreenName, cityFilter
         screen_name: screenNameMap.get(post.user_id) || "anonymous",
         has_liked: likedPostIds.has(post.id),
         city_tag: (post as any).city_tag || null,
+        image_url: (post as any).image_url || null,
       }));
 
       // Filter by search query
@@ -308,6 +310,45 @@ export function ForumFeed({ category, searchQuery, currentScreenName, cityFilter
               <p className="text-sm text-muted-foreground line-clamp-3">
                 {post.content}
               </p>
+
+              {/* Post Images */}
+              {post.image_url && (() => {
+                try {
+                  const images = JSON.parse(post.image_url);
+                  if (Array.isArray(images) && images.length > 0) {
+                    return (
+                      <div className={`grid gap-1 ${images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                        {images.slice(0, 4).map((url: string, idx: number) => (
+                          <div 
+                            key={idx} 
+                            className={`relative overflow-hidden rounded-lg ${images.length === 1 ? 'aspect-video' : 'aspect-square'}`}
+                          >
+                            <img
+                              src={url}
+                              alt={`Post image ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  }
+                } catch {
+                  // Single image URL (backwards compatibility)
+                  return (
+                    <div className="relative aspect-video overflow-hidden rounded-lg">
+                      <img
+                        src={post.image_url}
+                        alt="Post image"
+                        className="w-full h-full object-cover"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  );
+                }
+                return null;
+              })()}
 
               <div className="flex items-center gap-4 pt-2">
                 <Button
