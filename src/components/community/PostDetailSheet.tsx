@@ -74,6 +74,7 @@ export function PostDetailSheet({ post, onClose, currentScreenName, onPostUpdate
   const [localPost, setLocalPost] = useState<ForumPost | null>(null);
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
+  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content">("crisis");
 
   useEffect(() => {
     if (post) {
@@ -207,8 +208,13 @@ export function PostDetailSheet({ post, onClose, currentScreenName, onPostUpdate
     const crisisResult = detectCrisisContent(newComment);
     if (crisisResult.detected) {
       setCrisisSeverity(crisisResult.severity);
+      setCrisisCategory(crisisResult.category || "crisis");
       setShowCrisisAlert(true);
-      // Don't block commenting - just show the alert
+      // Block harmful content from being posted
+      if (crisisResult.category === "harmful_content") {
+        return;
+      }
+      // Crisis content shows alert but allows commenting
     }
 
     setSubmitting(true);
@@ -265,6 +271,7 @@ export function PostDetailSheet({ post, onClose, currentScreenName, onPostUpdate
         open={showCrisisAlert}
         onClose={() => setShowCrisisAlert(false)}
         severity={crisisSeverity}
+        category={crisisCategory}
       />
     <Sheet open={!!post} onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">

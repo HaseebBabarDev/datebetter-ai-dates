@@ -8,21 +8,62 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Phone, MessageSquare, ExternalLink, Heart } from "lucide-react";
+import { AlertTriangle, Phone, MessageSquare, ExternalLink, Heart, ShieldAlert } from "lucide-react";
 import { CrisisDetectionResult, CRISIS_RESOURCES } from "@/lib/crisisDetection";
 
 interface CrisisAlertDialogProps {
   open: boolean;
   onClose: () => void;
   severity: "moderate" | "severe";
+  category?: "crisis" | "harmful_content";
 }
 
 export const CrisisAlertDialog: React.FC<CrisisAlertDialogProps> = ({
   open,
   onClose,
   severity,
+  category = "crisis",
 }) => {
   const isSevere = severity === "severe";
+  const isHarmfulContent = category === "harmful_content";
+
+  // Different content for harmful content vs crisis
+  if (isHarmfulContent) {
+    return (
+      <AlertDialog open={open} onOpenChange={(open) => !open && onClose()}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-2 bg-destructive/20">
+              <ShieldAlert className="w-8 h-8 text-destructive" />
+            </div>
+            <AlertDialogTitle className="text-center">
+              Content Not Allowed
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center space-y-3">
+              <p>
+                This content cannot be processed as it involves topics that are harmful, illegal, or violate our community guidelines.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                D.E.V.I. is designed to provide healthy dating and relationship advice. We cannot assist with content involving minors, incest, sexual violence, or other harmful topics.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="p-4 rounded-lg bg-muted/50 border border-border my-4">
+            <p className="text-sm text-center">
+              If you or someone you know needs help, please reach out to appropriate resources or authorities.
+            </p>
+          </div>
+
+          <AlertDialogFooter className="mt-4">
+            <Button onClick={onClose} variant="outline" className="w-full">
+              I understand
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
 
   return (
     <AlertDialog open={open} onOpenChange={(open) => !open && onClose()}>
