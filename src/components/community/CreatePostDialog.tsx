@@ -70,6 +70,7 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
   const [hasPostedBefore, setHasPostedBefore] = useState<boolean | null>(null);
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
+  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content">("crisis");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -211,8 +212,13 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
     const crisisResult = detectCrisisContent(title + " " + content);
     if (crisisResult.detected) {
       setCrisisSeverity(crisisResult.severity);
+      setCrisisCategory(crisisResult.category || "crisis");
       setShowCrisisAlert(true);
-      // Don't block posting - just show the alert
+      // Block harmful content from being posted
+      if (crisisResult.category === "harmful_content") {
+        return;
+      }
+      // Crisis content shows alert but allows posting
     }
 
     setIsSubmitting(true);
@@ -307,6 +313,7 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
         open={showCrisisAlert}
         onClose={() => setShowCrisisAlert(false)}
         severity={crisisSeverity}
+        category={crisisCategory}
       />
 
       {/* First Post Disclosure Dialog */}

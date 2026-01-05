@@ -220,6 +220,7 @@ const Devi = () => {
   // Crisis detection state
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
+  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content">("crisis");
   
   // Win logging state
   const [showWinDialog, setShowWinDialog] = useState(false);
@@ -730,8 +731,13 @@ const Devi = () => {
     const crisisResult = detectCrisisContent(textToSend);
     if (crisisResult.detected) {
       setCrisisSeverity(crisisResult.severity);
+      setCrisisCategory(crisisResult.category || "crisis");
       setShowCrisisAlert(true);
-      // Don't block sending - just show the alert
+      // Block harmful content from being sent
+      if (crisisResult.category === "harmful_content") {
+        return;
+      }
+      // Crisis content shows alert but allows sending
     }
 
     const userMessage: Message = {
@@ -1232,6 +1238,7 @@ const Devi = () => {
         open={showCrisisAlert}
         onClose={() => setShowCrisisAlert(false)}
         severity={crisisSeverity}
+        category={crisisCategory}
       />
 
       {/* Requirements Dialog */}

@@ -15,10 +15,78 @@ const CRISIS_KEYWORDS = [
   "stalking", "stalker", "following me", "won't leave me alone", "harassing",
 ];
 
+// Harmful content keywords that should be blocked
+const HARMFUL_CONTENT_KEYWORDS = [
+  // Content involving minors
+  "underage", "minor", "child", "children", "kid", "kids", "teenager", "teen",
+  "young girl", "young boy", "little girl", "little boy", "preteen",
+  // Combined with inappropriate context markers
+  "dating a minor", "dating underage", "attracted to minors", "attracted to children",
+  "attracted to kids", "sexual with minor", "sexual with child", "inappropriate with minor",
+  "inappropriate with child", "inappropriate with kid",
+  // Incest
+  "incest", "my sister", "my brother", "my mother", "my father", "my mom", "my dad",
+  "my daughter", "my son", "my cousin", "family member", "relative",
+  // When combined with romantic/sexual context
+  "dating my sister", "dating my brother", "dating my mother", "dating my father",
+  "dating my daughter", "dating my son", "dating my cousin", "dating family",
+  "romantic with family", "sexual with family", "attracted to family",
+  "in love with my sister", "in love with my brother", "in love with my mother",
+  "in love with my father", "in love with my daughter", "in love with my son",
+  // Sexual violence
+  "rape", "raped", "raping", "sexual assault", "sexually assaulted", "molest",
+  "molested", "molesting", "non-consensual", "without consent", "forced sex",
+  // Other harmful content
+  "pedophile", "pedophilia", "child abuse", "child exploitation",
+  "trafficking", "sex trafficking", "human trafficking",
+];
+
+// Context words that make family terms harmful when combined
+const HARMFUL_CONTEXT_WORDS = [
+  "dating", "romantic", "attracted", "sexual", "intimate", "relationship with",
+  "in love with", "sleeping with", "hooking up", "physical with",
+];
+
+// Family terms that are only harmful in certain contexts
+const FAMILY_TERMS = [
+  "sister", "brother", "mother", "father", "mom", "dad", "daughter", "son",
+  "cousin", "aunt", "uncle", "niece", "nephew", "grandma", "grandpa",
+  "grandmother", "grandfather", "step-sister", "step-brother", "step-mother",
+  "step-father", "stepmom", "stepdad", "half-sister", "half-brother",
+];
+
 export interface CrisisDetectionResult {
   detected: boolean;
   keywords: string[];
   severity: "moderate" | "severe";
+  category?: "crisis" | "harmful_content";
+}
+
+function detectHarmfulFamilyContext(text: string): string[] {
+  const lowerText = text.toLowerCase();
+  const foundHarmful: string[] = [];
+  
+  for (const contextWord of HARMFUL_CONTEXT_WORDS) {
+    for (const familyTerm of FAMILY_TERMS) {
+      // Check for patterns like "dating my sister" or "attracted to my brother"
+      const patterns = [
+        `${contextWord} my ${familyTerm}`,
+        `${contextWord} his ${familyTerm}`,
+        `${contextWord} her ${familyTerm}`,
+        `${contextWord} their ${familyTerm}`,
+        `${contextWord} a ${familyTerm}`,
+        `my ${familyTerm}` + (lowerText.includes(contextWord) ? ` (${contextWord})` : ""),
+      ];
+      
+      for (const pattern of patterns) {
+        if (lowerText.includes(pattern.toLowerCase())) {
+          foundHarmful.push(`${contextWord} ${familyTerm}`);
+        }
+      }
+    }
+  }
+  
+  return foundHarmful;
 }
 
 export function detectCrisisContent(text: string): CrisisDetectionResult {
@@ -26,21 +94,54 @@ export function detectCrisisContent(text: string): CrisisDetectionResult {
   
   const lowerText = text.toLowerCase();
   const foundKeywords: string[] = [];
+  const foundHarmful: string[] = [];
   
+  // Check crisis keywords
   for (const keyword of CRISIS_KEYWORDS) {
     if (lowerText.includes(keyword.toLowerCase())) {
       foundKeywords.push(keyword);
     }
   }
   
-  // Determine severity
+  // Check harmful content keywords
+  for (const keyword of HARMFUL_CONTENT_KEYWORDS) {
+    if (lowerText.includes(keyword.toLowerCase())) {
+      foundHarmful.push(keyword);
+    }
+  }
+  
+  // Check for harmful family context combinations
+  const harmfulFamilyPatterns = detectHarmfulFamilyContext(lowerText);
+  foundHarmful.push(...harmfulFamilyPatterns);
+  
+  // Determine severity and category
   const severeKeywords = ["suicidal", "suicide", "kill myself", "end my life", "want to die"];
-  const hasSevere = foundKeywords.some(k => severeKeywords.includes(k.toLowerCase()));
+  const hasSevereCrisis = foundKeywords.some(k => severeKeywords.includes(k.toLowerCase()));
+  const hasHarmfulContent = foundHarmful.length > 0;
+  
+  // Harmful content is always severe
+  if (hasHarmfulContent) {
+    return {
+      detected: true,
+      keywords: [...new Set([...foundKeywords, ...foundHarmful])],
+      severity: "severe",
+      category: "harmful_content",
+    };
+  }
+  
+  if (foundKeywords.length > 0) {
+    return {
+      detected: true,
+      keywords: foundKeywords,
+      severity: hasSevereCrisis ? "severe" : "moderate",
+      category: "crisis",
+    };
+  }
   
   return {
-    detected: foundKeywords.length > 0,
-    keywords: foundKeywords,
-    severity: hasSevere ? "severe" : "moderate",
+    detected: false,
+    keywords: [],
+    severity: "moderate",
   };
 }
 
