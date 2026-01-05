@@ -165,27 +165,36 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
   const uploadImages = async (): Promise<string[]> => {
     if (!user || selectedImages.length === 0) return [];
 
-    const uploadedUrls: string[] = [];
     setUploadingImages(true);
 
     try {
-      for (const file of selectedImages) {
+      // Upload all images in parallel with unique filenames
+      const uploadPromises = selectedImages.map(async (file, index) => {
         const fileExt = file.name.split(".").pop();
-        const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const uniqueId = `${Date.now()}-${index}-${Math.random().toString(36).substring(2, 9)}`;
+        const fileName = `${user.id}/${uniqueId}.${fileExt}`;
+
+        console.log(`Uploading image ${index + 1}/${selectedImages.length}: ${fileName}`);
 
         const { error: uploadError } = await supabase.storage
           .from("community-photos")
           .upload(fileName, file);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error(`Upload error for image ${index + 1}:`, uploadError);
+          throw uploadError;
+        }
 
         const { data: urlData } = supabase.storage
           .from("community-photos")
           .getPublicUrl(fileName);
 
-        uploadedUrls.push(urlData.publicUrl);
-      }
+        console.log(`Uploaded image ${index + 1}: ${urlData.publicUrl}`);
+        return urlData.publicUrl;
+      });
 
+      const uploadedUrls = await Promise.all(uploadPromises);
+      console.log(`Successfully uploaded ${uploadedUrls.length} images`);
       return uploadedUrls;
     } catch (error) {
       console.error("Error uploading images:", error);
