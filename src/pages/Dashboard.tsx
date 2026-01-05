@@ -834,6 +834,7 @@ const Dashboard = () => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
+                      data-tour="view-patterns"
                       variant="outline"
                       onClick={() => navigate("/patterns")}
                       className="h-11 gap-2 rounded-xl border-border bg-card text-foreground hover:bg-muted/50 transition-all duration-200 active:scale-[0.98]"
