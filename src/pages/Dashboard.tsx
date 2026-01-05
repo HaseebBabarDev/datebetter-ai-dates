@@ -204,9 +204,10 @@ const Dashboard = () => {
     threshold: 80,
   });
 
-  // Calculate cycle phase alerts
+  // Calculate cycle phase alerts - hide for male users
+  const isMaleUser = profile?.gender_identity === "man_cis" || profile?.gender_identity === "man_trans";
   const cycleAlerts = useMemo(() => {
-    if (!profile?.track_cycle || !profile?.last_period_date) return null;
+    if (isMaleUser || !profile?.track_cycle || !profile?.last_period_date) return null;
 
     const lastPeriod = new Date(profile.last_period_date);
     const cycleLength = profile.cycle_length || 28;
@@ -855,8 +856,8 @@ const Dashboard = () => {
             {(() => {
               const alerts: { key: string; icon: React.ReactNode; label: string; sub?: string; color: string; onClick?: () => void }[] = [];
               
-              // Cycle Setup CTA - only show if not completed onboarding (they haven't consciously skipped it yet)
-              if (profile?.track_cycle && !profile?.last_period_date && !profile?.onboarding_completed) {
+              // Cycle Setup CTA - only show if not completed onboarding (they haven't consciously skipped it yet) and not male
+              if (!isMaleUser && profile?.track_cycle && !profile?.last_period_date && !profile?.onboarding_completed) {
                 alerts.push({
                   key: "cycle-setup",
                   icon: <Droplet className="w-3 h-3" />,
