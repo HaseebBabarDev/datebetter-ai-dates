@@ -1666,7 +1666,13 @@ export type Database = {
         | "conservative"
         | "traditional"
       pronouns: "she_her" | "he_him" | "they_them" | "other"
-      relationship_goal: "casual" | "dating" | "serious" | "marriage" | "unsure"
+      relationship_goal:
+        | "casual"
+        | "dating"
+        | "serious"
+        | "marriage"
+        | "unsure"
+        | "situationship"
       relationship_status:
         | "single"
         | "married"
@@ -1900,7 +1906,14 @@ export const Constants = {
         "traditional",
       ],
       pronouns: ["she_her", "he_him", "they_them", "other"],
-      relationship_goal: ["casual", "dating", "serious", "marriage", "unsure"],
+      relationship_goal: [
+        "casual",
+        "dating",
+        "serious",
+        "marriage",
+        "unsure",
+        "situationship",
+      ],
       relationship_status: [
         "single",
         "married",

@@ -25,6 +25,7 @@ import { toast } from "sonner";
 
 const relationshipGoals = [
   { value: "casual", label: "Casual Dating", icon: Clock, description: "Fun, no pressure" },
+  { value: "situationship", label: "Situationship", icon: Sparkles, description: "Undefined connection" },
   { value: "dating", label: "Dating", icon: Heart, description: "Open to connection" },
   { value: "serious", label: "Serious Relationship", icon: Users, description: "Looking for the one" },
   { value: "unsure", label: "Not Sure Yet", icon: Sparkles, description: "Exploring options" },
