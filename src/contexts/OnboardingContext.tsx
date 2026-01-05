@@ -130,6 +130,9 @@ export interface OnboardingData {
   redFlagSensitivity?: number;
   loveBombingSensitivity?: number;
   behavioralMonitoring?: number;
+  
+  // Screen 17: Devi Style
+  deviStyle?: string;
 }
 
 interface OnboardingContextType {
@@ -152,7 +155,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const dataRef = useRef<OnboardingData>(data);
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(true);
-  const totalSteps = 19; // 0-18 (added Dating Motivation screen)
+  const totalSteps = 20; // 0-19 (added Devi Style screen)
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -260,6 +263,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
             loveBombingSensitivity: profile.love_bombing_sensitivity || undefined,
             behavioralMonitoring: profile.behavioral_monitoring || undefined,
             datingMotivation: (profile as any).dating_motivation as string[] || undefined,
+            deviStyle: (profile as any).devi_style || undefined,
           });
 
           // Resume from saved step
@@ -378,6 +382,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         red_flag_sensitivity: currentData.redFlagSensitivity,
         love_bombing_sensitivity: currentData.loveBombingSensitivity,
         behavioral_monitoring: currentData.behavioralMonitoring,
+        devi_style: currentData.deviStyle,
       }).eq("user_id", user.id);
     } catch (error) {
       console.error("Error saving progress:", error);
