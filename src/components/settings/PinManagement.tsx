@@ -158,11 +158,7 @@ export const PinManagement: React.FC<PinManagementProps> = ({ userId }) => {
     }
   };
 
-  useEffect(() => {
-    if (confirmPin.length === 4 && newPin.length === 4) {
-      handleSaveNewPin();
-    }
-  }, [confirmPin]);
+  const canSave = confirmPin.length === 4 && newPin.length === 4;
 
   if (loading) {
     return null;
@@ -233,17 +229,30 @@ export const PinManagement: React.FC<PinManagementProps> = ({ userId }) => {
               }
             </DialogDescription>
           </DialogHeader>
-          <div className="py-6">
+          <div className="py-6 space-y-4">
             <PinInput
               value={resetStep === "enter" ? newPin : confirmPin}
               onChange={handlePinEntered}
               disabled={saving}
             />
-            {saving && (
-              <div className="flex items-center justify-center gap-2 mt-4 text-sm text-muted-foreground">
-                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                Saving...
-              </div>
+            {resetStep === "confirm" && canSave && (
+              <Button
+                onClick={handleSaveNewPin}
+                disabled={saving}
+                className="w-full"
+              >
+                {saving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    Confirm PIN
+                  </>
+                )}
+              </Button>
             )}
           </div>
         </DialogContent>
