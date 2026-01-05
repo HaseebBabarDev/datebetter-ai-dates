@@ -24,6 +24,7 @@ import PastPatternsScreen from "@/components/onboarding/screens/PastPatternsScre
 import BoundariesScreen from "@/components/onboarding/screens/BoundariesScreen";
 import MentalHealthScreen from "@/components/onboarding/screens/MentalHealthScreen";
 import SafetyIntimacyScreen from "@/components/onboarding/screens/SafetyIntimacyScreen";
+import DeviStyleScreen from "@/components/onboarding/screens/DeviStyleScreen";
 import CompletionScreen from "@/components/onboarding/screens/CompletionScreen";
 
 interface SetupContentProps {
@@ -85,7 +86,8 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
     <BoundariesScreen key={15} />,
     <MentalHealthScreen key={16} />,
     <SafetyIntimacyScreen key={17} />,
-    <CompletionScreen key={18} />,
+    <DeviStyleScreen key={18} />,
+    <CompletionScreen key={19} />,
   ];
 
   return screens[currentStep] || screens[0];
