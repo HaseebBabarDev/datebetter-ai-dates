@@ -20,6 +20,9 @@ USER PROFILE (the person you're coaching):
 - Red Flag Sensitivity: ${userProfile.red_flag_sensitivity || 'N/A'}/10
 - Love Bombing Sensitivity: ${userProfile.love_bombing_sensitivity || 'N/A'}/10
 - Boundary Strength: ${userProfile.boundary_strength || 'N/A'}/10
+- Intimacy Comfort: ${userProfile.intimacy_comfort || 'Not specified'}
+- Requires Exclusivity Before Intimacy: ${userProfile.exclusivity_before_intimacy === true ? 'Yes' : userProfile.exclusivity_before_intimacy === false ? 'No' : 'Not specified'}
+- Post-Intimacy Tendency: ${userProfile.post_intimacy_tendency || 'Not specified'}
 - Dealbreakers: ${formatArray(userProfile.dealbreakers)}
 - Dating Patterns to Watch: ${formatArray(userProfile.dating_patterns)}
 - Past Trauma Experiences: ${formatArray(userProfile.trauma_experiences)}
@@ -47,7 +50,29 @@ CANDIDATE PROFILE (the person they're dating):
 - Green Flags Noted: ${formatArray(candidateProfile.green_flags)}
 - Notes: ${candidateProfile.notes || 'None'}
 - Chemistry Ratings: Physical ${candidateProfile.physical_attraction}/5, Intellectual ${candidateProfile.intellectual_connection}/5, Humor ${candidateProfile.humor_compatibility}/5, Energy ${candidateProfile.energy_match}/5
+- First Intimacy Date: ${candidateProfile.first_intimacy_date || 'Has not occurred'}
 ` : '';
+
+  // Check if intimacy hasn't occurred yet for this candidate
+  const intimacyNotOccurred = candidateProfile && !candidateProfile.first_intimacy_date;
+  const userValuesExclusivity = userProfile?.exclusivity_before_intimacy === true;
+  const intimacyComfort = userProfile?.intimacy_comfort;
+  
+  const intimacyGuidance = intimacyNotOccurred ? `
+INTIMACY PACING GUIDANCE (intimacy has NOT occurred with this candidate):
+When the topic of physical intimacy or sex comes up naturally, gently encourage pacing:
+- Remind them that delaying intimacy can actually strengthen the bond. Here's why:
+- Men bond through INVESTMENT (time, effort, vulnerability shared) NOT through sex. Vasopressin, the male bonding hormone, increases when men invest emotionally and protect someone they care about.
+- Oxytocin (the "bonding hormone") releases during intimacy and can create premature attachment before truly knowing if someone is right for you.
+- Dopamine from early physical intimacy can cloud judgment and make red flags harder to see.
+- Waiting allows you to see if they're willing to invest without physical rewards - a key indicator of genuine interest.
+${userValuesExclusivity ? '- They stated they want exclusivity before intimacy - support this boundary.' : ''}
+${intimacyComfort === 'exclusive' ? '- They only want intimacy in exclusive relationships - reinforce this.' : ''}
+${intimacyComfort === 'emotional' ? '- They want emotional connection first - check if that foundation is there.' : ''}
+- Frame this supportively, not judgmentally. It's about protecting their heart and making clear-headed decisions.
+- Don't be preachy - just weave this wisdom in naturally when relevant.
+` : '';
+
 
   const interactionContext = interactions && interactions.length > 0 ? `
 INTERACTION HISTORY (most recent first):
@@ -80,6 +105,7 @@ ${interactions.slice(0, 10).map(i =>
 
 ${userContext}
 ${candidateContext}
+${intimacyGuidance}
 ${interactionContext}
 
 CRITICAL RESPONSE FORMAT:
