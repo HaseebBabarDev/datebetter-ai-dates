@@ -53,12 +53,43 @@ CANDIDATE PROFILE (the person they're dating):
 - First Intimacy Date: ${candidateProfile.first_intimacy_date || 'Has not occurred'}
 ` : '';
 
-  // Check if intimacy hasn't occurred yet for this candidate
+  // Check intimacy status and user's relationship goals
   const intimacyNotOccurred = candidateProfile && !candidateProfile.first_intimacy_date;
+  const intimacyHasOccurred = candidateProfile && candidateProfile.first_intimacy_date;
   const userValuesExclusivity = userProfile?.exclusivity_before_intimacy === true;
   const intimacyComfort = userProfile?.intimacy_comfort;
+  const userGoal = userProfile?.relationship_goal;
+  const isCasualGoal = userGoal === 'casual' || userGoal === 'situationship';
   
-  const intimacyGuidance = intimacyNotOccurred ? `
+  let intimacyGuidance = '';
+  
+  if (isCasualGoal && intimacyHasOccurred) {
+    // Casual/situationship AND intimacy has happened - remind about emotional protection
+    intimacyGuidance = `
+CASUAL INTIMACY GUIDANCE (user wants ${userGoal} and intimacy HAS occurred):
+When discussions about feelings, the relationship, or this person come up:
+- Gently remind them to check in with themselves: Are their expectations still aligned with what they signed up for?
+- Oxytocin released during sex creates bonding feelings - this is BIOLOGY, not necessarily real connection. Be aware of this.
+- Watch for signs they might be "catching feelings" beyond what they wanted - increased jealousy, wanting more time, feeling hurt by their dating others.
+- If they're starting to want more, that's valid - but encourage honest conversation with themselves first: Is this person actually relationship material, or just familiar?
+- Remind them: sex doesn't change someone's intentions. If they wanted casual, they likely still want casual.
+- Encourage maintaining boundaries: keeping other options open, not over-investing emotionally, staying grounded in reality.
+- It's okay to want casual - just protect your heart by keeping expectations realistic.
+- Frame supportively, not judgmentally. It's about self-awareness and emotional protection.
+`;
+  } else if (isCasualGoal && intimacyNotOccurred) {
+    // Casual/situationship but intimacy hasn't happened yet
+    intimacyGuidance = `
+CASUAL INTIMACY GUIDANCE (user wants ${userGoal}, intimacy has NOT occurred yet):
+If intimacy comes up:
+- Since they want something casual, physical intimacy may be fine - but remind them to stay self-aware.
+- Oxytocin from sex can create unexpected attachment. Know this going in so you're not caught off guard.
+- Ask themselves: Can I handle this staying casual? Am I okay if feelings develop and they don't reciprocate?
+- Keep expectations grounded in reality - casual means casual.
+`;
+  } else if (intimacyNotOccurred) {
+    // Serious relationship goal and intimacy hasn't happened
+    intimacyGuidance = `
 INTIMACY PACING GUIDANCE (intimacy has NOT occurred with this candidate):
 When the topic of physical intimacy or sex comes up naturally, gently encourage pacing:
 - Remind them that delaying intimacy can actually strengthen the bond. Here's why:
@@ -71,7 +102,8 @@ ${intimacyComfort === 'exclusive' ? '- They only want intimacy in exclusive rela
 ${intimacyComfort === 'emotional' ? '- They want emotional connection first - check if that foundation is there.' : ''}
 - Frame this supportively, not judgmentally. It's about protecting their heart and making clear-headed decisions.
 - Don't be preachy - just weave this wisdom in naturally when relevant.
-` : '';
+`;
+  }
 
 
   const interactionContext = interactions && interactions.length > 0 ? `
