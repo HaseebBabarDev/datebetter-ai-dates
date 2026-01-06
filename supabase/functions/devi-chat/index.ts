@@ -61,11 +61,21 @@ CANDIDATE PROFILE (the person they're dating):
   const userGoal = userProfile?.relationship_goal;
   const isCasualGoal = userGoal === 'casual' || userGoal === 'situationship';
   
-  // Check if this is a female user dating a male candidate (for intimacy pacing advice)
+  // Determine relationship gender dynamics for intimacy guidance
   const femaleGenders = ['woman_cis', 'woman_trans'];
   const maleGenders = ['man_cis', 'man_trans'];
-  const isFemaleUserMaleCandidate = femaleGenders.includes(userProfile?.gender_identity || '') && 
-                                     maleGenders.includes(candidateProfile?.gender_identity || '');
+  const userGenderIdentity = userProfile?.gender_identity || '';
+  const candidateGenderIdentity = candidateProfile?.gender_identity || '';
+  
+  const isFemaleUser = femaleGenders.includes(userGenderIdentity);
+  const isMaleUser = maleGenders.includes(userGenderIdentity);
+  const isFemaleCandidate = femaleGenders.includes(candidateGenderIdentity);
+  const isMaleCandidate = maleGenders.includes(candidateGenderIdentity);
+  
+  const isFemaleUserMaleCandidate = isFemaleUser && isMaleCandidate;
+  const isSameSexRelationship = (isFemaleUser && isFemaleCandidate) || (isMaleUser && isMaleCandidate);
+  const isWLW = isFemaleUser && isFemaleCandidate; // Women loving women
+  const isMLM = isMaleUser && isMaleCandidate; // Men loving men
   
   let intimacyGuidance = '';
   
@@ -109,6 +119,56 @@ ${intimacyComfort === 'emotional' ? '- They want emotional connection first - ch
 - Frame this supportively, not judgmentally. It's about protecting their heart and letting him prove his interest through actions.
 - Don't be preachy - just weave this wisdom in naturally when relevant.
 `;
+  } else if (intimacyNotOccurred && isWLW) {
+    // Serious relationship goal, women loving women, intimacy hasn't happened
+    intimacyGuidance = `
+INTIMACY GUIDANCE (WLW relationship, intimacy has NOT occurred):
+When intimacy comes up naturally in conversation:
+- WLW relationships can move fast emotionally ("U-Haul" stereotype exists for a reason!) - both partners release oxytocin during intimacy.
+- This double-oxytocin effect can create intense bonding VERY quickly - which feels amazing but can blur red flags.
+- Encourage pacing not because intimacy is "bad," but because intense early bonding can make it harder to leave if things aren't right.
+- Ask: Are you moving toward intimacy because you genuinely feel safe, or because the emotional intensity feels intoxicating?
+- Healthy intimacy comes from knowing each other, not just feeling deeply connected after a short time.
+${userValuesExclusivity ? '- They value exclusivity before intimacy - remind them this boundary is valid in any relationship.' : ''}
+${intimacyComfort === 'slow' ? '- They prefer taking things slow - validate this, especially when emotions run high.' : ''}
+${intimacyComfort === 'emotional' ? '- They want emotional connection first - help them distinguish between emotional intensity and true connection built over time.' : ''}
+- Frame supportively - WLW relationships are beautiful, just protect your heart by pacing yourself.
+- Don't be preachy - weave this wisdom in naturally when relevant.
+`;
+  } else if (intimacyNotOccurred && isMLM) {
+    // Serious relationship goal, men loving men, intimacy hasn't happened
+    intimacyGuidance = `
+INTIMACY GUIDANCE (MLM relationship, intimacy has NOT occurred):
+When intimacy comes up naturally in conversation:
+- In gay male dating culture, sex often happens early and that can be totally fine - no judgment.
+- The key is self-awareness: physical chemistry is NOT the same as emotional compatibility.
+- Dopamine from great sex can make you overlook whether you're actually compatible long-term.
+- If they want something serious, encourage them to notice: Does he want to spend time together OUTSIDE the bedroom? Is he investing emotionally, not just physically?
+- Great physical connection is a plus, but for a lasting relationship, look for someone who's interested in your mind, your life, your day.
+${userValuesExclusivity ? '- They value exclusivity before intimacy - this is a completely valid boundary, even if it feels counter to norms.' : ''}
+${intimacyComfort === 'slow' ? '- They prefer taking things slow - remind them there is no "right" timeline, only what feels right to them.' : ''}
+${intimacyComfort === 'emotional' ? '- They want emotional connection first - help them assess if he is showing up emotionally, not just physically.' : ''}
+- Frame supportively - the goal is helping them find what THEY want, not imposing any "should."
+- Don't be preachy - weave this wisdom in naturally when relevant.
+`;
+  } else if (intimacyHasOccurred && isWLW && !isCasualGoal) {
+    // Serious goal, WLW, intimacy has occurred
+    intimacyGuidance = `
+INTIMACY GUIDANCE (WLW relationship, intimacy HAS occurred, serious goal):
+- Oxytocin bonding can be intense in WLW relationships - both partners experience it.
+- Gently check: Are they assessing the relationship clearly, or is the bonding making everything feel "perfect"?
+- Encourage them to still notice behaviors and patterns, not just feelings.
+- It's okay to feel deeply connected - just stay grounded in what they're actually seeing, not just feeling.
+`;
+  } else if (intimacyHasOccurred && isMLM && !isCasualGoal) {
+    // Serious goal, MLM, intimacy has occurred
+    intimacyGuidance = `
+INTIMACY GUIDANCE (MLM relationship, intimacy HAS occurred, serious goal):
+- Great sex can make everything else feel "good enough" - encourage them to assess the full picture.
+- Is he showing up outside the bedroom? Texting, making plans, being emotionally present?
+- Physical compatibility matters, but for long-term: Is there substance beyond the chemistry?
+- Gently prompt: Are you staying because it's great, or because the sex is great?
+`;
   }
 
 
@@ -119,9 +179,8 @@ ${interactions.slice(0, 10).map(i =>
 ).join('\n')}
 ` : '';
 
-  // Determine user's gender for personalized tone
-  const userGender = userProfile?.gender_identity || 'unknown';
-  const isMaleUser = userGender?.includes('man') || userGender === 'man_cis' || userGender === 'man_trans';
+  // Determine user's gender for personalized tone (use previously defined isMaleUser if available)
+  const isMaleUserForTone = isMaleUser;
   
   // Get user's preferred Devi communication style
   const deviStyle = userProfile?.devi_style || 'balanced';
@@ -135,7 +194,7 @@ ${interactions.slice(0, 10).map(i =>
     styleInstructions = "Balance warmth with honesty. Be supportive but don't sugarcoat.";
   }
   
-  const genderContext = isMaleUser 
+  const genderContext = isMaleUserForTone 
     ? "You're coaching a man in the dating world. Be a supportive bro who gives real talk - think best friend who's been through it all. Skip the \"girl talk\" energy and be direct but empathetic. Men sometimes struggle to open up, so create space for vulnerability without being preachy."
     : "You're a supportive bestie with real talk energy. Empathetic but direct - you don't sugarcoat red flags.";
 
