@@ -61,6 +61,12 @@ CANDIDATE PROFILE (the person they're dating):
   const userGoal = userProfile?.relationship_goal;
   const isCasualGoal = userGoal === 'casual' || userGoal === 'situationship';
   
+  // Check if this is a female user dating a male candidate (for intimacy pacing advice)
+  const femaleGenders = ['woman_cis', 'woman_trans'];
+  const maleGenders = ['man_cis', 'man_trans'];
+  const isFemaleUserMaleCandidate = femaleGenders.includes(userProfile?.gender_identity || '') && 
+                                     maleGenders.includes(candidateProfile?.gender_identity || '');
+  
   let intimacyGuidance = '';
   
   if (isCasualGoal && intimacyHasOccurred) {
@@ -87,20 +93,20 @@ If intimacy comes up:
 - Ask themselves: Can I handle this staying casual? Am I okay if feelings develop and they don't reciprocate?
 - Keep expectations grounded in reality - casual means casual.
 `;
-  } else if (intimacyNotOccurred) {
-    // Serious relationship goal and intimacy hasn't happened
+  } else if (intimacyNotOccurred && isFemaleUserMaleCandidate) {
+    // Serious relationship goal, female user with male candidate, intimacy hasn't happened
     intimacyGuidance = `
-INTIMACY PACING GUIDANCE (intimacy has NOT occurred with this candidate):
+INTIMACY PACING GUIDANCE (female user with male candidate, intimacy has NOT occurred):
 When the topic of physical intimacy or sex comes up naturally, gently encourage pacing:
 - Remind them that delaying intimacy can actually strengthen the bond. Here's why:
-- Men bond through INVESTMENT (time, effort, vulnerability shared) NOT through sex. Vasopressin, the male bonding hormone, increases when men invest emotionally and protect someone they care about.
-- Oxytocin (the "bonding hormone") releases during intimacy and can create premature attachment before truly knowing if someone is right for you.
-- Dopamine from early physical intimacy can cloud judgment and make red flags harder to see.
-- Waiting allows you to see if they're willing to invest without physical rewards - a key indicator of genuine interest.
-${userValuesExclusivity ? '- They stated they want exclusivity before intimacy - support this boundary.' : ''}
-${intimacyComfort === 'exclusive' ? '- They only want intimacy in exclusive relationships - reinforce this.' : ''}
-${intimacyComfort === 'emotional' ? '- They want emotional connection first - check if that foundation is there.' : ''}
-- Frame this supportively, not judgmentally. It's about protecting their heart and making clear-headed decisions.
+- Men bond through INVESTMENT, not sex. Vasopressin (the male bonding hormone) is released when he invests time, effort, and emotional energy - not during sex.
+- For women, oxytocin released during sex creates attachment. But for him? Mostly dopamine (pleasure, novelty) - which fades.
+- The goal isn't to "withhold" - it's to give him time to invest and bond BEFORE the dopamine hit of sex.
+- If he's genuinely interested, waiting won't push him away. If it does, that tells you something important.
+${userValuesExclusivity ? '- They value exclusivity before intimacy - remind them to trust this instinct.' : ''}
+${intimacyComfort === 'slow' ? '- They prefer taking things slow - validate this is wise, especially with men.' : ''}
+${intimacyComfort === 'emotional' ? '- They want emotional connection first - check if HE has invested enough to earn that.' : ''}
+- Frame this supportively, not judgmentally. It's about protecting their heart and letting him prove his interest through actions.
 - Don't be preachy - just weave this wisdom in naturally when relevant.
 `;
   }
