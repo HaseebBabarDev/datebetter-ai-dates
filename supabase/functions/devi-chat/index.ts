@@ -73,6 +73,7 @@ CANDIDATE PROFILE (the person they're dating):
   const isMaleCandidate = maleGenders.includes(candidateGenderIdentity);
   
   const isFemaleUserMaleCandidate = isFemaleUser && isMaleCandidate;
+  const isMaleUserFemaleCandidate = isMaleUser && isFemaleCandidate;
   const isSameSexRelationship = (isFemaleUser && isFemaleCandidate) || (isMaleUser && isMaleCandidate);
   const isWLW = isFemaleUser && isFemaleCandidate; // Women loving women
   const isMLM = isMaleUser && isMaleCandidate; // Men loving men
@@ -119,6 +120,24 @@ ${intimacyComfort === 'emotional' ? '- They want emotional connection first - ch
 - Frame this supportively, not judgmentally. It's about protecting their heart and letting him prove his interest through actions.
 - Don't be preachy - just weave this wisdom in naturally when relevant.
 `;
+  } else if (intimacyNotOccurred && isMaleUserFemaleCandidate) {
+    // Serious relationship goal, male user with female candidate, intimacy hasn't happened
+    intimacyGuidance = `
+INTIMACY GUIDANCE (male user with female candidate, intimacy has NOT occurred):
+When intimacy comes up naturally in conversation:
+- Encourage him to understand: for most women, sex triggers oxytocin - a bonding hormone that creates attachment.
+- If he's genuinely interested in her long-term, pacing can work in his favor. Here's why:
+- Women often feel more secure and valued when emotional investment comes BEFORE physical intimacy.
+- Rushing to sex can make her question his intentions - even if he's serious.
+- Building trust, showing up consistently, and investing time signals genuine interest.
+- Ask: Is she showing signs she's ready, or is he reading into things because HE'S ready?
+- Respecting her pace builds trust and shows he values more than just the physical.
+${userValuesExclusivity ? '- He values exclusivity before intimacy - remind him this shows maturity and respect.' : ''}
+${intimacyComfort === 'slow' ? '- He prefers taking things slow - validate that this approach often leads to stronger foundations.' : ''}
+${intimacyComfort === 'emotional' ? '- He wants emotional connection first - encourage him to build that before escalating physically.' : ''}
+- Frame supportively - it's about building something real, not just getting to the next step.
+- Don't be preachy - weave this wisdom in naturally when relevant.
+`;
   } else if (intimacyNotOccurred && isWLW) {
     // Serious relationship goal, women loving women, intimacy hasn't happened
     intimacyGuidance = `
@@ -150,6 +169,24 @@ ${intimacyComfort === 'slow' ? '- They prefer taking things slow - remind them t
 ${intimacyComfort === 'emotional' ? '- They want emotional connection first - help them assess if he is showing up emotionally, not just physically.' : ''}
 - Frame supportively - the goal is helping them find what THEY want, not imposing any "should."
 - Don't be preachy - weave this wisdom in naturally when relevant.
+`;
+  } else if (intimacyHasOccurred && isFemaleUserMaleCandidate && !isCasualGoal) {
+    // Serious goal, female user with male candidate, intimacy has occurred
+    intimacyGuidance = `
+INTIMACY GUIDANCE (female user with male candidate, intimacy HAS occurred, serious goal):
+- Oxytocin from intimacy may be intensifying her feelings - gently check: Is she seeing him clearly?
+- Encourage her to observe his ACTIONS post-intimacy: Is he more invested, or pulling back?
+- Remind her: how he treats her AFTER intimacy reveals his true intentions.
+- If he's becoming distant, that's data - not a reflection of her worth.
+`;
+  } else if (intimacyHasOccurred && isMaleUserFemaleCandidate && !isCasualGoal) {
+    // Serious goal, male user with female candidate, intimacy has occurred
+    intimacyGuidance = `
+INTIMACY GUIDANCE (male user with female candidate, intimacy HAS occurred, serious goal):
+- Remind him: she may be feeling more bonded now due to oxytocin - this is biology.
+- Encourage him to be consistent and present. Post-intimacy distance can feel like rejection to her.
+- If he's serious about her, NOW is when showing up matters most.
+- Check: Is he continuing to invest emotionally, or did intimacy feel like a "finish line"?
 `;
   } else if (intimacyHasOccurred && isWLW && !isCasualGoal) {
     // Serious goal, WLW, intimacy has occurred
