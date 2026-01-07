@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Users, MessageCircle, Sparkles, ArrowRight, Brain } from "lucide-react";
@@ -50,11 +50,30 @@ const ModernLogo = () => (
 
 const Splash = () => {
   const navigate = useNavigate();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+
+    // iOS Safari can ignore inline autoplay unless these are set on the element.
+    el.muted = true;
+    el.defaultMuted = true;
+    el.setAttribute("muted", "");
+    el.setAttribute("playsinline", "");
+    el.setAttribute("webkit-playsinline", "");
+
+    const p = el.play();
+    if (p && typeof (p as Promise<void>).catch === "function") {
+      p.catch(() => {});
+    }
+  }, []);
 
   return (
     <div className="min-h-[100dvh] relative overflow-hidden">
       {/* Video Background - optimized for fast loading */}
       <video
+        ref={videoRef}
         autoPlay
         loop
         muted
@@ -65,15 +84,18 @@ const Splash = () => {
         webkit-playsinline="true"
         preload="metadata"
         poster="/videos/splash-poster.jpg"
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        style={{ objectFit: 'cover' }}
+        className="absolute inset-0 -z-10 w-full h-full object-cover pointer-events-none"
+        style={{ objectFit: "cover" }}
       >
-        <source src="/videos/splash-video.mp4" type="video/mp4; codecs=avc1.42E01E,mp4a.40.2" />
+        <source
+          src="/videos/splash-video.mp4"
+          type="video/mp4; codecs=avc1.42E01E,mp4a.40.2"
+        />
       </video>
-      
+
       {/* Fallback background image if video fails */}
-      <div 
-        className="absolute inset-0 w-full h-full bg-cover bg-center -z-10"
+      <div
+        className="absolute inset-0 w-full h-full bg-cover bg-center -z-20"
         style={{ backgroundImage: `url('/videos/splash-poster.jpg')` }}
       />
 
