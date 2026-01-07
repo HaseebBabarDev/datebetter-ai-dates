@@ -63,7 +63,7 @@ const Splash = () => {
         disableRemotePlayback
         x-webkit-airplay="deny"
         webkit-playsinline="true"
-        preload="none"
+        preload="metadata"
         poster="/videos/splash-poster.jpg"
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         style={{ objectFit: 'cover' }}
