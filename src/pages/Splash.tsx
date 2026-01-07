@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Users, MessageCircle, Sparkles, ArrowRight, Brain } from "lucide-react";
@@ -7,7 +7,7 @@ const ModernLogo = () => (
   <div className="relative w-24 h-24 sm:w-28 sm:h-28">
     {/* Glow effect */}
     <div className="absolute inset-0 rounded-3xl bg-[image:var(--gradient-hero)] blur-2xl opacity-50 animate-pulse" />
-    
+
     {/* Main logo container */}
     <div className="relative w-full h-full rounded-3xl bg-[image:var(--gradient-hero)] shadow-[var(--shadow-elegant)] flex items-center justify-center overflow-hidden">
       {/* Background pattern */}
@@ -17,21 +17,21 @@ const ModernLogo = () => (
         <div className="absolute bottom-3 left-4 w-2 h-2 rounded-full bg-white/30" />
         <div className="absolute bottom-5 right-2 w-1.5 h-1.5 rounded-full bg-white/40" />
       </div>
-      
+
       {/* Heart with chart line */}
       <svg viewBox="0 0 64 64" className="w-14 h-14 sm:w-16 sm:h-16 relative z-10">
         {/* Heart shape */}
-        <path 
-          d="M32 56 C16 44 8 34 8 24 C8 16 14 10 22 10 C26 10 30 12 32 16 C34 12 38 10 42 10 C50 10 56 16 56 24 C56 34 48 44 32 56Z" 
-          fill="white" 
+        <path
+          d="M32 56 C16 44 8 34 8 24 C8 16 14 10 22 10 C26 10 30 12 32 16 C34 12 38 10 42 10 C50 10 56 16 56 24 C56 34 48 44 32 56Z"
+          fill="white"
           fillOpacity="0.95"
         />
         {/* Data line through heart */}
-        <path 
-          d="M12 32 L22 32 L26 24 L30 38 L34 28 L38 34 L42 30 L52 30" 
-          stroke="url(#lineGradient)" 
-          strokeWidth="2.5" 
-          strokeLinecap="round" 
+        <path
+          d="M12 32 L22 32 L26 24 L30 38 L34 28 L38 34 L42 30 L52 30"
+          stroke="url(#lineGradient)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
         />
@@ -50,65 +50,52 @@ const ModernLogo = () => (
 
 const Splash = () => {
   const navigate = useNavigate();
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!el) return;
-
-    // iOS Safari can ignore inline autoplay unless these are set on the element.
-    el.muted = true;
-    el.defaultMuted = true;
-    el.setAttribute("muted", "");
-    el.setAttribute("playsinline", "");
-    el.setAttribute("webkit-playsinline", "");
-
-    const p = el.play();
-    if (p && typeof (p as Promise<void>).catch === "function") {
-      p.catch(() => {});
-    }
-  }, []);
 
   return (
     <div className="min-h-[100dvh] relative overflow-hidden">
-      {/* Video Background - optimized for fast loading */}
-      <video
-        ref={videoRef}
-        autoPlay
-        loop
-        muted
-        playsInline
-        disablePictureInPicture
-        disableRemotePlayback
-        x-webkit-airplay="deny"
-        webkit-playsinline="true"
-        preload="metadata"
-        poster="/videos/splash-poster.jpg"
-        className="absolute inset-0 -z-10 w-full h-full object-cover pointer-events-none"
-        style={{ objectFit: "cover" }}
-      >
-        <source
-          src="/videos/splash-video.mp4"
-          type="video/mp4; codecs=avc1.42E01E,mp4a.40.2"
+      {/* Background media */}
+      <div className="absolute inset-0 z-0">
+        {/* Fallback background image (shows immediately) */}
+        <div
+          className="absolute inset-0 w-full h-full bg-cover bg-center"
+          style={{ backgroundImage: `url('/videos/splash-poster.jpg')` }}
         />
-      </video>
 
-      {/* Fallback background image if video fails */}
-      <div
-        className="absolute inset-0 w-full h-full bg-cover bg-center -z-20"
-        style={{ backgroundImage: `url('/videos/splash-poster.jpg')` }}
-      />
+        {/* Video background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          poster="/videos/splash-poster.jpg"
+          controls={false}
+          disablePictureInPicture
+          disableRemotePlayback
+          x-webkit-airplay="deny"
+          webkit-playsinline="true"
+          aria-hidden="true"
+          tabIndex={-1}
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          style={{ objectFit: "cover" }}
+        >
+          <source
+            src="/videos/splash-video.mp4"
+            type="video/mp4; codecs=avc1.42E01E,mp4a.40.2"
+          />
+        </video>
+      </div>
 
       {/* Gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/30 to-background/90" />
-      <div className="absolute inset-0 bg-gradient-to-t from-primary/10 via-transparent to-transparent" />
-      
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-background/40 via-background/30 to-background/90" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-t from-primary/10 via-transparent to-transparent" />
+
       {/* Decorative elements - hidden on mobile */}
-      <div className="hidden sm:block absolute top-1/4 -right-20 w-64 h-64 rounded-full bg-primary/20 blur-3xl" />
-      <div className="hidden sm:block absolute bottom-1/3 -left-20 w-48 h-48 rounded-full bg-secondary/20 blur-3xl" />
+      <div className="hidden sm:block absolute top-1/4 -right-20 z-10 w-64 h-64 rounded-full bg-primary/20 blur-3xl" />
+      <div className="hidden sm:block absolute bottom-1/3 -left-20 z-10 w-48 h-48 rounded-full bg-secondary/20 blur-3xl" />
 
       {/* Content */}
-      <div className="relative z-10 min-h-[100dvh] flex flex-col items-center justify-center px-5 py-6 pt-safe-top pb-safe-bottom">
+      <div className="relative z-20 min-h-[100dvh] flex flex-col items-center justify-center px-5 py-6 pt-safe-top pb-safe-bottom">
         {/* Modern Logo */}
         <div className="mb-5">
           <ModernLogo />
