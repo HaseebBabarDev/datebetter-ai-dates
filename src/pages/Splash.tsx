@@ -50,6 +50,7 @@ const ModernLogo = () => (
 
 const Splash = () => {
   const navigate = useNavigate();
+  const videoRef = React.useRef<HTMLVideoElement>(null);
   
   // Detect if running in iOS WebView (not Safari)
   const isIOSWebView = React.useMemo(() => {
@@ -59,6 +60,40 @@ const Splash = () => {
     const isWebView = !/(Safari)/.test(ua) || /(CriOS|FxiOS|OPiOS|EdgiOS)/.test(ua);
     return isIOS && isWebView;
   }, []);
+
+  // Mobile browsers often require user interaction before autoplay works
+  // This effect attempts to play on first touch/click
+  React.useEffect(() => {
+    if (isIOSWebView) return;
+    
+    const video = videoRef.current;
+    if (!video) return;
+
+    const attemptPlay = () => {
+      video.play().catch(() => {
+        // Silently fail - poster image is visible as fallback
+      });
+    };
+
+    // Try to play immediately (works after navigation back)
+    attemptPlay();
+
+    // Listen for first user interaction to trigger play
+    const handleInteraction = () => {
+      attemptPlay();
+      // Remove listeners after first successful interaction
+      document.removeEventListener('touchstart', handleInteraction);
+      document.removeEventListener('click', handleInteraction);
+    };
+
+    document.addEventListener('touchstart', handleInteraction, { passive: true });
+    document.addEventListener('click', handleInteraction);
+
+    return () => {
+      document.removeEventListener('touchstart', handleInteraction);
+      document.removeEventListener('click', handleInteraction);
+    };
+  }, [isIOSWebView]);
 
   return (
     <div className="min-h-[100dvh] relative overflow-hidden">
@@ -73,11 +108,12 @@ const Splash = () => {
         {/* Video background - only render if NOT in iOS WebView */}
         {!isIOSWebView && (
           <video
+            ref={videoRef}
             autoPlay
             loop
             muted
             playsInline
-            preload="metadata"
+            preload="auto"
             poster="/videos/splash-poster.jpg"
             controls={false}
             disablePictureInPicture
