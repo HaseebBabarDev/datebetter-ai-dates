@@ -51,21 +51,9 @@ const ModernLogo = () => (
 const Splash = () => {
   const navigate = useNavigate();
   const videoRef = React.useRef<HTMLVideoElement>(null);
-  
-  // Detect if running in iOS WebView (not Safari)
-  const isIOSWebView = React.useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    const ua = navigator.userAgent;
-    const isIOS = /iPad|iPhone|iPod/.test(ua);
-    const isWebView = !/(Safari)/.test(ua) || /(CriOS|FxiOS|OPiOS|EdgiOS)/.test(ua);
-    return isIOS && isWebView;
-  }, []);
 
-  // Mobile browsers often require user interaction before autoplay works
-  // This effect attempts to play on first touch/click
+  // Attempt video autoplay on mount and user interaction
   React.useEffect(() => {
-    if (isIOSWebView) return;
-    
     const video = videoRef.current;
     if (!video) return;
 
@@ -75,13 +63,12 @@ const Splash = () => {
       });
     };
 
-    // Try to play immediately (works after navigation back)
+    // Try to play immediately
     attemptPlay();
 
-    // Listen for first user interaction to trigger play
+    // Listen for first user interaction to trigger play (mobile browsers)
     const handleInteraction = () => {
       attemptPlay();
-      // Remove listeners after first successful interaction
       document.removeEventListener('touchstart', handleInteraction);
       document.removeEventListener('click', handleInteraction);
     };
@@ -93,7 +80,7 @@ const Splash = () => {
       document.removeEventListener('touchstart', handleInteraction);
       document.removeEventListener('click', handleInteraction);
     };
-  }, [isIOSWebView]);
+  }, []);
 
   return (
     <div className="min-h-[100dvh] relative overflow-hidden">
@@ -105,32 +92,30 @@ const Splash = () => {
           style={{ backgroundImage: `url('/videos/splash-poster.jpg')` }}
         />
 
-        {/* Video background - only render if NOT in iOS WebView */}
-        {!isIOSWebView && (
-          <video
-            ref={videoRef}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            poster="/videos/splash-poster.jpg"
-            controls={false}
-            disablePictureInPicture
-            disableRemotePlayback
-            x-webkit-airplay="deny"
-            webkit-playsinline="true"
-            aria-hidden="true"
-            tabIndex={-1}
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none -z-10"
-            style={{ objectFit: "cover" }}
-          >
-            <source
-              src="/videos/splash-video.mp4"
-              type="video/mp4; codecs=avc1.42E01E,mp4a.40.2"
-            />
-          </video>
-        )}
+        {/* Video background */}
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          poster="/videos/splash-poster.jpg"
+          controls={false}
+          disablePictureInPicture
+          disableRemotePlayback
+          x-webkit-airplay="deny"
+          webkit-playsinline="true"
+          aria-hidden="true"
+          tabIndex={-1}
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none -z-10"
+          style={{ objectFit: "cover" }}
+        >
+          <source
+            src="/videos/splash-video.mp4"
+            type="video/mp4; codecs=avc1.42E01E,mp4a.40.2"
+          />
+        </video>
       </div>
 
       {/* Gradient overlays */}
