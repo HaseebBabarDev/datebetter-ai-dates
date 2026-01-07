@@ -53,7 +53,7 @@ const Splash = () => {
 
   return (
     <div className="min-h-[100dvh] relative overflow-hidden">
-      {/* Video Background */}
+      {/* Video Background - optimized for fast loading */}
       <video
         autoPlay
         loop
@@ -63,11 +63,12 @@ const Splash = () => {
         disableRemotePlayback
         x-webkit-airplay="deny"
         webkit-playsinline="true"
+        preload="none"
         poster="/videos/splash-poster.jpg"
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         style={{ objectFit: 'cover' }}
       >
-        <source src="/videos/splash-video.mp4" type="video/mp4" />
+        <source src="/videos/splash-video.mp4" type="video/mp4; codecs=avc1.42E01E,mp4a.40.2" />
       </video>
       
       {/* Fallback background image if video fails */}
