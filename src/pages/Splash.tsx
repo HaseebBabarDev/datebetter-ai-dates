@@ -50,40 +50,51 @@ const ModernLogo = () => (
 
 const Splash = () => {
   const navigate = useNavigate();
+  
+  // Detect if running in iOS WebView (not Safari)
+  const isIOSWebView = React.useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua);
+    const isWebView = !/(Safari)/.test(ua) || /(CriOS|FxiOS|OPiOS|EdgiOS)/.test(ua);
+    return isIOS && isWebView;
+  }, []);
 
   return (
     <div className="min-h-[100dvh] relative overflow-hidden">
       {/* Background media */}
       <div className="absolute inset-0 z-0">
-        {/* Fallback background image (shows immediately) */}
+        {/* Fallback background image (always visible as base layer) */}
         <div
-          className="absolute inset-0 w-full h-full bg-cover bg-center"
+          className="absolute inset-0 w-full h-full bg-cover bg-center -z-20"
           style={{ backgroundImage: `url('/videos/splash-poster.jpg')` }}
         />
 
-        {/* Video background */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="metadata"
-          poster="/videos/splash-poster.jpg"
-          controls={false}
-          disablePictureInPicture
-          disableRemotePlayback
-          x-webkit-airplay="deny"
-          webkit-playsinline="true"
-          aria-hidden="true"
-          tabIndex={-1}
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          style={{ objectFit: "cover" }}
-        >
-          <source
-            src="/videos/splash-video.mp4"
-            type="video/mp4; codecs=avc1.42E01E,mp4a.40.2"
-          />
-        </video>
+        {/* Video background - only render if NOT in iOS WebView */}
+        {!isIOSWebView && (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            poster="/videos/splash-poster.jpg"
+            controls={false}
+            disablePictureInPicture
+            disableRemotePlayback
+            x-webkit-airplay="deny"
+            webkit-playsinline="true"
+            aria-hidden="true"
+            tabIndex={-1}
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none -z-10"
+            style={{ objectFit: "cover" }}
+          >
+            <source
+              src="/videos/splash-video.mp4"
+              type="video/mp4; codecs=avc1.42E01E,mp4a.40.2"
+            />
+          </video>
+        )}
       </div>
 
       {/* Gradient overlays */}
