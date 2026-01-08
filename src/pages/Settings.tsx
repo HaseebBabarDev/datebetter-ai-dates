@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, RotateCcw, Gift, Copy, Share2, Users } from "lucide-react";
+import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, RotateCcw, Gift, Copy, Share2, Users, ScrollText } from "lucide-react";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { ProfilePhotoUpload } from "@/components/settings/ProfilePhotoUpload";
@@ -25,6 +25,7 @@ import { PaymentSheet } from "@/components/subscription/PaymentSheet";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { format, parse } from "date-fns";
 import { useTour, SETTINGS_TOUR_STEPS, TourRestartButton } from "@/components/tour";
+import { BetaNdaDialog } from "@/components/auth/BetaNdaDialog";
 
 type Profile = Tables<"profiles">;
 type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more" | "unlimited";
@@ -113,6 +114,7 @@ const Settings = () => {
   const [selectedPlanForPayment, setSelectedPlanForPayment] = useState<SubscriptionPlan | null>(null);
   const [referralStats, setReferralStats] = useState<{ total: number; converted: number; trialEarned: boolean }>({ total: 0, converted: 0, trialEarned: false });
   const [copiedReferral, setCopiedReferral] = useState(false);
+  const [showBetaNda, setShowBetaNda] = useState(false);
 
   // Account form state
   const [name, setName] = useState("");
@@ -756,6 +758,56 @@ const Settings = () => {
             {/* PIN Management */}
             <PinManagement userId={user.id} />
 
+            {/* Legal & Agreements */}
+            <Card>
+              <CardHeader className="pb-2 pt-4 px-4">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <ScrollText className="w-4 h-4 text-primary" />
+                  Legal & Agreements
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4 space-y-2">
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-10 text-sm"
+                  onClick={() => setShowBetaNda(true)}
+                >
+                  <span className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-muted-foreground" />
+                    Beta Tester NDA
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-10 text-sm"
+                  onClick={() => navigate("/terms")}
+                >
+                  <span className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                    Terms of Service
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-10 text-sm"
+                  onClick={() => navigate("/privacy-policy")}
+                >
+                  <span className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                    Privacy Policy
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </Button>
+                {localStorage.getItem("datebetter_beta_nda_accepted_at") && (
+                  <p className="text-xs text-muted-foreground pt-2 border-t">
+                    Beta NDA accepted on {new Date(localStorage.getItem("datebetter_beta_nda_accepted_at")!).toLocaleDateString()}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Delete Account */}
             <Card className="border-destructive/20 bg-destructive/5">
               <CardContent className="py-3 px-4">
@@ -1258,6 +1310,13 @@ const Settings = () => {
           onPaymentSuccess={handlePaymentSuccess}
         />
       )}
+
+      {/* Beta NDA Dialog - View Only */}
+      <BetaNdaDialog
+        open={showBetaNda}
+        onAccept={() => setShowBetaNda(false)}
+        viewOnly
+      />
     </div>
   );
 };

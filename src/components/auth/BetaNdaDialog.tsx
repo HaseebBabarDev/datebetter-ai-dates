@@ -14,9 +14,10 @@ import { Shield, FileText, CheckCircle2 } from "lucide-react";
 interface BetaNdaDialogProps {
   open: boolean;
   onAccept: () => void;
+  viewOnly?: boolean;
 }
 
-export const BetaNdaDialog: React.FC<BetaNdaDialogProps> = ({ open, onAccept }) => {
+export const BetaNdaDialog: React.FC<BetaNdaDialogProps> = ({ open, onAccept, viewOnly = false }) => {
   const [hasReadNda, setHasReadNda] = useState(false);
   const [acceptsNda, setAcceptsNda] = useState(false);
 
@@ -29,8 +30,8 @@ export const BetaNdaDialog: React.FC<BetaNdaDialogProps> = ({ open, onAccept }) 
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="max-w-lg max-h-[90vh] p-0 overflow-hidden" hideCloseButton>
+    <Dialog open={open} onOpenChange={viewOnly ? () => onAccept() : () => {}}>
+      <DialogContent className="max-w-lg max-h-[90vh] p-0 overflow-hidden" hideCloseButton={!viewOnly}>
         <DialogHeader className="p-6 pb-4 bg-gradient-to-br from-primary/10 to-secondary/10 border-b border-border/50">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-12 h-12 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center shadow-lg">
@@ -39,7 +40,7 @@ export const BetaNdaDialog: React.FC<BetaNdaDialogProps> = ({ open, onAccept }) 
             <div>
               <DialogTitle className="text-xl font-bold">Beta Tester Agreement</DialogTitle>
               <DialogDescription className="text-sm">
-                Please review and accept to continue
+                {viewOnly ? "Your accepted agreement" : "Please review and accept to continue"}
               </DialogDescription>
             </div>
           </div>
@@ -115,54 +116,66 @@ export const BetaNdaDialog: React.FC<BetaNdaDialogProps> = ({ open, onAccept }) 
         </ScrollArea>
 
         <div className="p-6 pt-4 border-t border-border/50 space-y-4 bg-muted/30">
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={() => setHasReadNda(!hasReadNda)}
-              className={`w-full p-3 rounded-xl border-2 transition-all duration-200 flex items-center gap-3 text-left ${
-                hasReadNda 
-                  ? "border-primary bg-primary/5" 
-                  : "border-border/50 bg-background/50 hover:border-primary/30"
-              }`}
+          {viewOnly ? (
+            <Button
+              onClick={onAccept}
+              className="w-full h-12 rounded-xl"
+              variant="outline"
             >
-              <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${
-                hasReadNda 
-                  ? "bg-primary text-primary-foreground" 
-                  : "bg-muted border border-border"
-              }`}>
-                {hasReadNda && <CheckCircle2 className="w-3.5 h-3.5" />}
-              </div>
-              <span className="text-sm">I have read the Beta Tester NDA in its entirety</span>
-            </button>
+              Close
+            </Button>
+          ) : (
+            <>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => setHasReadNda(!hasReadNda)}
+                  className={`w-full p-3 rounded-xl border-2 transition-all duration-200 flex items-center gap-3 text-left ${
+                    hasReadNda 
+                      ? "border-primary bg-primary/5" 
+                      : "border-border/50 bg-background/50 hover:border-primary/30"
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${
+                    hasReadNda 
+                      ? "bg-primary text-primary-foreground" 
+                      : "bg-muted border border-border"
+                  }`}>
+                    {hasReadNda && <CheckCircle2 className="w-3.5 h-3.5" />}
+                  </div>
+                  <span className="text-sm">I have read the Beta Tester NDA in its entirety</span>
+                </button>
 
-            <button
-              type="button"
-              onClick={() => setAcceptsNda(!acceptsNda)}
-              className={`w-full p-3 rounded-xl border-2 transition-all duration-200 flex items-center gap-3 text-left ${
-                acceptsNda 
-                  ? "border-primary bg-primary/5" 
-                  : "border-border/50 bg-background/50 hover:border-primary/30"
-              }`}
-            >
-              <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${
-                acceptsNda 
-                  ? "bg-primary text-primary-foreground" 
-                  : "bg-muted border border-border"
-              }`}>
-                {acceptsNda && <CheckCircle2 className="w-3.5 h-3.5" />}
+                <button
+                  type="button"
+                  onClick={() => setAcceptsNda(!acceptsNda)}
+                  className={`w-full p-3 rounded-xl border-2 transition-all duration-200 flex items-center gap-3 text-left ${
+                    acceptsNda 
+                      ? "border-primary bg-primary/5" 
+                      : "border-border/50 bg-background/50 hover:border-primary/30"
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${
+                    acceptsNda 
+                      ? "bg-primary text-primary-foreground" 
+                      : "bg-muted border border-border"
+                  }`}>
+                    {acceptsNda && <CheckCircle2 className="w-3.5 h-3.5" />}
+                  </div>
+                  <span className="text-sm">I accept and agree to the terms of this Agreement</span>
+                </button>
               </div>
-              <span className="text-sm">I accept and agree to the terms of this Agreement</span>
-            </button>
-          </div>
 
-          <Button
-            onClick={handleAccept}
-            disabled={!hasReadNda || !acceptsNda}
-            className="w-full h-12 rounded-xl bg-[image:var(--gradient-hero)] hover:opacity-90 transition-all duration-300 shadow-[var(--shadow-soft)] text-base font-semibold"
-          >
-            <Shield className="w-4 h-4 mr-2" />
-            Accept & Continue
-          </Button>
+              <Button
+                onClick={handleAccept}
+                disabled={!hasReadNda || !acceptsNda}
+                className="w-full h-12 rounded-xl bg-[image:var(--gradient-hero)] hover:opacity-90 transition-all duration-300 shadow-[var(--shadow-soft)] text-base font-semibold"
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                Accept & Continue
+              </Button>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>
