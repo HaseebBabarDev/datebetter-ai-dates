@@ -853,9 +853,9 @@ const Dashboard = () => {
 
             <UpgradeNudge />
             <FreeUpgradeBanner />
-            <div className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-full bg-muted/50 border border-border/50">
-              <Sparkles className="w-3 h-3 text-primary" />
-              <span className="text-[10px] text-muted-foreground">Chatting with Devi & logging honest interactions improves insights</span>
+            <div className="flex items-center justify-center gap-1.5 py-1 px-3 rounded-full bg-muted/50 border border-border/50">
+              <Sparkles className="w-3 h-3 text-primary shrink-0" />
+              <span className="text-[10px] font-medium text-foreground whitespace-nowrap">Chat with Devi & log honestly → better insights</span>
             </div>
 
             {/* Alerts */}
