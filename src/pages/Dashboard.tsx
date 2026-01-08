@@ -54,6 +54,7 @@ import { AIAlertsCard } from "@/components/dashboard/AIAlertsCard";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefresh";
 import { WinsStats, useDeviWins } from "@/components/devi/WinsStats";
+import { WillingnessToPaySurvey } from "@/components/subscription/WillingnessToPaySurvey";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -104,6 +105,8 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [reopeningId, setReopeningId] = useState<string | null>(null);
   const [showAllActivity, setShowAllActivity] = useState(false);
+  const [showWtpSurvey, setShowWtpSurvey] = useState(false);
+  const [surveyChecked, setSurveyChecked] = useState(false);
   
   // Devi wins tracking
   const { wins, refetch: refetchWins } = useDeviWins(user?.id);
@@ -180,6 +183,37 @@ const Dashboard = () => {
       fetchData();
     }
   }, [user]);
+
+  // Check and trigger willingness-to-pay survey at 10 candidates
+  useEffect(() => {
+    const checkSurvey = async () => {
+      if (!user || surveyChecked || candidates.length < 10) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from("willingness_to_pay_surveys")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        if (error) {
+          console.error("Error checking survey:", error);
+          return;
+        }
+        
+        setSurveyChecked(true);
+        
+        // If no survey exists, show it
+        if (!data) {
+          setShowWtpSurvey(true);
+        }
+      } catch (error) {
+        console.error("Error checking survey:", error);
+      }
+    };
+    
+    checkSurvey();
+  }, [user, candidates.length, surveyChecked]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -1326,6 +1360,13 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Willingness to Pay Survey */}
+      <WillingnessToPaySurvey
+        open={showWtpSurvey}
+        onOpenChange={setShowWtpSurvey}
+        candidateCount={candidates.length}
+      />
     </div>
   );
 };

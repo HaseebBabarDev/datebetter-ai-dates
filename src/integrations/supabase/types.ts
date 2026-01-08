@@ -1583,6 +1583,42 @@ export type Database = {
         }
         Relationships: []
       }
+      willingness_to_pay_surveys: {
+        Row: {
+          candidate_count_at_survey: number
+          completed_at: string
+          created_at: string
+          feedback: string | null
+          id: string
+          max_monthly_price: number | null
+          most_valued_features: string[] | null
+          preferred_plan: string | null
+          user_id: string
+        }
+        Insert: {
+          candidate_count_at_survey?: number
+          completed_at?: string
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          max_monthly_price?: number | null
+          most_valued_features?: string[] | null
+          preferred_plan?: string | null
+          user_id: string
+        }
+        Update: {
+          candidate_count_at_survey?: number
+          completed_at?: string
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          max_monthly_price?: number | null
+          most_valued_features?: string[] | null
+          preferred_plan?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       studios_public: {
