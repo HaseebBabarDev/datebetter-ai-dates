@@ -15,6 +15,9 @@ interface Candidate {
   green_flags: unknown[] | null;
   notes: string | null;
   their_attachment_style: string | null;
+  their_career_stage: string | null;
+  met_via: string | null;
+  met_app: string | null;
   created_at: string | null;
   updated_at: string | null;
 }
@@ -103,6 +106,9 @@ serve(async (req) => {
       return {
         nickname: c.nickname,
         status: c.status,
+        careerStage: c.their_career_stage,
+        metVia: c.met_via,
+        metApp: c.met_app, // Note: This is WHERE they met (e.g., Instagram), not their profession
         compatibility: c.compatibility_score,
         redFlagCount: Array.isArray(c.red_flags) ? c.red_flags.length : 0,
         redFlags: Array.isArray(c.red_flags) ? c.red_flags.slice(0, 5) : [],
@@ -146,6 +152,11 @@ Your job is to analyze the user's dating data and generate TWO types of alerts:
    - If behavior patterns suggest an upcoming issue (love bombing → ghosting cycle)
    - If the user tends to ignore advice in specific situations
    - Warning signs based on timeline patterns (too fast, too slow, stalling)
+
+IMPORTANT DISTINCTIONS:
+- "metApp" field (e.g., "instagram", "tinder") indicates WHERE the user met this person, NOT their profession
+- "careerStage" field indicates their actual profession/career
+- Do NOT confuse meeting on Instagram with being an influencer - they are different things
 
 Be specific, compassionate but direct. Reference specific candidates by nickname when relevant.
 Each alert should have:
