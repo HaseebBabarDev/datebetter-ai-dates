@@ -23,6 +23,7 @@ import {
   ScrollText
 } from "lucide-react";
 import { RevenueAnalytics } from "@/components/admin/RevenueAnalytics";
+import { AIUsageAnalytics } from "@/components/admin/AIUsageAnalytics";
 import { 
   Select,
   SelectContent,
@@ -643,6 +644,11 @@ const Admin = () => {
         {/* Revenue Analytics */}
         <div className="mb-8">
           <RevenueAnalytics />
+        </div>
+
+        {/* AI Usage Analytics */}
+        <div className="mb-8">
+          <AIUsageAnalytics />
         </div>
 
         {/* Referrals Section */}
