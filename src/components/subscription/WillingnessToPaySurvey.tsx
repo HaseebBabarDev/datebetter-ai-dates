@@ -23,12 +23,11 @@ interface WillingnessToPaySurveyProps {
 }
 
 const PRICE_OPTIONS = [
-  { value: "0", label: "I prefer free" },
-  { value: "5", label: "$5/month" },
-  { value: "10", label: "$10/month" },
-  { value: "15", label: "$15/month" },
-  { value: "20", label: "$20/month" },
-  { value: "25+", label: "$25+/month" },
+  { value: "9.99", label: "$9.99/month" },
+  { value: "14.99", label: "$14.99/month" },
+  { value: "19.99", label: "$19.99/month" },
+  { value: "24.99", label: "$24.99/month" },
+  { value: "29.99+", label: "$29.99+/month" },
 ];
 
 const FEATURES = [
@@ -42,9 +41,9 @@ const FEATURES = [
 
 const PLAN_OPTIONS = [
   { value: "free", label: "Free (limited features)" },
-  { value: "basic", label: "Basic ($5-10/mo)" },
-  { value: "standard", label: "Standard ($10-15/mo)" },
-  { value: "premium", label: "Premium ($15-25/mo)" },
+  { value: "basic", label: "Basic ($9.99/mo)" },
+  { value: "standard", label: "Standard ($14.99/mo)" },
+  { value: "premium", label: "Premium ($24.99/mo)" },
 ];
 
 export function WillingnessToPaySurvey({
