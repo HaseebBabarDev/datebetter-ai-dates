@@ -84,7 +84,7 @@ const QuickStartScreen = () => {
           education_level: data.educationLevel,
           attraction_importance: data.attractionImportance,
           onboarding_completed: true,
-          onboarding_step: 18,
+          onboarding_step: 21,
         })
         .eq("user_id", user.id);
 
