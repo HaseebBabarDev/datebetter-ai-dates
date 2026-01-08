@@ -47,7 +47,7 @@ import { differenceInDays, addDays, format } from "date-fns";
 import heroCouple from "@/assets/hero-couple.jpeg";
 import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
 import { FreeUpgradeBanner } from "@/components/subscription/FreeUpgradeBanner";
-import { DailyLoggingCTA } from "@/components/dashboard/DailyLoggingCTA";
+
 import { DeviCTA } from "@/components/dashboard/DeviCTA";
 import { ReferralCard } from "@/components/dashboard/ReferralCard";
 import { AIAlertsCard } from "@/components/dashboard/AIAlertsCard";
@@ -853,7 +853,10 @@ const Dashboard = () => {
 
             <UpgradeNudge />
             <FreeUpgradeBanner />
-            <DailyLoggingCTA interactions={interactions} candidates={candidates} />
+            <div className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-full bg-muted/50 border border-border/50">
+              <Sparkles className="w-3 h-3 text-primary" />
+              <span className="text-[10px] text-muted-foreground">Chatting with Devi & logging honest interactions improves insights</span>
+            </div>
 
             {/* Alerts */}
             {(() => {
