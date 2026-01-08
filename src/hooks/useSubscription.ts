@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more";
+export type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more" | "unlimited";
 
 interface Subscription {
   plan: SubscriptionPlan;
@@ -20,6 +20,7 @@ const PLAN_LIMITS: Record<SubscriptionPlan, { candidates: number; updates: numbe
   new_to_dating: { candidates: 3, updates: 5 },
   dating_often: { candidates: 7, updates: 12 },
   dating_more: { candidates: 12, updates: 20 },
+  unlimited: { candidates: 999, updates: 999 },
 };
 
 export function useSubscription() {
