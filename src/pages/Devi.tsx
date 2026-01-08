@@ -84,6 +84,7 @@ const QUICK_REPLIES = [
 ];
 
 const MAX_MESSAGE_LENGTH = 400;
+const MAX_CONVERSATION_MESSAGES = 40; // ~20 exchanges before suggesting new chat
 
 // Message bubble with truncation for long messages
 const MessageBubble: React.FC<{ 
@@ -1407,8 +1408,32 @@ const Devi = () => {
             ))
           )}
           
+          {/* Long conversation nudge */}
+          {messages.length >= MAX_CONVERSATION_MESSAGES && !isLoading && (
+            <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20">
+              <div className="flex items-start gap-2">
+                <Brain className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">This conversation is getting long</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    For better responses, consider starting a fresh chat. Your history is saved!
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-2 h-7 text-xs gap-1.5"
+                    onClick={startNewChat}
+                  >
+                    <Plus className="w-3 h-3" />
+                    Start new chat
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {/* Win prompt - show after conversation has messages and not loading */}
-          {messages.length >= 2 && !isLoading && messages[messages.length - 1]?.role === 'assistant' && (
+          {messages.length >= 2 && messages.length < MAX_CONVERSATION_MESSAGES && !isLoading && messages[messages.length - 1]?.role === 'assistant' && (
             <DeviWinPrompt onLogWin={() => setShowWinDialog(true)} className="mt-4" />
           )}
           
