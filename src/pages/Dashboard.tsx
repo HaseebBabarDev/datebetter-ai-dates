@@ -37,6 +37,7 @@ import {
   RefreshCw,
   Lightbulb,
   ChevronDown,
+  ClipboardList,
 } from "lucide-react";
 import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
@@ -802,6 +803,23 @@ const Dashboard = () => {
             </div>
             <div className="flex items-center gap-0.5">
               <TourRestartButton tourId="dashboard" tourSteps={DASHBOARD_TOUR_STEPS} />
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-foreground hover:bg-secondary/20 rounded-xl h-9 w-9" 
+                      onClick={() => setShowWtpSurvey(true)}
+                    >
+                      <ClipboardList className="w-5 h-5 text-secondary" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p className="text-xs">Take quick survey</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -905,19 +923,9 @@ const Dashboard = () => {
 
             <UpgradeNudge />
             <FreeUpgradeBanner />
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center justify-center gap-1.5 py-1 px-3 rounded-full bg-muted/50 border border-border/50 flex-1">
-                <Sparkles className="w-3 h-3 text-primary shrink-0" />
-                <span className="text-[10px] font-medium text-foreground whitespace-nowrap">Chat with Devi & log honestly → better insights</span>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowWtpSurvey(true)}
-                className="h-6 px-2 text-[10px] text-muted-foreground hover:text-foreground"
-              >
-                Survey
-              </Button>
+            <div className="flex items-center justify-center gap-1.5 py-1 px-3 rounded-full bg-muted/50 border border-border/50">
+              <Sparkles className="w-3 h-3 text-primary shrink-0" />
+              <span className="text-[10px] font-medium text-foreground whitespace-nowrap">Chat with Devi & log honestly → better insights</span>
             </div>
 
             {/* Alerts */}
