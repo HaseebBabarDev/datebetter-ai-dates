@@ -18,7 +18,7 @@ interface UsageTracking {
 const PLAN_LIMITS: Record<SubscriptionPlan, { candidates: number; updates: number }> = {
   free: { candidates: 1, updates: 1 },
   new_to_dating: { candidates: 3, updates: 5 },
-  dating_often: { candidates: 7, updates: 12 },
+  dating_often: { candidates: 10, updates: 30 },
   dating_more: { candidates: 12, updates: 20 },
   unlimited: { candidates: 999, updates: 999 },
 };
@@ -51,15 +51,15 @@ export function useSubscription() {
         console.error("Error fetching subscription:", subError);
       }
 
-      // If no subscription exists, create one
+      // If no subscription exists, create one with dating_often as default
       if (!subData) {
         const { data: newSub, error: insertError } = await supabase
           .from("user_subscriptions")
           .insert({
             user_id: user.id,
-            plan: "free",
-            candidates_limit: 1,
-            updates_per_candidate: 1,
+            plan: "dating_often",
+            candidates_limit: 10,
+            updates_per_candidate: 30,
           })
           .select()
           .single();
