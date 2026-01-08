@@ -26,6 +26,7 @@ import {
 import { RevenueAnalytics } from "@/components/admin/RevenueAnalytics";
 import { AIUsageAnalytics } from "@/components/admin/AIUsageAnalytics";
 import { WTPSurveyAnalytics } from "@/components/admin/WTPSurveyAnalytics";
+import { WillingnessToPaySurvey } from "@/components/subscription/WillingnessToPaySurvey";
 import { 
   Select,
   SelectContent,
@@ -52,6 +53,7 @@ const Admin = () => {
   const [grantingTrial, setGrantingTrial] = useState<string | null>(null);
   const [agreements, setAgreements] = useState<any[]>([]);
   const [loadingAgreements, setLoadingAgreements] = useState(false);
+  const [showWtpSurvey, setShowWtpSurvey] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -663,7 +665,7 @@ const Admin = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <WTPSurveyAnalytics />
+              <WTPSurveyAnalytics onInitiateSurvey={() => setShowWtpSurvey(true)} />
             </CardContent>
           </Card>
         </div>
@@ -950,6 +952,13 @@ const Admin = () => {
           </CardContent>
         </Card>
       </main>
+
+      {/* WTP Survey Dialog for Testing */}
+      <WillingnessToPaySurvey
+        open={showWtpSurvey}
+        onOpenChange={setShowWtpSurvey}
+        candidateCount={10}
+      />
     </div>
   );
 };
