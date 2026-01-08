@@ -6,14 +6,14 @@ interface LoadingScreenProps {
   onComplete?: () => void;
 }
 
-export function LoadingScreen({ minDuration = 1500, onComplete }: LoadingScreenProps) {
+export function LoadingScreen({ minDuration = 800, onComplete }: LoadingScreenProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const startTime = Date.now();
     
-    // Animate progress
+    // Faster progress animation
     const progressInterval = setInterval(() => {
       const elapsed = Date.now() - startTime;
       const newProgress = Math.min((elapsed / minDuration) * 100, 100);
@@ -22,7 +22,7 @@ export function LoadingScreen({ minDuration = 1500, onComplete }: LoadingScreenP
       if (newProgress >= 100) {
         clearInterval(progressInterval);
       }
-    }, 50);
+    }, 30);
 
     // Complete after minimum duration
     const timer = setTimeout(() => {

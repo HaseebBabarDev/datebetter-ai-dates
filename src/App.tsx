@@ -9,31 +9,42 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { BottomNavigation } from "@/components/navigation/BottomNavigation";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
+
+// Eagerly load critical paths
 import Splash from "./pages/Splash";
-import Onboarding from "./pages/Onboarding";
 import Auth from "./pages/Auth";
-import Setup from "./pages/Setup";
 import Dashboard from "./pages/Dashboard";
-import CandidateDetail from "./pages/CandidateDetail";
-import Patterns from "./pages/Patterns";
-import AddCandidate from "./pages/AddCandidate";
-import Settings from "./pages/Settings";
-import Notifications from "./pages/Notifications";
-import Devi from "./pages/Devi";
-import Admin from "./pages/Admin";
-import TestSetup from "./pages/TestSetup";
-import Subscription from "./pages/Subscription";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import Terms from "./pages/Terms";
-import About from "./pages/About";
-import Support from "./pages/Support";
 import Offline from "./pages/Offline";
-import ErrorPage from "./pages/Error";
-import ClearData from "./pages/ClearData";
-import AppVersion from "./pages/AppVersion";
-import Community from "./pages/Community";
-import NotFound from "./pages/NotFound";
+
+// Lazy load non-critical routes
+const Onboarding = lazy(() => import("./pages/Onboarding"));
+const Setup = lazy(() => import("./pages/Setup"));
+const CandidateDetail = lazy(() => import("./pages/CandidateDetail"));
+const Patterns = lazy(() => import("./pages/Patterns"));
+const AddCandidate = lazy(() => import("./pages/AddCandidate"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const Devi = lazy(() => import("./pages/Devi"));
+const Admin = lazy(() => import("./pages/Admin"));
+const TestSetup = lazy(() => import("./pages/TestSetup"));
+const Subscription = lazy(() => import("./pages/Subscription"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const About = lazy(() => import("./pages/About"));
+const Support = lazy(() => import("./pages/Support"));
+const ErrorPage = lazy(() => import("./pages/Error"));
+const ClearData = lazy(() => import("./pages/ClearData"));
+const AppVersion = lazy(() => import("./pages/AppVersion"));
+const Community = lazy(() => import("./pages/Community"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Minimal loading fallback for lazy routes
+const RouteLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -63,9 +74,9 @@ function AppContent() {
 
   return (
     <>
-      {showLoading && <LoadingScreen minDuration={1800} onComplete={handleLoadingComplete} />}
+      {showLoading && <LoadingScreen minDuration={800} onComplete={handleLoadingComplete} />}
       {appReady && (
-        <>
+        <Suspense fallback={<RouteLoader />}>
           <Routes>
             <Route path="/" element={<Splash />} />
             <Route path="/onboarding" element={<Onboarding />} />
@@ -93,7 +104,7 @@ function AppContent() {
             <Route path="*" element={<NotFound />} />
           </Routes>
           <BottomNavigation />
-        </>
+        </Suspense>
       )}
     </>
   );
