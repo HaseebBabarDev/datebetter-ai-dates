@@ -112,6 +112,11 @@ export interface OnboardingData {
   patternRecognition?: string[];
   
   // Screen 14: Family & Upbringing
+  parentStatus?: string;
+  motherStatus?: string;
+  fatherStatus?: string;
+  fullSiblings?: number;
+  halfSiblings?: number;
   parentsRelationshipDynamic?: string;
   parentsConflictStyle?: string;
   childoodLoveExpression?: string;

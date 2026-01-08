@@ -106,6 +106,25 @@ const ZODIAC_OPTIONS: { value: string; label: string; emoji: string }[] = [
   { value: "pisces", label: "Pisces", emoji: "♓" },
 ];
 
+const THEIR_PARENT_STATUS_OPTIONS = [
+  { value: "married_together", label: "Married Together" },
+  { value: "unmarried_together", label: "Unmarried Together" },
+  { value: "divorced", label: "Divorced" },
+  { value: "separated", label: "Separated" },
+  { value: "single_parent", label: "Single Parent" },
+  { value: "adopted", label: "Adopted" },
+  { value: "orphan_system", label: "Orphan/System" },
+  { value: "other_guardians", label: "Other Guardians" },
+  { value: "unknown", label: "Unknown" },
+];
+
+const THEIR_PARENT_PRESENCE_OPTIONS = [
+  { value: "present", label: "Present" },
+  { value: "absent", label: "Absent" },
+  { value: "deceased", label: "Deceased" },
+  { value: "unknown", label: "Unknown" },
+];
+
 const THEIR_PARENTS_OPTIONS = [
   { value: "together_healthy", label: "Together & Healthy" },
   { value: "together_unhealthy", label: "Together but Unhealthy" },
@@ -433,10 +452,30 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex flex-wrap gap-2">
-              {(candidate as any).their_parents_relationship && (candidate as any).their_parents_relationship !== "unknown" && (
+              {(candidate as any).their_parent_status && (candidate as any).their_parent_status !== "unknown" && (
                 <Badge variant="outline" className="gap-1">
                   <Users className="w-3 h-3" />
-                  Parents: {formatLabel((candidate as any).their_parents_relationship, THEIR_PARENTS_OPTIONS)}
+                  {formatLabel((candidate as any).their_parent_status, THEIR_PARENT_STATUS_OPTIONS)}
+                </Badge>
+              )}
+              {(candidate as any).their_mother_status && (candidate as any).their_mother_status !== "unknown" && (
+                <Badge variant="outline">
+                  Mother: {formatLabel((candidate as any).their_mother_status, THEIR_PARENT_PRESENCE_OPTIONS)}
+                </Badge>
+              )}
+              {(candidate as any).their_father_status && (candidate as any).their_father_status !== "unknown" && (
+                <Badge variant="outline">
+                  Father: {formatLabel((candidate as any).their_father_status, THEIR_PARENT_PRESENCE_OPTIONS)}
+                </Badge>
+              )}
+              {(candidate as any).their_siblings !== null && (candidate as any).their_siblings !== undefined && (
+                <Badge variant="outline">
+                  {(candidate as any).their_siblings} Sibling{(candidate as any).their_siblings !== 1 ? 's' : ''}
+                </Badge>
+              )}
+              {(candidate as any).their_parents_relationship && (candidate as any).their_parents_relationship !== "unknown" && (
+                <Badge variant="outline">
+                  Parents Rel: {formatLabel((candidate as any).their_parents_relationship, THEIR_PARENTS_OPTIONS)}
                 </Badge>
               )}
               {(candidate as any).their_felt_loved_as_child && (candidate as any).their_felt_loved_as_child !== "unknown" && (
