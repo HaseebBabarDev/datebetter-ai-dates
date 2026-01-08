@@ -84,7 +84,8 @@ const QUICK_REPLIES = [
 ];
 
 const MAX_MESSAGE_LENGTH = 400;
-const MAX_CONVERSATION_MESSAGES = 40; // ~20 exchanges before suggesting new chat
+const SOFT_LIMIT_MESSAGES = 30; // Soft warning
+const MAX_CONVERSATION_MESSAGES = 40; // Hard nudge to start new chat
 
 // Message bubble with truncation for long messages
 const MessageBubble: React.FC<{ 
@@ -1408,7 +1409,15 @@ const Devi = () => {
             ))
           )}
           
-          {/* Long conversation nudge */}
+          {/* Soft warning at 30 messages */}
+          {messages.length >= SOFT_LIMIT_MESSAGES && messages.length < MAX_CONVERSATION_MESSAGES && !isLoading && (
+            <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+              <MessageSquare className="w-3 h-3" />
+              <span>Long conversation — consider starting fresh soon for best results</span>
+            </div>
+          )}
+          
+          {/* Hard nudge at 40 messages */}
           {messages.length >= MAX_CONVERSATION_MESSAGES && !isLoading && (
             <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20">
               <div className="flex items-start gap-2">
