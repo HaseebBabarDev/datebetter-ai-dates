@@ -184,27 +184,44 @@ const Dashboard = () => {
     }
   }, [user]);
 
-  // Check and trigger willingness-to-pay survey at 10 candidates
+  // Check and trigger willingness-to-pay survey at 10 candidates OR if admin requested
   useEffect(() => {
     const checkSurvey = async () => {
-      if (!user || surveyChecked || candidates.length < 10) return;
+      if (!user || surveyChecked) return;
       
       try {
-        const { data, error } = await supabase
+        // Check if already completed survey
+        const { data: existingSurvey, error: surveyError } = await supabase
           .from("willingness_to_pay_surveys")
           .select("id")
           .eq("user_id", user.id)
           .maybeSingle();
         
-        if (error) {
-          console.error("Error checking survey:", error);
+        if (surveyError) {
+          console.error("Error checking survey:", surveyError);
           return;
         }
         
         setSurveyChecked(true);
         
-        // If no survey exists, show it
-        if (!data) {
+        // If already completed, don't show
+        if (existingSurvey) return;
+        
+        // Check for admin-triggered survey request
+        const { data: surveyRequest, error: requestError } = await supabase
+          .from("survey_requests")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("status", "pending")
+          .eq("survey_type", "wtp")
+          .maybeSingle();
+        
+        if (requestError) {
+          console.error("Error checking survey request:", requestError);
+        }
+        
+        // Show survey if admin requested OR if 10+ candidates
+        if (surveyRequest || candidates.length >= 10) {
           setShowWtpSurvey(true);
         }
       } catch (error) {

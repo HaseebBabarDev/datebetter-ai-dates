@@ -1413,6 +1413,36 @@ export type Database = {
         }
         Relationships: []
       }
+      survey_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          requested_by: string
+          status: string
+          survey_type: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          requested_by: string
+          status?: string
+          survey_type?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          requested_by?: string
+          status?: string
+          survey_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       usage_tracking: {
         Row: {
           candidate_id: string
