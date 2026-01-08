@@ -32,6 +32,8 @@ import {
   Shield,
   Sparkles,
   MessageSquare,
+  Brain,
+  Repeat,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
@@ -51,6 +53,21 @@ interface CandidateDeviStats {
   conversationCount: number;
   messageCount: number;
   lastChatDate: string | null;
+}
+
+interface PastRelationship {
+  duration: string;
+  howEnded: string;
+  traumas: string[];
+  notes?: string;
+}
+
+interface TraumaPatternAnalysis {
+  commonTraumas: { trauma: string; count: number; percentage: number }[];
+  endingPatterns: { ending: string; count: number }[];
+  totalRelationships: number;
+  hasTraumaData: boolean;
+  traumaNotes: string | null;
 }
 
 interface PatternStats {
@@ -96,6 +113,7 @@ interface PatternStats {
     avgMessagesPerConversation: number;
   };
   candidateDeviStats: CandidateDeviStats[];
+  traumaPatterns: TraumaPatternAnalysis;
 }
 
 const Patterns = () => {
@@ -115,13 +133,14 @@ const Patterns = () => {
 
   const fetchPatternData = async () => {
     try {
-      const [candidatesRes, interactionsRes, adviceRes, ncProgressRes, deviConversationsRes, deviMessagesRes] = await Promise.all([
+      const [candidatesRes, interactionsRes, adviceRes, ncProgressRes, deviConversationsRes, deviMessagesRes, profileRes] = await Promise.all([
         supabase.from("candidates").select("*").eq("user_id", user!.id),
         supabase.from("interactions").select("*").eq("user_id", user!.id),
         supabase.from("advice_tracking").select("*").eq("user_id", user!.id),
         supabase.from("no_contact_progress").select("*").eq("user_id", user!.id),
         supabase.from("devi_conversations").select("*").eq("user_id", user!.id),
         supabase.from("devi_messages").select("*").eq("user_id", user!.id),
+        supabase.from("profiles").select("past_relationship_traumas, relationship_trauma_notes").eq("user_id", user!.id).single(),
       ]);
 
       const candidates = candidatesRes.data || [];
@@ -130,6 +149,47 @@ const Patterns = () => {
       const ncProgress = ncProgressRes.data || [];
       const deviConversations = deviConversationsRes.data || [];
       const deviMessages = deviMessagesRes.data || [];
+      const profile = profileRes.data;
+
+      // Analyze trauma patterns from past relationships
+      const pastRelationships: PastRelationship[] = Array.isArray(profile?.past_relationship_traumas) 
+        ? (profile.past_relationship_traumas as unknown as PastRelationship[])
+        : [];
+      
+      const traumaCounts: Record<string, number> = {};
+      const endingCounts: Record<string, number> = {};
+      
+      pastRelationships.forEach((rel) => {
+        if (rel.traumas && Array.isArray(rel.traumas)) {
+          rel.traumas.forEach((trauma: string) => {
+            traumaCounts[trauma] = (traumaCounts[trauma] || 0) + 1;
+          });
+        }
+        if (rel.howEnded) {
+          endingCounts[rel.howEnded] = (endingCounts[rel.howEnded] || 0) + 1;
+        }
+      });
+
+      const totalRelationships = pastRelationships.length;
+      const commonTraumas = Object.entries(traumaCounts)
+        .map(([trauma, count]) => ({ 
+          trauma, 
+          count, 
+          percentage: totalRelationships > 0 ? Math.round((count / totalRelationships) * 100) : 0 
+        }))
+        .sort((a, b) => b.count - a.count);
+      
+      const endingPatterns = Object.entries(endingCounts)
+        .map(([ending, count]) => ({ ending, count }))
+        .sort((a, b) => b.count - a.count);
+
+      const traumaPatterns: TraumaPatternAnalysis = {
+        commonTraumas,
+        endingPatterns,
+        totalRelationships,
+        hasTraumaData: totalRelationships > 0,
+        traumaNotes: profile?.relationship_trauma_notes || null,
+      };
 
       // Calculate stats
       const activeCandidates = candidates.filter(
@@ -377,6 +437,7 @@ const Patterns = () => {
           avgMessagesPerConversation,
         },
         candidateDeviStats,
+        traumaPatterns,
       });
     } catch (error) {
       console.error("Error fetching pattern data:", error);
@@ -769,6 +830,96 @@ const Patterns = () => {
 
             {/* Insights Tab */}
             <TabsContent value="insights" className="space-y-4">
+              {/* Trauma Pattern Analysis */}
+              {stats.traumaPatterns.hasTraumaData && (
+                <Card className="border-amber-500/30 bg-amber-500/5">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Brain className="w-5 h-5 text-amber-500" />
+                      Relationship Trauma Patterns
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-xs text-muted-foreground">
+                      Recurring themes from {stats.traumaPatterns.totalRelationships} past relationship{stats.traumaPatterns.totalRelationships !== 1 ? 's' : ''} — awareness is the first step to healing
+                    </p>
+                    
+                    {/* Common Traumas */}
+                    {stats.traumaPatterns.commonTraumas.length > 0 && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Repeat className="w-4 h-4 text-amber-600" />
+                          <span className="text-sm font-medium">Recurring Patterns</span>
+                        </div>
+                        <div className="space-y-2">
+                          {stats.traumaPatterns.commonTraumas.slice(0, 6).map(({ trauma, count, percentage }) => (
+                            <div key={trauma} className="space-y-1">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs">{trauma}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {count}x ({percentage}%)
+                                </span>
+                              </div>
+                              <Progress 
+                                value={percentage} 
+                                className="h-2 [&>div]:bg-amber-500"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* How Relationships Ended */}
+                    {stats.traumaPatterns.endingPatterns.length > 0 && (
+                      <div className="space-y-3 pt-2 border-t border-border/50">
+                        <div className="flex items-center gap-2">
+                          <HeartCrack className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm font-medium">How They Ended</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {stats.traumaPatterns.endingPatterns.map(({ ending, count }) => (
+                            <Badge 
+                              key={ending} 
+                              variant="secondary" 
+                              className="bg-muted text-muted-foreground"
+                            >
+                              {ending} ({count})
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Trauma Notes Summary */}
+                    {stats.traumaPatterns.traumaNotes && (
+                      <div className="pt-2 border-t border-border/50">
+                        <p className="text-xs text-muted-foreground italic">
+                          "{stats.traumaPatterns.traumaNotes.slice(0, 150)}{stats.traumaPatterns.traumaNotes.length > 150 ? '...' : ''}"
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Insights */}
+                    {stats.traumaPatterns.commonTraumas.length > 0 && (
+                      <div className="p-3 bg-amber-500/10 rounded-lg space-y-2">
+                        <div className="flex items-start gap-2">
+                          <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                          <div className="space-y-1">
+                            <span className="text-xs font-medium text-amber-700">Insight</span>
+                            {stats.traumaPatterns.commonTraumas[0] && (
+                              <p className="text-xs text-muted-foreground">
+                                "{stats.traumaPatterns.commonTraumas[0].trauma}" appeared in {stats.traumaPatterns.commonTraumas[0].percentage}% of your past relationships. 
+                                Consider discussing this pattern with D.E.V.I.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
               {/* D.E.V.I. Engagement Overview */}
               <Card className="border-primary/30 bg-primary/5">
                 <CardHeader className="pb-2">
