@@ -10,6 +10,7 @@ const attachmentOptions = [
   { value: "anxious", label: "Anxious", description: "Need reassurance, fear abandonment" },
   { value: "avoidant", label: "Avoidant", description: "Value independence, struggle with closeness" },
   { value: "disorganized", label: "Disorganized", description: "Mixed patterns, can be unpredictable" },
+  { value: "unsure", label: "I don't know", description: "Not sure about my attachment style" },
 ];
 
 const PastPatternsScreen = () => {
