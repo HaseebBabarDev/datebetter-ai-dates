@@ -208,6 +208,50 @@ const SCHEDULE_OPTIONS = [
   { value: "self_employed", label: "Self-Employed" },
 ];
 
+const THEIR_PARENT_STATUS_OPTIONS = [
+  { value: "unknown", label: "I don't know" },
+  { value: "married_together", label: "Married Together" },
+  { value: "unmarried_together", label: "Unmarried Together" },
+  { value: "divorced", label: "Divorced" },
+  { value: "separated", label: "Separated" },
+  { value: "single_parent", label: "Single Parent" },
+  { value: "adopted", label: "Adopted" },
+  { value: "orphan_system", label: "Orphan/System" },
+  { value: "other_guardians", label: "Other Guardians" },
+];
+
+const THEIR_PARENT_PRESENCE_OPTIONS = [
+  { value: "unknown", label: "I don't know" },
+  { value: "present", label: "Present" },
+  { value: "absent", label: "Absent" },
+  { value: "deceased", label: "Deceased" },
+];
+
+const THEIR_PARENTS_RELATIONSHIP_OPTIONS = [
+  { value: "unknown", label: "I don't know" },
+  { value: "together_healthy", label: "Together & Healthy" },
+  { value: "together_unhealthy", label: "Together but Unhealthy" },
+  { value: "divorced_amicable", label: "Divorced (Amicable)" },
+  { value: "divorced_contentious", label: "Divorced (Contentious)" },
+  { value: "single_parent", label: "Single Parent" },
+];
+
+const THEIR_FELT_LOVED_OPTIONS = [
+  { value: "unknown", label: "I don't know" },
+  { value: "yes_consistently", label: "Yes, Consistently" },
+  { value: "sometimes", label: "Sometimes" },
+  { value: "rarely", label: "Rarely" },
+  { value: "no", label: "No" },
+];
+
+const THEIR_FAMILY_STABILITY_OPTIONS = [
+  { value: "unknown", label: "I don't know" },
+  { value: "very_stable", label: "Very Stable" },
+  { value: "mostly_stable", label: "Mostly Stable" },
+  { value: "some_instability", label: "Some Instability" },
+  { value: "frequent_chaos", label: "Frequent Chaos" },
+];
+
 const ZODIAC_OPTIONS = [
   { value: "unknown", label: "I don't know" },
   { value: "aries", label: "♈ Aries" },
@@ -237,7 +281,7 @@ const AddCandidate = () => {
   const [fetchingCandidate, setFetchingCandidate] = useState(isEditMode);
   const [activeTab, setActiveTab] = useState("basics");
   const [candidateMode, setCandidateMode] = useState<"quick" | "full" | null>(isEditMode ? "full" : null);
-  const TABS = ["basics", "about", "chemistry"] as const;
+  const TABS = ["basics", "about", "family", "chemistry"] as const;
 
   // Basic Info
   const [nickname, setNickname] = useState("");
@@ -277,6 +321,17 @@ const AddCandidate = () => {
   const [intellectualConnection, setIntellectualConnection] = useState(3);
   const [humorCompatibility, setHumorCompatibility] = useState(3);
   const [energyMatch, setEnergyMatch] = useState(3);
+
+  // Family & Upbringing
+  const [theirParentStatus, setTheirParentStatus] = useState("");
+  const [theirMotherStatus, setTheirMotherStatus] = useState("");
+  const [theirFatherStatus, setTheirFatherStatus] = useState("");
+  const [theirSiblings, setTheirSiblings] = useState("");
+  const [theirParentsRelationship, setTheirParentsRelationship] = useState("");
+  const [theirFeltLovedAsChild, setTheirFeltLovedAsChild] = useState("");
+  const [theirFamilyStability, setTheirFamilyStability] = useState("");
+  const [theirHealthyRelationshipModels, setTheirHealthyRelationshipModels] = useState<boolean | null>(null);
+  const [theirFamilyNotes, setTheirFamilyNotes] = useState("");
 
   // Intimacy
   const [beenIntimate, setBeenIntimate] = useState(false);
@@ -334,6 +389,16 @@ const AddCandidate = () => {
         setEnergyMatch(data.energy_match || 3);
         setBeenIntimate(!!data.first_intimacy_date);
         setFirstIntimacyDate(data.first_intimacy_date || "");
+        // Family & Upbringing
+        setTheirParentStatus((data as any).their_parent_status || "");
+        setTheirMotherStatus((data as any).their_mother_status || "");
+        setTheirFatherStatus((data as any).their_father_status || "");
+        setTheirSiblings((data as any).their_siblings?.toString() || "");
+        setTheirParentsRelationship((data as any).their_parents_relationship || "");
+        setTheirFeltLovedAsChild((data as any).their_felt_loved_as_child || "");
+        setTheirFamilyStability((data as any).their_family_stability || "");
+        setTheirHealthyRelationshipModels((data as any).their_healthy_relationship_models ?? null);
+        setTheirFamilyNotes((data as any).their_family_notes || "");
       }
     } catch (error) {
       console.error("Error fetching candidate:", error);
@@ -400,6 +465,16 @@ const AddCandidate = () => {
         humor_compatibility: humorCompatibility,
         energy_match: energyMatch,
         first_intimacy_date: beenIntimate && firstIntimacyDate ? firstIntimacyDate : null,
+        // Family & Upbringing
+        their_parent_status: theirParentStatus || null,
+        their_mother_status: theirMotherStatus || null,
+        their_father_status: theirFatherStatus || null,
+        their_siblings: theirSiblings ? parseInt(theirSiblings) : null,
+        their_parents_relationship: theirParentsRelationship || null,
+        their_felt_loved_as_child: theirFeltLovedAsChild || null,
+        their_family_stability: theirFamilyStability || null,
+        their_healthy_relationship_models: theirHealthyRelationshipModels,
+        their_family_notes: theirFamilyNotes || null,
       };
 
       if (isEditMode) {
@@ -755,7 +830,7 @@ const AddCandidate = () => {
         {candidateMode === "full" && (
           <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="basics" className="gap-1 text-xs">
                   <User className="w-3.5 h-3.5" />
                   Basics
@@ -763,6 +838,10 @@ const AddCandidate = () => {
                 <TabsTrigger value="about" className="gap-1 text-xs">
                   <Brain className="w-3.5 h-3.5" />
                   About
+                </TabsTrigger>
+                <TabsTrigger value="family" className="gap-1 text-xs">
+                  <Home className="w-3.5 h-3.5" />
+                  Family
                 </TabsTrigger>
                 <TabsTrigger value="chemistry" className="gap-1 text-xs">
                   <Zap className="w-3.5 h-3.5" />
@@ -1230,6 +1309,161 @@ const AddCandidate = () => {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="family" className="mt-4 space-y-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Home className="w-5 h-5 text-primary" />
+                    Family & Upbringing
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">Understanding their background helps identify compatibility</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Parents' Status</Label>
+                      <Select value={theirParentStatus} onValueChange={setTheirParentStatus}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {THEIR_PARENT_STATUS_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Siblings</Label>
+                      <Input
+                        type="number"
+                        placeholder="How many?"
+                        value={theirSiblings}
+                        onChange={(e) => setTheirSiblings(e.target.value)}
+                        min={0}
+                        max={20}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Mother</Label>
+                      <Select value={theirMotherStatus} onValueChange={setTheirMotherStatus}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {THEIR_PARENT_PRESENCE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Father</Label>
+                      <Select value={theirFatherStatus} onValueChange={setTheirFatherStatus}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {THEIR_PARENT_PRESENCE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Parents' Relationship</Label>
+                      <Select value={theirParentsRelationship} onValueChange={setTheirParentsRelationship}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {THEIR_PARENTS_RELATIONSHIP_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Family Stability</Label>
+                      <Select value={theirFamilyStability} onValueChange={setTheirFamilyStability}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {THEIR_FAMILY_STABILITY_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Felt Loved as Child?</Label>
+                    <Select value={theirFeltLovedAsChild} onValueChange={setTheirFeltLovedAsChild}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {THEIR_FELT_LOVED_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                    <div>
+                      <Label className="text-sm">Healthy Relationship Role Models?</Label>
+                      <p className="text-xs text-muted-foreground">Did they see healthy relationships growing up?</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={theirHealthyRelationshipModels === true ? "default" : "outline"}
+                        onClick={() => setTheirHealthyRelationshipModels(true)}
+                      >
+                        Yes
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={theirHealthyRelationshipModels === false ? "default" : "outline"}
+                        onClick={() => setTheirHealthyRelationshipModels(false)}
+                      >
+                        No
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={theirHealthyRelationshipModels === null ? "secondary" : "outline"}
+                        onClick={() => setTheirHealthyRelationshipModels(null)}
+                      >
+                        ?
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Family Notes</Label>
+                    <Textarea
+                      placeholder="Any other details about their family background..."
+                      value={theirFamilyNotes}
+                      onChange={(e) => setTheirFamilyNotes(e.target.value)}
+                      rows={3}
+                    />
                   </div>
                 </CardContent>
               </Card>
