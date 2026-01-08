@@ -14,7 +14,9 @@ import { PinLoginScreen } from "@/components/auth/PinLoginScreen";
 import { PinEnableQuickLoginDialog } from "@/components/auth/PinEnableQuickLoginDialog";
 import { PIN_SESSION_STORAGE_KEY } from "@/lib/pinCrypto";
 import { BetaNdaDialog } from "@/components/auth/BetaNdaDialog";
+import { BetaWelcomeDialog } from "@/components/auth/BetaWelcomeDialog";
 import { useNdaAgreement } from "@/hooks/useNdaAgreement";
+import { useBetaWelcome } from "@/hooks/useBetaWelcome";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -43,14 +45,21 @@ const Auth = () => {
   
   // Beta NDA state
   const { hasAcceptedNda, acceptNda, loading: ndaLoading } = useNdaAgreement();
+  const { hasSeenWelcome, markWelcomeSeen, loading: welcomeLoading } = useBetaWelcome();
   const [showBetaNda, setShowBetaNda] = useState(false);
+  const [showBetaWelcome, setShowBetaWelcome] = useState(false);
 
-  // Check for Beta NDA acceptance on mount
+  // Check for Beta NDA and Welcome acceptance on mount
   useEffect(() => {
-    if (!ndaLoading && hasAcceptedNda === false) {
-      setShowBetaNda(true);
+    if (!ndaLoading && !welcomeLoading) {
+      if (hasAcceptedNda === false) {
+        setShowBetaNda(true);
+      } else if (hasAcceptedNda === true && hasSeenWelcome === false) {
+        // NDA accepted but haven't seen welcome yet
+        setShowBetaWelcome(true);
+      }
     }
-  }, [ndaLoading, hasAcceptedNda]);
+  }, [ndaLoading, welcomeLoading, hasAcceptedNda, hasSeenWelcome]);
   
 
   // Check for saved login on mount
@@ -697,6 +706,16 @@ const Auth = () => {
       onAccept={async () => {
         await acceptNda();
         setShowBetaNda(false);
+        // Show welcome dialog after NDA is accepted
+        setShowBetaWelcome(true);
+      }}
+    />
+    
+    <BetaWelcomeDialog
+      open={showBetaWelcome}
+      onContinue={async () => {
+        await markWelcomeSeen();
+        setShowBetaWelcome(false);
       }}
     />
     </>
