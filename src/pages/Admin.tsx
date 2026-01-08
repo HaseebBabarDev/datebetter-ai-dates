@@ -20,10 +20,12 @@ import {
   MessageSquareOff,
   Gift,
   CheckCircle2,
-  ScrollText
+  ScrollText,
+  ClipboardList
 } from "lucide-react";
 import { RevenueAnalytics } from "@/components/admin/RevenueAnalytics";
 import { AIUsageAnalytics } from "@/components/admin/AIUsageAnalytics";
+import { WTPSurveyAnalytics } from "@/components/admin/WTPSurveyAnalytics";
 import { 
   Select,
   SelectContent,
@@ -649,6 +651,21 @@ const Admin = () => {
         {/* AI Usage Analytics */}
         <div className="mb-8">
           <AIUsageAnalytics />
+        </div>
+
+        {/* WTP Survey Analytics */}
+        <div className="mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <ClipboardList className="w-5 h-5 text-primary" />
+                Willingness to Pay Survey
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <WTPSurveyAnalytics />
+            </CardContent>
+          </Card>
         </div>
 
         {/* Referrals Section */}
