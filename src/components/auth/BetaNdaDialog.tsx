@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Shield, FileText, CheckCircle2 } from "lucide-react";
+import { Shield, FileText, CheckCircle2, Download, Printer } from "lucide-react";
 
 interface BetaNdaDialogProps {
   open: boolean;
@@ -55,10 +55,34 @@ export const BetaNdaDialog: React.FC<BetaNdaDialogProps> = ({
 
         <ScrollArea className="h-[40vh] px-6 py-4">
           <div className="prose prose-sm dark:prose-invert max-w-none">
-            <h3 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-primary" />
-              Beta Tester Non-Disclosure Agreement
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
+                <FileText className="w-4 h-4 text-primary" />
+                Beta Tester Non-Disclosure Agreement
+              </h3>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => window.print()}
+                  title="Print"
+                >
+                  <Printer className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  asChild
+                  title="Download PDF"
+                >
+                  <a href="/documents/beta-tester-nda.pdf" download="Beta-Tester-NDA.pdf">
+                    <Download className="w-4 h-4" />
+                  </a>
+                </Button>
+              </div>
+            </div>
             
             <p className="text-muted-foreground text-sm leading-relaxed mb-4">
               This Non-Disclosure Agreement ("Agreement") is entered into by and between IdeaaHaus, 
