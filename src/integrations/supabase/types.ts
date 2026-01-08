@@ -831,7 +831,9 @@ export type Database = {
           parent_wound_types: Json | null
           parents_conflict_style: string | null
           parents_relationship_dynamic: string | null
+          past_relationship_traumas: Json | null
           pattern_recognition: Json | null
+          personal_section_acknowledged: boolean | null
           political_dealbreakers: Json | null
           politics: Database["public"]["Enums"]["politics"] | null
           politics_importance: number | null
@@ -851,6 +853,7 @@ export type Database = {
           relationship_structure:
             | Database["public"]["Enums"]["relationship_structure"]
             | null
+          relationship_trauma_notes: string | null
           religion: Database["public"]["Enums"]["religion"] | null
           religion_practice_level: string | null
           response_time_preference: number | null
@@ -967,7 +970,9 @@ export type Database = {
           parent_wound_types?: Json | null
           parents_conflict_style?: string | null
           parents_relationship_dynamic?: string | null
+          past_relationship_traumas?: Json | null
           pattern_recognition?: Json | null
+          personal_section_acknowledged?: boolean | null
           political_dealbreakers?: Json | null
           politics?: Database["public"]["Enums"]["politics"] | null
           politics_importance?: number | null
@@ -987,6 +992,7 @@ export type Database = {
           relationship_structure?:
             | Database["public"]["Enums"]["relationship_structure"]
             | null
+          relationship_trauma_notes?: string | null
           religion?: Database["public"]["Enums"]["religion"] | null
           religion_practice_level?: string | null
           response_time_preference?: number | null
@@ -1103,7 +1109,9 @@ export type Database = {
           parent_wound_types?: Json | null
           parents_conflict_style?: string | null
           parents_relationship_dynamic?: string | null
+          past_relationship_traumas?: Json | null
           pattern_recognition?: Json | null
+          personal_section_acknowledged?: boolean | null
           political_dealbreakers?: Json | null
           politics?: Database["public"]["Enums"]["politics"] | null
           politics_importance?: number | null
@@ -1123,6 +1131,7 @@ export type Database = {
           relationship_structure?:
             | Database["public"]["Enums"]["relationship_structure"]
             | null
+          relationship_trauma_notes?: string | null
           religion?: Database["public"]["Enums"]["religion"] | null
           religion_practice_level?: string | null
           response_time_preference?: number | null
