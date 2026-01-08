@@ -5,7 +5,80 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper functions (declared first to use in buildFamilyContext)
+function calculateAge(birthDate: string): number {
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+function formatEnum(value: string | null | undefined): string {
+  if (!value) return 'Not specified';
+  return value.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+function formatArray(arr: any): string {
+  if (!arr || !Array.isArray(arr) || arr.length === 0) return 'None';
+  return arr.join(', ');
+}
+
+// Build family background context for AI
+const buildFamilyContext = (profile: any): string => {
+  const hasParentData = profile.parents_relationship_dynamic || profile.felt_loved_as_child;
+  if (!hasParentData) return '';
+
+  const parentWounds = formatArray(profile.parent_wound_types);
+  const childhoodTrauma = formatArray(profile.childhood_trauma_types);
+  const genPatterns = formatArray(profile.generational_patterns);
+  
+  let context = `
+FAMILY BACKGROUND & UPBRINGING (critical for understanding relationship patterns):
+- Parents' Relationship: ${formatEnum(profile.parents_relationship_dynamic)}
+- Felt Loved as Child: ${formatEnum(profile.felt_loved_as_child)}
+- Healthy Relationship Role Models: ${profile.healthy_relationship_models === true ? 'Yes' : profile.healthy_relationship_models === false ? 'No' : 'Not specified'}
+- Socioeconomic Background: ${formatEnum(profile.socioeconomic_background)}
+- Family Stability: ${formatEnum(profile.family_stability)}`;
+
+  if (parentWounds && parentWounds !== 'None') {
+    context += `
+- Parent Wounds: ${parentWounds}`;
+  }
+  
+  if (childhoodTrauma && childhoodTrauma !== 'None' && !childhoodTrauma.includes('None of these apply')) {
+    context += `
+- Childhood Trauma/ACEs: ${childhoodTrauma}`;
+  }
+  
+  if (genPatterns && genPatterns !== 'None' && !genPatterns.includes("None I'm aware of")) {
+    context += `
+- Generational Patterns in Family: ${genPatterns}`;
+  }
+
+  context += `
+
+IMPORTANT GUIDANCE FOR FAMILY BACKGROUND:
+- Parent wounds directly shape attachment style, tolerance for red flags, and relationship expectations.
+- Users who didn't feel loved as children may have lower standards (tolerating more) OR impossibly high standards (self-protection).
+- Those from unstable homes may normalize chaos or crave excessive stability.
+- Generational patterns tend to repeat unless consciously addressed - gently point these out.
+- Trauma survivors may be more susceptible to love bombing (feels like the love they never got).
+- Those without healthy relationship models may not recognize red flags OR may be overly suspicious.
+- Socioeconomic background affects views on financial stability, ambition, and security in relationships.
+- Be compassionate but honest when you see patterns from childhood repeating in their dating.
+`;
+
+  return context;
+};
+
 const buildSystemPrompt = (userProfile: any, candidateProfile: any, interactions: any[]) => {
+  // Build family background context
+  const familyContext = userProfile ? buildFamilyContext(userProfile) : '';
+  
   const userContext = userProfile ? `
 USER PROFILE (the person you're coaching):
 - Name: ${userProfile.name || 'Not provided'}
@@ -26,6 +99,7 @@ USER PROFILE (the person you're coaching):
 - Dealbreakers: ${formatArray(userProfile.dealbreakers)}
 - Dating Patterns to Watch: ${formatArray(userProfile.dating_patterns)}
 - Past Trauma Experiences: ${formatArray(userProfile.trauma_experiences)}
+${familyContext}
 ` : '';
 
   const candidateContext = candidateProfile ? `
@@ -313,26 +387,7 @@ Never:
 - Repeat back what the user just said - avoid reflective parroting like "So you're feeling..." or "It sounds like..." or restating their message. Jump straight to your insight or response. They know what they said.`;
 };
 
-function calculateAge(birthDate: string): number {
-  const today = new Date();
-  const birth = new Date(birthDate);
-  let age = today.getFullYear() - birth.getFullYear();
-  const monthDiff = today.getMonth() - birth.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    age--;
-  }
-  return age;
-}
-
-function formatEnum(value: string | null | undefined): string {
-  if (!value) return 'Not specified';
-  return value.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-}
-
-function formatArray(arr: any): string {
-  if (!arr || !Array.isArray(arr) || arr.length === 0) return 'None noted';
-  return arr.join(', ');
-}
+// Helper functions moved to top of file
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {

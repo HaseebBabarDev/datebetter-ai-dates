@@ -111,19 +111,34 @@ export interface OnboardingData {
   timeSinceLastRelationship?: string;
   patternRecognition?: string[];
   
-  // Screen 14: Boundaries
+  // Screen 14: Family & Upbringing
+  parentsRelationshipDynamic?: string;
+  parentsConflictStyle?: string;
+  childoodLoveExpression?: string;
+  feltLovedAsChild?: string;
+  childhoodEmotionalNeedsMet?: string;
+  parentWoundTypes?: string[];
+  childhoodTraumaTypes?: string[];
+  abuseHistory?: string[];
+  socioeconomicBackground?: string;
+  familyStability?: string;
+  caregiverConsistency?: string;
+  healthyRelationshipModels?: boolean;
+  generationalPatterns?: string[];
+  
+  // Screen 15: Boundaries
   dealbreakers?: string[];
   safetyPriorities?: string[];
   boundaryStrength?: number;
   
-  // Screen 15: Mental Health & Neurodivergence
+  // Screen 16: Mental Health & Neurodivergence
   isNeurodivergent?: string;
   neurodivergenceTypes?: string[];
   mentalHealthOpenness?: string;
   mentalHealthImportance?: number;
   inTherapy?: boolean;
   
-  // Screen 16: Safety/Intimacy
+  // Screen 17: Safety/Intimacy
   intimacyComfort?: string;
   safetyRequirements?: string[];
   postIntimacyTendency?: string;
@@ -131,7 +146,7 @@ export interface OnboardingData {
   loveBombingSensitivity?: number;
   behavioralMonitoring?: number;
   
-  // Screen 17: Devi Style
+  // Screen 18: Devi Style
   deviStyle?: string;
 }
 
@@ -155,7 +170,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const dataRef = useRef<OnboardingData>(data);
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(true);
-  const totalSteps = 20; // 0-19 (added Devi Style screen)
+  const totalSteps = 21; // 0-20 (added Family Upbringing screen)
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -248,6 +263,14 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
             longestRelationship: profile.longest_relationship || undefined,
             timeSinceLastRelationship: profile.time_since_last_relationship || undefined,
             patternRecognition: profile.pattern_recognition as string[] || undefined,
+            parentsRelationshipDynamic: (profile as any).parents_relationship_dynamic || undefined,
+            feltLovedAsChild: (profile as any).felt_loved_as_child || undefined,
+            parentWoundTypes: (profile as any).parent_wound_types as string[] || undefined,
+            childhoodTraumaTypes: (profile as any).childhood_trauma_types as string[] || undefined,
+            socioeconomicBackground: (profile as any).socioeconomic_background || undefined,
+            familyStability: (profile as any).family_stability || undefined,
+            healthyRelationshipModels: (profile as any).healthy_relationship_models ?? undefined,
+            generationalPatterns: (profile as any).generational_patterns as string[] || undefined,
             dealbreakers: profile.dealbreakers as string[] || undefined,
             safetyPriorities: profile.safety_priorities as string[] || undefined,
             boundaryStrength: profile.boundary_strength || undefined,
@@ -368,6 +391,14 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         longest_relationship: currentData.longestRelationship,
         time_since_last_relationship: currentData.timeSinceLastRelationship,
         pattern_recognition: currentData.patternRecognition,
+        parents_relationship_dynamic: currentData.parentsRelationshipDynamic,
+        felt_loved_as_child: currentData.feltLovedAsChild,
+        parent_wound_types: currentData.parentWoundTypes,
+        childhood_trauma_types: currentData.childhoodTraumaTypes,
+        socioeconomic_background: currentData.socioeconomicBackground,
+        family_stability: currentData.familyStability,
+        healthy_relationship_models: currentData.healthyRelationshipModels,
+        generational_patterns: currentData.generationalPatterns,
         dealbreakers: currentData.dealbreakers,
         safety_priorities: currentData.safetyPriorities,
         boundary_strength: currentData.boundaryStrength,
@@ -408,8 +439,9 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   // 3: HormoneCycleScreen, 4: DatingMotivationScreen, 5: RelationshipGoalsScreen,
   // 6: KidsFamilyScreen, 7: FaithValuesScreen, 8: PoliticsScreen, 9: CareerScreen,
   // 10: LocationScheduleScreen, 11: SocialActivityScreen, 12: PhysicalPreferencesScreen,
-  // 13: CommunicationScreen, 14: PastPatternsScreen, 15: BoundariesScreen,
-  // 16: MentalHealthScreen, 17: SafetyIntimacyScreen, 18: CompletionScreen
+  // 13: CommunicationScreen, 14: PastPatternsScreen, 15: FamilyUpbringingScreen,
+  // 16: BoundariesScreen, 17: MentalHealthScreen, 18: SafetyIntimacyScreen, 
+  // 19: DeviStyleScreen, 20: CompletionScreen
   const isStepComplete = useCallback((step: number): boolean => {
     switch (step) {
       case 0: return !!data.birthDate && !!data.ageConfirmed; // WelcomeScreen
@@ -427,10 +459,12 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
       case 12: return (data.attractionImportance ?? 0) > 0; // PhysicalPreferencesScreen
       case 13: return !!data.communicationStyle; // CommunicationScreen
       case 14: return !!data.attachmentStyle; // PastPatternsScreen
-      case 15: return (data.dealbreakers?.length ?? 0) > 0; // BoundariesScreen
-      case 16: return true; // MentalHealthScreen - optional
-      case 17: return !!data.intimacyComfort; // SafetyIntimacyScreen
-      case 18: return true; // CompletionScreen
+      case 15: return !!data.parentsRelationshipDynamic && !!data.feltLovedAsChild; // FamilyUpbringingScreen
+      case 16: return (data.dealbreakers?.length ?? 0) > 0; // BoundariesScreen
+      case 17: return true; // MentalHealthScreen - optional
+      case 18: return !!data.intimacyComfort; // SafetyIntimacyScreen
+      case 19: return true; // DeviStyleScreen - optional
+      case 20: return true; // CompletionScreen
       default: return false;
     }
   }, [data]);
