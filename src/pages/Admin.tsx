@@ -19,7 +19,8 @@ import {
   Calendar,
   MessageSquareOff,
   Gift,
-  CheckCircle2
+  CheckCircle2,
+  ScrollText
 } from "lucide-react";
 import { RevenueAnalytics } from "@/components/admin/RevenueAnalytics";
 import { 
@@ -46,6 +47,8 @@ const Admin = () => {
   const [referrals, setReferrals] = useState<any[]>([]);
   const [loadingReferrals, setLoadingReferrals] = useState(false);
   const [grantingTrial, setGrantingTrial] = useState<string | null>(null);
+  const [agreements, setAgreements] = useState<any[]>([]);
+  const [loadingAgreements, setLoadingAgreements] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -138,6 +141,41 @@ const Admin = () => {
     }
   };
 
+  const fetchAgreements = async () => {
+    setLoadingAgreements(true);
+    try {
+      const { data, error } = await supabase
+        .from("user_agreements")
+        .select("*")
+        .order("accepted_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Get profiles for users
+      const userIds = new Set<string>();
+      data?.forEach(a => userIds.add(a.user_id));
+
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, name")
+        .in("user_id", Array.from(userIds));
+
+      const profilesMap = new Map(profiles?.map(p => [p.user_id, p.name]) || []);
+
+      const enrichedAgreements = data?.map(a => ({
+        ...a,
+        user_name: profilesMap.get(a.user_id) || "Unknown"
+      })) || [];
+
+      setAgreements(enrichedAgreements);
+    } catch (error) {
+      console.error("Error fetching agreements:", error);
+      toast.error("Failed to load agreements");
+    } finally {
+      setLoadingAgreements(false);
+    }
+  };
+
   const checkAdminStatus = async () => {
     setCheckingAdmin(true);
     try {
@@ -152,6 +190,7 @@ const Admin = () => {
         setIsAdmin(true);
         fetchAllUsers();
         fetchReferrals();
+        fetchAgreements();
       } else {
         setIsAdmin(false);
       }
@@ -672,6 +711,51 @@ const Admin = () => {
                           )}
                         </Button>
                       )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* NDA Agreements Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <ScrollText className="w-5 h-5 text-primary" />
+                NDA Agreements ({agreements.length})
+              </CardTitle>
+              {loadingAgreements && <Loader2 className="w-4 h-4 animate-spin" />}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {agreements.length === 0 && !loadingAgreements ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No agreements yet</p>
+            ) : (
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                {agreements.map((agreement) => (
+                  <div 
+                    key={agreement.id}
+                    className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <p className="font-medium text-sm">{agreement.user_name}</p>
+                          <Badge variant="secondary" className="text-xs bg-success/10 text-success">
+                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            {agreement.agreement_type.replace(/_/g, ' ')}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            v{agreement.agreement_version}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Accepted: {new Date(agreement.accepted_at).toLocaleString()}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))}

@@ -1451,6 +1451,39 @@ export type Database = {
           },
         ]
       }
+      user_agreements: {
+        Row: {
+          accepted_at: string
+          agreement_type: string
+          agreement_version: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          agreement_type: string
+          agreement_version?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string
+          agreement_type?: string
+          agreement_version?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_blocks: {
         Row: {
           blocked_id: string

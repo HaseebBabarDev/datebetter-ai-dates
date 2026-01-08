@@ -7,7 +7,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Shield, FileText, CheckCircle2 } from "lucide-react";
 
@@ -15,16 +14,20 @@ interface BetaNdaDialogProps {
   open: boolean;
   onAccept: () => void;
   viewOnly?: boolean;
+  acceptedAt?: string | null;
 }
 
-export const BetaNdaDialog: React.FC<BetaNdaDialogProps> = ({ open, onAccept, viewOnly = false }) => {
+export const BetaNdaDialog: React.FC<BetaNdaDialogProps> = ({ 
+  open, 
+  onAccept, 
+  viewOnly = false,
+  acceptedAt 
+}) => {
   const [hasReadNda, setHasReadNda] = useState(false);
   const [acceptsNda, setAcceptsNda] = useState(false);
 
   const handleAccept = () => {
     if (hasReadNda && acceptsNda) {
-      localStorage.setItem("datebetter_beta_nda_accepted", "true");
-      localStorage.setItem("datebetter_beta_nda_accepted_at", new Date().toISOString());
       onAccept();
     }
   };
@@ -40,7 +43,11 @@ export const BetaNdaDialog: React.FC<BetaNdaDialogProps> = ({ open, onAccept, vi
             <div>
               <DialogTitle className="text-xl font-bold">Beta Tester Agreement</DialogTitle>
               <DialogDescription className="text-sm">
-                {viewOnly ? "Your accepted agreement" : "Please review and accept to continue"}
+                {viewOnly 
+                  ? acceptedAt 
+                    ? `Accepted on ${new Date(acceptedAt).toLocaleDateString()}`
+                    : "Your accepted agreement"
+                  : "Please review and accept to continue"}
               </DialogDescription>
             </div>
           </div>
