@@ -25,7 +25,8 @@ import { SliderInput } from "@/components/onboarding/SliderInput";
 import { 
   User, Heart, Users, Baby, Church, Vote, Briefcase, 
   MapPin, Sparkles, MessageCircle, Brain, Shield, Lock, Save,
-  Target, Stethoscope, Ruler, TrendingDown, DollarSign, CheckCircle2, AlertCircle
+  Target, Stethoscope, Ruler, TrendingDown, DollarSign, CheckCircle2, AlertCircle,
+  Home
 } from "lucide-react";
 import { toast } from "sonner";
 import { MultiSelectOption } from "@/components/onboarding/MultiSelectOption";
@@ -414,6 +415,70 @@ const PATTERN_RECOGNITION_OPTIONS = [
   "Difficulty with vulnerability",
 ];
 
+// Family & Upbringing options
+const PARENTS_RELATIONSHIP_OPTIONS = [
+  { value: "healthy_loving", label: "Healthy & Loving" },
+  { value: "functional", label: "Functional" },
+  { value: "high_conflict", label: "High Conflict" },
+  { value: "divorced_amicable", label: "Divorced (Amicable)" },
+  { value: "divorced_contentious", label: "Divorced (Contentious)" },
+  { value: "single_parent", label: "Single Parent" },
+  { value: "absent_parent", label: "Absent Parent(s)" },
+  { value: "other_caregivers", label: "Other Caregivers" },
+];
+
+const FELT_LOVED_OPTIONS = [
+  { value: "always", label: "Always felt loved" },
+  { value: "mostly", label: "Mostly felt loved" },
+  { value: "inconsistent", label: "Inconsistent" },
+  { value: "rarely", label: "Rarely felt loved" },
+  { value: "never", label: "Never felt loved" },
+];
+
+const SOCIOECONOMIC_OPTIONS = [
+  { value: "poverty", label: "Poverty" },
+  { value: "working_class", label: "Working Class" },
+  { value: "middle_class", label: "Middle Class" },
+  { value: "upper_middle", label: "Upper Middle Class" },
+  { value: "wealthy", label: "Wealthy" },
+  { value: "unstable", label: "Unstable/Variable" },
+];
+
+const FAMILY_STABILITY_OPTIONS = [
+  { value: "very_stable", label: "Very Stable" },
+  { value: "mostly_stable", label: "Mostly Stable" },
+  { value: "unstable", label: "Unstable" },
+  { value: "chaotic", label: "Chaotic" },
+];
+
+const PARENT_WOUND_OPTIONS = [
+  "Abandonment (physical or emotional)",
+  "Enmeshment (no boundaries)",
+  "Criticism/perfectionism",
+  "Emotional unavailability",
+  "Parentification (had to parent your parent)",
+  "Comparison to siblings",
+  "Conditional love (love based on performance)",
+  "Neglect",
+  "Control/helicopter parenting",
+  "None of these apply",
+];
+
+const GENERATIONAL_PATTERN_OPTIONS = [
+  "Codependency",
+  "Addiction",
+  "Infidelity",
+  "Divorce",
+  "Emotional suppression",
+  "Financial instability",
+  "Workaholism",
+  "Anger/rage issues",
+  "Anxiety/depression",
+  "Avoidant attachment",
+  "People-pleasing",
+  "None I'm aware of",
+];
+
 // Height stats: ~14.5% of US men are 6ft+
 const getHeightPoolImpact = () => ({ percent: 14.5, shrink: 85.5 });
 
@@ -494,7 +559,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
     }
   };
 
-  const SECTION_ORDER = ["identity", "motivation", "relationship", "partner_prefs", "kids", "faith", "politics", "career", "income", "lifestyle", "physical", "communication", "mental_health", "neurodivergence", "attachment", "boundaries", "intimacy", "devi", "cycle"];
+  const SECTION_ORDER = ["identity", "motivation", "relationship", "partner_prefs", "kids", "faith", "politics", "career", "income", "lifestyle", "physical", "communication", "mental_health", "neurodivergence", "attachment", "family", "boundaries", "intimacy", "devi", "cycle"];
   
   const SECTION_CONFIG: Record<string, { 
     label: string; 
@@ -516,6 +581,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
     mental_health: { label: "Mental Health", icon: <Stethoscope className="w-3.5 h-3.5" />, requiredFields: ["mental_health_openness"] },
     neurodivergence: { label: "Neurodivergence", icon: <Brain className="w-3.5 h-3.5" />, requiredFields: [] },
     attachment: { label: "Attachment & Patterns", icon: <Brain className="w-3.5 h-3.5" />, requiredFields: ["attachment_style"] },
+    family: { label: "Family & Upbringing", icon: <Home className="w-3.5 h-3.5" />, requiredFields: [] },
     boundaries: { label: "Boundaries & Dealbreakers", icon: <Shield className="w-3.5 h-3.5" />, requiredFields: ["boundary_strength"] },
     intimacy: { label: "Intimacy & Safety", icon: <Lock className="w-3.5 h-3.5" />, requiredFields: [] },
     devi: { label: "D.E.V.I. Settings", icon: <Sparkles className="w-3.5 h-3.5" />, requiredFields: [] },
@@ -1792,6 +1858,180 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               </div>
             </div>
             <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("attachment", e)}>
+              Next
+            </Button>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Family & Upbringing */}
+        <AccordionItem value="family" data-value="family" className={`border rounded-lg px-4 ${isSectionComplete("family") ? "border-green-500/30 bg-green-500/5" : ""}`}>
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2 flex-1">
+              <Home className="w-4 h-4 text-amber-500" />
+              <span className="font-medium">Family & Upbringing</span>
+              {isSectionComplete("family") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pb-4">
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 text-xs text-muted-foreground">
+              <Shield className="h-4 w-4 text-primary inline mr-1" />
+              This helps D.E.V.I. understand how your childhood experiences may influence your relationship patterns. Skip anything too personal.
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Parents'/Caregivers' Relationship</Label>
+              <Select
+                value={(formData as any).parents_relationship_dynamic || ""}
+                onValueChange={(v) => updateField("parents_relationship_dynamic" as any, v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {PARENTS_RELATIONSHIP_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Did you feel loved growing up?</Label>
+              <Select
+                value={(formData as any).felt_loved_as_child || ""}
+                onValueChange={(v) => updateField("felt_loved_as_child" as any, v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {FELT_LOVED_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <Label>Healthy relationship role models?</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={(formData as any).healthy_relationship_models === true ? "default" : "outline"}
+                  onClick={() => updateField("healthy_relationship_models" as any, true)}
+                >
+                  Yes
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={(formData as any).healthy_relationship_models === false ? "default" : "outline"}
+                  onClick={() => updateField("healthy_relationship_models" as any, false)}
+                >
+                  No
+                </Button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Socioeconomic Background</Label>
+                <Select
+                  value={(formData as any).socioeconomic_background || ""}
+                  onValueChange={(v) => updateField("socioeconomic_background" as any, v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {SOCIOECONOMIC_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Family Stability</Label>
+                <Select
+                  value={(formData as any).family_stability || ""}
+                  onValueChange={(v) => updateField("family_stability" as any, v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {FAMILY_STABILITY_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Parent Wounds (select all that apply)</Label>
+              <div className="flex flex-wrap gap-2">
+                {PARENT_WOUND_OPTIONS.map(wound => {
+                  const currentWounds = ((formData as any).parent_wound_types as string[] | null) || [];
+                  const isSelected = currentWounds.includes(wound);
+                  return (
+                    <button
+                      key={wound}
+                      type="button"
+                      onClick={() => {
+                        let updated: string[];
+                        if (wound === "None of these apply") {
+                          updated = isSelected ? [] : [wound];
+                        } else {
+                          const filtered = currentWounds.filter(w => w !== "None of these apply");
+                          updated = isSelected
+                            ? filtered.filter(w => w !== wound)
+                            : [...filtered, wound];
+                        }
+                        updateField("parent_wound_types" as any, updated);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        isSelected 
+                          ? "bg-amber-500 text-white border-amber-500" 
+                          : "bg-muted/50 text-muted-foreground border-border hover:border-amber-500/50"
+                      }`}
+                    >
+                      {wound}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Generational Patterns in Family (select all that apply)</Label>
+              <div className="flex flex-wrap gap-2">
+                {GENERATIONAL_PATTERN_OPTIONS.map(pattern => {
+                  const currentPatterns = ((formData as any).generational_patterns as string[] | null) || [];
+                  const isSelected = currentPatterns.includes(pattern);
+                  return (
+                    <button
+                      key={pattern}
+                      type="button"
+                      onClick={() => {
+                        let updated: string[];
+                        if (pattern === "None I'm aware of") {
+                          updated = isSelected ? [] : [pattern];
+                        } else {
+                          const filtered = currentPatterns.filter(p => p !== "None I'm aware of");
+                          updated = isSelected
+                            ? filtered.filter(p => p !== pattern)
+                            : [...filtered, pattern];
+                        }
+                        updateField("generational_patterns" as any, updated);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        isSelected 
+                          ? "bg-primary text-primary-foreground border-primary" 
+                          : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50"
+                      }`}
+                    >
+                      {pattern}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("family", e)}>
               Next
             </Button>
           </AccordionContent>
