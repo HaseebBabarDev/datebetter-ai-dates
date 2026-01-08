@@ -144,6 +144,7 @@ export type Database = {
           their_exercise: string | null
           their_family_notes: string | null
           their_family_stability: string | null
+          their_father_status: string | null
           their_felt_loved_as_child: string | null
           their_generational_patterns: Json | null
           their_healthy_relationship_models: boolean | null
@@ -151,8 +152,10 @@ export type Database = {
           their_kids_desire: Database["public"]["Enums"]["kids_desire"] | null
           their_kids_status: Database["public"]["Enums"]["kids_status"] | null
           their_mental_health_awareness: string | null
+          their_mother_status: string | null
           their_neurodivergence_types: Json | null
           their_neurodivergent: string | null
+          their_parent_status: string | null
           their_parent_wounds: Json | null
           their_parents_relationship: string | null
           their_politics: Database["public"]["Enums"]["politics"] | null
@@ -164,6 +167,7 @@ export type Database = {
             | null
           their_religion: Database["public"]["Enums"]["religion"] | null
           their_schedule_flexibility: string | null
+          their_siblings: number | null
           their_smoking: string | null
           their_social_style: string | null
           their_socioeconomic_background: string | null
@@ -217,6 +221,7 @@ export type Database = {
           their_exercise?: string | null
           their_family_notes?: string | null
           their_family_stability?: string | null
+          their_father_status?: string | null
           their_felt_loved_as_child?: string | null
           their_generational_patterns?: Json | null
           their_healthy_relationship_models?: boolean | null
@@ -224,8 +229,10 @@ export type Database = {
           their_kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
           their_kids_status?: Database["public"]["Enums"]["kids_status"] | null
           their_mental_health_awareness?: string | null
+          their_mother_status?: string | null
           their_neurodivergence_types?: Json | null
           their_neurodivergent?: string | null
+          their_parent_status?: string | null
           their_parent_wounds?: Json | null
           their_parents_relationship?: string | null
           their_politics?: Database["public"]["Enums"]["politics"] | null
@@ -237,6 +244,7 @@ export type Database = {
             | null
           their_religion?: Database["public"]["Enums"]["religion"] | null
           their_schedule_flexibility?: string | null
+          their_siblings?: number | null
           their_smoking?: string | null
           their_social_style?: string | null
           their_socioeconomic_background?: string | null
@@ -290,6 +298,7 @@ export type Database = {
           their_exercise?: string | null
           their_family_notes?: string | null
           their_family_stability?: string | null
+          their_father_status?: string | null
           their_felt_loved_as_child?: string | null
           their_generational_patterns?: Json | null
           their_healthy_relationship_models?: boolean | null
@@ -297,8 +306,10 @@ export type Database = {
           their_kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
           their_kids_status?: Database["public"]["Enums"]["kids_status"] | null
           their_mental_health_awareness?: string | null
+          their_mother_status?: string | null
           their_neurodivergence_types?: Json | null
           their_neurodivergent?: string | null
+          their_parent_status?: string | null
           their_parent_wounds?: Json | null
           their_parents_relationship?: string | null
           their_politics?: Database["public"]["Enums"]["politics"] | null
@@ -310,6 +321,7 @@ export type Database = {
             | null
           their_religion?: Database["public"]["Enums"]["religion"] | null
           their_schedule_flexibility?: string | null
+          their_siblings?: number | null
           their_smoking?: string | null
           their_social_style?: string | null
           their_socioeconomic_background?: string | null
@@ -771,13 +783,16 @@ export type Database = {
           faith_importance: number | null
           faith_requirements: Json | null
           family_stability: string | null
+          father_status: string | null
           felt_loved_as_child: string | null
           financial_importance: number | null
           financial_situation: string | null
           financial_vulnerability: number | null
           flexibility_rating: number | null
+          full_siblings: number | null
           gender_identity: Database["public"]["Enums"]["gender_identity"] | null
           generational_patterns: Json | null
+          half_siblings: number | null
           healthy_relationship_models: boolean | null
           height: string | null
           height_preference: string | null
@@ -804,6 +819,7 @@ export type Database = {
           mental_health_importance: number | null
           mental_health_openness: string | null
           monogamy_required: boolean | null
+          mother_status: string | null
           name: string | null
           neurodivergence_types: Json | null
           onboarding_completed: boolean | null
@@ -811,6 +827,7 @@ export type Database = {
           open_to_moving: boolean | null
           open_to_single_parenthood: boolean | null
           orientation_custom: string | null
+          parent_status: string | null
           parent_wound_types: Json | null
           parents_conflict_style: string | null
           parents_relationship_dynamic: string | null
@@ -900,15 +917,18 @@ export type Database = {
           faith_importance?: number | null
           faith_requirements?: Json | null
           family_stability?: string | null
+          father_status?: string | null
           felt_loved_as_child?: string | null
           financial_importance?: number | null
           financial_situation?: string | null
           financial_vulnerability?: number | null
           flexibility_rating?: number | null
+          full_siblings?: number | null
           gender_identity?:
             | Database["public"]["Enums"]["gender_identity"]
             | null
           generational_patterns?: Json | null
+          half_siblings?: number | null
           healthy_relationship_models?: boolean | null
           height?: string | null
           height_preference?: string | null
@@ -935,6 +955,7 @@ export type Database = {
           mental_health_importance?: number | null
           mental_health_openness?: string | null
           monogamy_required?: boolean | null
+          mother_status?: string | null
           name?: string | null
           neurodivergence_types?: Json | null
           onboarding_completed?: boolean | null
@@ -942,6 +963,7 @@ export type Database = {
           open_to_moving?: boolean | null
           open_to_single_parenthood?: boolean | null
           orientation_custom?: string | null
+          parent_status?: string | null
           parent_wound_types?: Json | null
           parents_conflict_style?: string | null
           parents_relationship_dynamic?: string | null
@@ -1031,15 +1053,18 @@ export type Database = {
           faith_importance?: number | null
           faith_requirements?: Json | null
           family_stability?: string | null
+          father_status?: string | null
           felt_loved_as_child?: string | null
           financial_importance?: number | null
           financial_situation?: string | null
           financial_vulnerability?: number | null
           flexibility_rating?: number | null
+          full_siblings?: number | null
           gender_identity?:
             | Database["public"]["Enums"]["gender_identity"]
             | null
           generational_patterns?: Json | null
+          half_siblings?: number | null
           healthy_relationship_models?: boolean | null
           height?: string | null
           height_preference?: string | null
@@ -1066,6 +1091,7 @@ export type Database = {
           mental_health_importance?: number | null
           mental_health_openness?: string | null
           monogamy_required?: boolean | null
+          mother_status?: string | null
           name?: string | null
           neurodivergence_types?: Json | null
           onboarding_completed?: boolean | null
@@ -1073,6 +1099,7 @@ export type Database = {
           open_to_moving?: boolean | null
           open_to_single_parenthood?: boolean | null
           orientation_custom?: string | null
+          parent_status?: string | null
           parent_wound_types?: Json | null
           parents_conflict_style?: string | null
           parents_relationship_dynamic?: string | null

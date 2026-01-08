@@ -29,7 +29,7 @@ function formatArray(arr: any): string {
 
 // Build family background context for AI
 const buildFamilyContext = (profile: any): string => {
-  const hasParentData = profile.parents_relationship_dynamic || profile.felt_loved_as_child;
+  const hasParentData = profile.parents_relationship_dynamic || profile.felt_loved_as_child || profile.parent_status;
   if (!hasParentData) return '';
 
   const parentWounds = formatArray(profile.parent_wound_types);
@@ -38,6 +38,11 @@ const buildFamilyContext = (profile: any): string => {
   
   let context = `
 FAMILY BACKGROUND & UPBRINGING (critical for understanding relationship patterns):
+- Parent Situation: ${formatEnum(profile.parent_status)}
+- Mother Status: ${formatEnum(profile.mother_status)}
+- Father Status: ${formatEnum(profile.father_status)}
+- Full Siblings: ${profile.full_siblings ?? 'Not specified'}
+- Half Siblings: ${profile.half_siblings ?? 'Not specified'}
 - Parents' Relationship: ${formatEnum(profile.parents_relationship_dynamic)}
 - Felt Loved as Child: ${formatEnum(profile.felt_loved_as_child)}
 - Healthy Relationship Role Models: ${profile.healthy_relationship_models === true ? 'Yes' : profile.healthy_relationship_models === false ? 'No' : 'Not specified'}
@@ -65,6 +70,11 @@ IMPORTANT GUIDANCE FOR FAMILY BACKGROUND:
 - Parent wounds directly shape attachment style, tolerance for red flags, and relationship expectations.
 - Users who didn't feel loved as children may have lower standards (tolerating more) OR impossibly high standards (self-protection).
 - Those from unstable homes may normalize chaos or crave excessive stability.
+- Deceased or absent parents create unique attachment patterns - loss of mother vs father affects differently.
+- Adopted individuals may have abandonment fears; orphans/system kids often struggle with trust.
+- Divorced parents model that relationships can end - affecting commitment views.
+- Only children vs those with many siblings have different sharing/attention needs in relationships.
+- Half siblings often indicate blended families with additional complexity.
 - Generational patterns tend to repeat unless consciously addressed - gently point these out.
 - Trauma survivors may be more susceptible to love bombing (feels like the love they never got).
 - Those without healthy relationship models may not recognize red flags OR may be overly suspicious.
@@ -104,12 +114,16 @@ ${familyContext}
 
   // Build candidate family context
   const buildCandidateFamilyContext = (candidate: any): string => {
-    const hasData = candidate.their_parents_relationship || candidate.their_felt_loved_as_child || 
-                    candidate.their_family_stability || candidate.their_healthy_relationship_models !== null;
+    const hasData = candidate.their_parent_status || candidate.their_parents_relationship || 
+                    candidate.their_felt_loved_as_child || candidate.their_siblings !== null;
     if (!hasData) return '';
     
     let context = `
 CANDIDATE'S FAMILY BACKGROUND:
+- Parent Status: ${formatEnum(candidate.their_parent_status)}
+- Mother Status: ${formatEnum(candidate.their_mother_status)}
+- Father Status: ${formatEnum(candidate.their_father_status)}
+- Siblings: ${candidate.their_siblings ?? 'Unknown'}
 - Parents' Relationship: ${formatEnum(candidate.their_parents_relationship)}
 - Felt Loved Growing Up: ${formatEnum(candidate.their_felt_loved_as_child)}
 - Family Stability: ${formatEnum(candidate.their_family_stability)}

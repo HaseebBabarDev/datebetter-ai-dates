@@ -416,6 +416,24 @@ const PATTERN_RECOGNITION_OPTIONS = [
 ];
 
 // Family & Upbringing options
+const PARENT_STATUS_OPTIONS = [
+  { value: "married_together", label: "Married Together" },
+  { value: "unmarried_together", label: "Unmarried Together" },
+  { value: "divorced", label: "Divorced" },
+  { value: "separated", label: "Separated" },
+  { value: "single_parent", label: "Single Parent" },
+  { value: "adopted", label: "Adopted" },
+  { value: "orphan_system", label: "Orphan/System" },
+  { value: "other_guardians", label: "Other Guardians" },
+];
+
+const PARENT_PRESENCE_OPTIONS = [
+  { value: "present", label: "Present" },
+  { value: "absent", label: "Absent" },
+  { value: "deceased", label: "Deceased" },
+  { value: "unknown", label: "Unknown/N/A" },
+];
+
 const PARENTS_RELATIONSHIP_OPTIONS = [
   { value: "healthy_loving", label: "Healthy & Loving" },
   { value: "functional", label: "Functional" },
@@ -1876,6 +1894,77 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
             <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 text-xs text-muted-foreground">
               <Shield className="h-4 w-4 text-primary inline mr-1" />
               This helps D.E.V.I. understand how your childhood experiences may influence your relationship patterns. Skip anything too personal.
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Parent/Guardian Situation</Label>
+              <Select
+                value={(formData as any).parent_status || ""}
+                onValueChange={(v) => updateField("parent_status" as any, v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {PARENT_STATUS_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Mother/Female Caregiver</Label>
+                <Select
+                  value={(formData as any).mother_status || ""}
+                  onValueChange={(v) => updateField("mother_status" as any, v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {PARENT_PRESENCE_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Father/Male Caregiver</Label>
+                <Select
+                  value={(formData as any).father_status || ""}
+                  onValueChange={(v) => updateField("father_status" as any, v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {PARENT_PRESENCE_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Full Siblings</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={20}
+                  value={(formData as any).full_siblings ?? ""}
+                  onChange={(e) => updateField("full_siblings" as any, e.target.value ? parseInt(e.target.value) : null)}
+                  placeholder="0"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Half Siblings</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={20}
+                  value={(formData as any).half_siblings ?? ""}
+                  onChange={(e) => updateField("half_siblings" as any, e.target.value ? parseInt(e.target.value) : null)}
+                  placeholder="0"
+                />
+              </div>
             </div>
             
             <div className="space-y-2">

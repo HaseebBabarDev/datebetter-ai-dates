@@ -3,9 +3,28 @@ import { useOnboarding } from "@/contexts/OnboardingContext";
 import { OnboardingLayout } from "../OnboardingLayout";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { OptionCard } from "../OptionCard";
 import { MultiSelectOption } from "../MultiSelectOption";
-import { Heart, AlertTriangle, Shield } from "lucide-react";
+import { Heart, AlertTriangle, Shield, Users } from "lucide-react";
+
+const parentStatusOptions = [
+  { value: "married_together", label: "Married Together", description: "Parents married and living together" },
+  { value: "unmarried_together", label: "Unmarried Together", description: "Parents together but not married" },
+  { value: "divorced", label: "Divorced", description: "Parents divorced" },
+  { value: "separated", label: "Separated", description: "Parents separated but not divorced" },
+  { value: "single_parent", label: "Single Parent", description: "Raised by one parent" },
+  { value: "adopted", label: "Adopted", description: "Raised by adoptive parents" },
+  { value: "orphan_system", label: "Orphan/System", description: "Raised in foster care or group home" },
+  { value: "other_guardians", label: "Other Guardians", description: "Raised by grandparents, relatives, etc." },
+];
+
+const parentPresenceOptions = [
+  { value: "present", label: "Present", description: "Active in your life" },
+  { value: "absent", label: "Absent", description: "Not present in your life" },
+  { value: "deceased", label: "Deceased", description: "Passed away" },
+  { value: "unknown", label: "Unknown/N/A", description: "Unknown or not applicable" },
+];
 
 const parentsRelationshipOptions = [
   { value: "healthy_loving", label: "Healthy & Loving", description: "Respectful, supportive partnership" },
@@ -144,6 +163,91 @@ const FamilyUpbringingScreen = () => {
             This information helps D.E.V.I. understand your relationship patterns and provide personalized guidance. 
             Skip any questions that feel too personal. Your data is private and encrypted.
           </p>
+        </div>
+
+        {/* Parent Status */}
+        <div className="space-y-2">
+          <Label className="text-sm flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            What was your parent/guardian situation growing up?
+          </Label>
+          <div className="space-y-1.5">
+            {parentStatusOptions.map((option) => (
+              <OptionCard
+                key={option.value}
+                selected={data.parentStatus === option.value}
+                onClick={() => updateData({ parentStatus: option.value })}
+                title={option.label}
+                description={option.description}
+                compact
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Mother Status */}
+        <div className="space-y-2">
+          <Label className="text-sm">Mother/Primary Female Caregiver Status</Label>
+          <div className="grid grid-cols-2 gap-2">
+            {parentPresenceOptions.map((option) => (
+              <Button
+                key={option.value}
+                type="button"
+                variant={data.motherStatus === option.value ? "default" : "outline"}
+                className="h-auto py-2 flex-col"
+                onClick={() => updateData({ motherStatus: option.value })}
+              >
+                <span className="text-sm">{option.label}</span>
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Father Status */}
+        <div className="space-y-2">
+          <Label className="text-sm">Father/Primary Male Caregiver Status</Label>
+          <div className="grid grid-cols-2 gap-2">
+            {parentPresenceOptions.map((option) => (
+              <Button
+                key={option.value}
+                type="button"
+                variant={data.fatherStatus === option.value ? "default" : "outline"}
+                className="h-auto py-2 flex-col"
+                onClick={() => updateData({ fatherStatus: option.value })}
+              >
+                <span className="text-sm">{option.label}</span>
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Siblings */}
+        <div className="space-y-3">
+          <Label className="text-sm">Siblings</Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Full Siblings</Label>
+              <Input
+                type="number"
+                min={0}
+                max={20}
+                value={data.fullSiblings ?? ""}
+                onChange={(e) => updateData({ fullSiblings: e.target.value ? parseInt(e.target.value) : undefined })}
+                placeholder="0"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Half Siblings</Label>
+              <Input
+                type="number"
+                min={0}
+                max={20}
+                value={data.halfSiblings ?? ""}
+                onChange={(e) => updateData({ halfSiblings: e.target.value ? parseInt(e.target.value) : undefined })}
+                placeholder="0"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Parents' Relationship */}

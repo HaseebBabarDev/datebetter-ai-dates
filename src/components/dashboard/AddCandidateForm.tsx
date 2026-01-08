@@ -172,6 +172,25 @@ const MENTAL_HEALTH_AWARENESS_OPTIONS = [
   { value: "unknown", label: "Unknown" },
 ];
 
+const THEIR_PARENT_STATUS_OPTIONS = [
+  { value: "married_together", label: "Married Together" },
+  { value: "unmarried_together", label: "Unmarried Together" },
+  { value: "divorced", label: "Divorced" },
+  { value: "separated", label: "Separated" },
+  { value: "single_parent", label: "Single Parent" },
+  { value: "adopted", label: "Adopted" },
+  { value: "orphan_system", label: "Orphan/System" },
+  { value: "other_guardians", label: "Other Guardians" },
+  { value: "unknown", label: "Unknown" },
+];
+
+const THEIR_PARENT_PRESENCE_OPTIONS = [
+  { value: "present", label: "Present" },
+  { value: "absent", label: "Absent" },
+  { value: "deceased", label: "Deceased" },
+  { value: "unknown", label: "Unknown" },
+];
+
 const THEIR_PARENTS_RELATIONSHIP_OPTIONS = [
   { value: "together_healthy", label: "Together & Healthy" },
   { value: "together_unhealthy", label: "Together but Unhealthy" },
@@ -295,6 +314,10 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   const [zodiacSign, setZodiacSign] = useState("");
 
   // Family & Upbringing
+  const [theirParentStatus, setTheirParentStatus] = useState("");
+  const [theirMotherStatus, setTheirMotherStatus] = useState("");
+  const [theirFatherStatus, setTheirFatherStatus] = useState("");
+  const [theirSiblings, setTheirSiblings] = useState("");
   const [theirParentsRelationship, setTheirParentsRelationship] = useState("");
   const [theirFeltLoved, setTheirFeltLoved] = useState("");
   const [theirFamilyStability, setTheirFamilyStability] = useState("");
@@ -337,6 +360,10 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
     setTheirNeurodivergent("");
     setTheirMentalHealthAwareness("");
     setZodiacSign("");
+    setTheirParentStatus("");
+    setTheirMotherStatus("");
+    setTheirFatherStatus("");
+    setTheirSiblings("");
     setTheirParentsRelationship("");
     setTheirFeltLoved("");
     setTheirFamilyStability("");
@@ -389,6 +416,10 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
         their_neurodivergent: theirNeurodivergent || null,
         their_mental_health_awareness: theirMentalHealthAwareness || null,
         zodiac_sign: zodiacSign || null,
+        their_parent_status: theirParentStatus || null,
+        their_mother_status: theirMotherStatus || null,
+        their_father_status: theirFatherStatus || null,
+        their_siblings: theirSiblings ? parseInt(theirSiblings) : null,
         their_parents_relationship: theirParentsRelationship || null,
         their_felt_loved_as_child: theirFeltLoved || null,
         their_family_stability: theirFamilyStability || null,
@@ -791,6 +822,56 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
                 <p className="text-xs text-muted-foreground">
                   Understanding their background helps D.E.V.I. provide better insights
                 </p>
+                
+                <div className="space-y-2">
+                  <Label>Parent Status</Label>
+                  <Select value={theirParentStatus} onValueChange={setTheirParentStatus}>
+                    <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                    <SelectContent>
+                      {THEIR_PARENT_STATUS_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Mother Status</Label>
+                    <Select value={theirMotherStatus} onValueChange={setTheirMotherStatus}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {THEIR_PARENT_PRESENCE_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Father Status</Label>
+                    <Select value={theirFatherStatus} onValueChange={setTheirFatherStatus}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {THEIR_PARENT_PRESENCE_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Number of Siblings</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={20}
+                    placeholder="0"
+                    value={theirSiblings}
+                    onChange={(e) => setTheirSiblings(e.target.value)}
+                  />
+                </div>
+                
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label>Parents' Relationship</Label>
