@@ -281,7 +281,51 @@ const AddCandidate = () => {
   const [fetchingCandidate, setFetchingCandidate] = useState(isEditMode);
   const [activeTab, setActiveTab] = useState("basics");
   const [candidateMode, setCandidateMode] = useState<"quick" | "full" | null>(isEditMode ? "full" : null);
-  const TABS = ["basics", "about", "family", "chemistry"] as const;
+const TABS = ["basics", "about", "family", "history", "chemistry"] as const;
+
+interface TheirPastRelationship {
+  id: string;
+  label: string;
+  duration: string;
+  endReason: string;
+  issues: string[];
+  notes: string;
+}
+
+const THEIR_RELATIONSHIP_DURATION_OPTIONS = [
+  { value: "less_than_6_months", label: "Less than 6 months" },
+  { value: "6_months_to_1_year", label: "6 months to 1 year" },
+  { value: "1_to_2_years", label: "1-2 years" },
+  { value: "2_to_5_years", label: "2-5 years" },
+  { value: "5_plus_years", label: "5+ years" },
+];
+
+const THEIR_END_REASON_OPTIONS = [
+  { value: "mutual", label: "Mutual decision" },
+  { value: "they_ended_it", label: "They ended it" },
+  { value: "partner_ended_it", label: "Partner ended it" },
+  { value: "cheating_them", label: "They cheated" },
+  { value: "cheating_partner", label: "Partner cheated" },
+  { value: "distance", label: "Distance/logistics" },
+  { value: "timing", label: "Bad timing" },
+  { value: "toxic", label: "Toxic/unhealthy" },
+  { value: "other", label: "Other" },
+];
+
+const THEIR_ISSUE_OPTIONS = [
+  { value: "commitment_issues", label: "Commitment issues" },
+  { value: "communication", label: "Communication problems" },
+  { value: "trust_issues", label: "Trust issues" },
+  { value: "jealousy", label: "Jealousy" },
+  { value: "infidelity", label: "Infidelity" },
+  { value: "emotional_unavailability", label: "Emotionally unavailable" },
+  { value: "controlling", label: "Controlling behavior" },
+  { value: "manipulation", label: "Manipulation" },
+  { value: "anger_issues", label: "Anger issues" },
+  { value: "addiction", label: "Addiction" },
+  { value: "financial", label: "Financial issues" },
+  { value: "intimacy", label: "Intimacy issues" },
+];
 
   // Basic Info
   const [nickname, setNickname] = useState("");
@@ -333,9 +377,46 @@ const AddCandidate = () => {
   const [theirHealthyRelationshipModels, setTheirHealthyRelationshipModels] = useState<boolean | null>(null);
   const [theirFamilyNotes, setTheirFamilyNotes] = useState("");
 
+  // Past Relationships
+  const [theirPastRelationships, setTheirPastRelationships] = useState<TheirPastRelationship[]>([]);
+  const [theirRelationshipNotes, setTheirRelationshipNotes] = useState("");
+
   // Intimacy
   const [beenIntimate, setBeenIntimate] = useState(false);
   const [firstIntimacyDate, setFirstIntimacyDate] = useState("");
+
+  const createEmptyTheirRelationship = (): TheirPastRelationship => ({
+    id: crypto.randomUUID(),
+    label: "",
+    duration: "",
+    endReason: "",
+    issues: [],
+    notes: "",
+  });
+
+  const addTheirRelationship = () => {
+    setTheirPastRelationships([...theirPastRelationships, createEmptyTheirRelationship()]);
+  };
+
+  const removeTheirRelationship = (id: string) => {
+    setTheirPastRelationships(theirPastRelationships.filter(r => r.id !== id));
+  };
+
+  const updateTheirRelationship = (id: string, field: keyof TheirPastRelationship, value: any) => {
+    setTheirPastRelationships(theirPastRelationships.map(r => 
+      r.id === id ? { ...r, [field]: value } : r
+    ));
+  };
+
+  const toggleTheirIssue = (relationshipId: string, issue: string) => {
+    setTheirPastRelationships(theirPastRelationships.map(r => {
+      if (r.id !== relationshipId) return r;
+      const issues = r.issues.includes(issue)
+        ? r.issues.filter(i => i !== issue)
+        : [...r.issues, issue];
+      return { ...r, issues };
+    }));
+  };
 
   useEffect(() => {
     if (editId && user) {
@@ -399,6 +480,11 @@ const AddCandidate = () => {
         setTheirFamilyStability((data as any).their_family_stability || "");
         setTheirHealthyRelationshipModels((data as any).their_healthy_relationship_models ?? null);
         setTheirFamilyNotes((data as any).their_family_notes || "");
+        // Past Relationships
+        if ((data as any).their_past_relationships) {
+          setTheirPastRelationships((data as any).their_past_relationships as TheirPastRelationship[]);
+        }
+        setTheirRelationshipNotes((data as any).their_relationship_notes || "");
       }
     } catch (error) {
       console.error("Error fetching candidate:", error);
@@ -475,6 +561,9 @@ const AddCandidate = () => {
         their_family_stability: theirFamilyStability || null,
         their_healthy_relationship_models: theirHealthyRelationshipModels,
         their_family_notes: theirFamilyNotes || null,
+        // Past Relationships
+        their_past_relationships: theirPastRelationships.length > 0 ? theirPastRelationships : null,
+        their_relationship_notes: theirRelationshipNotes || null,
       };
 
       if (isEditMode) {
@@ -830,22 +919,26 @@ const AddCandidate = () => {
         {candidateMode === "full" && (
           <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="basics" className="gap-1 text-xs">
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="basics" className="gap-1 text-xs px-1">
                   <User className="w-3.5 h-3.5" />
-                  Basics
+                  <span className="hidden sm:inline">Basics</span>
                 </TabsTrigger>
-                <TabsTrigger value="about" className="gap-1 text-xs">
+                <TabsTrigger value="about" className="gap-1 text-xs px-1">
                   <Brain className="w-3.5 h-3.5" />
-                  About
+                  <span className="hidden sm:inline">About</span>
                 </TabsTrigger>
-                <TabsTrigger value="family" className="gap-1 text-xs">
+                <TabsTrigger value="family" className="gap-1 text-xs px-1">
                   <Home className="w-3.5 h-3.5" />
-                  Family
+                  <span className="hidden sm:inline">Family</span>
                 </TabsTrigger>
-                <TabsTrigger value="chemistry" className="gap-1 text-xs">
+                <TabsTrigger value="history" className="gap-1 text-xs px-1">
+                  <Heart className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">History</span>
+                </TabsTrigger>
+                <TabsTrigger value="chemistry" className="gap-1 text-xs px-1">
                   <Zap className="w-3.5 h-3.5" />
-                  Chemistry
+                  <span className="hidden sm:inline">Chemistry</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -1462,6 +1555,133 @@ const AddCandidate = () => {
                       placeholder="Any other details about their family background..."
                       value={theirFamilyNotes}
                       onChange={(e) => setTheirFamilyNotes(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="history" className="mt-4 space-y-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-primary" />
+                    Past Relationships
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">What you know about their relationship history</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {theirPastRelationships.length === 0 ? (
+                    <div className="text-center py-6">
+                      <p className="text-sm text-muted-foreground mb-3">No past relationships added yet</p>
+                      <Button type="button" variant="outline" onClick={addTheirRelationship}>
+                        + Add Past Relationship
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      {theirPastRelationships.map((relationship, index) => (
+                        <div key={relationship.id} className="border rounded-lg p-4 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <Label className="font-medium">Relationship {index + 1}</Label>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => removeTheirRelationship(relationship.id)}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-xs">Label (e.g., "College ex")</Label>
+                            <Input
+                              placeholder="How they refer to this person..."
+                              value={relationship.label}
+                              onChange={(e) => updateTheirRelationship(relationship.id, 'label', e.target.value)}
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label className="text-xs">Duration</Label>
+                              <Select
+                                value={relationship.duration}
+                                onValueChange={(v) => updateTheirRelationship(relationship.id, 'duration', v)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {THEIR_RELATIONSHIP_DURATION_OPTIONS.map((opt) => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-xs">How it ended</Label>
+                              <Select
+                                value={relationship.endReason}
+                                onValueChange={(v) => updateTheirRelationship(relationship.id, 'endReason', v)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {THEIR_END_REASON_OPTIONS.map((opt) => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-xs">Issues/Patterns (select all that apply)</Label>
+                            <div className="flex flex-wrap gap-2">
+                              {THEIR_ISSUE_OPTIONS.map((issue) => (
+                                <Button
+                                  key={issue.value}
+                                  type="button"
+                                  variant={relationship.issues.includes(issue.value) ? "default" : "outline"}
+                                  size="sm"
+                                  className="text-xs h-7"
+                                  onClick={() => toggleTheirIssue(relationship.id, issue.value)}
+                                >
+                                  {issue.label}
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-xs">Notes</Label>
+                            <Textarea
+                              placeholder="Any other details about this relationship..."
+                              value={relationship.notes}
+                              onChange={(e) => updateTheirRelationship(relationship.id, 'notes', e.target.value)}
+                              rows={2}
+                            />
+                          </div>
+                        </div>
+                      ))}
+
+                      <Button type="button" variant="outline" className="w-full" onClick={addTheirRelationship}>
+                        + Add Another Relationship
+                      </Button>
+                    </>
+                  )}
+
+                  <div className="space-y-2 pt-4 border-t">
+                    <Label>General Notes on Their Relationship History</Label>
+                    <Textarea
+                      placeholder="Any general patterns or things you've noticed about their past relationships..."
+                      value={theirRelationshipNotes}
+                      onChange={(e) => setTheirRelationshipNotes(e.target.value)}
                       rows={3}
                     />
                   </div>
