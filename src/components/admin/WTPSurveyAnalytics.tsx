@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, ClipboardList, DollarSign, Star, MessageSquare, Play } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2, ClipboardList, DollarSign, Star, MessageSquare, Play, Send, Users } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -17,6 +18,14 @@ interface SurveyResponse {
   feedback: string | null;
   completed_at: string;
   user_name?: string;
+}
+
+interface UserForSurvey {
+  user_id: string;
+  name: string | null;
+  email?: string;
+  candidate_count: number;
+  has_completed_survey: boolean;
 }
 
 interface SurveyStats {
@@ -50,6 +59,10 @@ export function WTPSurveyAnalytics({ onInitiateSurvey }: WTPSurveyAnalyticsProps
   const [responses, setResponses] = useState<SurveyResponse[]>([]);
   const [stats, setStats] = useState<SurveyStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<UserForSurvey[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [sendingToUsers, setSendingToUsers] = useState(false);
+  const [showUserSelector, setShowUserSelector] = useState(false);
 
   useEffect(() => {
     fetchSurveyData();
@@ -115,6 +128,163 @@ export function WTPSurveyAnalytics({ onInitiateSurvey }: WTPSurveyAnalyticsProps
     }
   };
 
+  const fetchUsersForSurvey = async () => {
+    try {
+      // Get all profiles with candidate counts
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("user_id, name");
+
+      if (profilesError) throw profilesError;
+
+      // Get candidate counts per user
+      const { data: candidates, error: candidatesError } = await supabase
+        .from("candidates")
+        .select("user_id");
+
+      if (candidatesError) throw candidatesError;
+
+      // Get completed surveys
+      const { data: completedSurveys, error: surveysError } = await supabase
+        .from("willingness_to_pay_surveys")
+        .select("user_id");
+
+      if (surveysError) throw surveysError;
+
+      // Get pending survey requests
+      const { data: pendingRequests, error: requestsError } = await supabase
+        .from("survey_requests")
+        .select("user_id")
+        .eq("status", "pending");
+
+      if (requestsError) throw requestsError;
+
+      const completedSet = new Set(completedSurveys?.map(s => s.user_id) || []);
+      const pendingSet = new Set(pendingRequests?.map(r => r.user_id) || []);
+      
+      // Count candidates per user
+      const candidateCounts: Record<string, number> = {};
+      candidates?.forEach(c => {
+        candidateCounts[c.user_id] = (candidateCounts[c.user_id] || 0) + 1;
+      });
+
+      const usersData: UserForSurvey[] = (profiles || [])
+        .map(p => ({
+          user_id: p.user_id,
+          name: p.name,
+          candidate_count: candidateCounts[p.user_id] || 0,
+          has_completed_survey: completedSet.has(p.user_id) || pendingSet.has(p.user_id),
+        }))
+        .sort((a, b) => b.candidate_count - a.candidate_count);
+
+      setUsers(usersData);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      toast.error("Failed to load users");
+    }
+  };
+
+  const handleToggleUserSelector = () => {
+    if (!showUserSelector) {
+      fetchUsersForSurvey();
+    }
+    setShowUserSelector(!showUserSelector);
+    setSelectedUsers(new Set());
+  };
+
+  const handleSelectUser = (userId: string, checked: boolean) => {
+    setSelectedUsers(prev => {
+      const next = new Set(prev);
+      if (checked) {
+        next.add(userId);
+      } else {
+        next.delete(userId);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const eligibleUsers = users.filter(u => !u.has_completed_survey).map(u => u.user_id);
+      setSelectedUsers(new Set(eligibleUsers));
+    } else {
+      setSelectedUsers(new Set());
+    }
+  };
+
+  const handleSendSurvey = async () => {
+    if (selectedUsers.size === 0) {
+      toast.error("Please select at least one user");
+      return;
+    }
+
+    setSendingToUsers(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const requests = Array.from(selectedUsers).map(userId => ({
+        user_id: userId,
+        requested_by: user.id,
+        survey_type: "wtp",
+        status: "pending",
+      }));
+
+      const { error } = await supabase
+        .from("survey_requests")
+        .insert(requests);
+
+      if (error) throw error;
+
+      toast.success(`Survey sent to ${selectedUsers.size} user(s)`);
+      setSelectedUsers(new Set());
+      setShowUserSelector(false);
+      fetchUsersForSurvey();
+    } catch (error) {
+      console.error("Error sending surveys:", error);
+      toast.error("Failed to send surveys");
+    } finally {
+      setSendingToUsers(false);
+    }
+  };
+
+  const handleSendToAll = async () => {
+    const eligibleUsers = users.filter(u => !u.has_completed_survey);
+    if (eligibleUsers.length === 0) {
+      toast.error("No eligible users to send survey to");
+      return;
+    }
+
+    setSendingToUsers(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const requests = eligibleUsers.map(u => ({
+        user_id: u.user_id,
+        requested_by: user.id,
+        survey_type: "wtp",
+        status: "pending",
+      }));
+
+      const { error } = await supabase
+        .from("survey_requests")
+        .insert(requests);
+
+      if (error) throw error;
+
+      toast.success(`Survey sent to all ${eligibleUsers.length} eligible user(s)`);
+      setShowUserSelector(false);
+      fetchUsersForSurvey();
+    } catch (error) {
+      console.error("Error sending surveys:", error);
+      toast.error("Failed to send surveys");
+    } finally {
+      setSendingToUsers(false);
+    }
+  };
+
   if (loading) {
     return (
       <Card>
@@ -125,16 +295,94 @@ export function WTPSurveyAnalytics({ onInitiateSurvey }: WTPSurveyAnalyticsProps
     );
   }
 
+  const eligibleCount = users.filter(u => !u.has_completed_survey).length;
+
   return (
     <div className="space-y-6">
-      {/* Initiate Survey Button */}
-      {onInitiateSurvey && (
-        <div className="flex justify-end">
-          <Button onClick={onInitiateSurvey} className="gap-2">
+      {/* Action Buttons */}
+      <div className="flex flex-wrap gap-2 justify-end">
+        {onInitiateSurvey && (
+          <Button onClick={onInitiateSurvey} variant="outline" className="gap-2">
             <Play className="w-4 h-4" />
-            Initiate Survey (Test)
+            Test Survey
           </Button>
-        </div>
+        )}
+        <Button onClick={handleToggleUserSelector} variant={showUserSelector ? "secondary" : "default"} className="gap-2">
+          <Users className="w-4 h-4" />
+          {showUserSelector ? "Hide User Selector" : "Send Survey to Users"}
+        </Button>
+      </div>
+
+      {/* User Selector Panel */}
+      {showUserSelector && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Send className="w-5 h-5" />
+                Send Survey to Users
+              </CardTitle>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleSendToAll()}
+                  disabled={sendingToUsers || eligibleCount === 0}
+                >
+                  Send to All ({eligibleCount})
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSendSurvey}
+                  disabled={sendingToUsers || selectedUsers.size === 0}
+                  className="gap-2"
+                >
+                  {sendingToUsers && <Loader2 className="w-4 h-4 animate-spin" />}
+                  Send to Selected ({selectedUsers.size})
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              <div className="flex items-center gap-3 p-2 border-b sticky top-0 bg-card">
+                <Checkbox
+                  checked={eligibleCount > 0 && selectedUsers.size === eligibleCount}
+                  onCheckedChange={handleSelectAll}
+                />
+                <span className="text-sm font-medium">Select All Eligible</span>
+              </div>
+              {users.map((user) => (
+                <div
+                  key={user.user_id}
+                  className={`flex items-center gap-3 p-2 rounded-lg hover:bg-accent/50 ${
+                    user.has_completed_survey ? "opacity-50" : ""
+                  }`}
+                >
+                  <Checkbox
+                    checked={selectedUsers.has(user.user_id)}
+                    onCheckedChange={(checked) => handleSelectUser(user.user_id, checked as boolean)}
+                    disabled={user.has_completed_survey}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{user.name || "Unnamed User"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {user.candidate_count} candidates
+                    </p>
+                  </div>
+                  {user.has_completed_survey && (
+                    <Badge variant="secondary" className="text-xs">
+                      Already sent/completed
+                    </Badge>
+                  )}
+                </div>
+              ))}
+              {users.length === 0 && (
+                <p className="text-center text-muted-foreground py-4">Loading users...</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Stats Overview */}

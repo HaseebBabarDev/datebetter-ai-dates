@@ -84,6 +84,14 @@ export function WillingnessToPaySurvey({
 
       if (error) throw error;
 
+      // Mark any pending survey requests as completed
+      await supabase
+        .from("survey_requests")
+        .update({ status: "completed", completed_at: new Date().toISOString() })
+        .eq("user_id", user.id)
+        .eq("survey_type", "wtp")
+        .eq("status", "pending");
+
       toast.success("Thank you for your feedback! 💜");
       onOpenChange(false);
     } catch (error) {
