@@ -27,44 +27,47 @@ export const TourOverlay: React.FC = () => {
     // Start animation
     setIsAnimating(true);
 
-    const findTarget = () => {
+    const updateTargetRect = () => {
       const element = document.querySelector(currentStepData.target);
       if (element) {
         const rect = element.getBoundingClientRect();
+        // Use viewport-relative coordinates since we're in a fixed container
         setTargetRect({
-          top: rect.top + window.scrollY,
-          left: rect.left + window.scrollX,
+          top: rect.top,
+          left: rect.left,
           width: rect.width,
           height: rect.height,
         });
-        
-        // Scroll element into view with some offset
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-        
-        // End animation after positioning
-        setTimeout(() => setIsAnimating(false), 300);
+        setIsAnimating(false);
       } else {
-        // Target not found, try next step or skip
+        // Target not found
         console.warn(`Tour target not found: ${currentStepData.target}`);
         setTargetRect(null);
         setIsAnimating(false);
       }
     };
 
-    // Delay to let DOM settle and animations complete
-    const timer = setTimeout(findTarget, 150);
+    // First scroll element into view, then update rect
+    const element = document.querySelector(currentStepData.target);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    // Delay to let scroll and DOM settle
+    const timer = setTimeout(updateTargetRect, 400);
     
-    // Re-calculate on resize
-    const handleResize = () => {
-      setIsAnimating(true);
-      findTarget();
+    // Re-calculate on resize and scroll
+    const handleUpdate = () => {
+      updateTargetRect();
     };
     
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleUpdate);
+    window.addEventListener("scroll", handleUpdate, true);
     
     return () => {
       clearTimeout(timer);
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleUpdate);
+      window.removeEventListener("scroll", handleUpdate, true);
     };
   }, [isActive, currentStep, currentStepData]);
 
@@ -94,7 +97,7 @@ export const TourOverlay: React.FC = () => {
     const estimatedTooltipHeight = 180;
 
     const style: React.CSSProperties = {
-      position: "absolute",
+      position: "fixed",
       zIndex: 10001,
       width: tooltipWidth,
       opacity: isAnimating ? 0 : 1,
@@ -110,8 +113,8 @@ export const TourOverlay: React.FC = () => {
 
     // Calculate vertical position based on placement
     const targetBottom = targetRect.top + targetRect.height;
-    const spaceBelow = viewportHeight - (targetBottom - window.scrollY);
-    const spaceAbove = targetRect.top - window.scrollY;
+    const spaceBelow = viewportHeight - targetBottom;
+    const spaceAbove = targetRect.top;
 
     switch (tooltipPlacement) {
       case "top":
@@ -140,8 +143,8 @@ export const TourOverlay: React.FC = () => {
     <div className="fixed inset-0 z-[10000]" style={{ pointerEvents: "none" }}>
       {/* Dark overlay with cutout */}
       <svg 
-        className="absolute inset-0 w-full h-full" 
-        style={{ pointerEvents: "auto", minHeight: "100vh" }}
+        className="fixed inset-0 w-full h-full" 
+        style={{ pointerEvents: "auto" }}
       >
         <defs>
           <mask id="tour-mask">
@@ -178,7 +181,7 @@ export const TourOverlay: React.FC = () => {
         <>
           {/* Outer glow */}
           <div
-            className="absolute rounded-xl pointer-events-none"
+            className="fixed rounded-xl pointer-events-none"
             style={{
               top: targetRect.top - padding - 4,
               left: targetRect.left - padding - 4,
@@ -190,7 +193,7 @@ export const TourOverlay: React.FC = () => {
           />
           {/* Border */}
           <div
-            className="absolute border-2 border-primary rounded-xl pointer-events-none"
+            className="fixed border-2 border-primary rounded-xl pointer-events-none"
             style={{
               top: targetRect.top - padding,
               left: targetRect.left - padding,
