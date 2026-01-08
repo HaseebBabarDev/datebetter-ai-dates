@@ -1,0 +1,321 @@
+import React, { useEffect, useState, useCallback } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  Brain, 
+  Eye, 
+  TrendingUp, 
+  AlertTriangle, 
+  Info, 
+  Sparkles,
+  RefreshCw,
+  ChevronRight,
+  Zap
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+
+interface Alert {
+  severity: "info" | "warning" | "urgent";
+  title: string;
+  message: string;
+  candidateNickname?: string;
+  candidateId?: string;
+}
+
+interface AIAlertsData {
+  blindSpotAlerts: Alert[];
+  predictiveAlerts: Alert[];
+  lastGenerated: string;
+}
+
+interface AIAlertsCardProps {
+  candidateCount: number;
+  lastInteractionTime?: string;
+}
+
+const CACHE_KEY = "ai_alerts_cache";
+const CACHE_DURATION_MS = 1000 * 60 * 30; // 30 minutes
+
+export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({ 
+  candidateCount,
+  lastInteractionTime 
+}) => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<AIAlertsData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadCachedData = useCallback(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        const cacheAge = Date.now() - new Date(parsed.cachedAt).getTime();
+        
+        // Check if cache is still valid and interaction hasn't happened since
+        if (cacheAge < CACHE_DURATION_MS) {
+          const lastInteraction = lastInteractionTime ? new Date(lastInteractionTime).getTime() : 0;
+          const cacheTime = new Date(parsed.cachedAt).getTime();
+          
+          // If no new interaction since cache, use cached data
+          if (lastInteraction < cacheTime) {
+            setData(parsed.data);
+            return true;
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Error loading cached AI alerts:", e);
+    }
+    return false;
+  }, [lastInteractionTime]);
+
+  const fetchAlerts = useCallback(async (force = false) => {
+    if (!force && loadCachedData()) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setError("Not authenticated");
+        return;
+      }
+
+      const response = await supabase.functions.invoke("generate-ai-alerts", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data.error) {
+        if (response.data.error.includes("Rate limit")) {
+          toast({
+            title: "Please wait",
+            description: "AI is processing. Try again in a moment.",
+            variant: "default",
+          });
+        } else if (response.data.error.includes("credits")) {
+          toast({
+            title: "AI Credits Low",
+            description: "Please add funds to continue using AI features.",
+            variant: "destructive",
+          });
+        }
+        throw new Error(response.data.error);
+      }
+
+      const alertsData: AIAlertsData = response.data;
+      setData(alertsData);
+
+      // Cache the data
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        data: alertsData,
+        cachedAt: new Date().toISOString(),
+      }));
+
+    } catch (e) {
+      console.error("Error fetching AI alerts:", e);
+      setError(e instanceof Error ? e.message : "Failed to load alerts");
+    } finally {
+      setLoading(false);
+    }
+  }, [toast, loadCachedData]);
+
+  // Initial load
+  useEffect(() => {
+    if (candidateCount > 0) {
+      fetchAlerts();
+    }
+  }, [candidateCount, fetchAlerts]);
+
+  // Refetch when new interaction is logged
+  useEffect(() => {
+    if (lastInteractionTime && candidateCount > 0) {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        const lastInteraction = new Date(lastInteractionTime).getTime();
+        const cacheTime = new Date(parsed.cachedAt).getTime();
+        
+        // New interaction since last cache - trigger refresh
+        if (lastInteraction > cacheTime) {
+          fetchAlerts(true);
+        }
+      }
+    }
+  }, [lastInteractionTime, candidateCount, fetchAlerts]);
+
+  if (candidateCount === 0) {
+    return null;
+  }
+
+  const getSeverityStyles = (severity: string) => {
+    switch (severity) {
+      case "urgent":
+        return {
+          bg: "bg-destructive/10",
+          border: "border-destructive/30",
+          icon: "text-destructive",
+          iconBg: "bg-destructive/20",
+        };
+      case "warning":
+        return {
+          bg: "bg-amber-500/10",
+          border: "border-amber-500/30",
+          icon: "text-amber-600",
+          iconBg: "bg-amber-500/20",
+        };
+      default:
+        return {
+          bg: "bg-primary/10",
+          border: "border-primary/30",
+          icon: "text-primary",
+          iconBg: "bg-primary/20",
+        };
+    }
+  };
+
+  const getSeverityIcon = (severity: string) => {
+    switch (severity) {
+      case "urgent":
+        return <AlertTriangle className="w-4 h-4" />;
+      case "warning":
+        return <AlertTriangle className="w-4 h-4" />;
+      default:
+        return <Info className="w-4 h-4" />;
+    }
+  };
+
+  const allAlerts = [
+    ...(data?.blindSpotAlerts || []).map(a => ({ ...a, type: "blind_spot" as const })),
+    ...(data?.predictiveAlerts || []).map(a => ({ ...a, type: "predictive" as const })),
+  ];
+
+  const hasAlerts = allAlerts.length > 0;
+
+  return (
+    <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center">
+              <Brain className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <div>
+              <span className="text-sm font-semibold">AI Insights</span>
+              <p className="text-[10px] text-muted-foreground font-normal">
+                Blind spots & predictions
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => fetchAlerts(true)}
+            disabled={loading}
+            className="h-7 px-2"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent className="space-y-3 pt-0">
+        {loading && !data ? (
+          <div className="space-y-2">
+            <Skeleton className="h-16 w-full rounded-lg" />
+            <Skeleton className="h-16 w-full rounded-lg" />
+          </div>
+        ) : error && !data ? (
+          <div className="text-center py-4">
+            <p className="text-sm text-muted-foreground">{error}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchAlerts(true)}
+              className="mt-2"
+            >
+              Try Again
+            </Button>
+          </div>
+        ) : hasAlerts ? (
+          <div className="space-y-2">
+            {allAlerts.slice(0, 4).map((alert, idx) => {
+              const styles = getSeverityStyles(alert.severity);
+              return (
+                <button
+                  key={`${alert.type}-${idx}`}
+                  onClick={() => alert.candidateId ? navigate(`/candidate/${alert.candidateId}`) : undefined}
+                  disabled={!alert.candidateId}
+                  className={`w-full text-left rounded-lg p-3 border transition-all ${styles.bg} ${styles.border} ${
+                    alert.candidateId ? "hover:scale-[1.01] cursor-pointer" : ""
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${styles.iconBg} ${styles.icon}`}>
+                      {alert.type === "blind_spot" ? (
+                        <Eye className="w-3.5 h-3.5" />
+                      ) : (
+                        <TrendingUp className="w-3.5 h-3.5" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <span className={`text-[10px] uppercase tracking-wide font-medium ${styles.icon}`}>
+                          {alert.type === "blind_spot" ? "Blind Spot" : "Prediction"}
+                        </span>
+                        {alert.candidateNickname && (
+                          <span className="text-[10px] text-muted-foreground">
+                            • {alert.candidateNickname}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm font-medium text-foreground leading-tight">
+                        {alert.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                        {alert.message}
+                      </p>
+                    </div>
+                    {alert.candidateId && (
+                      <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-4">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-2">
+              <Sparkles className="w-5 h-5 text-emerald-600" />
+            </div>
+            <p className="text-sm font-medium text-foreground">Looking Good!</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              No concerning patterns detected right now.
+            </p>
+          </div>
+        )}
+
+        {data?.lastGenerated && (
+          <p className="text-[10px] text-muted-foreground text-center pt-1">
+            <Zap className="w-3 h-3 inline mr-1" />
+            Updated {new Date(data.lastGenerated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
