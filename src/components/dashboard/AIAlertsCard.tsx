@@ -270,65 +270,66 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
     return (
       <div
         key={alertKey}
-        className={`w-full text-left rounded-lg p-3 border transition-all ${styles.bg} ${styles.border}`}
+        className={`w-full text-left rounded-md p-2 border transition-all ${styles.bg} ${styles.border}`}
       >
-        <div className="flex items-start gap-3">
-          <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${styles.iconBg} ${styles.icon}`}>
+        <div className="flex items-start gap-2">
+          <div className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${styles.iconBg} ${styles.icon}`}>
             {alert.type === "blind_spot" ? (
-              <Eye className="w-3.5 h-3.5" />
+              <Eye className="w-3 h-3" />
             ) : (
-              <TrendingUp className="w-3.5 h-3.5" />
+              <TrendingUp className="w-3 h-3" />
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <span className={`text-[10px] uppercase tracking-wide font-medium ${styles.icon}`}>
+            <div className="flex items-center gap-1 flex-wrap">
+              <span className={`text-[9px] uppercase tracking-wide font-medium ${styles.icon}`}>
                 {alert.type === "blind_spot" ? "Blind Spot" : "Prediction"}
               </span>
               {alert.candidateNickname && (
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-[9px] text-muted-foreground">
                   • {alert.candidateNickname}
                 </span>
               )}
               {isHistory && generatedAt && (
-                <span className="text-[10px] text-muted-foreground ml-auto">
+                <span className="text-[9px] text-muted-foreground ml-auto">
                   {new Date(generatedAt).toLocaleDateString()}
                 </span>
               )}
             </div>
-            <p className="text-sm font-medium text-foreground leading-tight">
+            <p className="text-xs font-medium text-foreground leading-tight">
               {alert.title}
             </p>
-            <p className={`text-xs text-muted-foreground mt-0.5 ${isExpanded ? '' : 'line-clamp-2'}`}>
+            <p className={`text-[11px] text-muted-foreground leading-snug ${isExpanded ? '' : 'line-clamp-2'}`}>
               {alert.message}
             </p>
             
-            {/* Expand/collapse and navigation buttons */}
-            <div className="flex items-center gap-2 mt-2">
-              {alert.message.length > 100 && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleExpanded(alertKey);
-                  }}
-                  className="text-[10px] text-primary hover:underline flex items-center gap-0.5"
-                >
-                  {isExpanded ? (
-                    <>Show less <ChevronUp className="w-3 h-3" /></>
-                  ) : (
-                    <>Read more <ChevronDown className="w-3 h-3" /></>
-                  )}
-                </button>
-              )}
-              {alert.candidateId && (
-                <button
-                  onClick={() => navigate(`/candidate/${alert.candidateId}`)}
-                  className="text-[10px] text-primary hover:underline flex items-center gap-0.5 ml-auto"
-                >
-                  View candidate <ChevronRight className="w-3 h-3" />
-                </button>
-              )}
-            </div>
+            {(alert.message.length > 100 || alert.candidateId) && (
+              <div className="flex items-center gap-2 mt-1">
+                {alert.message.length > 100 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleExpanded(alertKey);
+                    }}
+                    className="text-[9px] text-primary hover:underline flex items-center"
+                  >
+                    {isExpanded ? (
+                      <>Less <ChevronUp className="w-2.5 h-2.5" /></>
+                    ) : (
+                      <>More <ChevronDown className="w-2.5 h-2.5" /></>
+                    )}
+                  </button>
+                )}
+                {alert.candidateId && (
+                  <button
+                    onClick={() => navigate(`/candidate/${alert.candidateId}`)}
+                    className="text-[9px] text-primary hover:underline flex items-center ml-auto"
+                  >
+                    View <ChevronRight className="w-2.5 h-2.5" />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -337,45 +338,45 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
 
   return (
     <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/5">
-      <CardHeader className="pb-2">
+      <CardHeader className="py-2 px-3">
         <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center">
-              <Brain className="w-4 h-4 text-primary-foreground" />
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-6 rounded-md bg-[image:var(--gradient-hero)] flex items-center justify-center">
+              <Brain className="w-3.5 h-3.5 text-primary-foreground" />
             </div>
             <div>
-              <span className="text-sm font-semibold">AI Insights</span>
-              <p className="text-[10px] text-muted-foreground font-normal">
+              <span className="text-xs font-semibold">AI Insights</span>
+              <p className="text-[9px] text-muted-foreground font-normal leading-none">
                 Blind spots & predictions
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center">
             <Sheet>
               <SheetTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 px-2"
+                  className="h-6 w-6 p-0"
                   disabled={history.length === 0}
                 >
-                  <History className="w-3.5 h-3.5" />
+                  <History className="w-3 h-3" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="bottom" className="h-[70vh]">
-                <SheetHeader className="pb-4">
-                  <SheetTitle className="flex items-center gap-2">
-                    <History className="w-5 h-5" />
+                <SheetHeader className="pb-3">
+                  <SheetTitle className="flex items-center gap-2 text-sm">
+                    <History className="w-4 h-4" />
                     Insight History
                   </SheetTitle>
                 </SheetHeader>
-                <ScrollArea className="h-[calc(70vh-80px)]">
+                <ScrollArea className="h-[calc(70vh-70px)]">
                   {history.length === 0 ? (
-                    <div className="text-center py-8">
-                      <p className="text-sm text-muted-foreground">No history yet</p>
+                    <div className="text-center py-6">
+                      <p className="text-xs text-muted-foreground">No history yet</p>
                     </div>
                   ) : (
-                    <div className="space-y-2 pr-4">
+                    <div className="space-y-1.5 pr-4">
                       {history.map((alert, idx) => renderAlert(
                         { ...alert, type: alert.type },
                         idx,
@@ -392,34 +393,34 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
               size="sm"
               onClick={() => fetchAlerts(true)}
               disabled={loading}
-              className="h-7 px-2"
+              className="h-6 w-6 p-0"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
             </Button>
           </div>
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-3 pt-0">
+      <CardContent className="space-y-1.5 pt-0 px-3 pb-2">
         {loading && !data ? (
-          <div className="space-y-2">
-            <Skeleton className="h-16 w-full rounded-lg" />
-            <Skeleton className="h-16 w-full rounded-lg" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-12 w-full rounded-md" />
+            <Skeleton className="h-12 w-full rounded-md" />
           </div>
         ) : error && !data ? (
-          <div className="text-center py-4">
-            <p className="text-sm text-muted-foreground">{error}</p>
+          <div className="text-center py-3">
+            <p className="text-xs text-muted-foreground">{error}</p>
             <Button
               variant="outline"
               size="sm"
               onClick={() => fetchAlerts(true)}
-              className="mt-2"
+              className="mt-1.5 h-7 text-xs"
             >
               Try Again
             </Button>
           </div>
         ) : hasAlerts ? (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {displayedAlerts.map((alert, idx) => renderAlert(alert, idx))}
             
             {hasMoreAlerts && (
@@ -427,32 +428,32 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowAll(!showAll)}
-                className="w-full text-xs h-8"
+                className="w-full text-[10px] h-6"
               >
                 {showAll ? (
-                  <>Show less <ChevronUp className="w-3.5 h-3.5 ml-1" /></>
+                  <>Less <ChevronUp className="w-3 h-3 ml-0.5" /></>
                 ) : (
-                  <>See {allAlerts.length - INITIAL_DISPLAY_COUNT} more insights <ChevronDown className="w-3.5 h-3.5 ml-1" /></>
+                  <>+{allAlerts.length - INITIAL_DISPLAY_COUNT} more <ChevronDown className="w-3 h-3 ml-0.5" /></>
                 )}
               </Button>
             )}
           </div>
         ) : (
-          <div className="text-center py-4">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-2">
-              <Sparkles className="w-5 h-5 text-emerald-600" />
+          <div className="text-center py-3">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-1.5">
+              <Sparkles className="w-4 h-4 text-emerald-600" />
             </div>
-            <p className="text-sm font-medium text-foreground">Looking Good!</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              No concerning patterns detected right now.
+            <p className="text-xs font-medium text-foreground">Looking Good!</p>
+            <p className="text-[10px] text-muted-foreground">
+              No concerning patterns detected.
             </p>
           </div>
         )}
 
         {data?.lastGenerated && (
-          <p className="text-[10px] text-muted-foreground text-center pt-1">
-            <Zap className="w-3 h-3 inline mr-1" />
-            Updated {new Date(data.lastGenerated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          <p className="text-[9px] text-muted-foreground text-center">
+            <Zap className="w-2.5 h-2.5 inline mr-0.5" />
+            {new Date(data.lastGenerated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </p>
         )}
       </CardContent>
