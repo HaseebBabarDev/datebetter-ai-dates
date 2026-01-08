@@ -158,10 +158,12 @@ export type Database = {
           their_parent_status: string | null
           their_parent_wounds: Json | null
           their_parents_relationship: string | null
+          their_past_relationships: Json | null
           their_politics: Database["public"]["Enums"]["politics"] | null
           their_relationship_goal:
             | Database["public"]["Enums"]["relationship_goal"]
             | null
+          their_relationship_notes: string | null
           their_relationship_status:
             | Database["public"]["Enums"]["relationship_status"]
             | null
@@ -235,10 +237,12 @@ export type Database = {
           their_parent_status?: string | null
           their_parent_wounds?: Json | null
           their_parents_relationship?: string | null
+          their_past_relationships?: Json | null
           their_politics?: Database["public"]["Enums"]["politics"] | null
           their_relationship_goal?:
             | Database["public"]["Enums"]["relationship_goal"]
             | null
+          their_relationship_notes?: string | null
           their_relationship_status?:
             | Database["public"]["Enums"]["relationship_status"]
             | null
@@ -312,10 +316,12 @@ export type Database = {
           their_parent_status?: string | null
           their_parent_wounds?: Json | null
           their_parents_relationship?: string | null
+          their_past_relationships?: Json | null
           their_politics?: Database["public"]["Enums"]["politics"] | null
           their_relationship_goal?:
             | Database["public"]["Enums"]["relationship_goal"]
             | null
+          their_relationship_notes?: string | null
           their_relationship_status?:
             | Database["public"]["Enums"]["relationship_status"]
             | null
