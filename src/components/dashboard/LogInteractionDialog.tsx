@@ -40,6 +40,7 @@ export const LogInteractionDialog = ({ candidates, compact = false }: LogInterac
       <DialogTrigger asChild>
         {compact ? (
           <Button 
+            id="log-interaction-trigger"
             variant="outline" 
             className="w-full h-full gap-2 rounded-xl border-border bg-card hover:bg-muted/50 transition-all duration-200 active:scale-[0.98]"
             disabled={hasNoCandidates}
@@ -48,7 +49,7 @@ export const LogInteractionDialog = ({ candidates, compact = false }: LogInterac
             <span className="text-xs font-medium">Log Interaction</span>
           </Button>
         ) : (
-          <Button variant="outline" className="w-full" disabled={hasNoCandidates}>
+          <Button id="log-interaction-trigger" variant="outline" className="w-full" disabled={hasNoCandidates}>
             <Clock className="w-4 h-4 mr-2" />
             Log Interaction
           </Button>

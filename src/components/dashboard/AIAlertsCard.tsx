@@ -51,6 +51,8 @@ interface HistoricAlert extends Alert {
 interface AIAlertsCardProps {
   candidateCount: number;
   lastInteractionTime?: string;
+  interactionCount?: number;
+  onLogInteraction?: () => void;
 }
 
 const CACHE_KEY = "ai_alerts_cache";
@@ -61,7 +63,9 @@ const INITIAL_DISPLAY_COUNT = 3;
 
 export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({ 
   candidateCount,
-  lastInteractionTime 
+  lastInteractionTime,
+  interactionCount = 0,
+  onLogInteraction
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -191,13 +195,13 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
   }, [toast, loadCachedData, saveToHistory]);
 
   useEffect(() => {
-    if (candidateCount > 0) {
+    if (candidateCount > 0 && interactionCount > 0) {
       fetchAlerts();
     }
-  }, [candidateCount, fetchAlerts]);
+  }, [candidateCount, interactionCount, fetchAlerts]);
 
   useEffect(() => {
-    if (lastInteractionTime && candidateCount > 0) {
+    if (lastInteractionTime && candidateCount > 0 && interactionCount > 0) {
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
@@ -209,7 +213,7 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
         }
       }
     }
-  }, [lastInteractionTime, candidateCount, fetchAlerts]);
+  }, [lastInteractionTime, candidateCount, interactionCount, fetchAlerts]);
 
   const toggleExpanded = (alertKey: string) => {
     setExpandedAlerts(prev => {
@@ -402,7 +406,27 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
       </CardHeader>
 
       <CardContent className="space-y-1.5 pt-0 px-3 pb-2">
-        {loading && !data ? (
+        {interactionCount === 0 ? (
+          <div className="text-center py-4">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+              <Brain className="w-5 h-5 text-primary" />
+            </div>
+            <p className="text-xs font-medium text-foreground mb-1">Log your first interaction</p>
+            <p className="text-[10px] text-muted-foreground mb-3">
+              AI insights will appear after you log interactions with your candidates
+            </p>
+            {onLogInteraction && (
+              <Button
+                size="sm"
+                onClick={onLogInteraction}
+                className="h-7 text-xs"
+              >
+                <Sparkles className="w-3 h-3 mr-1" />
+                Log Interaction
+              </Button>
+            )}
+          </div>
+        ) : loading && !data ? (
           <div className="space-y-1.5">
             <Skeleton className="h-12 w-full rounded-md" />
             <Skeleton className="h-12 w-full rounded-md" />
