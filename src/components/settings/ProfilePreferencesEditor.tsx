@@ -295,6 +295,125 @@ const NEURODIVERGENCE_TYPE_OPTIONS = [
   "ADHD", "Autism/ASD", "Dyslexia", "Anxiety", "Depression", "OCD", "PTSD", "Bipolar", "Other"
 ];
 
+// Additional options from full onboarding
+const HEIGHT_OPTIONS = [
+  { value: "under_5ft", label: "Under 5'0\"" },
+  { value: "5ft_5ft3", label: "5'0\" - 5'3\"" },
+  { value: "5ft4_5ft6", label: "5'4\" - 5'6\"" },
+  { value: "5ft7_5ft9", label: "5'7\" - 5'9\"" },
+  { value: "5ft10_6ft", label: "5'10\" - 6'0\"" },
+  { value: "over_6ft", label: "Over 6'0\"" },
+];
+
+const BODY_TYPE_OPTIONS = [
+  { value: "petite", label: "Petite" },
+  { value: "slim", label: "Slim" },
+  { value: "athletic", label: "Athletic" },
+  { value: "average", label: "Average" },
+  { value: "curvy", label: "Curvy" },
+  { value: "plus_size", label: "Plus size" },
+];
+
+const TRANSITION_STAGE_OPTIONS = [
+  { value: "pre", label: "Pre-transition" },
+  { value: "early", label: "Early transition (0-2 years)" },
+  { value: "established", label: "Established (2+ years)" },
+  { value: "not_medical", label: "Not medically transitioning" },
+];
+
+const HORMONE_PROFILE_OPTIONS = [
+  { value: "estrogen", label: "Estrogen-dominant" },
+  { value: "testosterone", label: "Testosterone-dominant" },
+  { value: "mixed", label: "Mixed/changing" },
+  { value: "no_hrt", label: "No HRT" },
+];
+
+const RELIGION_PRACTICE_LEVEL_OPTIONS = [
+  { value: "not_practicing", label: "Not practicing" },
+  { value: "occasionally", label: "Occasionally" },
+  { value: "regularly", label: "Regularly" },
+  { value: "devout", label: "Very devout" },
+];
+
+const KIDS_TIMELINE_OPTIONS = [
+  { value: "asap", label: "As soon as possible" },
+  { value: "1_2_years", label: "1-2 years" },
+  { value: "3_5_years", label: "3-5 years" },
+  { value: "5_plus_years", label: "5+ years" },
+  { value: "not_sure", label: "Not sure yet" },
+];
+
+const LIVING_SITUATION_OPTIONS = [
+  { value: "alone", label: "Living alone" },
+  { value: "roommates", label: "With roommates" },
+  { value: "family", label: "With family" },
+  { value: "partner", label: "With partner" },
+];
+
+const WORK_SCHEDULE_OPTIONS = [
+  { value: "9_to_5", label: "9-5 / Traditional" },
+  { value: "flexible", label: "Flexible hours" },
+  { value: "shift_work", label: "Shift work" },
+  { value: "remote", label: "Remote / WFH" },
+  { value: "freelance", label: "Freelance / Variable" },
+];
+
+const ACTIVITY_LEVEL_OPTIONS = [
+  { value: "sedentary", label: "Sedentary" },
+  { value: "light", label: "Lightly active" },
+  { value: "moderate", label: "Moderately active" },
+  { value: "very_active", label: "Very active" },
+  { value: "athlete", label: "Athletic" },
+];
+
+const CONFLICT_STYLE_OPTIONS = [
+  { value: "discuss_immediately", label: "Discuss immediately" },
+  { value: "cool_off_first", label: "Cool off then talk" },
+  { value: "avoid_conflict", label: "Tend to avoid conflict" },
+  { value: "need_time", label: "Need time to process" },
+];
+
+const LOVE_LANGUAGE_OPTIONS = [
+  "Words of Affirmation",
+  "Quality Time", 
+  "Physical Touch",
+  "Acts of Service",
+  "Receiving Gifts",
+];
+
+const DEALBREAKER_OPTIONS = [
+  "Dishonesty/lying",
+  "Infidelity/cheating",
+  "Active addiction",
+  "Anger issues",
+  "Emotional unavailability",
+  "Financial irresponsibility",
+  "Disrespect",
+  "Laziness/no ambition",
+  "Poor hygiene",
+  "Rudeness to service workers",
+];
+
+const SAFETY_PRIORITY_OPTIONS = [
+  "Meet in public first",
+  "Tell someone where I am",
+  "Video call before meeting",
+  "Share location with friend",
+  "Take my own transportation",
+  "Set time limits for first dates",
+];
+
+const PATTERN_RECOGNITION_OPTIONS = [
+  "Attracted to unavailable people",
+  "Rushing into relationships",
+  "Ignoring red flags",
+  "Fear of commitment",
+  "Becoming too dependent",
+  "Losing myself in relationships",
+  "Choosing the wrong type",
+  "Difficulty with vulnerability",
+];
+
 // Height stats: ~14.5% of US men are 6ft+
 const getHeightPoolImpact = () => ({ percent: 14.5, shrink: 85.5 });
 
@@ -375,13 +494,14 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
     }
   };
 
-  const SECTION_ORDER = ["motivation", "relationship", "partner_prefs", "kids", "faith", "politics", "career", "income", "lifestyle", "physical", "communication", "mental_health", "neurodivergence", "attachment", "boundaries", "intimacy", "devi", "cycle"];
+  const SECTION_ORDER = ["identity", "motivation", "relationship", "partner_prefs", "kids", "faith", "politics", "career", "income", "lifestyle", "physical", "communication", "mental_health", "neurodivergence", "attachment", "boundaries", "intimacy", "devi", "cycle"];
   
   const SECTION_CONFIG: Record<string, { 
     label: string; 
     icon: React.ReactNode; 
     requiredFields: (keyof Profile)[];
   }> = {
+    identity: { label: "Basic Identity", icon: <User className="w-3.5 h-3.5" />, requiredFields: ["name", "gender_identity", "birth_date"] },
     motivation: { label: "Dating Motivation", icon: <Target className="w-3.5 h-3.5" />, requiredFields: ["dating_motivation"] },
     relationship: { label: "Relationship Goals", icon: <Heart className="w-3.5 h-3.5" />, requiredFields: ["relationship_goal", "relationship_structure"] },
     partner_prefs: { label: "Partner Preferences", icon: <Users className="w-3.5 h-3.5" />, requiredFields: ["interested_in", "height_preference"] },
@@ -395,8 +515,8 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
     communication: { label: "Communication", icon: <MessageCircle className="w-3.5 h-3.5" />, requiredFields: ["communication_style"] },
     mental_health: { label: "Mental Health", icon: <Stethoscope className="w-3.5 h-3.5" />, requiredFields: ["mental_health_openness"] },
     neurodivergence: { label: "Neurodivergence", icon: <Brain className="w-3.5 h-3.5" />, requiredFields: [] },
-    attachment: { label: "Attachment", icon: <Brain className="w-3.5 h-3.5" />, requiredFields: ["attachment_style"] },
-    boundaries: { label: "Boundaries", icon: <Shield className="w-3.5 h-3.5" />, requiredFields: ["boundary_strength"] },
+    attachment: { label: "Attachment & Patterns", icon: <Brain className="w-3.5 h-3.5" />, requiredFields: ["attachment_style"] },
+    boundaries: { label: "Boundaries & Dealbreakers", icon: <Shield className="w-3.5 h-3.5" />, requiredFields: ["boundary_strength"] },
     intimacy: { label: "Intimacy & Safety", icon: <Lock className="w-3.5 h-3.5" />, requiredFields: [] },
     devi: { label: "D.E.V.I. Settings", icon: <Sparkles className="w-3.5 h-3.5" />, requiredFields: [] },
     cycle: { label: "Hormone Cycle", icon: <Lock className="w-3.5 h-3.5" />, requiredFields: [] },
@@ -504,6 +624,134 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
       </Card>
 
       <Accordion type="multiple" value={openSections} onValueChange={setOpenSections} className="space-y-2">
+
+        {/* Basic Identity */}
+        <AccordionItem value="identity" data-value="identity" className={`border rounded-lg px-4 ${isSectionComplete("identity") ? "border-green-500/30 bg-green-500/5" : ""}`}>
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2 flex-1">
+              <User className="w-4 h-4 text-blue-500" />
+              <span className="font-medium">Basic Identity</span>
+              {isSectionComplete("identity") && <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />}
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pb-4">
+            <div className="space-y-2">
+              <Label>Name</Label>
+              <Input
+                value={formData.name || ""}
+                onChange={(e) => updateField("name", e.target.value)}
+                placeholder="Your name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Date of Birth</Label>
+              <Input
+                type="date"
+                value={formData.birth_date || ""}
+                onChange={(e) => updateField("birth_date", e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Gender Identity</Label>
+                <Select
+                  value={formData.gender_identity || ""}
+                  onValueChange={(v) => updateField("gender_identity", v as Enums<"gender_identity">)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {GENDER_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Pronouns</Label>
+                <Select
+                  value={formData.pronouns || ""}
+                  onValueChange={(v) => updateField("pronouns", v as Enums<"pronouns">)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {PRONOUN_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {formData.pronouns === "other" && (
+              <div className="space-y-2">
+                <Label>Custom Pronouns</Label>
+                <Input
+                  value={formData.custom_pronouns || ""}
+                  onChange={(e) => updateField("custom_pronouns", e.target.value)}
+                  placeholder="Enter your pronouns"
+                />
+              </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Height</Label>
+                <Select
+                  value={formData.height || ""}
+                  onValueChange={(v) => updateField("height", v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {HEIGHT_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Body Type</Label>
+                <Select
+                  value={formData.body_type || ""}
+                  onValueChange={(v) => updateField("body_type", v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {BODY_TYPE_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Sexual Orientation</Label>
+                <Select
+                  value={formData.sexual_orientation || ""}
+                  onValueChange={(v) => updateField("sexual_orientation", v as Enums<"sexual_orientation">)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {ORIENTATION_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {formData.sexual_orientation === "self_describe" && (
+                <div className="space-y-2">
+                  <Label>Describe</Label>
+                  <Input
+                    value={formData.orientation_custom || ""}
+                    onChange={(e) => updateField("orientation_custom", e.target.value)}
+                    placeholder="Describe your orientation"
+                  />
+                </div>
+              )}
+            </div>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("identity", e)}>
+              Next
+            </Button>
+          </AccordionContent>
+        </AccordionItem>
 
         {/* Dating Motivation */}
         <AccordionItem value="motivation" data-value="motivation" className={`border rounded-lg px-4 ${isSectionComplete("motivation") ? "border-green-500/30 bg-green-500/5" : ""}`}>
@@ -757,11 +1005,34 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 </Select>
               </div>
             </div>
+            {(formData.kids_desire === "definitely_yes" || formData.kids_desire === "maybe") && (
+              <div className="space-y-2">
+                <Label>Kids Timeline</Label>
+                <Select
+                  value={formData.kids_timeline || ""}
+                  onValueChange={(v) => updateField("kids_timeline", v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {KIDS_TIMELINE_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <Label>Marriage before kids?</Label>
               <Switch
                 checked={formData.marriage_before_kids || false}
                 onCheckedChange={(v) => updateField("marriage_before_kids", v)}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label>Open to single parenthood?</Label>
+              <Switch
+                checked={formData.open_to_single_parenthood || false}
+                onCheckedChange={(v) => updateField("open_to_single_parenthood", v)}
               />
             </div>
             <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("kids", e)}>
@@ -789,6 +1060,20 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
                 <SelectContent>
                   {RELIGION_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Practice Level</Label>
+              <Select
+                value={formData.religion_practice_level || ""}
+                onValueChange={(v) => updateField("religion_practice_level", v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {RELIGION_PRACTICE_LEVEL_OPTIONS.map(opt => (
                     <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                   ))}
                 </SelectContent>
@@ -1082,6 +1367,60 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 </Select>
               </div>
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>State/Province</Label>
+                <Input
+                  value={formData.state || ""}
+                  onChange={(e) => updateField("state", e.target.value)}
+                  placeholder="Enter your state"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Living Situation</Label>
+                <Select
+                  value={formData.living_situation || ""}
+                  onValueChange={(v) => updateField("living_situation", v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {LIVING_SITUATION_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Work Schedule</Label>
+                <Select
+                  value={formData.work_schedule_type || ""}
+                  onValueChange={(v) => updateField("work_schedule_type", v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {WORK_SCHEDULE_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Activity Level</Label>
+                <Select
+                  value={formData.activity_level || ""}
+                  onValueChange={(v) => updateField("activity_level", v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {ACTIVITY_LEVEL_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <div className="flex items-center justify-between">
               <Label>Open to moving?</Label>
               <Switch
@@ -1212,6 +1551,20 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label>Conflict Style</Label>
+              <Select
+                value={formData.conflict_style || ""}
+                onValueChange={(v) => updateField("conflict_style", v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {CONFLICT_STYLE_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <SliderInput
               label="Response Time Preference"
               value={formData.response_time_preference || 5}
@@ -1219,6 +1572,34 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               leftLabel="Quick replies"
               rightLabel="Take your time"
             />
+            <div className="space-y-2">
+              <Label>Love Languages</Label>
+              <div className="flex flex-wrap gap-2">
+                {LOVE_LANGUAGE_OPTIONS.map(lang => {
+                  const currentLangs = (formData.love_languages as string[] | null) || [];
+                  const isSelected = currentLangs.includes(lang);
+                  return (
+                    <button
+                      key={lang}
+                      type="button"
+                      onClick={() => {
+                        const updated = isSelected
+                          ? currentLangs.filter(l => l !== lang)
+                          : [...currentLangs, lang];
+                        updateField("love_languages", updated as any);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        isSelected 
+                          ? "bg-primary text-primary-foreground border-primary" 
+                          : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50"
+                      }`}
+                    >
+                      {lang}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("communication", e)}>
               Next
             </Button>
@@ -1382,6 +1763,34 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 </Select>
               </div>
             </div>
+            <div className="space-y-2">
+              <Label>Dating Patterns You've Noticed</Label>
+              <div className="flex flex-wrap gap-2">
+                {PATTERN_RECOGNITION_OPTIONS.map(pattern => {
+                  const currentPatterns = (formData.pattern_recognition as string[] | null) || [];
+                  const isSelected = currentPatterns.includes(pattern);
+                  return (
+                    <button
+                      key={pattern}
+                      type="button"
+                      onClick={() => {
+                        const updated = isSelected
+                          ? currentPatterns.filter(p => p !== pattern)
+                          : [...currentPatterns, pattern];
+                        updateField("pattern_recognition", updated as any);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        isSelected 
+                          ? "bg-primary text-primary-foreground border-primary" 
+                          : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50"
+                      }`}
+                    >
+                      {pattern}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("attachment", e)}>
               Next
             </Button>
@@ -1398,6 +1807,62 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
+            <div className="space-y-2">
+              <Label>Absolute Dealbreakers</Label>
+              <div className="flex flex-wrap gap-2">
+                {DEALBREAKER_OPTIONS.map(db => {
+                  const currentDealbreakers = (formData.dealbreakers as string[] | null) || [];
+                  const isSelected = currentDealbreakers.includes(db);
+                  return (
+                    <button
+                      key={db}
+                      type="button"
+                      onClick={() => {
+                        const updated = isSelected
+                          ? currentDealbreakers.filter(d => d !== db)
+                          : [...currentDealbreakers, db];
+                        updateField("dealbreakers", updated as any);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        isSelected 
+                          ? "bg-red-500 text-white border-red-500" 
+                          : "bg-muted/50 text-muted-foreground border-border hover:border-red-500/50"
+                      }`}
+                    >
+                      {db}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Safety Priorities</Label>
+              <div className="flex flex-wrap gap-2">
+                {SAFETY_PRIORITY_OPTIONS.map(sp => {
+                  const currentPriorities = (formData.safety_priorities as string[] | null) || [];
+                  const isSelected = currentPriorities.includes(sp);
+                  return (
+                    <button
+                      key={sp}
+                      type="button"
+                      onClick={() => {
+                        const updated = isSelected
+                          ? currentPriorities.filter(p => p !== sp)
+                          : [...currentPriorities, sp];
+                        updateField("safety_priorities", updated as any);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        isSelected 
+                          ? "bg-primary text-primary-foreground border-primary" 
+                          : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50"
+                      }`}
+                    >
+                      {sp}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <SliderInput
               label="Boundary Strength"
               value={formData.boundary_strength || 3}
