@@ -34,7 +34,7 @@ type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more
 const PLAN_LIMITS: Record<SubscriptionPlan, { candidates: number; updates: number }> = {
   free: { candidates: 1, updates: 1 },
   new_to_dating: { candidates: 3, updates: 5 },
-  dating_often: { candidates: 7, updates: 12 },
+  dating_often: { candidates: 10, updates: 30 },
   dating_more: { candidates: 12, updates: 20 },
   unlimited: { candidates: 999, updates: 999 },
 };
