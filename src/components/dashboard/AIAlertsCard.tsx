@@ -11,11 +11,23 @@ import {
   Sparkles,
   RefreshCw,
   ChevronRight,
-  Zap
+  ChevronDown,
+  ChevronUp,
+  Zap,
+  History,
+  X
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Alert {
   severity: "info" | "warning" | "urgent";
@@ -31,13 +43,21 @@ interface AIAlertsData {
   lastGenerated: string;
 }
 
+interface HistoricAlert extends Alert {
+  type: "blind_spot" | "predictive";
+  generatedAt: string;
+}
+
 interface AIAlertsCardProps {
   candidateCount: number;
   lastInteractionTime?: string;
 }
 
 const CACHE_KEY = "ai_alerts_cache";
+const HISTORY_KEY = "ai_alerts_history";
 const CACHE_DURATION_MS = 1000 * 60 * 30; // 30 minutes
+const MAX_HISTORY_ITEMS = 50;
+const INITIAL_DISPLAY_COUNT = 3;
 
 export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({ 
   candidateCount,
@@ -48,6 +68,45 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<AIAlertsData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
+  const [expandedAlerts, setExpandedAlerts] = useState<Set<string>>(new Set());
+  const [history, setHistory] = useState<HistoricAlert[]>([]);
+
+  // Load history from localStorage
+  useEffect(() => {
+    try {
+      const storedHistory = localStorage.getItem(HISTORY_KEY);
+      if (storedHistory) {
+        setHistory(JSON.parse(storedHistory));
+      }
+    } catch (e) {
+      console.error("Error loading alert history:", e);
+    }
+  }, []);
+
+  const saveToHistory = useCallback((alertsData: AIAlertsData) => {
+    const newHistoryItems: HistoricAlert[] = [
+      ...alertsData.blindSpotAlerts.map(a => ({ 
+        ...a, 
+        type: "blind_spot" as const, 
+        generatedAt: alertsData.lastGenerated 
+      })),
+      ...alertsData.predictiveAlerts.map(a => ({ 
+        ...a, 
+        type: "predictive" as const, 
+        generatedAt: alertsData.lastGenerated 
+      })),
+    ];
+
+    setHistory(prev => {
+      // Deduplicate by title + message
+      const existingKeys = new Set(prev.map(h => `${h.title}|${h.message}`));
+      const uniqueNew = newHistoryItems.filter(n => !existingKeys.has(`${n.title}|${n.message}`));
+      const updated = [...uniqueNew, ...prev].slice(0, MAX_HISTORY_ITEMS);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
 
   const loadCachedData = useCallback(() => {
     try {
@@ -56,12 +115,10 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
         const parsed = JSON.parse(cached);
         const cacheAge = Date.now() - new Date(parsed.cachedAt).getTime();
         
-        // Check if cache is still valid and interaction hasn't happened since
         if (cacheAge < CACHE_DURATION_MS) {
           const lastInteraction = lastInteractionTime ? new Date(lastInteractionTime).getTime() : 0;
           const cacheTime = new Date(parsed.cachedAt).getTime();
           
-          // If no new interaction since cache, use cached data
           if (lastInteraction < cacheTime) {
             setData(parsed.data);
             return true;
@@ -118,8 +175,8 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
 
       const alertsData: AIAlertsData = response.data;
       setData(alertsData);
+      saveToHistory(alertsData);
 
-      // Cache the data
       localStorage.setItem(CACHE_KEY, JSON.stringify({
         data: alertsData,
         cachedAt: new Date().toISOString(),
@@ -131,16 +188,14 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [toast, loadCachedData]);
+  }, [toast, loadCachedData, saveToHistory]);
 
-  // Initial load
   useEffect(() => {
     if (candidateCount > 0) {
       fetchAlerts();
     }
   }, [candidateCount, fetchAlerts]);
 
-  // Refetch when new interaction is logged
   useEffect(() => {
     if (lastInteractionTime && candidateCount > 0) {
       const cached = localStorage.getItem(CACHE_KEY);
@@ -149,13 +204,24 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
         const lastInteraction = new Date(lastInteractionTime).getTime();
         const cacheTime = new Date(parsed.cachedAt).getTime();
         
-        // New interaction since last cache - trigger refresh
         if (lastInteraction > cacheTime) {
           fetchAlerts(true);
         }
       }
     }
   }, [lastInteractionTime, candidateCount, fetchAlerts]);
+
+  const toggleExpanded = (alertKey: string) => {
+    setExpandedAlerts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(alertKey)) {
+        newSet.delete(alertKey);
+      } else {
+        newSet.add(alertKey);
+      }
+      return newSet;
+    });
+  };
 
   if (candidateCount === 0) {
     return null;
@@ -187,23 +253,87 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
     }
   };
 
-  const getSeverityIcon = (severity: string) => {
-    switch (severity) {
-      case "urgent":
-        return <AlertTriangle className="w-4 h-4" />;
-      case "warning":
-        return <AlertTriangle className="w-4 h-4" />;
-      default:
-        return <Info className="w-4 h-4" />;
-    }
-  };
-
   const allAlerts = [
     ...(data?.blindSpotAlerts || []).map(a => ({ ...a, type: "blind_spot" as const })),
     ...(data?.predictiveAlerts || []).map(a => ({ ...a, type: "predictive" as const })),
   ];
 
   const hasAlerts = allAlerts.length > 0;
+  const displayedAlerts = showAll ? allAlerts : allAlerts.slice(0, INITIAL_DISPLAY_COUNT);
+  const hasMoreAlerts = allAlerts.length > INITIAL_DISPLAY_COUNT;
+
+  const renderAlert = (alert: typeof allAlerts[0], idx: number, isHistory = false, generatedAt?: string) => {
+    const alertKey = `${alert.type}-${idx}-${isHistory ? 'history' : 'current'}`;
+    const styles = getSeverityStyles(alert.severity);
+    const isExpanded = expandedAlerts.has(alertKey);
+    
+    return (
+      <div
+        key={alertKey}
+        className={`w-full text-left rounded-lg p-3 border transition-all ${styles.bg} ${styles.border}`}
+      >
+        <div className="flex items-start gap-3">
+          <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${styles.iconBg} ${styles.icon}`}>
+            {alert.type === "blind_spot" ? (
+              <Eye className="w-3.5 h-3.5" />
+            ) : (
+              <TrendingUp className="w-3.5 h-3.5" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span className={`text-[10px] uppercase tracking-wide font-medium ${styles.icon}`}>
+                {alert.type === "blind_spot" ? "Blind Spot" : "Prediction"}
+              </span>
+              {alert.candidateNickname && (
+                <span className="text-[10px] text-muted-foreground">
+                  • {alert.candidateNickname}
+                </span>
+              )}
+              {isHistory && generatedAt && (
+                <span className="text-[10px] text-muted-foreground ml-auto">
+                  {new Date(generatedAt).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+            <p className="text-sm font-medium text-foreground leading-tight">
+              {alert.title}
+            </p>
+            <p className={`text-xs text-muted-foreground mt-0.5 ${isExpanded ? '' : 'line-clamp-2'}`}>
+              {alert.message}
+            </p>
+            
+            {/* Expand/collapse and navigation buttons */}
+            <div className="flex items-center gap-2 mt-2">
+              {alert.message.length > 100 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleExpanded(alertKey);
+                  }}
+                  className="text-[10px] text-primary hover:underline flex items-center gap-0.5"
+                >
+                  {isExpanded ? (
+                    <>Show less <ChevronUp className="w-3 h-3" /></>
+                  ) : (
+                    <>Read more <ChevronDown className="w-3 h-3" /></>
+                  )}
+                </button>
+              )}
+              {alert.candidateId && (
+                <button
+                  onClick={() => navigate(`/candidate/${alert.candidateId}`)}
+                  className="text-[10px] text-primary hover:underline flex items-center gap-0.5 ml-auto"
+                >
+                  View candidate <ChevronRight className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/5">
@@ -220,15 +350,53 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
               </p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => fetchAlerts(true)}
-            disabled={loading}
-            className="h-7 px-2"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2"
+                  disabled={history.length === 0}
+                >
+                  <History className="w-3.5 h-3.5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-[70vh]">
+                <SheetHeader className="pb-4">
+                  <SheetTitle className="flex items-center gap-2">
+                    <History className="w-5 h-5" />
+                    Insight History
+                  </SheetTitle>
+                </SheetHeader>
+                <ScrollArea className="h-[calc(70vh-80px)]">
+                  {history.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-sm text-muted-foreground">No history yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 pr-4">
+                      {history.map((alert, idx) => renderAlert(
+                        { ...alert, type: alert.type },
+                        idx,
+                        true,
+                        alert.generatedAt
+                      ))}
+                    </div>
+                  )}
+                </ScrollArea>
+              </SheetContent>
+            </Sheet>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => fetchAlerts(true)}
+              disabled={loading}
+              className="h-7 px-2"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
         </CardTitle>
       </CardHeader>
 
@@ -252,50 +420,22 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
           </div>
         ) : hasAlerts ? (
           <div className="space-y-2">
-            {allAlerts.slice(0, 4).map((alert, idx) => {
-              const styles = getSeverityStyles(alert.severity);
-              return (
-                <button
-                  key={`${alert.type}-${idx}`}
-                  onClick={() => alert.candidateId ? navigate(`/candidate/${alert.candidateId}`) : undefined}
-                  disabled={!alert.candidateId}
-                  className={`w-full text-left rounded-lg p-3 border transition-all ${styles.bg} ${styles.border} ${
-                    alert.candidateId ? "hover:scale-[1.01] cursor-pointer" : ""
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${styles.iconBg} ${styles.icon}`}>
-                      {alert.type === "blind_spot" ? (
-                        <Eye className="w-3.5 h-3.5" />
-                      ) : (
-                        <TrendingUp className="w-3.5 h-3.5" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className={`text-[10px] uppercase tracking-wide font-medium ${styles.icon}`}>
-                          {alert.type === "blind_spot" ? "Blind Spot" : "Prediction"}
-                        </span>
-                        {alert.candidateNickname && (
-                          <span className="text-[10px] text-muted-foreground">
-                            • {alert.candidateNickname}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm font-medium text-foreground leading-tight">
-                        {alert.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                        {alert.message}
-                      </p>
-                    </div>
-                    {alert.candidateId && (
-                      <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+            {displayedAlerts.map((alert, idx) => renderAlert(alert, idx))}
+            
+            {hasMoreAlerts && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAll(!showAll)}
+                className="w-full text-xs h-8"
+              >
+                {showAll ? (
+                  <>Show less <ChevronUp className="w-3.5 h-3.5 ml-1" /></>
+                ) : (
+                  <>See {allAlerts.length - INITIAL_DISPLAY_COUNT} more insights <ChevronDown className="w-3.5 h-3.5 ml-1" /></>
+                )}
+              </Button>
+            )}
           </div>
         ) : (
           <div className="text-center py-4">
