@@ -142,12 +142,19 @@ export type Database = {
           their_drinking: string | null
           their_education_level: string | null
           their_exercise: string | null
+          their_family_notes: string | null
+          their_family_stability: string | null
+          their_felt_loved_as_child: string | null
+          their_generational_patterns: Json | null
+          their_healthy_relationship_models: boolean | null
           their_in_therapy: string | null
           their_kids_desire: Database["public"]["Enums"]["kids_desire"] | null
           their_kids_status: Database["public"]["Enums"]["kids_status"] | null
           their_mental_health_awareness: string | null
           their_neurodivergence_types: Json | null
           their_neurodivergent: string | null
+          their_parent_wounds: Json | null
+          their_parents_relationship: string | null
           their_politics: Database["public"]["Enums"]["politics"] | null
           their_relationship_goal:
             | Database["public"]["Enums"]["relationship_goal"]
@@ -159,6 +166,7 @@ export type Database = {
           their_schedule_flexibility: string | null
           their_smoking: string | null
           their_social_style: string | null
+          their_socioeconomic_background: string | null
           updated_at: string | null
           user_id: string
           zodiac_sign: string | null
@@ -207,12 +215,19 @@ export type Database = {
           their_drinking?: string | null
           their_education_level?: string | null
           their_exercise?: string | null
+          their_family_notes?: string | null
+          their_family_stability?: string | null
+          their_felt_loved_as_child?: string | null
+          their_generational_patterns?: Json | null
+          their_healthy_relationship_models?: boolean | null
           their_in_therapy?: string | null
           their_kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
           their_kids_status?: Database["public"]["Enums"]["kids_status"] | null
           their_mental_health_awareness?: string | null
           their_neurodivergence_types?: Json | null
           their_neurodivergent?: string | null
+          their_parent_wounds?: Json | null
+          their_parents_relationship?: string | null
           their_politics?: Database["public"]["Enums"]["politics"] | null
           their_relationship_goal?:
             | Database["public"]["Enums"]["relationship_goal"]
@@ -224,6 +239,7 @@ export type Database = {
           their_schedule_flexibility?: string | null
           their_smoking?: string | null
           their_social_style?: string | null
+          their_socioeconomic_background?: string | null
           updated_at?: string | null
           user_id: string
           zodiac_sign?: string | null
@@ -272,12 +288,19 @@ export type Database = {
           their_drinking?: string | null
           their_education_level?: string | null
           their_exercise?: string | null
+          their_family_notes?: string | null
+          their_family_stability?: string | null
+          their_felt_loved_as_child?: string | null
+          their_generational_patterns?: Json | null
+          their_healthy_relationship_models?: boolean | null
           their_in_therapy?: string | null
           their_kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
           their_kids_status?: Database["public"]["Enums"]["kids_status"] | null
           their_mental_health_awareness?: string | null
           their_neurodivergence_types?: Json | null
           their_neurodivergent?: string | null
+          their_parent_wounds?: Json | null
+          their_parents_relationship?: string | null
           their_politics?: Database["public"]["Enums"]["politics"] | null
           their_relationship_goal?:
             | Database["public"]["Enums"]["relationship_goal"]
@@ -289,6 +312,7 @@ export type Database = {
           their_schedule_flexibility?: string | null
           their_smoking?: string | null
           their_social_style?: string | null
+          their_socioeconomic_background?: string | null
           updated_at?: string | null
           user_id?: string
           zodiac_sign?: string | null

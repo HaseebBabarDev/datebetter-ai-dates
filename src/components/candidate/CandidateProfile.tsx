@@ -4,7 +4,7 @@ import { Tables, Enums } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Calendar, MapPin, User, Briefcase, Heart, Users, Church, Vote, Wine, Cigarette, Dumbbell, Brain } from "lucide-react";
+import { Pencil, Calendar, MapPin, User, Briefcase, Heart, Users, Church, Vote, Wine, Cigarette, Dumbbell, Brain, Home } from "lucide-react";
 import { CandidatePhotoUpload } from "./CandidatePhotoUpload";
 
 type Candidate = Tables<"candidates">;
@@ -104,6 +104,31 @@ const ZODIAC_OPTIONS: { value: string; label: string; emoji: string }[] = [
   { value: "capricorn", label: "Capricorn", emoji: "♑" },
   { value: "aquarius", label: "Aquarius", emoji: "♒" },
   { value: "pisces", label: "Pisces", emoji: "♓" },
+];
+
+const THEIR_PARENTS_OPTIONS = [
+  { value: "together_healthy", label: "Together & Healthy" },
+  { value: "together_unhealthy", label: "Together but Unhealthy" },
+  { value: "divorced_amicable", label: "Divorced (Amicable)" },
+  { value: "divorced_contentious", label: "Divorced (Contentious)" },
+  { value: "single_parent", label: "Single Parent" },
+  { value: "unknown", label: "Unknown" },
+];
+
+const THEIR_FELT_LOVED_OPTIONS = [
+  { value: "yes_consistently", label: "Yes, Consistently" },
+  { value: "sometimes", label: "Sometimes" },
+  { value: "rarely", label: "Rarely" },
+  { value: "no", label: "No" },
+  { value: "unknown", label: "Unknown" },
+];
+
+const THEIR_FAMILY_STABILITY_OPTIONS = [
+  { value: "very_stable", label: "Very Stable" },
+  { value: "mostly_stable", label: "Mostly Stable" },
+  { value: "some_instability", label: "Some Instability" },
+  { value: "frequent_chaos", label: "Frequent Chaos" },
+  { value: "unknown", label: "Unknown" },
 ];
 
 export const CandidateProfile: React.FC<CandidateProfileProps> = ({
@@ -389,6 +414,52 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                 </Badge>
               )}
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Family & Upbringing */}
+      {((candidate as any).their_parents_relationship || 
+        (candidate as any).their_felt_loved_as_child || 
+        (candidate as any).their_family_stability ||
+        (candidate as any).their_healthy_relationship_models !== null ||
+        (candidate as any).their_family_notes) && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Home className="w-5 h-5" />
+              Family & Upbringing
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {(candidate as any).their_parents_relationship && (candidate as any).their_parents_relationship !== "unknown" && (
+                <Badge variant="outline" className="gap-1">
+                  <Users className="w-3 h-3" />
+                  Parents: {formatLabel((candidate as any).their_parents_relationship, THEIR_PARENTS_OPTIONS)}
+                </Badge>
+              )}
+              {(candidate as any).their_felt_loved_as_child && (candidate as any).their_felt_loved_as_child !== "unknown" && (
+                <Badge variant="outline">
+                  Felt Loved: {formatLabel((candidate as any).their_felt_loved_as_child, THEIR_FELT_LOVED_OPTIONS)}
+                </Badge>
+              )}
+              {(candidate as any).their_family_stability && (candidate as any).their_family_stability !== "unknown" && (
+                <Badge variant="outline">
+                  {formatLabel((candidate as any).their_family_stability, THEIR_FAMILY_STABILITY_OPTIONS)}
+                </Badge>
+              )}
+              {(candidate as any).their_healthy_relationship_models !== null && (candidate as any).their_healthy_relationship_models !== undefined && (
+                <Badge variant="outline">
+                  Role Models: {(candidate as any).their_healthy_relationship_models ? "Yes" : "No"}
+                </Badge>
+              )}
+            </div>
+            {(candidate as any).their_family_notes && (
+              <p className="text-sm text-muted-foreground p-2 bg-muted/30 rounded">
+                {(candidate as any).their_family_notes}
+              </p>
+            )}
           </CardContent>
         </Card>
       )}
