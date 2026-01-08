@@ -711,9 +711,10 @@ const Dashboard = () => {
     return <Navigate to="/setup" replace />;
   }
 
-  const activeCandidateCount = candidates.filter(
+  const activeCandidates = candidates.filter(
     (c) => c.status !== "archived" && c.status !== "no_contact"
-  ).length;
+  );
+  const activeCandidateCount = activeCandidates.length;
 
   return (
     <div 
@@ -999,6 +1000,13 @@ const Dashboard = () => {
             <AIAlertsCard 
               candidateCount={candidates.length}
               lastInteractionTime={interactions[0]?.interaction_date || undefined}
+              interactionCount={interactions.length}
+              onLogInteraction={activeCandidates.length === 1 
+                ? () => navigate(`/candidate/${activeCandidates[0].id}?tab=interactions`)
+                : activeCandidates.length > 1 
+                  ? () => document.getElementById("log-interaction-trigger")?.click()
+                  : undefined
+              }
             />
 
             {/* Candidate Recap */}
