@@ -14,6 +14,7 @@ import { PinLoginScreen } from "@/components/auth/PinLoginScreen";
 import { PinEnableQuickLoginDialog } from "@/components/auth/PinEnableQuickLoginDialog";
 import { PIN_SESSION_STORAGE_KEY } from "@/lib/pinCrypto";
 import { BetaNdaDialog } from "@/components/auth/BetaNdaDialog";
+import { useNdaAgreement } from "@/hooks/useNdaAgreement";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -41,15 +42,15 @@ const Auth = () => {
   const [enableQuickLoginUserId, setEnableQuickLoginUserId] = useState<string | null>(null);
   
   // Beta NDA state
+  const { hasAcceptedNda, acceptNda, loading: ndaLoading } = useNdaAgreement();
   const [showBetaNda, setShowBetaNda] = useState(false);
 
   // Check for Beta NDA acceptance on mount
   useEffect(() => {
-    const ndaAccepted = localStorage.getItem("datebetter_beta_nda_accepted");
-    if (ndaAccepted !== "true") {
+    if (!ndaLoading && hasAcceptedNda === false) {
       setShowBetaNda(true);
     }
-  }, []);
+  }, [ndaLoading, hasAcceptedNda]);
   
 
   // Check for saved login on mount
@@ -693,7 +694,10 @@ const Auth = () => {
     
     <BetaNdaDialog
       open={showBetaNda}
-      onAccept={() => setShowBetaNda(false)}
+      onAccept={async () => {
+        await acceptNda();
+        setShowBetaNda(false);
+      }}
     />
     </>
   );

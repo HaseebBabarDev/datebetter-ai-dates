@@ -26,6 +26,7 @@ import { NotificationSettings } from "@/components/settings/NotificationSettings
 import { format, parse } from "date-fns";
 import { useTour, SETTINGS_TOUR_STEPS, TourRestartButton } from "@/components/tour";
 import { BetaNdaDialog } from "@/components/auth/BetaNdaDialog";
+import { useNdaAgreement } from "@/hooks/useNdaAgreement";
 
 type Profile = Tables<"profiles">;
 type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more" | "unlimited";
@@ -100,6 +101,7 @@ const Settings = () => {
   const defaultTab = searchParams.get("tab") || "account";
   const section = searchParams.get("section");
   const { startTour, hasCompletedTour, resetAllTours } = useTour();
+  const { ndaAcceptance, loading: ndaLoading } = useNdaAgreement();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -800,9 +802,9 @@ const Settings = () => {
                   </span>
                   <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 </Button>
-                {localStorage.getItem("datebetter_beta_nda_accepted_at") && (
+                {ndaAcceptance?.accepted_at && (
                   <p className="text-xs text-muted-foreground pt-2 border-t">
-                    Beta NDA accepted on {new Date(localStorage.getItem("datebetter_beta_nda_accepted_at")!).toLocaleDateString()}
+                    Beta NDA accepted on {new Date(ndaAcceptance.accepted_at).toLocaleDateString()}
                   </p>
                 )}
               </CardContent>
@@ -1316,6 +1318,7 @@ const Settings = () => {
         open={showBetaNda}
         onAccept={() => setShowBetaNda(false)}
         viewOnly
+        acceptedAt={ndaAcceptance?.accepted_at}
       />
     </div>
   );
