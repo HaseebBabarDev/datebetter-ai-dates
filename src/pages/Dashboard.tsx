@@ -50,6 +50,7 @@ import { FreeUpgradeBanner } from "@/components/subscription/FreeUpgradeBanner";
 import { DailyLoggingCTA } from "@/components/dashboard/DailyLoggingCTA";
 import { DeviCTA } from "@/components/dashboard/DeviCTA";
 import { ReferralCard } from "@/components/dashboard/ReferralCard";
+import { AIAlertsCard } from "@/components/dashboard/AIAlertsCard";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefresh";
 import { WinsStats, useDeviWins } from "@/components/devi/WinsStats";
@@ -990,6 +991,12 @@ const Dashboard = () => {
                 <div className="text-[10px] text-muted-foreground">Watch Out</div>
               </button>
             </div>
+
+            {/* AI Alerts Card */}
+            <AIAlertsCard 
+              candidateCount={candidates.length}
+              lastInteractionTime={interactions[0]?.interaction_date || undefined}
+            />
 
             {/* Candidate Recap */}
             {candidates.length > 0 && (

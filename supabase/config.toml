@@ -11,3 +11,6 @@ verify_jwt = true
 
 [functions.notify-referrer]
 verify_jwt = false
+
+[functions.generate-ai-alerts]
+verify_jwt = false
