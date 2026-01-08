@@ -12,6 +12,7 @@ const politicsOptions = [
   { value: "moderate", label: "Moderate" },
   { value: "conservative", label: "Conservative" },
   { value: "traditional", label: "Traditional" },
+  { value: "prefer_not_say", label: "Prefer not to say" },
 ];
 
 const PoliticsScreen = () => {

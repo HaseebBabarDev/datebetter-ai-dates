@@ -16,6 +16,7 @@ const religionOptions = [
   { value: "hindu", label: "Hinduism" },
   { value: "buddhist", label: "Buddhism" },
   { value: "other", label: "Other" },
+  { value: "prefer_not_say", label: "Prefer not to say" },
 ];
 
 const FaithValuesScreen = () => {

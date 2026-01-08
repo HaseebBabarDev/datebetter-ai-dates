@@ -16,6 +16,7 @@ const kidsDesireOptions = [
   { value: "definitely_yes", label: "Definitely yes" },
   { value: "maybe", label: "Maybe/Open to it" },
   { value: "definitely_no", label: "Definitely no" },
+  { value: "unsure", label: "I don't know yet" },
 ];
 
 const familyPriorityOptions = [
