@@ -102,6 +102,29 @@ USER PROFILE (the person you're coaching):
 ${familyContext}
 ` : '';
 
+  // Build candidate family context
+  const buildCandidateFamilyContext = (candidate: any): string => {
+    const hasData = candidate.their_parents_relationship || candidate.their_felt_loved_as_child || 
+                    candidate.their_family_stability || candidate.their_healthy_relationship_models !== null;
+    if (!hasData) return '';
+    
+    let context = `
+CANDIDATE'S FAMILY BACKGROUND:
+- Parents' Relationship: ${formatEnum(candidate.their_parents_relationship)}
+- Felt Loved Growing Up: ${formatEnum(candidate.their_felt_loved_as_child)}
+- Family Stability: ${formatEnum(candidate.their_family_stability)}
+- Had Healthy Relationship Role Models: ${candidate.their_healthy_relationship_models === true ? 'Yes' : candidate.their_healthy_relationship_models === false ? 'No' : 'Unknown'}`;
+    
+    if (candidate.their_family_notes) {
+      context += `
+- Family Notes: ${candidate.their_family_notes}`;
+    }
+    
+    return context;
+  };
+
+  const candidateFamilyContext = candidateProfile ? buildCandidateFamilyContext(candidateProfile) : '';
+
   const candidateContext = candidateProfile ? `
 CANDIDATE PROFILE (the person they're dating):
 - Nickname: ${candidateProfile.nickname}
@@ -125,6 +148,14 @@ CANDIDATE PROFILE (the person they're dating):
 - Notes: ${candidateProfile.notes || 'None'}
 - Chemistry Ratings: Physical ${candidateProfile.physical_attraction}/5, Intellectual ${candidateProfile.intellectual_connection}/5, Humor ${candidateProfile.humor_compatibility}/5, Energy ${candidateProfile.energy_match}/5
 - First Intimacy Date: ${candidateProfile.first_intimacy_date || 'Has not occurred'}
+${candidateFamilyContext}
+
+USING CANDIDATE FAMILY BACKGROUND:
+- Compare user's and candidate's family backgrounds to identify potential compatibility issues or healing opportunities.
+- If both had unstable childhoods, they may understand each other OR trigger each other's wounds.
+- If candidate lacked healthy role models, they may not know what a healthy relationship looks like - watch for this in their behaviors.
+- Someone who didn't feel loved as a child may struggle with intimacy, vulnerability, or have anxious/avoidant tendencies.
+- Use this context to explain candidate behaviors and help user have compassion while also protecting themselves.
 ` : '';
 
   // Check intimacy status and user's relationship goals

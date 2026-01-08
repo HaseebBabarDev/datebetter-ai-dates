@@ -28,7 +28,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { SliderInput } from "@/components/onboarding/SliderInput";
-import { Plus, User, MapPin, Church, Heart, Briefcase, Sparkles, Brain } from "lucide-react";
+import { Plus, User, MapPin, Church, Heart, Briefcase, Sparkles, Brain, Home } from "lucide-react";
 import { toast } from "sonner";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeLimitDialog } from "@/components/subscription/UpgradeLimitDialog";
@@ -172,6 +172,31 @@ const MENTAL_HEALTH_AWARENESS_OPTIONS = [
   { value: "unknown", label: "Unknown" },
 ];
 
+const THEIR_PARENTS_RELATIONSHIP_OPTIONS = [
+  { value: "together_healthy", label: "Together & Healthy" },
+  { value: "together_unhealthy", label: "Together but Unhealthy" },
+  { value: "divorced_amicable", label: "Divorced (Amicable)" },
+  { value: "divorced_contentious", label: "Divorced (Contentious)" },
+  { value: "single_parent", label: "Single Parent" },
+  { value: "unknown", label: "Unknown" },
+];
+
+const THEIR_FELT_LOVED_OPTIONS = [
+  { value: "yes_consistently", label: "Yes, Consistently" },
+  { value: "sometimes", label: "Sometimes" },
+  { value: "rarely", label: "Rarely" },
+  { value: "no", label: "No" },
+  { value: "unknown", label: "Unknown" },
+];
+
+const THEIR_FAMILY_STABILITY_OPTIONS = [
+  { value: "very_stable", label: "Very Stable" },
+  { value: "mostly_stable", label: "Mostly Stable" },
+  { value: "some_instability", label: "Some Instability" },
+  { value: "frequent_chaos", label: "Frequent Chaos" },
+  { value: "unknown", label: "Unknown" },
+];
+
 const ZODIAC_OPTIONS = [
   { value: "aries", label: "♈ Aries", emoji: "♈" },
   { value: "taurus", label: "♉ Taurus", emoji: "♉" },
@@ -269,6 +294,13 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
   // Zodiac
   const [zodiacSign, setZodiacSign] = useState("");
 
+  // Family & Upbringing
+  const [theirParentsRelationship, setTheirParentsRelationship] = useState("");
+  const [theirFeltLoved, setTheirFeltLoved] = useState("");
+  const [theirFamilyStability, setTheirFamilyStability] = useState("");
+  const [theirHealthyModels, setTheirHealthyModels] = useState<boolean | null>(null);
+  const [theirFamilyNotes, setTheirFamilyNotes] = useState("");
+
   const resetForm = () => {
     setNickname("");
     setAge("");
@@ -305,6 +337,11 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
     setTheirNeurodivergent("");
     setTheirMentalHealthAwareness("");
     setZodiacSign("");
+    setTheirParentsRelationship("");
+    setTheirFeltLoved("");
+    setTheirFamilyStability("");
+    setTheirHealthyModels(null);
+    setTheirFamilyNotes("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -352,8 +389,13 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
         their_neurodivergent: theirNeurodivergent || null,
         their_mental_health_awareness: theirMentalHealthAwareness || null,
         zodiac_sign: zodiacSign || null,
+        their_parents_relationship: theirParentsRelationship || null,
+        their_felt_loved_as_child: theirFeltLoved || null,
+        their_family_stability: theirFamilyStability || null,
+        their_healthy_relationship_models: theirHealthyModels,
+        their_family_notes: theirFamilyNotes || null,
         first_contact_date: new Date().toISOString().split("T")[0],
-      });
+      } as any);
 
       if (error) throw error;
 
@@ -733,6 +775,80 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Family & Upbringing */}
+            <AccordionItem value="family">
+              <AccordionTrigger className="text-sm">
+                <span className="flex items-center gap-2">
+                  <Home className="w-4 h-4" />
+                  Family & Upbringing
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-3 pt-2">
+                <p className="text-xs text-muted-foreground">
+                  Understanding their background helps D.E.V.I. provide better insights
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Parents' Relationship</Label>
+                    <Select value={theirParentsRelationship} onValueChange={setTheirParentsRelationship}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {THEIR_PARENTS_RELATIONSHIP_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Felt Loved Growing Up?</Label>
+                    <Select value={theirFeltLoved} onValueChange={setTheirFeltLoved}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {THEIR_FELT_LOVED_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Family Stability</Label>
+                    <Select value={theirFamilyStability} onValueChange={setTheirFamilyStability}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {THEIR_FAMILY_STABILITY_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Healthy Role Models?</Label>
+                    <Select 
+                      value={theirHealthyModels === null ? "" : theirHealthyModels ? "yes" : "no"} 
+                      onValueChange={(v) => setTheirHealthyModels(v === "" ? null : v === "yes")}
+                    >
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="yes">Yes</SelectItem>
+                        <SelectItem value="no">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Family Notes</Label>
+                  <Input
+                    placeholder="Any notes about their family background..."
+                    value={theirFamilyNotes}
+                    onChange={(e) => setTheirFamilyNotes(e.target.value)}
+                    maxLength={500}
+                  />
                 </div>
               </AccordionContent>
             </AccordionItem>
