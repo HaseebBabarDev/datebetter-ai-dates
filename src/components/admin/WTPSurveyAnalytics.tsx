@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ClipboardList, DollarSign, Star, MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, ClipboardList, DollarSign, Star, MessageSquare, Play } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface SurveyResponse {
   id: string;
@@ -40,7 +42,11 @@ const PLAN_LABELS: Record<string, string> = {
   premium: "Premium ($15-25/mo)",
 };
 
-export function WTPSurveyAnalytics() {
+interface WTPSurveyAnalyticsProps {
+  onInitiateSurvey?: () => void;
+}
+
+export function WTPSurveyAnalytics({ onInitiateSurvey }: WTPSurveyAnalyticsProps) {
   const [responses, setResponses] = useState<SurveyResponse[]>([]);
   const [stats, setStats] = useState<SurveyStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -121,6 +127,16 @@ export function WTPSurveyAnalytics() {
 
   return (
     <div className="space-y-6">
+      {/* Initiate Survey Button */}
+      {onInitiateSurvey && (
+        <div className="flex justify-end">
+          <Button onClick={onInitiateSurvey} className="gap-2">
+            <Play className="w-4 h-4" />
+            Initiate Survey (Test)
+          </Button>
+        </div>
+      )}
+
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
