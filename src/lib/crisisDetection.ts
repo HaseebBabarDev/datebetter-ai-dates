@@ -15,30 +15,39 @@ const CRISIS_KEYWORDS = [
   "stalking", "stalker", "following me", "won't leave me alone", "harassing",
 ];
 
-// Harmful content keywords that should be blocked
-const HARMFUL_CONTENT_KEYWORDS = [
-  // Content involving minors
-  "underage", "minor", "child", "children", "kid", "kids", "teenager", "teen",
-  "young girl", "young boy", "little girl", "little boy", "preteen",
-  // Combined with inappropriate context markers
+// Explicit harmful phrases that should ALWAYS be blocked (no context needed)
+const EXPLICIT_HARMFUL_KEYWORDS = [
+  // Explicit harmful phrases involving minors (require explicit harmful context)
   "dating a minor", "dating underage", "attracted to minors", "attracted to children",
   "attracted to kids", "sexual with minor", "sexual with child", "inappropriate with minor",
-  "inappropriate with child", "inappropriate with kid",
-  // Incest
-  "incest", "my sister", "my brother", "my mother", "my father", "my mom", "my dad",
-  "my daughter", "my son", "my cousin", "family member", "relative",
-  // When combined with romantic/sexual context
-  "dating my sister", "dating my brother", "dating my mother", "dating my father",
+  "inappropriate with child", "inappropriate with kid", "sex with minor", "sex with child",
+  "sex with kid", "sexual contact with minor", "sexual contact with child",
+  // Incest - explicit harmful phrases
+  "incest", "dating my sister", "dating my brother", "dating my mother", "dating my father",
   "dating my daughter", "dating my son", "dating my cousin", "dating family",
   "romantic with family", "sexual with family", "attracted to family",
   "in love with my sister", "in love with my brother", "in love with my mother",
   "in love with my father", "in love with my daughter", "in love with my son",
+  "sleeping with my sister", "sleeping with my brother", "sleeping with my mother",
+  "sleeping with my father", "sleeping with my daughter", "sleeping with my son",
   // Sexual violence
   "rape", "raped", "raping", "sexual assault", "sexually assaulted", "molest",
-  "molested", "molesting", "non-consensual", "without consent", "forced sex",
+  "molested", "molesting", "non-consensual sex", "forced sex",
   // Other harmful content
   "pedophile", "pedophilia", "child abuse", "child exploitation",
-  "trafficking", "sex trafficking", "human trafficking",
+  "sex trafficking", "human trafficking", "child porn", "child pornography",
+];
+
+// Words that are ONLY harmful when combined with sexual/romantic context
+const CONTEXT_SENSITIVE_TERMS = [
+  "underage", "minor", "preteen",
+];
+
+// Sexual/romantic context words that make context-sensitive terms harmful
+const SEXUAL_ROMANTIC_CONTEXT = [
+  "dating", "date", "romantic", "attracted", "sexual", "intimate", "sex with",
+  "sleep with", "sleeping with", "hook up", "hooking up", "physical with",
+  "relationship with", "in love with", "kissing", "touching",
 ];
 
 // Context words that make family terms harmful when combined
@@ -103,10 +112,23 @@ export function detectCrisisContent(text: string): CrisisDetectionResult {
     }
   }
   
-  // Check harmful content keywords
-  for (const keyword of HARMFUL_CONTENT_KEYWORDS) {
+  // Check explicit harmful keywords (always blocked)
+  for (const keyword of EXPLICIT_HARMFUL_KEYWORDS) {
     if (lowerText.includes(keyword.toLowerCase())) {
       foundHarmful.push(keyword);
+    }
+  }
+  
+  // Check context-sensitive terms (only harmful with sexual/romantic context)
+  for (const term of CONTEXT_SENSITIVE_TERMS) {
+    if (lowerText.includes(term.toLowerCase())) {
+      // Check if sexual/romantic context is also present
+      for (const context of SEXUAL_ROMANTIC_CONTEXT) {
+        if (lowerText.includes(context.toLowerCase())) {
+          foundHarmful.push(`${context} ${term}`);
+          break;
+        }
+      }
     }
   }
   
