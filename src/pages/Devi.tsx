@@ -227,6 +227,9 @@ const Devi = () => {
   // Win logging state
   const [showWinDialog, setShowWinDialog] = useState(false);
   
+  // Soft warning dismissal state
+  const [softWarningDismissed, setSoftWarningDismissed] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -514,6 +517,7 @@ const Devi = () => {
     setMessages([]);
     setCurrentConversationId(null);
     setHistoryOpen(false);
+    setSoftWarningDismissed(false); // Reset warning dismissal for new chat
     lastLoadedCandidateRef.current = null; // Reset so new conversation can be created
   }, []);
 
@@ -1410,10 +1414,17 @@ const Devi = () => {
           )}
           
           {/* Soft warning at 30 messages */}
-          {messages.length >= SOFT_LIMIT_MESSAGES && messages.length < MAX_CONVERSATION_MESSAGES && !isLoading && (
-            <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-              <MessageSquare className="w-3 h-3" />
-              <span>Long conversation — consider starting fresh soon for best results</span>
+          {messages.length >= SOFT_LIMIT_MESSAGES && messages.length < MAX_CONVERSATION_MESSAGES && !isLoading && !softWarningDismissed && (
+            <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+              <MessageSquare className="w-3 h-3 shrink-0" />
+              <span className="flex-1">Long conversation — consider starting fresh soon for best results</span>
+              <button 
+                onClick={() => setSoftWarningDismissed(true)}
+                className="p-0.5 hover:bg-muted rounded transition-colors"
+                aria-label="Dismiss warning"
+              >
+                <X className="w-3 h-3" />
+              </button>
             </div>
           )}
           
