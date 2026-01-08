@@ -21,6 +21,8 @@ import SocialActivityScreen from "@/components/onboarding/screens/SocialActivity
 import PhysicalPreferencesScreen from "@/components/onboarding/screens/PhysicalPreferencesScreen";
 import CommunicationScreen from "@/components/onboarding/screens/CommunicationScreen";
 import PastPatternsScreen from "@/components/onboarding/screens/PastPatternsScreen";
+import PersonalSectionIntroScreen from "@/components/onboarding/screens/PersonalSectionIntroScreen";
+import RelationshipTraumaScreen from "@/components/onboarding/screens/RelationshipTraumaScreen";
 import FamilyUpbringingScreen from "@/components/onboarding/screens/FamilyUpbringingScreen";
 import BoundariesScreen from "@/components/onboarding/screens/BoundariesScreen";
 import MentalHealthScreen from "@/components/onboarding/screens/MentalHealthScreen";
@@ -84,12 +86,14 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
     <PhysicalPreferencesScreen key={12} />,
     <CommunicationScreen key={13} />,
     <PastPatternsScreen key={14} />,
-    <FamilyUpbringingScreen key={15} />,
-    <BoundariesScreen key={16} />,
-    <MentalHealthScreen key={17} />,
-    <SafetyIntimacyScreen key={18} />,
-    <DeviStyleScreen key={19} />,
-    <CompletionScreen key={20} />,
+    <PersonalSectionIntroScreen key={15} />,
+    <RelationshipTraumaScreen key={16} />,
+    <FamilyUpbringingScreen key={17} />,
+    <BoundariesScreen key={18} />,
+    <MentalHealthScreen key={19} />,
+    <SafetyIntimacyScreen key={20} />,
+    <DeviStyleScreen key={21} />,
+    <CompletionScreen key={22} />,
   ];
 
   return screens[currentStep] || screens[0];

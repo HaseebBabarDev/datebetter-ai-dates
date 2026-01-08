@@ -122,6 +122,8 @@ const CompletionScreen = () => {
         family_stability: data.familyStability,
         healthy_relationship_models: data.healthyRelationshipModels,
         generational_patterns: data.generationalPatterns,
+        past_relationship_traumas: data.pastRelationshipTraumas,
+        relationship_trauma_notes: data.relationshipTraumaNotes,
         dealbreakers: data.dealbreakers,
         safety_priorities: data.safetyPriorities,
         boundary_strength: data.boundaryStrength,
@@ -138,7 +140,7 @@ const CompletionScreen = () => {
         behavioral_monitoring: data.behavioralMonitoring,
         devi_style: data.deviStyle,
         onboarding_completed: true,
-        onboarding_step: 21,
+        onboarding_step: 23,
       }).eq("user_id", user.id);
 
       if (error) throw error;
@@ -239,6 +241,8 @@ const CompletionScreen = () => {
         family_stability: data.familyStability,
         healthy_relationship_models: data.healthyRelationshipModels,
         generational_patterns: data.generationalPatterns,
+        past_relationship_traumas: data.pastRelationshipTraumas,
+        relationship_trauma_notes: data.relationshipTraumaNotes,
         dealbreakers: data.dealbreakers,
         safety_priorities: data.safetyPriorities,
         boundary_strength: data.boundaryStrength,
@@ -255,7 +259,7 @@ const CompletionScreen = () => {
         behavioral_monitoring: data.behavioralMonitoring,
         devi_style: data.deviStyle,
         onboarding_completed: true,
-        onboarding_step: 21,
+        onboarding_step: 23,
       }).eq("user_id", user.id);
 
       if (error) throw error;

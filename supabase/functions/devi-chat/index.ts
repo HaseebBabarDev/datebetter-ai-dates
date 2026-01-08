@@ -109,6 +109,8 @@ USER PROFILE (the person you're coaching):
 - Dealbreakers: ${formatArray(userProfile.dealbreakers)}
 - Dating Patterns to Watch: ${formatArray(userProfile.dating_patterns)}
 - Past Trauma Experiences: ${formatArray(userProfile.trauma_experiences)}
+- Relationship Trauma Notes: ${(userProfile as any).relationship_trauma_notes || 'None shared'}
+- Past Relationships with Issues: ${JSON.stringify((userProfile as any).past_relationship_traumas || [])}
 ${familyContext}
 ` : '';
 
