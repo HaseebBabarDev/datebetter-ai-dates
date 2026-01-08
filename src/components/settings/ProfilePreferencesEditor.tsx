@@ -1117,22 +1117,25 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               <div className="flex items-center gap-3">
                 <div className="flex-1">
                   <Input
-                    type="number"
+                    type="text"
                     inputMode="numeric"
                     pattern="[0-9]*"
                     placeholder="Min (18+)"
-                    min={18}
-                    max={100}
                     value={formData.preferred_age_min ?? ''}
                     onChange={(e) => {
-                      const val = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
-                      if (val === undefined || (val >= 18 && val <= 100)) {
-                        updateField("preferred_age_min", val as number | null);
+                      const rawVal = e.target.value.replace(/\D/g, '');
+                      if (rawVal === '') {
+                        updateField("preferred_age_min", null);
+                      } else {
+                        const num = parseInt(rawVal, 10);
+                        if (num <= 100) {
+                          updateField("preferred_age_min", num);
+                        }
                       }
                     }}
                     onBlur={(e) => {
-                      const val = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
-                      if (val !== undefined) {
+                      const val = formData.preferred_age_min;
+                      if (val !== null && val !== undefined) {
                         if (val < 18) updateField("preferred_age_min", 18);
                         else if (val > 100) updateField("preferred_age_min", 100);
                       }
@@ -1143,22 +1146,25 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                 <span className="text-muted-foreground">to</span>
                 <div className="flex-1">
                   <Input
-                    type="number"
+                    type="text"
                     inputMode="numeric"
                     pattern="[0-9]*"
                     placeholder="Max"
-                    min={18}
-                    max={100}
                     value={formData.preferred_age_max ?? ''}
                     onChange={(e) => {
-                      const val = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
-                      if (val === undefined || (val >= 18 && val <= 100)) {
-                        updateField("preferred_age_max", val as number | null);
+                      const rawVal = e.target.value.replace(/\D/g, '');
+                      if (rawVal === '') {
+                        updateField("preferred_age_max", null);
+                      } else {
+                        const num = parseInt(rawVal, 10);
+                        if (num <= 100) {
+                          updateField("preferred_age_max", num);
+                        }
                       }
                     }}
                     onBlur={(e) => {
-                      const val = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
-                      if (val !== undefined) {
+                      const val = formData.preferred_age_max;
+                      if (val !== null && val !== undefined) {
                         if (val < 18) updateField("preferred_age_max", 18);
                         else if (val > 100) updateField("preferred_age_max", 100);
                       }
