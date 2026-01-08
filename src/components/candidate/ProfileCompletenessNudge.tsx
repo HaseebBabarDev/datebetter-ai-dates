@@ -12,20 +12,9 @@ interface ProfileCompletenessNudgeProps {
   candidate: Candidate;
 }
 
+// Core field that determines if onboarding is complete
 const USER_PROFILE_FIELDS = [
-  { key: "relationship_goal", weight: 2 },
-  { key: "religion", weight: 2 },
-  { key: "politics", weight: 2 },
-  { key: "kids_desire", weight: 2 },
-  { key: "attachment_style", weight: 2 },
-  { key: "gender_identity", weight: 1 },
-  { key: "birth_date", weight: 1 },
-  { key: "country", weight: 1 },
-  { key: "city", weight: 1 },
-  { key: "schedule_flexibility", weight: 1 },
-  { key: "career_stage", weight: 1 },
-  { key: "education_level", weight: 1 },
-  { key: "social_style", weight: 1 },
+  { key: "onboarding_completed", weight: 10 },
 ];
 
 const CANDIDATE_PROFILE_FIELDS = [

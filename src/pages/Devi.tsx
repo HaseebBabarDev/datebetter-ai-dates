@@ -146,16 +146,10 @@ const MessageBubble: React.FC<{
   );
 };
 
+// Core fields that are required for onboarding completion
+// Only include fields that are actually collected during the onboarding flow
 const USER_PROFILE_FIELDS = [
-  { key: "relationship_goal", weight: 2, label: "Relationship Goal" },
-  { key: "religion", weight: 2, label: "Religion" },
-  { key: "politics", weight: 2, label: "Politics" },
-  { key: "kids_desire", weight: 2, label: "Kids Preference" },
-  { key: "attachment_style", weight: 2, label: "Attachment Style" },
-  { key: "gender_identity", weight: 1, label: "Gender" },
-  { key: "birth_date", weight: 1, label: "Birth Date" },
-  { key: "country", weight: 1, label: "Country" },
-  { key: "city", weight: 1, label: "City" },
+  { key: "onboarding_completed", weight: 10, label: "Onboarding Complete" },
 ];
 
 const CANDIDATE_PROFILE_FIELDS = [
