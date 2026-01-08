@@ -55,7 +55,8 @@ const PRONOUN_OPTIONS: { value: Enums<"pronouns">; label: string }[] = [
   { value: "other", label: "Other" },
 ];
 
-const RELIGION_OPTIONS: { value: Enums<"religion">; label: string }[] = [
+const RELIGION_OPTIONS: { value: Enums<"religion"> | "unknown"; label: string }[] = [
+  { value: "unknown", label: "I don't know" },
   { value: "none", label: "None/Atheist" },
   { value: "spiritual", label: "Spiritual" },
   { value: "christian_catholic", label: "Christian (Catholic)" },
@@ -68,7 +69,8 @@ const RELIGION_OPTIONS: { value: Enums<"religion">; label: string }[] = [
   { value: "other", label: "Other" },
 ];
 
-const POLITICS_OPTIONS: { value: Enums<"politics">; label: string }[] = [
+const POLITICS_OPTIONS: { value: Enums<"politics"> | "unknown"; label: string }[] = [
+  { value: "unknown", label: "I don't know" },
   { value: "progressive", label: "Progressive" },
   { value: "liberal", label: "Liberal" },
   { value: "moderate", label: "Moderate" },
@@ -76,7 +78,8 @@ const POLITICS_OPTIONS: { value: Enums<"politics">; label: string }[] = [
   { value: "traditional", label: "Traditional" },
 ];
 
-const RELATIONSHIP_GOAL_OPTIONS: { value: Enums<"relationship_goal">; label: string }[] = [
+const RELATIONSHIP_GOAL_OPTIONS: { value: Enums<"relationship_goal"> | "unknown"; label: string }[] = [
+  { value: "unknown", label: "I don't know" },
   { value: "casual", label: "Casual" },
   { value: "situationship", label: "Situationship" },
   { value: "dating", label: "Dating" },
@@ -86,26 +89,30 @@ const RELATIONSHIP_GOAL_OPTIONS: { value: Enums<"relationship_goal">; label: str
 ];
 
 const RELATIONSHIP_STATUS_OPTIONS = [
+  { value: "unknown", label: "I don't know" },
   { value: "single", label: "Single" },
   { value: "married", label: "Married" },
   { value: "recently_divorced", label: "Recently Divorced" },
   { value: "ethical_non_monogamy", label: "Ethical Non-Monogamy" },
 ];
 
-const KIDS_DESIRE_OPTIONS: { value: Enums<"kids_desire">; label: string }[] = [
+const KIDS_DESIRE_OPTIONS: { value: Enums<"kids_desire"> | "unknown"; label: string }[] = [
+  { value: "unknown", label: "I don't know" },
   { value: "definitely_yes", label: "Wants Kids" },
   { value: "maybe", label: "Maybe/Open" },
   { value: "definitely_no", label: "Doesn't Want Kids" },
   { value: "already_have", label: "Already Has Kids" },
 ];
 
-const KIDS_STATUS_OPTIONS: { value: Enums<"kids_status">; label: string }[] = [
+const KIDS_STATUS_OPTIONS: { value: Enums<"kids_status"> | "unknown"; label: string }[] = [
+  { value: "unknown", label: "I don't know" },
   { value: "no_kids", label: "No Kids" },
   { value: "has_young_kids", label: "Has Young Kids" },
   { value: "has_adult_kids", label: "Has Adult Kids" },
 ];
 
-const ATTACHMENT_STYLE_OPTIONS: { value: Enums<"attachment_style">; label: string }[] = [
+const ATTACHMENT_STYLE_OPTIONS: { value: Enums<"attachment_style"> | "unknown"; label: string }[] = [
+  { value: "unknown", label: "I don't know" },
   { value: "secure", label: "Secure" },
   { value: "anxious", label: "Anxious" },
   { value: "avoidant", label: "Avoidant" },
@@ -113,6 +120,7 @@ const ATTACHMENT_STYLE_OPTIONS: { value: Enums<"attachment_style">; label: strin
 ];
 
 const EDUCATION_OPTIONS = [
+  { value: "unknown", label: "I don't know" },
   { value: "high_school", label: "High School" },
   { value: "some_college", label: "Some College" },
   { value: "bachelors", label: "Bachelor's Degree" },
@@ -122,6 +130,7 @@ const EDUCATION_OPTIONS = [
 ];
 
 const SOCIAL_STYLE_OPTIONS = [
+  { value: "unknown", label: "I don't know" },
   { value: "homebody", label: "Homebody" },
   { value: "social_butterfly", label: "Social Butterfly" },
   { value: "balanced", label: "Balanced" },
@@ -129,6 +138,7 @@ const SOCIAL_STYLE_OPTIONS = [
 ];
 
 const LIFESTYLE_OPTIONS = [
+  { value: "unknown", label: "I don't know" },
   { value: "never", label: "Never" },
   { value: "rarely", label: "Rarely" },
   { value: "socially", label: "Socially" },
@@ -136,6 +146,7 @@ const LIFESTYLE_OPTIONS = [
 ];
 
 const EXERCISE_OPTIONS = [
+  { value: "unknown", label: "I don't know" },
   { value: "never", label: "Never" },
   { value: "rarely", label: "Rarely" },
   { value: "sometimes", label: "Sometimes" },
@@ -144,6 +155,7 @@ const EXERCISE_OPTIONS = [
 ];
 
 const CAREER_OPTIONS = [
+  { value: "unknown", label: "I don't know" },
   { value: "student", label: "Student" },
   { value: "entry_level", label: "Entry Level" },
   { value: "mid_career", label: "Mid-Career" },
@@ -157,6 +169,7 @@ const CAREER_OPTIONS = [
 ];
 
 const HEIGHT_OPTIONS = [
+  { value: "unknown", label: "I don't know" },
   { value: "under_5ft", label: "Under 5'0\" (152 cm)" },
   { value: "5ft_5ft3", label: "5'0\" - 5'3\" (152-160 cm)" },
   { value: "5ft4_5ft6", label: "5'4\" - 5'6\" (163-168 cm)" },
@@ -183,6 +196,7 @@ const DISTANCE_APPROX_OPTIONS = [
 ];
 
 const SCHEDULE_OPTIONS = [
+  { value: "unknown", label: "I don't know" },
   { value: "remote_flexible", label: "Remote / Fully Flexible" },
   { value: "hybrid", label: "Hybrid" },
   { value: "office_9_5", label: "Office 9-5" },
@@ -195,6 +209,7 @@ const SCHEDULE_OPTIONS = [
 ];
 
 const ZODIAC_OPTIONS = [
+  { value: "unknown", label: "I don't know" },
   { value: "aries", label: "♈ Aries" },
   { value: "taurus", label: "♉ Taurus" },
   { value: "gemini", label: "♊ Gemini" },
