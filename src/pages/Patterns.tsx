@@ -34,10 +34,41 @@ import {
   MessageSquare,
   Brain,
   Repeat,
+  Timer,
+  TrendingDown,
 } from "lucide-react";
 import { toast } from "sonner";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 import { WinsStats, useDeviWins } from "@/components/devi/WinsStats";
+
+// Duration parsing utilities
+const DURATION_ORDER = ['< 1 month', '1-3 months', '3-6 months', '6-12 months', '1-2 years', '2-5 years', '5+ years'];
+
+const parseDurationToMonths = (duration: string): number => {
+  switch (duration) {
+    case '< 1 month': return 0.5;
+    case '1-3 months': return 2;
+    case '3-6 months': return 4.5;
+    case '6-12 months': return 9;
+    case '1-2 years': return 18;
+    case '2-5 years': return 42;
+    case '5+ years': return 72;
+    default: return 0;
+  }
+};
+
+const getDurationLabel = (duration: string): string => {
+  switch (duration) {
+    case '< 1 month': return '<1mo';
+    case '1-3 months': return '1-3mo';
+    case '3-6 months': return '3-6mo';
+    case '6-12 months': return '6-12mo';
+    case '1-2 years': return '1-2yr';
+    case '2-5 years': return '2-5yr';
+    case '5+ years': return '5+yr';
+    default: return duration;
+  }
+};
 
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
@@ -62,12 +93,22 @@ interface PastRelationship {
   notes?: string;
 }
 
+interface DurationAnalysis {
+  avgDurationMonths: number;
+  durationDistribution: { duration: string; count: number }[];
+  traumaByDuration: { duration: string; traumas: { trauma: string; count: number }[] }[];
+  longestRelationship: string | null;
+  shortestRelationship: string | null;
+  hasData: boolean;
+}
+
 interface TraumaPatternAnalysis {
   commonTraumas: { trauma: string; count: number; percentage: number }[];
   endingPatterns: { ending: string; count: number }[];
   totalRelationships: number;
   hasTraumaData: boolean;
   traumaNotes: string | null;
+  durationAnalysis: DurationAnalysis;
 }
 
 interface PatternStats {
@@ -158,6 +199,8 @@ const Patterns = () => {
       
       const traumaCounts: Record<string, number> = {};
       const endingCounts: Record<string, number> = {};
+      const durationCounts: Record<string, number> = {};
+      const traumaByDuration: Record<string, Record<string, number>> = {};
       
       pastRelationships.forEach((rel) => {
         if (rel.traumas && Array.isArray(rel.traumas)) {
@@ -167,6 +210,19 @@ const Patterns = () => {
         }
         if (rel.howEnded) {
           endingCounts[rel.howEnded] = (endingCounts[rel.howEnded] || 0) + 1;
+        }
+        if (rel.duration) {
+          durationCounts[rel.duration] = (durationCounts[rel.duration] || 0) + 1;
+          
+          // Track traumas by duration
+          if (!traumaByDuration[rel.duration]) {
+            traumaByDuration[rel.duration] = {};
+          }
+          if (rel.traumas && Array.isArray(rel.traumas)) {
+            rel.traumas.forEach((trauma: string) => {
+              traumaByDuration[rel.duration][trauma] = (traumaByDuration[rel.duration][trauma] || 0) + 1;
+            });
+          }
         }
       });
 
@@ -183,12 +239,46 @@ const Patterns = () => {
         .map(([ending, count]) => ({ ending, count }))
         .sort((a, b) => b.count - a.count);
 
+      // Duration analysis
+      const durationDistribution = Object.entries(durationCounts)
+        .map(([duration, count]) => ({ duration, count }))
+        .sort((a, b) => DURATION_ORDER.indexOf(a.duration) - DURATION_ORDER.indexOf(b.duration));
+      
+      const durations = pastRelationships.map(r => r.duration).filter(Boolean);
+      const avgDurationMonths = durations.length > 0
+        ? durations.reduce((sum, d) => sum + parseDurationToMonths(d), 0) / durations.length
+        : 0;
+      
+      const sortedDurations = [...durations].sort(
+        (a, b) => parseDurationToMonths(b) - parseDurationToMonths(a)
+      );
+      
+      const traumaByDurationArray = Object.entries(traumaByDuration)
+        .map(([duration, traumas]) => ({
+          duration,
+          traumas: Object.entries(traumas)
+            .map(([trauma, count]) => ({ trauma, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 3)
+        }))
+        .sort((a, b) => DURATION_ORDER.indexOf(a.duration) - DURATION_ORDER.indexOf(b.duration));
+
+      const durationAnalysis: DurationAnalysis = {
+        avgDurationMonths,
+        durationDistribution,
+        traumaByDuration: traumaByDurationArray,
+        longestRelationship: sortedDurations[0] || null,
+        shortestRelationship: sortedDurations[sortedDurations.length - 1] || null,
+        hasData: durations.length > 0,
+      };
+
       const traumaPatterns: TraumaPatternAnalysis = {
         commonTraumas,
         endingPatterns,
         totalRelationships,
         hasTraumaData: totalRelationships > 0,
         traumaNotes: profile?.relationship_trauma_notes || null,
+        durationAnalysis,
       };
 
       // Calculate stats
@@ -920,6 +1010,128 @@ const Patterns = () => {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Relationship Duration Analysis */}
+              {stats.traumaPatterns.durationAnalysis.hasData && (
+                <Card className="border-purple-500/30 bg-purple-500/5">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Timer className="w-5 h-5 text-purple-500" />
+                      Relationship Duration Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-xs text-muted-foreground">
+                      Understanding how long your relationships typically last
+                    </p>
+
+                    {/* Duration Stats */}
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="p-3 bg-purple-500/10 rounded-lg text-center">
+                        <div className="text-lg font-bold text-purple-600">
+                          {stats.traumaPatterns.durationAnalysis.avgDurationMonths < 12 
+                            ? `${Math.round(stats.traumaPatterns.durationAnalysis.avgDurationMonths)}mo`
+                            : `${(stats.traumaPatterns.durationAnalysis.avgDurationMonths / 12).toFixed(1)}yr`
+                          }
+                        </div>
+                        <div className="text-xs text-muted-foreground">Avg Length</div>
+                      </div>
+                      <div className="p-3 bg-green-500/10 rounded-lg text-center">
+                        <TrendingUp className="w-4 h-4 mx-auto mb-1 text-green-600" />
+                        <div className="text-sm font-bold text-green-600">
+                          {getDurationLabel(stats.traumaPatterns.durationAnalysis.longestRelationship || '')}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Longest</div>
+                      </div>
+                      <div className="p-3 bg-muted rounded-lg text-center">
+                        <TrendingDown className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                        <div className="text-sm font-bold">
+                          {getDurationLabel(stats.traumaPatterns.durationAnalysis.shortestRelationship || '')}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Shortest</div>
+                      </div>
+                    </div>
+
+                    {/* Duration Distribution Chart */}
+                    {stats.traumaPatterns.durationAnalysis.durationDistribution.length > 0 && (
+                      <div className="space-y-2">
+                        <span className="text-sm font-medium">Duration Distribution</span>
+                        <div className="h-32">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={stats.traumaPatterns.durationAnalysis.durationDistribution.map(d => ({
+                              ...d,
+                              label: getDurationLabel(d.duration)
+                            }))}>
+                              <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+                              <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                              <Tooltip 
+                                formatter={(value: number) => [`${value} relationship${value !== 1 ? 's' : ''}`, 'Count']}
+                                labelFormatter={(label) => `Duration: ${label}`}
+                              />
+                              <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]}>
+                                {stats.traumaPatterns.durationAnalysis.durationDistribution.map((_, index) => (
+                                  <Cell key={`cell-${index}`} fill={`hsl(270, 70%, ${60 - index * 5}%)`} />
+                                ))}
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Trauma by Duration Correlation */}
+                    {stats.traumaPatterns.durationAnalysis.traumaByDuration.length > 0 && (
+                      <div className="space-y-3 pt-2 border-t border-border/50">
+                        <div className="flex items-center gap-2">
+                          <Brain className="w-4 h-4 text-purple-600" />
+                          <span className="text-sm font-medium">Trauma Patterns by Duration</span>
+                        </div>
+                        <div className="space-y-2">
+                          {stats.traumaPatterns.durationAnalysis.traumaByDuration.slice(0, 4).map(({ duration, traumas }) => (
+                            <div key={duration} className="space-y-1">
+                              <span className="text-xs font-medium text-muted-foreground">
+                                {duration}
+                              </span>
+                              <div className="flex flex-wrap gap-1">
+                                {traumas.map(({ trauma, count }) => (
+                                  <Badge 
+                                    key={trauma} 
+                                    variant="secondary" 
+                                    className="text-xs bg-purple-500/10 text-purple-700"
+                                  >
+                                    {trauma} ({count})
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Duration Insight */}
+                    {stats.traumaPatterns.durationAnalysis.avgDurationMonths > 0 && (
+                      <div className="p-3 bg-purple-500/10 rounded-lg space-y-2">
+                        <div className="flex items-start gap-2">
+                          <Lightbulb className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+                          <div className="space-y-1">
+                            <span className="text-xs font-medium text-purple-700">Pattern Insight</span>
+                            <p className="text-xs text-muted-foreground">
+                              {stats.traumaPatterns.durationAnalysis.avgDurationMonths < 6
+                                ? "Your relationships tend to be shorter. This could indicate quick identification of incompatibility, or patterns worth exploring with D.E.V.I."
+                                : stats.traumaPatterns.durationAnalysis.avgDurationMonths < 18
+                                ? "Your relationships typically last 6 months to over a year, suggesting you invest time before deciding."
+                                : "You tend toward longer-term relationships, showing commitment to making things work."
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
               {/* D.E.V.I. Engagement Overview */}
               <Card className="border-primary/30 bg-primary/5">
                 <CardHeader className="pb-2">
