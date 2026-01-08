@@ -651,7 +651,7 @@ const Settings = () => {
                     >
                       <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Year" /></SelectTrigger>
                       <SelectContent>
-                        {Array.from({ length: new Date().getFullYear() - 1920 + 1 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                        {Array.from({ length: (new Date().getFullYear() - 18) - 1920 + 1 }, (_, i) => (new Date().getFullYear() - 18) - i).map((year) => (
                           <SelectItem key={year} value={String(year)}>{year}</SelectItem>
                         ))}
                       </SelectContent>
