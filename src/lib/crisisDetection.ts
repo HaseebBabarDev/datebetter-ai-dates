@@ -40,20 +40,34 @@ const EXPLICIT_HARMFUL_KEYWORDS = [
 
 // Words that are ONLY harmful when combined with sexual/romantic context
 const CONTEXT_SENSITIVE_TERMS = [
-  "underage", "minor", "preteen",
+  // Minors / youth terms (NOT harmful by themselves)
+  "underage", "minor", "preteen", "teen", "teenager",
+  "child", "children", "kid", "kids",
+  "young girl", "young boy", "little girl", "little boy",
 ];
 
 // Sexual/romantic context words that make context-sensitive terms harmful
 const SEXUAL_ROMANTIC_CONTEXT = [
-  "dating", "date", "romantic", "attracted", "sexual", "intimate", "sex with",
-  "sleep with", "sleeping with", "hook up", "hooking up", "physical with",
-  "relationship with", "in love with", "kissing", "touching",
+  "dating", "date", "romantic", "attracted", "sexual",
+  "sex with", "sleep with", "sleeping with",
+  "hook up", "hooking up", "in love with",
 ];
 
 // Context words that make family terms harmful when combined
+// NOTE: Avoid overly broad terms like "relationship with" to prevent false positives
 const HARMFUL_CONTEXT_WORDS = [
-  "dating", "romantic", "attracted", "sexual", "intimate", "relationship with",
-  "in love with", "sleeping with", "hooking up", "physical with",
+  "dating",
+  "romantic",
+  "romantic relationship with",
+  "attracted",
+  "sexual",
+  "sexual relationship with",
+  "in love with",
+  "sleep with",
+  "sleeping with",
+  "hook up",
+  "hooking up",
+  "had sex with",
 ];
 
 // Family terms that are only harmful in certain contexts
@@ -84,7 +98,6 @@ function detectHarmfulFamilyContext(text: string): string[] {
         `${contextWord} her ${familyTerm}`,
         `${contextWord} their ${familyTerm}`,
         `${contextWord} a ${familyTerm}`,
-        `my ${familyTerm}` + (lowerText.includes(contextWord) ? ` (${contextWord})` : ""),
       ];
       
       for (const pattern of patterns) {
