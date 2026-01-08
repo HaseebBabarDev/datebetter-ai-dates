@@ -705,6 +705,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          abuse_history: Json | null
           activity_level: string | null
           ambition_level: number | null
           attachment_style:
@@ -717,7 +718,11 @@ export type Database = {
           body_type: string | null
           boundary_strength: number | null
           career_stage: string | null
+          caregiver_consistency: string | null
           chemistry_factors: Json | null
+          childhood_emotional_needs_met: string | null
+          childhood_love_expression: string | null
+          childhood_trauma_types: Json | null
           city: string | null
           communication_style:
             | Database["public"]["Enums"]["communication_style"]
@@ -741,11 +746,15 @@ export type Database = {
           exclusivity_before_intimacy: boolean | null
           faith_importance: number | null
           faith_requirements: Json | null
+          family_stability: string | null
+          felt_loved_as_child: string | null
           financial_importance: number | null
           financial_situation: string | null
           financial_vulnerability: number | null
           flexibility_rating: number | null
           gender_identity: Database["public"]["Enums"]["gender_identity"] | null
+          generational_patterns: Json | null
+          healthy_relationship_models: boolean | null
           height: string | null
           height_preference: string | null
           hormone_profile: string | null
@@ -778,6 +787,9 @@ export type Database = {
           open_to_moving: boolean | null
           open_to_single_parenthood: boolean | null
           orientation_custom: string | null
+          parent_wound_types: Json | null
+          parents_conflict_style: string | null
+          parents_relationship_dynamic: string | null
           pattern_recognition: Json | null
           political_dealbreakers: Json | null
           politics: Database["public"]["Enums"]["politics"] | null
@@ -810,6 +822,7 @@ export type Database = {
             | Database["public"]["Enums"]["sexual_orientation"]
             | null
           social_style: Database["public"]["Enums"]["social_style"] | null
+          socioeconomic_background: string | null
           state: string | null
           time_since_last_relationship: string | null
           track_cycle: boolean | null
@@ -821,6 +834,7 @@ export type Database = {
           work_schedule_type: string | null
         }
         Insert: {
+          abuse_history?: Json | null
           activity_level?: string | null
           ambition_level?: number | null
           attachment_style?:
@@ -833,7 +847,11 @@ export type Database = {
           body_type?: string | null
           boundary_strength?: number | null
           career_stage?: string | null
+          caregiver_consistency?: string | null
           chemistry_factors?: Json | null
+          childhood_emotional_needs_met?: string | null
+          childhood_love_expression?: string | null
+          childhood_trauma_types?: Json | null
           city?: string | null
           communication_style?:
             | Database["public"]["Enums"]["communication_style"]
@@ -857,6 +875,8 @@ export type Database = {
           exclusivity_before_intimacy?: boolean | null
           faith_importance?: number | null
           faith_requirements?: Json | null
+          family_stability?: string | null
+          felt_loved_as_child?: string | null
           financial_importance?: number | null
           financial_situation?: string | null
           financial_vulnerability?: number | null
@@ -864,6 +884,8 @@ export type Database = {
           gender_identity?:
             | Database["public"]["Enums"]["gender_identity"]
             | null
+          generational_patterns?: Json | null
+          healthy_relationship_models?: boolean | null
           height?: string | null
           height_preference?: string | null
           hormone_profile?: string | null
@@ -896,6 +918,9 @@ export type Database = {
           open_to_moving?: boolean | null
           open_to_single_parenthood?: boolean | null
           orientation_custom?: string | null
+          parent_wound_types?: Json | null
+          parents_conflict_style?: string | null
+          parents_relationship_dynamic?: string | null
           pattern_recognition?: Json | null
           political_dealbreakers?: Json | null
           politics?: Database["public"]["Enums"]["politics"] | null
@@ -928,6 +953,7 @@ export type Database = {
             | Database["public"]["Enums"]["sexual_orientation"]
             | null
           social_style?: Database["public"]["Enums"]["social_style"] | null
+          socioeconomic_background?: string | null
           state?: string | null
           time_since_last_relationship?: string | null
           track_cycle?: boolean | null
@@ -939,6 +965,7 @@ export type Database = {
           work_schedule_type?: string | null
         }
         Update: {
+          abuse_history?: Json | null
           activity_level?: string | null
           ambition_level?: number | null
           attachment_style?:
@@ -951,7 +978,11 @@ export type Database = {
           body_type?: string | null
           boundary_strength?: number | null
           career_stage?: string | null
+          caregiver_consistency?: string | null
           chemistry_factors?: Json | null
+          childhood_emotional_needs_met?: string | null
+          childhood_love_expression?: string | null
+          childhood_trauma_types?: Json | null
           city?: string | null
           communication_style?:
             | Database["public"]["Enums"]["communication_style"]
@@ -975,6 +1006,8 @@ export type Database = {
           exclusivity_before_intimacy?: boolean | null
           faith_importance?: number | null
           faith_requirements?: Json | null
+          family_stability?: string | null
+          felt_loved_as_child?: string | null
           financial_importance?: number | null
           financial_situation?: string | null
           financial_vulnerability?: number | null
@@ -982,6 +1015,8 @@ export type Database = {
           gender_identity?:
             | Database["public"]["Enums"]["gender_identity"]
             | null
+          generational_patterns?: Json | null
+          healthy_relationship_models?: boolean | null
           height?: string | null
           height_preference?: string | null
           hormone_profile?: string | null
@@ -1014,6 +1049,9 @@ export type Database = {
           open_to_moving?: boolean | null
           open_to_single_parenthood?: boolean | null
           orientation_custom?: string | null
+          parent_wound_types?: Json | null
+          parents_conflict_style?: string | null
+          parents_relationship_dynamic?: string | null
           pattern_recognition?: Json | null
           political_dealbreakers?: Json | null
           politics?: Database["public"]["Enums"]["politics"] | null
@@ -1046,6 +1084,7 @@ export type Database = {
             | Database["public"]["Enums"]["sexual_orientation"]
             | null
           social_style?: Database["public"]["Enums"]["social_style"] | null
+          socioeconomic_background?: string | null
           state?: string | null
           time_since_last_relationship?: string | null
           track_cycle?: boolean | null
