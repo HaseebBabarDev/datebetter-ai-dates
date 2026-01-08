@@ -13,14 +13,14 @@ const chemistryOptions = ["Humor", "Intelligence", "Confidence", "Kindness", "Am
 // Height stats: ~14.5% of US men are 6ft+
 const getHeightPoolImpact = () => ({ percent: 14.5, shrink: 85.5 });
 
-// Income pool data
-const getIncomePoolPercent = (incomeRange: string | undefined) => {
+// Income pool data with labels
+const getIncomePoolData = (incomeRange: string | undefined) => {
   switch (incomeRange) {
-    case "250k_plus": return 1;
-    case "150k_250k": return 6;
-    case "100k_150k": return 15;
-    case "75k_100k": return 30;
-    default: return 100;
+    case "250k_plus": return { percent: 1, label: "Top 1%", shrink: 99 };
+    case "150k_250k": return { percent: 6, label: "Top 6%", shrink: 94 };
+    case "100k_150k": return { percent: 15, label: "Top 15%", shrink: 85 };
+    case "75k_100k": return { percent: 30, label: "Top 30%", shrink: 70 };
+    default: return null;
   }
 };
 
@@ -31,7 +31,7 @@ const getCombinedPool = (heightPercent: number, incomePercent: number) => {
 
 const heightOptions = [
   { value: "no_preference", label: "No preference" },
-  { value: "taller_than_me", label: "Taller than me" },
+  { value: "taller_than_me", label: "Taller than me (6ft+)" },
   { value: "shorter_than_me", label: "Shorter than me" },
   { value: "similar_height", label: "Similar height to me" },
 ];
@@ -51,10 +51,10 @@ const PhysicalPreferencesScreen = () => {
 
   const showHeightImpact = data.heightPreference === "taller_than_me" && showPoolVisualizations;
   const heightImpact = getHeightPoolImpact();
-  const incomePercent = getIncomePoolPercent(data.preferredIncomeRange);
-  const hasIncomePreference = incomePercent < 100;
+  const incomePoolData = getIncomePoolData(data.preferredIncomeRange);
+  const hasIncomePreference = incomePoolData !== null;
   const combinedPool = showHeightImpact && hasIncomePreference 
-    ? getCombinedPool(heightImpact.percent, incomePercent) 
+    ? getCombinedPool(heightImpact.percent, incomePoolData.percent) 
     : null;
 
   return (
@@ -116,11 +116,11 @@ const PhysicalPreferencesScreen = () => {
               </p>
               
               {/* Combined impact with income */}
-              {combinedPool !== null && (
+              {combinedPool !== null && incomePoolData && (
                 <div className="mt-2 pt-2 border-t border-amber-500/20 space-y-2">
                   <div className="flex items-center gap-2">
-                    <TrendingDown className="w-3.5 h-3.5 text-red-500" />
-                    <span className="text-xs font-semibold text-red-600">Combined with Income Preference</span>
+                    <TrendingDown className="w-3.5 h-3.5 text-destructive" />
+                    <span className="text-xs font-semibold text-destructive">Combined with Income Preference</span>
                   </div>
                   
                   {/* Combined visual */}
@@ -132,7 +132,7 @@ const PhysicalPreferencesScreen = () => {
                             key={i} 
                             className={`w-1 h-3 rounded-full transition-all duration-500 ${
                               i < Math.max(1, Math.ceil(20 * (combinedPool / 100))) 
-                                ? 'bg-red-500' 
+                                ? 'bg-destructive' 
                                 : 'bg-muted-foreground/20'
                             }`}
                           />
@@ -141,11 +141,24 @@ const PhysicalPreferencesScreen = () => {
                     </div>
                   </div>
                   
-                  <p className="text-[11px] text-red-600 font-medium">
-                    Only {combinedPool.toFixed(1)}% of men are both 6ft+ AND earn {data.preferredIncomeRange?.replace(/_/g, "-").replace("plus", "+")}
+                  <p className="text-[11px] text-destructive font-medium">
+                    Only {combinedPool.toFixed(1)}% of men are both 6ft+ AND earn {incomePoolData.label}
                   </p>
                 </div>
               )}
+            </div>
+          )}
+          
+          {/* Show income-only impact if no height preference but has income preference */}
+          {showPoolVisualizations && !showHeightImpact && hasIncomePreference && incomePoolData && (
+            <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg animate-fade-in space-y-3">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-amber-600" />
+                <span className="text-xs font-semibold text-amber-700">Income Pool Impact</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Based on your income preference from Career screen: <span className="font-bold text-foreground">{incomePoolData.percent}%</span> of men earn this ({incomePoolData.label})
+              </p>
             </div>
           )}
         </div>
