@@ -59,37 +59,30 @@ export function DailyLoggingCTA({ interactions, candidates }: DailyLoggingCTAPro
   return (
     <>
       <Card className={`border ${completed ? 'border-green-500/30 bg-green-500/5' : 'border-accent/30 bg-accent/5'}`}>
-        <CardContent className="p-3">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-full shrink-0 ${completed ? 'bg-green-500/20' : 'bg-accent/20'}`}>
+        <CardContent className="px-3 py-2">
+          <div className="flex items-center gap-2">
+            <div className={`p-1.5 rounded-full shrink-0 ${completed ? 'bg-green-500/20' : 'bg-accent/20'}`}>
               {completed ? (
-                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
               ) : (
-                <ClipboardCheck className="w-4 h-4 text-accent-foreground" />
+                <ClipboardCheck className="w-3.5 h-3.5 text-accent-foreground" />
               )}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">
-                {completed ? "Daily goal reached!" : "Log your interactions"}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {completed 
-                  ? "Great job tracking your dating journey" 
-                  : "2x daily logging improves AI insights"}
-              </p>
-            </div>
-            <span className={`text-xs px-2 py-1 rounded-full shrink-0 ${completed ? 'bg-green-500/20 text-green-600' : 'bg-accent/20 text-accent-foreground'}`}>
-              {progress}/{goal} today
+            <p className="text-xs font-medium text-foreground flex-1">
+              {completed ? "Daily goal reached!" : "Log interactions"}
+            </p>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${completed ? 'bg-green-500/20 text-green-600' : 'bg-accent/20 text-accent-foreground'}`}>
+              {progress}/{goal}
             </span>
             {!completed && (
               <Button
                 size="sm"
                 variant="secondary"
-                className="shrink-0 gap-1 text-xs h-8"
+                className="shrink-0 gap-1 text-[10px] h-6 px-2"
                 onClick={handleLogClick}
               >
-                <Sparkles className="w-3 h-3" />
-                Log Now
+                <Sparkles className="w-2.5 h-2.5" />
+                Log
               </Button>
             )}
           </div>
