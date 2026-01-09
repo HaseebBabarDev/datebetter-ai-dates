@@ -1,9 +1,28 @@
-export const PIN_SESSION_STORAGE_KEY = "datebetter_pin_session";
+// Base key - the actual key will include the email hash for per-user storage
+export const PIN_SESSION_STORAGE_KEY_PREFIX = "datebetter_pin_session_";
+// Legacy key for migration
+export const PIN_SESSION_STORAGE_KEY_LEGACY = "datebetter_pin_session";
 
 export type PinSessionPayload = {
   accessToken: string;
   refreshToken: string;
 };
+
+// Generate a consistent hash for an email to use as storage key suffix
+export function getEmailStorageKey(email: string): string {
+  // Simple hash - lowercase and replace special chars
+  return email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+}
+
+// Get the full storage key for a specific user
+export function getPinStorageKey(email: string): string {
+  return `${PIN_SESSION_STORAGE_KEY_PREFIX}${getEmailStorageKey(email)}`;
+}
+
+// Get the PIN enabled key for a specific user  
+export function getPinEnabledKey(email: string): string {
+  return `datebetter_pin_enabled_${getEmailStorageKey(email)}`;
+}
 
 type EncryptedBlobV1 = {
   v: 1;
