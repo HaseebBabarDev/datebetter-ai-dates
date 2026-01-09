@@ -82,6 +82,11 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
       }
 
       if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 400 && errorData.error) {
+          toast.error(errorData.error);
+          return;
+        }
         throw new Error("Failed to analyze flags");
       }
 
