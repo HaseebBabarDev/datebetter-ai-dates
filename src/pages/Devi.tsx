@@ -329,6 +329,7 @@ const Devi = () => {
   
   // Feeling check-in prompt handling
   const [searchParams, setSearchParams] = useSearchParams();
+  const initialPromptTypeRef = useRef<string | null>(searchParams.get("prompt"));
   const feelingPromptHandled = useRef(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -377,8 +378,8 @@ const Devi = () => {
       
       setProfilesLoading(true);
       
-      // Check if we're in "feeling" mode (general chat)
-      const isGeneralChatMode = searchParams.get("prompt") === "feeling";
+      // Check if we started in "feeling" mode (general chat)
+      const isGeneralChatMode = initialPromptTypeRef.current === "feeling";
       
       // Fetch candidates
       const { data: candidatesData } = await supabase
@@ -414,7 +415,7 @@ const Devi = () => {
     };
 
     fetchData();
-  }, [user, candidateIdFromState, searchParams]);
+  }, [user, candidateIdFromState]);
 
   // Fetch conversations (last 30 days only)
   useEffect(() => {
