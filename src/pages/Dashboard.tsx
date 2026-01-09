@@ -1092,6 +1092,7 @@ const Dashboard = () => {
               candidateCount={candidates.length}
               lastInteractionTime={interactions[0]?.interaction_date || undefined}
               interactionCount={interactions.length}
+              userId={user?.id}
               onLogInteraction={activeCandidates.length === 1 
                 ? () => navigate(`/candidate/${activeCandidates[0].id}?tab=interactions`)
                 : activeCandidates.length > 1 

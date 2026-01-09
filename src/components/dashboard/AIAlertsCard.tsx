@@ -53,10 +53,13 @@ interface AIAlertsCardProps {
   lastInteractionTime?: string;
   interactionCount?: number;
   onLogInteraction?: () => void;
+  userId?: string;
 }
 
-const CACHE_KEY = "ai_alerts_cache";
-const HISTORY_KEY = "ai_alerts_history";
+// Generate per-user cache keys
+const getCacheKey = (userId?: string) => userId ? `ai_alerts_cache_${userId}` : "ai_alerts_cache";
+const getHistoryKey = (userId?: string) => userId ? `ai_alerts_history_${userId}` : "ai_alerts_history";
+
 const CACHE_DURATION_MS = 1000 * 60 * 30; // 30 minutes
 const MAX_HISTORY_ITEMS = 50;
 const INITIAL_DISPLAY_COUNT = 3;
@@ -65,8 +68,11 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
   candidateCount,
   lastInteractionTime,
   interactionCount = 0,
-  onLogInteraction
+  onLogInteraction,
+  userId
 }) => {
+  const CACHE_KEY = getCacheKey(userId);
+  const HISTORY_KEY = getHistoryKey(userId);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);

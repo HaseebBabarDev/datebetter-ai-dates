@@ -12,7 +12,7 @@ import authBg from "@/assets/auth-bg.jpg";
 import { PinSetupDialog } from "@/components/auth/PinSetupDialog";
 import { PinLoginScreen } from "@/components/auth/PinLoginScreen";
 import { PinEnableQuickLoginDialog } from "@/components/auth/PinEnableQuickLoginDialog";
-import { getPinStorageKey, getPinEnabledKey } from "@/lib/pinCrypto";
+import { getPinStorageKey, getPinEnabledKey, PIN_SESSION_STORAGE_KEY_LEGACY } from "@/lib/pinCrypto";
 import { BetaNdaDialog } from "@/components/auth/BetaNdaDialog";
 import { BetaWelcomeDialog } from "@/components/auth/BetaWelcomeDialog";
 import { useNdaAgreement } from "@/hooks/useNdaAgreement";
@@ -62,7 +62,7 @@ const Auth = () => {
   }, [ndaLoading, welcomeLoading, hasAcceptedNda, hasSeenWelcome]);
   
 
-  // Check for saved login on mount
+  // Check for saved login on mount (with legacy migration)
   useEffect(() => {
     const storedEmail = localStorage.getItem("datebetter_saved_email");
     
@@ -70,8 +70,24 @@ const Auth = () => {
       // Check for per-user PIN enabled and encrypted session
       const pinEnabledKey = getPinEnabledKey(storedEmail);
       const pinStorageKey = getPinStorageKey(storedEmail);
-      const pinEnabled = localStorage.getItem(pinEnabledKey);
-      const encryptedSession = localStorage.getItem(pinStorageKey);
+      let pinEnabled = localStorage.getItem(pinEnabledKey);
+      let encryptedSession = localStorage.getItem(pinStorageKey);
+
+      // Migrate from legacy keys if per-user keys don't exist
+      const legacyPinEnabled = localStorage.getItem("datebetter_pin_enabled");
+      const legacySession = localStorage.getItem(PIN_SESSION_STORAGE_KEY_LEGACY);
+      
+      if (!encryptedSession && legacySession && legacyPinEnabled === "true") {
+        // Migrate legacy data to per-user keys
+        localStorage.setItem(pinStorageKey, legacySession);
+        localStorage.setItem(pinEnabledKey, "true");
+        // Clean up legacy keys
+        localStorage.removeItem("datebetter_pin_enabled");
+        localStorage.removeItem(PIN_SESSION_STORAGE_KEY_LEGACY);
+        
+        pinEnabled = "true";
+        encryptedSession = legacySession;
+      }
 
       if (pinEnabled === "true" && encryptedSession && !user) {
         setSavedEmail(storedEmail);
