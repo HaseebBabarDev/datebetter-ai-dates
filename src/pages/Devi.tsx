@@ -42,6 +42,7 @@ import { format } from "date-fns";
 import { detectCrisisContent, CrisisDetectionResult } from "@/lib/crisisDetection";
 import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
 import { DeviWinDialog, DeviWinPrompt } from "@/components/devi/DeviWinDialog";
+import { ProfileSectionsNudge } from "@/components/devi/ProfileSectionsNudge";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -326,6 +327,9 @@ const Devi = () => {
   
   // Soft warning dismissal state
   const [softWarningDismissed, setSoftWarningDismissed] = useState(false);
+  
+  // Profile sections nudge dismissal state
+  const [profileNudgeDismissed, setProfileNudgeDismissed] = useState(false);
   
   // Feeling check-in prompt handling
   const [searchParams, setSearchParams] = useSearchParams();
@@ -1525,6 +1529,16 @@ const Devi = () => {
                     <Lock className="w-3 h-3" />
                     Complete profile to unlock chat
                   </button>
+                </div>
+              )}
+
+              {/* Profile sections nudge - show when profile is complete but family/relationship sections are missing */}
+              {hasFullProfile && !profileNudgeDismissed && (
+                <div className="pl-10 mt-4">
+                  <ProfileSectionsNudge 
+                    profile={userProfile} 
+                    onDismiss={() => setProfileNudgeDismissed(true)}
+                  />
                 </div>
               )}
             </div>
