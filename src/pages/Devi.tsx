@@ -377,6 +377,9 @@ const Devi = () => {
       
       setProfilesLoading(true);
       
+      // Check if we're in "feeling" mode (general chat)
+      const isGeneralChatMode = searchParams.get("prompt") === "feeling";
+      
       // Fetch candidates
       const { data: candidatesData } = await supabase
         .from("candidates")
@@ -387,11 +390,11 @@ const Devi = () => {
       
       if (candidatesData) {
         setCandidates(candidatesData);
-        // Auto-select if coming from candidate page
-        if (candidateIdFromState) {
+        // Auto-select if coming from candidate page (but NOT if in general chat mode)
+        if (candidateIdFromState && !isGeneralChatMode) {
           const found = candidatesData.find(c => c.id === candidateIdFromState);
           if (found) setSelectedCandidate(found);
-        } else if (candidatesData.length === 1) {
+        } else if (candidatesData.length === 1 && !isGeneralChatMode) {
           setSelectedCandidate(candidatesData[0]);
         }
       }
@@ -411,7 +414,7 @@ const Devi = () => {
     };
 
     fetchData();
-  }, [user, candidateIdFromState]);
+  }, [user, candidateIdFromState, searchParams]);
 
   // Fetch conversations (last 30 days only)
   useEffect(() => {
