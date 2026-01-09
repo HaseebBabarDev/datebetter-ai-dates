@@ -49,6 +49,11 @@ FAMILY BACKGROUND & UPBRINGING (critical for understanding relationship patterns
 - Socioeconomic Background: ${formatEnum(profile.socioeconomic_background)}
 - Family Stability: ${formatEnum(profile.family_stability)}`;
 
+  if (profile.family_upbringing_notes) {
+    context += `
+- Personal Notes About Family/Upbringing: ${profile.family_upbringing_notes}`;
+  }
+
   if (parentWounds && parentWounds !== 'None') {
     context += `
 - Parent Wounds: ${parentWounds}`;

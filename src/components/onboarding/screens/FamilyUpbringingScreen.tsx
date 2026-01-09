@@ -4,9 +4,10 @@ import { OnboardingLayout } from "../OnboardingLayout";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { OptionCard } from "../OptionCard";
 import { MultiSelectOption } from "../MultiSelectOption";
-import { Heart, AlertTriangle, Shield, Users } from "lucide-react";
+import { Heart, AlertTriangle, Shield, Users, PenLine } from "lucide-react";
 
 const parentStatusOptions = [
   { value: "married_together", label: "Married Together", description: "Parents married and living together" },
@@ -393,6 +394,23 @@ const FamilyUpbringingScreen = () => {
               />
             ))}
           </div>
+        </div>
+
+        {/* Free-form notes about family experience */}
+        <div className="space-y-2">
+          <Label className="text-sm flex items-center gap-2">
+            <PenLine className="h-4 w-4" />
+            Anything else about your family or upbringing? (optional)
+          </Label>
+          <Textarea
+            value={data.familyUpbringingNotes || ""}
+            onChange={(e) => updateData({ familyUpbringingNotes: e.target.value })}
+            placeholder="Share any context about your childhood, family dynamics, or experiences that shape how you approach relationships today..."
+            className="min-h-[100px] resize-none"
+          />
+          <p className="text-xs text-muted-foreground">
+            This helps D.E.V.I. understand your unique story and provide more personalized guidance.
+          </p>
         </div>
 
         <Button onClick={nextStep} disabled={!isValid} className="w-full" size="lg">

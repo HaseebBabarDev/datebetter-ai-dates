@@ -789,6 +789,7 @@ export type Database = {
           faith_importance: number | null
           faith_requirements: Json | null
           family_stability: string | null
+          family_upbringing_notes: string | null
           father_status: string | null
           felt_loved_as_child: string | null
           financial_importance: number | null
@@ -926,6 +927,7 @@ export type Database = {
           faith_importance?: number | null
           faith_requirements?: Json | null
           family_stability?: string | null
+          family_upbringing_notes?: string | null
           father_status?: string | null
           felt_loved_as_child?: string | null
           financial_importance?: number | null
@@ -1065,6 +1067,7 @@ export type Database = {
           faith_importance?: number | null
           faith_requirements?: Json | null
           family_stability?: string | null
+          family_upbringing_notes?: string | null
           father_status?: string | null
           felt_loved_as_child?: string | null
           financial_importance?: number | null
