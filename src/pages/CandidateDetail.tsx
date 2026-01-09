@@ -156,68 +156,14 @@ const CandidateDetail = () => {
   useEffect(() => {
     if (user && id) {
       fetchData();
-      checkPendingAdvice();
-      checkSuccessfulRelationshipStatus();
     }
   }, [user, id]);
-
-  const checkSuccessfulRelationshipStatus = async () => {
-    if (!user || !id) return;
-    
-    // Get candidate's compatibility score first
-    const { data: candidateData } = await supabase
-      .from("candidates")
-      .select("compatibility_score")
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .maybeSingle();
-    
-    const result = await checkSuccessfulRelationship(
-      id,
-      user.id,
-      candidateData?.compatibility_score ?? null
-    );
-    
-    setSuccessfulRelationship(result);
-  };
-
-  const checkPendingAdvice = async () => {
-    if (!user || !id) return;
-    
-    // First get the candidate to check if there's advice
-    const { data: candidateData } = await supabase
-      .from("candidates")
-      .select("score_breakdown")
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .maybeSingle();
-    
-    if (!candidateData?.score_breakdown) {
-      setHasPendingAdvice(false);
-      return;
-    }
-    
-    const scoreData = candidateData.score_breakdown as unknown as ScoreBreakdown;
-    if (!scoreData?.advice) {
-      setHasPendingAdvice(false);
-      return;
-    }
-    
-    // Check if advice has been responded to
-    const { data: adviceData } = await supabase
-      .from("advice_tracking")
-      .select("id")
-      .eq("candidate_id", id)
-      .eq("advice_text", scoreData.advice)
-      .maybeSingle();
-    
-    setHasPendingAdvice(!adviceData);
-  };
 
   const fetchData = async () => {
     console.log("Fetching candidate data for id:", id, "user:", user?.id);
     try {
-      const [candidateRes, interactionsRes, profileRes] = await Promise.all([
+      // Fetch all primary data in parallel
+      const [candidateRes, interactionsRes, profileRes, conversationsRes] = await Promise.all([
         supabase
           .from("candidates")
           .select("*")
@@ -235,30 +181,55 @@ const CandidateDetail = () => {
           .select("schedule_flexibility")
           .eq("user_id", user!.id)
           .single(),
+        supabase
+          .from("devi_conversations")
+          .select("id")
+          .eq("candidate_id", id!)
+          .eq("user_id", user!.id),
       ]);
 
       console.log("Candidate response:", candidateRes);
       console.log("Interactions response:", interactionsRes);
 
-      if (candidateRes.data) setCandidate(candidateRes.data);
+      if (candidateRes.data) {
+        setCandidate(candidateRes.data);
+        
+        // Check pending advice inline (no extra query needed)
+        const scoreData = candidateRes.data.score_breakdown as unknown as ScoreBreakdown;
+        if (scoreData?.advice) {
+          const { data: adviceData } = await supabase
+            .from("advice_tracking")
+            .select("id")
+            .eq("candidate_id", id!)
+            .eq("advice_text", scoreData.advice)
+            .maybeSingle();
+          setHasPendingAdvice(!adviceData);
+        } else {
+          setHasPendingAdvice(false);
+        }
+        
+        // Check successful relationship inline
+        const result = await checkSuccessfulRelationship(
+          id!,
+          user!.id,
+          candidateRes.data.compatibility_score ?? null
+        );
+        setSuccessfulRelationship(result);
+      }
+      
       if (interactionsRes.data) setInteractions(interactionsRes.data);
       if (profileRes.data) setUserProfile(profileRes.data);
 
-      // Fetch D.E.V.I. messages for this candidate
-      const { data: conversations } = await supabase
-        .from("devi_conversations")
-        .select("id")
-        .eq("candidate_id", id!)
-        .eq("user_id", user!.id);
-
-      if (conversations && conversations.length > 0) {
-        const conversationIds = conversations.map(c => c.id);
+      // Fetch D.E.V.I. messages if conversations exist
+      if (conversationsRes.data && conversationsRes.data.length > 0) {
+        const conversationIds = conversationsRes.data.map(c => c.id);
         const { data: messages } = await supabase
           .from("devi_messages")
           .select("*")
           .in("conversation_id", conversationIds)
           .eq("user_id", user!.id)
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: false })
+          .limit(50);
 
         if (messages) setDeviMessages(messages);
       }
@@ -749,7 +720,7 @@ const CandidateDetail = () => {
             <div data-tour="quick-log">
               <AddInteractionForm
                 candidateId={candidate.id}
-                onSuccess={() => { fetchData(); checkPendingAdvice(); checkSuccessfulRelationshipStatus(); }}
+                onSuccess={fetchData}
                 onRescore={handleRescore}
                 isNoContact={candidate.no_contact_active || false}
                 onBrokeContact={handleBrokeContact}
@@ -913,7 +884,7 @@ const CandidateDetail = () => {
               candidate={candidate}
               onUpdate={(updates) => setCandidate({ ...candidate, ...updates })}
               onStartNoContact={handleStartNoContact}
-              onAdviceResponded={checkPendingAdvice}
+              onAdviceResponded={fetchData}
               userSchedule={userProfile.schedule_flexibility}
             />
           </TabsContent>
@@ -931,7 +902,7 @@ const CandidateDetail = () => {
             <div className="grid grid-cols-2 gap-2">
               <AddInteractionForm
                 candidateId={candidate.id}
-                onSuccess={() => { fetchData(); checkPendingAdvice(); }}
+                onSuccess={fetchData}
                 onRescore={handleRescore}
                 isNoContact={candidate.no_contact_active || false}
                 onBrokeContact={handleBrokeContact}
@@ -945,7 +916,7 @@ const CandidateDetail = () => {
               />
               <AddInteractionForm
                 candidateId={candidate.id}
-                onSuccess={() => { fetchData(); checkPendingAdvice(); }}
+                onSuccess={fetchData}
                 onRescore={handleRescore}
                 isNoContact={candidate.no_contact_active || false}
                 onBrokeContact={handleBrokeContact}
