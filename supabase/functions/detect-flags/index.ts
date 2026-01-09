@@ -55,8 +55,16 @@ serve(async (req) => {
       .eq("user_id", user.id)
       .order("interaction_date", { ascending: false });
 
+    // Require at least one interaction before analyzing
+    if (!interactions || interactions.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Please log at least one interaction before analyzing flags" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Build context for AI analysis
-    const interactionDetails = interactions?.map((i: any) => ({
+    const interactionDetails = interactions.map((i: any) => ({
       date: i.interaction_date,
       type: i.interaction_type,
       duration: i.duration,
@@ -65,7 +73,7 @@ serve(async (req) => {
       notes: i.notes,
       who_initiated: i.who_initiated,
       who_paid: i.who_paid,
-    })) || [];
+    }));
 
     // Format status for AI readability
     const statusMap: Record<string, string> = {
