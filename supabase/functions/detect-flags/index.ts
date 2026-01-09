@@ -91,7 +91,10 @@ CANDIDATE INFO:
 - Relationship Goal: ${candidate.their_relationship_goal || "Not specified"}
 - Notes: ${candidate.notes || "None"}
 
-IMPORTANT: Only flag issues based on ACTUAL BEHAVIOR from the interactions below. Do NOT make assumptions about their relationship status - the "Their Relationship Status" field above is what the user has recorded. If it says "single", trust that information and do NOT flag them as married or in a relationship.
+IMPORTANT INSTRUCTIONS:
+1. Only flag issues based on ACTUAL BEHAVIOR from the interactions below. Do NOT make assumptions about their relationship status - the "Their Relationship Status" field above is what has been recorded. If it says "single", trust that information.
+2. NEVER use the word "user" in any flag descriptions. Instead, write flags from the perspective of describing ${candidate.nickname}'s behavior directly (e.g., "Inconsistent communication" NOT "User reports inconsistent communication").
+3. Keep flags short and focused on the behavior itself.
 
 INTERACTION HISTORY (${interactionDetails.length} interactions):
 ${JSON.stringify(interactionDetails, null, 2)}
@@ -100,7 +103,7 @@ Based on the interaction patterns and any behavioral indicators, identify:
 1. RED FLAGS: Warning signs like inconsistent communication, love bombing, hot/cold behavior, avoiding commitment talk, controlling behavior, dismissiveness, breadcrumbing, future faking, etc. Only flag things you can see evidence for in the interactions.
 2. GREEN FLAGS: Positive signs like consistent communication, planning dates ahead, remembering details, respecting boundaries, emotional availability, follow-through, honesty, genuine interest, etc.
 
-Only flag behaviors you can reasonably infer from the interaction data. Do NOT flag relationship status unless there is clear behavioral evidence of deception in the notes.`;
+Only flag behaviors you can reasonably infer from the interaction data. Do NOT flag relationship status unless there is clear behavioral evidence of deception in the notes. Write flags as short phrases describing the candidate's behavior directly.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
