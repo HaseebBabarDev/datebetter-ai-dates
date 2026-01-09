@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import authBg from "@/assets/auth-bg.jpg";
 import {
   decryptSessionWithPin,
+  encryptSessionWithPin,
   PIN_SESSION_STORAGE_KEY,
 } from "@/lib/pinCrypto";
 
@@ -44,12 +45,12 @@ export const PinLoginScreen: React.FC<PinLoginScreenProps> = ({
     try {
       const { accessToken, refreshToken } = await decryptSessionWithPin(pin, encrypted);
 
-      const { error } = await supabase.auth.setSession({
+      const { data, error } = await supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken,
       });
 
-      if (error) {
+      if (error || !data.session) {
         localStorage.removeItem(PIN_SESSION_STORAGE_KEY);
         toast({
           title: "Session expired",
@@ -58,6 +59,16 @@ export const PinLoginScreen: React.FC<PinLoginScreenProps> = ({
         });
         onSwitchAccount();
         return;
+      }
+
+      // Re-encrypt the new session tokens for future PIN logins
+      // (tokens may have been refreshed by setSession)
+      if (data.session.access_token && data.session.refresh_token) {
+        const newEncrypted = await encryptSessionWithPin(pin, {
+          accessToken: data.session.access_token,
+          refreshToken: data.session.refresh_token,
+        });
+        localStorage.setItem(PIN_SESSION_STORAGE_KEY, newEncrypted);
       }
 
       toast({ title: "Welcome back!" });
