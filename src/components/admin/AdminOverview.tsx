@@ -37,49 +37,42 @@ export function AdminOverview() {
 
   const fetchStats = async () => {
     try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const weekAgo = new Date(today);
-      weekAgo.setDate(weekAgo.getDate() - 7);
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
 
-      // Fetch all stats in parallel
-      const [
-        usersResult,
-        adminRolesResult,
-        candidatesResult,
-        interactionsResult,
-        conversationsResult,
-        messagesResult,
-        postsResult,
-        commentsResult,
-        newUsersTodayResult,
-        newUsersWeekResult
-      ] = await Promise.all([
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
-        supabase.from("user_roles").select("*", { count: "exact", head: true }).eq("role", "admin"),
-        supabase.from("candidates").select("*", { count: "exact", head: true }),
-        supabase.from("interactions").select("*", { count: "exact", head: true }),
-        supabase.from("devi_conversations").select("*", { count: "exact", head: true }),
-        supabase.from("devi_messages").select("*", { count: "exact", head: true }),
-        supabase.from("forum_posts").select("*", { count: "exact", head: true }),
-        supabase.from("forum_comments").select("*", { count: "exact", head: true }),
-        supabase.from("profiles").select("*", { count: "exact", head: true }).gte("created_at", today.toISOString()),
-        supabase.from("profiles").select("*", { count: "exact", head: true }).gte("created_at", weekAgo.toISOString())
-      ]);
+      if (!token) {
+        console.error("No auth token available");
+        setLoading(false);
+        return;
+      }
 
-      setStats({
-        totalUsers: usersResult.count || 0,
-        adminUsers: adminRolesResult.count || 0,
-        totalCandidates: candidatesResult.count || 0,
-        totalInteractions: interactionsResult.count || 0,
-        totalConversations: conversationsResult.count || 0,
-        totalMessages: messagesResult.count || 0,
-        totalPosts: postsResult.count || 0,
-        totalComments: commentsResult.count || 0,
-        newUsersToday: newUsersTodayResult.count || 0,
-        newUsersThisWeek: newUsersWeekResult.count || 0,
-        activeUsersToday: 0 // Would need activity tracking
+      const response = await supabase.functions.invoke("admin-overview-stats", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
+      if (response.error) {
+        console.error("Error fetching overview stats:", response.error);
+        return;
+      }
+
+      const data = response.data;
+      if (data?.stats) {
+        setStats({
+          totalUsers: data.stats.totalUsers || 0,
+          adminUsers: data.stats.adminUsers || 0,
+          totalCandidates: data.stats.totalCandidates || 0,
+          totalInteractions: data.stats.totalInteractions || 0,
+          totalConversations: data.stats.totalConversations || 0,
+          totalMessages: data.stats.totalMessages || 0,
+          totalPosts: data.stats.totalPosts || 0,
+          totalComments: data.stats.totalComments || 0,
+          newUsersToday: data.stats.newUsersToday || 0,
+          newUsersThisWeek: data.stats.newUsersThisWeek || 0,
+          activeUsersToday: 0,
+        });
+      }
     } catch (error) {
       console.error("Error fetching overview stats:", error);
     } finally {
