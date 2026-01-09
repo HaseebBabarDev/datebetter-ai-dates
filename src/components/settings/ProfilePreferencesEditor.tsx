@@ -578,7 +578,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
     }
   };
 
-  const SECTION_ORDER = ["identity", "motivation", "relationship", "partner_prefs", "kids", "faith", "politics", "career", "income", "lifestyle", "physical", "communication", "mental_health", "neurodivergence", "attachment", "family", "boundaries", "intimacy", "devi", "cycle"];
+  const SECTION_ORDER = ["identity", "motivation", "relationship", "partner_prefs", "kids", "faith", "politics", "career", "income", "lifestyle", "physical", "communication", "mental_health", "neurodivergence", "past_relationships", "attachment", "family", "boundaries", "intimacy", "devi", "cycle"];
   
   const SECTION_CONFIG: Record<string, { 
     label: string; 
@@ -599,6 +599,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
     communication: { label: "Communication", icon: <MessageCircle className="w-3.5 h-3.5" />, requiredFields: ["communication_style"] },
     mental_health: { label: "Mental Health", icon: <Stethoscope className="w-3.5 h-3.5" />, requiredFields: ["mental_health_openness"] },
     neurodivergence: { label: "Neurodivergence", icon: <Brain className="w-3.5 h-3.5" />, requiredFields: [] },
+    past_relationships: { label: "Past Relationships", icon: <Heart className="w-3.5 h-3.5" />, requiredFields: [] },
     attachment: { label: "Attachment & Patterns", icon: <Brain className="w-3.5 h-3.5" />, requiredFields: ["attachment_style"] },
     family: { label: "Family & Upbringing", icon: <Home className="w-3.5 h-3.5" />, requiredFields: [] },
     boundaries: { label: "Boundaries & Dealbreakers", icon: <Shield className="w-3.5 h-3.5" />, requiredFields: ["boundary_strength"] },
@@ -1789,6 +1790,39 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               </div>
             )}
             <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("neurodivergence", e)}>
+              Next
+            </Button>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Past Relationships */}
+        <AccordionItem value="past_relationships" data-value="past_relationships" className="border rounded-lg px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2 flex-1">
+              <Heart className="w-4 h-4 text-rose-500" />
+              <span className="font-medium">Past Relationships</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pb-4">
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-xs text-muted-foreground">
+              <Shield className="h-4 w-4 text-amber-500 inline mr-1" />
+              Share your relationship history and any patterns you've noticed. This helps D.E.V.I. provide more personalized guidance.
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Reflections on Past Relationships</Label>
+              <Textarea
+                value={(formData as any).relationship_trauma_notes || ""}
+                onChange={(e) => updateField("relationship_trauma_notes" as any, e.target.value)}
+                placeholder="Share any patterns you've noticed, lessons learned, difficult experiences, or things you want D.E.V.I. to understand about your relationship history..."
+                className="min-h-[120px] resize-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                Examples: past heartbreaks, recurring patterns, trust issues, what you've learned about yourself through past relationships.
+              </p>
+            </div>
+            
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("past_relationships", e)}>
               Next
             </Button>
           </AccordionContent>
