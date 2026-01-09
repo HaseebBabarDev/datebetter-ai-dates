@@ -17,10 +17,12 @@ type Candidate = Tables<"candidates">;
 
 interface QuickCandidateSelectProps {
   candidates: Candidate[];
+  variant?: "default" | "prominent";
 }
 
 export const QuickCandidateSelect: React.FC<QuickCandidateSelectProps> = ({
   candidates,
+  variant = "default",
 }) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
@@ -47,14 +49,26 @@ export const QuickCandidateSelect: React.FC<QuickCandidateSelectProps> = ({
 
   return (
     <>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="text-foreground hover:bg-primary/10 rounded-xl h-9 w-9"
-        onClick={() => setOpen(true)}
-      >
-        <Search className="w-5 h-5" />
-      </Button>
+      {variant === "prominent" ? (
+        <Button
+          variant="secondary"
+          size="sm"
+          className="h-9 px-3 gap-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-foreground border-0"
+          onClick={() => setOpen(true)}
+        >
+          <Search className="w-4 h-4" />
+          <span className="text-sm font-medium">Find</span>
+        </Button>
+      ) : (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-foreground hover:bg-primary/10 rounded-xl h-9 w-9"
+          onClick={() => setOpen(true)}
+        >
+          <Search className="w-5 h-5" />
+        </Button>
+      )}
 
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Search candidates..." />

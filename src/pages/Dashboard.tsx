@@ -802,8 +802,8 @@ const Dashboard = () => {
                 <p className="text-xs text-muted-foreground">{greeting}</p>
               </div>
             </div>
-            <div className="flex items-center gap-0.5">
-              <QuickCandidateSelect candidates={candidates} />
+            <div className="flex items-center gap-1">
+              <QuickCandidateSelect candidates={candidates} variant="prominent" />
               <TourRestartButton tourId="dashboard" tourSteps={DASHBOARD_TOUR_STEPS} />
               <TooltipProvider delayDuration={300}>
                 <Tooltip>
