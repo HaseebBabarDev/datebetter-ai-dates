@@ -93,11 +93,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
               dateBetter
             </h1>
           </div>
-          {showProgress && currentStep > 0 && (
-            <span className="text-xs text-muted-foreground">
-              {progress >= 50 ? "½ way there!" : ""}
-            </span>
-          )}
         </header>
       )}
 
