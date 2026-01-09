@@ -29,6 +29,7 @@ import {
 interface UserProfile {
   user_id: string;
   name: string | null;
+  email: string | null;
   created_at: string;
   isAdmin: boolean;
   subscription?: {
@@ -58,6 +59,7 @@ export function AdminUserManagement() {
     if (searchQuery.trim()) {
       const filtered = allUsers.filter(u => 
         u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         u.user_id.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredUsers(filtered);
@@ -69,12 +71,43 @@ export function AdminUserManagement() {
   const fetchAllUsers = async () => {
     setLoadingUsers(true);
     try {
-      const { data: profiles, error } = await supabase
-        .from("profiles")
-        .select("user_id, name, created_at")
-        .order("created_at", { ascending: false });
+      // Use edge function to get users with emails
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      let profiles: { user_id: string; name: string | null; email: string | null; created_at: string }[] = [];
+      
+      if (session) {
+        // Try to get users with emails via edge function
+        try {
+          const response = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-list-users`,
+            {
+              method: "GET",
+              headers: {
+                "Authorization": `Bearer ${session.access_token}`,
+              },
+            }
+          );
+          
+          if (response.ok) {
+            const result = await response.json();
+            profiles = result.users || [];
+          }
+        } catch (e) {
+          console.error("Edge function failed, falling back to profiles:", e);
+        }
+      }
+      
+      // Fallback to profiles table if edge function fails
+      if (profiles.length === 0) {
+        const { data: profilesData, error } = await supabase
+          .from("profiles")
+          .select("user_id, name, created_at")
+          .order("created_at", { ascending: false });
 
-      if (error) throw error;
+        if (error) throw error;
+        profiles = profilesData?.map(p => ({ ...p, email: null })) || [];
+      }
 
       // Fetch admin roles for all users
       const { data: roles } = await supabase
@@ -91,11 +124,11 @@ export function AdminUserManagement() {
 
       const subscriptionsMap = new Map(subscriptions?.map(s => [s.user_id, s]) || []);
       
-      const usersWithRoles = profiles?.map(p => ({
+      const usersWithRoles: UserProfile[] = profiles.map(p => ({
         ...p,
         isAdmin: adminUserIds.has(p.user_id),
         subscription: subscriptionsMap.get(p.user_id)
-      })) || [];
+      }));
 
       setAllUsers(usersWithRoles);
       setFilteredUsers(usersWithRoles);
@@ -427,7 +460,12 @@ export function AdminUserManagement() {
                           <Badge variant="outline" className="text-xs">You</Badge>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 flex-wrap">
+                      {userProfile.email && (
+                        <p className="text-xs text-muted-foreground">
+                          {userProfile.email}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 flex-wrap mt-1">
                         {userProfile.subscription && (
                           <Badge variant="outline" className="text-xs capitalize">
                             {userProfile.subscription.plan}
