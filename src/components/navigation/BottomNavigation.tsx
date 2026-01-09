@@ -14,9 +14,10 @@ export function BottomNavigation() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Don't show on auth, onboarding, splash pages
-  const hiddenPaths = ["/", "/auth", "/onboarding", "/setup", "/admin"];
-  if (hiddenPaths.some(path => location.pathname === path || location.pathname.startsWith("/onboarding"))) {
+  // Don't show on auth, onboarding, splash, admin pages
+  const hiddenPaths = ["/", "/auth", "/setup"];
+  const hiddenPrefixes = ["/onboarding", "/admin"];
+  if (hiddenPaths.includes(location.pathname) || hiddenPrefixes.some(prefix => location.pathname.startsWith(prefix))) {
     return null;
   }
 
