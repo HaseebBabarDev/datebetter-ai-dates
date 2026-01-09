@@ -73,7 +73,7 @@ export const ProfileSectionsNudge: React.FC<ProfileSectionsNudgeProps> = ({
             variant="outline"
             size="sm"
             className="w-full gap-2 justify-between bg-background/50 hover:bg-background"
-            onClick={() => navigate("/settings", { state: { tab: "profile", section: "family" } })}
+            onClick={() => navigate("/settings?tab=preferences&section=family")}
           >
             <span className="flex items-center gap-2">
               <Users className="w-4 h-4 text-primary" />
@@ -87,7 +87,7 @@ export const ProfileSectionsNudge: React.FC<ProfileSectionsNudgeProps> = ({
             variant="outline"
             size="sm"
             className="w-full gap-2 justify-between bg-background/50 hover:bg-background"
-            onClick={() => navigate("/settings", { state: { tab: "profile", section: "relationships" } })}
+            onClick={() => navigate("/settings?tab=preferences&section=past_relationships")}
           >
             <span className="flex items-center gap-2">
               <Heart className="w-4 h-4 text-primary" />
