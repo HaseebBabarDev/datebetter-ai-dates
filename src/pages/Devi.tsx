@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -326,6 +326,10 @@ const Devi = () => {
   
   // Soft warning dismissal state
   const [softWarningDismissed, setSoftWarningDismissed] = useState(false);
+  
+  // Feeling check-in prompt handling
+  const [searchParams, setSearchParams] = useSearchParams();
+  const feelingPromptHandled = useRef(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1040,6 +1044,26 @@ const Devi = () => {
       sendMessage();
     }
   };
+
+  // Handle feeling check-in prompt from dashboard
+  useEffect(() => {
+    const promptType = searchParams.get("prompt");
+    
+    if (promptType === "feeling" && !feelingPromptHandled.current && !profilesLoading && !conversationsLoading && canChatGeneral) {
+      feelingPromptHandled.current = true;
+      
+      // Clear the query param to prevent re-triggering
+      setSearchParams({}, { replace: true });
+      
+      // Start a new chat and send the feeling check-in message
+      startNewChat();
+      
+      // Small delay to ensure state is ready
+      setTimeout(() => {
+        sendMessage("I want to check in about how I'm feeling today. Can you help me process my emotions around dating right now?");
+      }, 100);
+    }
+  }, [searchParams, profilesLoading, conversationsLoading, canChatGeneral, setSearchParams, startNewChat, sendMessage]);
 
   if (authLoading) {
     return (

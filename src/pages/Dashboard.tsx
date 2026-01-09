@@ -925,6 +925,26 @@ const Dashboard = () => {
 
             <UpgradeNudge />
             <FreeUpgradeBanner />
+
+            {/* Log How I'm Feeling CTA */}
+            <Card 
+              className="overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-md active:scale-[0.99] border-primary/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5"
+              onClick={() => navigate("/devi?prompt=feeling")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+                    <Heart className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-semibold text-foreground">How are you feeling today?</h3>
+                    <p className="text-xs text-muted-foreground">Check in with D.E.V.I. about your emotions</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex items-center justify-center gap-1.5 py-1 px-3 rounded-full bg-muted/50 border border-border/50">
               <Sparkles className="w-3 h-3 text-primary shrink-0" />
               <span className="text-[10px] font-medium text-foreground whitespace-nowrap">Chat with Devi & log honestly → better insights</span>
