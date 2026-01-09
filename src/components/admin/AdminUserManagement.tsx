@@ -16,7 +16,11 @@ import {
   Calendar,
   MessageSquareOff,
   Search,
-  RefreshCw
+  RefreshCw,
+  Heart,
+  MessageSquare,
+  Brain,
+  Activity
 } from "lucide-react";
 import { 
   Select,
@@ -26,12 +30,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+interface UserUsage {
+  candidates: number;
+  interactions: number;
+  ai_conversations: number;
+  ai_messages: number;
+  last_ai_message: string | null;
+}
+
 interface UserProfile {
   user_id: string;
   name: string | null;
   email: string | null;
   created_at: string;
+  last_sign_in_at?: string | null;
   isAdmin: boolean;
+  usage?: UserUsage;
   subscription?: {
     plan: string;
     trial_ends_at: string | null;
@@ -71,10 +85,17 @@ export function AdminUserManagement() {
   const fetchAllUsers = async () => {
     setLoadingUsers(true);
     try {
-      // Use edge function to get users with emails
+      // Use edge function to get users with emails and usage data
       const { data: { session } } = await supabase.auth.getSession();
       
-      let profiles: { user_id: string; name: string | null; email: string | null; created_at: string }[] = [];
+      let usersFromApi: Array<{
+        user_id: string;
+        name: string | null;
+        email: string | null;
+        created_at: string;
+        last_sign_in_at?: string | null;
+        usage?: UserUsage;
+      }> = [];
       
       if (session) {
         // Try to get users with emails via edge function
@@ -91,7 +112,7 @@ export function AdminUserManagement() {
           
           if (response.ok) {
             const result = await response.json();
-            profiles = result.users || [];
+            usersFromApi = result.users || [];
           }
         } catch (e) {
           console.error("Edge function failed, falling back to profiles:", e);
@@ -99,14 +120,14 @@ export function AdminUserManagement() {
       }
       
       // Fallback to profiles table if edge function fails
-      if (profiles.length === 0) {
+      if (usersFromApi.length === 0) {
         const { data: profilesData, error } = await supabase
           .from("profiles")
           .select("user_id, name, created_at")
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-        profiles = profilesData?.map(p => ({ ...p, email: null })) || [];
+        usersFromApi = profilesData?.map(p => ({ ...p, email: null })) || [];
       }
 
       // Fetch admin roles for all users
@@ -124,7 +145,7 @@ export function AdminUserManagement() {
 
       const subscriptionsMap = new Map(subscriptions?.map(s => [s.user_id, s]) || []);
       
-      const usersWithRoles: UserProfile[] = profiles.map(p => ({
+      const usersWithRoles: UserProfile[] = usersFromApi.map(p => ({
         ...p,
         isAdmin: adminUserIds.has(p.user_id),
         subscription: subscriptionsMap.get(p.user_id)
@@ -478,11 +499,40 @@ export function AdminUserManagement() {
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Joined: {new Date(userProfile.created_at).toLocaleDateString()}
-                      </p>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
+                        <span>Joined: {new Date(userProfile.created_at).toLocaleDateString()}</span>
+                        {userProfile.last_sign_in_at && (
+                          <span>• Last login: {new Date(userProfile.last_sign_in_at).toLocaleDateString()}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
+
+                  {/* Usage Stats */}
+                  {userProfile.usage && (
+                    <div className="grid grid-cols-4 gap-2 mb-3 p-2 bg-muted/30 rounded-lg">
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <Heart className="w-3 h-3 text-pink-500" />
+                        <span className="font-medium">{userProfile.usage.candidates}</span>
+                        <span className="text-muted-foreground">candidates</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <Activity className="w-3 h-3 text-cyan-500" />
+                        <span className="font-medium">{userProfile.usage.interactions}</span>
+                        <span className="text-muted-foreground">interactions</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <Brain className="w-3 h-3 text-purple-500" />
+                        <span className="font-medium">{userProfile.usage.ai_conversations}</span>
+                        <span className="text-muted-foreground">AI chats</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <MessageSquare className="w-3 h-3 text-blue-500" />
+                        <span className="font-medium">{userProfile.usage.ai_messages}</span>
+                        <span className="text-muted-foreground">AI msgs</span>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
                     <Select
