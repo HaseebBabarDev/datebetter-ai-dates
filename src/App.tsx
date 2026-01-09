@@ -26,7 +26,8 @@ const AddCandidate = lazy(() => import("./pages/AddCandidate"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const Devi = lazy(() => import("./pages/Devi"));
-const Admin = lazy(() => import("./pages/Admin"));
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const TestSetup = lazy(() => import("./pages/TestSetup"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -89,7 +90,8 @@ function AppContent() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/devi" element={<Devi />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/test-setup" element={<TestSetup />} />
             <Route path="/subscription" element={<Subscription />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
