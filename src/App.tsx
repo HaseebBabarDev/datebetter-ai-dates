@@ -54,14 +54,17 @@ function AppContent() {
   const [showLoading, setShowLoading] = useState(true);
   const [appReady, setAppReady] = useState(false);
 
+  // Check if current path is an admin route - skip loading screen for admin
+  const isAdminRoute = window.location.pathname.startsWith("/admin");
+
   useEffect(() => {
-    // Check if this is the first load in this session
+    // Skip loading screen for admin routes or if already loaded
     const hasLoaded = sessionStorage.getItem("app_loaded");
-    if (hasLoaded) {
+    if (hasLoaded || isAdminRoute) {
       setShowLoading(false);
       setAppReady(true);
     }
-  }, []);
+  }, [isAdminRoute]);
 
   const handleLoadingComplete = () => {
     sessionStorage.setItem("app_loaded", "true");
