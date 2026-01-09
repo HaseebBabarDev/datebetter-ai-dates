@@ -1049,21 +1049,23 @@ const Devi = () => {
   useEffect(() => {
     const promptType = searchParams.get("prompt");
     
-    if (promptType === "feeling" && !feelingPromptHandled.current && !profilesLoading && !conversationsLoading && canChatGeneral) {
+    if (promptType === "feeling" && !feelingPromptHandled.current && !profilesLoading && !conversationsLoading) {
       feelingPromptHandled.current = true;
       
       // Clear the query param to prevent re-triggering
       setSearchParams({}, { replace: true });
       
-      // Start a new chat and send the feeling check-in message
+      // Start a new chat and pre-fill a sample prompt
       startNewChat();
+      setInput("I'm feeling [describe your emotions] about dating right now because...");
       
-      // Small delay to ensure state is ready
+      // Focus the textarea so user can edit
       setTimeout(() => {
-        sendMessage("I want to check in about how I'm feeling today. Can you help me process my emotions around dating right now?");
-      }, 100);
+        textareaRef.current?.focus();
+        textareaRef.current?.setSelectionRange(12, 32); // Select "[describe your emotions]"
+      }, 150);
     }
-  }, [searchParams, profilesLoading, conversationsLoading, canChatGeneral, setSearchParams, startNewChat, sendMessage]);
+  }, [searchParams, profilesLoading, conversationsLoading, setSearchParams, startNewChat]);
 
   if (authLoading) {
     return (
