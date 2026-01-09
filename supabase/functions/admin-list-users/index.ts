@@ -71,9 +71,52 @@ Deno.serve(async (req) => {
       .from("profiles")
       .select("user_id, name, created_at");
 
+    // Get usage stats for all users
+    const { data: candidates } = await supabaseClient
+      .from("candidates")
+      .select("user_id");
+    
+    const { data: interactions } = await supabaseClient
+      .from("interactions")
+      .select("user_id");
+    
+    const { data: conversations } = await supabaseClient
+      .from("devi_conversations")
+      .select("user_id");
+    
+    const { data: messages } = await supabaseClient
+      .from("devi_messages")
+      .select("user_id, created_at");
+
+    // Build usage maps
+    const candidateCountMap = new Map<string, number>();
+    candidates?.forEach(c => {
+      candidateCountMap.set(c.user_id, (candidateCountMap.get(c.user_id) || 0) + 1);
+    });
+
+    const interactionCountMap = new Map<string, number>();
+    interactions?.forEach(i => {
+      interactionCountMap.set(i.user_id, (interactionCountMap.get(i.user_id) || 0) + 1);
+    });
+
+    const conversationCountMap = new Map<string, number>();
+    conversations?.forEach(c => {
+      conversationCountMap.set(c.user_id, (conversationCountMap.get(c.user_id) || 0) + 1);
+    });
+
+    const messageCountMap = new Map<string, number>();
+    const lastMessageMap = new Map<string, string>();
+    messages?.forEach(m => {
+      messageCountMap.set(m.user_id, (messageCountMap.get(m.user_id) || 0) + 1);
+      const currentLast = lastMessageMap.get(m.user_id);
+      if (!currentLast || new Date(m.created_at) > new Date(currentLast)) {
+        lastMessageMap.set(m.user_id, m.created_at);
+      }
+    });
+
     const profilesMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
-    // Combine auth users with profiles
+    // Combine auth users with profiles and usage data
     const users = authUsers.users.map(authUser => {
       const profile = profilesMap.get(authUser.id);
       return {
@@ -81,6 +124,14 @@ Deno.serve(async (req) => {
         email: authUser.email,
         name: profile?.name || authUser.user_metadata?.name || null,
         created_at: profile?.created_at || authUser.created_at,
+        last_sign_in_at: authUser.last_sign_in_at,
+        usage: {
+          candidates: candidateCountMap.get(authUser.id) || 0,
+          interactions: interactionCountMap.get(authUser.id) || 0,
+          ai_conversations: conversationCountMap.get(authUser.id) || 0,
+          ai_messages: messageCountMap.get(authUser.id) || 0,
+          last_ai_message: lastMessageMap.get(authUser.id) || null,
+        }
       };
     }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
