@@ -1,0 +1,541 @@
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { 
+  Shield, 
+  Key, 
+  Loader2, 
+  Users, 
+  UserPlus,
+  Trash2,
+  Calendar,
+  MessageSquareOff,
+  Search,
+  RefreshCw
+} from "lucide-react";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface UserProfile {
+  user_id: string;
+  name: string | null;
+  created_at: string;
+  isAdmin: boolean;
+  subscription?: {
+    plan: string;
+    trial_ends_at: string | null;
+  };
+}
+
+export function AdminUserManagement() {
+  const { user } = useAuth();
+  const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [resettingPassword, setResettingPassword] = useState<string | null>(null);
+  const [togglingRole, setTogglingRole] = useState<string | null>(null);
+  const [creatingUser, setCreatingUser] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<string | null>(null);
+  const [managingSubscription, setManagingSubscription] = useState<string | null>(null);
+  const [removingFromCommunity, setRemovingFromCommunity] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchAllUsers();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const filtered = allUsers.filter(u => 
+        u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.user_id.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    } else {
+      setFilteredUsers(allUsers);
+    }
+  }, [searchQuery, allUsers]);
+
+  const fetchAllUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("user_id, name, created_at")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Fetch admin roles for all users
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("user_id, role")
+        .eq("role", "admin");
+
+      const adminUserIds = new Set(roles?.map(r => r.user_id) || []);
+      
+      // Fetch subscriptions
+      const { data: subscriptions } = await supabase
+        .from("user_subscriptions")
+        .select("user_id, plan, trial_ends_at");
+
+      const subscriptionsMap = new Map(subscriptions?.map(s => [s.user_id, s]) || []);
+      
+      const usersWithRoles = profiles?.map(p => ({
+        ...p,
+        isAdmin: adminUserIds.has(p.user_id),
+        subscription: subscriptionsMap.get(p.user_id)
+      })) || [];
+
+      setAllUsers(usersWithRoles);
+      setFilteredUsers(usersWithRoles);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      toast.error("Failed to load users");
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const handleToggleAdminRole = async (userId: string, currentlyAdmin: boolean) => {
+    if (userId === user?.id) {
+      toast.error("Cannot modify your own admin role");
+      return;
+    }
+
+    const action = currentlyAdmin ? "remove" : "add";
+    const confirmMessage = currentlyAdmin 
+      ? "Are you sure you want to remove admin access from this user?"
+      : "Are you sure you want to grant admin access to this user?";
+
+    if (!confirm(confirmMessage)) return;
+
+    setTogglingRole(userId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-user-role`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ targetUserId: userId, action }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to update role");
+      }
+
+      toast.success(result.message);
+      fetchAllUsers();
+    } catch (error) {
+      console.error("Error toggling admin role:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update role");
+    } finally {
+      setTogglingRole(null);
+    }
+  };
+
+  const handleCreateUser = async () => {
+    const email = prompt("Enter user email:");
+    if (!email) return;
+    
+    const password = prompt("Enter password for this user (minimum 6 characters):");
+    if (!password) return;
+    
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    
+    const name = prompt("Enter user name (optional):");
+
+    setCreatingUser(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-create-user`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ email, password, name: name || null }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to create user");
+      }
+
+      toast.success(`User created successfully: ${email}`);
+      fetchAllUsers();
+    } catch (error) {
+      console.error("Error creating user:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to create user");
+    } finally {
+      setCreatingUser(false);
+    }
+  };
+
+  const handleResetPassword = async (userId: string) => {
+    const newPassword = prompt("Enter new password for this user (minimum 6 characters):");
+    
+    if (!newPassword) return;
+    
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    setResettingPassword(userId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-reset-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ userId, newPassword }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to reset password");
+      }
+
+      toast.success("Password reset successfully");
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to reset password");
+    } finally {
+      setResettingPassword(null);
+    }
+  };
+
+  const handleSetTrial = async (userId: string, days: number) => {
+    setManagingSubscription(userId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-manage-subscription`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ targetUserId: userId, trialDays: days }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to set trial");
+      }
+
+      toast.success(result.message);
+      fetchAllUsers();
+    } catch (error) {
+      console.error("Error setting trial:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to set trial");
+    } finally {
+      setManagingSubscription(null);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (userId === user?.id) {
+      toast.error("Cannot delete your own account");
+      return;
+    }
+
+    const confirmed = confirm(`Are you sure you want to permanently delete ${userName || 'this user'}? This action cannot be undone.`);
+    if (!confirmed) return;
+
+    setDeletingUser(userId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-delete-user`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ targetUserId: userId }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to delete user");
+      }
+
+      toast.success("User deleted successfully");
+      fetchAllUsers();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete user");
+    } finally {
+      setDeletingUser(null);
+    }
+  };
+
+  const handleRemoveFromCommunity = async (userId: string, userName: string) => {
+    if (userId === user?.id) {
+      toast.error("Cannot remove yourself from community");
+      return;
+    }
+
+    const confirmed = confirm(`Remove ${userName || 'this user'} from community? This will delete all their posts, comments, and messages.`);
+    if (!confirmed) return;
+
+    setRemovingFromCommunity(userId);
+    try {
+      await supabase.from("forum_posts").delete().eq("user_id", userId);
+      await supabase.from("forum_comments").delete().eq("user_id", userId);
+      await supabase.from("direct_messages").delete().eq("sender_id", userId);
+      await supabase.from("profiles").update({ screen_name: null, screen_name_set_at: null }).eq("user_id", userId);
+
+      toast.success(`${userName || 'User'} removed from community`);
+    } catch (error) {
+      console.error("Error removing from community:", error);
+      toast.error("Failed to remove user from community");
+    } finally {
+      setRemovingFromCommunity(null);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">User Management</h2>
+          <p className="text-muted-foreground">{allUsers.length} total users</p>
+        </div>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search users..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Button variant="outline" size="icon" onClick={fetchAllUsers} disabled={loadingUsers}>
+            <RefreshCw className={`w-4 h-4 ${loadingUsers ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button onClick={handleCreateUser} disabled={creatingUser}>
+            {creatingUser ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                <UserPlus className="w-4 h-4 mr-2" />
+                Create
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      <Card>
+        <CardContent className="p-0">
+          {loadingUsers ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : filteredUsers.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-12">No users found</p>
+          ) : (
+            <div className="divide-y">
+              {filteredUsers.map((userProfile) => (
+                <div 
+                  key={userProfile.user_id}
+                  className="p-4 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <p className="font-medium text-sm">
+                          {userProfile.name || "Unnamed User"}
+                        </p>
+                        {userProfile.isAdmin && (
+                          <Badge variant="secondary" className="bg-primary/10 text-primary text-xs">
+                            <Shield className="w-3 h-3 mr-1" />
+                            Admin
+                          </Badge>
+                        )}
+                        {userProfile.user_id === user?.id && (
+                          <Badge variant="outline" className="text-xs">You</Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {userProfile.subscription && (
+                          <Badge variant="outline" className="text-xs capitalize">
+                            {userProfile.subscription.plan}
+                          </Badge>
+                        )}
+                        {userProfile.subscription?.trial_ends_at && new Date(userProfile.subscription.trial_ends_at) > new Date() && (
+                          <Badge variant="secondary" className="bg-accent/10 text-accent-foreground text-xs">
+                            <Calendar className="w-3 h-3 mr-1" />
+                            {Math.ceil((new Date(userProfile.subscription.trial_ends_at).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}d trial
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Joined: {new Date(userProfile.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                    <Select
+                      disabled={managingSubscription === userProfile.user_id}
+                      onValueChange={(value) => handleSetTrial(userProfile.user_id, parseInt(value))}
+                    >
+                      <SelectTrigger className="h-9 text-xs">
+                        <SelectValue placeholder="Trial" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="30">30 Days</SelectItem>
+                        <SelectItem value="60">60 Days</SelectItem>
+                        <SelectItem value="90">90 Days</SelectItem>
+                        <SelectItem value="0">Remove</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <Button
+                      size="sm"
+                      variant={userProfile.isAdmin ? "destructive" : "default"}
+                      onClick={() => handleToggleAdminRole(userProfile.user_id, userProfile.isAdmin)}
+                      disabled={togglingRole === userProfile.user_id || userProfile.user_id === user?.id}
+                      className="h-9 text-xs"
+                    >
+                      {togglingRole === userProfile.user_id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <>
+                          <Shield className="w-3 h-3 mr-1" />
+                          {userProfile.isAdmin ? "Revoke" : "Admin"}
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleResetPassword(userProfile.user_id)}
+                      disabled={resettingPassword === userProfile.user_id}
+                      className="h-9 text-xs"
+                    >
+                      {resettingPassword === userProfile.user_id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <>
+                          <Key className="w-3 h-3 mr-1" />
+                          Password
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleRemoveFromCommunity(userProfile.user_id, userProfile.name || "")}
+                      disabled={removingFromCommunity === userProfile.user_id || userProfile.user_id === user?.id}
+                      className="h-9 text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200"
+                    >
+                      {removingFromCommunity === userProfile.user_id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <>
+                          <MessageSquareOff className="w-3 h-3 mr-1" />
+                          Ban
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDeleteUser(userProfile.user_id, userProfile.name || "")}
+                      disabled={deletingUser === userProfile.user_id || userProfile.user_id === user?.id}
+                      className="h-9 text-xs"
+                    >
+                      {deletingUser === userProfile.user_id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <>
+                          <Trash2 className="w-3 h-3 mr-1" />
+                          Delete
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
