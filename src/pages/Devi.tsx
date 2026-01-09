@@ -87,6 +87,103 @@ const MAX_MESSAGE_LENGTH = 400;
 const SOFT_LIMIT_MESSAGES = 30; // Soft warning
 const MAX_CONVERSATION_MESSAGES = 40; // Hard nudge to start new chat
 
+// Format assistant messages with better structure
+const formatAssistantMessage = (content: string): React.ReactNode => {
+  // Split by double newlines to get paragraphs/sections
+  const sections = content.split(/\n\n+/);
+  
+  return sections.map((section, sectionIdx) => {
+    const lines = section.split('\n');
+    const elements: React.ReactNode[] = [];
+    let listItems: string[] = [];
+    let numberedItems: { num: string; text: string }[] = [];
+    
+    const flushList = () => {
+      if (listItems.length > 0) {
+        elements.push(
+          <ul key={`ul-${sectionIdx}-${elements.length}`} className="space-y-1.5 my-2 ml-1">
+            {listItems.map((item, i) => (
+              <li key={i} className="flex gap-2 items-start">
+                <span className="text-primary mt-1.5 flex-shrink-0">•</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        );
+        listItems = [];
+      }
+    };
+    
+    const flushNumberedList = () => {
+      if (numberedItems.length > 0) {
+        elements.push(
+          <ol key={`ol-${sectionIdx}-${elements.length}`} className="space-y-1.5 my-2 ml-1">
+            {numberedItems.map((item, i) => (
+              <li key={i} className="flex gap-2 items-start">
+                <span className="text-primary font-medium flex-shrink-0 min-w-[1.25rem]">{item.num}</span>
+                <span>{item.text}</span>
+              </li>
+            ))}
+          </ol>
+        );
+        numberedItems = [];
+      }
+    };
+    
+    lines.forEach((line, lineIdx) => {
+      const trimmed = line.trim();
+      
+      // Check for bullet points (-, *, •)
+      const bulletMatch = trimmed.match(/^[-*•]\s+(.+)$/);
+      if (bulletMatch) {
+        flushNumberedList();
+        listItems.push(bulletMatch[1]);
+        return;
+      }
+      
+      // Check for numbered lists (1., 2., etc.)
+      const numberedMatch = trimmed.match(/^(\d+)[.)]\s+(.+)$/);
+      if (numberedMatch) {
+        flushList();
+        numberedItems.push({ num: `${numberedMatch[1]}.`, text: numberedMatch[2] });
+        return;
+      }
+      
+      // Regular text - flush any pending lists first
+      flushList();
+      flushNumberedList();
+      
+      if (trimmed) {
+        // Check for bold text (**text** or __text__)
+        const formattedLine = trimmed.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/__(.+?)__/g, '<strong>$1</strong>');
+        
+        // Check if it looks like a header/title (short, ends with : or is all caps portion)
+        const isHeader = (trimmed.endsWith(':') && trimmed.length < 60) || 
+                         (trimmed.length < 40 && /^[A-Z]/.test(trimmed) && !trimmed.includes('.'));
+        
+        elements.push(
+          <p 
+            key={`p-${sectionIdx}-${lineIdx}`} 
+            className={isHeader ? "font-semibold text-foreground mt-2 first:mt-0" : ""}
+            dangerouslySetInnerHTML={{ __html: formattedLine }}
+          />
+        );
+      }
+    });
+    
+    // Flush any remaining lists
+    flushList();
+    flushNumberedList();
+    
+    return (
+      <div key={sectionIdx} className={sectionIdx > 0 ? "mt-3" : ""}>
+        {elements}
+      </div>
+    );
+  });
+};
+
 // Message bubble with truncation for long messages
 const MessageBubble: React.FC<{ 
   message: Message; 
@@ -118,7 +215,13 @@ const MessageBubble: React.FC<{
             className="max-w-full rounded-lg mb-2 max-h-48 object-cover"
           />
         )}
-        <p className="text-sm whitespace-pre-wrap">{displayContent}</p>
+        {message.role === 'assistant' ? (
+          <div className="text-sm space-y-1">
+            {formatAssistantMessage(displayContent)}
+          </div>
+        ) : (
+          <p className="text-sm whitespace-pre-wrap">{displayContent}</p>
+        )}
         {isLong && (
           <button
             onClick={() => setExpanded(!expanded)}
