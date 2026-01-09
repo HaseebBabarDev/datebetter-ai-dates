@@ -12,7 +12,7 @@ import { KeyRound, Shield, ArrowRight, Check } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { encryptSessionWithPin, PIN_SESSION_STORAGE_KEY } from "@/lib/pinCrypto";
+import { encryptSessionWithPin, getPinStorageKey, getPinEnabledKey } from "@/lib/pinCrypto";
 
 interface PinSetupDialogProps {
   open: boolean;
@@ -96,18 +96,19 @@ export const PinSetupDialog: React.FC<PinSetupDialogProps> = ({
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (session?.access_token && session?.refresh_token) {
+      if (session?.access_token && session?.refresh_token && user.email) {
+        const storageKey = getPinStorageKey(user.email);
         const encrypted = await encryptSessionWithPin(pin, {
           accessToken: session.access_token,
           refreshToken: session.refresh_token,
         });
-        localStorage.setItem(PIN_SESSION_STORAGE_KEY, encrypted);
+        localStorage.setItem(storageKey, encrypted);
       }
 
-      // Save email to localStorage for quick login
+      // Save email to localStorage for quick login (per-user)
       if (user.email) {
         localStorage.setItem("datebetter_saved_email", user.email);
-        localStorage.setItem("datebetter_pin_enabled", "true");
+        localStorage.setItem(getPinEnabledKey(user.email), "true");
       }
 
       toast({ title: "PIN set up successfully!" });
@@ -121,9 +122,12 @@ export const PinSetupDialog: React.FC<PinSetupDialogProps> = ({
   };
 
   const handleSkip = () => {
-    localStorage.removeItem("datebetter_pin_enabled");
+    // Don't clear other users' data - just skip for this user
+    if (user?.email) {
+      localStorage.removeItem(getPinEnabledKey(user.email));
+      localStorage.removeItem(getPinStorageKey(user.email));
+    }
     localStorage.removeItem("datebetter_saved_email");
-    localStorage.removeItem(PIN_SESSION_STORAGE_KEY);
     onSkip();
   };
 

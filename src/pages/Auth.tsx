@@ -12,7 +12,7 @@ import authBg from "@/assets/auth-bg.jpg";
 import { PinSetupDialog } from "@/components/auth/PinSetupDialog";
 import { PinLoginScreen } from "@/components/auth/PinLoginScreen";
 import { PinEnableQuickLoginDialog } from "@/components/auth/PinEnableQuickLoginDialog";
-import { PIN_SESSION_STORAGE_KEY } from "@/lib/pinCrypto";
+import { getPinStorageKey, getPinEnabledKey } from "@/lib/pinCrypto";
 import { BetaNdaDialog } from "@/components/auth/BetaNdaDialog";
 import { BetaWelcomeDialog } from "@/components/auth/BetaWelcomeDialog";
 import { useNdaAgreement } from "@/hooks/useNdaAgreement";
@@ -65,13 +65,16 @@ const Auth = () => {
   // Check for saved login on mount
   useEffect(() => {
     const storedEmail = localStorage.getItem("datebetter_saved_email");
-    const pinEnabled = localStorage.getItem("datebetter_pin_enabled");
-    const encryptedSession = localStorage.getItem(PIN_SESSION_STORAGE_KEY);
+    
+    if (storedEmail) {
+      // Check for per-user PIN enabled and encrypted session
+      const pinEnabledKey = getPinEnabledKey(storedEmail);
+      const pinStorageKey = getPinStorageKey(storedEmail);
+      const pinEnabled = localStorage.getItem(pinEnabledKey);
+      const encryptedSession = localStorage.getItem(pinStorageKey);
 
-    if (storedEmail && pinEnabled === "true") {
-      setSavedEmail(storedEmail);
-      // Only auto-show PIN login if we have an encrypted session on this device
-      if (encryptedSession && !user) {
+      if (pinEnabled === "true" && encryptedSession && !user) {
+        setSavedEmail(storedEmail);
         setShowPinLogin(true);
       }
     }
@@ -247,7 +250,7 @@ const Auth = () => {
                 // User has PIN - save email for quick login next time
                 if (currentUser.email) {
                   localStorage.setItem("datebetter_saved_email", currentUser.email);
-                  localStorage.setItem("datebetter_pin_enabled", "true");
+                  localStorage.setItem(getPinEnabledKey(currentUser.email), "true");
                 }
                 navigate("/dashboard");
               }
@@ -262,7 +265,7 @@ const Auth = () => {
               // User has PIN - save email for quick login next time
               if (currentUser.email) {
                 localStorage.setItem("datebetter_saved_email", currentUser.email);
-                localStorage.setItem("datebetter_pin_enabled", "true");
+                localStorage.setItem(getPinEnabledKey(currentUser.email), "true");
               }
               navigate(`/setup${setupQuery}`);
             }
@@ -306,9 +309,13 @@ const Auth = () => {
 
   const handleSwitchAccount = () => {
     setShowPinLogin(false);
-    setSavedEmail(null);
+    // Clear only the current saved email's PIN data, not all accounts
+    if (savedEmail) {
+      localStorage.removeItem(getPinEnabledKey(savedEmail));
+      localStorage.removeItem(getPinStorageKey(savedEmail));
+    }
     localStorage.removeItem("datebetter_saved_email");
-    localStorage.removeItem("datebetter_pin_enabled");
+    setSavedEmail(null);
   };
 
   const canSubmit = isSignUp 

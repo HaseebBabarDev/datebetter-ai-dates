@@ -11,7 +11,7 @@ import { PinInput } from "@/components/auth/PinInput";
 import { KeyRound, Check } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { encryptSessionWithPin, PIN_SESSION_STORAGE_KEY } from "@/lib/pinCrypto";
+import { encryptSessionWithPin, getPinStorageKey, getPinEnabledKey } from "@/lib/pinCrypto";
 
 interface PinEnableQuickLoginDialogProps {
   open: boolean;
@@ -91,16 +91,21 @@ export const PinEnableQuickLoginDialog: React.FC<PinEnableQuickLoginDialogProps>
         return;
       }
 
+      if (!email) {
+        toast({ title: "Email required", description: "Cannot enable PIN without email", variant: "destructive" });
+        onSkip();
+        return;
+      }
+
+      const storageKey = getPinStorageKey(email);
       const encrypted = await encryptSessionWithPin(pin, {
         accessToken: session.access_token,
         refreshToken: session.refresh_token,
       });
-      localStorage.setItem(PIN_SESSION_STORAGE_KEY, encrypted);
+      localStorage.setItem(storageKey, encrypted);
 
-      if (email) {
-        localStorage.setItem("datebetter_saved_email", email);
-        localStorage.setItem("datebetter_pin_enabled", "true");
-      }
+      localStorage.setItem("datebetter_saved_email", email);
+      localStorage.setItem(getPinEnabledKey(email), "true");
 
       toast({ title: "PIN quick sign-in enabled" });
       onComplete();

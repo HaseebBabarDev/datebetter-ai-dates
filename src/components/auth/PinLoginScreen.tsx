@@ -8,7 +8,8 @@ import authBg from "@/assets/auth-bg.jpg";
 import {
   decryptSessionWithPin,
   encryptSessionWithPin,
-  PIN_SESSION_STORAGE_KEY,
+  getPinStorageKey,
+  getPinEnabledKey,
 } from "@/lib/pinCrypto";
 
 interface PinLoginScreenProps {
@@ -34,7 +35,9 @@ export const PinLoginScreen: React.FC<PinLoginScreenProps> = ({
   const handlePinLogin = async () => {
     if (pin.length !== 4) return;
 
-    const encrypted = localStorage.getItem(PIN_SESSION_STORAGE_KEY);
+    // Use per-user storage key
+    const storageKey = getPinStorageKey(email);
+    const encrypted = localStorage.getItem(storageKey);
     if (!encrypted) {
       // Silently redirect to password login - no error toast needed
       onSwitchAccount();
@@ -51,7 +54,8 @@ export const PinLoginScreen: React.FC<PinLoginScreenProps> = ({
       });
 
       if (error || !data.session) {
-        localStorage.removeItem(PIN_SESSION_STORAGE_KEY);
+        localStorage.removeItem(storageKey);
+        localStorage.removeItem(getPinEnabledKey(email));
         toast({
           title: "Session expired",
           description: "Please sign in with your password again.",
@@ -68,7 +72,7 @@ export const PinLoginScreen: React.FC<PinLoginScreenProps> = ({
           accessToken: data.session.access_token,
           refreshToken: data.session.refresh_token,
         });
-        localStorage.setItem(PIN_SESSION_STORAGE_KEY, newEncrypted);
+        localStorage.setItem(storageKey, newEncrypted);
       }
 
       toast({ title: "Welcome back!" });
@@ -81,8 +85,8 @@ export const PinLoginScreen: React.FC<PinLoginScreenProps> = ({
       toast({ title: "Incorrect PIN", variant: "destructive" });
 
       if (next >= 3) {
-        localStorage.removeItem(PIN_SESSION_STORAGE_KEY);
-        localStorage.removeItem("datebetter_pin_enabled");
+        localStorage.removeItem(storageKey);
+        localStorage.removeItem(getPinEnabledKey(email));
         toast({
           title: "Too many attempts",
           description: "Please sign in with your password.",

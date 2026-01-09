@@ -5,7 +5,8 @@ import { Lock, Trash2, RefreshCw, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { PinInput } from "@/components/auth/PinInput";
-import { encryptSessionWithPin, PIN_SESSION_STORAGE_KEY } from "@/lib/pinCrypto";
+import { encryptSessionWithPin, getPinStorageKey, getPinEnabledKey } from "@/lib/pinCrypto";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ async function hashPin(pin: string): Promise<string> {
 }
 
 export const PinManagement: React.FC<PinManagementProps> = ({ userId }) => {
+  const { user } = useAuth();
   const [hasPin, setHasPin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showResetDialog, setShowResetDialog] = useState(false);
@@ -35,6 +37,7 @@ export const PinManagement: React.FC<PinManagementProps> = ({ userId }) => {
   const [confirmPin, setConfirmPin] = useState("");
   const [resetStep, setResetStep] = useState<"enter" | "confirm">("enter");
   const [saving, setSaving] = useState(false);
+  const userEmail = user?.email;
 
   useEffect(() => {
     checkPinStatus();
@@ -81,10 +84,12 @@ export const PinManagement: React.FC<PinManagementProps> = ({ userId }) => {
 
       if (error) throw error;
 
-      // Clear localStorage
-      localStorage.removeItem("datebetter_pin_enabled");
+      // Clear per-user localStorage
+      if (userEmail) {
+        localStorage.removeItem(getPinEnabledKey(userEmail));
+        localStorage.removeItem(getPinStorageKey(userEmail));
+      }
       localStorage.removeItem("datebetter_saved_email");
-      localStorage.removeItem(PIN_SESSION_STORAGE_KEY);
       sessionStorage.removeItem("datebetter_temp_session");
 
       setHasPin(false);
@@ -149,19 +154,23 @@ export const PinManagement: React.FC<PinManagementProps> = ({ userId }) => {
         if (error) throw error;
       }
 
-      // Update localStorage
-      localStorage.setItem("datebetter_pin_enabled", "true");
+      // Update per-user localStorage
+      if (userEmail) {
+        localStorage.setItem(getPinEnabledKey(userEmail), "true");
+        localStorage.setItem("datebetter_saved_email", userEmail);
+      }
 
       // Store encrypted session for PIN quick login on this device
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      if (session?.access_token && session?.refresh_token) {
+      if (session?.access_token && session?.refresh_token && userEmail) {
+        const storageKey = getPinStorageKey(userEmail);
         const encrypted = await encryptSessionWithPin(newPin, {
           accessToken: session.access_token,
           refreshToken: session.refresh_token,
         });
-        localStorage.setItem(PIN_SESSION_STORAGE_KEY, encrypted);
+        localStorage.setItem(storageKey, encrypted);
       }
 
       setHasPin(true);
