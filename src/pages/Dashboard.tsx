@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
+import { QuickCandidateSelect } from "@/components/dashboard/QuickCandidateSelect";
 import { CandidatesList } from "@/components/dashboard/CandidatesList";
 import { LogInteractionDialog } from "@/components/dashboard/LogInteractionDialog";
 import { useTour, DASHBOARD_TOUR_STEPS, TourRestartButton } from "@/components/tour";
@@ -802,6 +803,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-0.5">
+              <QuickCandidateSelect candidates={candidates} />
               <TourRestartButton tourId="dashboard" tourSteps={DASHBOARD_TOUR_STEPS} />
               <TooltipProvider delayDuration={300}>
                 <Tooltip>
