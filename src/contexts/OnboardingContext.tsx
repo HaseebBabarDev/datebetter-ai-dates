@@ -130,6 +130,7 @@ export interface OnboardingData {
   caregiverConsistency?: string;
   healthyRelationshipModels?: boolean;
   generationalPatterns?: string[];
+  familyUpbringingNotes?: string;
   
   // Screen 16: Relationship Trauma
   pastRelationshipTraumas?: any[]; // Array of PastRelationship objects
@@ -285,6 +286,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
             familyStability: (profile as any).family_stability || undefined,
             healthyRelationshipModels: (profile as any).healthy_relationship_models ?? undefined,
             generationalPatterns: (profile as any).generational_patterns as string[] || undefined,
+            familyUpbringingNotes: (profile as any).family_upbringing_notes || undefined,
             pastRelationshipTraumas: (profile as any).past_relationship_traumas || undefined,
             relationshipTraumaNotes: (profile as any).relationship_trauma_notes || undefined,
             dealbreakers: profile.dealbreakers as string[] || undefined,
@@ -420,6 +422,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         family_stability: currentData.familyStability,
         healthy_relationship_models: currentData.healthyRelationshipModels,
         generational_patterns: currentData.generationalPatterns,
+        family_upbringing_notes: currentData.familyUpbringingNotes,
         past_relationship_traumas: currentData.pastRelationshipTraumas,
         relationship_trauma_notes: currentData.relationshipTraumaNotes,
         dealbreakers: currentData.dealbreakers,

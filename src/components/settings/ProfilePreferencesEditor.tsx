@@ -5,6 +5,7 @@ import { Tables, Enums } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -2118,6 +2119,20 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                   );
                 })}
               </div>
+            </div>
+            
+            {/* Free-form notes about family experience */}
+            <div className="space-y-2">
+              <Label>Anything else about your family or upbringing? (optional)</Label>
+              <Textarea
+                value={(formData as any).family_upbringing_notes || ""}
+                onChange={(e) => updateField("family_upbringing_notes" as any, e.target.value)}
+                placeholder="Share any context about your childhood, family dynamics, or experiences that shape how you approach relationships today..."
+                className="min-h-[100px] resize-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                This helps D.E.V.I. understand your unique story and provide more personalized guidance.
+              </p>
             </div>
             
             <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("family", e)}>
