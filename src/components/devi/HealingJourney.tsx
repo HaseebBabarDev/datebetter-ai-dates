@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Heart, Sparkles, TrendingUp, TrendingDown, RefreshCw, Send, AlertTriangle, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { HealingProgressChart } from "./HealingProgressChart";
 
 interface HealingData {
   healingScore: number | null;
@@ -235,6 +236,9 @@ export const HealingJourney: React.FC<HealingJourneyProps> = ({ onClose, compact
               </Button>
             </div>
 
+            {/* Healing Progress Chart */}
+            <HealingProgressChart compact />
+
             {/* View patterns link */}
             <Button
               variant="ghost"
@@ -242,7 +246,7 @@ export const HealingJourney: React.FC<HealingJourneyProps> = ({ onClose, compact
               onClick={() => navigate("/patterns?tab=healing")}
               className="w-full gap-2 text-muted-foreground hover:text-foreground"
             >
-              View healing history
+              View full healing history
               <ChevronRight className="w-4 h-4" />
             </Button>
           </>
