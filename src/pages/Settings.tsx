@@ -132,31 +132,67 @@ const Settings = () => {
 
   useEffect(() => {
     if (user) {
-      fetchProfile();
-      fetchSubscription();
-      checkAdminStatus();
-      fetchReferralStats();
+      fetchAllData();
     }
   }, [user]);
 
-  const fetchReferralStats = async () => {
+  const fetchAllData = async () => {
     try {
-      const { data, error } = await supabase
-        .from("referrals")
-        .select("*")
-        .eq("referrer_id", user!.id);
+      // Fetch all data in parallel for faster load times
+      const [profileRes, subscriptionRes, adminRes, referralRes] = await Promise.all([
+        supabase.from("profiles").select("*").eq("user_id", user!.id).single(),
+        supabase.from("user_subscriptions").select("*").eq("user_id", user!.id).maybeSingle(),
+        supabase.from("user_roles").select("role").eq("user_id", user!.id).eq("role", "admin").maybeSingle(),
+        supabase.from("referrals").select("*").eq("referrer_id", user!.id),
+      ]);
 
-      if (error) throw error;
+      // Process profile
+      if (profileRes.data) {
+        const data = profileRes.data;
+        setProfile(data);
+        setName(data.name || "");
+        setAvatarUrl(data.avatar_url || null);
+        if (data.birth_date) {
+          setBirthDate(parse(data.birth_date, "yyyy-MM-dd", new Date()));
+        }
+        setCity(data.city || "");
+        setState(data.state || "");
+        setCountry(data.country || "");
+        setGenderIdentity(data.gender_identity || "");
+        setPronouns(data.pronouns || "");
+        setSexualOrientation(data.sexual_orientation || "");
+        setScreenName(data.screen_name || "");
+      }
 
-      const total = data?.length || 0;
-      const converted = data?.filter(r => r.status === "converted").length || 0;
-      const trialEarned = data?.some(r => r.trial_granted) || false;
+      // Process subscription
+      if (subscriptionRes.data?.plan) {
+        const validPlans: SubscriptionPlan[] = ["free", "new_to_dating", "dating_often", "dating_more", "unlimited"];
+        const plan = validPlans.includes(subscriptionRes.data.plan as SubscriptionPlan) 
+          ? subscriptionRes.data.plan as SubscriptionPlan 
+          : "free";
+        setCurrentPlan(plan);
+      }
 
-      setReferralStats({ total, converted, trialEarned });
+      // Process admin status
+      if (adminRes.data) {
+        setIsAdmin(true);
+        fetchAllUsers();
+      }
+
+      // Process referrals
+      if (referralRes.data) {
+        const total = referralRes.data.length;
+        const converted = referralRes.data.filter(r => r.status === "converted").length;
+        const trialEarned = referralRes.data.some(r => r.trial_granted);
+        setReferralStats({ total, converted, trialEarned });
+      }
     } catch (error) {
-      console.error("Error fetching referral stats:", error);
+      console.error("Error fetching settings data:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
 
   const referralCode = user?.id ? `DEVI-${user.id.slice(0, 6).toUpperCase()}` : "DEVI-FRIEND";
   const referralLink = `${window.location.origin}/auth?ref=${referralCode}`;
@@ -198,23 +234,6 @@ const Settings = () => {
     }
   }, [loading, profile, startTour, hasCompletedTour]);
 
-  const checkAdminStatus = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user!.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (!error && data) {
-        setIsAdmin(true);
-        fetchAllUsers();
-      }
-    } catch (error) {
-      console.error("Error checking admin status:", error);
-    }
-  };
 
   const fetchAllUsers = async () => {
     setLoadingUsers(true);
@@ -344,25 +363,6 @@ const Settings = () => {
     }
   };
 
-  const fetchSubscription = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("user_subscriptions")
-        .select("*")
-        .eq("user_id", user!.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      if (data && data.plan) {
-        // Validate that the plan is a known value
-        const validPlans: SubscriptionPlan[] = ["free", "new_to_dating", "dating_often", "dating_more", "unlimited"];
-        const plan = validPlans.includes(data.plan as SubscriptionPlan) ? data.plan as SubscriptionPlan : "free";
-        setCurrentPlan(plan);
-      }
-    } catch (error) {
-      console.error("Error fetching subscription:", error);
-    }
-  };
 
   const handleChangePlan = async (newPlan: SubscriptionPlan) => {
     if (newPlan === currentPlan) return;
@@ -431,36 +431,6 @@ const Settings = () => {
     }
   };
 
-  const fetchProfile = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", user!.id)
-        .single();
-
-      if (error) throw error;
-      if (data) {
-        setProfile(data);
-        setName(data.name || "");
-        setAvatarUrl(data.avatar_url || null);
-        if (data.birth_date) {
-          setBirthDate(parse(data.birth_date, "yyyy-MM-dd", new Date()));
-        }
-        setCity(data.city || "");
-        setState(data.state || "");
-        setCountry(data.country || "");
-        setGenderIdentity(data.gender_identity || "");
-        setPronouns(data.pronouns || "");
-        setSexualOrientation(data.sexual_orientation || "");
-        setScreenName(data.screen_name || "");
-      }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSaveAccount = async () => {
     setSaving(true);

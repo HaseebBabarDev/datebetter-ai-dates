@@ -74,29 +74,38 @@ const Community = () => {
       navigate("/auth");
       return;
     }
-    checkScreenName();
-    fetchUnreadCount();
+    fetchCommunityData();
   }, [user]);
 
-  const checkScreenName = async () => {
+  const fetchCommunityData = async () => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("screen_name")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      // Fetch screen name and unread count in parallel
+      const [profileRes, unreadRes] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("screen_name")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("direct_messages")
+          .select("*", { count: "exact", head: true })
+          .eq("recipient_id", user.id)
+          .eq("is_read", false),
+      ]);
 
-      if (error) throw error;
-      
-      if (data?.screen_name) {
-        setScreenName(data.screen_name);
+      if (profileRes.data?.screen_name) {
+        setScreenName(profileRes.data.screen_name);
       } else {
         setShowScreenNameSetup(true);
       }
+
+      if (!unreadRes.error && unreadRes.count) {
+        setUnreadCount(unreadRes.count);
+      }
     } catch (error) {
-      console.error("Error checking screen name:", error);
+      console.error("Error fetching community data:", error);
     } finally {
       setLoading(false);
     }
