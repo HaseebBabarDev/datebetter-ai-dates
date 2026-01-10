@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { OnboardingLayout } from "../OnboardingLayout";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { OptionCard } from "../OptionCard";
 import { MultiSelectOption } from "../MultiSelectOption";
 import { Heart, AlertTriangle, Shield, Users, PenLine } from "lucide-react";
+import { detectCrisisContent } from "@/lib/crisisDetection";
+import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
 
 const parentStatusOptions = [
   { value: "married_together", label: "Married Together", description: "Parents married and living together" },
@@ -106,7 +108,28 @@ const generationalPatterns = [
 
 const FamilyUpbringingScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
+  
+  // Crisis detection state
+  const [showCrisisAlert, setShowCrisisAlert] = useState(false);
+  const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
+  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content">("crisis");
 
+  const handleFamilyNotesChange = (notes: string) => {
+    // Check for crisis/harmful content
+    const crisisResult = detectCrisisContent(notes);
+    if (crisisResult.detected) {
+      setCrisisSeverity(crisisResult.severity);
+      setCrisisCategory(crisisResult.category || "crisis");
+      setShowCrisisAlert(true);
+      
+      // For harmful content, don't allow the update
+      if (crisisResult.category === "harmful_content") {
+        return;
+      }
+    }
+    
+    updateData({ familyUpbringingNotes: notes });
+  };
   const toggleParentWound = (wound: string) => {
     const current = data.parentWoundTypes || [];
     if (wound === "None of these apply") {
@@ -404,7 +427,7 @@ const FamilyUpbringingScreen = () => {
           </Label>
           <Textarea
             value={data.familyUpbringingNotes || ""}
-            onChange={(e) => updateData({ familyUpbringingNotes: e.target.value })}
+            onChange={(e) => handleFamilyNotesChange(e.target.value)}
             placeholder="Share any context about your childhood, family dynamics, or experiences that shape how you approach relationships today..."
             className="min-h-[100px] resize-none"
           />
@@ -417,6 +440,14 @@ const FamilyUpbringingScreen = () => {
           Continue
         </Button>
       </div>
+
+      {/* Crisis Alert Dialog */}
+      <CrisisAlertDialog
+        open={showCrisisAlert}
+        onClose={() => setShowCrisisAlert(false)}
+        severity={crisisSeverity}
+        category={crisisCategory}
+      />
     </OnboardingLayout>
   );
 };

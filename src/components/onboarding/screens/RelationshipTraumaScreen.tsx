@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MultiSelectOption } from "../MultiSelectOption";
 import { Heart, Plus, Trash2, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
+import { detectCrisisContent } from "@/lib/crisisDetection";
+import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
 import {
   Accordion,
   AccordionContent,
@@ -89,6 +91,11 @@ const RelationshipTraumaScreen = () => {
     (data.pastRelationshipTraumas as PastRelationship[]) || []
   );
   const [generalNotes, setGeneralNotes] = useState(data.relationshipTraumaNotes || "");
+  
+  // Crisis detection state
+  const [showCrisisAlert, setShowCrisisAlert] = useState(false);
+  const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
+  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content">("crisis");
 
   const addRelationship = () => {
     const newRel = createEmptyRelationship();
@@ -104,6 +111,21 @@ const RelationshipTraumaScreen = () => {
   };
 
   const updateRelationship = (id: string, field: keyof PastRelationship, value: any) => {
+    // Apply content validation for notes field
+    if (field === "notes" && typeof value === "string") {
+      const crisisResult = detectCrisisContent(value);
+      if (crisisResult.detected) {
+        setCrisisSeverity(crisisResult.severity);
+        setCrisisCategory(crisisResult.category || "crisis");
+        setShowCrisisAlert(true);
+        
+        // For harmful content, don't allow the update
+        if (crisisResult.category === "harmful_content") {
+          return;
+        }
+      }
+    }
+    
     const updated = relationships.map(r => 
       r.id === id ? { ...r, [field]: value } : r
     );
@@ -128,6 +150,19 @@ const RelationshipTraumaScreen = () => {
   };
 
   const handleGeneralNotesChange = (notes: string) => {
+    // Check for crisis/harmful content
+    const crisisResult = detectCrisisContent(notes);
+    if (crisisResult.detected) {
+      setCrisisSeverity(crisisResult.severity);
+      setCrisisCategory(crisisResult.category || "crisis");
+      setShowCrisisAlert(true);
+      
+      // For harmful content, don't allow the update
+      if (crisisResult.category === "harmful_content") {
+        return;
+      }
+    }
+    
     setGeneralNotes(notes);
     updateData({ relationshipTraumaNotes: notes });
   };
@@ -296,6 +331,14 @@ const RelationshipTraumaScreen = () => {
           Continue
         </Button>
       </div>
+
+      {/* Crisis Alert Dialog */}
+      <CrisisAlertDialog
+        open={showCrisisAlert}
+        onClose={() => setShowCrisisAlert(false)}
+        severity={crisisSeverity}
+        category={crisisCategory}
+      />
     </OnboardingLayout>
   );
 };
