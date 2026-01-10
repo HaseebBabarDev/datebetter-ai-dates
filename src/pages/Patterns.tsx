@@ -767,7 +767,7 @@ const Patterns = () => {
 
             {/* Healing Tab */}
             <TabsContent value="healing" className="space-y-4">
-              <HealingProgressChart />
+              <HealingProgressChart showInsights={true} />
               
               <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
                 <CardHeader className="pb-2">
