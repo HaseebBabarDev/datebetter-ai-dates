@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, Minus, Calendar, ChevronDown, ChevronUp } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Calendar, ChevronDown, ChevronUp, Sparkles, MessageCircle } from "lucide-react";
 import { format, subDays, parseISO } from "date-fns";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   LineChart,
   Line,
@@ -30,14 +31,16 @@ interface HealingScore {
 
 interface HealingProgressChartProps {
   compact?: boolean;
+  showInsights?: boolean;
 }
 
-export const HealingProgressChart: React.FC<HealingProgressChartProps> = ({ compact = false }) => {
+export const HealingProgressChart: React.FC<HealingProgressChartProps> = ({ compact = false, showInsights = false }) => {
   const { user } = useAuth();
   const [scores, setScores] = useState<HealingScore[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
   const [selectedScore, setSelectedScore] = useState<HealingScore | null>(null);
+  const [showAllInsights, setShowAllInsights] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -289,6 +292,73 @@ export const HealingProgressChart: React.FC<HealingProgressChartProps> = ({ comp
             {overallChange === 0 && " Stay consistent with your healing work."}
           </p>
         </div>
+
+        {/* AI Insights History */}
+        {showInsights && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" />
+                D.E.V.I.'s Insights
+              </h4>
+              {scores.filter(s => s.ai_insights).length > 3 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowAllInsights(!showAllInsights)}
+                  className="h-7 text-xs"
+                >
+                  {showAllInsights ? 'Show Less' : `View All (${scores.filter(s => s.ai_insights).length})`}
+                </Button>
+              )}
+            </div>
+            <ScrollArea className={showAllInsights ? "h-[400px]" : undefined}>
+              <div className="space-y-2">
+                {(showAllInsights ? scores : scores.slice(-3))
+                  .filter(s => s.ai_insights)
+                  .reverse()
+                  .map((score) => (
+                    <div 
+                      key={score.id}
+                      className="p-3 rounded-lg bg-muted/50 border border-border/50 space-y-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className={`text-sm font-semibold ${
+                          score.score >= 75 ? 'text-green-500' : 
+                          score.score >= 50 ? 'text-amber-500' : 'text-rose-500'
+                        }`}>
+                          {score.score}%
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {format(parseISO(score.created_at), "MMM d, yyyy")}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {score.ai_insights}
+                      </p>
+                      {score.score_change !== null && score.score_change !== 0 && (
+                        <div className={`flex items-center gap-1 text-xs ${
+                          score.score_change > 0 ? 'text-green-500' : 'text-rose-500'
+                        }`}>
+                          {score.score_change > 0 ? (
+                            <TrendingUp className="w-3 h-3" />
+                          ) : (
+                            <TrendingDown className="w-3 h-3" />
+                          )}
+                          {score.score_change > 0 ? '+' : ''}{score.score_change} from previous
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                {scores.filter(s => s.ai_insights).length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No insights yet. Chat with D.E.V.I. about your healing to get personalized insights.
+                  </p>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
