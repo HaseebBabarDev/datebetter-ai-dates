@@ -27,7 +27,7 @@ import {
   User, Heart, Users, Baby, Church, Vote, Briefcase, 
   MapPin, Sparkles, MessageCircle, Brain, Shield, Lock, Save,
   Target, Stethoscope, Ruler, TrendingDown, DollarSign, CheckCircle2, AlertCircle,
-  Home
+  Home, AlertTriangle
 } from "lucide-react";
 import { toast } from "sonner";
 import { MultiSelectOption } from "@/components/onboarding/MultiSelectOption";
@@ -498,6 +498,15 @@ const GENERATIONAL_PATTERN_OPTIONS = [
   "None I'm aware of",
 ];
 
+const EX_CONTACT_OPTIONS = [
+  { value: "no_contact", label: "No contact at all" },
+  { value: "occasional", label: "Occasional contact (rare texts/calls)" },
+  { value: "regular", label: "Regular contact (friends)" },
+  { value: "frequent", label: "Frequent contact (talk often)" },
+  { value: "still_connected", label: "Still emotionally connected" },
+  { value: "not_applicable", label: "No significant exes" },
+];
+
 // Height stats: ~14.5% of US men are 6ft+
 const getHeightPoolImpact = () => ({ percent: 14.5, shrink: 85.5 });
 
@@ -578,7 +587,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
     }
   };
 
-  const SECTION_ORDER = ["identity", "motivation", "relationship", "partner_prefs", "kids", "faith", "politics", "career", "income", "lifestyle", "physical", "communication", "mental_health", "neurodivergence", "past_relationships", "attachment", "family", "boundaries", "intimacy", "devi", "cycle"];
+  const SECTION_ORDER = ["identity", "motivation", "relationship", "partner_prefs", "kids", "faith", "politics", "career", "income", "lifestyle", "physical", "communication", "mental_health", "neurodivergence", "past_relationships", "attachment", "family", "healing", "boundaries", "intimacy", "devi", "cycle"];
   
   const SECTION_CONFIG: Record<string, { 
     label: string; 
@@ -602,6 +611,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
     past_relationships: { label: "Past Relationships", icon: <Heart className="w-3.5 h-3.5" />, requiredFields: [] },
     attachment: { label: "Attachment & Patterns", icon: <Brain className="w-3.5 h-3.5" />, requiredFields: ["attachment_style"] },
     family: { label: "Family & Upbringing", icon: <Home className="w-3.5 h-3.5" />, requiredFields: [] },
+    healing: { label: "Healing Journey", icon: <Heart className="w-3.5 h-3.5" />, requiredFields: [] },
     boundaries: { label: "Boundaries & Dealbreakers", icon: <Shield className="w-3.5 h-3.5" />, requiredFields: ["boundary_strength"] },
     intimacy: { label: "Intimacy & Safety", icon: <Lock className="w-3.5 h-3.5" />, requiredFields: [] },
     devi: { label: "D.E.V.I. Settings", icon: <Sparkles className="w-3.5 h-3.5" />, requiredFields: [] },
@@ -2171,6 +2181,149 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
             
             <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("family", e)}>
               Next
+            </Button>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Healing Journey */}
+        <AccordionItem value="healing" data-value="healing" className="border rounded-lg px-4 border-primary/20 bg-primary/5">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2 flex-1">
+              <Heart className="w-4 h-4 text-primary" />
+              <span className="font-medium">Healing Journey</span>
+              {(formData as any).healing_score && <span className="ml-auto text-sm font-bold text-primary">{(formData as any).healing_score}%</span>}
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pb-4">
+            <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-xs text-muted-foreground">
+              <Sparkles className="h-4 w-4 text-primary inline mr-1" />
+              Understanding where you are in your healing journey helps D.E.V.I. provide better support and determine if you're ready to date.
+            </div>
+
+            {/* Current Score Display */}
+            {(formData as any).healing_score && (
+              <div className="text-center p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+                <div className="text-3xl font-bold text-primary mb-1">{(formData as any).healing_score}%</div>
+                <div className="text-sm text-muted-foreground">Your Healing Score</div>
+                <Progress value={(formData as any).healing_score} className="h-2 mt-2" />
+                <div className="mt-2 text-xs">
+                  {(formData as any).healing_score >= 75 ? (
+                    <span className="text-green-600 font-medium">✓ Ready to date!</span>
+                  ) : (formData as any).healing_score >= 50 ? (
+                    <span className="text-amber-600 font-medium">Getting there — keep going!</span>
+                  ) : (
+                    <span className="text-rose-600 font-medium">Focus on healing first</span>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label>Are you still in contact with your ex(es)?</Label>
+              <Select
+                value={(formData as any).ex_contact_status || ""}
+                onValueChange={(v) => updateField("ex_contact_status" as any, v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {EX_CONTACT_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {(formData as any).ex_contact_status && (formData as any).ex_contact_status !== "not_applicable" && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>How over your most recent significant ex are you?</Label>
+                  <p className="text-xs text-muted-foreground">Be honest — this helps D.E.V.I. support you better</p>
+                </div>
+                <div className="pt-2 pb-4">
+                  <Slider
+                    value={[(formData as any).over_ex_level || 50]}
+                    onValueChange={(v) => updateField("over_ex_level" as any, v[0])}
+                    max={100}
+                    step={5}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between mt-2 text-xs">
+                    <span className="text-muted-foreground">Still attached</span>
+                    <span className="font-medium text-primary">
+                      {(() => {
+                        const val = (formData as any).over_ex_level || 50;
+                        if (val <= 20) return "Still deeply attached";
+                        if (val <= 40) return "Working through it";
+                        if (val <= 60) return "Making progress";
+                        if (val <= 80) return "Mostly moved on";
+                        return "Completely over them";
+                      })()}
+                    </span>
+                    <span className="text-muted-foreground">Completely over</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>How attached are you to past relationship patterns?</Label>
+                <p className="text-xs text-muted-foreground">Consider if you find yourself repeating the same dynamics</p>
+              </div>
+              <div className="pt-2 pb-4">
+                <Slider
+                  value={[(formData as any).attachment_to_past || 50]}
+                  onValueChange={(v) => updateField("attachment_to_past" as any, v[0])}
+                  max={100}
+                  step={5}
+                  className="w-full"
+                />
+                <div className="flex justify-between mt-2 text-xs">
+                  <span className="text-muted-foreground">Detached</span>
+                  <span className="font-medium text-primary">
+                    {(() => {
+                      const val = (formData as any).attachment_to_past || 50;
+                      if (val <= 20) return "Very detached";
+                      if (val <= 40) return "Mostly detached";
+                      if (val <= 60) return "Neutral";
+                      if (val <= 80) return "Somewhat attached";
+                      return "Very attached to past";
+                    })()}
+                  </span>
+                  <span className="text-muted-foreground">Very attached</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+              <div className="text-xs text-muted-foreground">
+                <p className="font-medium text-foreground mb-1">Healing isn't linear</p>
+                <p>It's okay to not be "over it" yet. D.E.V.I. is here to support your journey, wherever you are.</p>
+              </div>
+            </div>
+
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full mt-2" 
+              onClick={async (e) => {
+                e.preventDefault();
+                try {
+                  const { data, error } = await supabase.functions.invoke("calculate-healing-score", {
+                    body: { triggerType: "settings_refresh" },
+                  });
+                  if (!error && data) {
+                    updateField("healing_score" as any, data.healingScore);
+                    toast.success(`Healing score updated: ${data.healingScore}%`);
+                  }
+                } catch (err) {
+                  console.error("Error calculating score:", err);
+                }
+                goToNextSection("healing", e);
+              }}
+            >
+              Calculate & Continue
             </Button>
           </AccordionContent>
         </AccordionItem>
