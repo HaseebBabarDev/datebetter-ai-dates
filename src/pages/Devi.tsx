@@ -1609,8 +1609,8 @@ const Devi = () => {
                 </div>
               )}
 
-              {/* Healing Journey - show when messages is empty */}
-              {hasFullProfile && (
+              {/* Healing Journey - show only in general chat mode (no candidate selected) */}
+              {hasFullProfile && !selectedCandidate && (
                 <div className="pl-10 mt-4">
                   <HealingJourney />
                 </div>
