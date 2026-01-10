@@ -2542,6 +2542,27 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               onClick={async (e) => {
                 e.preventDefault();
                 try {
+                  // First save the healing fields to the database so the edge function can read them
+                  const healingFields = {
+                    ex_contact_status: (formData as any).ex_contact_status,
+                    over_ex_level: (formData as any).over_ex_level,
+                    attachment_to_past: (formData as any).attachment_to_past,
+                    past_relationship_traumas: (formData as any).past_relationship_traumas,
+                    relationship_trauma_notes: (formData as any).relationship_trauma_notes,
+                  };
+                  
+                  const { error: saveError } = await supabase
+                    .from("profiles")
+                    .update(healingFields)
+                    .eq("user_id", user!.id);
+                  
+                  if (saveError) {
+                    console.error("Error saving healing fields:", saveError);
+                    toast.error("Failed to save - please try again");
+                    return;
+                  }
+                  
+                  // Now calculate the score with the updated values
                   const { data, error } = await supabase.functions.invoke("calculate-healing-score", {
                     body: { triggerType: "settings_refresh" },
                   });
@@ -2551,6 +2572,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
                   }
                 } catch (err) {
                   console.error("Error calculating score:", err);
+                  toast.error("Failed to calculate score");
                 }
                 goToNextSection("healing", e);
               }}

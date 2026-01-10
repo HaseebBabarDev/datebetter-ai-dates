@@ -118,25 +118,26 @@ serve(async (req) => {
       "not_applicable": "No significant exes",
     };
 
-    // Map over_ex_level to description
-    const getOverExDescription = (level: number | null) => {
-      if (level === null) return "not specified";
-      if (level <= 20) return `${level}% - Still deeply attached`;
-      if (level <= 40) return `${level}% - Working through it`;
-      if (level <= 60) return `${level}% - Making progress`;
-      if (level <= 80) return `${level}% - Mostly moved on`;
-      return `${level}% - Completely over them`;
-    };
+  // Map over_ex_level to description (0=still attached, 100=completely over)
+  const getOverExDescription = (level: number | null) => {
+    if (level === null) return "not specified";
+    if (level <= 20) return `${level}% - Still deeply attached (very unhealthy for dating)`;
+    if (level <= 40) return `${level}% - Working through it (needs more healing)`;
+    if (level <= 60) return `${level}% - Making progress (getting there)`;
+    if (level <= 80) return `${level}% - Mostly moved on (good progress)`;
+    return `${level}% - Completely over them (healthy and ready)`;
+  };
 
-    // Map attachment_to_past to description
-    const getAttachmentDescription = (level: number | null) => {
-      if (level === null) return "not specified";
-      if (level <= 20) return `${level}% - Very detached from past patterns`;
-      if (level <= 40) return `${level}% - Mostly detached`;
-      if (level <= 60) return `${level}% - Neutral`;
-      if (level <= 80) return `${level}% - Somewhat attached to past patterns`;
-      return `${level}% - Very attached to past patterns`;
-    };
+  // Map attachment_to_past to description (0=detached/healthy, 100=very attached/unhealthy)
+  // IMPORTANT: Lower values = healthier (more detached from toxic patterns)
+  const getAttachmentDescription = (level: number | null) => {
+    if (level === null) return "not specified";
+    if (level <= 20) return `${level}% - Very detached from past patterns (HEALTHY)`;
+    if (level <= 40) return `${level}% - Mostly detached (GOOD)`;
+    if (level <= 60) return `${level}% - Neutral (moderate attachment)`;
+    if (level <= 80) return `${level}% - Somewhat attached to past patterns (CONCERNING)`;
+    return `${level}% - Very attached to past patterns (UNHEALTHY - needs work)`;
+  };
 
     let healingScore = 50; // default fallback
     let aiInsights = "";
@@ -182,17 +183,26 @@ ${relationshipSummaries.map((s, i) => `${i + 1}. ${s}`).join('\n')}
 
 ${dailyFeeling ? `**Today's Feeling:** "${dailyFeeling}"` : ''}
 
-## SCORING CRITERIA:
+## SCORING CRITERIA (CRITICAL - READ CAREFULLY):
 
-Consider these factors when calculating the score:
-1. **Ex Contact (Weight: 20%)** - No contact = higher score, still connected = lower
-2. **Over Ex Level (Weight: 25%)** - Higher % = more healed
-3. **Attachment to Past Patterns (Weight: 20%)** - Lower attachment = better
-4. **Trauma History (Weight: 20%)** - Consider severity and quantity of traumas
-   - Severe traumas (abuse, cheating, manipulation) impact more
-   - Having awareness of traumas is positive
-   - "None of these apply" is neutral-positive
-5. **Relationship Patterns (Weight: 15%)** - How relationships ended, duration, patterns
+The score should INVERSELY relate to negative indicators:
+1. **Ex Contact (Weight: 20%)** 
+   - "No contact at all" or "No significant exes" = HIGH score (16-20 pts)
+   - "Frequent contact" or "Still connected" = LOW score (0-5 pts)
+   
+2. **Over Ex Level (Weight: 25%)** - This is a 0-100 scale
+   - HIGHER percentage = MORE healed = HIGHER score
+   - 90-100% = add 22-25 pts, 60-80% = add 15-20 pts, 20-40% = add 5-10 pts, 0-20% = add 0-5 pts
+   
+3. **Attachment to Past Patterns (Weight: 20%)** - This is a 0-100 scale where LOWER = healthier
+   - 0-20% (detached) = HIGH score (16-20 pts)
+   - 80-100% (very attached) = LOW score (0-5 pts)
+   
+4. **Trauma History (Weight: 20%)**
+   - More severe/numerous traumas = LOWER score
+   - Having awareness and working through them is positive
+   
+5. **Relationship Patterns (Weight: 15%)**
 
 ## RESPONSE FORMAT:
 
