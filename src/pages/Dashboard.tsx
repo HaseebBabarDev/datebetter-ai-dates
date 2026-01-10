@@ -57,6 +57,7 @@ import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefresh";
 import { WinsStats, useDeviWins } from "@/components/devi/WinsStats";
 import { WillingnessToPaySurvey } from "@/components/subscription/WillingnessToPaySurvey";
+import { HealingScoreCard } from "@/components/dashboard/HealingScoreCard";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -1086,6 +1087,9 @@ const Dashboard = () => {
                 <div className="text-[10px] text-muted-foreground">Watch Out</div>
               </button>
             </div>
+
+            {/* Healing Score Card */}
+            <HealingScoreCard />
 
             {/* AI Alerts Card */}
             <AIAlertsCard 
