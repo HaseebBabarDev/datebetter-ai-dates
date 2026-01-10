@@ -1014,11 +1014,47 @@ const Devi = () => {
 
       // Save the single assistant message after streaming completes
       if (convId && fullContent) {
+        // Remove the marker before saving
+        const cleanContent = fullContent.replace(/\[RECALCULATE_HEALING_SCORE\]/g, '').trim();
         await saveMessage(convId, {
           id: assistantMessageId,
           role: 'assistant',
-          content: fullContent,
+          content: cleanContent,
         });
+        
+        // Check if D.E.V.I. triggered a healing score recalculation
+        if (fullContent.includes('[RECALCULATE_HEALING_SCORE]')) {
+          console.log('Healing score recalculation triggered by D.E.V.I.');
+          try {
+            const { data, error } = await supabase.functions.invoke('calculate-healing-score', {
+              body: { triggerType: 'devi_conversation' },
+            });
+            if (!error && data) {
+              toast.success(`Healing score updated: ${data.healingScore}%`, {
+                description: data.scoreChange !== null 
+                  ? `${data.scoreChange >= 0 ? '+' : ''}${data.scoreChange} points from last check`
+                  : 'First score calculated!',
+              });
+              // Update user profile state if available
+              if (userProfile) {
+                setUserProfile(prev => prev ? { ...prev, healing_score: data.healingScore } : prev);
+              }
+            }
+          } catch (err) {
+            console.error('Failed to recalculate healing score:', err);
+          }
+        }
+        
+        // Update the displayed content to remove the marker
+        if (fullContent.includes('[RECALCULATE_HEALING_SCORE]')) {
+          setMessages(prev => 
+            prev.map(m => 
+              m.id === assistantMessageId 
+                ? { ...m, content: cleanContent }
+                : m
+            )
+          );
+        }
       }
 
     } catch (error) {
@@ -1074,7 +1110,37 @@ const Devi = () => {
         textareaRef.current?.setSelectionRange(12, 32); // Select "[describe your emotions]"
       }, 150);
     }
-  }, [searchParams, profilesLoading, conversationsLoading, setSearchParams, startNewChat]);
+    
+    // Handle healing journey prompt from dashboard
+    if (promptType === "healing" && !feelingPromptHandled.current && !profilesLoading && !conversationsLoading) {
+      feelingPromptHandled.current = true;
+      
+      // Clear the query param to prevent re-triggering
+      setSearchParams({}, { replace: true });
+      
+      // Start a new chat with healing-focused context
+      startNewChat();
+      
+      // Get healing score for context
+      const healingScore = (userProfile as any)?.healing_score;
+      const contextMessage = healingScore 
+        ? `My current healing score is ${healingScore}%. I'd like to work on my healing journey and talk about [what's on your mind about healing/your ex/moving forward].`
+        : "I'd like to work on my healing journey. Can you help me understand where I am and what I can work on?";
+      
+      setInput(contextMessage);
+      
+      // Focus the textarea so user can edit
+      setTimeout(() => {
+        textareaRef.current?.focus();
+        if (healingScore) {
+          // Select the bracketed placeholder text
+          const start = contextMessage.indexOf('[');
+          const end = contextMessage.indexOf(']') + 1;
+          textareaRef.current?.setSelectionRange(start, end);
+        }
+      }, 150);
+    }
+  }, [searchParams, profilesLoading, conversationsLoading, setSearchParams, startNewChat, userProfile]);
 
   if (authLoading) {
     return (
