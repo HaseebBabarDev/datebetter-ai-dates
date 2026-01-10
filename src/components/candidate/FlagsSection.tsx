@@ -43,7 +43,7 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
     fetchContactAttemptCount();
   }, [candidate.id]);
   const [analyzing, setAnalyzing] = useState(false);
-
+  const [analyzingProsCons, setAnalyzingProsCons] = useState(false);
   const redFlags = (candidate.red_flags as string[]) || [];
   const greenFlags = (candidate.green_flags as string[]) || [];
   const pros = (candidate.pros as string[]) || [];
@@ -82,6 +82,71 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
     const updatedCons = cons.filter((_, i) => i !== index);
     await onUpdate({ cons: updatedCons });
     toast.success("Con removed");
+  };
+
+  const detectProsCons = async () => {
+    if (!canUseUpdate(candidate.id)) {
+      toast.error("No updates remaining for this candidate");
+      return;
+    }
+
+    setAnalyzingProsCons(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please sign in to analyze pros/cons");
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/detect-pros-cons`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ candidateId: candidate.id }),
+        }
+      );
+
+      if (response.status === 429) {
+        toast.error("Rate limit exceeded. Please try again later.");
+        return;
+      }
+      if (response.status === 402) {
+        toast.error("D.E.V.I. credits exhausted. Please add funds.");
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 400 && errorData.error) {
+          toast.error(errorData.error);
+          return;
+        }
+        throw new Error("Failed to analyze pros/cons");
+      }
+
+      const result = await response.json();
+      
+      // Increment usage count
+      await incrementUsage(candidate.id);
+      await refetch();
+      
+      // Update local state through parent
+      await onUpdate({
+        pros: result.pros || [],
+        cons: result.cons || [],
+      });
+
+      toast.success("Pros & cons analyzed successfully");
+    } catch (error) {
+      console.error("Error detecting pros/cons:", error);
+      toast.error("Failed to analyze pros/cons");
+    } finally {
+      setAnalyzingProsCons(false);
+    }
   };
 
   const detectFlags = async () => {
@@ -286,6 +351,61 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
           </CardContent>
         </Card>
       )}
+
+      {/* D.E.V.I. Pros/Cons Analysis */}
+      <Card className="border-purple-500/20 bg-gradient-to-r from-purple-50 to-purple-100/50 dark:from-purple-950/20 dark:to-purple-900/10 overflow-hidden">
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-medium text-sm">D.E.V.I. Pros & Cons</p>
+                {remainingUpdates > 0 && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge 
+                          variant="secondary" 
+                          className="text-[10px] px-2 py-0.5 bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 cursor-help shrink-0"
+                        >
+                          {remainingUpdates} Updates Left
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Analyze uses 1 update from your plan</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                AI-generates pros & cons from interactions and D.E.V.I. chats
+              </p>
+            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={detectProsCons}
+                    disabled={analyzingProsCons || !canUseUpdate(candidate.id)}
+                    size="sm"
+                    className="gap-2 shrink-0 bg-purple-600 hover:bg-purple-700"
+                  >
+                    {analyzingProsCons ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4" />
+                    )}
+                    {analyzingProsCons ? "Analyzing..." : "Generate"}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Uses 1 update from your plan</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Pros */}
       <Card className="border-blue-500/20">
