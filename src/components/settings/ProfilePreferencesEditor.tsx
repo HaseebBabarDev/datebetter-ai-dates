@@ -33,6 +33,8 @@ import { toast } from "sonner";
 import { MultiSelectOption } from "@/components/onboarding/MultiSelectOption";
 import { Progress } from "@/components/ui/progress";
 import { DeviSettings } from "@/components/settings/DeviSettings";
+import { detectCrisisContent } from "@/lib/crisisDetection";
+import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
 
 type Profile = Tables<"profiles">;
 
@@ -590,6 +592,11 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Crisis detection state
+  const [showCrisisAlert, setShowCrisisAlert] = useState(false);
+  const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
+  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content">("crisis");
+
   // Form state organized by section
   const [formData, setFormData] = useState<Partial<Profile>>({});
 
@@ -621,6 +628,29 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
 
   const updateField = <K extends keyof Profile>(field: K, value: Profile[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Validate text content for crisis/harmful content before updating
+  const validateAndUpdateTextField = (
+    field: string, 
+    value: string, 
+    updateFn: (field: any, value: any) => void
+  ) => {
+    // Check for crisis/harmful content
+    const crisisResult = detectCrisisContent(value);
+    if (crisisResult.detected) {
+      setCrisisSeverity(crisisResult.severity);
+      setCrisisCategory(crisisResult.category || "crisis");
+      setShowCrisisAlert(true);
+      
+      // For harmful content, don't allow the update
+      if (crisisResult.category === "harmful_content") {
+        return;
+      }
+    }
+    
+    // Allow the update (for crisis content, we show resources but still allow saving)
+    updateFn(field, value);
   };
 
   const handleSave = async () => {
@@ -1902,6 +1932,21 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               };
               
               const updateRelationship = (id: string, field: keyof PastRelationship, value: any) => {
+                // Apply content validation for notes field
+                if (field === "notes" && typeof value === "string") {
+                  const crisisResult = detectCrisisContent(value);
+                  if (crisisResult.detected) {
+                    setCrisisSeverity(crisisResult.severity);
+                    setCrisisCategory(crisisResult.category || "crisis");
+                    setShowCrisisAlert(true);
+                    
+                    // For harmful content, don't allow the update
+                    if (crisisResult.category === "harmful_content") {
+                      return;
+                    }
+                  }
+                }
+                
                 const updated = relationships.map(r => 
                   r.id === id ? { ...r, [field]: value } : r
                 );
@@ -2059,7 +2104,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               <Textarea
                 placeholder="Any patterns you've noticed, lessons learned, or things you want D.E.V.I. to understand about your relationship history..."
                 value={(formData as any).relationship_trauma_notes || ""}
-                onChange={(e) => updateField("relationship_trauma_notes" as any, e.target.value)}
+                onChange={(e) => validateAndUpdateTextField("relationship_trauma_notes", e.target.value, updateField)}
                 className="min-h-[100px] text-sm"
               />
             </div>
@@ -2402,7 +2447,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
               <Label>Anything else about your family or upbringing? (optional)</Label>
               <Textarea
                 value={(formData as any).family_upbringing_notes || ""}
-                onChange={(e) => updateField("family_upbringing_notes" as any, e.target.value)}
+                onChange={(e) => validateAndUpdateTextField("family_upbringing_notes", e.target.value, updateField)}
                 placeholder="Share any context about your childhood, family dynamics, or experiences that shape how you approach relationships today..."
                 className="min-h-[100px] resize-none"
               />
@@ -2803,6 +2848,14 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
         <Save className="w-4 h-4 mr-2" />
         {saving ? "Saving..." : "Save All Preferences"}
       </Button>
+
+      {/* Crisis Alert Dialog */}
+      <CrisisAlertDialog
+        open={showCrisisAlert}
+        onClose={() => setShowCrisisAlert(false)}
+        severity={crisisSeverity}
+        category={crisisCategory}
+      />
     </div>
   );
 };
