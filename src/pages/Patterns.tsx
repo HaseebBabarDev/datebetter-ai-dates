@@ -60,14 +60,21 @@ const parseDurationToMonths = (duration: string): number => {
 
 const getDurationLabel = (duration: string): string => {
   switch (duration) {
-    case '< 1 month': return '<1mo';
-    case '1-3 months': return '1-3mo';
-    case '3-6 months': return '3-6mo';
-    case '6-12 months': return '6-12mo';
-    case '1-2 years': return '1-2yr';
-    case '2-5 years': return '2-5yr';
-    case '5+ years': return '5+yr';
-    default: return duration;
+    case '< 1 month':
+    case 'less_than_1_month': return '<1mo';
+    case '1-3 months':
+    case '1_3_months': return '1-3mo';
+    case '3-6 months':
+    case '3_6_months': return '3-6mo';
+    case '6-12 months':
+    case '6_12_months': return '6-12mo';
+    case '1-2 years':
+    case '1_2_years': return '1-2yr';
+    case '2-5 years':
+    case '2_5_years': return '2-5yr';
+    case '5+ years':
+    case '5_plus_years': return '5+yr';
+    default: return duration.replace(/_/g, ' ').replace('plus', '+');
   }
 };
 
