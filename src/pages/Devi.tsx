@@ -43,6 +43,7 @@ import { detectCrisisContent, CrisisDetectionResult } from "@/lib/crisisDetectio
 import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
 import { DeviWinDialog, DeviWinPrompt } from "@/components/devi/DeviWinDialog";
 import { ProfileSectionsNudge } from "@/components/devi/ProfileSectionsNudge";
+import { HealingJourney } from "@/components/devi/HealingJourney";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -1539,6 +1540,13 @@ const Devi = () => {
                     profile={userProfile} 
                     onDismiss={() => setProfileNudgeDismissed(true)}
                   />
+                </div>
+              )}
+
+              {/* Healing Journey - show when messages is empty */}
+              {hasFullProfile && (
+                <div className="pl-10 mt-4">
+                  <HealingJourney />
                 </div>
               )}
             </div>

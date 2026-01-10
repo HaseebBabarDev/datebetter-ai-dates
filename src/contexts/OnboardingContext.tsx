@@ -136,7 +136,12 @@ export interface OnboardingData {
   pastRelationshipTraumas?: any[]; // Array of PastRelationship objects
   relationshipTraumaNotes?: string;
   
-  // Screen 17: Boundaries
+  // Screen 17: Healing Assessment
+  exContactStatus?: string;
+  overExLevel?: number;
+  attachmentToPast?: number;
+  
+  // Screen 18: Boundaries
   dealbreakers?: string[];
   safetyPriorities?: string[];
   boundaryStrength?: number;
@@ -180,7 +185,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const dataRef = useRef<OnboardingData>(data);
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(true);
-  const totalSteps = 23; // 0-22 (added Personal Intro and Relationship Trauma screens)
+  const totalSteps = 24; // 0-23 (added Personal Intro, Relationship Trauma, and Healing Assessment screens)
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -289,6 +294,9 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
             familyUpbringingNotes: (profile as any).family_upbringing_notes || undefined,
             pastRelationshipTraumas: (profile as any).past_relationship_traumas || undefined,
             relationshipTraumaNotes: (profile as any).relationship_trauma_notes || undefined,
+            exContactStatus: (profile as any).ex_contact_status || undefined,
+            overExLevel: (profile as any).over_ex_level ?? undefined,
+            attachmentToPast: (profile as any).attachment_to_past ?? undefined,
             dealbreakers: profile.dealbreakers as string[] || undefined,
             safetyPriorities: profile.safety_priorities as string[] || undefined,
             boundaryStrength: profile.boundary_strength || undefined,
@@ -425,6 +433,9 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         family_upbringing_notes: currentData.familyUpbringingNotes,
         past_relationship_traumas: currentData.pastRelationshipTraumas,
         relationship_trauma_notes: currentData.relationshipTraumaNotes,
+        ex_contact_status: currentData.exContactStatus,
+        over_ex_level: currentData.overExLevel,
+        attachment_to_past: currentData.attachmentToPast,
         dealbreakers: currentData.dealbreakers,
         safety_priorities: currentData.safetyPriorities,
         boundary_strength: currentData.boundaryStrength,
@@ -466,8 +477,9 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   // 6: KidsFamilyScreen, 7: FaithValuesScreen, 8: PoliticsScreen, 9: CareerScreen,
   // 10: LocationScheduleScreen, 11: SocialActivityScreen, 12: PhysicalPreferencesScreen,
   // 13: CommunicationScreen, 14: PastPatternsScreen, 15: PersonalSectionIntroScreen,
-  // 16: RelationshipTraumaScreen, 17: FamilyUpbringingScreen, 18: BoundariesScreen,
-  // 19: MentalHealthScreen, 20: SafetyIntimacyScreen, 21: DeviStyleScreen, 22: CompletionScreen
+  // 16: RelationshipTraumaScreen, 17: HealingAssessmentScreen, 18: FamilyUpbringingScreen, 
+  // 19: BoundariesScreen, 20: MentalHealthScreen, 21: SafetyIntimacyScreen, 
+  // 22: DeviStyleScreen, 23: CompletionScreen
   const isStepComplete = useCallback((step: number): boolean => {
     switch (step) {
       case 0: return !!data.birthDate && !!data.ageConfirmed; // WelcomeScreen
@@ -487,12 +499,13 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
       case 14: return !!data.attachmentStyle; // PastPatternsScreen
       case 15: return true; // PersonalSectionIntroScreen - acknowledgment only
       case 16: return true; // RelationshipTraumaScreen - optional
-      case 17: return !!data.parentsRelationshipDynamic && !!data.feltLovedAsChild; // FamilyUpbringingScreen
-      case 18: return (data.dealbreakers?.length ?? 0) > 0; // BoundariesScreen
-      case 19: return true; // MentalHealthScreen - optional
-      case 20: return !!data.intimacyComfort; // SafetyIntimacyScreen
-      case 21: return true; // DeviStyleScreen - optional
-      case 22: return true; // CompletionScreen
+      case 17: return true; // HealingAssessmentScreen - optional
+      case 18: return !!data.parentsRelationshipDynamic && !!data.feltLovedAsChild; // FamilyUpbringingScreen
+      case 19: return (data.dealbreakers?.length ?? 0) > 0; // BoundariesScreen
+      case 20: return true; // MentalHealthScreen - optional
+      case 21: return !!data.intimacyComfort; // SafetyIntimacyScreen
+      case 22: return true; // DeviStyleScreen - optional
+      case 23: return true; // CompletionScreen
       default: return false;
     }
   }, [data]);

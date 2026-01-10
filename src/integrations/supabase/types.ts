@@ -648,6 +648,39 @@ export type Database = {
         }
         Relationships: []
       }
+      healing_scores: {
+        Row: {
+          ai_insights: string | null
+          created_at: string
+          id: string
+          previous_score: number | null
+          score: number
+          score_change: number | null
+          trigger_type: string
+          user_id: string
+        }
+        Insert: {
+          ai_insights?: string | null
+          created_at?: string
+          id?: string
+          previous_score?: number | null
+          score: number
+          score_change?: number | null
+          trigger_type?: string
+          user_id: string
+        }
+        Update: {
+          ai_insights?: string | null
+          created_at?: string
+          id?: string
+          previous_score?: number | null
+          score?: number
+          score_change?: number | null
+          trigger_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       interactions: {
         Row: {
           ai_analysis: Json | null
@@ -753,6 +786,7 @@ export type Database = {
           attachment_style:
             | Database["public"]["Enums"]["attachment_style"]
             | null
+          attachment_to_past: number | null
           attraction_importance: number | null
           avatar_url: string | null
           behavioral_monitoring: number | null
@@ -785,6 +819,7 @@ export type Database = {
           distance_preference: string | null
           education_level: string | null
           education_matters: boolean | null
+          ex_contact_status: string | null
           exclusivity_before_intimacy: boolean | null
           faith_importance: number | null
           faith_requirements: Json | null
@@ -800,6 +835,8 @@ export type Database = {
           gender_identity: Database["public"]["Enums"]["gender_identity"] | null
           generational_patterns: Json | null
           half_siblings: number | null
+          healing_assessment_date: string | null
+          healing_score: number | null
           healthy_relationship_models: boolean | null
           height: string | null
           height_preference: string | null
@@ -834,6 +871,7 @@ export type Database = {
           open_to_moving: boolean | null
           open_to_single_parenthood: boolean | null
           orientation_custom: string | null
+          over_ex_level: number | null
           parent_status: string | null
           parent_wound_types: Json | null
           parents_conflict_style: string | null
@@ -891,6 +929,7 @@ export type Database = {
           attachment_style?:
             | Database["public"]["Enums"]["attachment_style"]
             | null
+          attachment_to_past?: number | null
           attraction_importance?: number | null
           avatar_url?: string | null
           behavioral_monitoring?: number | null
@@ -923,6 +962,7 @@ export type Database = {
           distance_preference?: string | null
           education_level?: string | null
           education_matters?: boolean | null
+          ex_contact_status?: string | null
           exclusivity_before_intimacy?: boolean | null
           faith_importance?: number | null
           faith_requirements?: Json | null
@@ -940,6 +980,8 @@ export type Database = {
             | null
           generational_patterns?: Json | null
           half_siblings?: number | null
+          healing_assessment_date?: string | null
+          healing_score?: number | null
           healthy_relationship_models?: boolean | null
           height?: string | null
           height_preference?: string | null
@@ -974,6 +1016,7 @@ export type Database = {
           open_to_moving?: boolean | null
           open_to_single_parenthood?: boolean | null
           orientation_custom?: string | null
+          over_ex_level?: number | null
           parent_status?: string | null
           parent_wound_types?: Json | null
           parents_conflict_style?: string | null
@@ -1031,6 +1074,7 @@ export type Database = {
           attachment_style?:
             | Database["public"]["Enums"]["attachment_style"]
             | null
+          attachment_to_past?: number | null
           attraction_importance?: number | null
           avatar_url?: string | null
           behavioral_monitoring?: number | null
@@ -1063,6 +1107,7 @@ export type Database = {
           distance_preference?: string | null
           education_level?: string | null
           education_matters?: boolean | null
+          ex_contact_status?: string | null
           exclusivity_before_intimacy?: boolean | null
           faith_importance?: number | null
           faith_requirements?: Json | null
@@ -1080,6 +1125,8 @@ export type Database = {
             | null
           generational_patterns?: Json | null
           half_siblings?: number | null
+          healing_assessment_date?: string | null
+          healing_score?: number | null
           healthy_relationship_models?: boolean | null
           height?: string | null
           height_preference?: string | null
@@ -1114,6 +1161,7 @@ export type Database = {
           open_to_moving?: boolean | null
           open_to_single_parenthood?: boolean | null
           orientation_custom?: string | null
+          over_ex_level?: number | null
           parent_status?: string | null
           parent_wound_types?: Json | null
           parents_conflict_style?: string | null
