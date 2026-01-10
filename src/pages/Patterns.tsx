@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,7 @@ import {
 import { toast } from "sonner";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 import { WinsStats, useDeviWins } from "@/components/devi/WinsStats";
+import { HealingProgressChart } from "@/components/devi/HealingProgressChart";
 
 // Duration parsing utilities
 const DURATION_ORDER = ['< 1 month', '1-3 months', '3-6 months', '6-12 months', '1-2 years', '2-5 years', '5+ years'];
@@ -160,8 +161,12 @@ interface PatternStats {
 const Patterns = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<PatternStats | null>(null);
+  
+  // Get tab from URL params, default to "overview"
+  const defaultTab = searchParams.get("tab") || "overview";
   
   // Devi wins tracking
   const { wins } = useDeviWins(user?.id);
@@ -662,12 +667,13 @@ const Patterns = () => {
             </CardContent>
           </Card>
         ) : (
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-4 h-auto p-1 bg-muted/50 backdrop-blur-sm">
+          <Tabs defaultValue={defaultTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-5 mb-4 h-auto p-1 bg-muted/50 backdrop-blur-sm">
               <TabsTrigger value="overview" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Overview</TabsTrigger>
+              <TabsTrigger value="healing" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Healing</TabsTrigger>
               <TabsTrigger value="dating" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Dating</TabsTrigger>
               <TabsTrigger value="insights" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Insights</TabsTrigger>
-              <TabsTrigger value="nocontact" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">No Contact</TabsTrigger>
+              <TabsTrigger value="nocontact" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">NC</TabsTrigger>
             </TabsList>
 
             {/* Overview Tab */}
@@ -757,6 +763,44 @@ const Patterns = () => {
                   </CardContent>
                 </Card>
               )}
+            </TabsContent>
+
+            {/* Healing Tab */}
+            <TabsContent value="healing" className="space-y-4">
+              <HealingProgressChart />
+              
+              <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-primary" />
+                    Your Healing Journey
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Your healing score tracks your emotional readiness for dating based on how you're processing past relationships.
+                  </p>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-4 bg-green-500/10 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-green-500">75%+</div>
+                      <div className="text-xs text-muted-foreground">Ready to Date</div>
+                    </div>
+                    <div className="p-4 bg-amber-500/10 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-amber-500">50-74%</div>
+                      <div className="text-xs text-muted-foreground">Dating Mindfully</div>
+                    </div>
+                  </div>
+                  
+                  <Button
+                    onClick={() => navigate("/devi?prompt=healing")}
+                    className="w-full gap-2"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Talk to D.E.V.I. About Your Healing
+                  </Button>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Dating Tab */}
