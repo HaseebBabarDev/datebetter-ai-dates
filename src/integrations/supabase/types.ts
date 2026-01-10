@@ -105,6 +105,7 @@ export type Database = {
           ai_description: string | null
           city: string | null
           compatibility_score: number | null
+          cons: Json | null
           country: string | null
           created_at: string | null
           distance_approximation: string | null
@@ -130,6 +131,7 @@ export type Database = {
           photo_url: string | null
           physical_attraction: number | null
           pronouns: Database["public"]["Enums"]["pronouns"] | null
+          pros: Json | null
           red_flags: Json | null
           relationship_ended_at: string | null
           score_breakdown: Json | null
@@ -182,6 +184,7 @@ export type Database = {
           ai_description?: string | null
           city?: string | null
           compatibility_score?: number | null
+          cons?: Json | null
           country?: string | null
           created_at?: string | null
           distance_approximation?: string | null
@@ -209,6 +212,7 @@ export type Database = {
           photo_url?: string | null
           physical_attraction?: number | null
           pronouns?: Database["public"]["Enums"]["pronouns"] | null
+          pros?: Json | null
           red_flags?: Json | null
           relationship_ended_at?: string | null
           score_breakdown?: Json | null
@@ -261,6 +265,7 @@ export type Database = {
           ai_description?: string | null
           city?: string | null
           compatibility_score?: number | null
+          cons?: Json | null
           country?: string | null
           created_at?: string | null
           distance_approximation?: string | null
@@ -288,6 +293,7 @@ export type Database = {
           photo_url?: string | null
           physical_attraction?: number | null
           pronouns?: Database["public"]["Enums"]["pronouns"] | null
+          pros?: Json | null
           red_flags?: Json | null
           relationship_ended_at?: string | null
           score_breakdown?: Json | null
