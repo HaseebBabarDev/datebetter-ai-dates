@@ -1032,7 +1032,7 @@ const Devi = () => {
             if (!error && data) {
               toast.success(`Healing score updated: ${data.healingScore}%`, {
                 description: data.scoreChange !== null 
-                  ? `${data.scoreChange >= 0 ? '+' : ''}${data.scoreChange} points from last check`
+                  ? `${Math.abs(data.scoreChange)}% ${data.scoreChange >= 0 ? 'up' : 'down'} from last check`
                   : 'First score calculated!',
               });
               // Update user profile state if available
