@@ -654,30 +654,31 @@ const Patterns = () => {
       </header>
 
       <main className="px-4 py-3 max-w-lg mx-auto">
-        {!stats || stats.totalCandidates === 0 ? (
-          <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardContent className="py-12 text-center">
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-muted flex items-center justify-center mb-4">
-                <PieChart className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <h3 className="font-medium text-foreground mb-2">No Data Yet</h3>
-              <p className="text-sm text-muted-foreground">
-                Start adding candidates and logging interactions to see your dating patterns.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-4 h-auto p-1 bg-muted/50 backdrop-blur-sm">
-              <TabsTrigger value="overview" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Overview</TabsTrigger>
-              <TabsTrigger value="healing" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Healing</TabsTrigger>
-              <TabsTrigger value="dating" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Dating</TabsTrigger>
-              <TabsTrigger value="insights" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Insights</TabsTrigger>
-              <TabsTrigger value="nocontact" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">NC</TabsTrigger>
-            </TabsList>
+        <Tabs defaultValue={defaultTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-5 mb-4 h-auto p-1 bg-muted/50 backdrop-blur-sm">
+            <TabsTrigger value="overview" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Overview</TabsTrigger>
+            <TabsTrigger value="healing" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Healing</TabsTrigger>
+            <TabsTrigger value="dating" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Dating</TabsTrigger>
+            <TabsTrigger value="insights" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">Insights</TabsTrigger>
+            <TabsTrigger value="nocontact" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">NC</TabsTrigger>
+          </TabsList>
 
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-4">
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-4">
+            {!stats || stats.totalCandidates === 0 ? (
+              <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+                <CardContent className="py-12 text-center">
+                  <div className="w-16 h-16 mx-auto rounded-2xl bg-muted flex items-center justify-center mb-4">
+                    <PieChart className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="font-medium text-foreground mb-2">No Data Yet</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Start adding candidates and logging interactions to see your dating patterns.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center gap-2">
@@ -763,9 +764,11 @@ const Patterns = () => {
                   </CardContent>
                 </Card>
               )}
-            </TabsContent>
+            </>
+          )}
+          </TabsContent>
 
-            {/* Healing Tab */}
+          {/* Healing Tab */}
             <TabsContent value="healing" className="space-y-4">
               <HealingProgressChart showInsights={true} />
               
@@ -1465,7 +1468,6 @@ const Patterns = () => {
               )}
             </TabsContent>
           </Tabs>
-        )}
       </main>
     </div>
   );
