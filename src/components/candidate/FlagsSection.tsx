@@ -3,7 +3,8 @@ import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, CheckCircle, Sparkles, Loader2, Phone } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { AlertTriangle, CheckCircle, Sparkles, Loader2, Phone, ThumbsUp, ThumbsDown, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -45,6 +46,43 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
 
   const redFlags = (candidate.red_flags as string[]) || [];
   const greenFlags = (candidate.green_flags as string[]) || [];
+  const pros = (candidate.pros as string[]) || [];
+  const cons = (candidate.cons as string[]) || [];
+  
+  const [newPro, setNewPro] = useState("");
+  const [newCon, setNewCon] = useState("");
+  const [addingPro, setAddingPro] = useState(false);
+  const [addingCon, setAddingCon] = useState(false);
+
+  const handleAddPro = async () => {
+    if (!newPro.trim()) return;
+    const updatedPros = [...pros, newPro.trim()];
+    await onUpdate({ pros: updatedPros });
+    setNewPro("");
+    setAddingPro(false);
+    toast.success("Pro added");
+  };
+
+  const handleAddCon = async () => {
+    if (!newCon.trim()) return;
+    const updatedCons = [...cons, newCon.trim()];
+    await onUpdate({ cons: updatedCons });
+    setNewCon("");
+    setAddingCon(false);
+    toast.success("Con added");
+  };
+
+  const handleRemovePro = async (index: number) => {
+    const updatedPros = pros.filter((_, i) => i !== index);
+    await onUpdate({ pros: updatedPros });
+    toast.success("Pro removed");
+  };
+
+  const handleRemoveCon = async (index: number) => {
+    const updatedCons = cons.filter((_, i) => i !== index);
+    await onUpdate({ cons: updatedCons });
+    toast.success("Con removed");
+  };
 
   const detectFlags = async () => {
     if (!canUseUpdate(candidate.id)) {
@@ -248,6 +286,128 @@ export const FlagsSection: React.FC<FlagsSectionProps> = ({
           </CardContent>
         </Card>
       )}
+
+      {/* Pros */}
+      <Card className="border-blue-500/20">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg flex items-center gap-2 text-blue-600">
+              <ThumbsUp className="w-5 h-5" />
+              Pros ({pros.length})
+            </CardTitle>
+            {!addingPro && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setAddingPro(true)}
+                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Add
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {addingPro && (
+            <div className="flex gap-2 mb-3">
+              <Input
+                placeholder="Enter a pro..."
+                value={newPro}
+                onChange={(e) => setNewPro(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddPro()}
+                className="flex-1"
+                autoFocus
+              />
+              <Button size="sm" onClick={handleAddPro} className="bg-blue-600 hover:bg-blue-700">
+                Add
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => { setAddingPro(false); setNewPro(""); }}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+          {pros.length === 0 && !addingPro ? (
+            <p className="text-muted-foreground text-sm text-center py-2">
+              No pros added yet. Click "Add" to list positives about this person.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {pros.map((pro, idx) => (
+                <Badge
+                  key={idx}
+                  className="bg-blue-600 hover:bg-blue-700 cursor-pointer group pr-1"
+                  onClick={() => handleRemovePro(idx)}
+                >
+                  {pro}
+                  <X className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Badge>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Cons */}
+      <Card className="border-orange-500/20">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg flex items-center gap-2 text-orange-600">
+              <ThumbsDown className="w-5 h-5" />
+              Cons ({cons.length})
+            </CardTitle>
+            {!addingCon && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setAddingCon(true)}
+                className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Add
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {addingCon && (
+            <div className="flex gap-2 mb-3">
+              <Input
+                placeholder="Enter a con..."
+                value={newCon}
+                onChange={(e) => setNewCon(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddCon()}
+                className="flex-1"
+                autoFocus
+              />
+              <Button size="sm" onClick={handleAddCon} className="bg-orange-600 hover:bg-orange-700">
+                Add
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => { setAddingCon(false); setNewCon(""); }}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+          {cons.length === 0 && !addingCon ? (
+            <p className="text-muted-foreground text-sm text-center py-2">
+              No cons added yet. Click "Add" to note concerns about this person.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {cons.map((con, idx) => (
+                <Badge
+                  key={idx}
+                  className="bg-orange-600 hover:bg-orange-700 cursor-pointer group pr-1"
+                  onClick={() => handleRemoveCon(idx)}
+                >
+                  {con}
+                  <X className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Badge>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
