@@ -180,7 +180,7 @@ export const HealingJourney: React.FC<HealingJourneyProps> = ({ onClose, compact
                     <span className={`text-sm font-medium ${
                       latestResult.scoreChange > 0 ? "text-green-600" : "text-rose-600"
                     }`}>
-                      {latestResult.scoreChange > 0 ? "+" : ""}{latestResult.scoreChange} points since last check
+                      {Math.abs(latestResult.scoreChange)}% {latestResult.scoreChange > 0 ? "up" : "down"} since last check
                     </span>
                   </div>
                 )}

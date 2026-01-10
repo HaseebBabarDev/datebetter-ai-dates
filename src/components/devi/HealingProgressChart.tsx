@@ -345,7 +345,7 @@ export const HealingProgressChart: React.FC<HealingProgressChartProps> = ({ comp
                           ) : (
                             <TrendingDown className="w-3 h-3" />
                           )}
-                          {score.score_change > 0 ? '+' : ''}{score.score_change} from previous
+                          {Math.abs(score.score_change)}% {score.score_change > 0 ? 'up' : 'down'} from previous
                         </div>
                       )}
                     </div>
