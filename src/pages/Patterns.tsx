@@ -1144,7 +1144,7 @@ const Patterns = () => {
                           {stats.traumaPatterns.durationAnalysis.traumaByDuration.slice(0, 4).map(({ duration, traumas }) => (
                             <div key={duration} className="space-y-1">
                               <span className="text-xs font-medium text-muted-foreground">
-                                {duration}
+                                {getDurationLabel(duration)}
                               </span>
                               <div className="flex flex-wrap gap-1">
                                 {traumas.map(({ trauma, count }) => (
