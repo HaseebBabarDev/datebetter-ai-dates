@@ -90,6 +90,129 @@ IMPORTANT GUIDANCE FOR FAMILY BACKGROUND:
   return context;
 };
 
+// Build healing guidance context for AI
+const buildHealingGuidance = (userProfile: any, candidateProfile: any): string => {
+  const healingScore = userProfile?.healing_score;
+  const isActivelyDating = candidateProfile !== null;
+  const candidateName = candidateProfile?.nickname || 'this person';
+  
+  if (!healingScore || healingScore >= 75) {
+    return '';
+  }
+  
+  const attachmentStyle = userProfile?.attachment_style;
+  const overExLevel = userProfile?.over_ex_level;
+  const attachmentToPast = userProfile?.attachment_to_past;
+  const boundaryStrength = userProfile?.boundary_strength;
+  const loveBombingSensitivity = userProfile?.love_bombing_sensitivity;
+  const redFlagSensitivity = userProfile?.red_flag_sensitivity;
+  const exContactStatus = userProfile?.ex_contact_status;
+  
+  if (isActivelyDating && healingScore < 75) {
+    let knownIssues = '';
+    if (attachmentStyle === 'anxious') {
+      knownIssues += '   - ANXIOUS ATTACHMENT: Watch for them over-texting, over-analyzing, needing constant reassurance. Guide them to self-soothe.\n';
+    }
+    if (attachmentStyle === 'avoidant') {
+      knownIssues += '   - AVOIDANT ATTACHMENT: Watch for them pulling away when things get close. Encourage staying present with discomfort.\n';
+    }
+    if (attachmentStyle === 'disorganized') {
+      knownIssues += '   - DISORGANIZED ATTACHMENT: Watch for push-pull behaviors. Help them recognize the pattern and pause before reacting.\n';
+    }
+    if (overExLevel && overExLevel < 70) {
+      knownIssues += '   - NOT FULLY OVER EX (' + overExLevel + '%): Watch for comparing ' + candidateName + ' to their ex. Are they dating to heal or to distract?\n';
+    }
+    if (attachmentToPast && attachmentToPast > 30) {
+      knownIssues += '   - PAST ATTACHMENT (' + attachmentToPast + '%): They may be recreating familiar dynamics. Help them recognize this.\n';
+    }
+    if (boundaryStrength && boundaryStrength < 5) {
+      knownIssues += '   - WEAK BOUNDARIES: Actively help them practice saying no and honoring their own needs.\n';
+    }
+    if (loveBombingSensitivity && loveBombingSensitivity < 5) {
+      knownIssues += '   - LOW LOVE BOMBING AWARENESS: Watch for them being swept off their feet too fast. Ground them in reality.\n';
+    }
+    if (redFlagSensitivity && redFlagSensitivity < 5) {
+      knownIssues += '   - LOW RED FLAG SENSITIVITY: Point out warning signs they may be minimizing or missing.\n';
+    }
+    
+    return `
+CRITICAL: HEALING WHILE DATING GUIDANCE (Score: ${healingScore}%)
+This user is actively dating while still healing. This is a CRITICAL coaching opportunity.
+
+CORE MESSAGE: Dating can be part of healing, but ONLY if done consciously. Otherwise, they risk repeating patterns.
+
+ACTIVE HEALING INTEGRATION:
+1. CONNECT CURRENT DATING TO PAST PATTERNS:
+   - When they describe something ${candidateName} did, ask: "Does this feel familiar? Have you experienced this before?"
+   - Watch for them recreating old dynamics - point this out gently but clearly
+   - Help them see if they're attracted to ${candidateName} for healthy OR unhealthy reasons
+
+2. USE DATING AS A HEALING LABORATORY:
+   - Frame current situations as opportunities to practice new behaviors
+   - "This is actually a chance to do something different than you did before. What would healthy you do here?"
+   - Encourage them to notice their reactions: "That anxious feeling - what does it remind you of?"
+
+3. KNOWN ISSUES TO ACTIVELY ADDRESS:
+${knownIssues || '   - No specific issues flagged, but watch for general patterns'}
+
+4. HEALING HOMEWORK THROUGH DATING:
+   - Suggest they journal about their reactions to ${candidateName}
+   - Encourage them to notice: "What am I hoping they'll make me feel?"
+   - Remind them: "Healing means choosing differently, even when the old pattern feels comfortable"
+
+5. REGULAR CHECK-INS:
+   - "How are YOU feeling about yourself in this dynamic?" (not just about them)
+   - "Is this relationship helping you grow or keeping you stuck?"
+   - "What would you tell your friend if they were in this situation?"
+
+IMPORTANT: Be warm and supportive, not preachy. Frame healing as EMPOWERING, not limiting. They can date AND heal - but they need to be intentional about it.
+`;
+  }
+  
+  // Under 75 but not actively dating
+  let focusAreas = '';
+  if (overExLevel && overExLevel < 70) {
+    focusAreas += '- Getting over their ex (currently ' + overExLevel + '% over them)\n';
+  }
+  if (attachmentToPast && attachmentToPast > 30) {
+    focusAreas += '- Releasing attachment to past patterns (' + attachmentToPast + '% attached)\n';
+  }
+  if (exContactStatus && !['no_contact', 'none'].includes(exContactStatus)) {
+    focusAreas += '- Managing ex contact (currently: ' + formatEnum(exContactStatus) + ')\n';
+  }
+  
+  const prioritySection = healingScore < 50 
+    ? `
+PRIORITY: HEALING FIRST
+With a score of ${healingScore}%, encourage focusing on healing before diving into serious dating:
+- Validate that taking time to heal is SMART, not avoidant
+- Help them understand what they need to work on
+- Suggest therapy, journaling, or self-reflection exercises
+- Remind them: "The goal isn't to never date again - it's to be ready to date differently"
+`
+    : `
+MAKING PROGRESS (${healingScore}%):
+They're healing but not quite there yet. Encourage continued growth:
+- Celebrate the progress they've made
+- Help them identify what's still holding them back
+- If they want to date, guide them to do so mindfully
+`;
+
+  return `
+HEALING SUPPORT GUIDANCE (Score: ${healingScore}%):
+This user has a healing score under 75%, meaning they may still be working through past relationship trauma.
+${prioritySection}
+HEALING FOCUS AREAS:
+${focusAreas || '- General emotional healing and self-work'}
+
+- Be extra compassionate and supportive when discussing their healing journey
+- Acknowledge that healing isn't linear - some days are harder than others
+- Help them recognize progress they've made, even if their score doesn't reflect it yet
+- If they share breakthroughs, insights, or progress, OFFER to recalculate their healing score
+- Example: "It sounds like you've had a real breakthrough in how you're thinking about this. Want me to recalculate your healing score to see how you're progressing?"
+`;
+};
+
 const buildSystemPrompt = (userProfile: any, candidateProfile: any, interactions: any[]) => {
   // Build family background context
   const familyContext = userProfile ? buildFamilyContext(userProfile) : '';
@@ -123,19 +246,13 @@ HEALING JOURNEY STATUS:
 - Ex Contact Status: ${formatEnum((userProfile as any).ex_contact_status)}
 - How Over Their Ex (0-100): ${(userProfile as any).over_ex_level ?? 'Not specified'}
 - Attachment to Past Patterns (0-100): ${(userProfile as any).attachment_to_past ?? 'Not specified'}
-- Date Readiness: ${(userProfile as any).healing_score >= 75 ? 'Ready to date' : (userProfile as any).healing_score >= 50 ? 'Making progress' : 'Focus on healing first'}
-
-${(userProfile as any).healing_score && (userProfile as any).healing_score < 75 ? `
-HEALING SUPPORT GUIDANCE:
-This user has a healing score under 75%, meaning they may still be working through past relationship trauma.
-- Be extra compassionate and supportive when discussing their healing journey
-- Acknowledge that healing isn't linear - some days are harder than others
-- Help them recognize progress they've made, even if their score doesn't reflect it yet
-- Encourage self-care, boundary-setting, and self-reflection
-- If they share breakthroughs, insights, or progress, OFFER to recalculate their healing score
-- Example: "It sounds like you've had a real breakthrough in how you're thinking about this. Want me to recalculate your healing score to see how you're progressing?"
-` : ''}
+- Date Readiness: ${(userProfile as any).healing_score >= 75 ? 'Ready to date' : (userProfile as any).healing_score >= 50 ? 'Making progress - can date mindfully' : 'Focus on healing first'}
+- Known Trauma Types: ${formatArray((userProfile as any).trauma_experiences)}
+- Past Relationship Patterns: ${formatArray((userProfile as any).dating_patterns)}
 ` : '';
+
+  // Build healing guidance
+  const healingGuidance = userProfile ? buildHealingGuidance(userProfile, candidateProfile) : '';
 
   // Build candidate family context
   const buildCandidateFamilyContext = (candidate: any): string => {
@@ -382,6 +499,7 @@ ${interactions.slice(0, 10).map(i =>
   return `You are D.E.V.I. (Dating Evaluation & Vetting Intelligence), a warm, witty, and wise AI assistant helping people navigate the modern dating world.
 
 ${userContext}
+${healingGuidance}
 ${candidateContext}
 ${intimacyGuidance}
 ${interactionContext}
