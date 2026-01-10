@@ -1,3 +1,4 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -5,6 +6,15 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+interface PastRelationship {
+  id: string;
+  label: string;
+  duration: string;
+  traumas: string[];
+  notes: string;
+  endReason: string;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -21,6 +31,7 @@ serve(async (req) => {
     // Get auth token from request
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
+      console.error("No authorization header provided");
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -32,18 +43,31 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     
     if (userError || !user) {
+      console.error("User auth error:", userError);
       return new Response(JSON.stringify({ error: "Invalid token" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    console.log("Processing healing score for user:", user.id);
+
     const { triggerType = "assessment", dailyFeeling } = await req.json();
 
-    // Fetch user profile for healing assessment data
+    // Fetch user profile for healing assessment data AND past relationship data
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("ex_contact_status, over_ex_level, attachment_to_past, past_relationship_traumas, relationship_trauma_notes, healing_score")
+      .select(`
+        ex_contact_status, 
+        over_ex_level, 
+        attachment_to_past, 
+        past_relationship_traumas, 
+        relationship_trauma_notes, 
+        healing_score,
+        attachment_style,
+        longest_relationship,
+        time_since_last_relationship
+      `)
       .eq("user_id", user.id)
       .single();
 
@@ -57,62 +81,130 @@ serve(async (req) => {
 
     const previousScore = profile.healing_score;
 
-    // Calculate base healing score from assessment data
-    let baseScore = 50; // Start at neutral
+    // Parse past relationships data
+    const pastRelationships: PastRelationship[] = Array.isArray(profile.past_relationship_traumas) 
+      ? profile.past_relationship_traumas 
+      : [];
 
-    // Ex contact status impact (0-15 points)
-    const exContactScores: Record<string, number> = {
-      "no_contact": 15,
-      "occasional": 12,
-      "regular": 8,
-      "frequent": 4,
-      "still_connected": 0,
-      "not_applicable": 15,
+    // Build comprehensive trauma summary
+    const allTraumas: string[] = [];
+    const relationshipSummaries: string[] = [];
+    
+    pastRelationships.forEach((rel, index) => {
+      if (rel.traumas && rel.traumas.length > 0) {
+        allTraumas.push(...rel.traumas);
+      }
+      const summary = [
+        rel.label || `Relationship ${index + 1}`,
+        rel.duration ? `(${rel.duration.replace(/_/g, ' ')})` : '',
+        rel.endReason ? `ended: ${rel.endReason.replace(/_/g, ' ')}` : '',
+        rel.traumas?.length ? `traumas: ${rel.traumas.join(', ')}` : '',
+        rel.notes ? `notes: "${rel.notes}"` : ''
+      ].filter(Boolean).join(' - ');
+      relationshipSummaries.push(summary);
+    });
+
+    const uniqueTraumas = [...new Set(allTraumas)];
+    const hasNoneApply = uniqueTraumas.includes("None of these apply");
+    const significantTraumas = uniqueTraumas.filter(t => t !== "None of these apply");
+
+    // Map ex contact status to readable text
+    const exContactLabels: Record<string, string> = {
+      "no_contact": "No contact at all",
+      "occasional": "Occasional contact (rare texts/calls)",
+      "regular": "Regular contact (friends)",
+      "frequent": "Frequent contact (talk often)",
+      "still_connected": "Still emotionally connected",
+      "not_applicable": "No significant exes",
     };
-    baseScore += exContactScores[profile.ex_contact_status || "not_applicable"] || 0;
 
-    // Over ex level (0-25 points, based on 0-100 slider)
-    const overExScore = Math.round((profile.over_ex_level || 50) * 0.25);
-    baseScore += overExScore;
+    // Map over_ex_level to description
+    const getOverExDescription = (level: number | null) => {
+      if (level === null) return "not specified";
+      if (level <= 20) return `${level}% - Still deeply attached`;
+      if (level <= 40) return `${level}% - Working through it`;
+      if (level <= 60) return `${level}% - Making progress`;
+      if (level <= 80) return `${level}% - Mostly moved on`;
+      return `${level}% - Completely over them`;
+    };
 
-    // Attachment to past (inverse - lower attachment is better) (0-20 points)
-    const attachmentScore = Math.round((100 - (profile.attachment_to_past || 50)) * 0.2);
-    baseScore += attachmentScore;
+    // Map attachment_to_past to description
+    const getAttachmentDescription = (level: number | null) => {
+      if (level === null) return "not specified";
+      if (level <= 20) return `${level}% - Very detached from past patterns`;
+      if (level <= 40) return `${level}% - Mostly detached`;
+      if (level <= 60) return `${level}% - Neutral`;
+      if (level <= 80) return `${level}% - Somewhat attached to past patterns`;
+      return `${level}% - Very attached to past patterns`;
+    };
 
-    // Past relationship trauma impact (-10 to +10 based on number and severity)
-    const traumas = Array.isArray(profile.past_relationship_traumas) ? profile.past_relationship_traumas : [];
-    const traumaCount = traumas.length;
-    
-    // Having processed traumas shows healing awareness, but too many unprocessed can indicate more work needed
-    if (traumaCount === 0) {
-      baseScore += 5; // Either no trauma or hasn't reflected yet
-    } else if (traumaCount <= 2) {
-      baseScore += 8; // Some reflection
-    } else if (traumaCount <= 4) {
-      baseScore += 5; // Good awareness
-    } else {
-      baseScore += 2; // Significant trauma history to work through
-    }
-
-    // Cap the score between 0 and 100
-    let healingScore = Math.max(0, Math.min(100, baseScore));
-
-    // Generate AI insights
+    let healingScore = 50; // default fallback
     let aiInsights = "";
-    
+
     if (lovableApiKey) {
       try {
-        const systemPrompt = `You are D.E.V.I., a compassionate dating AI assistant. Based on the user's healing assessment data, provide a brief, supportive insight about their healing journey. Be warm, encouraging, and specific.
+        // Build the comprehensive prompt for AI-driven scoring
+        const scoringPrompt = `You are D.E.V.I., an expert AI dating coach specializing in relationship healing and readiness assessment.
 
-Assessment Data:
-- Ex Contact Status: ${profile.ex_contact_status || "not specified"}
-- How over their ex (0-100): ${profile.over_ex_level || "not specified"}
-- Attachment to past patterns (0-100): ${profile.attachment_to_past || "not specified"}
-- Number of past relationship traumas identified: ${traumaCount}
-- Calculated Healing Score: ${healingScore}%
-${dailyFeeling ? `- Today's feeling shared: "${dailyFeeling}"` : ""}
+Analyze the following user data and calculate a HEALING SCORE from 0-100, where:
+- 0-40: Significant healing work needed before dating
+- 41-60: Making progress but should proceed cautiously
+- 61-75: Good progress, can date while continuing to heal
+- 76-90: Ready to date with healthy awareness
+- 91-100: Fully healed and emotionally available
 
-Provide a 2-3 sentence supportive insight. If the score is below 75%, include encouragement that healing isn't linear. Focus on their strengths and growth areas.`;
+## HEALING ASSESSMENT DATA:
+
+**Ex Contact Status:** ${exContactLabels[profile.ex_contact_status] || profile.ex_contact_status || "Not specified"}
+
+**How Over Their Most Recent Ex:** ${getOverExDescription(profile.over_ex_level)}
+
+**Attachment to Past Relationship Patterns:** ${getAttachmentDescription(profile.attachment_to_past)}
+
+**Attachment Style:** ${profile.attachment_style || "Not specified"}
+
+**Longest Relationship:** ${profile.longest_relationship?.replace(/_/g, ' ') || "Not specified"}
+
+**Time Since Last Relationship:** ${profile.time_since_last_relationship?.replace(/_/g, ' ') || "Not specified"}
+
+## PAST RELATIONSHIP HISTORY:
+
+${pastRelationships.length > 0 ? `
+**Number of Past Relationships Documented:** ${pastRelationships.length}
+
+**Relationship Details:**
+${relationshipSummaries.map((s, i) => `${i + 1}. ${s}`).join('\n')}
+
+**All Trauma Types Experienced:** ${significantTraumas.length > 0 ? significantTraumas.join(', ') : (hasNoneApply ? 'None reported' : 'Not specified')}
+` : 'No past relationships documented'}
+
+**General Reflections:** ${profile.relationship_trauma_notes || "None provided"}
+
+${dailyFeeling ? `**Today's Feeling:** "${dailyFeeling}"` : ''}
+
+## SCORING CRITERIA:
+
+Consider these factors when calculating the score:
+1. **Ex Contact (Weight: 20%)** - No contact = higher score, still connected = lower
+2. **Over Ex Level (Weight: 25%)** - Higher % = more healed
+3. **Attachment to Past Patterns (Weight: 20%)** - Lower attachment = better
+4. **Trauma History (Weight: 20%)** - Consider severity and quantity of traumas
+   - Severe traumas (abuse, cheating, manipulation) impact more
+   - Having awareness of traumas is positive
+   - "None of these apply" is neutral-positive
+5. **Relationship Patterns (Weight: 15%)** - How relationships ended, duration, patterns
+
+## RESPONSE FORMAT:
+
+You MUST respond with ONLY a valid JSON object in this exact format:
+{
+  "score": <number between 0-100>,
+  "insight": "<2-3 sentence personalized insight about their healing journey, be warm and supportive>"
+}
+
+Do not include any other text, markdown, or explanation outside the JSON.`;
+
+        console.log("Calling AI for healing score calculation...");
 
         const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -123,30 +215,57 @@ Provide a 2-3 sentence supportive insight. If the score is below 75%, include en
           body: JSON.stringify({
             model: "google/gemini-2.5-flash",
             messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: "Generate a healing insight for this user." },
+              { role: "system", content: "You are a JSON-only response bot. Always respond with valid JSON." },
+              { role: "user", content: scoringPrompt },
             ],
           }),
         });
 
         if (aiResponse.ok) {
           const aiData = await aiResponse.json();
-          aiInsights = aiData.choices?.[0]?.message?.content || "";
+          const rawContent = aiData.choices?.[0]?.message?.content || "";
+          console.log("AI raw response:", rawContent);
+
+          // Parse the JSON response
+          try {
+            // Clean the response - remove markdown code blocks if present
+            let cleanContent = rawContent.trim();
+            if (cleanContent.startsWith("```json")) {
+              cleanContent = cleanContent.replace(/^```json\n?/, "").replace(/\n?```$/, "");
+            } else if (cleanContent.startsWith("```")) {
+              cleanContent = cleanContent.replace(/^```\n?/, "").replace(/\n?```$/, "");
+            }
+
+            const parsed = JSON.parse(cleanContent);
+            healingScore = Math.max(0, Math.min(100, Math.round(parsed.score)));
+            aiInsights = parsed.insight || "";
+            console.log("AI calculated score:", healingScore);
+          } catch (parseError) {
+            console.error("Failed to parse AI response:", parseError);
+            // Fall back to formula-based calculation
+            healingScore = calculateFallbackScore(profile, significantTraumas.length);
+          }
+        } else {
+          console.error("AI API error:", await aiResponse.text());
+          healingScore = calculateFallbackScore(profile, significantTraumas.length);
         }
       } catch (aiError) {
-        console.error("AI insight generation error:", aiError);
-        // Continue without AI insights
+        console.error("AI calculation error:", aiError);
+        healingScore = calculateFallbackScore(profile, significantTraumas.length);
       }
+    } else {
+      console.log("No Lovable API key, using fallback calculation");
+      healingScore = calculateFallbackScore(profile, significantTraumas.length);
     }
 
-    // Default insights if AI didn't provide any
+    // Generate fallback insight if AI didn't provide one
     if (!aiInsights) {
       if (healingScore >= 75) {
-        aiInsights = "You're showing great progress in your healing journey! Your awareness and self-reflection are powerful tools. Keep nurturing your growth.";
+        aiInsights = "You're showing strong emotional readiness! Your self-awareness and healing work are paying off. You're in a good place to date with confidence.";
       } else if (healingScore >= 50) {
-        aiInsights = "You're making steady progress. Remember, healing isn't linear — some days will feel harder than others, and that's completely normal. D.E.V.I. is here to support you.";
+        aiInsights = "You're making meaningful progress on your healing journey. Remember, it's okay to date while still working through some things — just stay mindful of your patterns and needs.";
       } else {
-        aiInsights = "Healing takes time, and it's okay to not be where you want to be yet. The fact that you're here, reflecting on your journey, shows incredible strength. Take it one day at a time.";
+        aiInsights = "Your healing journey is still unfolding, and that's completely okay. Consider focusing on yourself for now, and know that D.E.V.I. is here to support you every step of the way.";
       }
     }
 
@@ -182,6 +301,8 @@ Provide a 2-3 sentence supportive insight. If the score is below 75%, include en
       console.error("Update profile error:", updateError);
     }
 
+    console.log("Healing score calculated successfully:", { healingScore, previousScore, scoreChange });
+
     return new Response(
       JSON.stringify({
         healingScore,
@@ -205,3 +326,40 @@ Provide a 2-3 sentence supportive insight. If the score is below 75%, include en
     );
   }
 });
+
+// Fallback formula-based calculation
+function calculateFallbackScore(profile: any, traumaCount: number): number {
+  let baseScore = 50;
+
+  // Ex contact status impact (0-20 points)
+  const exContactScores: Record<string, number> = {
+    "no_contact": 20,
+    "occasional": 15,
+    "regular": 10,
+    "frequent": 5,
+    "still_connected": 0,
+    "not_applicable": 18,
+  };
+  baseScore += exContactScores[profile.ex_contact_status || "not_applicable"] || 10;
+
+  // Over ex level (0-25 points)
+  const overExScore = Math.round((profile.over_ex_level || 50) * 0.25);
+  baseScore += overExScore;
+
+  // Attachment to past (inverse) (0-20 points)
+  const attachmentScore = Math.round((100 - (profile.attachment_to_past || 50)) * 0.2);
+  baseScore += attachmentScore;
+
+  // Trauma impact (-15 to +5)
+  if (traumaCount === 0) {
+    baseScore += 5;
+  } else if (traumaCount <= 2) {
+    baseScore += 0;
+  } else if (traumaCount <= 5) {
+    baseScore -= 5;
+  } else {
+    baseScore -= 15;
+  }
+
+  return Math.max(0, Math.min(100, baseScore));
+}
