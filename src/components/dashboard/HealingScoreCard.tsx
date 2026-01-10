@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Heart, CheckCircle, TrendingUp, AlertTriangle, ChevronRight, Sparkles } from "lucide-react";
+import { Heart, CheckCircle, TrendingUp, AlertTriangle, ChevronRight, Sparkles, MessageCircle } from "lucide-react";
 
 interface HealingScoreCardProps {
   compact?: boolean;
@@ -135,11 +135,17 @@ export const HealingScoreCard: React.FC<HealingScoreCardProps> = ({ compact = fa
         <Progress value={healingScore} className="h-2" />
 
         {healingScore < 75 && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Sparkles className="w-3 h-3 text-primary" />
-            <span>Chat with D.E.V.I. to track your progress</span>
-            <ChevronRight className="w-3 h-3 ml-auto group-hover:translate-x-0.5 transition-transform" />
-          </div>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate("/devi?prompt=healing");
+            }}
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors text-xs font-medium text-primary"
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+            <span>Talk to D.E.V.I. about your healing</span>
+            <ChevronRight className="w-3 h-3 ml-auto" />
+          </button>
         )}
       </CardContent>
     </Card>
