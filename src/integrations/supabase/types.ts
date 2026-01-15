@@ -1926,6 +1926,7 @@ export type Database = {
         | "moderate"
         | "conservative"
         | "traditional"
+        | "prefer_not_say"
       pronouns: "she_her" | "he_him" | "they_them" | "other"
       relationship_goal:
         | "casual"
@@ -2165,6 +2166,7 @@ export const Constants = {
         "moderate",
         "conservative",
         "traditional",
+        "prefer_not_say",
       ],
       pronouns: ["she_her", "he_him", "they_them", "other"],
       relationship_goal: [
