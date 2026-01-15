@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TourProvider, TourOverlay } from "@/components/tour";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import HelpButton from "@/components/HelpButton";
 import { BottomNavigation } from "@/components/navigation/BottomNavigation";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { LoadingScreen } from "@/components/LoadingScreen";
@@ -110,6 +111,7 @@ function AppContent() {
             <Route path="*" element={<NotFound />} />
           </Routes>
           <BottomNavigation />
+          <HelpButton />
         </Suspense>
       )}
     </>
