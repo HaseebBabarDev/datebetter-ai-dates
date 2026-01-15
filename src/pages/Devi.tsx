@@ -385,85 +385,83 @@ const Devi = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Fetch candidates and user profile
+  // Fetch candidates, user profile, and conversations in parallel
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
       
       setProfilesLoading(true);
+      setConversationsLoading(true);
       
       // Check if we started in "feeling" or "healing" mode (general chat - no candidate)
       const isGeneralChatMode = initialPromptTypeRef.current === "feeling" || initialPromptTypeRef.current === "healing";
       
-      // Fetch candidates
-      const { data: candidatesData } = await supabase
-        .from("candidates")
-        .select("*")
-        .eq("user_id", user.id)
-        .neq("status", "archived")
-        .order("updated_at", { ascending: false });
+      // Calculate 30 days ago for conversation cleanup
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       
-      if (candidatesData) {
-        setCandidates(candidatesData);
+      // Fetch all data in parallel
+      const [candidatesRes, profileRes, conversationsRes] = await Promise.all([
+        supabase
+          .from("candidates")
+          .select("*")
+          .eq("user_id", user.id)
+          .neq("status", "archived")
+          .order("updated_at", { ascending: false }),
+        supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .single(),
+        supabase
+          .from("devi_conversations")
+          .select("*")
+          .eq("user_id", user.id)
+          .gte("updated_at", thirtyDaysAgo.toISOString())
+          .order("updated_at", { ascending: false })
+          .limit(50),
+      ]);
+      
+      // Process candidates
+      if (candidatesRes.data) {
+        setCandidates(candidatesRes.data);
         // Auto-select if coming from candidate page (but NOT if in general chat mode)
         if (candidateIdFromState && !isGeneralChatMode) {
-          const found = candidatesData.find(c => c.id === candidateIdFromState);
+          const found = candidatesRes.data.find(c => c.id === candidateIdFromState);
           if (found) setSelectedCandidate(found);
-        } else if (candidatesData.length === 1 && !isGeneralChatMode) {
-          setSelectedCandidate(candidatesData[0]);
+        } else if (candidatesRes.data.length === 1 && !isGeneralChatMode) {
+          setSelectedCandidate(candidatesRes.data[0]);
         }
       }
       
-      // Fetch user profile
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", user.id)
-        .single();
+      // Process profile
+      if (profileRes.data) {
+        setUserProfile(profileRes.data);
+      }
       
-      if (profileData) {
-        setUserProfile(profileData);
+      // Process conversations
+      if (conversationsRes.data) {
+        setConversations(conversationsRes.data as Conversation[]);
       }
       
       setProfilesLoading(false);
+      setConversationsLoading(false);
     };
 
     fetchData();
   }, [user, candidateIdFromState]);
 
-  // Fetch conversations (last 30 days only)
+  // Clean up old conversations in background (non-blocking)
   useEffect(() => {
-    const fetchConversations = async () => {
-      if (!user) return;
-      
-      setConversationsLoading(true);
-      
-      // Calculate 30 days ago
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
-      // Clean up old conversations (older than 30 days)
-      await supabase
-        .from("devi_conversations")
-        .delete()
-        .eq("user_id", user.id)
-        .lt("updated_at", thirtyDaysAgo.toISOString());
-      
-      // Fetch remaining conversations
-      const { data } = await supabase
-        .from("devi_conversations")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("updated_at", { ascending: false })
-        .limit(50);
-      
-      if (data) {
-        setConversations(data as Conversation[]);
-      }
-      setConversationsLoading(false);
-    };
-
-    fetchConversations();
+    if (!user) return;
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    // Fire and forget - don't await
+    supabase
+      .from("devi_conversations")
+      .delete()
+      .eq("user_id", user.id)
+      .lt("updated_at", thirtyDaysAgo.toISOString());
   }, [user]);
 
   // Fetch interactions when candidate changes

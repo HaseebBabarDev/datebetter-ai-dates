@@ -48,7 +48,16 @@ const RouteLoader = () => (
   </div>
 );
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes - data stays fresh
+      gcTime: 1000 * 60 * 30, // 30 minutes - keep in cache
+      refetchOnWindowFocus: false, // Don't refetch on tab focus
+      retry: 1, // Only retry once on failure
+    },
+  },
+});
 
 function AppContent() {
   const isOnline = useOnlineStatus();
