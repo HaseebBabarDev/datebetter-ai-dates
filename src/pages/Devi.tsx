@@ -1211,21 +1211,21 @@ const Devi = () => {
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border safe-area-top">
-        <div className="container mx-auto px-4 py-3 max-w-lg">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-xl shrink-0">
-              <ArrowLeft className="w-5 h-5" />
+        <div className="container mx-auto px-2 py-2 max-w-lg">
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-lg shrink-0 h-8 w-8">
+              <ArrowLeft className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="rounded-xl shrink-0">
-              <Home className="w-5 h-5" />
+            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="rounded-lg shrink-0 h-8 w-8">
+              <Home className="w-4 h-4" />
             </Button>
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-primary-foreground" />
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <div className="w-7 h-7 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
+                <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
               </div>
               <div className="min-w-0">
-                <h1 className="font-semibold text-foreground">D.E.V.I.</h1>
-                <p className="text-xs text-muted-foreground truncate">Your AI assistant</p>
+                <h1 className="font-semibold text-sm text-foreground leading-tight">D.E.V.I.</h1>
+                <p className="text-[10px] text-muted-foreground truncate leading-tight">Your AI</p>
               </div>
             </div>
             
@@ -1237,10 +1237,10 @@ const Devi = () => {
               variant="ghost"
               size="icon"
               onClick={startNewChat}
-              className="rounded-xl shrink-0"
+              className="rounded-lg shrink-0 h-8 w-8"
               title="New Chat"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4" />
             </Button>
             
             {/* Adjust Tone Button */}
@@ -1248,10 +1248,10 @@ const Devi = () => {
               variant="ghost"
               size="icon"
               onClick={() => navigate("/settings?tab=preferences")}
-              className="rounded-xl shrink-0"
+              className="rounded-lg shrink-0 h-8 w-8"
               title="Adjust Devi's Tone"
             >
-              <SlidersHorizontal className="w-5 h-5" />
+              <SlidersHorizontal className="w-4 h-4" />
             </Button>
             
             {/* Layout Toggle Button */}
@@ -1266,13 +1266,13 @@ const Devi = () => {
                       setChatLayout(newLayout);
                       localStorage.setItem('devi-chat-layout', newLayout);
                     }}
-                    className="rounded-xl shrink-0"
+                    className="rounded-lg shrink-0 h-8 w-8"
                     title={chatLayout === "bubble" ? "Switch to Article View" : "Switch to Bubble View"}
                   >
                     {chatLayout === "bubble" ? (
-                      <AlignLeft className="w-5 h-5" />
+                      <AlignLeft className="w-4 h-4" />
                     ) : (
-                      <LayoutGrid className="w-5 h-5" />
+                      <LayoutGrid className="w-4 h-4" />
                     )}
                   </Button>
                 </TooltipTrigger>
@@ -1285,8 +1285,8 @@ const Devi = () => {
             {/* Chat History Sheet */}
             <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-xl shrink-0" title="Chat History" data-tour="devi-history">
-                  <MessageSquare className="w-5 h-5" />
+                <Button variant="ghost" size="icon" className="rounded-lg shrink-0 h-8 w-8" title="Chat History" data-tour="devi-history">
+                  <MessageSquare className="w-4 h-4" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-80 p-0">
