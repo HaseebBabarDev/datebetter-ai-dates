@@ -1,7 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Users, MessageCircle, Sparkles, ArrowRight, Brain } from "lucide-react";
+import { Users, MessageCircle, Sparkles, ArrowRight, Brain, Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const ModernLogo = () => (
   <div className="relative w-24 h-24 sm:w-28 sm:h-28">
@@ -50,7 +52,37 @@ const ModernLogo = () => (
 
 const Splash = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const videoRef = React.useRef<HTMLVideoElement>(null);
+  const [checkingOnboarding, setCheckingOnboarding] = React.useState(false);
+
+  // Redirect logged-in users to dashboard or setup
+  React.useEffect(() => {
+    const checkUserStatus = async () => {
+      if (authLoading || !user) return;
+      
+      setCheckingOnboarding(true);
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("onboarding_completed")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        if (profile?.onboarding_completed) {
+          navigate("/dashboard", { replace: true });
+        } else {
+          navigate("/setup", { replace: true });
+        }
+      } catch (error) {
+        console.error("Error checking onboarding status:", error);
+        // If there's an error, let user stay on splash and try logging in again
+        setCheckingOnboarding(false);
+      }
+    };
+
+    checkUserStatus();
+  }, [user, authLoading, navigate]);
 
   // Attempt video autoplay on mount and user interaction
   React.useEffect(() => {
@@ -81,6 +113,18 @@ const Splash = () => {
       document.removeEventListener('click', handleInteraction);
     };
   }, []);
+
+  // Show loading state while checking auth
+  if (authLoading || checkingOnboarding) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center bg-background">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[100dvh] relative overflow-hidden">
