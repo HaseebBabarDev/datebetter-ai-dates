@@ -392,8 +392,8 @@ const Devi = () => {
       
       setProfilesLoading(true);
       
-      // Check if we started in "feeling" mode (general chat)
-      const isGeneralChatMode = initialPromptTypeRef.current === "feeling";
+      // Check if we started in "feeling" or "healing" mode (general chat - no candidate)
+      const isGeneralChatMode = initialPromptTypeRef.current === "feeling" || initialPromptTypeRef.current === "healing";
       
       // Fetch candidates
       const { data: candidatesData } = await supabase
@@ -1109,6 +1109,9 @@ const Devi = () => {
       // Clear the query param to prevent re-triggering
       setSearchParams({}, { replace: true });
       
+      // Clear any selected candidate - feeling check-in is always general chat
+      setSelectedCandidate(null);
+      
       // Start a new chat and pre-fill a sample prompt
       startNewChat();
       setInput("I'm feeling [describe your emotions] about dating right now because...");
@@ -1126,6 +1129,9 @@ const Devi = () => {
       
       // Clear the query param to prevent re-triggering
       setSearchParams({}, { replace: true });
+      
+      // Clear any selected candidate - healing is always general chat
+      setSelectedCandidate(null);
       
       // Start a new chat with healing-focused context
       startNewChat();
