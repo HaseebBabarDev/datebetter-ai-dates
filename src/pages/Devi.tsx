@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -44,6 +44,7 @@ import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
 import { DeviWinDialog, DeviWinPrompt } from "@/components/devi/DeviWinDialog";
 import { ProfileSectionsNudge } from "@/components/devi/ProfileSectionsNudge";
 import { HealingJourney } from "@/components/devi/HealingJourney";
+import { ChatGPTMessage } from "@/components/devi/ChatGPTMessage";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -331,6 +332,14 @@ const Devi = () => {
   
   // Profile sections nudge dismissal state
   const [profileNudgeDismissed, setProfileNudgeDismissed] = useState(false);
+  
+  // Chat layout style - bubble (default) or chatgpt
+  const [chatLayout, setChatLayout] = useState<"bubble" | "chatgpt">(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('devi-chat-layout') as "bubble" | "chatgpt") || "bubble";
+    }
+    return "bubble";
+  });
   
   // Feeling check-in prompt handling
   const [searchParams, setSearchParams] = useSearchParams();
@@ -1239,6 +1248,34 @@ const Devi = () => {
               <SlidersHorizontal className="w-5 h-5" />
             </Button>
             
+            {/* Layout Toggle Button */}
+            <TooltipProvider delayDuration={400}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      const newLayout = chatLayout === "bubble" ? "chatgpt" : "bubble";
+                      setChatLayout(newLayout);
+                      localStorage.setItem('devi-chat-layout', newLayout);
+                    }}
+                    className="rounded-xl shrink-0"
+                    title={chatLayout === "bubble" ? "Switch to Article View" : "Switch to Bubble View"}
+                  >
+                    {chatLayout === "bubble" ? (
+                      <AlignLeft className="w-5 h-5" />
+                    ) : (
+                      <LayoutGrid className="w-5 h-5" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p className="text-xs">{chatLayout === "bubble" ? "Switch to Article View" : "Switch to Bubble View"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
             {/* Chat History Sheet */}
             <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
               <SheetTrigger asChild>
@@ -1540,33 +1577,55 @@ const Devi = () => {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto min-h-0">
-        <div className="container mx-auto px-4 py-4 max-w-lg space-y-4">
+        <div className={`container mx-auto px-4 py-4 ${chatLayout === "chatgpt" ? "max-w-2xl" : "max-w-lg"} space-y-4`}>
           {messages.length === 0 ? (
             <div className="py-4">
               {/* Single welcome bubble - feels like a chat */}
-              <div className="flex items-start gap-2 mb-4">
-                <div className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
-                  <Sparkles className="w-4 h-4 text-primary-foreground" />
-                </div>
-                <div className="bg-muted rounded-2xl rounded-bl-md p-3 max-w-[85%]">
-                  <p className="text-sm">
-                    {selectedCandidate 
-                      ? `Hey! 👋 What's going on with ${selectedCandidate.nickname}?`
-                      : "Hey babe! 👋 I'm here to help with anything dating-related. Ask me about dating advice, red flags, self-improvement, or select a candidate to discuss someone specific!"}
-                  </p>
-                </div>
+              <div className={chatLayout === "chatgpt" ? "mb-6" : "flex items-start gap-2 mb-4"}>
+                {chatLayout === "chatgpt" ? (
+                  <>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-7 h-7 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center">
+                        <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
+                      </div>
+                      <span className="text-sm font-medium text-muted-foreground">D.E.V.I.</span>
+                    </div>
+                    <div className="pl-9">
+                      <p className="text-base leading-relaxed">
+                        {selectedCandidate 
+                          ? `Hey! 👋 What's going on with ${selectedCandidate.nickname}?`
+                          : "Hey babe! 👋 I'm here to help with anything dating-related. Ask me about dating advice, red flags, self-improvement, or select a candidate to discuss someone specific!"}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4 text-primary-foreground" />
+                    </div>
+                    <div className="bg-muted rounded-2xl rounded-bl-md p-3 max-w-[85%]">
+                      <p className="text-sm">
+                        {selectedCandidate 
+                          ? `Hey! 👋 What's going on with ${selectedCandidate.nickname}?`
+                          : "Hey babe! 👋 I'm here to help with anything dating-related. Ask me about dating advice, red flags, self-improvement, or select a candidate to discuss someone specific!"}
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Quick prompts - show for both general and candidate mode when can chat */}
               {((chatMode === "general" && canChatGeneral) || (chatMode === "candidate" && canChatWithCandidate)) && (
-                <div className="pl-10 space-y-2">
-                  <p className="text-xs text-muted-foreground mb-2">Try asking:</p>
+                <div className={chatLayout === "chatgpt" ? "pl-9 space-y-3" : "pl-10 space-y-2"}>
+                  <p className={`text-muted-foreground ${chatLayout === "chatgpt" ? "text-sm" : "text-xs"} mb-2`}>Try asking:</p>
                   <div className="flex flex-wrap gap-2">
                     {EXAMPLE_QUESTIONS.map((q, i) => (
                       <button
                         key={i}
                         onClick={() => setInput(q)}
-                        className="text-xs px-3 py-1.5 rounded-full border border-primary/30 text-primary bg-primary/5 hover:bg-primary/10 transition-colors"
+                        className={`rounded-full border border-border text-foreground hover:bg-muted transition-colors ${
+                          chatLayout === "chatgpt" ? "text-sm px-4 py-2" : "text-xs px-3 py-1.5 border-primary/30 text-primary bg-primary/5 hover:bg-primary/10"
+                        }`}
                       >
                         {q}
                       </button>
@@ -1618,13 +1677,23 @@ const Devi = () => {
             </div>
           ) : (
             messages.map((msg, index) => (
-              <MessageBubble 
-                key={msg.id} 
-                message={msg} 
-                isLast={index === messages.length - 1}
-                onQuickReply={(reply) => sendMessage(reply)}
-                isLoading={isLoading}
-              />
+              chatLayout === "chatgpt" ? (
+                <ChatGPTMessage 
+                  key={msg.id} 
+                  message={msg} 
+                  isLast={index === messages.length - 1}
+                  onQuickReply={(reply) => sendMessage(reply)}
+                  isLoading={isLoading}
+                />
+              ) : (
+                <MessageBubble 
+                  key={msg.id} 
+                  message={msg} 
+                  isLast={index === messages.length - 1}
+                  onQuickReply={(reply) => sendMessage(reply)}
+                  isLoading={isLoading}
+                />
+              )
             ))
           )}
           
@@ -1687,7 +1756,7 @@ const Devi = () => {
 
       {/* Input */}
       <div className="shrink-0 bg-background border-t border-border pb-16 safe-area-bottom">
-        <div className="container mx-auto px-4 py-3 max-w-lg">
+        <div className={`container mx-auto px-4 py-3 ${chatLayout === "chatgpt" ? "max-w-2xl" : "max-w-lg"}`}>
           {/* Pending Image Preview */}
           {pendingImage && (
             <div className="mb-2">
