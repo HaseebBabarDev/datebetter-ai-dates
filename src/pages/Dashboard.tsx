@@ -184,6 +184,15 @@ const Dashboard = () => {
   useEffect(() => {
     if (user) {
       fetchData();
+      // Prefetch Devi page data in background for faster navigation
+      const prefetchDeviData = async () => {
+        await Promise.all([
+          supabase.from("devi_conversations").select("id, candidate_id, title, updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(20),
+        ]);
+      };
+      // Delay prefetch to not compete with main data load
+      const prefetchTimer = setTimeout(prefetchDeviData, 1000);
+      return () => clearTimeout(prefetchTimer);
     }
   }, [user]);
 

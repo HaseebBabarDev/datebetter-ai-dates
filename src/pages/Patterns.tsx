@@ -186,13 +186,14 @@ const Patterns = () => {
 
   const fetchPatternData = async () => {
     try {
+      // Fetch data in parallel - limit large tables for performance
       const [candidatesRes, interactionsRes, adviceRes, ncProgressRes, deviConversationsRes, deviMessagesRes, profileRes] = await Promise.all([
         supabase.from("candidates").select("*").eq("user_id", user!.id),
-        supabase.from("interactions").select("*").eq("user_id", user!.id),
-        supabase.from("advice_tracking").select("*").eq("user_id", user!.id),
-        supabase.from("no_contact_progress").select("*").eq("user_id", user!.id),
-        supabase.from("devi_conversations").select("*").eq("user_id", user!.id),
-        supabase.from("devi_messages").select("*").eq("user_id", user!.id),
+        supabase.from("interactions").select("*").eq("user_id", user!.id).limit(500),
+        supabase.from("advice_tracking").select("*").eq("user_id", user!.id).limit(200),
+        supabase.from("no_contact_progress").select("*").eq("user_id", user!.id).limit(200),
+        supabase.from("devi_conversations").select("id, candidate_id, created_at, updated_at").eq("user_id", user!.id),
+        supabase.from("devi_messages").select("id, conversation_id, role").eq("user_id", user!.id).limit(1000),
         supabase.from("profiles").select("past_relationship_traumas, relationship_trauma_notes").eq("user_id", user!.id).single(),
       ]);
 
