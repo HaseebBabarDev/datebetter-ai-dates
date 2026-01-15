@@ -36,11 +36,6 @@ const HelpButton = () => {
     }
   };
 
-  const handleEmailClick = () => {
-    // Try mailto first, if it fails the dialog is already open
-    window.location.href = `mailto:${SUPPORT_EMAIL}?subject=Help Request`;
-  };
-
   return (
     <>
       <button
@@ -59,13 +54,13 @@ const HelpButton = () => {
               Contact Support
             </DialogTitle>
             <DialogDescription>
-              Need help? Reach out to our support team.
+              Need help? Copy our support email below.
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 pt-2">
             <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-              <span className="text-sm font-medium flex-1 truncate">{SUPPORT_EMAIL}</span>
+              <span className="text-sm font-medium flex-1">{SUPPORT_EMAIL}</span>
               <Button
                 variant="ghost"
                 size="icon"
@@ -80,21 +75,22 @@ const HelpButton = () => {
               </Button>
             </div>
             
-            <div className="flex gap-2">
-              <Button 
-                className="flex-1" 
-                onClick={handleEmailClick}
-              >
-                <Mail className="w-4 h-4 mr-2" />
-                Open Email App
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleCopy}
-              >
-                {copied ? "Copied!" : "Copy"}
-              </Button>
-            </div>
+            <Button 
+              className="w-full" 
+              onClick={handleCopy}
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4 mr-2" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copy Email
+                </>
+              )}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
