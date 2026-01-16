@@ -1135,6 +1135,13 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
     
     // ENFORCE SCORE LIMITS in multiple scenarios:
     
+    // 0. CRITICAL: If relationship-ending patterns are detected, FORCE score down to cap
+    // This fixes the bug where score went to 83% but should be capped at 20%
+    if (shouldEndRelationship && analysis.overall_score > sentimentAdjustedOverall) {
+      console.log(`FORCING SCORE DOWN: Relationship-ending pattern detected. AI suggested ${analysis.overall_score}%, forcing to ${sentimentAdjustedOverall}%`);
+      analysis.overall_score = sentimentAdjustedOverall;
+    }
+    
     // 1. If there are negative interactions, cap the score
     if (negativeCount > 0 && analysis.overall_score > sentimentAdjustedOverall) {
       console.log(`Capping AI score from ${analysis.overall_score} to ${sentimentAdjustedOverall} due to ${negativeCount} negative interactions`);
@@ -1158,6 +1165,11 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
     
     // 4. Also cap emotional compatibility if there are negative interactions
     if (negativeCount > 0 && analysis.breakdown?.emotional_compatibility > adjustedEmotionalScore) {
+      analysis.breakdown.emotional_compatibility = adjustedEmotionalScore;
+    }
+    
+    // 5. Force emotional score down if relationship should end
+    if (shouldEndRelationship && analysis.breakdown?.emotional_compatibility > adjustedEmotionalScore) {
       analysis.breakdown.emotional_compatibility = adjustedEmotionalScore;
     }
 
