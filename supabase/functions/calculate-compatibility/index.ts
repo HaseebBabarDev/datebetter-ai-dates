@@ -528,15 +528,14 @@ serve(async (req) => {
     // Recovery is VERY gradual - score can only go up by 1% at a time
     let sentimentAdjustedOverall;
     if (shouldEndRelationship) {
-      // Relationship-ending patterns: base cap starts at 5, grows SLOWLY up to 20 max
-      // Even with perfect behavior, reaching 20% takes 15+ consecutive positive interactions
+      // Relationship-ending patterns: cap grows SLOWLY from 5 up to 20 max with recovery
       const maxCap = Math.min(20, 5 + recoveryBonusFromStreak);
 
-      // Get previous score to ensure we only move +1 at a time
+      // Get previous score to ensure we only move gradually (both up AND down)
       const previousScore =
         typeof candidate.compatibility_score === "number"
           ? Math.round(candidate.compatibility_score)
-          : 5;
+          : null;
 
       // Base computed score (still respects sentiment)
       let computedScore = Math.min(
@@ -544,18 +543,25 @@ serve(async (req) => {
         Math.max(5, Math.round(baseScores.overall_score + interactionSentiment))
       );
 
-      // GRADUAL RECOVERY: Only allow +1% increase per rescore, and only if streak is growing
-      // This means even logging many positives at once won't jump the score
-      if (recentPositiveStreak >= 3 && computedScore > previousScore) {
-        // Allow at most +1 from previous score
+      if (previousScore === null) {
+        // First time scoring - use computed
+        sentimentAdjustedOverall = computedScore;
+      } else if (recentPositiveStreak >= 3 && computedScore >= previousScore) {
+        // GRADUAL RECOVERY: Only allow +1% increase per rescore
         sentimentAdjustedOverall = Math.min(maxCap, previousScore + 1);
+      } else if (computedScore < previousScore) {
+        // GRADUAL DECREASE: Only allow -1% decrease per rescore (or -2 for very bad)
+        // This prevents dramatic drops from 20% to 5%
+        const dropAmount = previousScore - computedScore;
+        const maxDrop = dropAmount > 10 ? 2 : 1; // Allow -2 if computed is much lower
+        sentimentAdjustedOverall = Math.max(5, previousScore - maxDrop);
       } else {
-        // Keep at previous or computed (whichever is lower for bad cases)
-        sentimentAdjustedOverall = Math.min(maxCap, Math.max(computedScore, previousScore));
+        // No streak but score is same or higher - keep previous
+        sentimentAdjustedOverall = Math.min(maxCap, previousScore);
       }
 
       console.log(
-        `SCORE with recovery: ${sentimentAdjustedOverall} (max cap: ${maxCap}, previous: ${previousScore}, streak: ${recentPositiveStreak})`
+        `SCORE with recovery: ${sentimentAdjustedOverall} (max cap: ${maxCap}, previous: ${previousScore}, computed: ${computedScore}, streak: ${recentPositiveStreak})`
       );
     } else if (hasCriticalRedFlag) {
       const recoveryBonus = Math.max(0, interactionSentiment + 20);
