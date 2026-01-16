@@ -416,13 +416,19 @@ const CandidateDetail = () => {
   }, [location.state, candidate, navigate, location.pathname]);
 
   // Handle showing rating dialog after new candidate dialog closes
+  // Only show if user has 3+ interactions and a score has been generated
   const handleNewCandidateDialogClose = (open: boolean) => {
     setShowNewCandidateDialog(open);
-    if (!open && isFirstCandidate && shouldShowRatingDialog()) {
-      // Small delay before showing rating dialog
-      setTimeout(() => {
-        setShowRatingDialog(true);
-      }, 500);
+    if (!open && isFirstCandidate) {
+      const totalInteractions = interactions?.length || 0;
+      const hasScoreGenerated = typeof candidate?.compatibility_score === "number";
+      
+      if (shouldShowRatingDialog(totalInteractions, hasScoreGenerated)) {
+        // Small delay before showing rating dialog
+        setTimeout(() => {
+          setShowRatingDialog(true);
+        }, 500);
+      }
     }
   };
 
@@ -460,9 +466,22 @@ const CandidateDetail = () => {
   };
 
   // Handler for when an interaction is logged - fetches data and switches to insights tab
+  // Also checks if we should show the rating dialog (after 3+ interactions with score)
   const handleInteractionLogged = async () => {
     await fetchData();
     setActiveTab("profile"); // Switch to insights tab after logging
+    
+    // Check if we should show rating dialog after this interaction
+    // Need to add 1 to current count since fetchData might not have updated yet
+    const newInteractionCount = (interactions?.length || 0) + 1;
+    const hasScoreGenerated = typeof candidate?.compatibility_score === "number";
+    
+    if (newInteractionCount >= 3 && hasScoreGenerated && shouldShowRatingDialog(newInteractionCount, hasScoreGenerated)) {
+      // Small delay to let the UI settle
+      setTimeout(() => {
+        setShowRatingDialog(true);
+      }, 1500);
+    }
   };
 
   const handleBrokeContact = async () => {

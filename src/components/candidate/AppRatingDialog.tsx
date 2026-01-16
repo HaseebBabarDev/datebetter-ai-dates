@@ -86,7 +86,7 @@ export const AppRatingDialog: React.FC<AppRatingDialogProps> = ({
             Enjoying the app?
           </AlertDialogTitle>
           <AlertDialogDescription className="text-base">
-            Your first candidate is added! We'd love to hear how we're doing.
+            You've been tracking your dating journey! We'd love to hear how we're doing.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -144,7 +144,11 @@ export const AppRatingDialog: React.FC<AppRatingDialogProps> = ({
 };
 
 // Helper to check if we should show the rating dialog
-export const shouldShowRatingDialog = (): boolean => {
+// Now requires: 3+ interactions logged AND at least one score generated
+export const shouldShowRatingDialog = (
+  totalInteractions?: number,
+  hasScoreGenerated?: boolean
+): boolean => {
   // Already rated
   if (localStorage.getItem("app_rated") === "true") {
     return false;
@@ -157,6 +161,16 @@ export const shouldShowRatingDialog = (): boolean => {
     if (daysSinceSkip < 7) {
       return false;
     }
+  }
+
+  // Require at least 3 interactions logged
+  if (typeof totalInteractions === "number" && totalInteractions < 3) {
+    return false;
+  }
+
+  // Require at least one score to have been generated
+  if (hasScoreGenerated === false) {
+    return false;
   }
 
   return true;
