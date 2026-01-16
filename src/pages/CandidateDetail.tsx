@@ -912,7 +912,6 @@ const CandidateDetail = () => {
           </TabsList>
 
           <TabsContent value="profile" className="mt-4 space-y-4">
-            <AIDisclosure variant="inline" className="justify-center mb-2" />
             <ProfileCompleteness candidate={candidate} />
             <CompatibilityScore
               candidate={candidate}
@@ -968,7 +967,6 @@ const CandidateDetail = () => {
           </TabsContent>
 
           <TabsContent value="flags" className="mt-4 space-y-4">
-            <AIDisclosure variant="inline" className="justify-center" />
             <FlagsSection
               candidate={candidate}
               onUpdate={handleUpdateCandidate}
@@ -982,6 +980,11 @@ const CandidateDetail = () => {
             />
           </TabsContent>
         </Tabs>
+
+        {/* AI Disclosure - at bottom for App Store compliance */}
+        <div className="mt-8 pb-4">
+          <AIDisclosure variant="compact" className="justify-center" />
+        </div>
       </main>
     </div>
   );
