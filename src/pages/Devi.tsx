@@ -334,12 +334,12 @@ const Devi = () => {
   // Profile sections nudge dismissal state
   const [profileNudgeDismissed, setProfileNudgeDismissed] = useState(false);
   
-  // Chat layout style - bubble (default) or chatgpt
+  // Chat layout style - chatgpt (default) or bubble
   const [chatLayout, setChatLayout] = useState<"bubble" | "chatgpt">(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem('devi-chat-layout') as "bubble" | "chatgpt") || "bubble";
+      return (localStorage.getItem('devi-chat-layout') as "bubble" | "chatgpt") || "chatgpt";
     }
-    return "bubble";
+    return "chatgpt";
   });
   
   // Feeling check-in prompt handling
