@@ -484,13 +484,14 @@ serve(async (req) => {
         }
       });
       
-      // Recovery logic: If there's a consistent positive streak, allow gradual score recovery
-      // This encourages growth and behavior change over time
+      // Recovery logic: If there's a consistent positive streak, allow VERY gradual score recovery
+      // This encourages growth and behavior change over time - but slowly over weeks/months
       recoveryBonusFromStreak = 0;
       if (recentPositiveStreak >= 3) {
-        // 3+ consecutive positive interactions = start recovering
-        recoveryBonusFromStreak = (recentPositiveStreak - 2) * 5; // +5 per positive after the first 2
-        recoveryBonusFromStreak = Math.min(recoveryBonusFromStreak, 25); // Cap recovery bonus at 25
+        // 3+ consecutive positive interactions = start recovering VERY slowly
+        // Only +1% per positive interaction after the first 2 (not +5%)
+        recoveryBonusFromStreak = recentPositiveStreak - 2; // +1 per positive after the first 2
+        recoveryBonusFromStreak = Math.min(recoveryBonusFromStreak, 15); // Cap recovery bonus at 15 max (needs 17+ positives)
         console.log(
           `RECOVERY: ${recentPositiveStreak} consecutive positive interactions, bonus: +${recoveryBonusFromStreak}`
         );
@@ -498,7 +499,7 @@ serve(async (req) => {
 
       // Cap the sentiment adjustment based on severity, but apply recovery bonus
       if (shouldEndRelationship) {
-        // Allow recovery if there's a positive streak
+        // Allow recovery if there's a positive streak - but keep sentiment very negative
         const adjustedMin = -40 + recoveryBonusFromStreak;
         interactionSentiment = Math.max(
           -80,
@@ -524,40 +525,37 @@ serve(async (req) => {
     const adjustedEmotionalScore = Math.max(5, Math.min(100, baseScores.emotional_compatibility + interactionSentiment));
     
     // Hard cap the overall score based on severity of issues
-    // Recovery bonus is already applied to interactionSentiment, now adjust the caps
+    // Recovery is VERY gradual - score can only go up by 1% at a time
     let sentimentAdjustedOverall;
     if (shouldEndRelationship) {
-      // Relationship-ending patterns: base cap at 20, but allow gradual recovery up to 45
-      // Recovery comes from consecutive positive interactions showing behavior change
-      const maxCap = Math.min(45, 20 + recoveryBonusFromStreak);
+      // Relationship-ending patterns: base cap starts at 5, grows SLOWLY up to 20 max
+      // Even with perfect behavior, reaching 20% takes 15+ consecutive positive interactions
+      const maxCap = Math.min(20, 5 + recoveryBonusFromStreak);
+
+      // Get previous score to ensure we only move +1 at a time
+      const previousScore =
+        typeof candidate.compatibility_score === "number"
+          ? Math.round(candidate.compatibility_score)
+          : 5;
 
       // Base computed score (still respects sentiment)
-      sentimentAdjustedOverall = Math.min(
+      let computedScore = Math.min(
         maxCap,
         Math.max(5, Math.round(baseScores.overall_score + interactionSentiment))
       );
 
-      // Ensure users see a *tiny* upward movement when the recovery streak keeps going:
-      // +1 point on every other consecutive positive interaction (4, 6, 8, ...)
-      const previous =
-        typeof candidate.compatibility_score === "number"
-          ? Math.round(candidate.compatibility_score)
-          : null;
-
-      const shouldNudgeUp =
-        previous !== null &&
-        recentPositiveStreak >= 4 &&
-        recentPositiveStreak % 2 === 0;
-
-      if (shouldNudgeUp) {
-        sentimentAdjustedOverall = Math.min(
-          maxCap,
-          Math.max(sentimentAdjustedOverall, previous + 1)
-        );
+      // GRADUAL RECOVERY: Only allow +1% increase per rescore, and only if streak is growing
+      // This means even logging many positives at once won't jump the score
+      if (recentPositiveStreak >= 3 && computedScore > previousScore) {
+        // Allow at most +1 from previous score
+        sentimentAdjustedOverall = Math.min(maxCap, previousScore + 1);
+      } else {
+        // Keep at previous or computed (whichever is lower for bad cases)
+        sentimentAdjustedOverall = Math.min(maxCap, Math.max(computedScore, previousScore));
       }
 
       console.log(
-        `SCORE with recovery: ${sentimentAdjustedOverall} (max cap: ${maxCap}, recovery bonus from streak: ${recoveryBonusFromStreak}, streak: ${recentPositiveStreak})`
+        `SCORE with recovery: ${sentimentAdjustedOverall} (max cap: ${maxCap}, previous: ${previousScore}, streak: ${recentPositiveStreak})`
       );
     } else if (hasCriticalRedFlag) {
       const recoveryBonus = Math.max(0, interactionSentiment + 20);
@@ -1135,14 +1133,14 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
     const previousScore = candidate.compatibility_score;
 
     // If the relationship is in a "low cap" state but the user is logging a consistent
-    // recovery streak, force a tiny visible improvement (+1 every other positive log).
+    // recovery streak, ensure the score goes up by exactly +1 (very gradual).
+    // Max cap is now 20 (not 45) to keep recovery slow.
     if (
       shouldEndRelationship &&
       typeof previousScore === "number" &&
-      recentPositiveStreak >= 4 &&
-      recentPositiveStreak % 2 === 0
+      recentPositiveStreak >= 3
     ) {
-      const maxCap = Math.min(45, 20 + recoveryBonusFromStreak);
+      const maxCap = Math.min(20, 5 + recoveryBonusFromStreak);
       const nudged = Math.min(maxCap, Math.round(previousScore) + 1);
 
       if (typeof analysis.overall_score === "number" && analysis.overall_score < nudged) {
