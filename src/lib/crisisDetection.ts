@@ -1,11 +1,11 @@
-// Crisis keywords and phrases that should trigger alerts
+// Crisis keywords and phrases that should trigger SUPPORT alerts (not block)
 const CRISIS_KEYWORDS = [
   // Suicidal ideation
   "suicidal", "suicide", "kill myself", "end my life", "want to die", "don't want to live",
   "better off dead", "no reason to live", "end it all", "take my own life",
   // Self-harm
   "self harm", "self-harm", "cutting myself", "hurt myself", "hurting myself",
-  // Abuse indicators
+  // Abuse indicators - show resources, don't block
   "hit me", "hits me", "hitting me", "abusive", "abuse", "violent", "threatens me",
   "threatened me", "scared of him", "scared of her", "scared of them", "afraid of him",
   "afraid of her", "controls me", "controlling", "won't let me", "isolating me",
@@ -15,13 +15,21 @@ const CRISIS_KEYWORDS = [
   "stalking", "stalker", "following me", "won't leave me alone", "harassing",
 ];
 
+// EMERGENCY keywords - should prompt call 911
+const EMERGENCY_KEYWORDS = [
+  "rape", "raped", "raping", "being raped", "he raped me", "she raped me",
+  "sexual assault", "sexually assaulted", "being assaulted",
+];
+
 // Explicit harmful phrases that should ALWAYS be blocked (no context needed)
+// NOTE: This is specifically for content involving MINORS or INCEST - not adult sexual content
 const EXPLICIT_HARMFUL_KEYWORDS = [
-  // Explicit harmful phrases involving minors (require explicit harmful context)
+  // Explicit harmful phrases involving minors
   "dating a minor", "dating underage", "attracted to minors", "attracted to children",
   "attracted to kids", "sexual with minor", "sexual with child", "inappropriate with minor",
   "inappropriate with child", "inappropriate with kid", "sex with minor", "sex with child",
   "sex with kid", "sexual contact with minor", "sexual contact with child",
+  "sex with a child", "sex with a minor", "sex with a kid",
   // Incest - explicit harmful phrases
   "incest", "dating my sister", "dating my brother", "dating my mother", "dating my father",
   "dating my daughter", "dating my son", "dating my cousin", "dating family",
@@ -30,44 +38,46 @@ const EXPLICIT_HARMFUL_KEYWORDS = [
   "in love with my father", "in love with my daughter", "in love with my son",
   "sleeping with my sister", "sleeping with my brother", "sleeping with my mother",
   "sleeping with my father", "sleeping with my daughter", "sleeping with my son",
-  // Sexual violence
-  "rape", "raped", "raping", "sexual assault", "sexually assaulted", "molest",
-  "molested", "molesting", "non-consensual sex", "forced sex",
-  // Other harmful content
+  "sex with my sister", "sex with my brother", "sex with my mother",
+  "sex with my father", "sex with my daughter", "sex with my son",
+  // Other truly harmful content
   "pedophile", "pedophilia", "child abuse", "child exploitation",
   "sex trafficking", "human trafficking", "child porn", "child pornography",
+  "molest", "molested", "molesting",
 ];
 
 // Words that are ONLY harmful when combined with sexual/romantic context
-const CONTEXT_SENSITIVE_TERMS = [
-  // Minors / youth terms (NOT harmful by themselves)
-  "underage", "minor", "preteen", "teen", "teenager",
-  "child", "children", "kid", "kids",
+// These MUST be about minors specifically
+const CONTEXT_SENSITIVE_MINOR_TERMS = [
+  "underage", "minor", "preteen",
+  "child", "children",
   "young girl", "young boy", "little girl", "little boy",
 ];
 
-// Sexual/romantic context words that make context-sensitive terms harmful
-const SEXUAL_ROMANTIC_CONTEXT = [
-  "dating", "date", "romantic", "attracted", "sexual",
+// Sexual context words that make minor terms harmful
+// NOTE: These are checked ONLY when combined with minor terms above
+const SEXUAL_CONTEXT_FOR_MINORS = [
   "sex with", "sleep with", "sleeping with",
-  "hook up", "hooking up", "in love with",
+  "attracted to", "sexual with", "sexual relationship with",
+  "hooking up with", "hook up with", "intimate with",
 ];
 
 // Context words that make family terms harmful when combined
-// NOTE: Avoid overly broad terms like "relationship with" to prevent false positives
 const HARMFUL_CONTEXT_WORDS = [
   "dating",
   "romantic",
   "romantic relationship with",
-  "attracted",
+  "attracted to",
   "sexual",
   "sexual relationship with",
   "in love with",
   "sleep with",
   "sleeping with",
-  "hook up",
-  "hooking up",
+  "hook up with",
+  "hooking up with",
   "had sex with",
+  "having sex with",
+  "sex with",
 ];
 
 // Family terms that are only harmful in certain contexts
@@ -82,7 +92,7 @@ export interface CrisisDetectionResult {
   detected: boolean;
   keywords: string[];
   severity: "moderate" | "severe";
-  category?: "crisis" | "harmful_content";
+  category?: "crisis" | "harmful_content" | "emergency";
 }
 
 function detectHarmfulFamilyContext(text: string): string[] {
@@ -111,39 +121,75 @@ function detectHarmfulFamilyContext(text: string): string[] {
   return foundHarmful;
 }
 
+function detectMinorSexualContext(text: string): string[] {
+  const lowerText = text.toLowerCase();
+  const foundHarmful: string[] = [];
+  
+  for (const minorTerm of CONTEXT_SENSITIVE_MINOR_TERMS) {
+    if (lowerText.includes(minorTerm.toLowerCase())) {
+      // Only flag if ALSO has explicit sexual context with the minor
+      for (const sexualContext of SEXUAL_CONTEXT_FOR_MINORS) {
+        // Check for patterns like "sex with a child" or "attracted to minors"
+        const patterns = [
+          `${sexualContext} ${minorTerm}`,
+          `${sexualContext} a ${minorTerm}`,
+          `${sexualContext} the ${minorTerm}`,
+        ];
+        
+        for (const pattern of patterns) {
+          if (lowerText.includes(pattern.toLowerCase())) {
+            foundHarmful.push(`${sexualContext} ${minorTerm}`);
+          }
+        }
+      }
+    }
+  }
+  
+  return foundHarmful;
+}
+
 export function detectCrisisContent(text: string): CrisisDetectionResult {
   if (!text) return { detected: false, keywords: [], severity: "moderate" };
   
   const lowerText = text.toLowerCase();
   const foundKeywords: string[] = [];
   const foundHarmful: string[] = [];
+  const foundEmergency: string[] = [];
   
-  // Check crisis keywords
+  // Check emergency keywords first (rape/assault - show 911)
+  for (const keyword of EMERGENCY_KEYWORDS) {
+    if (lowerText.includes(keyword.toLowerCase())) {
+      foundEmergency.push(keyword);
+    }
+  }
+  
+  // If emergency detected, return immediately with emergency category
+  if (foundEmergency.length > 0) {
+    return {
+      detected: true,
+      keywords: foundEmergency,
+      severity: "severe",
+      category: "emergency",
+    };
+  }
+  
+  // Check crisis keywords (show support resources, don't block)
   for (const keyword of CRISIS_KEYWORDS) {
     if (lowerText.includes(keyword.toLowerCase())) {
       foundKeywords.push(keyword);
     }
   }
   
-  // Check explicit harmful keywords (always blocked)
+  // Check explicit harmful keywords (always blocked - minors/incest)
   for (const keyword of EXPLICIT_HARMFUL_KEYWORDS) {
     if (lowerText.includes(keyword.toLowerCase())) {
       foundHarmful.push(keyword);
     }
   }
   
-  // Check context-sensitive terms (only harmful with sexual/romantic context)
-  for (const term of CONTEXT_SENSITIVE_TERMS) {
-    if (lowerText.includes(term.toLowerCase())) {
-      // Check if sexual/romantic context is also present
-      for (const context of SEXUAL_ROMANTIC_CONTEXT) {
-        if (lowerText.includes(context.toLowerCase())) {
-          foundHarmful.push(`${context} ${term}`);
-          break;
-        }
-      }
-    }
-  }
+  // Check for minor + sexual context combinations
+  const minorSexualPatterns = detectMinorSexualContext(lowerText);
+  foundHarmful.push(...minorSexualPatterns);
   
   // Check for harmful family context combinations
   const harmfulFamilyPatterns = detectHarmfulFamilyContext(lowerText);
@@ -154,7 +200,7 @@ export function detectCrisisContent(text: string): CrisisDetectionResult {
   const hasSevereCrisis = foundKeywords.some(k => severeKeywords.includes(k.toLowerCase()));
   const hasHarmfulContent = foundHarmful.length > 0;
   
-  // Harmful content is always severe
+  // Harmful content is always severe and blocked
   if (hasHarmfulContent) {
     return {
       detected: true,
@@ -164,6 +210,7 @@ export function detectCrisisContent(text: string): CrisisDetectionResult {
     };
   }
   
+  // Crisis content shows resources but allows sending
   if (foundKeywords.length > 0) {
     return {
       detected: true,
@@ -181,6 +228,11 @@ export function detectCrisisContent(text: string): CrisisDetectionResult {
 }
 
 export const CRISIS_RESOURCES = {
+  emergency: {
+    name: "Emergency Services",
+    phone: "911",
+    description: "Call 911 immediately if you are in danger",
+  },
   suicide: {
     name: "National Suicide Prevention Lifeline",
     phone: "988",
@@ -192,6 +244,11 @@ export const CRISIS_RESOURCES = {
     phone: "1-800-799-7233",
     text: "Text START to 88788",
     url: "https://www.thehotline.org",
+  },
+  sexualAssault: {
+    name: "RAINN Sexual Assault Hotline",
+    phone: "1-800-656-4673",
+    url: "https://www.rainn.org",
   },
   crisis: {
     name: "Crisis Text Line",

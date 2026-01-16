@@ -68,7 +68,7 @@ export function CreatePostDialog({ open, onOpenChange, screenName }: CreatePostD
   const [hasPostedBefore, setHasPostedBefore] = useState<boolean | null>(null);
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
-  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content">("crisis");
+  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content" | "emergency">("crisis");
 
   useEffect(() => {
     if (open && user && hasPostedBefore === null) {

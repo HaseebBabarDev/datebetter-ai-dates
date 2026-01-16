@@ -323,7 +323,7 @@ const Devi = () => {
   // Crisis detection state
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
-  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content">("crisis");
+  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content" | "emergency">("crisis");
   
   // Win logging state
   const [showWinDialog, setShowWinDialog] = useState(false);

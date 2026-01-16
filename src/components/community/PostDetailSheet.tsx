@@ -74,7 +74,7 @@ export function PostDetailSheet({ post, onClose, currentScreenName, onPostUpdate
   const [localPost, setLocalPost] = useState<ForumPost | null>(null);
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
-  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content">("crisis");
+  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content" | "emergency">("crisis");
 
   useEffect(() => {
     if (post) {
