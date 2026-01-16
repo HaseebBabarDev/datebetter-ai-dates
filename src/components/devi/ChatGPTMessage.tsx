@@ -14,6 +14,7 @@ interface Message {
 const QUICK_REPLIES = [
   "Tell me more",
   "What should I do?",
+  "Explain the science",
   "Help me rewire my thoughts",
 ];
 
