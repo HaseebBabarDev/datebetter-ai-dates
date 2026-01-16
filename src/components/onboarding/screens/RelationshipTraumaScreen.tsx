@@ -326,10 +326,20 @@ const RelationshipTraumaScreen = () => {
           />
         </div>
 
-        {/* Continue button */}
-        <Button onClick={handleContinue} className="w-full" size="lg">
-          Continue
-        </Button>
+        {/* Action buttons */}
+        <div className="flex gap-3">
+          <Button 
+            variant="outline" 
+            onClick={nextStep} 
+            className="flex-1" 
+            size="lg"
+          >
+            Skip for now
+          </Button>
+          <Button onClick={handleContinue} className="flex-1" size="lg">
+            Continue
+          </Button>
+        </div>
       </div>
 
       {/* Crisis Alert Dialog */}
