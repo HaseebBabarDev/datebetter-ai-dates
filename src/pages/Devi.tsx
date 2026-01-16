@@ -1887,6 +1887,8 @@ const Devi = () => {
               </TooltipProvider>
             </div>
           )}
+          {/* AI Disclosure - at bottom for App Store compliance */}
+          <AIDisclosure variant="compact" className="justify-center mt-2" />
         </div>
       </div>
 
@@ -1907,13 +1909,6 @@ const Devi = () => {
         candidateId={selectedCandidate?.id}
         conversationId={currentConversationId || undefined}
       />
-
-      {/* AI Disclosure - fixed at bottom for App Store compliance */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 pb-safe-bottom bg-gradient-to-t from-background via-background/95 to-transparent pt-3 pb-2">
-        <div className="max-w-lg mx-auto px-4">
-          <AIDisclosure variant="compact" className="justify-center" />
-        </div>
-      </div>
     </div>
   );
 };
