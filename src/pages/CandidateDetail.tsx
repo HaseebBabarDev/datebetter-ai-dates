@@ -79,6 +79,13 @@ const CandidateDetail = () => {
   const initialTab = (location.state as { tab?: string })?.tab;
   const [activeTab, setActiveTab] = useState<string | undefined>(initialTab);
 
+  // Sync tab state when navigating to this page with a different tab in location state
+  useEffect(() => {
+    const tabFromState = (location.state as { tab?: string })?.tab;
+    if (tabFromState && tabFromState !== activeTab) {
+      setActiveTab(tabFromState);
+    }
+  }, [location.state]);
   // Clean up any stale scroll locks on mount/unmount and tab changes
   useEffect(() => {
     const cleanupScrollLocks = () => {
@@ -452,6 +459,12 @@ const CandidateDetail = () => {
     setActiveTab("no-contact");
   };
 
+  // Handler for when an interaction is logged - fetches data and switches to insights tab
+  const handleInteractionLogged = async () => {
+    await fetchData();
+    setActiveTab("profile"); // Switch to insights tab after logging
+  };
+
   const handleBrokeContact = async () => {
     if (!candidate || !user) return;
     
@@ -720,7 +733,7 @@ const CandidateDetail = () => {
             <div data-tour="quick-log">
               <AddInteractionForm
                 candidateId={candidate.id}
-                onSuccess={fetchData}
+                onSuccess={handleInteractionLogged}
                 onRescore={handleRescore}
                 isNoContact={candidate.no_contact_active || false}
                 onBrokeContact={handleBrokeContact}
@@ -902,7 +915,7 @@ const CandidateDetail = () => {
             <div className="grid grid-cols-2 gap-2">
               <AddInteractionForm
                 candidateId={candidate.id}
-                onSuccess={fetchData}
+                onSuccess={handleInteractionLogged}
                 onRescore={handleRescore}
                 isNoContact={candidate.no_contact_active || false}
                 onBrokeContact={handleBrokeContact}
@@ -916,7 +929,7 @@ const CandidateDetail = () => {
               />
               <AddInteractionForm
                 candidateId={candidate.id}
-                onSuccess={fetchData}
+                onSuccess={handleInteractionLogged}
                 onRescore={handleRescore}
                 isNoContact={candidate.no_contact_active || false}
                 onBrokeContact={handleBrokeContact}

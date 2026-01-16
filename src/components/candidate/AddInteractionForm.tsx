@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Enums } from "@/integrations/supabase/types";
@@ -57,6 +58,7 @@ interface AddInteractionFormProps {
   hasPendingAdvice?: boolean;
   defaultType?: Enums<"interaction_type">;
   triggerButton?: React.ReactNode;
+  navigateToInsights?: boolean; // If true, navigate to candidate insights after logging
 }
 
 const INTERACTION_TYPES: { value: Enums<"interaction_type">; label: string }[] = [
@@ -93,8 +95,11 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   hasPendingAdvice = false,
   defaultType = "coffee",
   triggerButton,
+  navigateToInsights = false,
 }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { canUseUpdate, getRemainingUpdates, subscription, refetch, incrementUsage } = useSubscription();
   const [open, setOpen] = useState(false);
   const [showBrokeContactDialog, setShowBrokeContactDialog] = useState(false);
@@ -177,6 +182,18 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
       // Trigger rescore after logging interaction
       if (onRescore) {
         onRescore();
+      }
+      
+      // Navigate to candidate insights page after logging (from any screen)
+      const candidateDetailPath = `/candidate/${candidateId}`;
+      const isAlreadyOnCandidateDetail = location.pathname === candidateDetailPath;
+      
+      if (!isAlreadyOnCandidateDetail) {
+        // Navigate to the candidate's insights tab (value="profile" displays as "Insights")
+        navigate(candidateDetailPath, { state: { tab: "profile" } });
+      } else {
+        // Already on candidate detail - switch to insights tab
+        // The parent component will handle tab switching via onSuccess callback
       }
     } catch (error) {
       console.error("Error adding interaction:", error);
