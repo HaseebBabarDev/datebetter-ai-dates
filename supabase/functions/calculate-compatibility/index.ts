@@ -243,6 +243,61 @@ serve(async (req) => {
     let recentPositiveStreak = 0; // Track consecutive positive recent interactions for recovery
     let recoveryBonusFromStreak = 0; // Derived from streak; used to relax caps gradually
 
+    // IMPORTANT: Some relationship-ending patterns (e.g. love bombing) may be present in older
+    // interactions that fall outside the "recent 10" window. We still need to honor those
+    // signals and keep the overall score capped until the user has a sustained positive streak.
+    const { data: historicalFlagInteractions } = await supabase
+      .from("interactions")
+      .select("notes")
+      .eq("candidate_id", candidateId)
+      .eq("user_id", user.id)
+      .not("notes", "is", null)
+      // Only pull notes that match relationship-ending flags.
+      .or(
+        [
+          "notes.ilike.%ghost%",
+          "notes.ilike.%blocked%",
+          "notes.ilike.%love bomb%",
+          "notes.ilike.%lovebomb%",
+          "notes.ilike.%post intimacy%",
+          "notes.ilike.%dropped off after sex%",
+          "notes.ilike.%changed after intimacy%",
+          "notes.ilike.%different after sex%",
+        ].join(",")
+      )
+      .limit(50);
+
+    const historicalFlagText = `${(historicalFlagInteractions || [])
+      .map((r: any) => r.notes || "")
+      .join(" ")} ${(candidate.notes || "")}`.toLowerCase();
+
+    const hasHistoricalGhosting = historicalFlagText.includes("ghost");
+    const hasHistoricalBlocked = historicalFlagText.includes("blocked");
+    const hasHistoricalLoveBombing = historicalFlagText.includes("love bomb");
+    const hasHistoricalPostIntimacy =
+      historicalFlagText.includes("post intimacy") ||
+      historicalFlagText.includes("dropped off after sex") ||
+      historicalFlagText.includes("changed after intimacy") ||
+      historicalFlagText.includes("different after sex");
+
+    if (hasHistoricalGhosting) hasGhostingPattern = true;
+    if (hasHistoricalBlocked) hasBlockedPattern = true;
+    if (hasHistoricalLoveBombing) hasLoveBombingPattern = true;
+    if (hasHistoricalPostIntimacy) hasPostIntimacyDropOff = true;
+
+    // If any historical "relationship-ending" pattern exists, keep low-cap mode on.
+    if (
+      hasHistoricalGhosting ||
+      hasHistoricalBlocked ||
+      hasHistoricalLoveBombing ||
+      hasHistoricalPostIntimacy
+    ) {
+      shouldEndRelationship = true;
+      console.log(
+        `HISTORICAL FLAGS: end-mode enabled (ghosting=${hasHistoricalGhosting}, blocked=${hasHistoricalBlocked}, loveBomb=${hasHistoricalLoveBombing}, postIntimacy=${hasHistoricalPostIntimacy})`
+      );
+    }
+
     if (interactions && interactions.length > 0) {
       const interactionDetails = interactions.map((i: any) => 
         `- ${i.interaction_date}: ${i.interaction_type}${i.duration ? ` (${i.duration})` : ''} - Feeling: ${i.overall_feeling}/5${i.gut_feeling ? `, Gut: "${i.gut_feeling}"` : ''}${i.notes ? ` - Notes: "${i.notes}"` : ''}`
