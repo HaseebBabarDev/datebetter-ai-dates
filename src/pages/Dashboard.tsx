@@ -858,9 +858,7 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="relative z-10 px-4 py-4 max-w-lg mx-auto pb-24">
-        {/* AI Disclosure Banner */}
-        <AIDisclosure variant="banner" className="mb-4" />
+      <main className="relative z-10 px-4 py-4 max-w-lg mx-auto pb-32">
         
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setQualityFilter(null); }} className="w-full">
           <TabsList className="w-full grid grid-cols-2 gap-1 mb-5 h-12 p-1 bg-background/80 backdrop-blur-md rounded-2xl border border-border/50 shadow-sm">
@@ -1437,6 +1435,13 @@ const Dashboard = () => {
         onOpenChange={setShowWtpSurvey}
         candidateCount={candidates.length}
       />
+
+      {/* AI Disclosure - fixed at bottom for App Store compliance */}
+      <div className="fixed bottom-16 left-0 right-0 z-20 pb-safe-bottom bg-gradient-to-t from-background via-background/95 to-transparent pt-4 pb-2">
+        <div className="max-w-lg mx-auto px-4">
+          <AIDisclosure variant="compact" className="justify-center" />
+        </div>
+      </div>
     </div>
   );
 };

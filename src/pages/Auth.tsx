@@ -655,8 +655,11 @@ const Auth = () => {
           </div>
         </div>
 
-        {/* Security and AI badges */}
-        <div className="flex flex-col items-center gap-2 mt-4 text-muted-foreground">
+      </main>
+
+      {/* Security and AI badges - fixed at bottom for App Store compliance */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 pb-safe-bottom bg-gradient-to-t from-background via-background/95 to-transparent pt-4 pb-3">
+        <div className="flex flex-col items-center gap-1.5 text-muted-foreground max-w-md mx-auto px-4">
           <div className="flex items-center gap-2">
             <Shield className="w-3.5 h-3.5" />
             <span className="text-xs">Your data is encrypted & secure</span>
@@ -666,7 +669,7 @@ const Auth = () => {
             <span className="text-xs">AI-powered features for personalized insights</span>
           </div>
         </div>
-      </main>
+      </div>
     </div>
     
     <PinSetupDialog
