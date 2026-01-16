@@ -1124,30 +1124,53 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
     // Guardrail: fix common "you both" claims that contradict the actual profile data.
     enforceEducationConsistency(analysis, profile, candidate);
 
-    // ENFORCE SCORE LIMITS: If there are negative interactions, cap the score
+    // Track previous score for comparison
+    const previousScore = candidate.compatibility_score;
+
+    // CRITICAL BUG FIX: Prevent dramatic score increases
+    // If there was a previous score that was low (under 25%), it was low for a reason
+    // (relationship-ending patterns, red flags, etc.). We must prevent the AI from
+    // ignoring this and jumping to a high score.
+    const previousScoreNum = typeof previousScore === "number" ? Math.round(previousScore) : null;
+    
+    // ENFORCE SCORE LIMITS in multiple scenarios:
+    
+    // 1. If there are negative interactions, cap the score
     if (negativeCount > 0 && analysis.overall_score > sentimentAdjustedOverall) {
       console.log(`Capping AI score from ${analysis.overall_score} to ${sentimentAdjustedOverall} due to ${negativeCount} negative interactions`);
       analysis.overall_score = sentimentAdjustedOverall;
     }
     
-    // Also cap emotional compatibility if there are negative interactions
+    // 2. CRITICAL: If previous score was low (under 25%), prevent jumping more than +3 points
+    // This prevents the AI from "forgetting" why the score was low
+    if (previousScoreNum !== null && previousScoreNum < 25 && analysis.overall_score > previousScoreNum + 3) {
+      const maxAllowed = previousScoreNum + 3;
+      console.log(`PREVENTING SCORE JUMP: Previous was ${previousScoreNum}%, AI suggested ${analysis.overall_score}%, capping to ${maxAllowed}%`);
+      analysis.overall_score = maxAllowed;
+    }
+    
+    // 3. If previous score was between 25-40%, prevent jumping more than +5 points
+    if (previousScoreNum !== null && previousScoreNum >= 25 && previousScoreNum < 40 && analysis.overall_score > previousScoreNum + 5) {
+      const maxAllowed = previousScoreNum + 5;
+      console.log(`PREVENTING MODERATE SCORE JUMP: Previous was ${previousScoreNum}%, AI suggested ${analysis.overall_score}%, capping to ${maxAllowed}%`);
+      analysis.overall_score = maxAllowed;
+    }
+    
+    // 4. Also cap emotional compatibility if there are negative interactions
     if (negativeCount > 0 && analysis.breakdown?.emotional_compatibility > adjustedEmotionalScore) {
       analysis.breakdown.emotional_compatibility = adjustedEmotionalScore;
     }
-
-    // Track previous score for comparison
-    const previousScore = candidate.compatibility_score;
 
     // If the relationship is in a "low cap" state but the user is logging a consistent
     // recovery streak, ensure the score goes up by exactly +1 (very gradual).
     // Max cap is now 20 (not 45) to keep recovery slow.
     if (
       shouldEndRelationship &&
-      typeof previousScore === "number" &&
+      typeof previousScoreNum === "number" &&
       recentPositiveStreak >= 3
     ) {
       const maxCap = Math.min(20, 5 + recoveryBonusFromStreak);
-      const nudged = Math.min(maxCap, Math.round(previousScore) + 1);
+      const nudged = Math.min(maxCap, previousScoreNum + 1);
 
       if (typeof analysis.overall_score === "number" && analysis.overall_score < nudged) {
         console.log(
