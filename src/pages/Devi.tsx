@@ -548,6 +548,9 @@ const Devi = () => {
   const loadConversation = useCallback(async (conversationId: string) => {
     if (!user) return;
     
+    // Reset soft warning when loading a conversation
+    setSoftWarningDismissed(false);
+    
     const { data: messagesData } = await supabase
       .from("devi_messages")
       .select("*")
@@ -573,6 +576,9 @@ const Devi = () => {
     if (convData?.candidate_id) {
       const candidate = candidates.find(c => c.id === convData.candidate_id);
       if (candidate) setSelectedCandidate(candidate);
+    } else {
+      // Clear candidate if conversation has no candidate
+      setSelectedCandidate(null);
     }
     
     setCurrentConversationId(conversationId);
@@ -946,62 +952,66 @@ const Devi = () => {
       let displayedContent = "";
       let messageAdded = false;
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        textBuffer += decoder.decode(value, { stream: true });
+          textBuffer += decoder.decode(value, { stream: true });
 
-        // Process complete lines
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
+          // Process complete lines
+          let newlineIndex: number;
+          while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
+            let line = textBuffer.slice(0, newlineIndex);
+            textBuffer = textBuffer.slice(newlineIndex + 1);
 
-          if (line.endsWith('\r')) line = line.slice(0, -1);
-          if (line.startsWith(':') || line.trim() === '') continue;
-          if (!line.startsWith('data: ')) continue;
+            if (line.endsWith('\r')) line = line.slice(0, -1);
+            if (line.startsWith(':') || line.trim() === '') continue;
+            if (!line.startsWith('data: ')) continue;
 
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === '[DONE]') continue;
+            const jsonStr = line.slice(6).trim();
+            if (jsonStr === '[DONE]') continue;
 
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              fullContent += content;
-              
-              // Only display up to the last complete word (ends with space, punctuation, or newline)
-              const lastWordBoundary = fullContent.search(/[\s.,!?:;\n][^\s.,!?:;\n]*$/);
-              const contentToDisplay = lastWordBoundary > 0 
-                ? fullContent.slice(0, lastWordBoundary + 1)
-                : "";
-              
-              // Only update UI if we have new complete words to show
-              if (contentToDisplay.length > displayedContent.length) {
-                displayedContent = contentToDisplay;
+            try {
+              const parsed = JSON.parse(jsonStr);
+              const content = parsed.choices?.[0]?.delta?.content;
+              if (content) {
+                fullContent += content;
                 
-                if (!messageAdded) {
-                  // Add the message bubble on first displayable content
-                  messageAdded = true;
-                  setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: displayedContent }]);
-                } else {
-                  setMessages(prev => 
-                    prev.map(m => 
-                      m.id === assistantMessageId 
-                        ? { ...m, content: displayedContent }
-                        : m
-                    )
-                  );
+                // Only display up to the last complete word (ends with space, punctuation, or newline)
+                const lastWordBoundary = fullContent.search(/[\s.,!?:;\n][^\s.,!?:;\n]*$/);
+                const contentToDisplay = lastWordBoundary > 0 
+                  ? fullContent.slice(0, lastWordBoundary + 1)
+                  : fullContent; // Show all content if no word boundary found
+                
+                // Only update UI if we have new content to show
+                if (contentToDisplay.length > displayedContent.length) {
+                  displayedContent = contentToDisplay;
+                  
+                  if (!messageAdded) {
+                    // Add the message bubble on first displayable content
+                    messageAdded = true;
+                    setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: displayedContent }]);
+                  } else {
+                    setMessages(prev => 
+                      prev.map(m => 
+                        m.id === assistantMessageId 
+                          ? { ...m, content: displayedContent }
+                          : m
+                      )
+                    );
+                  }
                 }
               }
+            } catch {
+              // Incomplete JSON chunk - skip and continue, don't put back to buffer
+              // This prevents infinite loops on malformed data
+              continue;
             }
-          } catch {
-            // Partial JSON - put back and wait for more data
-            textBuffer = line + '\n' + textBuffer;
-            break;
           }
         }
+      } finally {
+        reader.releaseLock();
       }
 
       // Display any remaining content after stream ends
@@ -1067,8 +1077,14 @@ const Devi = () => {
     } catch (error) {
       console.error("Chat error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to send message");
-      // Remove the user message if there was an error
-      setMessages(prev => prev.filter(m => m.id !== userMessage.id));
+      // Don't remove the user message on error - keep it visible so user knows what they sent
+      // Just add an error message from the assistant
+      const errorMessage: Message = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: "Sorry, I couldn't process that message. Please try again.",
+      };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
