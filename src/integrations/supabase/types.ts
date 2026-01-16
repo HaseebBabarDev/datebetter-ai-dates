@@ -1867,7 +1867,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
-      attachment_style: "secure" | "anxious" | "avoidant" | "disorganized"
+      attachment_style:
+        | "secure"
+        | "anxious"
+        | "avoidant"
+        | "disorganized"
+        | "unsure"
       candidate_status:
         | "just_matched"
         | "texting"
@@ -1918,7 +1923,12 @@ export type Database = {
         | "event"
         | "intimate"
         | "phone_call"
-      kids_desire: "definitely_yes" | "maybe" | "definitely_no" | "already_have"
+      kids_desire:
+        | "definitely_yes"
+        | "maybe"
+        | "definitely_no"
+        | "already_have"
+        | "unsure"
       kids_status: "no_kids" | "has_young_kids" | "has_adult_kids"
       politics:
         | "progressive"
@@ -1940,6 +1950,7 @@ export type Database = {
         | "married"
         | "recently_divorced"
         | "ethical_non_monogamy"
+        | "in_relationship"
       relationship_structure: "monogamous" | "open" | "polyamorous" | "unsure"
       religion:
         | "none"
@@ -2102,7 +2113,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
-      attachment_style: ["secure", "anxious", "avoidant", "disorganized"],
+      attachment_style: [
+        "secure",
+        "anxious",
+        "avoidant",
+        "disorganized",
+        "unsure",
+      ],
       candidate_status: [
         "just_matched",
         "texting",
@@ -2159,7 +2176,13 @@ export const Constants = {
         "intimate",
         "phone_call",
       ],
-      kids_desire: ["definitely_yes", "maybe", "definitely_no", "already_have"],
+      kids_desire: [
+        "definitely_yes",
+        "maybe",
+        "definitely_no",
+        "already_have",
+        "unsure",
+      ],
       kids_status: ["no_kids", "has_young_kids", "has_adult_kids"],
       politics: [
         "progressive",
@@ -2183,6 +2206,7 @@ export const Constants = {
         "married",
         "recently_divorced",
         "ethical_non_monogamy",
+        "in_relationship",
       ],
       relationship_structure: ["monogamous", "open", "polyamorous", "unsure"],
       religion: [
