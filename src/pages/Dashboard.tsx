@@ -46,7 +46,7 @@ import { CandidatesList } from "@/components/dashboard/CandidatesList";
 import { LogInteractionDialog } from "@/components/dashboard/LogInteractionDialog";
 import { useTour, DASHBOARD_TOUR_STEPS, TourRestartButton } from "@/components/tour";
 import { differenceInDays, addDays, format } from "date-fns";
-import heroCouple from "@/assets/hero-couple.jpeg";
+
 import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
 import { FreeUpgradeBanner } from "@/components/subscription/FreeUpgradeBanner";
 
@@ -788,15 +788,6 @@ const Dashboard = () => {
       {/* Pull to Refresh Indicator */}
       <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} />
       
-      {/* Hero Background Image */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <img 
-          src={heroCouple} 
-          alt="" 
-          className="w-full h-full object-cover object-top opacity-40"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background" />
-      </div>
 
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[image:var(--gradient-header)] backdrop-blur-xl border-b border-border/50 pt-safe-top">
