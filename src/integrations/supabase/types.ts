@@ -1952,6 +1952,7 @@ export type Database = {
         | "hindu"
         | "buddhist"
         | "other"
+        | "prefer_not_say"
       sexual_orientation:
         | "straight"
         | "lesbian"
@@ -2195,6 +2196,7 @@ export const Constants = {
         "hindu",
         "buddhist",
         "other",
+        "prefer_not_say",
       ],
       sexual_orientation: [
         "straight",
