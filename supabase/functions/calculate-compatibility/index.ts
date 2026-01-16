@@ -240,6 +240,7 @@ serve(async (req) => {
     let hasCandidateHarassment = false; // Candidate obsessively contacts/stalks user
     let hasDiscriminatoryBehavior = false; // Fat shaming, racism, degrading remarks
     let shouldEndRelationship = false; // When true, score will be capped very low
+    let recentPositiveStreak = 0; // Track consecutive positive recent interactions for recovery
     
     if (interactions && interactions.length > 0) {
       const interactionDetails = interactions.map((i: any) => 
@@ -429,7 +430,10 @@ serve(async (req) => {
       }
       
       // Process each interaction for additional penalties
-      interactions.forEach((i: any) => {
+      // Track recent positive streak for recovery scoring
+      let streakBroken = false;
+      
+      interactions.forEach((i: any, index: number) => {
         const feeling = i.overall_feeling || 3;
         const gut = (i.gut_feeling || "").toLowerCase();
         const notes = (i.notes || "").toLowerCase();
@@ -440,34 +444,64 @@ serve(async (req) => {
         const hasSerious = seriousRedFlags.some(phrase => notes.includes(phrase));
         const hasModerate = moderateRedFlags.some(phrase => notes.includes(phrase));
         
+        // Track positive streak (interactions are ordered most recent first)
+        const isPositive = feeling >= 4 && !hasEndingFlag && !hasCritical && !hasSerious && !hasModerate;
+        if (!streakBroken && isPositive) {
+          recentPositiveStreak++;
+        } else if (!isPositive && index < 5) {
+          // Only break streak on negative interaction in the 5 most recent
+          streakBroken = true;
+        }
+        
+        // Apply recency weighting - recent interactions (first 3) have more impact
+        const recencyMultiplier = index < 3 ? 1.5 : (index < 6 ? 1.0 : 0.7);
+        
         if (hasEndingFlag) {
           shouldEndRelationship = true;
           negativeCount++;
-          interactionSentiment -= 35;
+          interactionSentiment -= Math.round(35 * recencyMultiplier);
         } else if (hasCritical) {
           hasCriticalRedFlag = true;
           shouldEndRelationship = true;
           negativeCount++;
-          interactionSentiment -= 40;
+          interactionSentiment -= Math.round(40 * recencyMultiplier);
         } else if (hasSerious) {
           negativeCount++;
-          interactionSentiment -= 25;
+          interactionSentiment -= Math.round(25 * recencyMultiplier);
         } else if (hasModerate || feeling <= 2 || negativeGutFeelings.includes(gut)) {
           negativeCount++;
-          interactionSentiment -= hasModerate ? 15 : (feeling === 1 ? 12 : 8);
+          const penalty = hasModerate ? 15 : (feeling === 1 ? 12 : 8);
+          interactionSentiment -= Math.round(penalty * recencyMultiplier);
         } else if (feeling >= 4 && positiveGutFeelings.includes(gut)) {
           positiveCount++;
-          interactionSentiment += 3;
+          // Positive interactions get boosted by recency
+          interactionSentiment += Math.round(5 * recencyMultiplier);
+        } else if (feeling >= 4) {
+          // Positive feeling without specific gut feeling still helps
+          positiveCount++;
+          interactionSentiment += Math.round(3 * recencyMultiplier);
         }
       });
       
-      // Cap the sentiment adjustment based on severity
+      // Recovery logic: If there's a consistent positive streak, allow gradual score recovery
+      // This encourages growth and behavior change over time
+      let recoveryBonus = 0;
+      if (recentPositiveStreak >= 3) {
+        // 3+ consecutive positive interactions = start recovering
+        recoveryBonus = (recentPositiveStreak - 2) * 5; // +5 per positive after the first 2
+        recoveryBonus = Math.min(recoveryBonus, 25); // Cap recovery bonus at 25
+        console.log(`RECOVERY: ${recentPositiveStreak} consecutive positive interactions, bonus: +${recoveryBonus}`);
+      }
+      
+      // Cap the sentiment adjustment based on severity, but apply recovery bonus
       if (shouldEndRelationship) {
-        interactionSentiment = Math.max(-80, Math.min(-40, interactionSentiment));
+        // Allow recovery if there's a positive streak
+        const adjustedMin = -40 + recoveryBonus;
+        interactionSentiment = Math.max(-80, Math.min(adjustedMin, interactionSentiment + recoveryBonus));
       } else if (hasCriticalRedFlag) {
-        interactionSentiment = Math.max(-60, Math.min(10, interactionSentiment));
+        interactionSentiment = Math.max(-60, Math.min(10 + recoveryBonus, interactionSentiment + recoveryBonus));
       } else {
-        interactionSentiment = Math.max(-45, Math.min(10, interactionSentiment));
+        interactionSentiment = Math.max(-45, Math.min(15 + recoveryBonus, interactionSentiment + recoveryBonus));
       }
     }
 
@@ -478,13 +512,19 @@ serve(async (req) => {
     const adjustedEmotionalScore = Math.max(5, Math.min(100, baseScores.emotional_compatibility + interactionSentiment));
     
     // Hard cap the overall score based on severity of issues
+    // Recovery bonus is already applied to interactionSentiment, now adjust the caps
     let sentimentAdjustedOverall;
     if (shouldEndRelationship) {
-      // Relationship-ending patterns: cap at 20 max
-      sentimentAdjustedOverall = Math.min(20, Math.max(5, baseScores.overall_score + interactionSentiment));
-      console.log(`SCORE CAPPED at ${sentimentAdjustedOverall} due to relationship-ending pattern`);
+      // Relationship-ending patterns: base cap at 20, but allow gradual recovery up to 45
+      // Recovery comes from consecutive positive interactions showing behavior change
+      const recoveryBonus = Math.max(0, interactionSentiment + 40); // How much we've recovered from -40 baseline
+      const maxCap = Math.min(45, 20 + recoveryBonus); // Can recover up to 45% with consistent positivity
+      sentimentAdjustedOverall = Math.min(maxCap, Math.max(5, baseScores.overall_score + interactionSentiment));
+      console.log(`SCORE with recovery: ${sentimentAdjustedOverall} (max cap: ${maxCap}, recovery bonus from streak: ${recoveryBonus})`);
     } else if (hasCriticalRedFlag) {
-      sentimentAdjustedOverall = Math.min(30, Math.max(15, baseScores.overall_score + interactionSentiment));
+      const recoveryBonus = Math.max(0, interactionSentiment + 20);
+      const maxCap = Math.min(55, 30 + recoveryBonus);
+      sentimentAdjustedOverall = Math.min(maxCap, Math.max(15, baseScores.overall_score + interactionSentiment));
     } else {
       sentimentAdjustedOverall = Math.max(20, Math.min(100, baseScores.overall_score + interactionSentiment));
     }
