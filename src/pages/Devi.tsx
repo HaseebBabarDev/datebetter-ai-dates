@@ -426,13 +426,13 @@ const Devi = () => {
       // Process candidates
       if (candidatesRes.data) {
         setCandidates(candidatesRes.data);
-        // Auto-select if coming from candidate page (but NOT if in general chat mode)
+        // Auto-select ONLY if coming from candidate page with explicit candidateId
+        // Never auto-select when navigating without candidateId (general chat mode)
         if (candidateIdFromState && !isGeneralChatMode) {
           const found = candidatesRes.data.find(c => c.id === candidateIdFromState);
           if (found) setSelectedCandidate(found);
-        } else if (candidatesRes.data.length === 1 && !isGeneralChatMode) {
-          setSelectedCandidate(candidatesRes.data[0]);
         }
+        // Removed: auto-selecting single candidate - users should explicitly choose
       }
       
       // Process profile
