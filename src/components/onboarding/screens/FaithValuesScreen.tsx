@@ -11,6 +11,7 @@ const religionOptions = [
   { value: "spiritual", label: "Spiritual but not religious" },
   { value: "christian_catholic", label: "Christianity (Catholic)" },
   { value: "christian_protestant", label: "Christianity (Protestant)" },
+  { value: "christian_other", label: "Christianity (Other)" },
   { value: "jewish", label: "Judaism" },
   { value: "muslim", label: "Islam" },
   { value: "hindu", label: "Hinduism" },
