@@ -83,19 +83,21 @@ const renderChatGPTContent = (content: string): React.ReactNode => {
       flushNumberedList();
       
       if (trimmed) {
-        // Check if it looks like a header/title
-        const isHeader = (trimmed.endsWith(':') && trimmed.length < 60) || 
-                         trimmed.startsWith('#') ||
-                         (trimmed.length < 50 && /^[A-Z]/.test(trimmed) && !trimmed.includes('.') && lineIdx === 0);
+        // Check if it looks like a header/title - require more context to avoid streaming artifacts
+        // Only treat as header if it ends with colon OR starts with # AND has reasonable length
+        const isHeader = (trimmed.endsWith(':') && trimmed.length > 3 && trimmed.length < 60) || 
+                         (trimmed.startsWith('#') && trimmed.length > 2);
         
-        // Check for blockquote style (starts with > or is emphasized standalone)
+        // Check for blockquote style (only explicit > prefix)
         const isBlockquote = trimmed.startsWith('>');
         const blockquoteText = isBlockquote ? trimmed.slice(1).trim() : trimmed;
         
         // Check if this is a short, impactful statement (like ChatGPT's emphasis blocks)
+        // Require COMPLETE bold markers to avoid streaming issues where ** appears before closing **
+        const hasCompleteBold = /^\*\*.+\*\*$/.test(trimmed);
         const isEmphasisBlock = !isBlockquote && 
+                                hasCompleteBold &&
                                 trimmed.length < 80 && 
-                                (trimmed.startsWith('**') || /^[A-Z][^.]*\.$/.test(trimmed)) &&
                                 lines.length > 1;
         
         if (isBlockquote || isEmphasisBlock) {
