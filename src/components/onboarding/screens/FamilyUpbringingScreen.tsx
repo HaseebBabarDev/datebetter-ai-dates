@@ -436,9 +436,19 @@ const FamilyUpbringingScreen = () => {
           </p>
         </div>
 
-        <Button onClick={nextStep} disabled={!isValid} className="w-full" size="lg">
-          Continue
-        </Button>
+        <div className="flex gap-3">
+          <Button 
+            variant="outline" 
+            onClick={nextStep} 
+            className="flex-1" 
+            size="lg"
+          >
+            Skip for now
+          </Button>
+          <Button onClick={nextStep} disabled={!isValid} className="flex-1" size="lg">
+            Continue
+          </Button>
+        </div>
       </div>
 
       {/* Crisis Alert Dialog */}
