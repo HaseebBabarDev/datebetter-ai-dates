@@ -595,7 +595,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
   // Crisis detection state
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
-  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content">("crisis");
+  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content" | "emergency">("crisis");
 
   // Form state organized by section
   const [formData, setFormData] = useState<Partial<Profile>>({});

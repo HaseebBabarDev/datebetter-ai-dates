@@ -8,14 +8,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Phone, MessageSquare, ExternalLink, Heart, ShieldAlert } from "lucide-react";
-import { CrisisDetectionResult, CRISIS_RESOURCES } from "@/lib/crisisDetection";
+import { AlertTriangle, Phone, MessageSquare, ExternalLink, Heart, ShieldAlert, Siren } from "lucide-react";
+import { CRISIS_RESOURCES } from "@/lib/crisisDetection";
 
 interface CrisisAlertDialogProps {
   open: boolean;
   onClose: () => void;
   severity: "moderate" | "severe";
-  category?: "crisis" | "harmful_content";
+  category?: "crisis" | "harmful_content" | "emergency";
 }
 
 export const CrisisAlertDialog: React.FC<CrisisAlertDialogProps> = ({
@@ -26,8 +26,103 @@ export const CrisisAlertDialog: React.FC<CrisisAlertDialogProps> = ({
 }) => {
   const isSevere = severity === "severe";
   const isHarmfulContent = category === "harmful_content";
+  const isEmergency = category === "emergency";
 
-  // Different content for harmful content vs crisis
+  // Emergency - rape/sexual assault - show 911 prominently
+  if (isEmergency) {
+    return (
+      <AlertDialog open={open} onOpenChange={(open) => !open && onClose()}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-2 bg-destructive/20">
+              <Siren className="w-8 h-8 text-destructive" />
+            </div>
+            <AlertDialogTitle className="text-center">
+              Your Safety Comes First
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center space-y-3">
+              <p>
+                If you are in immediate danger or have experienced sexual assault, please reach out for help right away.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                You are not alone. Professional help is available 24/7.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-3 my-4">
+            {/* Emergency 911 */}
+            <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+              <h4 className="font-semibold text-sm mb-2">If you're in immediate danger</h4>
+              <a
+                href="tel:911"
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg bg-destructive text-destructive-foreground text-lg font-bold hover:opacity-90"
+              >
+                <Phone className="w-5 h-5" />
+                Call 911
+              </a>
+            </div>
+
+            {/* RAINN */}
+            <div className="p-4 rounded-lg bg-muted/50 border border-border">
+              <h4 className="font-semibold text-sm mb-2">{CRISIS_RESOURCES.sexualAssault.name}</h4>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={`tel:${CRISIS_RESOURCES.sexualAssault.phone}`}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90"
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                  {CRISIS_RESOURCES.sexualAssault.phone}
+                </a>
+                <a
+                  href={CRISIS_RESOURCES.sexualAssault.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-foreground text-sm font-medium hover:bg-muted/80"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  RAINN.org
+                </a>
+              </div>
+            </div>
+
+            {/* Domestic Violence Hotline */}
+            <div className="p-4 rounded-lg bg-muted/50 border border-border">
+              <h4 className="font-semibold text-sm mb-2">{CRISIS_RESOURCES.domesticViolence.name}</h4>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={`tel:${CRISIS_RESOURCES.domesticViolence.phone}`}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90"
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                  {CRISIS_RESOURCES.domesticViolence.phone}
+                </a>
+                <a
+                  href={`sms:88788?body=START`}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-foreground text-sm font-medium hover:bg-muted/80"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  Text START to 88788
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-xs text-muted-foreground text-center">
+            All services are free, confidential, and available 24/7. You can still continue chatting with D.E.V.I. after closing this.
+          </p>
+
+          <AlertDialogFooter className="mt-4">
+            <Button onClick={onClose} variant="outline" className="w-full">
+              I understand, continue
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
+
+  // Harmful content - minors, incest, etc - blocked
   if (isHarmfulContent) {
     return (
       <AlertDialog open={open} onOpenChange={(open) => !open && onClose()}>
@@ -44,7 +139,7 @@ export const CrisisAlertDialog: React.FC<CrisisAlertDialogProps> = ({
                 This content cannot be processed as it involves topics that are harmful, illegal, or violate our community guidelines.
               </p>
               <p className="text-sm text-muted-foreground">
-                D.E.V.I. is designed to provide healthy dating and relationship advice. We cannot assist with content involving minors, incest, sexual violence, or other harmful topics.
+                D.E.V.I. is designed to provide healthy dating and relationship advice. We cannot assist with content involving minors, incest, or other harmful topics.
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -65,6 +160,7 @@ export const CrisisAlertDialog: React.FC<CrisisAlertDialogProps> = ({
     );
   }
 
+  // Crisis - self-harm, abuse, etc - show resources but allow continuing
   return (
     <AlertDialog open={open} onOpenChange={(open) => !open && onClose()}>
       <AlertDialogContent className="max-w-md">
