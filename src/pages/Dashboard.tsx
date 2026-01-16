@@ -58,6 +58,7 @@ import { PullToRefreshIndicator } from "@/components/PullToRefresh";
 import { WinsStats, useDeviWins } from "@/components/devi/WinsStats";
 import { WillingnessToPaySurvey } from "@/components/subscription/WillingnessToPaySurvey";
 import { HealingScoreCard } from "@/components/dashboard/HealingScoreCard";
+import { AIDisclosure } from "@/components/AIDisclosure";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -858,6 +859,9 @@ const Dashboard = () => {
       </header>
 
       <main className="relative z-10 px-4 py-4 max-w-lg mx-auto pb-24">
+        {/* AI Disclosure Banner */}
+        <AIDisclosure variant="banner" className="mb-4" />
+        
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setQualityFilter(null); }} className="w-full">
           <TabsList className="w-full grid grid-cols-2 gap-1 mb-5 h-12 p-1 bg-background/80 backdrop-blur-md rounded-2xl border border-border/50 shadow-sm">
             <TabsTrigger 

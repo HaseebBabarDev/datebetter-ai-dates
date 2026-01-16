@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Mail, Lock, ArrowLeft, Sparkles, Heart, Shield, CheckCircle2, KeyRound } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, Sparkles, Heart, Shield, CheckCircle2, KeyRound, Bot } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import authBg from "@/assets/auth-bg.jpg";
 import { PinSetupDialog } from "@/components/auth/PinSetupDialog";
@@ -655,10 +655,16 @@ const Auth = () => {
           </div>
         </div>
 
-        {/* Security badge */}
-        <div className="flex items-center justify-center gap-2 mt-4 text-muted-foreground">
-          <Shield className="w-3.5 h-3.5" />
-          <span className="text-xs">Your data is encrypted & secure</span>
+        {/* Security and AI badges */}
+        <div className="flex flex-col items-center gap-2 mt-4 text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Shield className="w-3.5 h-3.5" />
+            <span className="text-xs">Your data is encrypted & secure</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Bot className="w-3.5 h-3.5" />
+            <span className="text-xs">AI-powered features for personalized insights</span>
+          </div>
         </div>
       </main>
     </div>

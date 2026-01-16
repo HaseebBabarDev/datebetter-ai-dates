@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Edit, Info } from "lucide-react";
+import { AIDisclosure } from "@/components/AIDisclosure";
 
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
@@ -911,6 +912,7 @@ const CandidateDetail = () => {
           </TabsList>
 
           <TabsContent value="profile" className="mt-4 space-y-4">
+            <AIDisclosure variant="inline" className="justify-center mb-2" />
             <ProfileCompleteness candidate={candidate} />
             <CompatibilityScore
               candidate={candidate}
@@ -965,7 +967,8 @@ const CandidateDetail = () => {
             <InteractionHistory interactions={interactions} deviMessages={deviMessages} />
           </TabsContent>
 
-          <TabsContent value="flags" className="mt-4">
+          <TabsContent value="flags" className="mt-4 space-y-4">
+            <AIDisclosure variant="inline" className="justify-center" />
             <FlagsSection
               candidate={candidate}
               onUpdate={handleUpdateCandidate}
