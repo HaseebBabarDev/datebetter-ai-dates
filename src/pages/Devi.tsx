@@ -45,6 +45,7 @@ import { DeviWinDialog, DeviWinPrompt } from "@/components/devi/DeviWinDialog";
 import { ProfileSectionsNudge } from "@/components/devi/ProfileSectionsNudge";
 import { HealingJourney } from "@/components/devi/HealingJourney";
 import { ChatGPTMessage } from "@/components/devi/ChatGPTMessage";
+import { AIDisclosure } from "@/components/AIDisclosure";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -1239,7 +1240,7 @@ const Devi = () => {
               </div>
               <div className="min-w-0">
                 <h1 className="font-semibold text-sm text-foreground leading-tight">D.E.V.I.</h1>
-                <p className="text-[10px] text-muted-foreground truncate leading-tight">Your AI</p>
+                <AIDisclosure variant="compact" />
               </div>
             </div>
             
