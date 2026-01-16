@@ -9,6 +9,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 import { BottomNavigation } from "@/components/navigation/BottomNavigation";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useScheduledReminders } from "@/hooks/useScheduledReminders";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { useState, useEffect, lazy, Suspense } from "react";
 
@@ -63,6 +64,9 @@ function AppContent() {
   const isOnline = useOnlineStatus();
   const [showLoading, setShowLoading] = useState(true);
   const [appReady, setAppReady] = useState(false);
+
+  // Enable scheduled reminders at 9 AM, 2 PM, and 6 PM
+  useScheduledReminders();
 
   // Check if current path is an admin route - skip loading screen for admin
   const isAdminRoute = window.location.pathname.startsWith("/admin");
