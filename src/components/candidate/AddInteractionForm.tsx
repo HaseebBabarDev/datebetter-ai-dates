@@ -308,7 +308,15 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction>Got it</AlertDialogAction>
+            <AlertDialogAction
+              onClick={() => {
+                setShowPendingAdviceDialog(false);
+                // Navigate to candidate insights page with the advice section
+                navigate(`/candidate/${candidateId}`, { state: { tab: "profile" } });
+              }}
+            >
+              Go to Advice
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
