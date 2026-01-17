@@ -232,11 +232,11 @@ const Splash = () => {
 };
 
 const FeatureItem: React.FC<{ icon: React.ElementType; text: string }> = ({ icon: Icon, text }) => (
-  <div className="flex items-center gap-2 py-1.5">
-    <div className="w-5 h-5 rounded-full bg-primary/30 flex items-center justify-center shrink-0">
-      <Icon className="w-2.5 h-2.5 text-primary" />
+  <div className="flex items-center gap-2.5 py-2 px-3 rounded-lg bg-black/50 backdrop-blur-sm">
+    <div className="w-6 h-6 rounded-full bg-primary/40 flex items-center justify-center shrink-0">
+      <Icon className="w-3 h-3 text-primary" />
     </div>
-    <span className="text-white/90 text-xs font-medium">{text}</span>
+    <span className="text-white text-sm font-semibold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{text}</span>
   </div>
 );
 
