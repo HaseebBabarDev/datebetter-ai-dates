@@ -185,7 +185,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const dataRef = useRef<OnboardingData>(data);
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(true);
-  const totalSteps = 24; // 0-23 (added Personal Intro, Relationship Trauma, and Healing Assessment screens)
+  const totalSteps = 25; // Must match Setup.tsx screens array (0-24)
 
   // Keep ref in sync with state
   useEffect(() => {
