@@ -74,6 +74,16 @@ const QUICK_PROMPTS = [
   { icon: Heart, label: "Dating Profile", type: "dating_profile", prompt: "Analyze this dating profile" },
 ];
 
+// Get gender-appropriate greeting based on user profile
+const getDeviGreeting = (profile: Profile | null): string => {
+  const isMale = profile?.gender_identity === "man_cis" || profile?.gender_identity === "man_trans";
+  
+  if (isMale) {
+    return "Hey! 👋 I'm here to help with anything dating-related. Ask me about dating advice, red flags, self-improvement, or select a candidate to discuss someone specific!";
+  }
+  return "Hey babe! 👋 I'm here to help with anything dating-related. Ask me about dating advice, red flags, self-improvement, or select a candidate to discuss someone specific!";
+};
+
 const EXAMPLE_QUESTIONS = [
   "Why isn't he texting me back?",
   "Is this a red flag?",
@@ -1615,7 +1625,7 @@ const Devi = () => {
                       <p className="text-base leading-relaxed">
                         {selectedCandidate 
                           ? `Hey! 👋 What's going on with ${selectedCandidate.nickname}?`
-                          : "Hey babe! 👋 I'm here to help with anything dating-related. Ask me about dating advice, red flags, self-improvement, or select a candidate to discuss someone specific!"}
+                          : getDeviGreeting(userProfile)}
                       </p>
                     </div>
                   </>
@@ -1628,7 +1638,7 @@ const Devi = () => {
                       <p className="text-sm">
                         {selectedCandidate 
                           ? `Hey! 👋 What's going on with ${selectedCandidate.nickname}?`
-                          : "Hey babe! 👋 I'm here to help with anything dating-related. Ask me about dating advice, red flags, self-improvement, or select a candidate to discuss someone specific!"}
+                          : getDeviGreeting(userProfile)}
                       </p>
                     </div>
                   </>
