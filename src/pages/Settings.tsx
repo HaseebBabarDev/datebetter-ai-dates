@@ -977,6 +977,26 @@ const Settings = () => {
                   <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 </button>
                 <button
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText("support@datebetterapp.com");
+                      toast.success("Email copied! Send us a request to delete your account.");
+                    } catch {
+                      toast.error("Failed to copy email");
+                    }
+                  }}
+                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-destructive/10 transition-colors text-left group"
+                >
+                  <div className="flex items-center gap-3">
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                    <div>
+                      <span className="text-sm text-destructive">Delete Account</span>
+                      <p className="text-xs text-muted-foreground">Email support@datebetterapp.com</p>
+                    </div>
+                  </div>
+                  <Copy className="w-4 h-4 text-muted-foreground group-hover:text-destructive" />
+                </button>
+                <button
                   onClick={() => navigate("/app-version")}
                   className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left"
                 >
