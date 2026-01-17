@@ -84,12 +84,33 @@ const getDeviGreeting = (profile: Profile | null): string => {
   return "Hey babe! 👋 I'm here to help with anything dating-related. Ask me about dating advice, red flags, self-improvement, or select a candidate to discuss someone specific!";
 };
 
-const EXAMPLE_QUESTIONS = [
-  "Why isn't he texting me back?",
-  "Is this a red flag?",
-  "How do I bring up exclusivity?",
-  "Help me rewire my dating thoughts",
-];
+// Get pronoun based on user's dating preferences
+const getTargetPronoun = (profile: Profile | null): string => {
+  const interestedIn = profile?.interested_in || [];
+  
+  // If interested in only men
+  if (interestedIn.length === 1 && interestedIn[0] === "men") {
+    return "he";
+  }
+  // If interested in only women
+  if (interestedIn.length === 1 && interestedIn[0] === "women") {
+    return "she";
+  }
+  // If interested in multiple or non-binary/all - use "they"
+  return "they";
+};
+
+const getExampleQuestions = (profile: Profile | null): string[] => {
+  const pronoun = getTargetPronoun(profile);
+  const verb = pronoun === "they" ? "aren't" : "isn't";
+  
+  return [
+    `Why ${verb} ${pronoun} texting me back?`,
+    "Is this a red flag?",
+    "How do I bring up exclusivity?",
+    "Help me rewire my dating thoughts",
+  ];
+};
 
 const QUICK_REPLIES = [
   "Tell me more",
@@ -1650,7 +1671,7 @@ const Devi = () => {
                 <div className={chatLayout === "chatgpt" ? "pl-9 space-y-3" : "pl-10 space-y-2"}>
                   <p className={`text-muted-foreground ${chatLayout === "chatgpt" ? "text-sm" : "text-xs"} mb-2`}>Try asking:</p>
                   <div className="flex flex-wrap gap-2">
-                    {EXAMPLE_QUESTIONS.map((q, i) => (
+                    {getExampleQuestions(userProfile).map((q, i) => (
                       <button
                         key={i}
                         onClick={() => setInput(q)}
