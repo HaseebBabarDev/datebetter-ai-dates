@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { OnboardingLayout } from "../OnboardingLayout";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,7 @@ const regularityOptions = [
 
 const HormoneCycleScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
+  const hasSkipped = useRef(false);
 
   const isCisMale = data.genderIdentity === "man_cis";
   const isMale = data.genderIdentity === "man_cis" || data.genderIdentity === "man_trans";
@@ -53,8 +54,10 @@ const HormoneCycleScreen = () => {
 
   // Auto-skip this screen for cis males - it's not relevant
   useEffect(() => {
-    if (isCisMale) {
-      nextStep();
+    if (isCisMale && !hasSkipped.current) {
+      hasSkipped.current = true;
+      // Use setTimeout to avoid state update during render
+      setTimeout(() => nextStep(), 0);
     }
   }, [isCisMale, nextStep]);
 
