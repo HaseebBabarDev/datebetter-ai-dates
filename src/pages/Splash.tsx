@@ -189,12 +189,14 @@ const Splash = () => {
           <span className="text-[10px] sm:text-xs text-white font-semibold">Dating Evaluation & Vetting Intelligence</span>
         </div>
 
-        {/* Features */}
-        <div className="w-full max-w-xs sm:max-w-sm space-y-2 mb-5">
-          <FeatureItem icon={Sparkles} text="AI scores candidates & detects red flags" />
-          <FeatureItem icon={Brain} text="Help me rewire my dating thoughts" />
-          <FeatureItem icon={MessageCircle} text="Chat with D.E.V.I. for personalized advice" />
-          <FeatureItem icon={Users} text="Join a private community" />
+        {/* Features - Clean list style */}
+        <div className="w-full max-w-xs sm:max-w-sm mb-5">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+            <FeatureItem icon={Sparkles} text="AI scoring" />
+            <FeatureItem icon={Brain} text="Pattern insights" />
+            <FeatureItem icon={MessageCircle} text="24/7 AI coach" />
+            <FeatureItem icon={Users} text="Private community" />
+          </div>
         </div>
         
         {/* Footer */}
@@ -230,11 +232,11 @@ const Splash = () => {
 };
 
 const FeatureItem: React.FC<{ icon: React.ElementType; text: string }> = ({ icon: Icon, text }) => (
-  <div className="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl bg-black/30 backdrop-blur-sm border border-white/10 hover:border-primary/30 transition-all duration-300">
-    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
-      <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+  <div className="flex items-center gap-2 py-1.5">
+    <div className="w-5 h-5 rounded-full bg-primary/30 flex items-center justify-center shrink-0">
+      <Icon className="w-2.5 h-2.5 text-primary" />
     </div>
-    <span className="font-inter text-white font-semibold text-xs sm:text-sm drop-shadow-md">{text}</span>
+    <span className="text-white/90 text-xs font-medium">{text}</span>
   </div>
 );
 
