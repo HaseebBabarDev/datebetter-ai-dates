@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 // Import all screens
 import WelcomeScreen from "@/components/onboarding/screens/WelcomeScreen";
+import AppearanceScreen from "@/components/onboarding/screens/AppearanceScreen";
 import QuickStartScreen from "@/components/onboarding/screens/QuickStartScreen";
 import BasicIdentityScreen from "@/components/onboarding/screens/BasicIdentityScreen";
 import DatingPreferencesScreen from "@/components/onboarding/screens/DatingPreferencesScreen";
@@ -40,14 +41,15 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
   const [initialized, setInitialized] = useState(false);
 
   // Handle setup mode from URL params - skip WelcomeScreen if already chosen
+  // Note: step 1 is now AppearanceScreen, step 2 is BasicIdentityScreen
   useEffect(() => {
     if (!loading && !initialized && currentStep === 0 && setupMode) {
       if (setupMode === "quick") {
         updateData({ quickStartMode: true });
-        goToStep(1);
+        goToStep(1); // Go to AppearanceScreen
       } else if (setupMode === "full") {
         updateData({ quickStartMode: false });
-        goToStep(1);
+        goToStep(1); // Go to AppearanceScreen
       }
       setInitialized(true);
     } else if (!loading && !initialized) {
@@ -66,36 +68,37 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
     );
   }
 
-  // If quick start mode is enabled and we're past the welcome screen, show QuickStartScreen
-  if (data.quickStartMode && currentStep === 1) {
+  // If quick start mode is enabled and we're past the appearance screen, show QuickStartScreen
+  if (data.quickStartMode && currentStep === 2) {
     return <QuickStartScreen />;
   }
 
   const screens = [
     <WelcomeScreen key={0} />,
-    <BasicIdentityScreen key={1} />,
-    <DatingPreferencesScreen key={2} />,
-    <HormoneCycleScreen key={3} />,
-    <DatingMotivationScreen key={4} />,
-    <RelationshipGoalsScreen key={5} />,
-    <KidsFamilyScreen key={6} />,
-    <FaithValuesScreen key={7} />,
-    <PoliticsScreen key={8} />,
-    <CareerScreen key={9} />,
-    <LocationScheduleScreen key={10} />,
-    <SocialActivityScreen key={11} />,
-    <PhysicalPreferencesScreen key={12} />,
-    <CommunicationScreen key={13} />,
-    <PastPatternsScreen key={14} />,
-    <PersonalSectionIntroScreen key={15} />,
-    <RelationshipTraumaScreen key={16} />,
-    <HealingAssessmentScreen key={17} />,
-    <FamilyUpbringingScreen key={18} />,
-    <BoundariesScreen key={19} />,
-    <MentalHealthScreen key={20} />,
-    <SafetyIntimacyScreen key={21} />,
-    <DeviStyleScreen key={22} />,
-    <CompletionScreen key={23} />,
+    <AppearanceScreen key={1} />,
+    <BasicIdentityScreen key={2} />,
+    <DatingPreferencesScreen key={3} />,
+    <HormoneCycleScreen key={4} />,
+    <DatingMotivationScreen key={5} />,
+    <RelationshipGoalsScreen key={6} />,
+    <KidsFamilyScreen key={7} />,
+    <FaithValuesScreen key={8} />,
+    <PoliticsScreen key={9} />,
+    <CareerScreen key={10} />,
+    <LocationScheduleScreen key={11} />,
+    <SocialActivityScreen key={12} />,
+    <PhysicalPreferencesScreen key={13} />,
+    <CommunicationScreen key={14} />,
+    <PastPatternsScreen key={15} />,
+    <PersonalSectionIntroScreen key={16} />,
+    <RelationshipTraumaScreen key={17} />,
+    <HealingAssessmentScreen key={18} />,
+    <FamilyUpbringingScreen key={19} />,
+    <BoundariesScreen key={20} />,
+    <MentalHealthScreen key={21} />,
+    <SafetyIntimacyScreen key={22} />,
+    <DeviStyleScreen key={23} />,
+    <CompletionScreen key={24} />,
   ];
 
   return screens[currentStep] || screens[0];
