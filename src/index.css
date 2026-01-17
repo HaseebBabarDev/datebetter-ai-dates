@@ -273,9 +273,9 @@ All colors MUST be HSL.
     overscroll-behavior: none;
   }
 
-  /* Default text alignment */
-  h1, h2, h3, h4, h5, h6, p, span, label, div {
-    text-align: left;
+  /* Default text alignment - allow center override */
+  h1, h2, h3, h4, h5, h6, p, label {
+    text-align: inherit;
   }
 
   /* iOS Safe Area Support */
