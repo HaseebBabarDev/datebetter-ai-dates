@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, RotateCcw, Gift, Copy, Share2, Users, ScrollText } from "lucide-react";
+import { ThemeSelector } from "@/components/settings/ThemeSelector";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { ProfilePhotoUpload } from "@/components/settings/ProfilePhotoUpload";
@@ -729,6 +730,9 @@ const Settings = () => {
 
             {/* PIN Management */}
             <PinManagement userId={user.id} />
+
+            {/* Theme / Appearance */}
+            <ThemeSelector />
 
             {/* Legal & Agreements */}
             <Card>
