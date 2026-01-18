@@ -1,18 +1,25 @@
 // Crisis keywords and phrases that should trigger SUPPORT alerts (not block)
+// IMPORTANT: These should be specific phrases, not single words that could appear in normal dating context
 const CRISIS_KEYWORDS = [
-  // Suicidal ideation
+  // Suicidal ideation - these are specific enough
   "suicidal", "suicide", "kill myself", "end my life", "want to die", "don't want to live",
   "better off dead", "no reason to live", "end it all", "take my own life",
-  // Self-harm
+  // Self-harm - specific phrases
   "self harm", "self-harm", "cutting myself", "hurt myself", "hurting myself",
-  // Abuse indicators - show resources, don't block
-  "hit me", "hits me", "hitting me", "abusive", "abuse", "violent", "threatens me",
-  "threatened me", "scared of him", "scared of her", "scared of them", "afraid of him",
-  "afraid of her", "controls me", "controlling", "won't let me", "isolating me",
-  // Coercion
-  "forced me", "forcing me", "makes me", "made me do", "pressured", "coerced",
-  // Danger indicators
-  "stalking", "stalker", "following me", "won't leave me alone", "harassing",
+  // Abuse indicators - REQUIRE CONTEXT, use specific phrases only
+  // Removed standalone "controlling", "abuse", "pressured", "coerced" - too vague
+  "he hit me", "she hit me", "they hit me", "hits me", "hitting me", 
+  "he's abusive", "she's abusive", "abusive relationship", "abusive partner",
+  "violent toward me", "violent with me", "threatens to hurt me", "threatened to hurt me",
+  "scared of him hurting", "scared of her hurting", "scared he will", "scared she will",
+  "afraid he will hurt", "afraid she will hurt", "afraid of him hurting", "afraid of her hurting",
+  "he controls me", "she controls me", "controls everything i do", "won't let me leave",
+  "won't let me see", "isolating me from", "isolated me from",
+  // Coercion - more specific phrases
+  "forced me to", "forcing me to", "made me do things", "sexually coerced",
+  // Danger indicators - keep these specific
+  "stalking me", "he's stalking", "she's stalking", "my stalker", 
+  "following me everywhere", "won't stop contacting me", "harassing me constantly",
 ];
 
 // EMERGENCY keywords - should prompt call 911
