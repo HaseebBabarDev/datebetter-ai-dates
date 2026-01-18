@@ -583,8 +583,10 @@ serve(async (req) => {
     // Recovery is VERY gradual - score can only go up by 1% at a time
     let sentimentAdjustedOverall;
     if (shouldEndRelationship) {
-      // Relationship-ending patterns: cap grows SLOWLY from 5 up to 20 max with recovery
-      const maxCap = Math.min(20, 5 + recoveryBonusFromStreak);
+      // Relationship-ending patterns: use a RANGE of low values (12-28%) instead of flat 20%
+      // This creates more natural-looking scores
+      const baseLowCap = 12 + Math.floor(Math.random() * 8); // Random base between 12-19
+      const maxCap = Math.min(28, baseLowCap + recoveryBonusFromStreak);
 
       // Get previous score to ensure we only move gradually (both up AND down)
       const previousScore =
@@ -592,27 +594,29 @@ serve(async (req) => {
           ? Math.round(candidate.compatibility_score)
           : null;
 
-      // Base computed score (still respects sentiment)
+      // Base computed score (still respects sentiment, with variance)
+      const variance = Math.floor(Math.random() * 5) - 2; // -2 to +2 variance
       let computedScore = Math.min(
         maxCap,
-        Math.max(5, Math.round(baseScores.overall_score + interactionSentiment))
+        Math.max(8, Math.round(baseScores.overall_score + interactionSentiment + variance))
       );
 
       if (previousScore === null) {
-        // First time scoring - use computed
-        sentimentAdjustedOverall = computedScore;
+        // First time scoring - use computed with some randomness in low range
+        sentimentAdjustedOverall = Math.min(maxCap, Math.max(12, computedScore));
       } else if (recentPositiveStreak >= 3 && computedScore >= previousScore) {
-        // GRADUAL RECOVERY: Only allow +1% increase per rescore
-        sentimentAdjustedOverall = Math.min(maxCap, previousScore + 1);
+        // GRADUAL RECOVERY: Only allow +1% or +2% increase per rescore
+        const recoveryAmount = Math.random() > 0.6 ? 2 : 1;
+        sentimentAdjustedOverall = Math.min(maxCap, previousScore + recoveryAmount);
       } else if (computedScore < previousScore) {
-        // GRADUAL DECREASE: Only allow -1% decrease per rescore (or -2 for very bad)
-        // This prevents dramatic drops from 20% to 5%
-        const dropAmount = previousScore - computedScore;
-        const maxDrop = dropAmount > 10 ? 2 : 1; // Allow -2 if computed is much lower
-        sentimentAdjustedOverall = Math.max(5, previousScore - maxDrop);
+        // GRADUAL DECREASE: Only allow -1% to -3% decrease per rescore
+        // This prevents dramatic drops and creates natural decline
+        const maxDrop = Math.min(3, Math.max(1, Math.ceil((previousScore - computedScore) / 5)));
+        sentimentAdjustedOverall = Math.max(8, previousScore - maxDrop);
       } else {
-        // No streak but score is same or higher - keep previous
-        sentimentAdjustedOverall = Math.min(maxCap, previousScore);
+        // No streak but score is same or higher - keep previous with tiny variance
+        const tinyVariance = Math.floor(Math.random() * 3) - 1; // -1 to +1
+        sentimentAdjustedOverall = Math.min(maxCap, Math.max(8, previousScore + tinyVariance));
       }
 
       console.log(
