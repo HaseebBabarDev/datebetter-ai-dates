@@ -226,6 +226,50 @@ serve(async (req) => {
       .order("created_at", { ascending: false })
       .limit(10);
 
+    // CHECK IF THERE'S NEW DATA SINCE LAST SCORE UPDATE
+    // If no new interactions or candidate updates since last score, return existing score unchanged
+    const lastScoreUpdate = candidate.last_score_update ? new Date(candidate.last_score_update) : null;
+    const candidateUpdatedAt = candidate.updated_at ? new Date(candidate.updated_at) : null;
+    
+    let hasNewDataSinceLastScore = false;
+    
+    if (!lastScoreUpdate) {
+      // Never scored before - needs calculation
+      hasNewDataSinceLastScore = true;
+    } else {
+      // Check if candidate was updated since last score
+      if (candidateUpdatedAt && candidateUpdatedAt > lastScoreUpdate) {
+        hasNewDataSinceLastScore = true;
+      }
+      
+      // Check if any interaction was created/updated since last score
+      if (interactions && interactions.length > 0) {
+        const mostRecentInteraction = interactions[0];
+        const interactionCreatedAt = mostRecentInteraction.created_at ? new Date(mostRecentInteraction.created_at) : null;
+        if (interactionCreatedAt && interactionCreatedAt > lastScoreUpdate) {
+          hasNewDataSinceLastScore = true;
+        }
+      }
+    }
+    
+    // If no new data, return the existing score unchanged
+    if (!hasNewDataSinceLastScore && candidate.compatibility_score !== null) {
+      console.log(`NO NEW DATA since last score update (${lastScoreUpdate?.toISOString()}). Returning existing score: ${candidate.compatibility_score}%`);
+      return new Response(
+        JSON.stringify({
+          overall_score: candidate.compatibility_score,
+          previous_score: candidate.compatibility_score,
+          score_changed: false,
+          breakdown: candidate.score_breakdown || {},
+          no_recalculation_needed: true,
+          message: "Score unchanged - no new interactions or updates since last calculation"
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    console.log(`NEW DATA DETECTED - recalculating score (last update: ${lastScoreUpdate?.toISOString()})`);
+
     // Build interaction summary and calculate sentiment
     let interactionSummary = "No interactions logged yet.";
     let interactionSentiment = 0;
