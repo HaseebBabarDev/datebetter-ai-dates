@@ -387,8 +387,22 @@ serve(async (req) => {
       // DETECT RELATIONSHIP-ENDING PATTERNS
       
       // 1. Ghosting detection
-      const ghostingIndicators = ["ghosted", "ghosting", "got ghosted", "being ghosted", "went silent", "radio silence", "stopped responding", "no response", "disappeared"];
-      hasGhostingPattern = ghostingIndicators.some(phrase => combinedNotes.includes(phrase));
+      // Avoid false positives like "no response" without any time context.
+      const ghostingIndicators = [
+        "ghosted",
+        "ghosting",
+        "got ghosted",
+        "being ghosted",
+        "went silent",
+        "radio silence",
+        "stopped responding",
+        "disappeared",
+        "no response for days",
+        "no response for weeks",
+        "no response for a week",
+        "no response for 3 days",
+      ];
+      hasGhostingPattern = ghostingIndicators.some((phrase) => combinedNotes.includes(phrase));
       if (hasGhostingPattern) {
         shouldEndRelationship = true;
         interactionSentiment -= 50;
@@ -429,32 +443,61 @@ serve(async (req) => {
       }
       
       // 4. Love bombing detection
-      const hasLoveBombingLanguage = loveBombingPhrases.some(phrase => combinedNotes.includes(phrase));
+      // NOTE: avoid false positives. One romantic phrase alone should NOT force an end-mode cap.
+      const matchedLoveBombingPhrases = loveBombingPhrases.filter((phrase) => combinedNotes.includes(phrase));
+      const hasLoveBombingLanguage = matchedLoveBombingPhrases.length > 0;
+
+      // Stronger love-bombing signals (more predictive of manipulation when very early)
+      const strongLoveBombingPhrases = [
+        "soulmate",
+        "marry me",
+        "move in together",
+        "you're the one",
+        "you're my everything",
+        "can't live without you",
+        "planning our future",
+        "talking about marriage",
+        "talking about kids",
+        "destiny",
+        "fate brought us",
+      ];
+      const hasStrongLoveBombingLanguage = strongLoveBombingPhrases.some((phrase) => combinedNotes.includes(phrase));
+
       const hasFinancialInstability = combinedNotes.includes("not financially stable") || 
         combinedNotes.includes("earning hourly") || 
         combinedNotes.includes("broke") ||
         combinedNotes.includes("no money") ||
         combinedNotes.includes("can't afford") ||
         combinedNotes.includes("struggling financially");
-      
-      // Love bombing with ANY concerning pattern = major red flag
+
       if (hasLoveBombingLanguage) {
         hasLoveBombingPattern = true;
+
         const daysSinceFirstContact = candidate.first_contact_date 
           ? Math.floor((Date.now() - new Date(candidate.first_contact_date).getTime()) / (1000 * 60 * 60 * 24))
           : 999;
-        
-        if (hasFinancialInstability) {
+
+        // Severity: strong phrases count heavier; multiple matches matters.
+        const loveBombingSeverity =
+          (hasStrongLoveBombingLanguage ? 2 : 0) + Math.min(3, matchedLoveBombingPhrases.length);
+
+        // Only force end-mode when love bombing is clearly intense AND early/paired with other red flags.
+        if (hasFinancialInstability && loveBombingSeverity >= 3) {
           shouldEndRelationship = true;
           interactionSentiment -= 45;
-          console.log("DETECTED: Love bombing with financial instability - RELATIONSHIP SHOULD END");
-        } else if (daysSinceFirstContact <= 14) {
+          console.log("DETECTED: Strong love bombing + financial instability - end-mode");
+        } else if (daysSinceFirstContact <= 14 && loveBombingSeverity >= 4) {
           shouldEndRelationship = true;
-          interactionSentiment -= 40;
-          console.log("DETECTED: Early love bombing within 2 weeks - RELATIONSHIP SHOULD END");
+          interactionSentiment -= 35;
+          console.log("DETECTED: Strong early love bombing (2+ strong signals) - end-mode");
+        } else if (loveBombingSeverity >= 4 && (hasGhostingPattern || hasBlockedPattern)) {
+          shouldEndRelationship = true;
+          interactionSentiment -= 35;
+          console.log("DETECTED: Strong love bombing + ghosting/blocked - end-mode");
         } else {
-          interactionSentiment -= 25;
-          console.log("DETECTED: Love bombing pattern");
+          // Otherwise treat as a caution signal, not a hard cap.
+          interactionSentiment -= Math.min(25, 10 + loveBombingSeverity * 3);
+          console.log("DETECTED: Mild love bombing language (caution)");
         }
       }
       
