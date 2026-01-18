@@ -194,7 +194,7 @@ const Splash = () => {
           <div className="grid grid-cols-2 gap-x-4 gap-y-2">
             <FeatureItem icon={Sparkles} text="AI scoring" />
             <FeatureItem icon={Brain} text="Pattern insights" />
-            <FeatureItem icon={MessageCircle} text="24/7 AI coach" />
+            <FeatureItem icon={MessageCircle} text="24/7 AI assistant" />
             <FeatureItem icon={Users} text="Private community" />
           </div>
         </div>
