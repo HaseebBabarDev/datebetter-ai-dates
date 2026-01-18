@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Heart, CheckCircle, TrendingUp, AlertTriangle, ChevronRight, Sparkles, MessageCircle } from "lucide-react";
+import { Heart, CheckCircle, TrendingUp, ChevronRight, MessageCircle, Sparkles } from "lucide-react";
 
 interface HealingScoreCardProps {
   compact?: boolean;
@@ -105,48 +104,87 @@ export const HealingScoreCard: React.FC<HealingScoreCardProps> = ({ compact = fa
   }
 
   const readiness = getReadinessInfo(healingScore);
+  
+  // Calculate circle properties
+  const radius = 40;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (healingScore / 100) * circumference;
 
   return (
     <Card 
-      className={`overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-md active:scale-[0.99] border ${readiness.bgColor}`}
+      className={`overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-lg active:scale-[0.99] border ${readiness.bgColor}`}
       onClick={() => navigate("/patterns?tab=healing")}
     >
-      <CardContent className="p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${readiness.color} bg-current/10`}>
-              {readiness.icon}
+      <CardContent className="p-4">
+        <div className="flex items-center gap-4">
+          {/* Circular Progress */}
+          <div className="relative flex-shrink-0">
+            <svg width="96" height="96" className="transform -rotate-90">
+              {/* Background circle */}
+              <circle
+                cx="48"
+                cy="48"
+                r={radius}
+                stroke="currentColor"
+                strokeWidth="8"
+                fill="none"
+                className="text-muted/20"
+              />
+              {/* Progress circle */}
+              <circle
+                cx="48"
+                cy="48"
+                r={radius}
+                stroke="currentColor"
+                strokeWidth="8"
+                fill="none"
+                strokeLinecap="round"
+                className={getScoreColor(healingScore)}
+                style={{
+                  strokeDasharray: circumference,
+                  strokeDashoffset: strokeDashoffset,
+                  transition: "stroke-dashoffset 0.5s ease-in-out",
+                }}
+              />
+            </svg>
+            {/* Center content */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className={`text-xl font-bold ${getScoreColor(healingScore)}`}>
+                {healingScore}%
+              </span>
+              <Sparkles className="w-3 h-3 text-muted-foreground" />
             </div>
-            <div>
+          </div>
+
+          {/* Info section */}
+          <div className="flex-1 min-w-0 space-y-2">
+            <div className="flex items-center gap-2">
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center ${readiness.color} bg-current/10`}>
+                {readiness.icon}
+              </div>
               <h3 className="text-sm font-semibold text-foreground">Healing Score</h3>
-              <p className="text-xs text-muted-foreground">{readiness.subtext}</p>
             </div>
-          </div>
-          <div className="text-right">
-            <div className={`text-2xl font-bold ${getScoreColor(healingScore)}`}>
-              {healingScore}%
-            </div>
-            <div className={`text-xs font-medium ${readiness.color}`}>
+            <p className={`text-xs font-medium ${readiness.color}`}>
               {readiness.text}
-            </div>
+            </p>
+            <p className="text-xs text-muted-foreground line-clamp-1">{readiness.subtext}</p>
+            
+            {healingScore < 75 && (
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate("/devi?prompt=healing");
+                }}
+                className="flex items-center gap-1.5 py-1.5 px-2.5 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors text-xs font-medium text-primary"
+              >
+                <MessageCircle className="w-3 h-3" />
+                <span>Talk to D.E.V.I.</span>
+              </button>
+            )}
           </div>
+
+          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
         </div>
-
-        <Progress value={healingScore} className="h-2" />
-
-        {healingScore < 75 && (
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate("/devi?prompt=healing");
-            }}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors text-xs font-medium text-primary"
-          >
-            <MessageCircle className="w-3.5 h-3.5" />
-            <span>Talk to D.E.V.I. about your healing</span>
-            <ChevronRight className="w-3 h-3 ml-auto" />
-          </button>
-        )}
       </CardContent>
     </Card>
   );
