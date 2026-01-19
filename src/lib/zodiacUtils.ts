@@ -432,8 +432,11 @@ export function getHoroscopeCompatibility(
   const partnerElement = ELEMENT_MAP[partner];
   const elementPairing = getElementPairing(userElement, partnerElement);
   
+  // Use week number for deterministic weekly refresh
+  const weekNum = getWeekNumber();
+  
   const descriptions = COMPATIBILITY_DESCRIPTIONS[compatibility.level];
-  const description = descriptions[Math.floor(Math.random() * descriptions.length)];
+  const description = descriptions[weekNum % descriptions.length];
   
   // Build strengths based on shared or complementary elements
   const strengths: string[] = [];
@@ -460,16 +463,16 @@ export function getHoroscopeCompatibility(
   }
   challenges.push("Remember: compatibility is about effort, not just stars!");
 
-  // Get love advice
+  // Get love advice - refreshes weekly
   const adviceOptions = LOVE_ADVICE[elementPairing] || LOVE_ADVICE["fire-fire"];
-  const loveAdvice = adviceOptions[Math.floor(Date.now() / 86400000) % adviceOptions.length];
+  const loveAdvice = adviceOptions[weekNum % adviceOptions.length];
 
   // Get communication tip for partner
   const communicationTip = COMMUNICATION_TIPS[partner] || "Be open and honest in your communication";
 
-  // Get date idea
+  // Get date idea - refreshes weekly
   const dateIdeas = DATE_IDEAS[elementPairing] || DATE_IDEAS["fire-fire"];
-  const dateIdea = dateIdeas[Math.floor(Date.now() / 86400000) % dateIdeas.length];
+  const dateIdea = dateIdeas[weekNum % dateIdeas.length];
   
   return {
     level: compatibility.level,
