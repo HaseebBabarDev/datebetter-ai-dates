@@ -41,6 +41,7 @@ const ErrorPage = lazy(() => import("./pages/Error"));
 const ClearData = lazy(() => import("./pages/ClearData"));
 const AppVersion = lazy(() => import("./pages/AppVersion"));
 const Community = lazy(() => import("./pages/Community"));
+const SelfDiscovery = lazy(() => import("./pages/SelfDiscovery"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Minimal loading fallback for lazy routes
@@ -122,6 +123,7 @@ function AppContent() {
             <Route path="/clear-data" element={<ClearData />} />
             <Route path="/app-version" element={<AppVersion />} />
             <Route path="/community" element={<Community />} />
+            <Route path="/self-discovery" element={<SelfDiscovery />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <BottomNavigation />
