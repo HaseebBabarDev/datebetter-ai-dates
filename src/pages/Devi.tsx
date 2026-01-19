@@ -1893,15 +1893,6 @@ const Devi = () => {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <VoiceInputButton
-                onTranscript={(text) => {
-                  setInput(prev => prev ? `${prev} ${text}` : text);
-                }}
-                onPartialTranscript={(text) => {
-                  // Could show partial transcript indicator if desired
-                }}
-                disabled={isLoading}
-              />
               <Textarea
                 ref={textareaRef}
                 value={input}
