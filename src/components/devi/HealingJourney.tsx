@@ -6,9 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { Heart, Sparkles, TrendingUp, TrendingDown, RefreshCw, Send, AlertTriangle, ChevronRight } from "lucide-react";
+import { Heart, Sparkles, TrendingUp, TrendingDown, RefreshCw, Send, AlertTriangle, ChevronRight, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { HealingProgressChart } from "./HealingProgressChart";
+import { VoicePlayButton } from "./VoicePlayButton";
 
 interface HealingData {
   healingScore: number | null;
@@ -187,9 +188,12 @@ export const HealingJourney: React.FC<HealingJourneyProps> = ({ onClose, compact
 
                 {latestResult.aiInsights && (
                   <div className="p-3 rounded-lg bg-muted/50 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      <span className="text-xs font-medium text-primary">D.E.V.I.'s Insight</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-medium text-primary">D.E.V.I.'s Insight</span>
+                      </div>
+                      <VoicePlayButton text={latestResult.aiInsights} size="sm" variant="icon" />
                     </div>
                     <p className="text-sm text-muted-foreground">{latestResult.aiInsights}</p>
                   </div>

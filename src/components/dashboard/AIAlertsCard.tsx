@@ -17,8 +17,10 @@ import {
   History,
   X
 } from "lucide-react";
+import { Volume2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
 import { useToast } from "@/hooks/use-toast";
 import {
   Sheet,
@@ -306,9 +308,17 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
                 </span>
               )}
             </div>
-            <p className="text-xs font-medium text-foreground leading-tight">
-              {alert.title}
-            </p>
+            <div className="flex items-start justify-between gap-1">
+              <p className="text-xs font-medium text-foreground leading-tight">
+                {alert.title}
+              </p>
+              <VoicePlayButton 
+                text={`${alert.title}. ${alert.message}`} 
+                size="sm" 
+                variant="icon" 
+                className="shrink-0"
+              />
+            </div>
             <p className={`text-[11px] text-muted-foreground leading-snug ${isExpanded ? '' : 'line-clamp-2'}`}>
               {alert.message}
             </p>
