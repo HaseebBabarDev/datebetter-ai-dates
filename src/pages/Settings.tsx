@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, RotateCcw, Gift, Copy, Share2, Users, ScrollText } from "lucide-react";
+import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, RotateCcw, Gift, Copy, Share2, Users, ScrollText, Sparkles, Heart, Brain, MessageCircle } from "lucide-react";
 import { ThemeSelector } from "@/components/settings/ThemeSelector";
 import { ZodiacModeSettings } from "@/components/settings/ZodiacModeSettings";
 import { toast } from "sonner";
@@ -737,6 +737,38 @@ const Settings = () => {
 
             {/* Zodiac Mode */}
             <ZodiacModeSettings />
+
+            {/* Self-Discovery Quizzes */}
+            <Card 
+              className="cursor-pointer hover:shadow-md transition-all"
+              onClick={() => navigate("/self-discovery")}
+            >
+              <CardHeader className="pb-2 pt-4 px-4">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  Self-Discovery Quizzes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4">
+                <p className="text-sm text-muted-foreground mb-3">
+                  Take quizzes to help D.E.V.I. personalize your guidance
+                </p>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 flex items-center gap-1.5 py-1.5 px-2 rounded-lg bg-muted/50 text-xs">
+                    <Heart className="w-3.5 h-3.5 text-primary" />
+                    <span>Attachment</span>
+                  </div>
+                  <div className="flex-1 flex items-center gap-1.5 py-1.5 px-2 rounded-lg bg-muted/50 text-xs">
+                    <MessageCircle className="w-3.5 h-3.5 text-primary" />
+                    <span>Love Language</span>
+                  </div>
+                  <div className="flex-1 flex items-center gap-1.5 py-1.5 px-2 rounded-lg bg-muted/50 text-xs">
+                    <Brain className="w-3.5 h-3.5 text-primary" />
+                    <span>Personality</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Legal & Agreements */}
             <Card>
