@@ -203,12 +203,12 @@ export function HoroscopeCompatibility({
 
                 {/* Tabbed Content */}
                 <Tabs defaultValue="insights" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 h-9 bg-muted/60 p-1 rounded-lg">
-                    <TabsTrigger value="insights" className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 rounded-md">Insights</TabsTrigger>
-                    <TabsTrigger value="weekly" className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 rounded-md">This Week</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2 h-10 bg-muted/60 p-1 rounded-lg gap-1">
+                    <TabsTrigger value="insights" className="h-8 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 rounded-md py-1.5">Insights</TabsTrigger>
+                    <TabsTrigger value="weekly" className="h-8 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 rounded-md py-1.5">This Week</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="insights" className="space-y-2 mt-3">
+                  <TabsContent value="insights" className="space-y-2 mt-4 pt-1">
                     {/* Strengths & Challenges */}
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
@@ -271,7 +271,7 @@ export function HoroscopeCompatibility({
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="weekly" className="space-y-2 mt-3">
+                  <TabsContent value="weekly" className="space-y-2 mt-4 pt-1">
                     {weeklyPrediction && (
                       <>
                         {/* Weekly Theme */}
