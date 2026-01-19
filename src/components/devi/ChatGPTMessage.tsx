@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { ChevronDown, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { VoicePlayButton } from "./VoicePlayButton";
 
 interface Message {
   id: string;
@@ -232,12 +233,13 @@ export const ChatGPTMessage: React.FC<ChatGPTMessageProps> = ({
   // Assistant messages - ChatGPT style (full width, clean typography)
   return (
     <div className="mb-8">
-      {/* D.E.V.I. Avatar & Label */}
+      {/* D.E.V.I. Avatar & Label with Voice Play */}
       <div className="flex items-center gap-2 mb-3">
         <div className="w-7 h-7 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center">
           <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
         </div>
         <span className="text-sm font-medium text-muted-foreground">D.E.V.I.</span>
+        <VoicePlayButton text={message.content} size="sm" />
       </div>
       
       {/* Message content - full width, clean typography */}
