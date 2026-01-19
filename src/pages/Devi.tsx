@@ -1006,7 +1006,6 @@ const Devi = () => {
       // Single message bubble with cumulative content
       const assistantMessageId = crypto.randomUUID();
       let fullContent = "";
-      let displayedContent = "";
       let messageAdded = false;
 
       try {
@@ -1035,29 +1034,20 @@ const Devi = () => {
               if (content) {
                 fullContent += content;
                 
-                // Only display up to the last complete word (ends with space, punctuation, or newline)
-                const lastWordBoundary = fullContent.search(/[\s.,!?:;\n][^\s.,!?:;\n]*$/);
-                const contentToDisplay = lastWordBoundary > 0 
-                  ? fullContent.slice(0, lastWordBoundary + 1)
-                  : fullContent; // Show all content if no word boundary found
-                
-                // Only update UI if we have new content to show
-                if (contentToDisplay.length > displayedContent.length) {
-                  displayedContent = contentToDisplay;
-                  
-                  if (!messageAdded) {
-                    // Add the message bubble on first displayable content
-                    messageAdded = true;
-                    setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: displayedContent }]);
-                  } else {
-                    setMessages(prev => 
-                      prev.map(m => 
-                        m.id === assistantMessageId 
-                          ? { ...m, content: displayedContent }
-                          : m
-                      )
-                    );
-                  }
+                // Stream content progressively - show all accumulated content
+                // This provides smooth streaming without jarring re-renders
+                if (!messageAdded) {
+                  // Add the message bubble on first content
+                  messageAdded = true;
+                  setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: fullContent }]);
+                } else {
+                  setMessages(prev => 
+                    prev.map(m => 
+                      m.id === assistantMessageId 
+                        ? { ...m, content: fullContent }
+                        : m
+                    )
+                  );
                 }
               }
             } catch {
@@ -1071,19 +1061,9 @@ const Devi = () => {
         reader.releaseLock();
       }
 
-      // Display any remaining content after stream ends
-      if (fullContent !== displayedContent) {
-        if (!messageAdded) {
-          setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: fullContent }]);
-        } else {
-          setMessages(prev => 
-            prev.map(m => 
-              m.id === assistantMessageId 
-                ? { ...m, content: fullContent }
-                : m
-            )
-          );
-        }
+      // Ensure final content is displayed if stream ended mid-update
+      if (fullContent && !messageAdded) {
+        setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: fullContent }]);
       }
 
       // Save the single assistant message after streaming completes

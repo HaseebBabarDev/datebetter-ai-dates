@@ -233,12 +233,16 @@ export const ChatGPTMessage: React.FC<ChatGPTMessageProps> = ({
   // Assistant messages - ChatGPT style (full width, clean typography)
   return (
     <div className="mb-8">
-      {/* D.E.V.I. Avatar & Label */}
+      {/* D.E.V.I. Avatar & Label with speaker button */}
       <div className="flex items-center gap-2 mb-3">
         <div className="w-7 h-7 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center">
           <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
         </div>
         <span className="text-sm font-medium text-muted-foreground">D.E.V.I.</span>
+        {/* Voice playback button next to label */}
+        {!isLoading && message.content && (
+          <VoicePlayButton text={message.content} variant="icon" size="sm" />
+        )}
       </div>
       
       {/* Message content - full width, clean typography */}
@@ -252,11 +256,6 @@ export const ChatGPTMessage: React.FC<ChatGPTMessageProps> = ({
         )}
         <div className="text-foreground">
           {renderChatGPTContent(message.content)}
-        </div>
-        
-        {/* Voice playback with speed control */}
-        <div className="mt-6">
-          <VoicePlayButton text={message.content} variant="blob" />
         </div>
       </div>
       
