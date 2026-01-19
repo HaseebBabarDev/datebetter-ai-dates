@@ -239,7 +239,6 @@ export const ChatGPTMessage: React.FC<ChatGPTMessageProps> = ({
           <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
         </div>
         <span className="text-sm font-medium text-muted-foreground">D.E.V.I.</span>
-        <VoicePlayButton text={message.content} size="sm" />
       </div>
       
       {/* Message content - full width, clean typography */}
@@ -255,10 +254,9 @@ export const ChatGPTMessage: React.FC<ChatGPTMessageProps> = ({
           {renderChatGPTContent(message.content)}
         </div>
         
-        {/* Voice playback options */}
-        <div className="mt-6 flex flex-col gap-3">
+        {/* Voice playback with speed control */}
+        <div className="mt-6">
           <VoicePlayButton text={message.content} variant="blob" />
-          <VoicePlayButton text={message.content} variant="bar" />
         </div>
       </div>
       
