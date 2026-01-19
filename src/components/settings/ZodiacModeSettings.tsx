@@ -166,18 +166,7 @@ export function ZodiacModeSettings() {
                 disabled={saving}
               >
                 <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Select your sign">
-                    {userZodiacSign && (
-                      <span className="flex items-center gap-2">
-                        <span className="text-lg">
-                          {ZODIAC_SIGNS.find(z => z.value === userZodiacSign)?.symbol}
-                        </span>
-                        <span>
-                          {ZODIAC_SIGNS.find(z => z.value === userZodiacSign)?.label}
-                        </span>
-                      </span>
-                    )}
-                  </SelectValue>
+                  <SelectValue placeholder="Select your sign" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border shadow-lg z-50">
                   {ZODIAC_SIGNS.map((sign) => (
