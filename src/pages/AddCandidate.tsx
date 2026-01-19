@@ -281,6 +281,7 @@ const AddCandidate = () => {
   const [fetchingCandidate, setFetchingCandidate] = useState(isEditMode);
   const [activeTab, setActiveTab] = useState("basics");
   const [candidateMode, setCandidateMode] = useState<"quick" | "full" | null>(isEditMode ? "full" : null);
+  const [zodiacModeEnabled, setZodiacModeEnabled] = useState(false);
 const TABS = ["basics", "about", "family", "history", "chemistry"] as const;
 
 interface TheirPastRelationship {
@@ -417,6 +418,22 @@ const THEIR_ISSUE_OPTIONS = [
       return { ...r, issues };
     }));
   };
+
+  // Fetch user's zodiac mode preference
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("zodiac_mode_enabled")
+        .eq("user_id", user.id)
+        .single();
+      if (data) {
+        setZodiacModeEnabled(data.zodiac_mode_enabled ?? false);
+      }
+    };
+    fetchUserProfile();
+  }, [user]);
 
   useEffect(() => {
     if (editId && user) {
@@ -881,6 +898,28 @@ const THEIR_ISSUE_OPTIONS = [
                     />
                   </div>
                 </div>
+
+                {/* Zodiac Sign - Only show when zodiac mode is enabled */}
+                {zodiacModeEnabled && (
+                  <div className="space-y-2 pt-2 border-t border-border">
+                    <Label className="flex items-center gap-2">
+                      <span>✨</span> Their Zodiac Sign
+                      <span className="text-xs text-muted-foreground">(Entertainment only)</span>
+                    </Label>
+                    <Select value={zodiacSign} onValueChange={setZodiacSign}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select sign" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ZODIAC_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
