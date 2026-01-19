@@ -4,19 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Star, Sparkles, AlertCircle, Check, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Star, Sparkles, AlertCircle, Check, X, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 import {
-  ZODIAC_SIGNS,
   getZodiacLabel,
   getZodiacSymbol,
   getHoroscopeCompatibility,
@@ -26,6 +17,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Link } from "react-router-dom";
 
 interface HoroscopeCompatibilityProps {
   candidateId: string;
@@ -41,35 +33,14 @@ export function HoroscopeCompatibility({
   const { user } = useAuth();
   const [userZodiacSign, setUserZodiacSign] = useState<string | null>(null);
   const [zodiacModeEnabled, setZodiacModeEnabled] = useState(false);
-  const [partnerSign, setPartnerSign] = useState<string | null>(candidateZodiacSign);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
-  const [canUpdateToday, setCanUpdateToday] = useState(true);
-  const [lastUpdateDate, setLastUpdateDate] = useState<string | null>(null);
-
-  const STORAGE_KEY = `zodiac_last_update_${candidateId}`;
-
-  // Check if user can update zodiac today
-  useEffect(() => {
-    const lastUpdate = localStorage.getItem(STORAGE_KEY);
-    if (lastUpdate) {
-      setLastUpdateDate(lastUpdate);
-      const today = new Date().toDateString();
-      const lastUpdateDay = new Date(lastUpdate).toDateString();
-      setCanUpdateToday(today !== lastUpdateDay);
-    }
-  }, [candidateId]);
 
   useEffect(() => {
     if (user) {
       loadUserZodiac();
     }
   }, [user]);
-
-  useEffect(() => {
-    setPartnerSign(candidateZodiacSign);
-  }, [candidateZodiacSign]);
 
   const loadUserZodiac = async () => {
     try {
@@ -90,57 +61,22 @@ export function HoroscopeCompatibility({
     }
   };
 
-  const handlePartnerSignChange = async (sign: string) => {
-    // Check daily limit (allow first-time setting without limit)
-    if (partnerSign && !canUpdateToday) {
-      toast.error("You can only update zodiac sign once per day");
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const { error } = await supabase
-        .from("candidates")
-        .update({ zodiac_sign: sign })
-        .eq("id", candidateId)
-        .eq("user_id", user!.id);
-
-      if (error) throw error;
-
-      // Record update time if this was a change (not initial setting)
-      if (partnerSign) {
-        const now = new Date().toISOString();
-        localStorage.setItem(STORAGE_KEY, now);
-        setLastUpdateDate(now);
-        setCanUpdateToday(false);
-      }
-
-      setPartnerSign(sign);
-      toast.success(`${candidateNickname}'s sign updated to ${getZodiacLabel(sign)}`);
-    } catch (error) {
-      console.error("Error updating candidate zodiac:", error);
-      toast.error("Failed to update zodiac sign");
-    } finally {
-      setSaving(false);
-    }
-  };
-
   // Don't render if zodiac mode is not enabled
   if (!zodiacModeEnabled || loading) {
     return null;
   }
 
-  const compatibility = getHoroscopeCompatibility(userZodiacSign, partnerSign);
+  const compatibility = getHoroscopeCompatibility(userZodiacSign, candidateZodiacSign);
 
   const getLevelColor = (level: string) => {
     switch (level) {
       case "high":
-        return "text-green-500 bg-green-500/10 border-green-500/20";
+        return "text-emerald-600 bg-emerald-500/10 border-emerald-500/30";
       case "medium":
-        return "text-yellow-500 bg-yellow-500/10 border-yellow-500/20";
+        return "text-amber-600 bg-amber-500/10 border-amber-500/30";
       case "low":
       case "challenging":
-        return "text-orange-500 bg-orange-500/10 border-orange-500/20";
+        return "text-orange-600 bg-orange-500/10 border-orange-500/30";
       default:
         return "text-muted-foreground bg-muted/10";
     }
@@ -162,9 +98,9 @@ export function HoroscopeCompatibility({
   };
 
   return (
-    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+    <Card className="border-primary/20 overflow-hidden">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-2 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5">
           <CollapsibleTrigger className="w-full">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-base">
@@ -172,7 +108,7 @@ export function HoroscopeCompatibility({
                 Horoscope Compatibility
               </CardTitle>
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs bg-muted/50">
+                <Badge variant="outline" className="text-[10px] px-2 py-0.5 bg-background/80">
                   Entertainment Only
                 </Badge>
                 {isOpen ? (
@@ -186,94 +122,94 @@ export function HoroscopeCompatibility({
         </CardHeader>
 
         <CollapsibleContent>
-          <CardContent className="space-y-4">
-            {/* Partner Zodiac Selection */}
-            {!partnerSign && (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">
-                  {candidateNickname}'s Zodiac Sign
-                </Label>
-                <Select
-                  value={partnerSign || ""}
-                  onValueChange={handlePartnerSignChange}
-                  disabled={saving}
+          <CardContent className="pt-4 space-y-4">
+            {/* Missing partner zodiac sign */}
+            {!candidateZodiacSign && userZodiacSign && (
+              <div className="flex flex-col items-center gap-3 py-4">
+                <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center">
+                  <Star className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground text-center">
+                  Add {candidateNickname}'s zodiac sign to see compatibility
+                </p>
+                <Link
+                  to={`/add-candidate?edit=${candidateId}`}
+                  className="text-sm text-primary font-medium flex items-center gap-1 hover:underline"
                 >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Select their sign to see compatibility" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border shadow-lg z-50">
-                    {ZODIAC_SIGNS.map((sign) => (
-                      <SelectItem key={sign.value} value={sign.value}>
-                        <span className="flex items-center gap-2">
-                          <span className="text-lg">{sign.symbol}</span>
-                          <span>{sign.label}</span>
-                          <span className="text-xs text-muted-foreground ml-1">
-                            ({sign.dates})
-                          </span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <Pencil className="w-3 h-3" />
+                  Edit Profile
+                </Link>
               </div>
             )}
 
             {/* Compatibility Display */}
-            {userZodiacSign && partnerSign && compatibility && (
-              <div className="space-y-4">
-                {/* Signs Display */}
-                <div className="flex items-center justify-center gap-4 py-3">
+            {userZodiacSign && candidateZodiacSign && compatibility && (
+              <div className="space-y-5">
+                {/* Signs Display - Enhanced */}
+                <div className="flex items-center justify-center gap-6 py-2">
                   <div className="text-center">
-                    <div className="text-3xl mb-1">{getZodiacSymbol(userZodiacSign)}</div>
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-2 mx-auto border border-primary/20">
+                      <span className="text-3xl">{getZodiacSymbol(userZodiacSign)}</span>
+                    </div>
                     <div className="text-xs text-muted-foreground">You</div>
-                    <div className="text-sm font-medium">{getZodiacLabel(userZodiacSign)}</div>
+                    <div className="text-sm font-semibold">{getZodiacLabel(userZodiacSign)}</div>
                   </div>
-                  <Sparkles className="w-6 h-6 text-primary animate-pulse" />
+                  
+                  <div className="flex flex-col items-center">
+                    <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+                  </div>
+                  
                   <div className="text-center">
-                    <div className="text-3xl mb-1">{getZodiacSymbol(partnerSign)}</div>
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-2 mx-auto border border-primary/20">
+                      <span className="text-3xl">{getZodiacSymbol(candidateZodiacSign)}</span>
+                    </div>
                     <div className="text-xs text-muted-foreground">{candidateNickname}</div>
-                    <div className="text-sm font-medium">{getZodiacLabel(partnerSign)}</div>
+                    <div className="text-sm font-semibold">{getZodiacLabel(candidateZodiacSign)}</div>
                   </div>
                 </div>
 
-                {/* Compatibility Score */}
-                <div className="text-center space-y-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="text-2xl font-bold text-primary">
+                {/* Compatibility Score - Enhanced */}
+                <div className="text-center space-y-3">
+                  <div className="flex items-center justify-center gap-3">
+                    <span className="text-3xl font-bold text-primary">
                       {compatibility.percentage}%
                     </span>
-                    <Badge className={cn("text-xs", getLevelColor(compatibility.level))}>
+                    <Badge className={cn("text-xs font-medium", getLevelColor(compatibility.level))}>
                       {getLevelLabel(compatibility.level)}
                     </Badge>
                   </div>
                   <Progress
                     value={compatibility.percentage}
-                    className="h-2"
+                    className="h-2 max-w-xs mx-auto"
                   />
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground max-w-sm mx-auto">
                     {compatibility.description}
                   </p>
                 </div>
 
-                {/* Strengths & Challenges */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label className="text-xs font-medium text-green-600">Strengths</Label>
-                    <div className="space-y-1">
+                {/* Strengths & Challenges - Enhanced */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="space-y-2 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                    <Label className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
+                      <Check className="w-3.5 h-3.5" />
+                      Strengths
+                    </Label>
+                    <div className="space-y-1.5">
                       {compatibility.strengths.map((strength, i) => (
                         <div key={i} className="flex items-start gap-2 text-xs">
-                          <Check className="w-3 h-3 text-green-500 mt-0.5 shrink-0" />
                           <span className="text-muted-foreground">{strength}</span>
                         </div>
                       ))}
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs font-medium text-orange-600">Challenges</Label>
-                    <div className="space-y-1">
+                  <div className="space-y-2 p-3 rounded-lg bg-orange-500/5 border border-orange-500/10">
+                    <Label className="text-xs font-semibold text-orange-600 flex items-center gap-1">
+                      <X className="w-3.5 h-3.5" />
+                      Challenges
+                    </Label>
+                    <div className="space-y-1.5">
                       {compatibility.challenges.map((challenge, i) => (
                         <div key={i} className="flex items-start gap-2 text-xs">
-                          <X className="w-3 h-3 text-orange-500 mt-0.5 shrink-0" />
                           <span className="text-muted-foreground">{challenge}</span>
                         </div>
                       ))}
@@ -281,57 +217,27 @@ export function HoroscopeCompatibility({
                   </div>
                 </div>
 
-                {/* Change Sign Option */}
-                <div className="pt-2 border-t">
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="text-xs text-muted-foreground">
-                      Update {candidateNickname}'s sign
-                    </Label>
-                    {!canUpdateToday && (
-                      <span className="text-xs text-muted-foreground">
-                        (Available tomorrow)
-                      </span>
-                    )}
-                  </div>
-                  <Select
-                    value={partnerSign}
-                    onValueChange={handlePartnerSignChange}
-                    disabled={saving || !canUpdateToday}
+                {/* Edit link */}
+                <div className="text-center pt-1">
+                  <Link
+                    to={`/add-candidate?edit=${candidateId}`}
+                    className="text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1"
                   >
-                    <SelectTrigger className={cn(
-                      "bg-background h-9 text-sm",
-                      !canUpdateToday && "opacity-50 cursor-not-allowed"
-                    )}>
-                      <SelectValue>
-                        <span className="flex items-center gap-2">
-                          <span>{getZodiacSymbol(partnerSign)}</span>
-                          <span>{getZodiacLabel(partnerSign)}</span>
-                        </span>
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border shadow-lg z-50">
-                      {ZODIAC_SIGNS.map((sign) => (
-                        <SelectItem key={sign.value} value={sign.value}>
-                          <span className="flex items-center gap-2">
-                            <span>{sign.symbol}</span>
-                            <span>{sign.label}</span>
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <Pencil className="w-3 h-3" />
+                    Update {candidateNickname}'s sign in profile
+                  </Link>
                 </div>
               </div>
             )}
 
             {/* Missing user zodiac sign */}
             {!userZodiacSign && (
-              <div className="flex gap-2 p-3 rounded-lg bg-muted/50 border border-border/50">
-                <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-                <div className="text-xs text-muted-foreground">
+              <div className="flex gap-3 p-4 rounded-lg bg-muted/50 border border-border/50">
+                <AlertCircle className="w-5 h-5 text-muted-foreground shrink-0" />
+                <div className="text-sm text-muted-foreground">
                   <p>
                     Set your zodiac sign in{" "}
-                    <a href="/settings?tab=account" className="text-primary underline">
+                    <a href="/settings" className="text-primary font-medium hover:underline">
                       Settings
                     </a>{" "}
                     to see horoscope compatibility.
@@ -340,12 +246,12 @@ export function HoroscopeCompatibility({
               </div>
             )}
 
-            {/* Disclaimer */}
-            <div className="flex gap-2 p-3 rounded-lg bg-muted/30 border border-border/30">
+            {/* Disclaimer - Compact */}
+            <div className="flex gap-2 p-2.5 rounded-lg bg-muted/20 border border-border/20">
               <Star className="w-4 h-4 text-primary shrink-0 mt-0.5" />
               <p className="text-xs text-muted-foreground">
                 <span className="font-medium text-foreground">Just for fun!</span> This is not part of D.E.V.I.'s 
-                AI analysis. Your real compatibility score is based on actual patterns and data.
+                AI analysis.
               </p>
             </div>
           </CardContent>
