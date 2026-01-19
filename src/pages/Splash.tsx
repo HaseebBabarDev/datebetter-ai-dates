@@ -243,7 +243,7 @@ const Splash = () => {
           <Button
             onClick={handleGoogleSignIn}
             variant="outline"
-            className="w-full border-white/50 bg-white text-gray-700 hover:bg-gray-100 font-poppins font-semibold h-12"
+            className="w-full border-border/50 bg-background/85 text-foreground hover:bg-background/95 font-poppins font-semibold h-12"
             size="lg"
             disabled={googleLoading}
           >
