@@ -12,6 +12,7 @@ import BasicIdentityScreen from "@/components/onboarding/screens/BasicIdentitySc
 import DatingPreferencesScreen from "@/components/onboarding/screens/DatingPreferencesScreen";
 import HormoneCycleScreen from "@/components/onboarding/screens/HormoneCycleScreen";
 import DatingMotivationScreen from "@/components/onboarding/screens/DatingMotivationScreen";
+import DatingStyleScreen from "@/components/onboarding/screens/DatingStyleScreen";
 import RelationshipGoalsScreen from "@/components/onboarding/screens/RelationshipGoalsScreen";
 import KidsFamilyScreen from "@/components/onboarding/screens/KidsFamilyScreen";
 import FaithValuesScreen from "@/components/onboarding/screens/FaithValuesScreen";
@@ -39,6 +40,10 @@ interface SetupContentProps {
 const SetupContent = ({ setupMode }: SetupContentProps) => {
   const { currentStep, loading, data, updateData, goToStep } = useOnboarding();
   const [initialized, setInitialized] = useState(false);
+
+  // Check if user is a heterosexual male (man seeking women)
+  const isMaleHetero = (data.genderIdentity === 'man_cis' || data.genderIdentity === 'man_trans') && 
+                       data.interestedIn?.includes('women');
 
   // Handle setup mode from URL params - skip WelcomeScreen if already chosen
   // Note: step 1 is now AppearanceScreen, step 2 is BasicIdentityScreen
@@ -73,13 +78,24 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
     return <QuickStartScreen />;
   }
 
-  const screens = [
+  // Build screens array dynamically based on user profile
+  // DatingStyleScreen is inserted after DatingMotivationScreen for male hetero users
+  const baseScreens = [
     <WelcomeScreen key={0} />,
     <AppearanceScreen key={1} />,
     <BasicIdentityScreen key={2} />,
     <DatingPreferencesScreen key={3} />,
     <HormoneCycleScreen key={4} />,
     <DatingMotivationScreen key={5} />,
+  ];
+
+  // Insert DatingStyleScreen for male heterosexual users
+  if (isMaleHetero) {
+    baseScreens.push(<DatingStyleScreen key="dating-style" />);
+  }
+
+  // Continue with remaining screens
+  const remainingScreens = [
     <RelationshipGoalsScreen key={6} />,
     <KidsFamilyScreen key={7} />,
     <FaithValuesScreen key={8} />,
@@ -100,6 +116,8 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
     <DeviStyleScreen key={23} />,
     <CompletionScreen key={24} />,
   ];
+
+  const screens = [...baseScreens, ...remainingScreens];
 
   return screens[currentStep] || screens[0];
 };

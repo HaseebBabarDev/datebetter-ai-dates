@@ -198,7 +198,11 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const dataRef = useRef<OnboardingData>(data);
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(true);
-  const totalSteps = 25; // Must match Setup.tsx screens array (0-24)
+  
+  // Dynamic total steps: 25 base + 1 if male hetero (DatingStyleScreen)
+  const isMaleHetero = (data.genderIdentity === 'man_cis' || data.genderIdentity === 'man_trans') && 
+                       data.interestedIn?.includes('women');
+  const totalSteps = isMaleHetero ? 26 : 25; // 0-24 base, or 0-25 with DatingStyleScreen
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -328,6 +332,14 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
             deviStyle: (profile as any).devi_style || undefined,
             zodiacSign: profile.zodiac_sign || undefined,
             zodiacModeEnabled: profile.zodiac_mode_enabled ?? undefined,
+            // Male Dating Style Assessment fields
+            datingHonestyIntent: (profile as any).dating_honesty_intent || undefined,
+            relationshipBlockers: (profile as any).relationship_blockers as string[] || undefined,
+            relationshipBlockerTimeline: (profile as any).relationship_blocker_timeline || undefined,
+            attachmentSecurityLevel: (profile as any).attachment_security_level || undefined,
+            relationshipMotivation: (profile as any).relationship_motivation || undefined,
+            jealousyTriggers: (profile as any).jealousy_triggers || undefined,
+            datingSkillChallenges: (profile as any).dating_skill_challenges as string[] || undefined,
           });
 
           // Resume from saved step
