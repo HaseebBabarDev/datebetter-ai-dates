@@ -19,6 +19,7 @@ import { AddInteractionForm } from "@/components/candidate/AddInteractionForm";
 import { NoContactMode } from "@/components/candidate/NoContactMode";
 import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
 import { ProfileCompleteness } from "@/components/candidate/ProfileCompleteness";
+import { HoroscopeCompatibility } from "@/components/candidate/HoroscopeCompatibility";
 import { AppRatingDialog, shouldShowRatingDialog } from "@/components/candidate/AppRatingDialog";
 import { SuccessfulRelationshipCTA, checkSuccessfulRelationship } from "@/components/candidate/SuccessfulRelationshipCTA";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -919,6 +920,12 @@ const CandidateDetail = () => {
               onStartNoContact={handleStartNoContact}
               onAdviceResponded={fetchData}
               userSchedule={userProfile.schedule_flexibility}
+            />
+            {/* Horoscope Compatibility - Entertainment Only Section */}
+            <HoroscopeCompatibility
+              candidateId={candidate.id}
+              candidateNickname={candidate.nickname}
+              candidateZodiacSign={(candidate as any).zodiac_sign}
             />
           </TabsContent>
 
