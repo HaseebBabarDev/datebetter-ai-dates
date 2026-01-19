@@ -138,12 +138,12 @@ export function HoroscopeCompatibility({
         </CardHeader>
 
         <CollapsibleContent>
-          <CardContent className="pt-4 space-y-4">
+          <CardContent className="pt-3 space-y-3">
             {/* Missing partner zodiac sign */}
             {!candidateZodiacSign && userZodiacSign && (
-              <div className="flex flex-col items-center gap-3 py-4">
-                <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center">
-                  <Star className="w-6 h-6 text-muted-foreground" />
+              <div className="flex flex-col items-center gap-2 py-3">
+                <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center">
+                  <Star className="w-5 h-5 text-muted-foreground" />
                 </div>
                 <p className="text-sm text-muted-foreground text-center">
                   Add {candidateNickname}'s zodiac sign to see compatibility
@@ -160,154 +160,152 @@ export function HoroscopeCompatibility({
 
             {/* Compatibility Display */}
             {userZodiacSign && candidateZodiacSign && compatibility && (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* Signs Display */}
-                <div className="flex items-center justify-center gap-6 py-2">
+                <div className="flex items-center justify-center gap-5 py-1">
                   <div className="text-center">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-1.5 mx-auto border border-primary/20">
-                      <span className="text-2xl">{getZodiacSymbol(userZodiacSign)}</span>
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-1 mx-auto border border-primary/20">
+                      <span className="text-xl">{getZodiacSymbol(userZodiacSign)}</span>
                     </div>
-                    <div className="text-xs text-muted-foreground">You</div>
-                    <div className="text-sm font-semibold">{getZodiacLabel(userZodiacSign)}</div>
+                    <div className="text-[10px] text-muted-foreground">You</div>
+                    <div className="text-xs font-semibold">{getZodiacLabel(userZodiacSign)}</div>
                   </div>
                   
-                  <div className="flex flex-col items-center">
-                    <Sparkles className="w-5 h-5 text-primary animate-pulse" />
-                  </div>
+                  <Sparkles className="w-4 h-4 text-primary animate-pulse" />
                   
                   <div className="text-center">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-1.5 mx-auto border border-primary/20">
-                      <span className="text-2xl">{getZodiacSymbol(candidateZodiacSign)}</span>
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-1 mx-auto border border-primary/20">
+                      <span className="text-xl">{getZodiacSymbol(candidateZodiacSign)}</span>
                     </div>
-                    <div className="text-xs text-muted-foreground">{candidateNickname}</div>
-                    <div className="text-sm font-semibold">{getZodiacLabel(candidateZodiacSign)}</div>
+                    <div className="text-[10px] text-muted-foreground">{candidateNickname}</div>
+                    <div className="text-xs font-semibold">{getZodiacLabel(candidateZodiacSign)}</div>
                   </div>
                 </div>
 
                 {/* Compatibility Score */}
-                <div className="text-center space-y-2">
-                  <div className="flex items-center justify-center gap-3">
-                    <span className="text-3xl font-bold text-primary">
+                <div className="text-center space-y-1.5">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-2xl font-bold text-primary">
                       {compatibility.percentage}%
                     </span>
-                    <Badge className={cn("text-xs font-medium", getLevelColor(compatibility.level))}>
+                    <Badge className={cn("text-[10px] font-medium", getLevelColor(compatibility.level))}>
                       {getLevelLabel(compatibility.level)}
                     </Badge>
                   </div>
                   <Progress
                     value={compatibility.percentage}
-                    className="h-2 max-w-xs mx-auto"
+                    className="h-1.5 max-w-xs mx-auto"
                   />
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {compatibility.description}
                   </p>
                 </div>
 
                 {/* Tabbed Content */}
                 <Tabs defaultValue="insights" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 h-10 bg-muted/50 p-1">
-                    <TabsTrigger value="insights" className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md">Insights</TabsTrigger>
-                    <TabsTrigger value="weekly" className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md">This Week</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2 h-8 bg-muted/50 p-0.5">
+                    <TabsTrigger value="insights" className="text-[11px] data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md h-7">Insights</TabsTrigger>
+                    <TabsTrigger value="weekly" className="text-[11px] data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md h-7">This Week</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="insights" className="space-y-3 mt-3">
+                  <TabsContent value="insights" className="space-y-2 mt-2">
                     {/* Strengths & Challenges */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1.5 p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1 p-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
                         <Label className="text-[10px] font-semibold text-emerald-600 flex items-center gap-1">
                           <Check className="w-3 h-3" />
                           Strengths
                         </Label>
-                        <div className="space-y-1">
+                        <div className="space-y-0.5">
                           {compatibility.strengths.slice(0, 2).map((strength, i) => (
-                            <p key={i} className="text-[11px] text-muted-foreground leading-tight">{strength}</p>
+                            <p key={i} className="text-[10px] text-muted-foreground leading-tight">{strength}</p>
                           ))}
                         </div>
                       </div>
-                      <div className="space-y-1.5 p-2.5 rounded-lg bg-orange-500/5 border border-orange-500/10">
+                      <div className="space-y-1 p-2 rounded-lg bg-orange-500/5 border border-orange-500/10">
                         <Label className="text-[10px] font-semibold text-orange-600 flex items-center gap-1">
                           <X className="w-3 h-3" />
                           Challenges
                         </Label>
-                        <div className="space-y-1">
+                        <div className="space-y-0.5">
                           {compatibility.challenges.slice(0, 2).map((challenge, i) => (
-                            <p key={i} className="text-[11px] text-muted-foreground leading-tight">{challenge}</p>
+                            <p key={i} className="text-[10px] text-muted-foreground leading-tight">{challenge}</p>
                           ))}
                         </div>
                       </div>
                     </div>
 
                     {/* Love Advice */}
-                    <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+                    <div className="p-2 rounded-lg bg-primary/5 border border-primary/10">
                       <div className="flex items-start gap-2">
-                        <Heart className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                        <Heart className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
                         <div>
                           <Label className="text-[10px] font-semibold text-primary">Love Advice</Label>
-                          <p className="text-xs text-muted-foreground mt-0.5">{compatibility.loveAdvice}</p>
+                          <p className="text-[11px] text-muted-foreground">{compatibility.loveAdvice}</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Communication Tip */}
-                    <div className="p-3 rounded-lg bg-muted/30 border border-border/30">
+                    <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
                       <div className="flex items-start gap-2">
-                        <MessageCircle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                        <MessageCircle className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
                         <div>
                           <Label className="text-[10px] font-semibold text-foreground">
                             Communicating with {getZodiacLabel(candidateZodiacSign)}
                           </Label>
-                          <p className="text-xs text-muted-foreground mt-0.5">{compatibility.communicationTip}</p>
+                          <p className="text-[11px] text-muted-foreground">{compatibility.communicationTip}</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Date Idea */}
-                    <div className="p-3 rounded-lg bg-muted/30 border border-border/30">
+                    <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
                       <div className="flex items-start gap-2">
-                        <Calendar className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                        <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
                         <div>
                           <Label className="text-[10px] font-semibold text-foreground">Date Idea</Label>
-                          <p className="text-xs text-muted-foreground mt-0.5">{compatibility.dateIdea}</p>
+                          <p className="text-[11px] text-muted-foreground">{compatibility.dateIdea}</p>
                         </div>
                       </div>
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="weekly" className="space-y-3 mt-3">
+                  <TabsContent value="weekly" className="space-y-2 mt-2">
                     {weeklyPrediction && (
                       <>
                         {/* Weekly Theme */}
-                        <div className="text-center p-4 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
-                          <div className="text-xs text-muted-foreground mb-1">This Week's Theme</div>
-                          <div className="text-lg font-bold text-primary">{weeklyPrediction.theme}</div>
-                          <div className="flex items-center justify-center gap-1 mt-2">
-                            <Zap className={cn("w-4 h-4", getEnergyColor(weeklyPrediction.loveEnergy))} />
-                            <span className={cn("text-xs font-medium", getEnergyColor(weeklyPrediction.loveEnergy))}>
+                        <div className="text-center p-3 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+                          <div className="text-[10px] text-muted-foreground">This Week's Theme</div>
+                          <div className="text-base font-bold text-primary">{weeklyPrediction.theme}</div>
+                          <div className="flex items-center justify-center gap-1 mt-1">
+                            <Zap className={cn("w-3.5 h-3.5", getEnergyColor(weeklyPrediction.loveEnergy))} />
+                            <span className={cn("text-[11px] font-medium", getEnergyColor(weeklyPrediction.loveEnergy))}>
                               {weeklyPrediction.loveEnergy.charAt(0).toUpperCase() + weeklyPrediction.loveEnergy.slice(1)} Love Energy
                             </span>
                           </div>
                         </div>
 
                         {/* Weekly Advice */}
-                        <div className="p-3 rounded-lg bg-muted/30 border border-border/30">
+                        <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
                           <div className="flex items-start gap-2">
-                            <Star className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                            <Star className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
                             <div>
                               <Label className="text-[10px] font-semibold text-foreground">Weekly Guidance</Label>
-                              <p className="text-xs text-muted-foreground mt-0.5">{weeklyPrediction.advice}</p>
+                              <p className="text-[11px] text-muted-foreground">{weeklyPrediction.advice}</p>
                             </div>
                           </div>
                         </div>
 
                         {/* Focus Area & Lucky Day */}
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="p-2.5 rounded-lg bg-muted/20 border border-border/20 text-center">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="p-2 rounded-lg bg-muted/20 border border-border/20 text-center">
                             <div className="text-[10px] text-muted-foreground">Focus Area</div>
-                            <p className="text-xs font-medium mt-0.5">{weeklyPrediction.focusArea}</p>
+                            <p className="text-[11px] font-medium">{weeklyPrediction.focusArea}</p>
                           </div>
-                          <div className="p-2.5 rounded-lg bg-primary/5 border border-primary/10 text-center">
+                          <div className="p-2 rounded-lg bg-primary/5 border border-primary/10 text-center">
                             <div className="text-[10px] text-muted-foreground">Lucky Day</div>
-                            <p className="text-xs font-medium text-primary mt-0.5">{weeklyPrediction.luckyDay}</p>
+                            <p className="text-[11px] font-medium text-primary">{weeklyPrediction.luckyDay}</p>
                           </div>
                         </div>
                       </>
@@ -316,12 +314,12 @@ export function HoroscopeCompatibility({
                 </Tabs>
 
                 {/* Edit link */}
-                <div className="text-center pt-1">
+                <div className="text-center">
                   <Link
                     to={`/add-candidate?edit=${candidateId}`}
-                    className="text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1"
+                    className="text-[11px] text-muted-foreground hover:text-primary inline-flex items-center gap-1"
                   >
-                    <Pencil className="w-3 h-3" />
+                    <Pencil className="w-2.5 h-2.5" />
                     Update {candidateNickname}'s sign
                   </Link>
                 </div>
@@ -330,24 +328,22 @@ export function HoroscopeCompatibility({
 
             {/* Missing user zodiac sign */}
             {!userZodiacSign && (
-              <div className="flex gap-3 p-4 rounded-lg bg-muted/50 border border-border/50">
-                <AlertCircle className="w-5 h-5 text-muted-foreground shrink-0" />
-                <div className="text-sm text-muted-foreground">
-                  <p>
-                    Set your zodiac sign in{" "}
-                    <a href="/settings" className="text-primary font-medium hover:underline">
-                      Settings
-                    </a>{" "}
-                    to see horoscope compatibility.
-                  </p>
-                </div>
+              <div className="flex gap-2 p-3 rounded-lg bg-muted/50 border border-border/50">
+                <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  Set your zodiac sign in{" "}
+                  <a href="/settings" className="text-primary font-medium hover:underline">
+                    Settings
+                  </a>{" "}
+                  to see horoscope compatibility.
+                </p>
               </div>
             )}
 
             {/* Disclaimer */}
-            <div className="flex gap-2 p-2 rounded-lg bg-muted/20 border border-border/20">
-              <Star className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
-              <p className="text-[10px] text-muted-foreground">
+            <div className="flex gap-1.5 p-1.5 rounded-md bg-muted/20 border border-border/20">
+              <Star className="w-3 h-3 text-primary shrink-0 mt-0.5" />
+              <p className="text-[9px] text-muted-foreground">
                 <span className="font-medium text-foreground">Just for fun!</span> Not part of D.E.V.I.'s AI analysis.
               </p>
             </div>
