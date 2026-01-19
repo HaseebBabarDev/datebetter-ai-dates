@@ -72,6 +72,9 @@ const FloatingBlob: React.FC<{ isPlaying: boolean; onClick: () => void; isLoadin
   );
 };
 
+const SPEED_OPTIONS = [1, 1.5, 2] as const;
+type PlaybackSpeed = typeof SPEED_OPTIONS[number];
+
 export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
   text,
   disabled = false,
@@ -81,7 +84,18 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const cycleSpeed = useCallback(() => {
+    const currentIndex = SPEED_OPTIONS.indexOf(playbackSpeed);
+    const nextIndex = (currentIndex + 1) % SPEED_OPTIONS.length;
+    const newSpeed = SPEED_OPTIONS[nextIndex];
+    setPlaybackSpeed(newSpeed);
+    if (audioRef.current) {
+      audioRef.current.playbackRate = newSpeed;
+    }
+  }, [playbackSpeed]);
 
   const stopAudio = useCallback(() => {
     if (audioRef.current) {
@@ -129,6 +143,7 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
       const audioUrl = URL.createObjectURL(audioBlob);
       
       const audio = new Audio(audioUrl);
+      audio.playbackRate = playbackSpeed;
       audioRef.current = audio;
 
       audio.onended = () => {
@@ -152,7 +167,7 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [text, isPlaying, stopAudio]);
+  }, [text, isPlaying, stopAudio, playbackSpeed]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -164,14 +179,42 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
     };
   }, []);
 
-  // Blob variant - floating animated blob
+  // Blob variant - floating animated blob with speed control
   if (variant === "blob") {
     return (
       <div className={cn("flex flex-col items-center gap-3 py-4", className)}>
         <FloatingBlob isPlaying={isPlaying} onClick={playAudio} isLoading={isLoading} />
-        <span className="text-sm text-muted-foreground">
-          {isLoading ? "Generating..." : isPlaying ? "Tap to pause" : "Tap to listen"}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted-foreground">
+            {isLoading ? "Generating..." : isPlaying ? "Tap to pause" : "Tap to listen"}
+          </span>
+          {(isPlaying || audioRef.current) && (
+            <button
+              onClick={cycleSpeed}
+              className="px-2 py-1 text-xs font-medium rounded-full bg-muted hover:bg-muted/80 text-foreground transition-colors"
+            >
+              {playbackSpeed}x
+            </button>
+          )}
+        </div>
+        {!isPlaying && !isLoading && (
+          <div className="flex items-center gap-2">
+            {SPEED_OPTIONS.map((speed) => (
+              <button
+                key={speed}
+                onClick={() => setPlaybackSpeed(speed)}
+                className={cn(
+                  "px-2.5 py-1 text-xs font-medium rounded-full transition-colors",
+                  playbackSpeed === speed
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                )}
+              >
+                {speed}x
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
