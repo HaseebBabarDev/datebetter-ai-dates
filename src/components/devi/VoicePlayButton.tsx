@@ -8,7 +8,7 @@ interface VoicePlayButtonProps {
   text: string;
   disabled?: boolean;
   size?: "sm" | "default" | "lg";
-  variant?: "inline" | "bar" | "blob";
+  variant?: "inline" | "icon" | "bar" | "blob";
   className?: string;
 }
 
@@ -252,6 +252,41 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
             <Volume2 className="w-5 h-5 text-primary" />
             <span className="text-sm font-medium text-foreground">Listen to this response</span>
           </>
+        )}
+      </button>
+    );
+  }
+
+  // Icon variant - compact icon-only button for tight spaces
+  if (variant === "icon") {
+    const iconSizeStyles = {
+      sm: { button: "h-6 w-6", icon: "w-3 h-3" },
+      default: { button: "h-8 w-8", icon: "w-4 h-4" },
+      lg: { button: "h-10 w-10", icon: "w-5 h-5" },
+    };
+    const iconStyles = iconSizeStyles[size];
+
+    return (
+      <button
+        className={cn(
+          "rounded-full flex items-center justify-center transition-all",
+          isPlaying 
+            ? "bg-primary text-primary-foreground" 
+            : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground",
+          disabled && "opacity-50 cursor-not-allowed",
+          iconStyles.button,
+          className
+        )}
+        onClick={playAudio}
+        disabled={disabled || isLoading}
+        title={isPlaying ? "Pause" : "Listen"}
+      >
+        {isLoading ? (
+          <Loader2 className={cn(iconStyles.icon, "animate-spin")} />
+        ) : isPlaying ? (
+          <Pause className={iconStyles.icon} />
+        ) : (
+          <Volume2 className={iconStyles.icon} />
         )}
       </button>
     );
