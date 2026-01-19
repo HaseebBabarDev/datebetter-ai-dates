@@ -216,36 +216,41 @@ serve(async (req) => {
       throw new Error("Candidate not found");
     }
 
-    // Fetch recent interactions for context (order by date then created_at to get true most recent)
-    const { data: interactions } = await supabase
+    // Fetch recent USER interactions for context.
+    // IMPORTANT: We exclude system-generated "D.E.V.I. Score Update" interactions so refreshes don't
+    // (a) count as new data and (b) affect sentiment scoring.
+    const { data: interactionsRaw } = await supabase
       .from("interactions")
       .select("*")
       .eq("candidate_id", candidateId)
       .eq("user_id", user.id)
       .order("interaction_date", { ascending: false })
       .order("created_at", { ascending: false })
-      .limit(10);
+      .limit(25);
+
+    const interactions = (interactionsRaw || [])
+      .filter((i: any) => {
+        const notes = typeof i?.notes === "string" ? i.notes : "";
+        return !notes.startsWith("D.E.V.I. Score Update:");
+      })
+      .slice(0, 10);
 
     // CHECK IF THERE'S NEW DATA SINCE LAST SCORE UPDATE
-    // If no new interactions or candidate updates since last score, return existing score unchanged
+    // Score should only change when the USER logs a new interaction.
     const lastScoreUpdate = candidate.last_score_update ? new Date(candidate.last_score_update) : null;
-    const candidateUpdatedAt = candidate.updated_at ? new Date(candidate.updated_at) : null;
-    
+
     let hasNewDataSinceLastScore = false;
-    
+
     if (!lastScoreUpdate) {
       // Never scored before - needs calculation
       hasNewDataSinceLastScore = true;
     } else {
-      // Check if candidate was updated since last score
-      if (candidateUpdatedAt && candidateUpdatedAt > lastScoreUpdate) {
-        hasNewDataSinceLastScore = true;
-      }
-      
-      // Check if any interaction was created/updated since last score
+      // Check if any user interaction was created since last score
       if (interactions && interactions.length > 0) {
         const mostRecentInteraction = interactions[0];
-        const interactionCreatedAt = mostRecentInteraction.created_at ? new Date(mostRecentInteraction.created_at) : null;
+        const interactionCreatedAt = mostRecentInteraction.created_at
+          ? new Date(mostRecentInteraction.created_at)
+          : null;
         if (interactionCreatedAt && interactionCreatedAt > lastScoreUpdate) {
           hasNewDataSinceLastScore = true;
         }
