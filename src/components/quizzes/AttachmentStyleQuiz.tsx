@@ -6,7 +6,7 @@ import QuizLayout, { QuizOption } from "./QuizLayout";
 import { toast } from "sonner";
 
 interface AttachmentStyleQuizProps {
-  onComplete: () => void;
+  onComplete: (result: string) => void;
   onBack: () => void;
 }
 
@@ -179,7 +179,7 @@ const AttachmentStyleQuiz: React.FC<AttachmentStyleQuizProps> = ({ onComplete, o
         })
         .eq("user_id", user.id);
 
-      onComplete();
+      onComplete(primary);
     } catch (error) {
       console.error("Error saving quiz results:", error);
       toast.error("Failed to save results. Please try again.");

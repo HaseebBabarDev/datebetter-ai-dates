@@ -56,6 +56,8 @@ const SelfDiscovery = () => {
   const [activeQuiz, setActiveQuiz] = useState<QuizType>(null);
   const [completedQuizzes, setCompletedQuizzes] = useState<Set<QuizType>>(new Set());
   const [showCompletion, setShowCompletion] = useState(false);
+  const [completedQuizType, setCompletedQuizType] = useState<QuizType>(null);
+  const [quizResult, setQuizResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -90,8 +92,10 @@ const SelfDiscovery = () => {
     }
   };
 
-  const handleQuizComplete = (quizType: QuizType) => {
+  const handleQuizComplete = (quizType: QuizType, result: string) => {
     setCompletedQuizzes(prev => new Set([...prev, quizType]));
+    setCompletedQuizType(quizType);
+    setQuizResult(result);
     setShowCompletion(true);
     setActiveQuiz(null);
   };
@@ -102,6 +106,8 @@ const SelfDiscovery = () => {
 
   const handleTakeAnotherQuiz = () => {
     setShowCompletion(false);
+    setCompletedQuizType(null);
+    setQuizResult(null);
   };
 
   // Show completion screen
@@ -110,19 +116,21 @@ const SelfDiscovery = () => {
       <QuizCompletionScreen
         onContinue={handleContinueToDevi}
         onTakeAnother={handleTakeAnotherQuiz}
+        quizType={completedQuizType || undefined}
+        result={quizResult || undefined}
       />
     );
   }
 
   // Show active quiz
   if (activeQuiz === "attachment") {
-    return <AttachmentStyleQuiz onComplete={() => handleQuizComplete("attachment")} onBack={() => setActiveQuiz(null)} />;
+    return <AttachmentStyleQuiz onComplete={(result) => handleQuizComplete("attachment", result)} onBack={() => setActiveQuiz(null)} />;
   }
   if (activeQuiz === "love_language") {
-    return <LoveLanguageQuiz onComplete={() => handleQuizComplete("love_language")} onBack={() => setActiveQuiz(null)} />;
+    return <LoveLanguageQuiz onComplete={(result) => handleQuizComplete("love_language", result)} onBack={() => setActiveQuiz(null)} />;
   }
   if (activeQuiz === "personality") {
-    return <PersonalityQuiz onComplete={() => handleQuizComplete("personality")} onBack={() => setActiveQuiz(null)} />;
+    return <PersonalityQuiz onComplete={(result) => handleQuizComplete("personality", result)} onBack={() => setActiveQuiz(null)} />;
   }
 
   // Show quiz hub
