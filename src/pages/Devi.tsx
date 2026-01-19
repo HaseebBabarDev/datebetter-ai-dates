@@ -46,6 +46,8 @@ import { ProfileSectionsNudge } from "@/components/devi/ProfileSectionsNudge";
 import { HealingJourney } from "@/components/devi/HealingJourney";
 import { ChatGPTMessage } from "@/components/devi/ChatGPTMessage";
 import { AIDisclosure } from "@/components/AIDisclosure";
+import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
+import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -267,6 +269,12 @@ const MessageBubble: React.FC<{
           </button>
         )}
       </div>
+      {/* Voice play button for assistant messages */}
+      {message.role === 'assistant' && (
+        <div className="mt-1 ml-1">
+          <VoicePlayButton text={message.content} size="sm" />
+        </div>
+      )}
       {showQuickReplies && (
         <div className="flex flex-wrap gap-2 mt-2">
           {QUICK_REPLIES.map((reply) => (
@@ -1885,6 +1893,15 @@ const Devi = () => {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+              <VoiceInputButton
+                onTranscript={(text) => {
+                  setInput(prev => prev ? `${prev} ${text}` : text);
+                }}
+                onPartialTranscript={(text) => {
+                  // Could show partial transcript indicator if desired
+                }}
+                disabled={isLoading}
+              />
               <Textarea
                 ref={textareaRef}
                 value={input}
