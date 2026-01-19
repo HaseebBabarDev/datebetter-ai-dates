@@ -163,6 +163,10 @@ export interface OnboardingData {
   
   // Screen 18: Devi Style
   deviStyle?: string;
+  
+  // Zodiac Mode (Entertainment Only)
+  zodiacSign?: string;
+  zodiacModeEnabled?: boolean;
 }
 
 interface OnboardingContextType {
@@ -313,6 +317,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
             behavioralMonitoring: profile.behavioral_monitoring || undefined,
             datingMotivation: (profile as any).dating_motivation as string[] || undefined,
             deviStyle: (profile as any).devi_style || undefined,
+            zodiacSign: profile.zodiac_sign || undefined,
+            zodiacModeEnabled: profile.zodiac_mode_enabled ?? undefined,
           });
 
           // Resume from saved step
@@ -451,6 +457,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         love_bombing_sensitivity: currentData.loveBombingSensitivity,
         behavioral_monitoring: currentData.behavioralMonitoring,
         devi_style: currentData.deviStyle,
+        zodiac_sign: currentData.zodiacSign,
+        zodiac_mode_enabled: currentData.zodiacModeEnabled,
       }).eq("user_id", user.id);
     } catch (error) {
       console.error("Error saving progress:", error);
