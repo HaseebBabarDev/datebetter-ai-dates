@@ -171,13 +171,7 @@ export function ZodiacModeSettings() {
                 <SelectContent className="bg-background border shadow-lg z-50">
                   {ZODIAC_SIGNS.map((sign) => (
                     <SelectItem key={sign.value} value={sign.value}>
-                      <span className="flex items-center gap-2">
-                        <span className="text-lg">{sign.symbol}</span>
-                        <span>{sign.label}</span>
-                        <span className="text-xs text-muted-foreground ml-1">
-                          ({sign.dates})
-                        </span>
-                      </span>
+                      {sign.symbol} {sign.label} ({sign.dates})
                     </SelectItem>
                   ))}
                 </SelectContent>
