@@ -5,12 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
-import { Star, Sparkles, AlertCircle, Check, X, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { Star, Sparkles, AlertCircle, Check, X, ChevronDown, ChevronUp, Pencil, Heart, MessageCircle, Calendar, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   getZodiacLabel,
   getZodiacSymbol,
   getHoroscopeCompatibility,
+  getWeeklyPrediction,
 } from "@/lib/zodiacUtils";
 import {
   Collapsible,
@@ -18,6 +19,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Link } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface HoroscopeCompatibilityProps {
   candidateId: string;
@@ -67,6 +69,7 @@ export function HoroscopeCompatibility({
   }
 
   const compatibility = getHoroscopeCompatibility(userZodiacSign, candidateZodiacSign);
+  const weeklyPrediction = getWeeklyPrediction(userZodiacSign, candidateZodiacSign);
 
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -94,6 +97,19 @@ export function HoroscopeCompatibility({
         return "Challenging";
       default:
         return level;
+    }
+  };
+
+  const getEnergyColor = (energy: string) => {
+    switch (energy) {
+      case "high":
+        return "text-emerald-600";
+      case "medium":
+        return "text-amber-600";
+      case "low":
+        return "text-orange-600";
+      default:
+        return "text-muted-foreground";
     }
   };
 
@@ -144,12 +160,12 @@ export function HoroscopeCompatibility({
 
             {/* Compatibility Display */}
             {userZodiacSign && candidateZodiacSign && compatibility && (
-              <div className="space-y-5">
-                {/* Signs Display - Enhanced */}
+              <div className="space-y-4">
+                {/* Signs Display */}
                 <div className="flex items-center justify-center gap-6 py-2">
                   <div className="text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-2 mx-auto border border-primary/20">
-                      <span className="text-3xl">{getZodiacSymbol(userZodiacSign)}</span>
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-1.5 mx-auto border border-primary/20">
+                      <span className="text-2xl">{getZodiacSymbol(userZodiacSign)}</span>
                     </div>
                     <div className="text-xs text-muted-foreground">You</div>
                     <div className="text-sm font-semibold">{getZodiacLabel(userZodiacSign)}</div>
@@ -160,16 +176,16 @@ export function HoroscopeCompatibility({
                   </div>
                   
                   <div className="text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-2 mx-auto border border-primary/20">
-                      <span className="text-3xl">{getZodiacSymbol(candidateZodiacSign)}</span>
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-1.5 mx-auto border border-primary/20">
+                      <span className="text-2xl">{getZodiacSymbol(candidateZodiacSign)}</span>
                     </div>
                     <div className="text-xs text-muted-foreground">{candidateNickname}</div>
                     <div className="text-sm font-semibold">{getZodiacLabel(candidateZodiacSign)}</div>
                   </div>
                 </div>
 
-                {/* Compatibility Score - Enhanced */}
-                <div className="text-center space-y-3">
+                {/* Compatibility Score */}
+                <div className="text-center space-y-2">
                   <div className="flex items-center justify-center gap-3">
                     <span className="text-3xl font-bold text-primary">
                       {compatibility.percentage}%
@@ -182,40 +198,122 @@ export function HoroscopeCompatibility({
                     value={compatibility.percentage}
                     className="h-2 max-w-xs mx-auto"
                   />
-                  <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                  <p className="text-sm text-muted-foreground">
                     {compatibility.description}
                   </p>
                 </div>
 
-                {/* Strengths & Challenges - Enhanced */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="space-y-2 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
-                    <Label className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
-                      <Check className="w-3.5 h-3.5" />
-                      Strengths
-                    </Label>
-                    <div className="space-y-1.5">
-                      {compatibility.strengths.map((strength, i) => (
-                        <div key={i} className="flex items-start gap-2 text-xs">
-                          <span className="text-muted-foreground">{strength}</span>
+                {/* Tabbed Content */}
+                <Tabs defaultValue="insights" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 h-9">
+                    <TabsTrigger value="insights" className="text-xs">Insights</TabsTrigger>
+                    <TabsTrigger value="weekly" className="text-xs">This Week</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="insights" className="space-y-3 mt-3">
+                    {/* Strengths & Challenges */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5 p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                        <Label className="text-[10px] font-semibold text-emerald-600 flex items-center gap-1">
+                          <Check className="w-3 h-3" />
+                          Strengths
+                        </Label>
+                        <div className="space-y-1">
+                          {compatibility.strengths.slice(0, 2).map((strength, i) => (
+                            <p key={i} className="text-[11px] text-muted-foreground leading-tight">{strength}</p>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-2 p-3 rounded-lg bg-orange-500/5 border border-orange-500/10">
-                    <Label className="text-xs font-semibold text-orange-600 flex items-center gap-1">
-                      <X className="w-3.5 h-3.5" />
-                      Challenges
-                    </Label>
-                    <div className="space-y-1.5">
-                      {compatibility.challenges.map((challenge, i) => (
-                        <div key={i} className="flex items-start gap-2 text-xs">
-                          <span className="text-muted-foreground">{challenge}</span>
+                      </div>
+                      <div className="space-y-1.5 p-2.5 rounded-lg bg-orange-500/5 border border-orange-500/10">
+                        <Label className="text-[10px] font-semibold text-orange-600 flex items-center gap-1">
+                          <X className="w-3 h-3" />
+                          Challenges
+                        </Label>
+                        <div className="space-y-1">
+                          {compatibility.challenges.slice(0, 2).map((challenge, i) => (
+                            <p key={i} className="text-[11px] text-muted-foreground leading-tight">{challenge}</p>
+                          ))}
                         </div>
-                      ))}
+                      </div>
                     </div>
-                  </div>
-                </div>
+
+                    {/* Love Advice */}
+                    <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+                      <div className="flex items-start gap-2">
+                        <Heart className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                        <div>
+                          <Label className="text-[10px] font-semibold text-primary">Love Advice</Label>
+                          <p className="text-xs text-muted-foreground mt-0.5">{compatibility.loveAdvice}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Communication Tip */}
+                    <div className="p-3 rounded-lg bg-muted/30 border border-border/30">
+                      <div className="flex items-start gap-2">
+                        <MessageCircle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                        <div>
+                          <Label className="text-[10px] font-semibold text-foreground">
+                            Communicating with {getZodiacLabel(candidateZodiacSign)}
+                          </Label>
+                          <p className="text-xs text-muted-foreground mt-0.5">{compatibility.communicationTip}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Date Idea */}
+                    <div className="p-3 rounded-lg bg-muted/30 border border-border/30">
+                      <div className="flex items-start gap-2">
+                        <Calendar className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                        <div>
+                          <Label className="text-[10px] font-semibold text-foreground">Date Idea</Label>
+                          <p className="text-xs text-muted-foreground mt-0.5">{compatibility.dateIdea}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="weekly" className="space-y-3 mt-3">
+                    {weeklyPrediction && (
+                      <>
+                        {/* Weekly Theme */}
+                        <div className="text-center p-4 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+                          <div className="text-xs text-muted-foreground mb-1">This Week's Theme</div>
+                          <div className="text-lg font-bold text-primary">{weeklyPrediction.theme}</div>
+                          <div className="flex items-center justify-center gap-1 mt-2">
+                            <Zap className={cn("w-4 h-4", getEnergyColor(weeklyPrediction.loveEnergy))} />
+                            <span className={cn("text-xs font-medium", getEnergyColor(weeklyPrediction.loveEnergy))}>
+                              {weeklyPrediction.loveEnergy.charAt(0).toUpperCase() + weeklyPrediction.loveEnergy.slice(1)} Love Energy
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Weekly Advice */}
+                        <div className="p-3 rounded-lg bg-muted/30 border border-border/30">
+                          <div className="flex items-start gap-2">
+                            <Star className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                            <div>
+                              <Label className="text-[10px] font-semibold text-foreground">Weekly Guidance</Label>
+                              <p className="text-xs text-muted-foreground mt-0.5">{weeklyPrediction.advice}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Focus Area & Lucky Day */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="p-2.5 rounded-lg bg-muted/20 border border-border/20 text-center">
+                            <div className="text-[10px] text-muted-foreground">Focus Area</div>
+                            <p className="text-xs font-medium mt-0.5">{weeklyPrediction.focusArea}</p>
+                          </div>
+                          <div className="p-2.5 rounded-lg bg-primary/5 border border-primary/10 text-center">
+                            <div className="text-[10px] text-muted-foreground">Lucky Day</div>
+                            <p className="text-xs font-medium text-primary mt-0.5">{weeklyPrediction.luckyDay}</p>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </TabsContent>
+                </Tabs>
 
                 {/* Edit link */}
                 <div className="text-center pt-1">
@@ -224,7 +322,7 @@ export function HoroscopeCompatibility({
                     className="text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1"
                   >
                     <Pencil className="w-3 h-3" />
-                    Update {candidateNickname}'s sign in profile
+                    Update {candidateNickname}'s sign
                   </Link>
                 </div>
               </div>
@@ -246,12 +344,11 @@ export function HoroscopeCompatibility({
               </div>
             )}
 
-            {/* Disclaimer - Compact */}
-            <div className="flex gap-2 p-2.5 rounded-lg bg-muted/20 border border-border/20">
-              <Star className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-              <p className="text-xs text-muted-foreground">
-                <span className="font-medium text-foreground">Just for fun!</span> This is not part of D.E.V.I.'s 
-                AI analysis.
+            {/* Disclaimer */}
+            <div className="flex gap-2 p-2 rounded-lg bg-muted/20 border border-border/20">
+              <Star className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+              <p className="text-[10px] text-muted-foreground">
+                <span className="font-medium text-foreground">Just for fun!</span> Not part of D.E.V.I.'s AI analysis.
               </p>
             </div>
           </CardContent>

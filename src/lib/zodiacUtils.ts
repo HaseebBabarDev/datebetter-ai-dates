@@ -59,6 +59,17 @@ interface CompatibilityResult {
   description: string;
   strengths: string[];
   challenges: string[];
+  loveAdvice: string;
+  communicationTip: string;
+  dateIdea: string;
+}
+
+interface WeeklyPrediction {
+  theme: string;
+  loveEnergy: "high" | "medium" | "low";
+  advice: string;
+  luckyDay: string;
+  focusArea: string;
 }
 
 // Traditional astrological compatibility based on elements
@@ -275,6 +286,136 @@ const ELEMENT_MAP: Record<string, string> = {
   cancer: "water", scorpio: "water", pisces: "water",
 };
 
+// Love advice by pairing type
+const LOVE_ADVICE: Record<string, string[]> = {
+  "fire-fire": [
+    "Keep the spark alive with spontaneous adventures",
+    "Give each other space to shine individually",
+    "Channel competitive energy into shared goals",
+  ],
+  "fire-earth": [
+    "Fire can inspire Earth to take more risks",
+    "Earth helps ground Fire's impulsive nature",
+    "Balance excitement with stability",
+  ],
+  "fire-air": [
+    "An exciting match! Air fans Fire's flames",
+    "Stay connected through deep conversations",
+    "Support each other's independence",
+  ],
+  "fire-water": [
+    "Fire can help Water come out of their shell",
+    "Water teaches Fire emotional depth",
+    "Practice patience with different communication styles",
+  ],
+  "earth-earth": [
+    "Build a secure foundation together",
+    "Don't forget to add excitement and novelty",
+    "Share your practical dreams and plans",
+  ],
+  "earth-air": [
+    "Earth provides grounding for Air's ideas",
+    "Air helps Earth see new perspectives",
+    "Find balance between routine and spontaneity",
+  ],
+  "earth-water": [
+    "A nurturing and stable combination",
+    "Create a comfortable sanctuary together",
+    "Express emotions openly despite Earth's reserve",
+  ],
+  "air-air": [
+    "Endless conversations and intellectual connection",
+    "Remember to ground dreams in reality",
+    "Give each other emotional reassurance",
+  ],
+  "air-water": [
+    "Air can help Water communicate feelings",
+    "Water teaches Air emotional intelligence",
+    "Be patient with different processing styles",
+  ],
+  "water-water": [
+    "Deep emotional understanding and intuition",
+    "Create healthy boundaries to avoid codependency",
+    "Channel emotions into creative expression together",
+  ],
+};
+
+// Communication tips by sign
+const COMMUNICATION_TIPS: Record<string, string> = {
+  aries: "Be direct but patient—they appreciate honesty and quick resolution",
+  taurus: "Give them time to process—rushing leads to stubbornness",
+  gemini: "Keep it interesting—variety and mental stimulation are key",
+  cancer: "Create emotional safety—they need to feel secure to open up",
+  leo: "Acknowledge their feelings first—appreciation goes a long way",
+  virgo: "Be specific and practical—vague statements cause anxiety",
+  libra: "Stay balanced and fair—they hate conflict and one-sidedness",
+  scorpio: "Be authentic—they can sense insincerity immediately",
+  sagittarius: "Keep it light and optimistic—heavy talks need humor breaks",
+  capricorn: "Show respect for their time—be organized and purposeful",
+  aquarius: "Appeal to logic first—emotions can follow understanding",
+  pisces: "Be gentle and compassionate—harsh words wound deeply",
+};
+
+// Date ideas by element pairing
+const DATE_IDEAS: Record<string, string[]> = {
+  "fire-fire": ["Adventure sports", "Dance class", "Road trip", "Competitive games night"],
+  "fire-earth": ["Hiking with a picnic", "Cooking class", "Wine tasting", "Home improvement project together"],
+  "fire-air": ["Art gallery hopping", "Comedy show", "Karaoke night", "Travel planning date"],
+  "fire-water": ["Sunset beach walk", "Spa day", "Romantic dinner", "Stargazing"],
+  "earth-earth": ["Farmers market & cooking", "Pottery class", "Garden date", "Financial planning + nice dinner"],
+  "earth-air": ["Museum visit", "Book club for two", "Escape room", "Trying new restaurants"],
+  "earth-water": ["Cozy movie night in", "Couples massage", "Aquarium visit", "Baking together"],
+  "air-air": ["Trivia night", "Poetry reading", "Group social event", "Learning something new together"],
+  "air-water": ["Music concert", "Beach bonfire", "Art therapy class", "Deep conversation café date"],
+  "water-water": ["Candlelit dinner at home", "Nature retreat", "Couples meditation", "Memory scrapbook making"],
+};
+
+// Weekly themes based on planetary energy (simplified, rotates weekly)
+const WEEKLY_THEMES = [
+  { theme: "Communication", focusArea: "Express your feelings openly this week", luckyDay: "Wednesday" },
+  { theme: "Romance", focusArea: "Small gestures of love have big impact", luckyDay: "Friday" },
+  { theme: "Growth", focusArea: "Work through a challenge together", luckyDay: "Tuesday" },
+  { theme: "Adventure", focusArea: "Try something new as a couple", luckyDay: "Saturday" },
+  { theme: "Intimacy", focusArea: "Deepen your emotional connection", luckyDay: "Sunday" },
+  { theme: "Harmony", focusArea: "Find balance in give and take", luckyDay: "Thursday" },
+  { theme: "Passion", focusArea: "Reignite the spark with spontaneity", luckyDay: "Monday" },
+];
+
+const WEEKLY_ADVICE_BY_LEVEL: Record<CompatibilityLevel, string[]> = {
+  high: [
+    "The stars align in your favor! Use this energy to deepen your bond.",
+    "Your natural chemistry is amplified—plan something special together.",
+    "Trust flows easily now—share something vulnerable with each other.",
+  ],
+  medium: [
+    "This is a week for understanding differences and finding common ground.",
+    "Focus on quality time—even small moments can strengthen your connection.",
+    "A good week to practice active listening and patience.",
+  ],
+  low: [
+    "Take it slow this week—small steps lead to big breakthroughs.",
+    "Focus on one area of your relationship to improve together.",
+    "Patience is your superpower right now—use it generously.",
+  ],
+  challenging: [
+    "Challenges this week are opportunities for growth—embrace them.",
+    "Give each other extra grace—everyone processes differently.",
+    "Focus on what you appreciate about each other, not what frustrates you.",
+  ],
+};
+
+function getElementPairing(element1: string, element2: string): string {
+  const sorted = [element1, element2].sort();
+  return `${sorted[0]}-${sorted[1]}`;
+}
+
+function getWeekNumber(): number {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 1);
+  const diff = now.getTime() - start.getTime();
+  return Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
+}
+
 export function getHoroscopeCompatibility(
   userSign: string | null,
   partnerSign: string | null
@@ -289,6 +430,7 @@ export function getHoroscopeCompatibility(
   
   const userElement = ELEMENT_MAP[user];
   const partnerElement = ELEMENT_MAP[partner];
+  const elementPairing = getElementPairing(userElement, partnerElement);
   
   const descriptions = COMPATIBILITY_DESCRIPTIONS[compatibility.level];
   const description = descriptions[Math.floor(Math.random() * descriptions.length)];
@@ -317,6 +459,17 @@ export function getHoroscopeCompatibility(
     }
   }
   challenges.push("Remember: compatibility is about effort, not just stars!");
+
+  // Get love advice
+  const adviceOptions = LOVE_ADVICE[elementPairing] || LOVE_ADVICE["fire-fire"];
+  const loveAdvice = adviceOptions[Math.floor(Date.now() / 86400000) % adviceOptions.length];
+
+  // Get communication tip for partner
+  const communicationTip = COMMUNICATION_TIPS[partner] || "Be open and honest in your communication";
+
+  // Get date idea
+  const dateIdeas = DATE_IDEAS[elementPairing] || DATE_IDEAS["fire-fire"];
+  const dateIdea = dateIdeas[Math.floor(Date.now() / 86400000) % dateIdeas.length];
   
   return {
     level: compatibility.level,
@@ -324,5 +477,44 @@ export function getHoroscopeCompatibility(
     description,
     strengths,
     challenges,
+    loveAdvice,
+    communicationTip,
+    dateIdea,
+  };
+}
+
+export function getWeeklyPrediction(
+  userSign: string | null,
+  partnerSign: string | null
+): WeeklyPrediction | null {
+  if (!userSign || !partnerSign) return null;
+
+  const user = userSign.toLowerCase();
+  const partner = partnerSign.toLowerCase();
+  
+  const compatibility = COMPATIBILITY_MATRIX[user]?.[partner];
+  if (!compatibility) return null;
+
+  const weekNum = getWeekNumber();
+  const weeklyTheme = WEEKLY_THEMES[weekNum % WEEKLY_THEMES.length];
+  
+  // Calculate love energy based on compatibility + weekly variance
+  const baseEnergy = compatibility.percentage;
+  const weeklyVariance = ((weekNum * 17) % 20) - 10; // -10 to +10
+  const adjustedEnergy = Math.max(30, Math.min(100, baseEnergy + weeklyVariance));
+  
+  const loveEnergy: "high" | "medium" | "low" = 
+    adjustedEnergy >= 75 ? "high" : 
+    adjustedEnergy >= 50 ? "medium" : "low";
+
+  const adviceOptions = WEEKLY_ADVICE_BY_LEVEL[compatibility.level];
+  const advice = adviceOptions[weekNum % adviceOptions.length];
+
+  return {
+    theme: weeklyTheme.theme,
+    loveEnergy,
+    advice,
+    luckyDay: weeklyTheme.luckyDay,
+    focusArea: weeklyTheme.focusArea,
   };
 }
