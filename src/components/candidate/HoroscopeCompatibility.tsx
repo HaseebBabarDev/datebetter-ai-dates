@@ -212,24 +212,26 @@ export function HoroscopeCompatibility({
                   </p>
                 </div>
 
-                {/* Tabbed Content */}
-                <Tabs defaultValue="insights" className="w-full mt-2">
-                  <TabsList className="grid w-full grid-cols-2 h-9 bg-muted/60 rounded-lg p-0.5 gap-1">
-                    <TabsTrigger
-                      value="insights"
-                      className="text-[11px] py-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md"
-                    >
-                      Insights
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="weekly"
-                      className="text-[11px] py-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md"
-                    >
-                      This Week
-                    </TabsTrigger>
-                  </TabsList>
+                {/* Compact Pill Toggle */}
+                <Tabs defaultValue="insights" className="w-full mt-3">
+                  <div className="flex justify-center">
+                    <TabsList className="inline-flex h-7 bg-muted/50 rounded-full p-0.5">
+                      <TabsTrigger
+                        value="insights"
+                        className="text-[10px] px-3 py-1 h-6 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      >
+                        Insights
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="weekly"
+                        className="text-[10px] px-3 py-1 h-6 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      >
+                        This Week
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
 
-                  <TabsContent value="insights" className="space-y-2 mt-4">
+                  <TabsContent value="insights" className="space-y-2 mt-3">
                     {/* Strengths & Challenges */}
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
@@ -334,16 +336,14 @@ export function HoroscopeCompatibility({
                   </TabsContent>
                 </Tabs>
 
-                {/* Edit link */}
-                <div className="text-center">
-                  <Link
-                    to={`/add-candidate?edit=${candidateId}`}
-                    className="text-[11px] text-muted-foreground hover:text-primary inline-flex items-center gap-1"
-                  >
-                    <Pencil className="w-2.5 h-2.5" />
-                    Update {candidateNickname}'s sign
-                  </Link>
-                </div>
+                {/* Edit link - subtle */}
+                <Link
+                  to={`/add-candidate?edit=${candidateId}`}
+                  className="text-[10px] text-muted-foreground/60 hover:text-primary inline-flex items-center gap-1 justify-center w-full pt-1"
+                >
+                  <Pencil className="w-2.5 h-2.5" />
+                  Update {candidateNickname}'s sign
+                </Link>
               </div>
             )}
 
