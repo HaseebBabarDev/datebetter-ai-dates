@@ -65,6 +65,12 @@ export const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
       return;
     }
 
+    // Check if mediaDevices is available (not available in some webviews/non-HTTPS)
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast.error("Voice input not available. Please use a modern browser with HTTPS.");
+      return;
+    }
+
     setIsConnecting(true);
 
     try {
