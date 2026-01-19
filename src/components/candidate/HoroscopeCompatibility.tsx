@@ -116,15 +116,15 @@ export function HoroscopeCompatibility({
   return (
     <Card className="border-primary/20 overflow-hidden">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CardHeader className="pb-2 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5">
+        <CardHeader className="py-2.5 px-4 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5">
           <CollapsibleTrigger className="w-full">
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Star className="w-5 h-5 text-primary" />
+              <CardTitle className="flex items-center gap-1.5 text-sm font-semibold">
+                <Star className="w-4 h-4 text-primary" />
                 Horoscope Compatibility
               </CardTitle>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-[10px] px-2 py-0.5 bg-background/80">
+              <div className="flex items-center gap-1.5">
+                <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-5 bg-background/80 font-normal">
                   Entertainment Only
                 </Badge>
                 {isOpen ? (
@@ -138,7 +138,7 @@ export function HoroscopeCompatibility({
         </CardHeader>
 
         <CollapsibleContent>
-          <CardContent className="pt-3 space-y-3">
+          <CardContent className="pt-3 pb-3 px-4 space-y-2.5">
             {/* Missing partner zodiac sign */}
             {!candidateZodiacSign && userZodiacSign && (
               <div className="flex flex-col items-center gap-2 py-3">
@@ -160,55 +160,55 @@ export function HoroscopeCompatibility({
 
             {/* Compatibility Display */}
             {userZodiacSign && candidateZodiacSign && compatibility && (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {/* Signs Display */}
-                <div className="flex items-center justify-center gap-5 py-1">
+                <div className="flex items-center justify-center gap-4">
                   <div className="text-center">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-1 mx-auto border border-primary/20">
-                      <span className="text-xl">{getZodiacSymbol(userZodiacSign)}</span>
+                    <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-0.5 mx-auto border border-primary/20">
+                      <span className="text-lg">{getZodiacSymbol(userZodiacSign)}</span>
                     </div>
-                    <div className="text-[10px] text-muted-foreground">You</div>
-                    <div className="text-xs font-semibold">{getZodiacLabel(userZodiacSign)}</div>
+                    <div className="text-[9px] text-muted-foreground">You</div>
+                    <div className="text-[11px] font-semibold">{getZodiacLabel(userZodiacSign)}</div>
                   </div>
                   
-                  <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                  <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" />
                   
                   <div className="text-center">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-1 mx-auto border border-primary/20">
-                      <span className="text-xl">{getZodiacSymbol(candidateZodiacSign)}</span>
+                    <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-0.5 mx-auto border border-primary/20">
+                      <span className="text-lg">{getZodiacSymbol(candidateZodiacSign)}</span>
                     </div>
-                    <div className="text-[10px] text-muted-foreground">{candidateNickname}</div>
-                    <div className="text-xs font-semibold">{getZodiacLabel(candidateZodiacSign)}</div>
+                    <div className="text-[9px] text-muted-foreground">{candidateNickname}</div>
+                    <div className="text-[11px] font-semibold">{getZodiacLabel(candidateZodiacSign)}</div>
                   </div>
                 </div>
 
                 {/* Compatibility Score */}
-                <div className="text-center space-y-1.5">
+                <div className="text-center space-y-1">
                   <div className="flex items-center justify-center gap-2">
-                    <span className="text-2xl font-bold text-primary">
+                    <span className="text-xl font-bold text-primary">
                       {compatibility.percentage}%
                     </span>
-                    <Badge className={cn("text-[10px] font-medium", getLevelColor(compatibility.level))}>
+                    <Badge className={cn("text-[9px] font-medium px-1.5 py-0 h-5", getLevelColor(compatibility.level))}>
                       {getLevelLabel(compatibility.level)}
                     </Badge>
                   </div>
                   <Progress
                     value={compatibility.percentage}
-                    className="h-1.5 max-w-xs mx-auto"
+                    className="h-1 max-w-[200px] mx-auto"
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[11px] text-muted-foreground">
                     {compatibility.description}
                   </p>
                 </div>
 
                 {/* Tabbed Content */}
                 <Tabs defaultValue="insights" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 h-10 bg-muted/60 p-1 rounded-lg gap-1">
-                    <TabsTrigger value="insights" className="h-8 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 rounded-md py-1.5">Insights</TabsTrigger>
-                    <TabsTrigger value="weekly" className="h-8 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 rounded-md py-1.5">This Week</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2 h-9 bg-muted/60 p-1 rounded-lg gap-1">
+                    <TabsTrigger value="insights" className="h-7 text-[11px] data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 rounded-md">Insights</TabsTrigger>
+                    <TabsTrigger value="weekly" className="h-7 text-[11px] data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 rounded-md">This Week</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="insights" className="space-y-2 mt-4 pt-1">
+                  <TabsContent value="insights" className="space-y-2 mt-3">
                     {/* Strengths & Challenges */}
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
