@@ -789,6 +789,7 @@ export type Database = {
           abuse_history: Json | null
           activity_level: string | null
           ambition_level: number | null
+          attachment_security_level: string | null
           attachment_style:
             | Database["public"]["Enums"]["attachment_style"]
             | null
@@ -819,8 +820,10 @@ export type Database = {
             | Database["public"]["Enums"]["cycle_regularity"]
             | null
           dating_history_text: string | null
+          dating_honesty_intent: string | null
           dating_motivation: string[] | null
           dating_patterns: Json | null
+          dating_skill_challenges: Json | null
           dealbreakers: Json | null
           devi_style: string | null
           distance_preference: string | null
@@ -855,6 +858,7 @@ export type Database = {
           intimacy_comfort: string | null
           is_neurodivergent: string | null
           is_trans: boolean | null
+          jealousy_triggers: Json | null
           kids_desire: Database["public"]["Enums"]["kids_desire"] | null
           kids_status: Database["public"]["Enums"]["kids_status"] | null
           kids_timeline: string | null
@@ -899,12 +903,16 @@ export type Database = {
           primary_love_language: string | null
           pronouns: Database["public"]["Enums"]["pronouns"] | null
           quiz_attachment_completed_at: string | null
+          quiz_dating_style_completed_at: string | null
           quiz_love_language_completed_at: string | null
           quiz_personality_completed_at: string | null
           red_flag_sensitivity: number | null
+          relationship_blocker_timeline: string | null
+          relationship_blockers: Json | null
           relationship_goal:
             | Database["public"]["Enums"]["relationship_goal"]
             | null
+          relationship_motivation: string | null
           relationship_status:
             | Database["public"]["Enums"]["relationship_status"]
             | null
@@ -942,6 +950,7 @@ export type Database = {
           abuse_history?: Json | null
           activity_level?: string | null
           ambition_level?: number | null
+          attachment_security_level?: string | null
           attachment_style?:
             | Database["public"]["Enums"]["attachment_style"]
             | null
@@ -972,8 +981,10 @@ export type Database = {
             | Database["public"]["Enums"]["cycle_regularity"]
             | null
           dating_history_text?: string | null
+          dating_honesty_intent?: string | null
           dating_motivation?: string[] | null
           dating_patterns?: Json | null
+          dating_skill_challenges?: Json | null
           dealbreakers?: Json | null
           devi_style?: string | null
           distance_preference?: string | null
@@ -1010,6 +1021,7 @@ export type Database = {
           intimacy_comfort?: string | null
           is_neurodivergent?: string | null
           is_trans?: boolean | null
+          jealousy_triggers?: Json | null
           kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
           kids_status?: Database["public"]["Enums"]["kids_status"] | null
           kids_timeline?: string | null
@@ -1054,12 +1066,16 @@ export type Database = {
           primary_love_language?: string | null
           pronouns?: Database["public"]["Enums"]["pronouns"] | null
           quiz_attachment_completed_at?: string | null
+          quiz_dating_style_completed_at?: string | null
           quiz_love_language_completed_at?: string | null
           quiz_personality_completed_at?: string | null
           red_flag_sensitivity?: number | null
+          relationship_blocker_timeline?: string | null
+          relationship_blockers?: Json | null
           relationship_goal?:
             | Database["public"]["Enums"]["relationship_goal"]
             | null
+          relationship_motivation?: string | null
           relationship_status?:
             | Database["public"]["Enums"]["relationship_status"]
             | null
@@ -1097,6 +1113,7 @@ export type Database = {
           abuse_history?: Json | null
           activity_level?: string | null
           ambition_level?: number | null
+          attachment_security_level?: string | null
           attachment_style?:
             | Database["public"]["Enums"]["attachment_style"]
             | null
@@ -1127,8 +1144,10 @@ export type Database = {
             | Database["public"]["Enums"]["cycle_regularity"]
             | null
           dating_history_text?: string | null
+          dating_honesty_intent?: string | null
           dating_motivation?: string[] | null
           dating_patterns?: Json | null
+          dating_skill_challenges?: Json | null
           dealbreakers?: Json | null
           devi_style?: string | null
           distance_preference?: string | null
@@ -1165,6 +1184,7 @@ export type Database = {
           intimacy_comfort?: string | null
           is_neurodivergent?: string | null
           is_trans?: boolean | null
+          jealousy_triggers?: Json | null
           kids_desire?: Database["public"]["Enums"]["kids_desire"] | null
           kids_status?: Database["public"]["Enums"]["kids_status"] | null
           kids_timeline?: string | null
@@ -1209,12 +1229,16 @@ export type Database = {
           primary_love_language?: string | null
           pronouns?: Database["public"]["Enums"]["pronouns"] | null
           quiz_attachment_completed_at?: string | null
+          quiz_dating_style_completed_at?: string | null
           quiz_love_language_completed_at?: string | null
           quiz_personality_completed_at?: string | null
           red_flag_sensitivity?: number | null
+          relationship_blocker_timeline?: string | null
+          relationship_blockers?: Json | null
           relationship_goal?:
             | Database["public"]["Enums"]["relationship_goal"]
             | null
+          relationship_motivation?: string | null
           relationship_status?:
             | Database["public"]["Enums"]["relationship_status"]
             | null

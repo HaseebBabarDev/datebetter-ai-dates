@@ -238,6 +238,36 @@ USING QUIZ RESULTS (IMPORTANT):
 `;
   })() : '';
 
+  // Build male dating style assessment context
+  const maleAssessmentContext = userProfile ? (() => {
+    const hasMaleData = userProfile.dating_honesty_intent || userProfile.relationship_blockers || userProfile.dating_skill_challenges;
+    if (!hasMaleData) return '';
+    
+    const blockers = Array.isArray(userProfile.relationship_blockers) ? userProfile.relationship_blockers : [];
+    const challenges = Array.isArray(userProfile.dating_skill_challenges) ? userProfile.dating_skill_challenges : [];
+    
+    return `
+DATING STYLE ASSESSMENT (for male users - use for coaching):
+- Honesty Approach: ${formatEnum(userProfile.dating_honesty_intent)}
+- Relationship Blockers: ${blockers.length > 0 ? blockers.join(', ') : 'None identified'}
+- Timeline for Change: ${formatEnum(userProfile.relationship_blocker_timeline) || 'Not specified'}
+- Security Level: ${formatEnum(userProfile.attachment_security_level)}
+- Dating Skill Challenges: ${challenges.length > 0 ? challenges.join(', ') : 'None identified'}
+- Jealousy Triggers: ${userProfile.jealousy_triggers ? JSON.stringify(userProfile.jealousy_triggers) : 'Not assessed'}
+
+COACHING APPROACH FOR THIS USER:
+${blockers.includes('retroactive_jealousy') ? '- ADDRESS RETROACTIVE JEALOUSY: Help him understand this is about his own insecurity, not her past. Gently challenge without shaming.\n' : ''}
+${blockers.includes('enjoying_youth') ? '- NOT READY TO SETTLE: Respect his timeline but help him be honest with women about intentions.\n' : ''}
+${blockers.includes('financial') ? '- FINANCIAL CONCERNS: Valid reason to wait. Help him date intentionally without leading anyone on.\n' : ''}
+${blockers.includes('trust_issues') ? '- TRUST ISSUES: Help him distinguish between valid caution and self-sabotage.\n' : ''}
+${blockers.includes('commitment_fear') ? '- COMMITMENT FEAR: Explore root causes gently. Often tied to family patterns or past hurt.\n' : ''}
+${challenges.includes('interview_mode') ? '- INTERVIEW MODE: Coach him on making conversations flow naturally. Less questions, more sharing.\n' : ''}
+${challenges.includes('oversharing') ? '- OVERSHARING: Help him understand vulnerability timing. Too much too soon creates pressure.\n' : ''}
+${challenges.includes('defensive') ? '- GETS DEFENSIVE: Work on receiving feedback without walls. This often stems from insecurity.\n' : ''}
+${challenges.includes('reading_signals') ? '- SIGNAL READING: Help him understand subtle cues. Teach him to ask directly when unsure.\n' : ''}
+`;
+  })() : '';
+
   const userContext = userProfile ? `
 USER PROFILE (the person you're coaching):
 - Name: ${userProfile.name || 'Not provided'}
@@ -262,6 +292,7 @@ USER PROFILE (the person you're coaching):
 - Past Relationships with Issues: ${JSON.stringify((userProfile as any).past_relationship_traumas || [])}
 ${familyContext}
 ${quizContext}
+${maleAssessmentContext}
 
 HEALING JOURNEY STATUS:
 - Current Healing Score: ${(userProfile as any).healing_score ?? 'Not calculated'}%

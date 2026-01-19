@@ -5,14 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, MessageCircle, Brain, CheckCircle2, Clock, ChevronRight, Sparkles } from "lucide-react";
+import { Heart, MessageCircle, Brain, CheckCircle2, Clock, ChevronRight, Sparkles, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AttachmentStyleQuiz from "@/components/quizzes/AttachmentStyleQuiz";
 import LoveLanguageQuiz from "@/components/quizzes/LoveLanguageQuiz";
 import PersonalityQuiz from "@/components/quizzes/PersonalityQuiz";
+import DatingStyleQuiz from "@/components/quizzes/DatingStyleQuiz";
 import QuizCompletionScreen from "@/components/quizzes/QuizCompletionScreen";
 
-type QuizType = "attachment" | "love_language" | "personality" | null;
+type QuizType = "attachment" | "love_language" | "personality" | "dating_style" | null;
 
 interface QuizInfo {
   id: QuizType;
@@ -21,6 +22,7 @@ interface QuizInfo {
   time: string;
   icon: React.ElementType;
   completedAtField: string;
+  forMaleUsers?: boolean;
 }
 
 const QUIZZES: QuizInfo[] = [
@@ -47,6 +49,15 @@ const QUIZZES: QuizInfo[] = [
     time: "6-7 min",
     icon: Brain,
     completedAtField: "quiz_personality_completed_at",
+  },
+  {
+    id: "dating_style",
+    title: "Dating Style Assessment",
+    description: "Scenario-based questions to understand your dating approach, blockers, and areas for growth.",
+    time: "4-5 min",
+    icon: Target,
+    completedAtField: "quiz_dating_style_completed_at",
+    forMaleUsers: true,
   },
 ];
 
@@ -116,7 +127,7 @@ const SelfDiscovery = () => {
       <QuizCompletionScreen
         onContinue={handleContinueToDevi}
         onTakeAnother={handleTakeAnotherQuiz}
-        quizType={completedQuizType || undefined}
+        quizType={completedQuizType as any}
         result={quizResult || undefined}
       />
     );
@@ -131,6 +142,9 @@ const SelfDiscovery = () => {
   }
   if (activeQuiz === "personality") {
     return <PersonalityQuiz onComplete={(result) => handleQuizComplete("personality", result)} onBack={() => setActiveQuiz(null)} />;
+  }
+  if (activeQuiz === "dating_style") {
+    return <DatingStyleQuiz onComplete={(result) => handleQuizComplete("dating_style", result)} onBack={() => setActiveQuiz(null)} />;
   }
 
   // Show quiz hub

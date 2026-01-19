@@ -167,6 +167,15 @@ export interface OnboardingData {
   // Zodiac Mode (Entertainment Only)
   zodiacSign?: string;
   zodiacModeEnabled?: boolean;
+  
+  // Male Dating Style Assessment
+  datingHonestyIntent?: string;
+  relationshipBlockers?: string[];
+  relationshipBlockerTimeline?: string;
+  attachmentSecurityLevel?: string;
+  relationshipMotivation?: string;
+  jealousyTriggers?: Record<string, any>;
+  datingSkillChallenges?: string[];
 }
 
 interface OnboardingContextType {
@@ -459,7 +468,15 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         devi_style: currentData.deviStyle,
         zodiac_sign: currentData.zodiacSign,
         zodiac_mode_enabled: currentData.zodiacModeEnabled,
-      }).eq("user_id", user.id);
+        // Male Dating Style Assessment fields
+        dating_honesty_intent: currentData.datingHonestyIntent,
+        relationship_blockers: currentData.relationshipBlockers,
+        relationship_blocker_timeline: currentData.relationshipBlockerTimeline,
+        attachment_security_level: currentData.attachmentSecurityLevel,
+        relationship_motivation: currentData.relationshipMotivation,
+        jealousy_triggers: currentData.jealousyTriggers,
+        dating_skill_challenges: currentData.datingSkillChallenges,
+      } as any).eq("user_id", user.id);
     } catch (error) {
       console.error("Error saving progress:", error);
     }
