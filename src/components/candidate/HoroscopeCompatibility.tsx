@@ -164,8 +164,8 @@ export function HoroscopeCompatibility({
                 {/* Signs Display */}
                 <div className="flex items-center justify-center gap-6">
                   {/* User Sign */}
-                  <div className="text-center flex flex-col items-center">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center shadow-sm border border-primary/20">
+                  <div className="text-center flex flex-col items-center animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center shadow-sm border border-primary/20 hover-scale">
                       <span className="text-2xl">{getZodiacSymbol(userZodiacSign)}</span>
                     </div>
                     <div className="mt-1.5 space-y-0.5">
@@ -175,15 +175,15 @@ export function HoroscopeCompatibility({
                   </div>
                   
                   {/* Connection Indicator */}
-                  <div className="flex flex-col items-center gap-1">
+                  <div className="flex flex-col items-center gap-1 animate-scale-in" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
                     <div className="w-8 h-[2px] bg-gradient-to-r from-primary/40 via-primary to-primary/40 rounded-full" />
                     <Sparkles className="w-4 h-4 text-primary animate-pulse" />
                     <div className="w-8 h-[2px] bg-gradient-to-r from-primary/40 via-primary to-primary/40 rounded-full" />
                   </div>
                   
                   {/* Candidate Sign */}
-                  <div className="text-center flex flex-col items-center">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center shadow-sm border border-primary/20">
+                  <div className="text-center flex flex-col items-center animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center shadow-sm border border-primary/20 hover-scale">
                       <span className="text-2xl">{getZodiacSymbol(candidateZodiacSign)}</span>
                     </div>
                     <div className="mt-1.5 space-y-0.5">
@@ -194,7 +194,7 @@ export function HoroscopeCompatibility({
                 </div>
 
                 {/* Compatibility Score */}
-                <div className="text-center space-y-2 pt-1">
+                <div className="text-center space-y-2 pt-1 animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}>
                   <div className="flex items-center justify-center gap-2.5">
                     <span className="text-2xl font-bold text-primary">
                       {compatibility.percentage}%
