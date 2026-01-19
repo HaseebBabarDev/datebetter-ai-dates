@@ -1,24 +1,79 @@
-import React, { useState, useRef, useCallback } from "react";
-import { Volume2, VolumeX, Loader2, Square } from "lucide-react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { Volume2, Pause, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 interface VoicePlayButtonProps {
   text: string;
   disabled?: boolean;
-  size?: "sm" | "default";
+  size?: "sm" | "default" | "lg";
+  variant?: "inline" | "bar";
+  className?: string;
 }
+
+// Animated sound wave bars component
+const SoundWave: React.FC<{ isPlaying: boolean; colorClass?: string }> = ({ 
+  isPlaying, 
+  colorClass = "bg-primary" 
+}) => {
+  return (
+    <div className="flex items-center gap-[3px] h-4">
+      {[1, 2, 3, 4, 5].map((bar) => (
+        <div
+          key={bar}
+          className={cn(
+            "w-[3px] rounded-full transition-all",
+            colorClass,
+            isPlaying ? "animate-pulse" : "h-1"
+          )}
+          style={{
+            height: isPlaying ? `${Math.random() * 12 + 4}px` : '4px',
+            animationDelay: `${bar * 0.1}s`,
+            animationDuration: `${0.4 + bar * 0.1}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+// Animated bars that update continuously while playing
+const LiveSoundWave: React.FC<{ colorClass?: string }> = ({ colorClass = "bg-primary" }) => {
+  const [heights, setHeights] = useState([4, 8, 6, 10, 5]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHeights([
+        Math.random() * 12 + 4,
+        Math.random() * 14 + 4,
+        Math.random() * 10 + 4,
+        Math.random() * 12 + 4,
+        Math.random() * 8 + 4,
+      ]);
+    }, 150);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-[3px] h-5">
+      {heights.map((height, idx) => (
+        <div
+          key={idx}
+          className={cn("w-[3px] rounded-full transition-all duration-150", colorClass)}
+          style={{ height: `${height}px` }}
+        />
+      ))}
+    </div>
+  );
+};
 
 export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
   text,
   disabled = false,
   size = "sm",
+  variant = "inline",
+  className,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -96,7 +151,7 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
   }, [text, isPlaying, stopAudio]);
 
   // Cleanup on unmount
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -105,33 +160,82 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
     };
   }, []);
 
-  const iconSize = size === "sm" ? "w-3.5 h-3.5" : "w-4 h-4";
-  const buttonSize = size === "sm" ? "h-7 w-7" : "h-8 w-8";
+  // Bar variant - full width bar with animation
+  if (variant === "bar") {
+    return (
+      <button
+        onClick={playAudio}
+        disabled={disabled || isLoading}
+        className={cn(
+          "w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl transition-all",
+          "bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20",
+          "border border-primary/20",
+          isPlaying && "from-primary/20 to-accent/20 shadow-md",
+          disabled && "opacity-50 cursor-not-allowed",
+          className
+        )}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="w-5 h-5 animate-spin text-primary" />
+            <span className="text-sm font-medium text-foreground">Generating audio...</span>
+          </>
+        ) : isPlaying ? (
+          <>
+            <div className="flex items-center gap-3">
+              <LiveSoundWave colorClass="bg-primary" />
+              <span className="text-sm font-medium text-foreground">Playing...</span>
+            </div>
+            <Pause className="w-5 h-5 text-primary ml-auto" />
+          </>
+        ) : (
+          <>
+            <Volume2 className="w-5 h-5 text-primary" />
+            <span className="text-sm font-medium text-foreground">Listen to this response</span>
+          </>
+        )}
+      </button>
+    );
+  }
+
+  // Inline variant - small button with icon
+  const sizeStyles = {
+    sm: { button: "h-8 px-2.5 gap-1.5", icon: "w-3.5 h-3.5", text: "text-xs" },
+    default: { button: "h-9 px-3 gap-2", icon: "w-4 h-4", text: "text-sm" },
+    lg: { button: "h-10 px-4 gap-2.5", icon: "w-5 h-5", text: "text-sm" },
+  };
+
+  const styles = sizeStyles[size];
 
   return (
-    <TooltipProvider delayDuration={300}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`${buttonSize} shrink-0 text-muted-foreground hover:text-foreground`}
-            onClick={playAudio}
-            disabled={disabled || isLoading}
-          >
-            {isLoading ? (
-              <Loader2 className={`${iconSize} animate-spin`} />
-            ) : isPlaying ? (
-              <Square className={iconSize} />
-            ) : (
-              <Volume2 className={iconSize} />
-            )}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="top">
-          <p className="text-xs">{isPlaying ? "Stop" : "Listen to this message"}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Button
+      variant={isPlaying ? "default" : "ghost"}
+      size="sm"
+      className={cn(
+        styles.button,
+        "rounded-full transition-all",
+        isPlaying && "bg-primary text-primary-foreground shadow-md",
+        !isPlaying && "text-muted-foreground hover:text-foreground hover:bg-muted",
+        className
+      )}
+      onClick={playAudio}
+      disabled={disabled || isLoading}
+    >
+      {isLoading ? (
+        <Loader2 className={cn(styles.icon, "animate-spin")} />
+      ) : isPlaying ? (
+        <>
+          <LiveSoundWave colorClass="bg-primary-foreground" />
+          <Pause className={styles.icon} />
+        </>
+      ) : (
+        <>
+          <Volume2 className={styles.icon} />
+          <span className={styles.text}>Listen</span>
+        </>
+      )}
+    </Button>
   );
 };
+
+export default VoicePlayButton;
