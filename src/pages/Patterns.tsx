@@ -41,6 +41,7 @@ import { toast } from "sonner";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 import { WinsStats, useDeviWins } from "@/components/devi/WinsStats";
 import { HealingProgressChart } from "@/components/devi/HealingProgressChart";
+import { SelfDiscoveryProfile } from "@/components/patterns/SelfDiscoveryProfile";
 
 // Duration parsing utilities
 const DURATION_ORDER = ['< 1 month', '1-3 months', '3-6 months', '6-12 months', '1-2 years', '2-5 years', '5+ years'];
@@ -999,104 +1000,7 @@ const Patterns = () => {
             <TabsContent value="insights" className="space-y-4">
               {/* Self-Discovery Quiz Results */}
               {quizResults?.hasAnyQuiz && (
-                <Card className="border-primary/30 bg-primary/5">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Sparkles className="w-5 h-5 text-primary" />
-                      Self-Discovery Profile
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <p className="text-xs text-muted-foreground">
-                      Your quiz results help D.E.V.I. personalize guidance
-                    </p>
-
-                    <div className="grid gap-3">
-                      {/* Attachment Style */}
-                      {quizResults.attachmentStyle && (
-                        <div className="p-3 rounded-lg bg-background border border-border/50">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Heart className="w-4 h-4 text-primary" />
-                            <span className="text-sm font-medium">Attachment Style</span>
-                          </div>
-                          <p className="text-base font-semibold capitalize text-primary">
-                            {quizResults.attachmentStyle.replace(/-/g, ' ').replace(/_/g, ' ')}
-                          </p>
-                          {quizResults.attachmentTendencies && (
-                            <div className="mt-2 flex flex-wrap gap-1.5">
-                              {Object.entries(quizResults.attachmentTendencies)
-                                .sort(([, a], [, b]) => b - a)
-                                .slice(0, 3)
-                                .map(([style, percentage]) => (
-                                  <Badge key={style} variant="secondary" className="text-xs capitalize">
-                                    {style}: {percentage}%
-                                  </Badge>
-                                ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Love Language */}
-                      {quizResults.primaryLoveLanguage && (
-                        <div className="p-3 rounded-lg bg-background border border-border/50">
-                          <div className="flex items-center gap-2 mb-2">
-                            <MessageSquare className="w-4 h-4 text-primary" />
-                            <span className="text-sm font-medium">Love Language</span>
-                          </div>
-                          <p className="text-base font-semibold text-primary">
-                            {quizResults.primaryLoveLanguage.replace(/_/g, ' ')}
-                          </p>
-                          {quizResults.secondaryLoveLanguage && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Secondary: {quizResults.secondaryLoveLanguage.replace(/_/g, ' ')}
-                            </p>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Personality Type */}
-                      {quizResults.personalityType && (
-                        <div className="p-3 rounded-lg bg-background border border-border/50">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Brain className="w-4 h-4 text-primary" />
-                            <span className="text-sm font-medium">Personality Type</span>
-                          </div>
-                          <p className="text-base font-semibold text-primary">
-                            {quizResults.personalityType.toUpperCase()}
-                          </p>
-                          {quizResults.personalityDimensions && (
-                            <div className="mt-2 grid grid-cols-4 gap-2">
-                              {Object.entries(quizResults.personalityDimensions).map(([dim, values]) => {
-                                const entries = Object.entries(values);
-                                const dominant = entries.reduce((a, b) => a[1] > b[1] ? a : b);
-                                return (
-                                  <div key={dim} className="text-center">
-                                    <div className="text-sm font-bold text-foreground">{dominant[0]}</div>
-                                    <div className="text-[10px] text-muted-foreground">{dominant[1]}%</div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* CTA to take more quizzes */}
-                    {(!quizResults.attachmentStyle || !quizResults.primaryLoveLanguage || !quizResults.personalityType) && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => navigate("/self-discovery")}
-                      >
-                        <Sparkles className="w-4 h-4 mr-2" />
-                        Complete More Quizzes
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
+                <SelfDiscoveryProfile quizResults={quizResults} />
               )}
 
               {/* CTA if no quizzes taken */}
