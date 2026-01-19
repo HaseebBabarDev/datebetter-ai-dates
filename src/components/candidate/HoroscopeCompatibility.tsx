@@ -5,39 +5,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Star, Sparkles, AlertCircle, Check, X, ChevronDown, ChevronUp, Pencil, Heart, MessageCircle, Calendar, Zap, Loader2 } from "lucide-react";
+import { Star, Sparkles, AlertCircle, Check, X, ChevronDown, ChevronUp, Pencil, Heart, MessageCircle, Calendar, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   getZodiacLabel,
   getZodiacSymbol,
   getHoroscopeCompatibility,
   getWeeklyPrediction,
-  ZODIAC_SIGNS,
 } from "@/lib/zodiacUtils";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
 
 interface HoroscopeCompatibilityProps {
   candidateId: string;
@@ -55,8 +37,6 @@ export function HoroscopeCompatibility({
   const [zodiacModeEnabled, setZodiacModeEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(true);
-  const [isEditingSign, setIsEditingSign] = useState(false);
-  const [savingSign, setSavingSign] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -80,29 +60,6 @@ export function HoroscopeCompatibility({
       console.error("Error loading user zodiac:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleUpdateUserSign = async (sign: string) => {
-    if (!user) return;
-    setSavingSign(true);
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ zodiac_sign: sign })
-        .eq("user_id", user.id);
-
-      if (error) throw error;
-
-      setUserZodiacSign(sign);
-      setIsEditingSign(false);
-      const signInfo = ZODIAC_SIGNS.find(z => z.value === sign);
-      toast.success(`Your sign is now ${signInfo?.label} ${signInfo?.symbol}`);
-    } catch (error) {
-      console.error("Error updating zodiac sign:", error);
-      toast.error("Failed to update zodiac sign");
-    } finally {
-      setSavingSign(false);
     }
   };
 
@@ -206,58 +163,16 @@ export function HoroscopeCompatibility({
               <div className="space-y-4">
                 {/* Signs Display */}
                 <div className="flex items-center justify-center gap-6">
-                  {/* User Sign - Clickable to Edit */}
-                  <Dialog open={isEditingSign} onOpenChange={setIsEditingSign}>
-                    <DialogTrigger asChild>
-                      <button className="text-center flex flex-col items-center animate-fade-in group cursor-pointer" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
-                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center shadow-sm border border-primary/20 hover-scale relative">
-                          <span className="text-2xl">{getZodiacSymbol(userZodiacSign)}</span>
-                          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-background border border-border flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Pencil className="w-2.5 h-2.5 text-muted-foreground" />
-                          </div>
-                        </div>
-                        <div className="mt-1.5 space-y-0.5">
-                          <div className="text-[10px] text-muted-foreground font-medium">You</div>
-                          <div className="text-xs font-semibold group-hover:text-primary transition-colors">{getZodiacLabel(userZodiacSign)}</div>
-                        </div>
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-sm">
-                      <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                          <Star className="w-5 h-5 text-primary" />
-                          Update Your Sign
-                        </DialogTitle>
-                        <DialogDescription>
-                          Select your zodiac sign to recalculate compatibility
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="grid grid-cols-3 gap-2 pt-2">
-                        {ZODIAC_SIGNS.map((sign) => (
-                          <button
-                            key={sign.value}
-                            onClick={() => handleUpdateUserSign(sign.value)}
-                            disabled={savingSign}
-                            className={cn(
-                              "flex flex-col items-center gap-1 p-3 rounded-xl border transition-all hover-scale",
-                              userZodiacSign === sign.value
-                                ? "bg-primary/10 border-primary/30"
-                                : "bg-muted/30 border-border/50 hover:bg-muted/50"
-                            )}
-                          >
-                            <span className="text-2xl">{sign.symbol}</span>
-                            <span className="text-[10px] font-medium">{sign.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                      {savingSign && (
-                        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Updating...
-                        </div>
-                      )}
-                    </DialogContent>
-                  </Dialog>
+                  {/* User Sign */}
+                  <div className="text-center flex flex-col items-center animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center shadow-sm border border-primary/20 hover-scale">
+                      <span className="text-2xl">{getZodiacSymbol(userZodiacSign)}</span>
+                    </div>
+                    <div className="mt-1.5 space-y-0.5">
+                      <div className="text-[10px] text-muted-foreground font-medium">You</div>
+                      <div className="text-xs font-semibold">{getZodiacLabel(userZodiacSign)}</div>
+                    </div>
+                  </div>
                   
                   {/* Connection Indicator */}
                   <div className="flex flex-col items-center gap-1 animate-scale-in" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
@@ -432,34 +347,17 @@ export function HoroscopeCompatibility({
               </div>
             )}
 
-            {/* Missing user zodiac sign - Inline Selector */}
+            {/* Missing user zodiac sign */}
             {!userZodiacSign && (
-              <div className="space-y-3 p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 animate-fade-in">
-                <div className="flex items-center gap-2 justify-center">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center border border-primary/20">
-                    <Star className="w-6 h-6 text-primary" />
-                  </div>
-                </div>
-                <div className="text-center space-y-1">
-                  <p className="text-sm font-medium">What's your zodiac sign?</p>
-                  <p className="text-xs text-muted-foreground">Select to see your compatibility</p>
-                </div>
-                <Select onValueChange={handleUpdateUserSign} disabled={savingSign}>
-                  <SelectTrigger className="w-full bg-background">
-                    <SelectValue placeholder={savingSign ? "Saving..." : "Select your sign..."} />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background">
-                    {ZODIAC_SIGNS.map((sign) => (
-                      <SelectItem key={sign.value} value={sign.value}>
-                        <span className="flex items-center gap-2">
-                          <span className="text-lg">{sign.symbol}</span>
-                          <span>{sign.label}</span>
-                          <span className="text-muted-foreground text-xs">({sign.dates})</span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="flex gap-2 p-3 rounded-lg bg-muted/50 border border-border/50 animate-fade-in">
+                <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  Set your zodiac sign in{" "}
+                  <Link to="/settings" className="text-primary font-medium hover:underline">
+                    Settings
+                  </Link>{" "}
+                  to see horoscope compatibility.
+                </p>
               </div>
             )}
 
