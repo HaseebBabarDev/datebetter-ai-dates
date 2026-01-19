@@ -927,6 +927,8 @@ export type Database = {
           updated_at: string | null
           user_id: string
           work_schedule_type: string | null
+          zodiac_mode_enabled: boolean | null
+          zodiac_sign: string | null
         }
         Insert: {
           abuse_history?: Json | null
@@ -1072,6 +1074,8 @@ export type Database = {
           updated_at?: string | null
           user_id: string
           work_schedule_type?: string | null
+          zodiac_mode_enabled?: boolean | null
+          zodiac_sign?: string | null
         }
         Update: {
           abuse_history?: Json | null
@@ -1217,6 +1221,8 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           work_schedule_type?: string | null
+          zodiac_mode_enabled?: boolean | null
+          zodiac_sign?: string | null
         }
         Relationships: []
       }
