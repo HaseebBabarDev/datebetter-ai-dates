@@ -203,9 +203,19 @@ export function HoroscopeCompatibility({
 
                 {/* Tabbed Content */}
                 <Tabs defaultValue="insights" className="w-full mt-2">
-                  <TabsList className="grid w-full grid-cols-2 bg-muted/60 rounded-lg p-1">
-                    <TabsTrigger value="insights" className="text-xs py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md">Insights</TabsTrigger>
-                    <TabsTrigger value="weekly" className="text-xs py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md">This Week</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2 h-9 bg-muted/60 rounded-lg p-0.5 gap-1">
+                    <TabsTrigger
+                      value="insights"
+                      className="text-[11px] py-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md"
+                    >
+                      Insights
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="weekly"
+                      className="text-[11px] py-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md"
+                    >
+                      This Week
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="insights" className="space-y-2 mt-4">
