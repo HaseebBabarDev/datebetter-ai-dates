@@ -792,6 +792,7 @@ export type Database = {
           attachment_style:
             | Database["public"]["Enums"]["attachment_style"]
             | null
+          attachment_tendencies: Json | null
           attachment_to_past: number | null
           attraction_importance: number | null
           avatar_url: string | null
@@ -885,6 +886,8 @@ export type Database = {
           past_relationship_traumas: Json | null
           pattern_recognition: Json | null
           personal_section_acknowledged: boolean | null
+          personality_dimensions: Json | null
+          personality_type: string | null
           political_dealbreakers: Json | null
           politics: Database["public"]["Enums"]["politics"] | null
           politics_importance: number | null
@@ -893,7 +896,11 @@ export type Database = {
           preferred_age_min: number | null
           preferred_education_level: string | null
           preferred_income_range: string | null
+          primary_love_language: string | null
           pronouns: Database["public"]["Enums"]["pronouns"] | null
+          quiz_attachment_completed_at: string | null
+          quiz_love_language_completed_at: string | null
+          quiz_personality_completed_at: string | null
           red_flag_sensitivity: number | null
           relationship_goal:
             | Database["public"]["Enums"]["relationship_goal"]
@@ -913,6 +920,7 @@ export type Database = {
           schedule_flexibility: string | null
           screen_name: string | null
           screen_name_set_at: string | null
+          secondary_love_language: string | null
           sexual_orientation:
             | Database["public"]["Enums"]["sexual_orientation"]
             | null
@@ -937,6 +945,7 @@ export type Database = {
           attachment_style?:
             | Database["public"]["Enums"]["attachment_style"]
             | null
+          attachment_tendencies?: Json | null
           attachment_to_past?: number | null
           attraction_importance?: number | null
           avatar_url?: string | null
@@ -1032,6 +1041,8 @@ export type Database = {
           past_relationship_traumas?: Json | null
           pattern_recognition?: Json | null
           personal_section_acknowledged?: boolean | null
+          personality_dimensions?: Json | null
+          personality_type?: string | null
           political_dealbreakers?: Json | null
           politics?: Database["public"]["Enums"]["politics"] | null
           politics_importance?: number | null
@@ -1040,7 +1051,11 @@ export type Database = {
           preferred_age_min?: number | null
           preferred_education_level?: string | null
           preferred_income_range?: string | null
+          primary_love_language?: string | null
           pronouns?: Database["public"]["Enums"]["pronouns"] | null
+          quiz_attachment_completed_at?: string | null
+          quiz_love_language_completed_at?: string | null
+          quiz_personality_completed_at?: string | null
           red_flag_sensitivity?: number | null
           relationship_goal?:
             | Database["public"]["Enums"]["relationship_goal"]
@@ -1060,6 +1075,7 @@ export type Database = {
           schedule_flexibility?: string | null
           screen_name?: string | null
           screen_name_set_at?: string | null
+          secondary_love_language?: string | null
           sexual_orientation?:
             | Database["public"]["Enums"]["sexual_orientation"]
             | null
@@ -1084,6 +1100,7 @@ export type Database = {
           attachment_style?:
             | Database["public"]["Enums"]["attachment_style"]
             | null
+          attachment_tendencies?: Json | null
           attachment_to_past?: number | null
           attraction_importance?: number | null
           avatar_url?: string | null
@@ -1179,6 +1196,8 @@ export type Database = {
           past_relationship_traumas?: Json | null
           pattern_recognition?: Json | null
           personal_section_acknowledged?: boolean | null
+          personality_dimensions?: Json | null
+          personality_type?: string | null
           political_dealbreakers?: Json | null
           politics?: Database["public"]["Enums"]["politics"] | null
           politics_importance?: number | null
@@ -1187,7 +1206,11 @@ export type Database = {
           preferred_age_min?: number | null
           preferred_education_level?: string | null
           preferred_income_range?: string | null
+          primary_love_language?: string | null
           pronouns?: Database["public"]["Enums"]["pronouns"] | null
+          quiz_attachment_completed_at?: string | null
+          quiz_love_language_completed_at?: string | null
+          quiz_personality_completed_at?: string | null
           red_flag_sensitivity?: number | null
           relationship_goal?:
             | Database["public"]["Enums"]["relationship_goal"]
@@ -1207,6 +1230,7 @@ export type Database = {
           schedule_flexibility?: string | null
           screen_name?: string | null
           screen_name_set_at?: string | null
+          secondary_love_language?: string | null
           sexual_orientation?:
             | Database["public"]["Enums"]["sexual_orientation"]
             | null

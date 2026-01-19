@@ -217,6 +217,27 @@ const buildSystemPrompt = (userProfile: any, candidateProfile: any, interactions
   // Build family background context
   const familyContext = userProfile ? buildFamilyContext(userProfile) : '';
   
+  // Build self-discovery quiz context
+  const quizContext = userProfile ? (() => {
+    const hasQuizData = userProfile.primary_love_language || userProfile.personality_type || userProfile.attachment_tendencies;
+    if (!hasQuizData) return '';
+    
+    return `
+SELF-DISCOVERY QUIZ RESULTS (use subtly to personalize guidance):
+- Primary Love Language: ${userProfile.primary_love_language || 'Not taken'}
+- Secondary Love Language: ${userProfile.secondary_love_language || 'None'}
+- Personality Type (MBTI): ${userProfile.personality_type || 'Not taken'}
+- Attachment Tendencies: ${userProfile.attachment_tendencies ? JSON.stringify(userProfile.attachment_tendencies) : 'Not taken'}
+
+USING QUIZ RESULTS (IMPORTANT):
+- Adjust your TONE based on their personality type (e.g., INTJs prefer direct analysis, ENFPs need encouragement)
+- Reference their love language when discussing relationship needs ("Since you value quality time...")
+- Use attachment tendencies to anticipate reactions and provide relevant guidance
+- NEVER mention quiz results clinically - weave insights naturally into advice
+- Frame observations as patterns or tendencies, not fixed labels
+`;
+  })() : '';
+
   const userContext = userProfile ? `
 USER PROFILE (the person you're coaching):
 - Name: ${userProfile.name || 'Not provided'}
@@ -240,6 +261,7 @@ USER PROFILE (the person you're coaching):
 - Relationship Trauma Notes: ${(userProfile as any).relationship_trauma_notes || 'None shared'}
 - Past Relationships with Issues: ${JSON.stringify((userProfile as any).past_relationship_traumas || [])}
 ${familyContext}
+${quizContext}
 
 HEALING JOURNEY STATUS:
 - Current Healing Score: ${(userProfile as any).healing_score ?? 'Not calculated'}%
