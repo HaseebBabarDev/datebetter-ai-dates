@@ -83,6 +83,8 @@ const QuickStartScreen = () => {
           income_range: data.incomeRange,
           education_level: data.educationLevel,
           attraction_importance: data.attractionImportance,
+          zodiac_sign: data.zodiacSign || null,
+          zodiac_mode_enabled: data.zodiacModeEnabled ?? false,
           onboarding_completed: true,
           onboarding_step: 23,
         })
