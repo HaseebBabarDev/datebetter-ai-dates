@@ -203,15 +203,15 @@ export function HoroscopeCompatibility({
 
                 {/* Tabbed Content */}
                 <Tabs defaultValue="insights" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 h-8 bg-muted/50 p-0.5">
-                    <TabsTrigger value="insights" className="text-[11px] data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md h-7">Insights</TabsTrigger>
-                    <TabsTrigger value="weekly" className="text-[11px] data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md h-7">This Week</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2 h-9 bg-muted/60 p-1 rounded-lg">
+                    <TabsTrigger value="insights" className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 rounded-md">Insights</TabsTrigger>
+                    <TabsTrigger value="weekly" className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 rounded-md">This Week</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="insights" className="space-y-2 mt-2">
+                  <TabsContent value="insights" className="space-y-2 mt-3">
                     {/* Strengths & Challenges */}
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1 p-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                      <div className="space-y-1 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                         <Label className="text-[10px] font-semibold text-emerald-600 flex items-center gap-1">
                           <Check className="w-3 h-3" />
                           Strengths
@@ -222,7 +222,7 @@ export function HoroscopeCompatibility({
                           ))}
                         </div>
                       </div>
-                      <div className="space-y-1 p-2 rounded-lg bg-orange-500/5 border border-orange-500/10">
+                      <div className="space-y-1 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
                         <Label className="text-[10px] font-semibold text-orange-600 flex items-center gap-1">
                           <X className="w-3 h-3" />
                           Challenges
@@ -236,7 +236,7 @@ export function HoroscopeCompatibility({
                     </div>
 
                     {/* Love Advice */}
-                    <div className="p-2 rounded-lg bg-primary/5 border border-primary/10">
+                    <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
                       <div className="flex items-start gap-2">
                         <Heart className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
                         <div>
@@ -247,7 +247,7 @@ export function HoroscopeCompatibility({
                     </div>
 
                     {/* Communication Tip */}
-                    <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                    <div className="p-2 rounded-lg bg-muted/50 border border-border/50">
                       <div className="flex items-start gap-2">
                         <MessageCircle className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
                         <div>
@@ -260,7 +260,7 @@ export function HoroscopeCompatibility({
                     </div>
 
                     {/* Date Idea */}
-                    <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                    <div className="p-2 rounded-lg bg-muted/50 border border-border/50">
                       <div className="flex items-start gap-2">
                         <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
                         <div>
@@ -271,11 +271,11 @@ export function HoroscopeCompatibility({
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="weekly" className="space-y-2 mt-2">
+                  <TabsContent value="weekly" className="space-y-2 mt-3">
                     {weeklyPrediction && (
                       <>
                         {/* Weekly Theme */}
-                        <div className="text-center p-3 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+                        <div className="text-center p-3 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/25">
                           <div className="text-[10px] text-muted-foreground">This Week's Theme</div>
                           <div className="text-base font-bold text-primary">{weeklyPrediction.theme}</div>
                           <div className="flex items-center justify-center gap-1 mt-1">
@@ -287,7 +287,7 @@ export function HoroscopeCompatibility({
                         </div>
 
                         {/* Weekly Advice */}
-                        <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                        <div className="p-2 rounded-lg bg-muted/50 border border-border/50">
                           <div className="flex items-start gap-2">
                             <Star className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
                             <div>
@@ -299,11 +299,11 @@ export function HoroscopeCompatibility({
 
                         {/* Focus Area & Lucky Day */}
                         <div className="grid grid-cols-2 gap-2">
-                          <div className="p-2 rounded-lg bg-muted/20 border border-border/20 text-center">
+                          <div className="p-2 rounded-lg bg-muted/50 border border-border/50 text-center">
                             <div className="text-[10px] text-muted-foreground">Focus Area</div>
                             <p className="text-[11px] font-medium">{weeklyPrediction.focusArea}</p>
                           </div>
-                          <div className="p-2 rounded-lg bg-primary/5 border border-primary/10 text-center">
+                          <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-center">
                             <div className="text-[10px] text-muted-foreground">Lucky Day</div>
                             <p className="text-[11px] font-medium text-primary">{weeklyPrediction.luckyDay}</p>
                           </div>
