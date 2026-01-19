@@ -45,6 +45,21 @@ export function HoroscopeCompatibility({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
+  const [canUpdateToday, setCanUpdateToday] = useState(true);
+  const [lastUpdateDate, setLastUpdateDate] = useState<string | null>(null);
+
+  const STORAGE_KEY = `zodiac_last_update_${candidateId}`;
+
+  // Check if user can update zodiac today
+  useEffect(() => {
+    const lastUpdate = localStorage.getItem(STORAGE_KEY);
+    if (lastUpdate) {
+      setLastUpdateDate(lastUpdate);
+      const today = new Date().toDateString();
+      const lastUpdateDay = new Date(lastUpdate).toDateString();
+      setCanUpdateToday(today !== lastUpdateDay);
+    }
+  }, [candidateId]);
 
   useEffect(() => {
     if (user) {
@@ -76,6 +91,12 @@ export function HoroscopeCompatibility({
   };
 
   const handlePartnerSignChange = async (sign: string) => {
+    // Check daily limit (allow first-time setting without limit)
+    if (partnerSign && !canUpdateToday) {
+      toast.error("You can only update zodiac sign once per day");
+      return;
+    }
+
     setSaving(true);
     try {
       const { error } = await supabase
@@ -85,6 +106,14 @@ export function HoroscopeCompatibility({
         .eq("user_id", user!.id);
 
       if (error) throw error;
+
+      // Record update time if this was a change (not initial setting)
+      if (partnerSign) {
+        const now = new Date().toISOString();
+        localStorage.setItem(STORAGE_KEY, now);
+        setLastUpdateDate(now);
+        setCanUpdateToday(false);
+      }
 
       setPartnerSign(sign);
       toast.success(`${candidateNickname}'s sign updated to ${getZodiacLabel(sign)}`);
@@ -254,15 +283,25 @@ export function HoroscopeCompatibility({
 
                 {/* Change Sign Option */}
                 <div className="pt-2 border-t">
-                  <Label className="text-xs text-muted-foreground mb-2 block">
-                    Update {candidateNickname}'s sign
-                  </Label>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-xs text-muted-foreground">
+                      Update {candidateNickname}'s sign
+                    </Label>
+                    {!canUpdateToday && (
+                      <span className="text-xs text-muted-foreground">
+                        (Available tomorrow)
+                      </span>
+                    )}
+                  </div>
                   <Select
                     value={partnerSign}
                     onValueChange={handlePartnerSignChange}
-                    disabled={saving}
+                    disabled={saving || !canUpdateToday}
                   >
-                    <SelectTrigger className="bg-background h-9 text-sm">
+                    <SelectTrigger className={cn(
+                      "bg-background h-9 text-sm",
+                      !canUpdateToday && "opacity-50 cursor-not-allowed"
+                    )}>
                       <SelectValue>
                         <span className="flex items-center gap-2">
                           <span>{getZodiacSymbol(partnerSign)}</span>
