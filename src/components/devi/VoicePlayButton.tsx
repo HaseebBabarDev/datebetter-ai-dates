@@ -8,37 +8,11 @@ interface VoicePlayButtonProps {
   text: string;
   disabled?: boolean;
   size?: "sm" | "default" | "lg";
-  variant?: "inline" | "bar";
+  variant?: "inline" | "bar" | "blob";
   className?: string;
 }
 
-// Animated sound wave bars component
-const SoundWave: React.FC<{ isPlaying: boolean; colorClass?: string }> = ({ 
-  isPlaying, 
-  colorClass = "bg-primary" 
-}) => {
-  return (
-    <div className="flex items-center gap-[3px] h-4">
-      {[1, 2, 3, 4, 5].map((bar) => (
-        <div
-          key={bar}
-          className={cn(
-            "w-[3px] rounded-full transition-all",
-            colorClass,
-            isPlaying ? "animate-pulse" : "h-1"
-          )}
-          style={{
-            height: isPlaying ? `${Math.random() * 12 + 4}px` : '4px',
-            animationDelay: `${bar * 0.1}s`,
-            animationDuration: `${0.4 + bar * 0.1}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// Animated bars that update continuously while playing
+// Animated sound wave bars that update continuously while playing
 const LiveSoundWave: React.FC<{ colorClass?: string }> = ({ colorClass = "bg-primary" }) => {
   const [heights, setHeights] = useState([4, 8, 6, 10, 5]);
 
@@ -65,6 +39,36 @@ const LiveSoundWave: React.FC<{ colorClass?: string }> = ({ colorClass = "bg-pri
         />
       ))}
     </div>
+  );
+};
+
+// Floating blob component
+const FloatingBlob: React.FC<{ isPlaying: boolean; onClick: () => void; isLoading: boolean }> = ({
+  isPlaying,
+  onClick,
+  isLoading,
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      disabled={isLoading}
+      className={cn(
+        "voice-blob mx-auto cursor-pointer transition-all hover:scale-105 active:scale-95",
+        isPlaying && "speaking"
+      )}
+      aria-label={isPlaying ? "Stop playing" : "Play message"}
+    >
+      <div className="voice-blob-inner" />
+      <div className="absolute inset-0 flex items-center justify-center z-10">
+        {isLoading ? (
+          <Loader2 className="w-6 h-6 text-primary-foreground animate-spin" />
+        ) : isPlaying ? (
+          <Pause className="w-6 h-6 text-primary-foreground drop-shadow-md" />
+        ) : (
+          <Volume2 className="w-6 h-6 text-primary-foreground drop-shadow-md" />
+        )}
+      </div>
+    </button>
   );
 };
 
@@ -159,6 +163,18 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
       }
     };
   }, []);
+
+  // Blob variant - floating animated blob
+  if (variant === "blob") {
+    return (
+      <div className={cn("flex flex-col items-center gap-3 py-4", className)}>
+        <FloatingBlob isPlaying={isPlaying} onClick={playAudio} isLoading={isLoading} />
+        <span className="text-sm text-muted-foreground">
+          {isLoading ? "Generating..." : isPlaying ? "Tap to pause" : "Tap to listen"}
+        </span>
+      </div>
+    );
+  }
 
   // Bar variant - full width bar with animation
   if (variant === "bar") {

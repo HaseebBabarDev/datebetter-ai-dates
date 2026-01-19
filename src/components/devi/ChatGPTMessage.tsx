@@ -255,9 +255,9 @@ export const ChatGPTMessage: React.FC<ChatGPTMessageProps> = ({
           {renderChatGPTContent(message.content)}
         </div>
         
-        {/* Voice playback bar at bottom of message */}
-        <div className="mt-4">
-          <VoicePlayButton text={message.content} variant="bar" />
+        {/* Voice playback - floating blob style */}
+        <div className="mt-6">
+          <VoicePlayButton text={message.content} variant="blob" />
         </div>
       </div>
       
