@@ -202,7 +202,7 @@ const LoveLanguageQuiz: React.FC<LoveLanguageQuizProps> = ({ onComplete, onBack 
       </div>
 
       {/* Continue Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border/50">
+      <div className="fixed bottom-0 left-0 right-0 p-4 pb-20 bg-background/95 backdrop-blur-sm border-t border-border/50">
         <Button
           onClick={handleNext}
           disabled={!selectedAnswer || saving}
