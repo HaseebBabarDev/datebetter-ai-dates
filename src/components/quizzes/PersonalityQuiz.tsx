@@ -6,7 +6,7 @@ import QuizLayout, { QuizOption } from "./QuizLayout";
 import { toast } from "sonner";
 
 interface PersonalityQuizProps {
-  onComplete: () => void;
+  onComplete: (result: string) => void;
   onBack: () => void;
 }
 
@@ -228,7 +228,7 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ onComplete, onBack })
         })
         .eq("user_id", user.id);
 
-      onComplete();
+      onComplete(type);
     } catch (error) {
       console.error("Error saving quiz results:", error);
       toast.error("Failed to save results. Please try again.");
