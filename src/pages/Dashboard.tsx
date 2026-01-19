@@ -58,6 +58,7 @@ import { PullToRefreshIndicator } from "@/components/PullToRefresh";
 import { WinsStats, useDeviWins } from "@/components/devi/WinsStats";
 import { WillingnessToPaySurvey } from "@/components/subscription/WillingnessToPaySurvey";
 import { HealingScoreCard } from "@/components/dashboard/HealingScoreCard";
+import { SelfDiscoveryCTA } from "@/components/dashboard/SelfDiscoveryCTA";
 import { AIDisclosure } from "@/components/AIDisclosure";
 
 type Profile = Tables<"profiles">;
@@ -925,6 +926,9 @@ const Dashboard = () => {
                 </Tooltip>
               </TooltipProvider>
             </div>
+
+            {/* Self-Discovery Quizzes CTA */}
+            <SelfDiscoveryCTA userId={user.id} variant="compact" />
 
             <UpgradeNudge />
             <FreeUpgradeBanner />
