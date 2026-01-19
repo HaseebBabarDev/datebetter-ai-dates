@@ -160,43 +160,54 @@ export function HoroscopeCompatibility({
 
             {/* Compatibility Display */}
             {userZodiacSign && candidateZodiacSign && compatibility && (
-              <div className="space-y-2.5">
+              <div className="space-y-4">
                 {/* Signs Display */}
-                <div className="flex items-center justify-center gap-4">
-                  <div className="text-center">
-                    <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-0.5 mx-auto border border-primary/20">
-                      <span className="text-lg">{getZodiacSymbol(userZodiacSign)}</span>
+                <div className="flex items-center justify-center gap-6">
+                  {/* User Sign */}
+                  <div className="text-center flex flex-col items-center">
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center shadow-sm border border-primary/20">
+                      <span className="text-2xl">{getZodiacSymbol(userZodiacSign)}</span>
                     </div>
-                    <div className="text-[9px] text-muted-foreground">You</div>
-                    <div className="text-[11px] font-semibold">{getZodiacLabel(userZodiacSign)}</div>
+                    <div className="mt-1.5 space-y-0.5">
+                      <div className="text-[10px] text-muted-foreground font-medium">You</div>
+                      <div className="text-xs font-semibold">{getZodiacLabel(userZodiacSign)}</div>
+                    </div>
                   </div>
                   
-                  <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" />
+                  {/* Connection Indicator */}
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="w-8 h-[2px] bg-gradient-to-r from-primary/40 via-primary to-primary/40 rounded-full" />
+                    <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                    <div className="w-8 h-[2px] bg-gradient-to-r from-primary/40 via-primary to-primary/40 rounded-full" />
+                  </div>
                   
-                  <div className="text-center">
-                    <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-0.5 mx-auto border border-primary/20">
-                      <span className="text-lg">{getZodiacSymbol(candidateZodiacSign)}</span>
+                  {/* Candidate Sign */}
+                  <div className="text-center flex flex-col items-center">
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center shadow-sm border border-primary/20">
+                      <span className="text-2xl">{getZodiacSymbol(candidateZodiacSign)}</span>
                     </div>
-                    <div className="text-[9px] text-muted-foreground">{candidateNickname}</div>
-                    <div className="text-[11px] font-semibold">{getZodiacLabel(candidateZodiacSign)}</div>
+                    <div className="mt-1.5 space-y-0.5">
+                      <div className="text-[10px] text-muted-foreground font-medium">{candidateNickname}</div>
+                      <div className="text-xs font-semibold">{getZodiacLabel(candidateZodiacSign)}</div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Compatibility Score */}
-                <div className="text-center space-y-1">
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="text-xl font-bold text-primary">
+                <div className="text-center space-y-2 pt-1">
+                  <div className="flex items-center justify-center gap-2.5">
+                    <span className="text-2xl font-bold text-primary">
                       {compatibility.percentage}%
                     </span>
-                    <Badge className={cn("text-[9px] font-medium px-1.5 py-0 h-5", getLevelColor(compatibility.level))}>
+                    <Badge className={cn("text-[10px] font-medium px-2 py-0.5", getLevelColor(compatibility.level))}>
                       {getLevelLabel(compatibility.level)}
                     </Badge>
                   </div>
                   <Progress
                     value={compatibility.percentage}
-                    className="h-1 max-w-[200px] mx-auto"
+                    className="h-1.5 max-w-[220px] mx-auto"
                   />
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground max-w-[240px] mx-auto">
                     {compatibility.description}
                   </p>
                 </div>
