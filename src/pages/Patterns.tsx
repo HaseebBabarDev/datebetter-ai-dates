@@ -165,12 +165,23 @@ interface PatternStats {
   traumaPatterns: TraumaPatternAnalysis;
 }
 
+interface QuizResults {
+  attachmentStyle: string | null;
+  attachmentTendencies: Record<string, number> | null;
+  primaryLoveLanguage: string | null;
+  secondaryLoveLanguage: string | null;
+  personalityType: string | null;
+  personalityDimensions: Record<string, { [key: string]: number }> | null;
+  hasAnyQuiz: boolean;
+}
+
 const Patterns = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<PatternStats | null>(null);
+  const [quizResults, setQuizResults] = useState<QuizResults | null>(null);
   
   // Get tab from URL params, default to "overview"
   const defaultTab = searchParams.get("tab") || "overview";
@@ -194,7 +205,7 @@ const Patterns = () => {
         supabase.from("no_contact_progress").select("*").eq("user_id", user!.id).limit(200),
         supabase.from("devi_conversations").select("id, candidate_id, created_at, updated_at").eq("user_id", user!.id),
         supabase.from("devi_messages").select("id, conversation_id, role").eq("user_id", user!.id).limit(1000),
-        supabase.from("profiles").select("past_relationship_traumas, relationship_trauma_notes").eq("user_id", user!.id).single(),
+        supabase.from("profiles").select("past_relationship_traumas, relationship_trauma_notes, attachment_style, attachment_tendencies, primary_love_language, secondary_love_language, personality_type, personality_dimensions").eq("user_id", user!.id).single(),
       ]);
 
       const candidates = candidatesRes.data || [];
@@ -541,6 +552,17 @@ const Patterns = () => {
         },
         candidateDeviStats,
         traumaPatterns,
+      });
+
+      // Set quiz results
+      setQuizResults({
+        attachmentStyle: profile?.attachment_style || null,
+        attachmentTendencies: profile?.attachment_tendencies as Record<string, number> | null,
+        primaryLoveLanguage: profile?.primary_love_language || null,
+        secondaryLoveLanguage: profile?.secondary_love_language || null,
+        personalityType: profile?.personality_type || null,
+        personalityDimensions: profile?.personality_dimensions as Record<string, { [key: string]: number }> | null,
+        hasAnyQuiz: !!(profile?.attachment_style || profile?.primary_love_language || profile?.personality_type),
       });
     } catch (error) {
       console.error("Error fetching pattern data:", error);
@@ -975,6 +997,130 @@ const Patterns = () => {
 
             {/* Insights Tab */}
             <TabsContent value="insights" className="space-y-4">
+              {/* Self-Discovery Quiz Results */}
+              {quizResults?.hasAnyQuiz && (
+                <Card className="border-primary/30 bg-primary/5">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-primary" />
+                      Self-Discovery Profile
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-xs text-muted-foreground">
+                      Your quiz results help D.E.V.I. personalize guidance
+                    </p>
+
+                    <div className="grid gap-3">
+                      {/* Attachment Style */}
+                      {quizResults.attachmentStyle && (
+                        <div className="p-3 rounded-lg bg-background border border-border/50">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Heart className="w-4 h-4 text-primary" />
+                            <span className="text-sm font-medium">Attachment Style</span>
+                          </div>
+                          <p className="text-base font-semibold capitalize text-primary">
+                            {quizResults.attachmentStyle.replace(/-/g, ' ').replace(/_/g, ' ')}
+                          </p>
+                          {quizResults.attachmentTendencies && (
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {Object.entries(quizResults.attachmentTendencies)
+                                .sort(([, a], [, b]) => b - a)
+                                .slice(0, 3)
+                                .map(([style, percentage]) => (
+                                  <Badge key={style} variant="secondary" className="text-xs capitalize">
+                                    {style}: {percentage}%
+                                  </Badge>
+                                ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Love Language */}
+                      {quizResults.primaryLoveLanguage && (
+                        <div className="p-3 rounded-lg bg-background border border-border/50">
+                          <div className="flex items-center gap-2 mb-2">
+                            <MessageSquare className="w-4 h-4 text-primary" />
+                            <span className="text-sm font-medium">Love Language</span>
+                          </div>
+                          <p className="text-base font-semibold text-primary">
+                            {quizResults.primaryLoveLanguage.replace(/_/g, ' ')}
+                          </p>
+                          {quizResults.secondaryLoveLanguage && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Secondary: {quizResults.secondaryLoveLanguage.replace(/_/g, ' ')}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Personality Type */}
+                      {quizResults.personalityType && (
+                        <div className="p-3 rounded-lg bg-background border border-border/50">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Brain className="w-4 h-4 text-primary" />
+                            <span className="text-sm font-medium">Personality Type</span>
+                          </div>
+                          <p className="text-base font-semibold text-primary">
+                            {quizResults.personalityType.toUpperCase()}
+                          </p>
+                          {quizResults.personalityDimensions && (
+                            <div className="mt-2 grid grid-cols-4 gap-2">
+                              {Object.entries(quizResults.personalityDimensions).map(([dim, values]) => {
+                                const entries = Object.entries(values);
+                                const dominant = entries.reduce((a, b) => a[1] > b[1] ? a : b);
+                                return (
+                                  <div key={dim} className="text-center">
+                                    <div className="text-sm font-bold text-foreground">{dominant[0]}</div>
+                                    <div className="text-[10px] text-muted-foreground">{dominant[1]}%</div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* CTA to take more quizzes */}
+                    {(!quizResults.attachmentStyle || !quizResults.primaryLoveLanguage || !quizResults.personalityType) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => navigate("/self-discovery")}
+                      >
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Complete More Quizzes
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* CTA if no quizzes taken */}
+              {!quizResults?.hasAnyQuiz && (
+                <Card 
+                  className="border-dashed border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => navigate("/self-discovery")}
+                >
+                  <CardContent className="py-8 text-center">
+                    <div className="w-12 h-12 mx-auto rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                      <Sparkles className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="font-medium mb-1">Discover Your Patterns</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Take quizzes to understand your attachment style, love language, and personality
+                    </p>
+                    <Button size="sm">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Start Quizzes
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Trauma Pattern Analysis */}
               {stats.traumaPatterns.hasTraumaData && (
                 <Card className="border-amber-500/30 bg-amber-500/5">
