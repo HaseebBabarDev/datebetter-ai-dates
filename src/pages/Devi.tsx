@@ -102,7 +102,16 @@ const getTargetPronoun = (profile: Profile | null): string => {
   return "they";
 };
 
-const getExampleQuestions = (profile: Profile | null): string[] => {
+// Mental health focused questions (when no candidate selected)
+const GENERAL_QUESTIONS = [
+  "How do I stop overthinking after dates?",
+  "Am I ready to start dating again?",
+  "Why do I keep attracting unavailable people?",
+  "Help me build my self-worth",
+];
+
+// Relationship focused questions (when candidate selected)
+const getRelationshipQuestions = (profile: Profile | null): string[] => {
   const pronoun = getTargetPronoun(profile);
   const verb = pronoun === "they" ? "aren't" : "isn't";
   
@@ -110,8 +119,16 @@ const getExampleQuestions = (profile: Profile | null): string[] => {
     `Why ${verb} ${pronoun} texting me back?`,
     "Is this a red flag?",
     "How do I bring up exclusivity?",
-    "Help me rewire my dating thoughts",
+    "Should I end things?",
   ];
+};
+
+// Get example questions based on context
+const getExampleQuestions = (profile: Profile | null, hasCandidate: boolean): string[] => {
+  if (hasCandidate) {
+    return getRelationshipQuestions(profile);
+  }
+  return GENERAL_QUESTIONS;
 };
 
 const QUICK_REPLIES = [
@@ -1679,7 +1696,7 @@ const Devi = () => {
                 <div className={chatLayout === "chatgpt" ? "pl-9 space-y-3" : "pl-10 space-y-2"}>
                   <p className={`text-muted-foreground ${chatLayout === "chatgpt" ? "text-sm" : "text-xs"} mb-2`}>Try asking:</p>
                   <div className="flex flex-wrap gap-2">
-                    {getExampleQuestions(userProfile).map((q, i) => (
+                    {getExampleQuestions(userProfile, !!selectedCandidate).map((q, i) => (
                       <button
                         key={i}
                         onClick={() => setInput(q)}
