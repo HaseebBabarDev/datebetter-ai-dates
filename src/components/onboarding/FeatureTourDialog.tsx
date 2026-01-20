@@ -31,8 +31,8 @@ const tourSlides = [
     icon: Sparkles,
     title: "This isn't a dating app",
     subtitle: "It's your AI dating assistant",
-    description: "D.E.V.I. helps you navigate the people you're already dating. Get personalized insights, track compatibility, and make smarter decisions.",
-    voiceScript: "Hey! Welcome to DateBetter. I'm Devi, your personal dating assistant. This isn't a dating app — I'm here to help you with the people you're already dating. Let me show you how I can help.",
+    description: "Whether you're newly dating or already in a relationship, Devi is here for you. Get personalized insights, track compatibility, and make smarter decisions at every stage.",
+    voiceScript: "Hey! Welcome to DateBetter. I'm Devi, your personal dating assistant. This isn't a dating app — whether you're just starting to date someone new or you're already in a relationship, I'm here to guide you. Let me show you how I can help.",
     color: "from-primary to-pink-500",
   },
   {
