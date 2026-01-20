@@ -606,22 +606,6 @@ const Auth = () => {
             </Button>
 
           </form>
-
-          {/* Divider */}
-          {!isForgotPassword && (
-            <div className="relative my-5">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border/50" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background/80 px-3 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-          )}
-
-
           {/* Quick PIN Sign In for returning users */}
           {!isSignUp && !isForgotPassword && savedEmail && (
             <div className="mt-4 pt-4 border-t border-border/30">
