@@ -257,6 +257,11 @@ export const ChatGPTMessage: React.FC<ChatGPTMessageProps> = ({
         <div className="text-foreground">
           {renderChatGPTContent(message.content)}
         </div>
+        
+        {/* Voice playback blob - centered under message */}
+        {!isLoading && message.content && (
+          <VoicePlayButton text={message.content} variant="blob" />
+        )}
       </div>
       
       {/* Quick replies */}
