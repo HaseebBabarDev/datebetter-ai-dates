@@ -7,6 +7,7 @@ import { Sparkles, Heart, MessageSquare, Brain, ChevronDown, ChevronRight } from
 import { useNavigate } from "react-router-dom";
 
 interface QuizResults {
+  datingStyleProfile: string | null;
   attachmentStyle: string | null;
   attachmentTendencies: Record<string, number> | null;
   primaryLoveLanguage: string | null;
@@ -328,7 +329,7 @@ export function SelfDiscoveryProfile({ quizResults }: SelfDiscoveryProfileProps)
         )}
 
         {/* CTA to take more quizzes */}
-        {(!quizResults.attachmentStyle || !quizResults.primaryLoveLanguage || !quizResults.personalityType) && (
+        {(!quizResults.datingStyleProfile || !quizResults.attachmentStyle || !quizResults.primaryLoveLanguage || !quizResults.personalityType) && (
           <Button
             variant="outline"
             size="sm"

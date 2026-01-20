@@ -167,6 +167,7 @@ interface PatternStats {
 }
 
 interface QuizResults {
+  datingStyleProfile: string | null;
   attachmentStyle: string | null;
   attachmentTendencies: Record<string, number> | null;
   primaryLoveLanguage: string | null;
@@ -206,7 +207,13 @@ const Patterns = () => {
         supabase.from("no_contact_progress").select("*").eq("user_id", user!.id).limit(200),
         supabase.from("devi_conversations").select("id, candidate_id, created_at, updated_at").eq("user_id", user!.id),
         supabase.from("devi_messages").select("id, conversation_id, role").eq("user_id", user!.id).limit(1000),
-        supabase.from("profiles").select("past_relationship_traumas, relationship_trauma_notes, attachment_style, attachment_tendencies, primary_love_language, secondary_love_language, personality_type, personality_dimensions").eq("user_id", user!.id).single(),
+        supabase
+          .from("profiles")
+          .select(
+            "past_relationship_traumas, relationship_trauma_notes, quiz_dating_style_completed_at, attachment_security_level, jealousy_triggers, attachment_style, attachment_tendencies, primary_love_language, secondary_love_language, personality_type, personality_dimensions"
+          )
+          .eq("user_id", user!.id)
+          .single(),
       ]);
 
       const candidates = candidatesRes.data || [];
@@ -557,13 +564,19 @@ const Patterns = () => {
 
       // Set quiz results
       setQuizResults({
+        datingStyleProfile: profile?.attachment_security_level || null,
         attachmentStyle: profile?.attachment_style || null,
         attachmentTendencies: profile?.attachment_tendencies as Record<string, number> | null,
         primaryLoveLanguage: profile?.primary_love_language || null,
         secondaryLoveLanguage: profile?.secondary_love_language || null,
         personalityType: profile?.personality_type || null,
         personalityDimensions: profile?.personality_dimensions as Record<string, { [key: string]: number }> | null,
-        hasAnyQuiz: !!(profile?.attachment_style || profile?.primary_love_language || profile?.personality_type),
+        hasAnyQuiz: !!(
+          profile?.attachment_security_level ||
+          profile?.attachment_style ||
+          profile?.primary_love_language ||
+          profile?.personality_type
+        ),
       });
     } catch (error) {
       console.error("Error fetching pattern data:", error);
@@ -1015,7 +1028,7 @@ const Patterns = () => {
                     </div>
                     <h3 className="font-medium mb-1">Discover Your Patterns</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Take quizzes to understand your attachment style, love language, and personality
+                      Take quizzes to understand your dating style, attachment style, love language, and personality
                     </p>
                     <Button size="sm">
                       <Sparkles className="w-4 h-4 mr-2" />
