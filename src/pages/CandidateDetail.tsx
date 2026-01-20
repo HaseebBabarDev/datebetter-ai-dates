@@ -530,10 +530,102 @@ const CandidateDetail = () => {
       
       if (error) throw error;
       
+      // Auto-add to past relationships in profile preferences
+      try {
+        // Calculate duration based on first_contact_date
+        let durationValue = "less_than_3_months";
+        if (candidate.first_contact_date) {
+          const startDate = new Date(candidate.first_contact_date);
+          const endDate = new Date();
+          const monthsDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12 + 
+            (endDate.getMonth() - startDate.getMonth());
+          
+          if (monthsDiff < 3) durationValue = "less_than_3_months";
+          else if (monthsDiff < 6) durationValue = "3_to_6_months";
+          else if (monthsDiff < 12) durationValue = "6_months_to_1_year";
+          else if (monthsDiff < 24) durationValue = "1_to_2_years";
+          else if (monthsDiff < 60) durationValue = "2_to_5_years";
+          else durationValue = "5_plus_years";
+        }
+
+        // Map end reason to past relationship format
+        const endReasonMap: Record<string, string> = {
+          "Lost interest": "i_ended",
+          "They ended it": "they_ended",
+          "Incompatible": "grew_apart",
+          "Red flags": "other",
+          "Met someone else": "i_ended",
+          "Not ready to date": "i_ended",
+          "Distance/logistics": "long_distance",
+          "Ghosted": "ghosted",
+          "Mutual decision": "mutual",
+          "Other": "other",
+          "No Contact": "other",
+        };
+        const mappedEndReason = endReason ? (endReasonMap[endReason] || "other") : "other";
+
+        // Detect traumas from red flags
+        const detectedTraumas: string[] = [];
+        const redFlags = Array.isArray(candidate.red_flags) ? candidate.red_flags as string[] : [];
+        const flagToTrauma: Record<string, string> = {
+          "Love bombing": "Love bombing then withdrawal",
+          "Gaslighting": "Gaslighting/manipulation",
+          "Controlling": "Controlling behavior",
+          "Manipulation": "Gaslighting/manipulation",
+          "Ghosting": "Ghosting/abandonment",
+          "Disrespectful": "Verbal abuse",
+          "Jealousy": "Jealousy/possessiveness",
+          "Dishonesty": "Dishonesty",
+          "Financial red flags": "Financial abuse",
+        };
+        redFlags.forEach(flag => {
+          const trauma = flagToTrauma[flag];
+          if (trauma && !detectedTraumas.includes(trauma)) {
+            detectedTraumas.push(trauma);
+          }
+        });
+        if (endReason === "Ghosted" && !detectedTraumas.includes("Ghosting/abandonment")) {
+          detectedTraumas.push("Ghosting/abandonment");
+        }
+
+        // Fetch current past relationships
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("past_relationship_traumas")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        const currentRelationships = Array.isArray(profileData?.past_relationship_traumas) 
+          ? profileData.past_relationship_traumas 
+          : [];
+
+        // Create new past relationship entry
+        const newRelationship = {
+          id: Date.now().toString(),
+          label: candidate.nickname,
+          duration: durationValue,
+          traumas: detectedTraumas.length > 0 ? detectedTraumas : ["None of these apply"],
+          notes: candidate.notes || "",
+          endReason: mappedEndReason,
+        };
+
+        // Update profile with new past relationship
+        await supabase
+          .from("profiles")
+          .update({
+            past_relationship_traumas: [...currentRelationships, newRelationship],
+          })
+          .eq("user_id", user.id);
+
+      } catch (profileError) {
+        console.error("Error adding to past relationships:", profileError);
+        // Don't fail the main operation if profile update fails
+      }
+      
       setCandidate({ ...candidate, ...updates });
       setShowEndRelationshipDialog(false);
       setEndReason("");
-      toast.success(`Relationship with ${candidate.nickname} ended. Take care of yourself. 💜`);
+      toast.success(`Relationship with ${candidate.nickname} ended and added to your history. Take care of yourself. 💜`);
     } catch (error) {
       console.error("Error ending relationship:", error);
       toast.error("Failed to end relationship");
