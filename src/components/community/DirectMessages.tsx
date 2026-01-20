@@ -50,8 +50,42 @@ export function DirectMessages({ currentScreenName, onUnreadCountChange }: Direc
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
+    if (!user) return;
     fetchConversations();
-  }, []);
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`direct-messages-realtime-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "direct_messages",
+          filter: `recipient_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newMsg = payload.new as Message;
+
+          // If the thread is open, append immediately for snappy UX
+          if (selectedConversation?.participant_id === newMsg.sender_id) {
+            setMessages((prev) => [...prev, newMsg]);
+            markMessagesAsRead(newMsg.sender_id);
+          }
+
+          // Always refresh conversation list + badges
+          fetchConversations();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, selectedConversation?.participant_id]);
 
   useEffect(() => {
     if (selectedConversation) {
@@ -197,7 +231,12 @@ export function DirectMessages({ currentScreenName, onUnreadCountChange }: Direc
   };
 
   const sendMessage = async () => {
-    if (!user || !selectedConversation || !newMessage.trim()) return;
+    if (!user) {
+      toast.error("Session expired — please sign in again");
+      return;
+    }
+
+    if (!selectedConversation || !newMessage.trim()) return;
 
     setSending(true);
 

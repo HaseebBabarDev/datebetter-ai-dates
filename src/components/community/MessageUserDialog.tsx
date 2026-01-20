@@ -30,7 +30,17 @@ export function MessageUserDialog({
   const [sending, setSending] = useState(false);
 
   const handleSend = async () => {
-    if (!user || !message.trim()) return;
+    if (!user) {
+      toast.error("Session expired — please sign in again");
+      return;
+    }
+
+    if (!recipientId) {
+      toast.error("Missing recipient — please try again");
+      return;
+    }
+
+    if (!message.trim()) return;
 
     setSending(true);
     try {
@@ -89,7 +99,7 @@ export function MessageUserDialog({
             </span>
             <Button
               onClick={handleSend}
-              disabled={!message.trim() || sending}
+              disabled={!user || !recipientId || !message.trim() || sending}
               className="gap-2"
             >
               {sending ? (

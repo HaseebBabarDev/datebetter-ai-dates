@@ -101,8 +101,8 @@ const Community = () => {
         setShowScreenNameSetup(true);
       }
 
-      if (!unreadRes.error && unreadRes.count) {
-        setUnreadCount(unreadRes.count);
+      if (!unreadRes.error) {
+        setUnreadCount(unreadRes.count ?? 0);
       }
     } catch (error) {
       console.error("Error fetching community data:", error);
@@ -121,8 +121,8 @@ const Community = () => {
         .eq("recipient_id", user.id)
         .eq("is_read", false);
 
-      if (!error && count) {
-        setUnreadCount(count);
+      if (!error) {
+        setUnreadCount(count ?? 0);
       }
     } catch (error) {
       console.error("Error fetching unread count:", error);
