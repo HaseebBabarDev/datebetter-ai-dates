@@ -6,8 +6,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// Use Sarah voice - warm, friendly female voice perfect for D.E.V.I.
-const DEFAULT_VOICE_ID = "EXAVITQu4vr4xnSDxMaL";
+// Voice options for D.E.V.I.
+const VOICE_IDS = {
+  mature: "EXAVITQu4vr4xnSDxMaL",  // Sarah - warm, friendly female voice
+  younger: "pFZP5JQG7iQjIQuC4Bku", // Lily - energetic, youthful voice
+};
+const DEFAULT_VOICE_ID = VOICE_IDS.mature;
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -16,7 +20,10 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voiceId } = await req.json();
+    const { text, voiceId, voicePreference } = await req.json();
+    
+    // Determine which voice to use: explicit voiceId > voicePreference > default
+    const selectedVoice = voiceId || VOICE_IDS[voicePreference as keyof typeof VOICE_IDS] || DEFAULT_VOICE_ID;
 
     if (!text || typeof text !== "string") {
       return new Response(
@@ -61,7 +68,7 @@ serve(async (req) => {
 
     // Use turbo model for lower latency
     const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId || DEFAULT_VOICE_ID}?output_format=mp3_44100_128`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoice}?output_format=mp3_44100_128`,
       {
         method: "POST",
         headers: {

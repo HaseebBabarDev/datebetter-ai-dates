@@ -870,6 +870,7 @@ export type Database = {
           dating_skill_challenges: Json | null
           dealbreakers: Json | null
           devi_style: string | null
+          devi_voice: string | null
           distance_preference: string | null
           education_level: string | null
           education_matters: boolean | null
@@ -1031,6 +1032,7 @@ export type Database = {
           dating_skill_challenges?: Json | null
           dealbreakers?: Json | null
           devi_style?: string | null
+          devi_voice?: string | null
           distance_preference?: string | null
           education_level?: string | null
           education_matters?: boolean | null
@@ -1194,6 +1196,7 @@ export type Database = {
           dating_skill_challenges?: Json | null
           dealbreakers?: Json | null
           devi_style?: string | null
+          devi_voice?: string | null
           distance_preference?: string | null
           education_level?: string | null
           education_matters?: boolean | null

@@ -3,6 +3,8 @@ import { Volume2, Pause, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface VoicePlayButtonProps {
   text: string;
@@ -10,6 +12,7 @@ interface VoicePlayButtonProps {
   size?: "sm" | "default" | "lg";
   variant?: "inline" | "icon" | "bar" | "blob";
   className?: string;
+  voicePreference?: "mature" | "younger";
 }
 
 // Animated sound wave bars that update continuously while playing
@@ -81,11 +84,33 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
   size = "sm",
   variant = "inline",
   className,
+  voicePreference,
 }) => {
+  const { user } = useAuth();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1);
+  const [userVoice, setUserVoice] = useState<string | undefined>(voicePreference);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Fetch user's voice preference if not explicitly provided
+  useEffect(() => {
+    if (voicePreference || !user) return;
+    
+    const fetchVoicePref = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("devi_voice")
+        .eq("user_id", user.id)
+        .single();
+      
+      if (data?.devi_voice) {
+        setUserVoice(data.devi_voice);
+      }
+    };
+    
+    fetchVoicePref();
+  }, [user, voicePreference]);
 
   const cycleSpeed = useCallback(() => {
     const currentIndex = SPEED_OPTIONS.indexOf(playbackSpeed);
@@ -130,7 +155,7 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ text, voicePreference: userVoice }),
         }
       );
 
@@ -167,7 +192,7 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [text, isPlaying, stopAudio, playbackSpeed]);
+  }, [text, isPlaying, stopAudio, playbackSpeed, userVoice]);
 
   // Cleanup on unmount
   useEffect(() => {
