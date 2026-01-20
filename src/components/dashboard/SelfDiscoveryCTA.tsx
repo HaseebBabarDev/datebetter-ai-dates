@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Heart, MessageCircle, Brain, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Sparkles, Heart, MessageCircle, Brain, ChevronRight, CheckCircle2, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -25,12 +25,13 @@ export const SelfDiscoveryCTA: React.FC<SelfDiscoveryCTAProps> = ({ userId, vari
     try {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("quiz_attachment_completed_at, quiz_love_language_completed_at, quiz_personality_completed_at")
+        .select("quiz_attachment_completed_at, quiz_love_language_completed_at, quiz_personality_completed_at, quiz_dating_style_completed_at")
         .eq("user_id", userId)
         .single();
 
       if (profile) {
         let count = 0;
+        if ((profile as any).quiz_dating_style_completed_at) count++;
         if ((profile as any).quiz_attachment_completed_at) count++;
         if ((profile as any).quiz_love_language_completed_at) count++;
         if ((profile as any).quiz_personality_completed_at) count++;
@@ -44,7 +45,7 @@ export const SelfDiscoveryCTA: React.FC<SelfDiscoveryCTAProps> = ({ userId, vari
   };
 
   // All quizzes completed - don't show CTA
-  if (completedCount >= 3) {
+  if (completedCount >= 4) {
     return null;
   }
 
@@ -63,7 +64,7 @@ export const SelfDiscoveryCTA: React.FC<SelfDiscoveryCTAProps> = ({ userId, vari
               <div>
                 <p className="font-medium text-sm">Take Self-Discovery Quizzes</p>
                 <p className="text-xs text-muted-foreground">
-                  {completedCount}/3 completed • Personalize D.E.V.I.
+                  {completedCount}/4 completed • Personalize D.E.V.I.
                 </p>
               </div>
             </div>
@@ -92,8 +93,9 @@ export const SelfDiscoveryCTA: React.FC<SelfDiscoveryCTAProps> = ({ userId, vari
         {/* Quiz Progress */}
         <div className="flex items-center gap-2 mb-4">
           {[
+            { icon: Target, label: "Dating" },
             { icon: Heart, label: "Attachment" },
-            { icon: MessageCircle, label: "Love Language" },
+            { icon: MessageCircle, label: "Love" },
             { icon: Brain, label: "Personality" },
           ].map((quiz, index) => {
             const Icon = quiz.icon;
