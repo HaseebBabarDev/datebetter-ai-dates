@@ -17,7 +17,8 @@ import {
   VolumeX,
   Loader2,
   Pause,
-  Play
+  Play,
+  ClipboardList
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -50,6 +51,14 @@ const tourSlides = [
     description: "Share text conversations and I'll help decode mixed signals, identify red flags, and suggest your next move.",
     voiceScript: "Got a confusing text? Send me a screenshot. I'll decode the mixed signals, spot the red flags, and tell you exactly what to say next.",
     color: "from-cyan-500 to-blue-500",
+  },
+  {
+    icon: ClipboardList,
+    title: "Take Personality Quizzes",
+    subtitle: "Understand yourself better",
+    description: "Discover your attachment style, love language, and personality type. The more I know about you, the better my advice gets.",
+    voiceScript: "I've got personality quizzes for you — attachment style, love language, and more. The more detail you enter about yourself in your profile and preferences, the more accurate and personalized my guidance becomes.",
+    color: "from-emerald-500 to-teal-500",
   },
   {
     icon: FileText,
