@@ -1068,15 +1068,97 @@ const Devi = () => {
 
       // Save the single assistant message after streaming completes
       if (convId && fullContent) {
-        // Remove the marker before saving
-        const cleanContent = fullContent.replace(/\[RECALCULATE_HEALING_SCORE\]/g, '').trim();
+        // Remove all markers before saving/displaying
+        let cleanContent = fullContent
+          .replace(/\[RECALCULATE_HEALING_SCORE\]/g, '')
+          .replace(/\[SET_HEALING_SCORE:\d+\]/g, '')
+          .replace(/\[SET_BOUNDARY_STRENGTH:\d+\]/g, '')
+          .replace(/\[SET_RED_FLAG_SENSITIVITY:\d+\]/g, '')
+          .replace(/\[SET_LOVE_BOMBING_SENSITIVITY:\d+\]/g, '')
+          .replace(/\[SET_OVER_EX_LEVEL:\d+\]/g, '')
+          .replace(/\[SET_ATTACHMENT_TO_PAST:\d+\]/g, '')
+          .trim();
+          
         await saveMessage(convId, {
           id: assistantMessageId,
           role: 'assistant',
           content: cleanContent,
         });
         
-        // Check if D.E.V.I. triggered a healing score recalculation
+        // Process profile update markers
+        const profileUpdates: Partial<Profile> = {};
+        let hasUpdates = false;
+        
+        // Parse direct value markers
+        const healingMatch = fullContent.match(/\[SET_HEALING_SCORE:(\d+)\]/);
+        if (healingMatch) {
+          const value = Math.min(100, Math.max(0, parseInt(healingMatch[1])));
+          profileUpdates.healing_score = value;
+          hasUpdates = true;
+          toast.success(`Healing score updated to ${value}%`);
+        }
+        
+        const boundaryMatch = fullContent.match(/\[SET_BOUNDARY_STRENGTH:(\d+)\]/);
+        if (boundaryMatch) {
+          const value = Math.min(10, Math.max(1, parseInt(boundaryMatch[1])));
+          profileUpdates.boundary_strength = value;
+          hasUpdates = true;
+          toast.success(`Boundary strength updated to ${value}/10`);
+        }
+        
+        const redFlagMatch = fullContent.match(/\[SET_RED_FLAG_SENSITIVITY:(\d+)\]/);
+        if (redFlagMatch) {
+          const value = Math.min(10, Math.max(1, parseInt(redFlagMatch[1])));
+          profileUpdates.red_flag_sensitivity = value;
+          hasUpdates = true;
+          toast.success(`Red flag sensitivity updated to ${value}/10`);
+        }
+        
+        const loveBombingMatch = fullContent.match(/\[SET_LOVE_BOMBING_SENSITIVITY:(\d+)\]/);
+        if (loveBombingMatch) {
+          const value = Math.min(10, Math.max(1, parseInt(loveBombingMatch[1])));
+          profileUpdates.love_bombing_sensitivity = value;
+          hasUpdates = true;
+          toast.success(`Love bombing sensitivity updated to ${value}/10`);
+        }
+        
+        const overExMatch = fullContent.match(/\[SET_OVER_EX_LEVEL:(\d+)\]/);
+        if (overExMatch) {
+          const value = Math.min(10, Math.max(1, parseInt(overExMatch[1])));
+          profileUpdates.over_ex_level = value;
+          hasUpdates = true;
+          toast.success(`Over ex level updated to ${value}/10`);
+        }
+        
+        const attachmentMatch = fullContent.match(/\[SET_ATTACHMENT_TO_PAST:(\d+)\]/);
+        if (attachmentMatch) {
+          const value = Math.min(10, Math.max(1, parseInt(attachmentMatch[1])));
+          profileUpdates.attachment_to_past = value;
+          hasUpdates = true;
+          toast.success(`Attachment to past updated to ${value}/10`);
+        }
+        
+        // Apply profile updates to database
+        if (hasUpdates && user) {
+          try {
+            const { error } = await supabase
+              .from('profiles')
+              .update(profileUpdates)
+              .eq('user_id', user.id);
+              
+            if (error) {
+              console.error('Failed to update profile:', error);
+              toast.error('Failed to save profile updates');
+            } else {
+              // Update local state
+              setUserProfile(prev => prev ? { ...prev, ...profileUpdates } : prev);
+            }
+          } catch (err) {
+            console.error('Profile update error:', err);
+          }
+        }
+        
+        // Check if D.E.V.I. triggered a healing score recalculation (legacy marker)
         if (fullContent.includes('[RECALCULATE_HEALING_SCORE]')) {
           console.log('Healing score recalculation triggered by D.E.V.I.');
           try {
@@ -1099,8 +1181,16 @@ const Devi = () => {
           }
         }
         
-        // Update the displayed content to remove the marker
-        if (fullContent.includes('[RECALCULATE_HEALING_SCORE]')) {
+        // Update the displayed content to remove all markers
+        const hasMarkers = fullContent.includes('[RECALCULATE_HEALING_SCORE]') ||
+          fullContent.includes('[SET_HEALING_SCORE:') ||
+          fullContent.includes('[SET_BOUNDARY_STRENGTH:') ||
+          fullContent.includes('[SET_RED_FLAG_SENSITIVITY:') ||
+          fullContent.includes('[SET_LOVE_BOMBING_SENSITIVITY:') ||
+          fullContent.includes('[SET_OVER_EX_LEVEL:') ||
+          fullContent.includes('[SET_ATTACHMENT_TO_PAST:');
+          
+        if (hasMarkers) {
           setMessages(prev => 
             prev.map(m => 
               m.id === assistantMessageId 
