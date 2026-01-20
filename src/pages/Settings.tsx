@@ -21,7 +21,6 @@ import { ZodiacModeSettings } from "@/components/settings/ZodiacModeSettings";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { ProfilePhotoUpload } from "@/components/settings/ProfilePhotoUpload";
-import { PinManagement } from "@/components/settings/PinManagement";
 import { Badge } from "@/components/ui/badge";
 import { PaymentSheet } from "@/components/subscription/PaymentSheet";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
@@ -729,8 +728,7 @@ const Settings = () => {
               </CardContent>
             </Card>
 
-            {/* PIN Management */}
-            <PinManagement userId={user.id} />
+            {/* Theme / Appearance */}
 
             {/* Theme / Appearance */}
             <ThemeSelector />
