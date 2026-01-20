@@ -87,15 +87,17 @@ const Notifications = () => {
       }
     });
 
-    // Oxytocin alerts (recent intimacy)
+    // Oxytocin alerts (recent intimacy) - deduplicated by candidate, one per 72hrs
     const intimateInteractions = interactions.filter((i) => i.interaction_type === "intimate");
+    const seenOxyCandidates = new Set<string>();
     intimateInteractions.forEach((interaction) => {
       const daysSince = differenceInDays(today, new Date(interaction.interaction_date || ""));
       if (daysSince <= 3) {
         const candidate = candidates.find((c) => c.id === interaction.candidate_id);
-        if (candidate) {
+        if (candidate && !seenOxyCandidates.has(candidate.id)) {
+          seenOxyCandidates.add(candidate.id);
           notifs.push({
-            id: `oxy-${interaction.id}`,
+            id: `oxy-${candidate.id}`,
             type: "oxytocin",
             icon: <Flame className="w-4 h-4" />,
             title: `Oxytocin active`,
