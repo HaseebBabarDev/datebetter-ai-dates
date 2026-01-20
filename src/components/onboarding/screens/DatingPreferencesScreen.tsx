@@ -17,13 +17,14 @@ const orientationOptions = [
   { value: "queer", label: "Queer" },
   { value: "asexual", label: "Asexual spectrum" },
   { value: "no_label", label: "Prefer not to label" },
+  { value: "self_describe", label: "Self-describe" },
 ];
 
 const interestedInOptions = [
   { value: "men", label: "Men" },
   { value: "women", label: "Women" },
   { value: "non_binary", label: "Non-binary people" },
-  { value: "all", label: "All genders" },
+  { value: "everyone", label: "Everyone" },
 ];
 
 const DatingPreferencesScreen = () => {
@@ -31,10 +32,10 @@ const DatingPreferencesScreen = () => {
 
   const toggleInterestedIn = (value: string) => {
     const current = data.interestedIn || [];
-    if (value === "all") {
-      updateData({ interestedIn: ["all"] });
+    if (value === "everyone") {
+      updateData({ interestedIn: ["everyone"] });
     } else {
-      const filtered = current.filter((v) => v !== "all");
+      const filtered = current.filter((v) => v !== "everyone");
       if (filtered.includes(value)) {
         updateData({ interestedIn: filtered.filter((v) => v !== value) });
       } else if (filtered.length < 2) {

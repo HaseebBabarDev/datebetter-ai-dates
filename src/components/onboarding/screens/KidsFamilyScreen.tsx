@@ -13,9 +13,10 @@ const kidsStatusOptions = [
 ];
 
 const kidsDesireOptions = [
-  { value: "definitely_yes", label: "Definitely yes" },
-  { value: "maybe", label: "Maybe/Open to it" },
-  { value: "definitely_no", label: "Definitely no" },
+  { value: "definitely_yes", label: "Definitely want kids" },
+  { value: "maybe", label: "Open to kids" },
+  { value: "definitely_no", label: "Don't want kids" },
+  { value: "already_have", label: "Already have kids, done" },
   { value: "unsure", label: "I don't know yet" },
 ];
 

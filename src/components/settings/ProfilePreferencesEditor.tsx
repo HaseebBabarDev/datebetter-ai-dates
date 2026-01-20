@@ -111,6 +111,7 @@ const PRONOUN_OPTIONS = [
 
 const ORIENTATION_OPTIONS = [
   { value: "straight", label: "Straight" },
+  { value: "gay", label: "Gay" },
   { value: "lesbian", label: "Lesbian" },
   { value: "bisexual", label: "Bisexual" },
   { value: "pansexual", label: "Pansexual" },
@@ -154,6 +155,7 @@ const KIDS_DESIRE_OPTIONS = [
   { value: "maybe", label: "Open to kids" },
   { value: "definitely_no", label: "Don't want kids" },
   { value: "already_have", label: "Already have kids, done" },
+  { value: "unsure", label: "I don't know yet" },
 ];
 
 const RELIGION_OPTIONS = [
@@ -175,6 +177,7 @@ const POLITICS_OPTIONS = [
   { value: "moderate", label: "Moderate" },
   { value: "conservative", label: "Conservative" },
   { value: "traditional", label: "Traditional" },
+  { value: "prefer_not_say", label: "Prefer not to say" },
 ];
 
 const SOCIAL_STYLE_OPTIONS = [
@@ -231,14 +234,11 @@ const CAREER_STAGE_OPTIONS = [
 ];
 
 const DISTANCE_PREFERENCE_OPTIONS = [
-  { value: "within_10_miles", label: "Within 10 miles" },
-  { value: "within_25_miles", label: "Within 25 miles" },
-  { value: "within_50_miles", label: "Within 50 miles" },
-  { value: "within_100_miles", label: "Within 100 miles" },
-  { value: "same_city", label: "Same city" },
-  { value: "same_state", label: "Same state/region" },
-  { value: "same_country", label: "Same country" },
-  { value: "anywhere", label: "Anywhere" },
+  { value: "5mi", label: "Same neighborhood (5 mi)" },
+  { value: "15mi", label: "Same city (15 mi)" },
+  { value: "50mi", label: "Same region (50 mi)" },
+  { value: "ldr", label: "Long distance OK" },
+  { value: "relocate", label: "Will relocate" },
 ];
 
 const LONGEST_RELATIONSHIP_OPTIONS = [
@@ -287,11 +287,11 @@ const COUNTRY_OPTIONS = [
 ];
 
 const DATING_MOTIVATION_OPTIONS = [
-  { value: "find_partner", label: "Find a life partner" },
-  { value: "explore", label: "Explore and have fun" },
+  { value: "love", label: "Love & Connection" },
+  { value: "social_status", label: "Social Status" },
+  { value: "financial_help", label: "Financial Security" },
   { value: "companionship", label: "Companionship" },
-  { value: "casual", label: "Casual dating" },
-  { value: "not_sure", label: "Not sure yet" },
+  { value: "adventure", label: "Adventure & Excitement" },
 ];
 
 const INTERESTED_IN_OPTIONS = [
@@ -302,7 +302,6 @@ const INTERESTED_IN_OPTIONS = [
 ];
 
 const INCOME_RANGE_OPTIONS = [
-  { value: "no_preference", label: "Prefer not to say" },
   { value: "under_25k", label: "Under $25k" },
   { value: "25k_50k", label: "$25k - $50k" },
   { value: "50k_75k", label: "$50k - $75k" },
@@ -310,6 +309,7 @@ const INCOME_RANGE_OPTIONS = [
   { value: "100k_150k", label: "$100k - $150k" },
   { value: "150k_250k", label: "$150k - $250k" },
   { value: "250k_plus", label: "$250k+" },
+  { value: "prefer_not_say", label: "Prefer not to say" },
 ];
 
 const HEIGHT_PREFERENCE_OPTIONS = [
@@ -323,9 +323,9 @@ const CHEMISTRY_OPTIONS = ["Humor", "Intelligence", "Confidence", "Kindness", "A
 
 const MENTAL_HEALTH_OPENNESS_OPTIONS = [
   { value: "very_open", label: "Very open to discussing" },
-  { value: "somewhat_open", label: "Somewhat open" },
-  { value: "private", label: "Prefer to keep private" },
-  { value: "in_therapy", label: "Currently in therapy" },
+  { value: "selective", label: "Share with trusted people" },
+  { value: "private", label: "Keep it private" },
+  { value: "still_learning", label: "Still learning about myself" },
 ];
 
 const INTIMACY_COMFORT_OPTIONS = [
@@ -343,14 +343,14 @@ const POST_INTIMACY_OPTIONS = [
 ];
 
 const NEURODIVERGENT_OPTIONS = [
-  { value: "no", label: "No" },
   { value: "yes", label: "Yes" },
-  { value: "exploring", label: "Exploring/unsure" },
+  { value: "exploring", label: "Exploring/Questioning" },
+  { value: "no", label: "No" },
   { value: "prefer_not_say", label: "Prefer not to say" },
 ];
 
 const NEURODIVERGENCE_TYPE_OPTIONS = [
-  "ADHD", "Autism/ASD", "Dyslexia", "Anxiety", "Depression", "OCD", "PTSD", "Bipolar", "Other"
+  "ADHD", "Autism/ASD", "Dyslexia", "Dyspraxia", "Dyscalculia", "OCD", "Tourette's", "Other"
 ];
 
 // Additional options from full onboarding
@@ -409,19 +409,23 @@ const LIVING_SITUATION_OPTIONS = [
 ];
 
 const WORK_SCHEDULE_OPTIONS = [
-  { value: "9_to_5", label: "9-5 / Traditional" },
-  { value: "flexible", label: "Flexible hours" },
-  { value: "shift_work", label: "Shift work" },
-  { value: "remote", label: "Remote / WFH" },
-  { value: "freelance", label: "Freelance / Variable" },
+  { value: "remote_flexible", label: "Remote / Flexible" },
+  { value: "hybrid", label: "Hybrid" },
+  { value: "office_9_5", label: "Office 9-5" },
+  { value: "shift_work", label: "Shift Work" },
+  { value: "on_call", label: "On-Call" },
+  { value: "overnight", label: "Night Shift" },
+  { value: "frequent_traveler", label: "Frequent Traveler" },
+  { value: "student", label: "Student" },
+  { value: "self_employed", label: "Self-Employed" },
 ];
 
 const ACTIVITY_LEVEL_OPTIONS = [
   { value: "sedentary", label: "Sedentary" },
   { value: "light", label: "Lightly active" },
   { value: "moderate", label: "Moderately active" },
+  { value: "active", label: "Active" },
   { value: "very_active", label: "Very active" },
-  { value: "athlete", label: "Athletic" },
 ];
 
 const CONFLICT_STYLE_OPTIONS = [

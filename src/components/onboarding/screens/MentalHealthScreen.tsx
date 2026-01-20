@@ -12,7 +12,7 @@ const neurodivergentOptions = [
   { value: "yes", label: "Yes" },
   { value: "exploring", label: "Exploring/Questioning" },
   { value: "no", label: "No" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
+  { value: "prefer_not_say", label: "Prefer not to say" },
 ];
 
 const neurodivergenceTypes = [
