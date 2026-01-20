@@ -237,14 +237,15 @@ const Dashboard = () => {
     }
   };
 
+  // Only start dashboard tour AFTER feature tour is complete (not showing)
   useEffect(() => {
-    if (!loading && profile && !hasCompletedTour("dashboard")) {
+    if (!loading && profile && !showTour && !hasCompletedTour("dashboard")) {
       const timer = setTimeout(() => {
         startTour("dashboard", DASHBOARD_TOUR_STEPS);
-      }, 1000);
+      }, 500);
       return () => clearTimeout(timer);
     }
-  }, [loading, profile, startTour, hasCompletedTour]);
+  }, [loading, profile, showTour, startTour, hasCompletedTour]);
 
   useEffect(() => {
     if (user) {
