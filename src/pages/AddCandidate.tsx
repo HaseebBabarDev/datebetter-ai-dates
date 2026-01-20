@@ -591,6 +591,16 @@ const THEIR_ISSUE_OPTIONS = [
           .eq("user_id", user.id);
 
         if (error) throw error;
+
+        // Auto-recalculate compatibility score after edit
+        try {
+          await supabase.functions.invoke("calculate-compatibility", {
+            body: { candidateId: editId },
+          });
+        } catch (e) {
+          console.error("Auto-rescore failed:", e);
+        }
+
         toast.success(`${nickname} updated!`);
         navigate(`/candidate/${editId}`);
       } else {
