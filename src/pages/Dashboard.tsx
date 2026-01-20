@@ -587,14 +587,16 @@ const Dashboard = () => {
     // Add notification items
     const today = new Date();
 
-    // Oxytocin alerts (recent intimacy)
+    // Oxytocin alerts (recent intimacy) - deduplicate by candidate
+    const oxytocinCandidateIds = new Set<string>();
     interactions
       .filter((i) => i.interaction_type === "intimate")
       .forEach((interaction) => {
         const daysSince = differenceInDays(today, new Date(interaction.interaction_date || ""));
         if (daysSince <= 3) {
           const candidate = candidates.find((c) => c.id === interaction.candidate_id);
-          if (candidate) {
+          if (candidate && !oxytocinCandidateIds.has(candidate.id)) {
+            oxytocinCandidateIds.add(candidate.id);
             activityItems.push({
               type: "notification",
               candidate,
