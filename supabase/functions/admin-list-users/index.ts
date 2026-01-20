@@ -56,14 +56,46 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get all users from auth.users via admin API
-    const { data: authUsers, error: usersError } = await supabaseClient.auth.admin.listUsers({
-      perPage: 1000,
-    });
+    // Get all users from auth.users via admin API with pagination
+    let allAuthUsers: Array<{
+      id: string;
+      email?: string;
+      user_metadata?: { name?: string };
+      created_at: string;
+      last_sign_in_at?: string | null;
+    }> = [];
+    
+    let page = 1;
+    const perPage = 1000;
+    let hasMore = true;
+    
+    while (hasMore) {
+      const { data: authUsers, error: usersError } = await supabaseClient.auth.admin.listUsers({
+        page,
+        perPage,
+      });
 
-    if (usersError) {
-      console.error("Error listing users:", usersError);
-      throw usersError;
+      if (usersError) {
+        console.error("Error listing users:", usersError);
+        throw usersError;
+      }
+      
+      if (authUsers?.users && authUsers.users.length > 0) {
+        allAuthUsers = [...allAuthUsers, ...authUsers.users];
+        hasMore = authUsers.users.length === perPage;
+        page++;
+      } else {
+        hasMore = false;
+      }
+    }
+    
+    console.log(`Fetched ${allAuthUsers.length} users from auth`);
+    
+    if (allAuthUsers.length === 0) {
+      return new Response(
+        JSON.stringify({ users: [] }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Get profiles for additional info
@@ -117,7 +149,22 @@ Deno.serve(async (req) => {
     const profilesMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
     // Combine auth users with profiles and usage data
-    const users = authUsers.users.map(authUser => {
+    interface UserData {
+      user_id: string;
+      email: string | undefined;
+      name: string | null;
+      created_at: string;
+      last_sign_in_at: string | null | undefined;
+      usage: {
+        candidates: number;
+        interactions: number;
+        ai_conversations: number;
+        ai_messages: number;
+        last_ai_message: string | null;
+      };
+    }
+    
+    const users: UserData[] = allAuthUsers.map(authUser => {
       const profile = profilesMap.get(authUser.id);
       return {
         user_id: authUser.id,
