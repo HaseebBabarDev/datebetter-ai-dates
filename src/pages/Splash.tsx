@@ -117,7 +117,7 @@ const Splash = () => {
   // Show loading state while checking auth
   if (authLoading || checkingOnboarding) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center bg-background">
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Loading...</p>
@@ -127,8 +127,8 @@ const Splash = () => {
   }
 
   return (
-    <div className="min-h-[100dvh] relative overflow-hidden">
-      {/* Video background */}
+    <div className="fixed inset-0 overflow-hidden">
+      {/* Video background - covers entire viewport including safe areas */}
       <video
         ref={videoRef}
         autoPlay
@@ -144,7 +144,6 @@ const Splash = () => {
         aria-hidden="true"
         tabIndex={-1}
         className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
-        style={{ objectFit: "cover" }}
       >
         <source
           src="/videos/splash-video.mp4"
@@ -152,7 +151,7 @@ const Splash = () => {
         />
       </video>
 
-      {/* Gradient overlays */}
+      {/* Gradient overlays - extend beyond safe areas */}
       <div className="absolute inset-0 z-10 bg-gradient-to-b from-background/40 via-background/30 to-background/90" />
       <div className="absolute inset-0 z-10 bg-gradient-to-t from-primary/10 via-transparent to-transparent" />
 
@@ -160,8 +159,8 @@ const Splash = () => {
       <div className="hidden sm:block absolute top-1/4 -right-20 z-10 w-64 h-64 rounded-full bg-primary/20 blur-3xl" />
       <div className="hidden sm:block absolute bottom-1/3 -left-20 z-10 w-48 h-48 rounded-full bg-secondary/20 blur-3xl" />
 
-      {/* Content */}
-      <div className="relative z-20 min-h-[100dvh] flex flex-col items-center justify-center px-5 py-6 pt-safe-top pb-safe-bottom">
+      {/* Content - scrollable within safe areas */}
+      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-5 py-6 overflow-y-auto" style={{ paddingTop: 'max(env(safe-area-inset-top), 1.5rem)', paddingBottom: 'max(env(safe-area-inset-bottom), 1.5rem)' }}>
         {/* Modern Logo */}
         <div className="mb-5">
           <ModernLogo />

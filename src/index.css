@@ -305,6 +305,30 @@ All colors MUST be HSL.
     margin-bottom: env(safe-area-inset-bottom);
   }
 
+  /* Full viewport height for iOS - accounts for browser chrome */
+  .h-screen-safe {
+    height: 100vh;
+    height: 100dvh;
+    height: -webkit-fill-available;
+  }
+
+  .min-h-screen-safe {
+    min-height: 100vh;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+  }
+
+  /* Ensures full coverage to edges on iOS */
+  .full-bleed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+  }
+
   /* iOS Touch Targets - minimum 44px but allow smaller icons */
   button:not(.icon-only), 
   a:not(.icon-only), 
