@@ -32,7 +32,7 @@ const tourSlides = [
     title: "This isn't a dating app",
     subtitle: "It's your AI dating assistant",
     description: "D.E.V.I. helps you navigate the people you're already dating. Get personalized insights, track compatibility, and make smarter decisions.",
-    voiceScript: "Hey! Welcome to DateBetter. I'm D.E.V.I., your personal dating assistant. This isn't a dating app — I'm here to help you with the people you're already dating. Let me show you how I can help.",
+    voiceScript: "Hey! Welcome to DateBetter. I'm Devi, your personal dating assistant. This isn't a dating app — I'm here to help you with the people you're already dating. Let me show you how I can help.",
     color: "from-primary to-pink-500",
   },
   {
@@ -46,8 +46,8 @@ const tourSlides = [
   {
     icon: Camera,
     title: "Upload Screenshots",
-    subtitle: "Let D.E.V.I. analyze conversations",
-    description: "Share text conversations and D.E.V.I. will help decode mixed signals, identify red flags, and suggest your next move.",
+    subtitle: "Let Devi analyze conversations",
+    description: "Share text conversations and I'll help decode mixed signals, identify red flags, and suggest your next move.",
     voiceScript: "Got a confusing text? Send me a screenshot. I'll decode the mixed signals, spot the red flags, and tell you exactly what to say next.",
     color: "from-cyan-500 to-blue-500",
   },
@@ -55,13 +55,13 @@ const tourSlides = [
     icon: FileText,
     title: "Log Every Detail",
     subtitle: "The more you share, the smarter I get",
-    description: "Track dates, interactions, and gut feelings. D.E.V.I. connects the dots to reveal patterns you might miss.",
+    description: "Track dates, interactions, and gut feelings. I connect the dots to reveal patterns you might miss.",
     voiceScript: "The more you tell me, the better I can help. Log your dates, how you felt, what they said. I'll connect the dots and show you patterns you might be missing.",
     color: "from-amber-500 to-orange-500",
   },
   {
     icon: Heart,
-    title: "Let me guide you",
+    title: "Let Devi guide you",
     subtitle: "From first date to committed relationship",
     description: "Get real-time alerts, compatibility scores, and personalized coaching as your relationship evolves.",
     voiceScript: "I'll be with you every step of the way — from first date jitters to something more serious. Real-time alerts, compatibility scores, and honest advice. Let's get started!",
@@ -226,7 +226,7 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && handleSkip()}>
-      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden border-0">
+      <DialogContent className="max-w-[320px] sm:max-w-xs p-0 gap-0 overflow-hidden border-0">
         {/* Top controls */}
         <div className="absolute top-4 left-4 right-4 z-10 flex justify-between">
           {/* Mute toggle */}
@@ -334,7 +334,7 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
                       />
                     ))}
                   </div>
-                  <span className="text-xs text-white/70 ml-2">D.E.V.I. speaking</span>
+                  <span className="text-xs text-white/70 ml-2">Devi speaking</span>
                 </motion.div>
               )}
             </div>
