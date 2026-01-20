@@ -38,7 +38,20 @@ import {
   Lightbulb,
   ChevronDown,
   ClipboardList,
+  Reply,
+  Send,
+  Loader2,
+  MessageSquare,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { CandidateSearch } from "@/components/dashboard/CandidateSearch";
 import { CandidateFilters, SortOption, StatusFilter } from "@/components/dashboard/CandidateFilters";
 import { QuickCandidateSelect } from "@/components/dashboard/QuickCandidateSelect";
@@ -71,6 +84,8 @@ type AdminMessage = {
   message: string;
   is_read: boolean;
   created_at: string;
+  sender_type?: string;
+  reply_to?: string | null;
 };
 
 type RecentActivityItem = {
@@ -122,6 +137,10 @@ const Dashboard = () => {
   const [showAllActivity, setShowAllActivity] = useState(false);
   const [showWtpSurvey, setShowWtpSurvey] = useState(false);
   const [surveyChecked, setSurveyChecked] = useState(false);
+  const [replyDialogOpen, setReplyDialogOpen] = useState(false);
+  const [replyingToMessage, setReplyingToMessage] = useState<AdminMessage | null>(null);
+  const [replyContent, setReplyContent] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
   
   // Devi wins tracking
   const { wins, refetch: refetchWins } = useDeviWins(user?.id);
@@ -183,7 +202,36 @@ const Dashboard = () => {
     }
   };
 
-  // Start tour for new users
+  const handleSendReply = async () => {
+    if (!replyingToMessage || !replyContent.trim() || !user) return;
+    
+    setSendingReply(true);
+    try {
+      const { error } = await supabase
+        .from("admin_messages")
+        .insert({
+          user_id: user.id,
+          sender_id: user.id,
+          sender_type: 'user',
+          title: `Re: ${replyingToMessage.title}`,
+          message: replyContent.trim(),
+          reply_to: replyingToMessage.id,
+        });
+      
+      if (error) throw error;
+      
+      toast.success("Reply sent to admin");
+      setReplyContent("");
+      setReplyDialogOpen(false);
+      setReplyingToMessage(null);
+    } catch (error) {
+      console.error("Error sending reply:", error);
+      toast.error("Failed to send reply");
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
   useEffect(() => {
     if (!loading && profile && !hasCompletedTour("dashboard")) {
       const timer = setTimeout(() => {
@@ -1347,6 +1395,9 @@ const Dashboard = () => {
                           );
                         }
                       };
+                      
+                      const isFromAdmin = item.adminMessage.sender_type !== 'user';
+                      
                       return (
                         <div
                           key={`admin-msg-${item.adminMessage.id}`}
@@ -1360,7 +1411,11 @@ const Dashboard = () => {
                           <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
                             item.adminMessage.is_read ? 'bg-muted' : 'bg-primary/20'
                           }`}>
-                            <Bell className={`w-4 h-4 ${item.adminMessage.is_read ? 'text-muted-foreground' : 'text-primary'}`} />
+                            {isFromAdmin ? (
+                              <Bell className={`w-4 h-4 ${item.adminMessage.is_read ? 'text-muted-foreground' : 'text-primary'}`} />
+                            ) : (
+                              <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                            )}
                           </div>
                           <div className="flex-1 text-left min-w-0">
                             <div className="flex items-center gap-2">
@@ -1370,9 +1425,27 @@ const Dashboard = () => {
                               {!item.adminMessage.is_read && (
                                 <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
                               )}
+                              {!isFromAdmin && (
+                                <span className="text-xs text-muted-foreground">(Your reply)</span>
+                              )}
                             </div>
                             <p className="text-xs text-muted-foreground truncate">{item.adminMessage.message}</p>
                           </div>
+                          {isFromAdmin && !item.adminMessage.reply_to && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setReplyingToMessage(item.adminMessage!);
+                                setReplyDialogOpen(true);
+                              }}
+                              className="shrink-0 text-xs h-7 px-2 text-muted-foreground hover:text-primary"
+                            >
+                              <Reply className="w-3 h-3 mr-1" />
+                              Reply
+                            </Button>
+                          )}
                         </div>
                       );
                     }
@@ -1497,6 +1570,44 @@ const Dashboard = () => {
         onOpenChange={setShowWtpSurvey}
         candidateCount={candidates.length}
       />
+
+      {/* Reply to Admin Dialog */}
+      <Dialog open={replyDialogOpen} onOpenChange={setReplyDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reply to Admin</DialogTitle>
+            <DialogDescription>
+              {replyingToMessage && (
+                <span className="block mt-2 p-2 bg-muted rounded text-sm">
+                  <strong>Original:</strong> {replyingToMessage.title}
+                  <br />
+                  {replyingToMessage.message}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Textarea
+              placeholder="Type your reply..."
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              rows={4}
+            />
+            <Button 
+              onClick={handleSendReply} 
+              disabled={sendingReply || !replyContent.trim()}
+              className="w-full"
+            >
+              {sendingReply ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : (
+                <Send className="w-4 h-4 mr-2" />
+              )}
+              Send Reply
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* AI Disclosure - fixed at bottom for App Store compliance */}
       <div className="fixed bottom-16 left-0 right-0 z-20 pb-safe-bottom bg-gradient-to-t from-background via-background/95 to-transparent pt-4 pb-2">

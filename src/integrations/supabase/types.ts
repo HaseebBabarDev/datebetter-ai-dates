@@ -20,7 +20,9 @@ export type Database = {
           id: string
           is_read: boolean
           message: string
+          reply_to: string | null
           sender_id: string
+          sender_type: string
           title: string
           user_id: string
         }
@@ -29,7 +31,9 @@ export type Database = {
           id?: string
           is_read?: boolean
           message: string
+          reply_to?: string | null
           sender_id: string
+          sender_type?: string
           title: string
           user_id: string
         }
@@ -38,11 +42,21 @@ export type Database = {
           id?: string
           is_read?: boolean
           message?: string
+          reply_to?: string | null
           sender_id?: string
+          sender_type?: string
           title?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "admin_messages_reply_to_fkey"
+            columns: ["reply_to"]
+            isOneToOne: false
+            referencedRelation: "admin_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       advice_tracking: {
         Row: {

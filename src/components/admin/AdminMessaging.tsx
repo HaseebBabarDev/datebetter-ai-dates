@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +16,12 @@ import {
   Trash2,
   Mail,
   MailOpen,
-  Users
+  Users,
+  Reply,
+  ChevronDown,
+  ChevronUp,
+  User,
+  Shield
 } from "lucide-react";
 import { 
   Dialog,
@@ -33,17 +38,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { format } from "date-fns";
 
 interface AdminMessage {
   id: string;
   user_id: string;
   sender_id: string;
+  sender_type: string;
   title: string;
   message: string;
   is_read: boolean;
   created_at: string;
+  reply_to: string | null;
   recipient_name?: string;
   recipient_email?: string;
+  replies?: AdminMessage[];
 }
 
 interface UserOption {
@@ -60,6 +69,9 @@ export function AdminMessaging() {
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [expandedThreads, setExpandedThreads] = useState<Set<string>>(new Set());
+  const [replyingTo, setReplyingTo] = useState<AdminMessage | null>(null);
+  const [replyContent, setReplyContent] = useState("");
   
   // New message form
   const [selectedUserId, setSelectedUserId] = useState<string>("");
@@ -79,23 +91,53 @@ export function AdminMessaging() {
         .from("admin_messages")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(100);
+        .limit(200);
 
       if (error) throw error;
 
       // Fetch recipient names
       const userIds = [...new Set(data?.map(m => m.user_id) || [])];
+      const senderIds = [...new Set(data?.map(m => m.sender_id) || [])];
+      const allIds = [...new Set([...userIds, ...senderIds])];
+      
       const { data: profiles } = await supabase
         .from("profiles")
         .select("user_id, name")
-        .in("user_id", userIds);
+        .in("user_id", allIds);
 
       const profileMap = new Map(profiles?.map(p => [p.user_id, p.name]) || []);
 
-      setMessages(data?.map(m => ({
+      // Organize messages into threads (parent messages and their replies)
+      const messagesWithNames = data?.map(m => ({
         ...m,
-        recipient_name: profileMap.get(m.user_id) || "Unknown"
-      })) || []);
+        recipient_name: profileMap.get(m.user_id) || "Unknown",
+        sender_name: profileMap.get(m.sender_id) || "Admin"
+      })) || [];
+
+      // Group replies under parent messages
+      const parentMessages: AdminMessage[] = [];
+      const repliesMap = new Map<string, AdminMessage[]>();
+
+      messagesWithNames.forEach(msg => {
+        if (msg.reply_to) {
+          const existing = repliesMap.get(msg.reply_to) || [];
+          existing.push(msg);
+          repliesMap.set(msg.reply_to, existing);
+        } else {
+          parentMessages.push(msg);
+        }
+      });
+
+      // Attach replies to parent messages
+      parentMessages.forEach(parent => {
+        parent.replies = repliesMap.get(parent.id) || [];
+        // Sort replies by date
+        parent.replies.sort((a, b) => 
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      });
+
+      setMessages(parentMessages);
     } catch (error) {
       console.error("Error fetching messages:", error);
       toast.error("Failed to load messages");
@@ -164,6 +206,7 @@ export function AdminMessaging() {
         const messagesToInsert = users.map(u => ({
           user_id: u.user_id,
           sender_id: user!.id,
+          sender_type: 'admin',
           title: messageTitle.trim(),
           message: messageContent.trim(),
         }));
@@ -181,6 +224,7 @@ export function AdminMessaging() {
           .insert({
             user_id: selectedUserId,
             sender_id: user!.id,
+            sender_type: 'admin',
             title: messageTitle.trim(),
             message: messageContent.trim(),
           });
@@ -204,8 +248,41 @@ export function AdminMessaging() {
     }
   };
 
+  const handleSendReply = async (parentMessage: AdminMessage) => {
+    if (!replyContent.trim()) {
+      toast.error("Please enter a reply message");
+      return;
+    }
+
+    setSending(true);
+    try {
+      const { error } = await supabase
+        .from("admin_messages")
+        .insert({
+          user_id: parentMessage.user_id,
+          sender_id: user!.id,
+          sender_type: 'admin',
+          title: `Re: ${parentMessage.title}`,
+          message: replyContent.trim(),
+          reply_to: parentMessage.id,
+        });
+
+      if (error) throw error;
+      
+      toast.success("Reply sent");
+      setReplyContent("");
+      setReplyingTo(null);
+      fetchMessages();
+    } catch (error) {
+      console.error("Error sending reply:", error);
+      toast.error("Failed to send reply");
+    } finally {
+      setSending(false);
+    }
+  };
+
   const handleDeleteMessage = async (messageId: string) => {
-    if (!confirm("Delete this message?")) return;
+    if (!confirm("Delete this message and all its replies?")) return;
 
     try {
       const { error } = await supabase
@@ -222,11 +299,31 @@ export function AdminMessaging() {
     }
   };
 
+  const toggleThread = (messageId: string) => {
+    setExpandedThreads(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(messageId)) {
+        newSet.delete(messageId);
+      } else {
+        newSet.add(messageId);
+      }
+      return newSet;
+    });
+  };
+
   const filteredMessages = messages.filter(m =>
     m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.recipient_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const getUnreadCount = (msg: AdminMessage) => {
+    let count = msg.is_read ? 0 : 1;
+    msg.replies?.forEach(r => {
+      if (!r.is_read) count++;
+    });
+    return count;
+  };
 
   return (
     <div className="space-y-6">
@@ -236,7 +333,7 @@ export function AdminMessaging() {
             <MessageSquare className="w-6 h-6" />
             In-App Messaging
           </h2>
-          <p className="text-muted-foreground">{messages.length} messages sent</p>
+          <p className="text-muted-foreground">{messages.length} conversations</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <div className="relative flex-1 sm:w-64">
@@ -351,50 +448,171 @@ export function AdminMessaging() {
             </div>
           ) : (
             <div className="divide-y">
-              {filteredMessages.map((msg) => (
-                <div 
-                  key={msg.id}
-                  className="p-4 hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                        msg.is_read ? 'bg-muted' : 'bg-primary/10'
-                      }`}>
-                        {msg.is_read ? (
-                          <MailOpen className="w-5 h-5 text-muted-foreground" />
-                        ) : (
-                          <Mail className="w-5 h-5 text-primary" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-medium text-sm truncate">{msg.title}</p>
-                          {!msg.is_read && (
-                            <Badge variant="secondary" className="bg-primary/10 text-primary text-xs">
-                              Unread
-                            </Badge>
-                          )}
+              {filteredMessages.map((msg) => {
+                const isExpanded = expandedThreads.has(msg.id);
+                const hasReplies = (msg.replies?.length || 0) > 0;
+                const unreadCount = getUnreadCount(msg);
+                
+                return (
+                  <div key={msg.id} className="transition-colors">
+                    {/* Main message */}
+                    <div 
+                      className={`p-4 hover:bg-muted/50 ${hasReplies ? 'cursor-pointer' : ''}`}
+                      onClick={() => hasReplies && toggleThread(msg.id)}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                            unreadCount > 0 ? 'bg-primary/10' : 'bg-muted'
+                          }`}>
+                            {unreadCount > 0 ? (
+                              <Mail className="w-5 h-5 text-primary" />
+                            ) : (
+                              <MailOpen className="w-5 h-5 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <p className="font-medium text-sm truncate">{msg.title}</p>
+                              {unreadCount > 0 && (
+                                <Badge variant="secondary" className="bg-primary/10 text-primary text-xs">
+                                  {unreadCount} unread
+                                </Badge>
+                              )}
+                              {hasReplies && (
+                                <Badge variant="outline" className="text-xs">
+                                  {msg.replies?.length} {msg.replies?.length === 1 ? 'reply' : 'replies'}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate mb-1">{msg.message}</p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <User className="w-3 h-3" />
+                                To: {msg.recipient_name}
+                              </span>
+                              <span>•</span>
+                              <span>{format(new Date(msg.created_at), "MMM d, h:mm a")}</span>
+                            </div>
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground truncate">{msg.message}</p>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                          <span>To: {msg.recipient_name}</span>
-                          <span>•</span>
-                          <span>{new Date(msg.created_at).toLocaleDateString()}</span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {hasReplies && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-muted-foreground"
+                            >
+                              {isExpanded ? (
+                                <ChevronUp className="w-4 h-4" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4" />
+                              )}
+                            </Button>
+                          )}
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setReplyingTo(replyingTo?.id === msg.id ? null : msg);
+                              setReplyContent("");
+                            }}
+                            className="text-muted-foreground hover:text-primary"
+                          >
+                            <Reply className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteMessage(msg.id);
+                            }}
+                            className="text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </div>
                     </div>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => handleDeleteMessage(msg.id)}
-                      className="shrink-0 text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+
+                    {/* Reply input */}
+                    {replyingTo?.id === msg.id && (
+                      <div className="px-4 pb-4 bg-muted/30">
+                        <div className="flex gap-2">
+                          <Textarea
+                            placeholder="Type your reply..."
+                            value={replyContent}
+                            onChange={(e) => setReplyContent(e.target.value)}
+                            rows={2}
+                            className="flex-1"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSendReply(msg);
+                            }}
+                            disabled={sending || !replyContent.trim()}
+                            size="sm"
+                          >
+                            {sending ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Send className="w-4 h-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Thread replies */}
+                    {isExpanded && hasReplies && (
+                      <div className="pl-12 pr-4 pb-4 space-y-3 bg-muted/20">
+                        {msg.replies?.map((reply) => (
+                          <div 
+                            key={reply.id}
+                            className={`p-3 rounded-lg ${
+                              reply.sender_type === 'user' 
+                                ? 'bg-blue-500/10 border border-blue-500/20' 
+                                : 'bg-card border border-border'
+                            }`}
+                          >
+                            <div className="flex items-start gap-2">
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                                reply.sender_type === 'user' ? 'bg-blue-500/20' : 'bg-primary/20'
+                              }`}>
+                                {reply.sender_type === 'user' ? (
+                                  <User className="w-3 h-3 text-blue-600" />
+                                ) : (
+                                  <Shield className="w-3 h-3 text-primary" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className={`text-xs font-medium ${
+                                    reply.sender_type === 'user' ? 'text-blue-600' : 'text-primary'
+                                  }`}>
+                                    {reply.sender_type === 'user' ? msg.recipient_name : 'Admin'}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {format(new Date(reply.created_at), "MMM d, h:mm a")}
+                                  </span>
+                                  {!reply.is_read && (
+                                    <span className="w-2 h-2 rounded-full bg-primary" />
+                                  )}
+                                </div>
+                                <p className="text-sm text-foreground">{reply.message}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
