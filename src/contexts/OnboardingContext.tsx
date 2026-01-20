@@ -163,6 +163,7 @@ export interface OnboardingData {
   
   // Screen 18: Devi Style
   deviStyle?: string;
+  deviVoice?: string;
   
   // Zodiac Mode (Entertainment Only)
   zodiacSign?: string;
@@ -328,6 +329,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
             behavioralMonitoring: profile.behavioral_monitoring || undefined,
             datingMotivation: (profile as any).dating_motivation as string[] || undefined,
             deviStyle: (profile as any).devi_style || undefined,
+            deviVoice: (profile as any).devi_voice || undefined,
             zodiacSign: profile.zodiac_sign || undefined,
             zodiacModeEnabled: profile.zodiac_mode_enabled ?? undefined,
             // Male Dating Style Assessment fields
@@ -476,6 +478,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         love_bombing_sensitivity: currentData.loveBombingSensitivity,
         behavioral_monitoring: currentData.behavioralMonitoring,
         devi_style: currentData.deviStyle,
+        devi_voice: currentData.deviVoice,
         zodiac_sign: currentData.zodiacSign,
         zodiac_mode_enabled: currentData.zodiacModeEnabled,
         // Male Dating Style Assessment fields
