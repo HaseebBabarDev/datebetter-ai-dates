@@ -1,11 +1,11 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Sparkles, ArrowRight, Heart, MessageCircle, Brain } from "lucide-react";
+import { CheckCircle2, Sparkles, ArrowRight, Heart, MessageCircle, Brain, Target } from "lucide-react";
 
 interface QuizCompletionScreenProps {
   onContinue: () => void;
   onTakeAnother: () => void;
-  quizType?: "attachment" | "love_language" | "personality";
+  quizType?: "attachment" | "love_language" | "personality" | "dating_style";
   result?: string;
 }
 
@@ -56,69 +56,40 @@ const LOVE_LANGUAGE_RESULTS: Record<string, { label: string; description: string
 };
 
 const PERSONALITY_RESULTS: Record<string, { label: string; description: string }> = {
-  INTJ: { 
-    label: "INTJ - The Architect", 
-    description: "Strategic and independent, you approach relationships with logic and long-term thinking. You value intellectual connection and seek partners who share your vision and depth." 
+  INTJ: { label: "INTJ - The Architect", description: "Strategic and independent, you approach relationships with logic and long-term thinking." },
+  INTP: { label: "INTP - The Logician", description: "Curious and analytical, you thrive on intellectual exploration in relationships." },
+  ENTJ: { label: "ENTJ - The Commander", description: "Confident and decisive, you bring direction and ambition to relationships." },
+  ENTP: { label: "ENTP - The Debater", description: "Innovative and energetic, you love exploring ideas and challenging conventions." },
+  INFJ: { label: "INFJ - The Advocate", description: "Insightful and idealistic, you seek deep, meaningful connections." },
+  INFP: { label: "INFP - The Mediator", description: "Creative and empathetic, you approach relationships with idealism and deep feeling." },
+  ENFJ: { label: "ENFJ - The Protagonist", description: "Charismatic and nurturing, you invest deeply in your relationships." },
+  ENFP: { label: "ENFP - The Campaigner", description: "Enthusiastic and imaginative, you bring creativity and passion to relationships." },
+  ISTJ: { label: "ISTJ - The Logistician", description: "Reliable and dedicated, you approach relationships with commitment and loyalty." },
+  ISFJ: { label: "ISFJ - The Defender", description: "Warm and conscientious, you show love through acts of care and devotion." },
+  ESTJ: { label: "ESTJ - The Executive", description: "Organized and direct, you bring structure and reliability to relationships." },
+  ESFJ: { label: "ESFJ - The Consul", description: "Caring and sociable, you thrive on creating harmony in relationships." },
+  ISTP: { label: "ISTP - The Virtuoso", description: "Practical and observant, you prefer showing love through actions rather than words." },
+  ISFP: { label: "ISFP - The Adventurer", description: "Gentle and sensitive, you express yourself through creativity and presence." },
+  ESTP: { label: "ESTP - The Entrepreneur", description: "Bold and energetic, you bring excitement and spontaneity to relationships." },
+  ESFP: { label: "ESFP - The Entertainer", description: "Spontaneous and fun-loving, you bring joy and energy to relationships." },
+};
+
+const DATING_STYLE_RESULTS: Record<string, { label: string; description: string }> = {
+  secure_honest: {
+    label: "The Grounded Dater",
+    description: "You're confident, honest, and secure. You date from a healthy place and can handle the ups and downs. D.E.V.I. will help you find the right match for your level.",
   },
-  INTP: { 
-    label: "INTP - The Logician", 
-    description: "Curious and analytical, you thrive on intellectual exploration. In relationships, you value mental stimulation and partners who appreciate your unique way of seeing the world." 
+  developing: {
+    label: "Work in Progress",
+    description: "You have good instincts but some areas to grow. D.E.V.I. will help you identify patterns and build better dating habits.",
   },
-  ENTJ: { 
-    label: "ENTJ - The Commander", 
-    description: "Confident and decisive, you bring direction and ambition to relationships. You value partners who can match your drive and engage in meaningful discussions." 
+  needs_growth: {
+    label: "Building Foundations",
+    description: "You're self-aware enough to want to improve. D.E.V.I. will focus on helping you develop confidence and healthier dating patterns.",
   },
-  ENTP: { 
-    label: "ENTP - The Debater", 
-    description: "Innovative and energetic, you love exploring ideas and challenging conventions. You're drawn to partners who can keep up with your wit and embrace spontaneity." 
-  },
-  INFJ: { 
-    label: "INFJ - The Advocate", 
-    description: "Insightful and idealistic, you seek deep, meaningful connections. You value authenticity and are drawn to partners who share your values and emotional depth." 
-  },
-  INFP: { 
-    label: "INFP - The Mediator", 
-    description: "Creative and empathetic, you approach relationships with idealism and deep feeling. You seek partners who understand your inner world and share your values." 
-  },
-  ENFJ: { 
-    label: "ENFJ - The Protagonist", 
-    description: "Charismatic and nurturing, you invest deeply in your relationships. You're attuned to others' needs and seek partners who appreciate your warmth and vision." 
-  },
-  ENFP: { 
-    label: "ENFP - The Campaigner", 
-    description: "Enthusiastic and imaginative, you bring creativity and passion to relationships. You value authentic connection and partners who embrace your free-spirited nature." 
-  },
-  ISTJ: { 
-    label: "ISTJ - The Logistician", 
-    description: "Reliable and dedicated, you approach relationships with commitment and loyalty. You value tradition, stability, and partners who share your sense of responsibility." 
-  },
-  ISFJ: { 
-    label: "ISFJ - The Defender", 
-    description: "Warm and conscientious, you show love through acts of care and devotion. You value security and seek partners who appreciate your nurturing nature." 
-  },
-  ESTJ: { 
-    label: "ESTJ - The Executive", 
-    description: "Organized and direct, you bring structure and reliability to relationships. You value clear communication and partners who share your practical approach to life." 
-  },
-  ESFJ: { 
-    label: "ESFJ - The Consul", 
-    description: "Caring and sociable, you thrive on creating harmony in relationships. You're attentive to others' needs and value partners who appreciate your warmth and dedication." 
-  },
-  ISTP: { 
-    label: "ISTP - The Virtuoso", 
-    description: "Practical and observant, you prefer showing love through actions rather than words. You value independence and partners who respect your need for space." 
-  },
-  ISFP: { 
-    label: "ISFP - The Adventurer", 
-    description: "Gentle and sensitive, you express yourself through creativity and presence. You value authenticity and seek partners who appreciate your quiet depth." 
-  },
-  ESTP: { 
-    label: "ESTP - The Entrepreneur", 
-    description: "Bold and energetic, you bring excitement and spontaneity to relationships. You live in the moment and value partners who can keep up with your adventurous spirit." 
-  },
-  ESFP: { 
-    label: "ESFP - The Entertainer", 
-    description: "Spontaneous and fun-loving, you bring joy and energy to relationships. You value experiences and partners who embrace life's pleasures with enthusiasm." 
+  red_flags: {
+    label: "Time for Self-Reflection",
+    description: "Some patterns might be holding you back. D.E.V.I. will gently challenge you to grow—because you deserve better relationships too.",
   },
 };
 
@@ -126,6 +97,7 @@ const QUIZ_TITLES: Record<string, { title: string; icon: React.ElementType }> = 
   attachment: { title: "Attachment Style", icon: Heart },
   love_language: { title: "Love Language", icon: MessageCircle },
   personality: { title: "Personality Type", icon: Brain },
+  dating_style: { title: "Dating Style", icon: Target },
 };
 
 const QuizCompletionScreen: React.FC<QuizCompletionScreenProps> = ({
@@ -151,6 +123,9 @@ const QuizCompletionScreen: React.FC<QuizCompletionScreenProps> = ({
     }
     if (quizType === "personality") {
       return PERSONALITY_RESULTS[result.toUpperCase()];
+    }
+    if (quizType === "dating_style") {
+      return DATING_STYLE_RESULTS[normalizedResult];
     }
     return null;
   };

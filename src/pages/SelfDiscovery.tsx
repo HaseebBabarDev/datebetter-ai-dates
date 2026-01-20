@@ -22,10 +22,17 @@ interface QuizInfo {
   time: string;
   icon: React.ElementType;
   completedAtField: string;
-  forMaleUsers?: boolean;
 }
 
 const QUIZZES: QuizInfo[] = [
+  {
+    id: "dating_style",
+    title: "Dating Style Assessment",
+    description: "Scenario-based questions to understand your dating approach, patterns, and areas for growth.",
+    time: "4-5 min",
+    icon: Target,
+    completedAtField: "quiz_dating_style_completed_at",
+  },
   {
     id: "attachment",
     title: "Attachment Style",
@@ -50,15 +57,6 @@ const QUIZZES: QuizInfo[] = [
     icon: Brain,
     completedAtField: "quiz_personality_completed_at",
   },
-  {
-    id: "dating_style",
-    title: "Dating Style Assessment",
-    description: "Scenario-based questions to understand your dating approach, blockers, and areas for growth.",
-    time: "4-5 min",
-    icon: Target,
-    completedAtField: "quiz_dating_style_completed_at",
-    forMaleUsers: true,
-  },
 ];
 
 const SelfDiscovery = () => {
@@ -70,7 +68,6 @@ const SelfDiscovery = () => {
   const [completedQuizType, setCompletedQuizType] = useState<QuizType>(null);
   const [quizResult, setQuizResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isMaleUser, setIsMaleUser] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -86,7 +83,7 @@ const SelfDiscovery = () => {
     try {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("quiz_attachment_completed_at, quiz_love_language_completed_at, quiz_personality_completed_at, quiz_dating_style_completed_at, gender_identity")
+        .select("quiz_attachment_completed_at, quiz_love_language_completed_at, quiz_personality_completed_at, quiz_dating_style_completed_at")
         .eq("user_id", user.id)
         .single();
 
@@ -97,10 +94,6 @@ const SelfDiscovery = () => {
         if ((profile as any).quiz_personality_completed_at) completed.add("personality");
         if ((profile as any).quiz_dating_style_completed_at) completed.add("dating_style");
         setCompletedQuizzes(completed);
-        
-        // Check if user is male
-        const gender = profile.gender_identity;
-        setIsMaleUser(gender === "man_cis" || gender === "man_trans");
       }
     } catch (error) {
       console.error("Error loading quiz status:", error);
@@ -169,7 +162,7 @@ const SelfDiscovery = () => {
 
       {/* Quiz Cards */}
       <div className="px-4 space-y-4">
-        {QUIZZES.filter(quiz => !quiz.forMaleUsers || isMaleUser).map((quiz) => {
+        {QUIZZES.map((quiz) => {
           const Icon = quiz.icon;
           const isCompleted = completedQuizzes.has(quiz.id);
 

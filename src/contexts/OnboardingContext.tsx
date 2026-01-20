@@ -199,10 +199,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(true);
   
-  // Dynamic total steps: 25 base + 1 if male hetero (DatingStyleScreen)
-  const isMaleHetero = (data.genderIdentity === 'man_cis' || data.genderIdentity === 'man_trans') && 
-                       data.interestedIn?.includes('women');
-  const totalSteps = isMaleHetero ? 26 : 25; // 0-24 base, or 0-25 with DatingStyleScreen
+  // Total steps: 26 (0-25) - DatingStyleScreen included for all users
+  const totalSteps = 26;
 
   // Keep ref in sync with state
   useEffect(() => {

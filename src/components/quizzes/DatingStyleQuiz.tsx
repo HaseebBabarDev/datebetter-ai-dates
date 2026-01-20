@@ -26,22 +26,22 @@ const QUESTIONS: Question[] = [
   {
     id: "honesty_1",
     category: "honesty",
-    text: "She asks 'What are you looking for?' You...",
+    text: "They ask 'What are you looking for?' You...",
     options: [
-      { text: "Tell her exactly what I want, even if it's not what she wants to hear", score: 10 },
+      { text: "Tell them exactly what I want, even if it's not what they want to hear", score: 10 },
       { text: "Give a vague answer to keep my options open", score: 4 },
-      { text: "Say what I think she wants to hear", score: 2, flag: "deceptive" },
+      { text: "Say what I think they want to hear", score: 2, flag: "deceptive" },
       { text: "Deflect with humor and change the subject", score: 3 },
     ],
   },
   {
     id: "honesty_2",
     category: "honesty",
-    text: "You're talking to multiple women at once. If one asks, you...",
+    text: "You're talking to multiple people at once. If one asks, you...",
     options: [
       { text: "I'm honest—we're not exclusive yet", score: 10 },
       { text: "Say I'm 'getting to know people' without details", score: 6 },
-      { text: "Tell her she's the only one even if she isn't", score: 1, flag: "deceptive" },
+      { text: "Tell them they're the only one even if they aren't", score: 1, flag: "deceptive" },
       { text: "Avoid the question entirely", score: 3 },
     ],
   },
@@ -49,21 +49,21 @@ const QUESTIONS: Question[] = [
   {
     id: "security_1",
     category: "security",
-    text: "She hasn't texted back in 6 hours. You feel...",
+    text: "They haven't texted back in 6 hours. You feel...",
     options: [
-      { text: "Fine—she's probably busy", score: 10 },
+      { text: "Fine—they're probably busy", score: 10 },
       { text: "A little anxious but I distract myself", score: 7 },
       { text: "Checking my phone constantly, wondering what I did wrong", score: 3, flag: "anxious" },
-      { text: "Annoyed—I'd never do that to her", score: 4, flag: "entitled" },
+      { text: "Annoyed—I'd never do that to them", score: 4, flag: "entitled" },
     ],
   },
   {
     id: "security_2",
     category: "security",
-    text: "She mentions a close male friend. Your first thought is...",
+    text: "They mention a close friend of the gender you'd date. Your first thought is...",
     options: [
       { text: "Cool, friends are healthy", score: 10 },
-      { text: "I'd want to meet him eventually", score: 8 },
+      { text: "I'd want to meet them eventually", score: 8 },
       { text: "Is there something between them?", score: 4, flag: "jealousy" },
       { text: "That's a red flag for me", score: 2, flag: "jealousy" },
     ],
@@ -86,16 +86,16 @@ const QUESTIONS: Question[] = [
     text: "If things got serious, what would concern you most?",
     options: [
       { text: "Losing my freedom/independence", score: 5, flag: "avoidant" },
-      { text: "That she might lose interest in me", score: 4, flag: "anxious" },
+      { text: "That they might lose interest in me", score: 4, flag: "anxious" },
       { text: "That we might not be compatible long-term", score: 8 },
       { text: "Nothing—I'd be excited", score: 10 },
     ],
   },
-  // Jealousy Triggers (Values)
+  // Jealousy Triggers
   {
     id: "triggers_1",
     category: "triggers",
-    text: "She likes another guy's thirst trap on Instagram. You...",
+    text: "They like an attractive person's photo on social media. You...",
     options: [
       { text: "Don't care—it's just a like", score: 10 },
       { text: "Notice it but don't say anything", score: 7 },
@@ -106,7 +106,7 @@ const QUESTIONS: Question[] = [
   {
     id: "triggers_2",
     category: "triggers",
-    text: "She's still friends with an ex. Honestly, you...",
+    text: "They're still friends with an ex. Honestly, you...",
     options: [
       { text: "Get it—not everyone cuts people off", score: 10 },
       { text: "Am okay if there's transparency", score: 8 },
@@ -129,10 +129,10 @@ const QUESTIONS: Question[] = [
   {
     id: "skills_2",
     category: "skills",
-    text: "She challenges your opinion. You typically...",
+    text: "They challenge your opinion. You typically...",
     options: [
       { text: "Enjoy the debate—different views are interesting", score: 10 },
-      { text: "Listen and consider her perspective", score: 9 },
+      { text: "Listen and consider their perspective", score: 9 },
       { text: "Feel the need to defend myself", score: 4, flag: "defensive" },
       { text: "Get quiet or change the subject", score: 5, flag: "avoidant" },
     ],
@@ -140,7 +140,7 @@ const QUESTIONS: Question[] = [
   {
     id: "skills_3",
     category: "skills",
-    text: "After a great first date, how soon do you text her?",
+    text: "After a great first date, how soon do you text them?",
     options: [
       { text: "When I feel like it—I don't overthink timing", score: 10 },
       { text: "Next day to keep momentum", score: 9 },
@@ -151,9 +151,9 @@ const QUESTIONS: Question[] = [
   {
     id: "skills_4",
     category: "skills",
-    text: "She shares something vulnerable. You usually...",
+    text: "They share something vulnerable. You usually...",
     options: [
-      { text: "Listen and validate her feelings", score: 10 },
+      { text: "Listen and validate their feelings", score: 10 },
       { text: "Share something vulnerable too", score: 7 },
       { text: "Try to fix the problem or give advice", score: 5, flag: "fixer" },
       { text: "Feel awkward and don't know what to say", score: 4, flag: "emotional_difficulty" },
@@ -163,7 +163,7 @@ const QUESTIONS: Question[] = [
 
 const RESULT_PROFILES: Record<string, { title: string; description: string }> = {
   secure_honest: {
-    title: "The Grounded Guy",
+    title: "The Grounded Dater",
     description: "You're confident, honest, and secure. You date from a healthy place and can handle the ups and downs. D.E.V.I. will help you find the right match for your level.",
   },
   developing: {
