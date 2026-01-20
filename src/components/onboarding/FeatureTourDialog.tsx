@@ -72,7 +72,7 @@ const tourSlides = [
     icon: Heart,
     title: "Let Devi guide you",
     subtitle: "From first date to committed relationship",
-    description: "Get real-time alerts, compatibility scores, and personalized coaching as your relationship evolves.",
+    description: "Get real-time alerts, compatibility scores, and personalized advice as your relationship evolves.",
     voiceScript: "I'll be with you every step of the way — from first date jitters to something more serious. Real-time alerts, compatibility scores, and honest advice. Let's get started!",
     color: "from-rose-500 to-pink-600",
   },
