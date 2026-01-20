@@ -4,15 +4,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Mail, Lock, ArrowLeft, Sparkles, Heart, Shield, CheckCircle2, KeyRound, Bot } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, Sparkles, Heart, Shield, CheckCircle2, Bot } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import authBg from "@/assets/auth-bg.jpg";
-import { PinSetupDialog } from "@/components/auth/PinSetupDialog";
-import { PinLoginScreen } from "@/components/auth/PinLoginScreen";
-import { PinEnableQuickLoginDialog } from "@/components/auth/PinEnableQuickLoginDialog";
-import { getPinStorageKey, getPinEnabledKey, PIN_SESSION_STORAGE_KEY_LEGACY } from "@/lib/pinCrypto";
 import { BetaNdaDialog } from "@/components/auth/BetaNdaDialog";
 import { BetaWelcomeDialog } from "@/components/auth/BetaWelcomeDialog";
 import { useNdaAgreement } from "@/hooks/useNdaAgreement";
@@ -35,14 +30,6 @@ const Auth = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   
-  // PIN-related state
-  const [showPinSetup, setShowPinSetup] = useState(false);
-  const [showPinLogin, setShowPinLogin] = useState(false);
-  const [showEnablePinQuickLogin, setShowEnablePinQuickLogin] = useState(false);
-  const [savedEmail, setSavedEmail] = useState<string | null>(null);
-  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
-  const [enableQuickLoginUserId, setEnableQuickLoginUserId] = useState<string | null>(null);
-  
   // Beta NDA state
   const { hasAcceptedNda, acceptNda, loading: ndaLoading } = useNdaAgreement();
   const { hasSeenWelcome, markWelcomeSeen, loading: welcomeLoading } = useBetaWelcome();
@@ -55,47 +42,10 @@ const Auth = () => {
       if (hasAcceptedNda === false) {
         setShowBetaNda(true);
       } else if (hasAcceptedNda === true && hasSeenWelcome === false) {
-        // NDA accepted but haven't seen welcome yet
         setShowBetaWelcome(true);
       }
     }
   }, [ndaLoading, welcomeLoading, hasAcceptedNda, hasSeenWelcome]);
-
-  
-
-  // Check for saved login on mount (with legacy migration)
-  useEffect(() => {
-    const storedEmail = localStorage.getItem("datebetter_saved_email");
-    
-    if (storedEmail) {
-      // Check for per-user PIN enabled and encrypted session
-      const pinEnabledKey = getPinEnabledKey(storedEmail);
-      const pinStorageKey = getPinStorageKey(storedEmail);
-      let pinEnabled = localStorage.getItem(pinEnabledKey);
-      let encryptedSession = localStorage.getItem(pinStorageKey);
-
-      // Migrate from legacy keys if per-user keys don't exist
-      const legacyPinEnabled = localStorage.getItem("datebetter_pin_enabled");
-      const legacySession = localStorage.getItem(PIN_SESSION_STORAGE_KEY_LEGACY);
-      
-      if (!encryptedSession && legacySession && legacyPinEnabled === "true") {
-        // Migrate legacy data to per-user keys
-        localStorage.setItem(pinStorageKey, legacySession);
-        localStorage.setItem(pinEnabledKey, "true");
-        // Clean up legacy keys
-        localStorage.removeItem("datebetter_pin_enabled");
-        localStorage.removeItem(PIN_SESSION_STORAGE_KEY_LEGACY);
-        
-        pinEnabled = "true";
-        encryptedSession = legacySession;
-      }
-
-      if (pinEnabled === "true" && encryptedSession && !user) {
-        setSavedEmail(storedEmail);
-        setShowPinLogin(true);
-      }
-    }
-  }, [user]);
 
   const getPasswordStrength = () => {
     if (password.length === 0) return { strength: 0, label: "", color: "" };
@@ -191,7 +141,6 @@ const Auth = () => {
           });
         } else {
           toast({ title: "Account created! Welcome to dateBetter" });
-          sessionStorage.setItem("datebetter_temp_session", password);
           
           // Handle referral
           if (referralCode && data?.user) {
@@ -220,22 +169,8 @@ const Auth = () => {
             }
           }
           
-          // Continue to PIN setup
-          if (data?.user) {
-            const { data: existingPin } = await supabase
-              .from("user_pins")
-              .select("id")
-              .eq("user_id", data.user.id)
-              .single();
-            
-            const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
-            if (!existingPin) {
-              setPendingNavigation(`/setup${setupQuery}`);
-              setShowPinSetup(true);
-            } else {
-              navigate(`/setup${setupQuery}`);
-            }
-          }
+          const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
+          navigate(`/setup${setupQuery}`);
         }
       } else {
         // Sign in flow
@@ -248,44 +183,17 @@ const Auth = () => {
           });
         } else {
           toast({ title: "Welcome back!" });
-          sessionStorage.setItem("datebetter_temp_session", password);
           
           const { data: { user: currentUser } } = await supabase.auth.getUser();
           if (currentUser) {
-            const { data: existingPin } = await supabase
-              .from("user_pins")
-              .select("id")
-              .eq("user_id", currentUser.id)
-              .single();
-            
             const profile = await checkOnboardingStatus(currentUser.id);
             if (profile?.onboarding_completed) {
-              if (!existingPin) {
-                setPendingNavigation("/dashboard");
-                setShowPinSetup(true);
-              } else {
-                // User has PIN - save email for quick login next time
-                if (currentUser.email) {
-                  localStorage.setItem("datebetter_saved_email", currentUser.email);
-                  localStorage.setItem(getPinEnabledKey(currentUser.email), "true");
-                }
-                navigate("/dashboard");
-              }
+              navigate("/dashboard");
               return;
             }
             
             const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
-            if (!existingPin) {
-              setPendingNavigation(`/setup${setupQuery}`);
-              setShowPinSetup(true);
-            } else {
-              // User has PIN - save email for quick login next time
-              if (currentUser.email) {
-                localStorage.setItem("datebetter_saved_email", currentUser.email);
-                localStorage.setItem(getPinEnabledKey(currentUser.email), "true");
-              }
-              navigate(`/setup${setupQuery}`);
-            }
+            navigate(`/setup${setupQuery}`);
           }
         }
       }
@@ -296,63 +204,13 @@ const Auth = () => {
     }
   };
 
-  const handlePinSetupComplete = () => {
-    setShowPinSetup(false);
-    if (pendingNavigation) {
-      navigate(pendingNavigation);
-    }
-  };
-
-  const handlePinSetupSkip = () => {
-    setShowPinSetup(false);
-    if (pendingNavigation) {
-      navigate(pendingNavigation);
-    }
-  };
-
-  const handlePinLoginSuccess = async () => {
-    setShowPinLogin(false);
-    // Check onboarding status
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-    if (currentUser) {
-      const profile = await checkOnboardingStatus(currentUser.id);
-      if (profile?.onboarding_completed) {
-        navigate("/dashboard");
-      } else {
-        navigate("/setup");
-      }
-    }
-  };
-
-  const handleSwitchAccount = () => {
-    setShowPinLogin(false);
-    // Clear only the current saved email's PIN data, not all accounts
-    if (savedEmail) {
-      localStorage.removeItem(getPinEnabledKey(savedEmail));
-      localStorage.removeItem(getPinStorageKey(savedEmail));
-    }
-    localStorage.removeItem("datebetter_saved_email");
-    setSavedEmail(null);
-  };
-
   const canSubmit = isSignUp 
     ? email && password && confirmPassword && password === confirmPassword && termsAccepted && privacyAccepted && strength >= 50
     : email && password;
 
-  // Show PIN login screen if saved credentials exist
-  if (showPinLogin && savedEmail) {
-    return (
-      <PinLoginScreen
-        email={savedEmail}
-        onSuccess={handlePinLoginSuccess}
-        onSwitchAccount={handleSwitchAccount}
-      />
-    );
-  }
-
   return (
     <>
-    <div className="min-h-[100dvh] relative overflow-hidden">
+    <div className="fixed inset-0 overflow-hidden">
       {/* Background with gradient overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -366,325 +224,299 @@ const Auth = () => {
       <div className="hidden sm:block absolute top-20 right-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl" />
       <div className="hidden sm:block absolute bottom-40 left-10 w-40 h-40 rounded-full bg-secondary/10 blur-3xl" />
 
-      {/* Header */}
-      <header className="relative z-10 px-4 pt-safe-top py-3 flex items-center gap-3">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => navigate("/")} 
-          className="bg-background/60 backdrop-blur-md border border-border/50 hover:bg-background/80 rounded-xl h-10 w-10"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center">
-            <Heart className="w-4 h-4 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">
-            dateBetter
-          </span>
-        </div>
-      </header>
-
-      <main className="relative z-10 flex-1 px-4 pb-safe-bottom pb-4 max-w-md mx-auto w-full">
-        {/* Glass card */}
-        <div className="bg-[image:var(--gradient-glass)] backdrop-blur-xl rounded-3xl p-6 shadow-[var(--shadow-elegant)] border border-border/30">
-          
-          {/* Header section */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[image:var(--gradient-hero)] mb-4 shadow-[var(--shadow-glow)]">
-              {isForgotPassword ? (
-                <Mail className="w-7 h-7 text-primary-foreground" />
-              ) : isSignUp ? (
-                <Sparkles className="w-7 h-7 text-primary-foreground" />
-              ) : (
-                <Heart className="w-7 h-7 text-primary-foreground" />
-              )}
+      {/* Scrollable content container */}
+      <div className="absolute inset-0 overflow-y-auto" style={{ paddingTop: 'max(env(safe-area-inset-top), 0px)', paddingBottom: 'max(env(safe-area-inset-bottom), 0px)' }}>
+        {/* Header */}
+        <header className="relative z-10 px-4 py-3 flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate("/")} 
+            className="bg-background/60 backdrop-blur-md border border-border/50 hover:bg-background/80 rounded-xl h-10 w-10"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center">
+              <Heart className="w-4 h-4 text-primary-foreground" />
             </div>
-            <h2 className="text-2xl font-bold mb-1 text-foreground">
-              {isForgotPassword ? "Reset Password" : isSignUp ? "Join dateBetter" : "Welcome Back"}
-            </h2>
-            <p className="text-muted-foreground text-sm">
-              {isForgotPassword
-                ? "We'll send you a reset link"
-                : isSignUp 
-                  ? "Your journey to better dating starts here" 
-                  : "Sign in to continue your journey"}
-            </p>
+            <span className="text-lg font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">
+              dateBetter
+            </span>
           </div>
+        </header>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 h-12 rounded-xl bg-background/50 border-border/50 focus:border-primary focus:ring-primary/20"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            {!isForgotPassword && (
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-sm font-medium">
-                    {isSignUp ? "Create Password" : "Password"}
-                  </Label>
-                  {!isSignUp && (
-                    <button
-                      type="button"
-                      onClick={() => setIsForgotPassword(true)}
-                      className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
-                    >
-                      Forgot password?
-                    </button>
-                  )}
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 h-12 rounded-xl bg-background/50 border-border/50 focus:border-primary focus:ring-primary/20"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                
-                {/* Password strength indicator */}
-                {isSignUp && password.length > 0 && (
-                  <div className="space-y-1.5 pt-1">
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div 
-                          key={i}
-                          className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                            strength >= i * 25 ? color : "bg-muted"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Shield className="w-3 h-3" />
-                      <span>Password strength: <span className="font-medium text-foreground">{label}</span></span>
-                    </p>
-                  </div>
+        <main className="relative z-10 flex-1 px-4 pb-24 max-w-md mx-auto w-full">
+          {/* Glass card */}
+          <div className="bg-[image:var(--gradient-glass)] backdrop-blur-xl rounded-3xl p-6 shadow-[var(--shadow-elegant)] border border-border/30">
+            
+            {/* Header section */}
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[image:var(--gradient-hero)] mb-4 shadow-[var(--shadow-glow)]">
+                {isForgotPassword ? (
+                  <Mail className="w-7 h-7 text-primary-foreground" />
+                ) : isSignUp ? (
+                  <Sparkles className="w-7 h-7 text-primary-foreground" />
+                ) : (
+                  <Heart className="w-7 h-7 text-primary-foreground" />
                 )}
               </div>
-            )}
+              <h2 className="text-2xl font-bold mb-1 text-foreground">
+                {isForgotPassword ? "Reset Password" : isSignUp ? "Join dateBetter" : "Welcome Back"}
+              </h2>
+              <p className="text-muted-foreground text-sm">
+                {isForgotPassword
+                  ? "We'll send you a reset link"
+                  : isSignUp 
+                    ? "Your journey to better dating starts here" 
+                    : "Sign in to continue your journey"}
+              </p>
+            </div>
 
-            {/* Confirm Password */}
-            {isSignUp && !isForgotPassword && (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Email */}
               <div className="space-y-1.5">
-                <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
+                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="confirmPassword"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="pl-10 h-12 rounded-xl bg-background/50 border-border/50 focus:border-primary focus:ring-primary/20"
                     required
                   />
-                  {confirmPassword && password === confirmPassword && (
-                    <CheckCircle2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-success" />
+                </div>
+              </div>
+
+              {/* Password */}
+              {!isForgotPassword && (
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-sm font-medium">
+                      {isSignUp ? "Create Password" : "Password"}
+                    </Label>
+                    {!isSignUp && (
+                      <button
+                        type="button"
+                        onClick={() => setIsForgotPassword(true)}
+                        className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
+                      >
+                        Forgot password?
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-10 pr-10 h-12 rounded-xl bg-background/50 border-border/50 focus:border-primary focus:ring-primary/20"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  
+                  {/* Password strength indicator */}
+                  {isSignUp && password.length > 0 && (
+                    <div className="space-y-1.5 pt-1">
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4].map((i) => (
+                          <div 
+                            key={i}
+                            className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                              strength >= i * 25 ? color : "bg-muted"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Shield className="w-3 h-3" />
+                        <span>Password strength: <span className="font-medium text-foreground">{label}</span></span>
+                      </p>
+                    </div>
                   )}
                 </div>
-                {confirmPassword && password !== confirmPassword && (
-                  <p className="text-xs text-destructive flex items-center gap-1">
-                    Passwords don't match
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Terms & Privacy - Modern toggle style */}
-            {isSignUp && !isForgotPassword && (
-              <div className="space-y-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setTermsAccepted(!termsAccepted)}
-                  className={`w-full p-3 rounded-xl border-2 transition-all duration-200 flex items-center gap-3 text-left ${
-                    termsAccepted 
-                      ? "border-primary bg-primary/5" 
-                      : "border-border/50 bg-background/30 hover:border-primary/30"
-                  }`}
-                >
-                  <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${
-                    termsAccepted 
-                      ? "bg-primary text-primary-foreground" 
-                      : "bg-muted border border-border"
-                  }`}>
-                    {termsAccepted && <CheckCircle2 className="w-3.5 h-3.5" />}
-                  </div>
-                  <span className="text-sm">
-                    I agree to the{" "}
-                    <span 
-                      className="text-primary font-medium hover:underline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate("/terms");
-                      }}
-                    >
-                      Terms of Service
-                    </span>
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPrivacyAccepted(!privacyAccepted)}
-                  className={`w-full p-3 rounded-xl border-2 transition-all duration-200 flex items-center gap-3 text-left ${
-                    privacyAccepted 
-                      ? "border-primary bg-primary/5" 
-                      : "border-border/50 bg-background/30 hover:border-primary/30"
-                  }`}
-                >
-                  <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${
-                    privacyAccepted 
-                      ? "bg-primary text-primary-foreground" 
-                      : "bg-muted border border-border"
-                  }`}>
-                    {privacyAccepted && <CheckCircle2 className="w-3.5 h-3.5" />}
-                  </div>
-                  <span className="text-sm">
-                    I agree to the{" "}
-                    <span 
-                      className="text-primary font-medium hover:underline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate("/privacy-policy");
-                      }}
-                    >
-                      Privacy Policy
-                    </span>
-                  </span>
-                </button>
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              className="w-full h-12 rounded-xl bg-[image:var(--gradient-hero)] hover:opacity-90 transition-all duration-300 shadow-[var(--shadow-soft)] text-base font-semibold mt-4"
-              disabled={loading || (isSignUp && !canSubmit)}
-            >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                  Please wait...
-                </span>
-              ) : isForgotPassword ? (
-                "Send Reset Link"
-              ) : isSignUp ? (
-                <span className="flex items-center gap-2">
-                  Create Account
-                  <Sparkles className="w-4 h-4" />
-                </span>
-              ) : (
-                "Sign In"
               )}
-            </Button>
 
-          </form>
-          {/* Quick PIN Sign In for returning users */}
-          {!isSignUp && !isForgotPassword && savedEmail && (
-            <div className="mt-4 pt-4 border-t border-border/30">
+              {/* Confirm Password */}
+              {isSignUp && !isForgotPassword && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="confirmPassword"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="pl-10 h-12 rounded-xl bg-background/50 border-border/50 focus:border-primary focus:ring-primary/20"
+                      required
+                    />
+                    {confirmPassword && password === confirmPassword && (
+                      <CheckCircle2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-success" />
+                    )}
+                  </div>
+                  {confirmPassword && password !== confirmPassword && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      Passwords don't match
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Terms & Privacy - Modern toggle style */}
+              {isSignUp && !isForgotPassword && (
+                <div className="space-y-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setTermsAccepted(!termsAccepted)}
+                    className={`w-full p-3 rounded-xl border-2 transition-all duration-200 flex items-center gap-3 text-left ${
+                      termsAccepted 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border/50 bg-background/30 hover:border-primary/30"
+                    }`}
+                  >
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${
+                      termsAccepted 
+                        ? "bg-primary text-primary-foreground" 
+                        : "bg-muted border border-border"
+                    }`}>
+                      {termsAccepted && <CheckCircle2 className="w-3.5 h-3.5" />}
+                    </div>
+                    <span className="text-sm">
+                      I agree to the{" "}
+                      <span 
+                        className="text-primary font-medium hover:underline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/terms");
+                        }}
+                      >
+                        Terms of Service
+                      </span>
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPrivacyAccepted(!privacyAccepted)}
+                    className={`w-full p-3 rounded-xl border-2 transition-all duration-200 flex items-center gap-3 text-left ${
+                      privacyAccepted 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border/50 bg-background/30 hover:border-primary/30"
+                    }`}
+                  >
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${
+                      privacyAccepted 
+                        ? "bg-primary text-primary-foreground" 
+                        : "bg-muted border border-border"
+                    }`}>
+                      {privacyAccepted && <CheckCircle2 className="w-3.5 h-3.5" />}
+                    </div>
+                    <span className="text-sm">
+                      I agree to the{" "}
+                      <span 
+                        className="text-primary font-medium hover:underline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/privacy-policy");
+                        }}
+                      >
+                        Privacy Policy
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              )}
+
+              {/* Submit Button */}
               <Button
-                type="button"
-                variant="outline"
-                className="w-full h-11 rounded-xl"
-                onClick={() => {
-                  setEmail(savedEmail);
-                  setShowPinLogin(true);
-                }}
+                type="submit"
+                className="w-full h-12 rounded-xl bg-[image:var(--gradient-hero)] hover:opacity-90 transition-all duration-300 shadow-[var(--shadow-soft)] text-base font-semibold mt-4"
+                disabled={loading || (isSignUp && !canSubmit)}
               >
-                <KeyRound className="w-4 h-4 mr-2" />
-                Quick sign in with PIN
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                    Please wait...
+                  </span>
+                ) : isForgotPassword ? (
+                  "Send Reset Link"
+                ) : isSignUp ? (
+                  <span className="flex items-center gap-2">
+                    Create Account
+                    <Sparkles className="w-4 h-4" />
+                  </span>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
-              <p className="text-center text-xs text-muted-foreground mt-2">
-                Signed in before as {savedEmail.split("@")[0]}
-              </p>
+
+            </form>
+
+            {/* Toggle Sign In/Up */}
+            <div className="mt-6 pt-4 border-t border-border/30">
+              {!isForgotPassword ? (
+                <p className="text-center text-sm text-muted-foreground">
+                  {isSignUp ? "Already have an account?" : "New to dateBetter?"}{" "}
+                  <button
+                    type="button"
+                    className="text-primary font-semibold hover:text-primary/80 transition-colors"
+                    onClick={() => setIsSignUp(!isSignUp)}
+                  >
+                    {isSignUp ? "Sign in" : "Create account"}
+                  </button>
+                </p>
+              ) : (
+                <p className="text-center text-sm text-muted-foreground">
+                  Remember your password?{" "}
+                  <button
+                    type="button"
+                    className="text-primary font-semibold hover:text-primary/80 transition-colors"
+                    onClick={() => setIsForgotPassword(false)}
+                  >
+                    Back to sign in
+                  </button>
+                </p>
+              )}
             </div>
-          )}
-
-          {/* Toggle Sign In/Up */}
-          <div className={`mt-6 pt-4 border-t border-border/30 ${!isSignUp && !isForgotPassword && savedEmail ? 'mt-4 pt-4' : ''}`}>
-            {!isForgotPassword ? (
-              <p className="text-center text-sm text-muted-foreground">
-                {isSignUp ? "Already have an account?" : "New to dateBetter?"}{" "}
-                <button
-                  type="button"
-                  className="text-primary font-semibold hover:text-primary/80 transition-colors"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                >
-                  {isSignUp ? "Sign in" : "Create account"}
-                </button>
-              </p>
-            ) : (
-              <p className="text-center text-sm text-muted-foreground">
-                Remember your password?{" "}
-                <button
-                  type="button"
-                  className="text-primary font-semibold hover:text-primary/80 transition-colors"
-                  onClick={() => setIsForgotPassword(false)}
-                >
-                  Back to sign in
-                </button>
-              </p>
-            )}
           </div>
-        </div>
+        </main>
 
-      </main>
-
-      {/* Security and AI badges - fixed at bottom for App Store compliance */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 pb-safe-bottom bg-gradient-to-t from-background via-background/95 to-transparent pt-4 pb-3">
-        <div className="flex flex-col items-center gap-1.5 text-muted-foreground max-w-md mx-auto px-4">
-          <div className="flex items-center gap-2">
-            <Shield className="w-3.5 h-3.5" />
-            <span className="text-xs">Your data is encrypted & secure</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Bot className="w-3.5 h-3.5" />
-            <span className="text-xs">AI-powered features for personalized insights</span>
+        {/* Security and AI badges - fixed at bottom for App Store compliance */}
+        <div className="fixed bottom-0 left-0 right-0 z-20 pb-safe-bottom bg-gradient-to-t from-background via-background/95 to-transparent pt-4 pb-3">
+          <div className="flex flex-col items-center gap-1.5 text-muted-foreground max-w-md mx-auto px-4">
+            <div className="flex items-center gap-2">
+              <Shield className="w-3.5 h-3.5" />
+              <span className="text-xs">Your data is encrypted & secure</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Bot className="w-3.5 h-3.5" />
+              <span className="text-xs">AI-powered features for personalized insights</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    
-    <PinSetupDialog
-      open={showPinSetup}
-      onOpenChange={setShowPinSetup}
-      onComplete={handlePinSetupComplete}
-      onSkip={handlePinSetupSkip}
-    />
     
     <BetaNdaDialog
       open={showBetaNda}
       onAccept={async () => {
         await acceptNda();
         setShowBetaNda(false);
-        // Show welcome dialog after NDA is accepted
         setShowBetaWelcome(true);
       }}
     />
