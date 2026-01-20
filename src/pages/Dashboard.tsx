@@ -73,6 +73,8 @@ import { WillingnessToPaySurvey } from "@/components/subscription/WillingnessToP
 import { HealingScoreCard } from "@/components/dashboard/HealingScoreCard";
 import { SelfDiscoveryCTA } from "@/components/dashboard/SelfDiscoveryCTA";
 import { AIDisclosure } from "@/components/AIDisclosure";
+import { FeatureTourDialog } from "@/components/onboarding/FeatureTourDialog";
+import { useFeatureTour } from "@/hooks/useFeatureTour";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -144,6 +146,9 @@ const Dashboard = () => {
   
   // Devi wins tracking
   const { wins, refetch: refetchWins } = useDeviWins(user?.id);
+  
+  // Feature tour for new users
+  const { showTour, completeTour } = useFeatureTour(user?.id);
 
   const handleReopenRelationship = async (candidateId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -860,6 +865,8 @@ const Dashboard = () => {
       {/* Pull to Refresh Indicator */}
       <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} />
       
+      {/* Feature Tour for New Users */}
+      <FeatureTourDialog open={showTour} onClose={completeTour} />
 
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[image:var(--gradient-header)] backdrop-blur-xl border-b border-border/50 pt-safe-top">
