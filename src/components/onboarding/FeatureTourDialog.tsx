@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -74,49 +74,36 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
-  const [autoAdvance, setAutoAdvance] = useState(true);
+  const [audioEnded, setAudioEnded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const hasPlayedRef = useRef<Set<number>>(new Set());
+  const currentSlideRef = useRef(currentSlide);
+  
+  // Keep ref in sync with state
+  useEffect(() => {
+    currentSlideRef.current = currentSlide;
+  }, [currentSlide]);
   
   const slide = tourSlides[currentSlide];
   const IconComponent = slide.icon;
   const isLastSlide = currentSlide === tourSlides.length - 1;
 
-  // Auto-play voice when slide changes
-  useEffect(() => {
-    if (open && !isMuted && !hasPlayedRef.current.has(currentSlide)) {
-      playVoice();
-      hasPlayedRef.current.add(currentSlide);
-    }
-  }, [currentSlide, open, isMuted]);
-
-  // Reset when dialog opens
-  useEffect(() => {
-    if (open) {
-      setCurrentSlide(0);
-      hasPlayedRef.current.clear();
-    } else {
-      // Cleanup audio when closing
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    }
-  }, [open]);
-
-  const playVoice = async () => {
+  const playVoice = useCallback(async (slideIndex: number) => {
     if (isMuted) return;
     
     // Stop any currently playing audio
     if (audioRef.current) {
       audioRef.current.pause();
+      URL.revokeObjectURL(audioRef.current.src);
       audioRef.current = null;
     }
 
     setIsLoadingAudio(true);
     setIsPlaying(true);
+    setAudioEnded(false);
 
     try {
+      const scriptToPlay = tourSlides[slideIndex].voiceScript;
+      
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
         {
@@ -126,7 +113,7 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
             "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text: slide.voiceScript }),
+          body: JSON.stringify({ text: scriptToPlay }),
         }
       );
 
@@ -142,19 +129,22 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
       
       audio.onended = () => {
         setIsPlaying(false);
+        setAudioEnded(true);
         URL.revokeObjectURL(audioUrl);
         
         // Auto-advance to next slide after voice finishes
-        if (autoAdvance && currentSlide < tourSlides.length - 1) {
+        const currentIdx = currentSlideRef.current;
+        if (currentIdx < tourSlides.length - 1) {
           setTimeout(() => {
-            setCurrentSlide(prev => prev + 1);
-          }, 500);
+            setCurrentSlide(currentIdx + 1);
+          }, 800);
         }
       };
       
       audio.onerror = () => {
         setIsPlaying(false);
         setIsLoadingAudio(false);
+        setAudioEnded(true);
       };
 
       setIsLoadingAudio(false);
@@ -163,11 +153,43 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
       console.error("Voice playback error:", error);
       setIsPlaying(false);
       setIsLoadingAudio(false);
+      setAudioEnded(true);
     }
+  }, [isMuted]);
+
+  // Auto-play voice when slide changes
+  useEffect(() => {
+    if (open && !isMuted) {
+      // Small delay to let animation settle
+      const timer = setTimeout(() => {
+        playVoice(currentSlide);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [currentSlide, open, isMuted, playVoice]);
+
+  // Reset when dialog opens
+  useEffect(() => {
+    if (open) {
+      setCurrentSlide(0);
+      setAudioEnded(false);
+      setIsPlaying(false);
+    } else {
+      // Cleanup audio when closing
+      if (audioRef.current) {
+        audioRef.current.pause();
+        URL.revokeObjectURL(audioRef.current.src);
+        audioRef.current = null;
+      }
+    }
+  }, [open]);
+
+  const handleReplay = () => {
+    playVoice(currentSlide);
   };
 
   const togglePlayPause = () => {
-    if (audioRef.current) {
+    if (audioRef.current && !audioEnded) {
       if (isPlaying) {
         audioRef.current.pause();
         setIsPlaying(false);
@@ -176,26 +198,31 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
         setIsPlaying(true);
       }
     } else {
-      playVoice();
+      // Audio ended or doesn't exist, replay
+      handleReplay();
     }
   };
 
   const toggleMute = () => {
-    setIsMuted(!isMuted);
+    const newMuted = !isMuted;
+    setIsMuted(newMuted);
     if (audioRef.current) {
       audioRef.current.pause();
+      URL.revokeObjectURL(audioRef.current.src);
       audioRef.current = null;
     }
     setIsPlaying(false);
-    setAutoAdvance(isMuted); // Resume auto-advance when unmuting
+    setAudioEnded(false);
   };
 
   const handleNext = () => {
     if (audioRef.current) {
       audioRef.current.pause();
+      URL.revokeObjectURL(audioRef.current.src);
       audioRef.current = null;
     }
     setIsPlaying(false);
+    setAudioEnded(false);
     
     if (currentSlide < tourSlides.length - 1) {
       setCurrentSlide(currentSlide + 1);
@@ -207,9 +234,11 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
   const handlePrev = () => {
     if (audioRef.current) {
       audioRef.current.pause();
+      URL.revokeObjectURL(audioRef.current.src);
       audioRef.current = null;
     }
     setIsPlaying(false);
+    setAudioEnded(false);
     
     if (currentSlide > 0) {
       setCurrentSlide(currentSlide - 1);
@@ -219,9 +248,21 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
   const handleSkip = () => {
     if (audioRef.current) {
       audioRef.current.pause();
+      URL.revokeObjectURL(audioRef.current.src);
       audioRef.current = null;
     }
     onClose();
+  };
+
+  const handleDotClick = (index: number) => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      URL.revokeObjectURL(audioRef.current.src);
+      audioRef.current = null;
+    }
+    setIsPlaying(false);
+    setAudioEnded(false);
+    setCurrentSlide(index);
   };
 
   return (
@@ -356,7 +397,7 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
             </motion.p>
           </AnimatePresence>
 
-          {/* Play/Pause button */}
+          {/* Play/Pause/Replay button */}
           <div className="flex justify-center mb-4">
             <Button
               variant="outline"
@@ -366,13 +407,21 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
               className="gap-2"
             >
               {isLoadingAudio ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Loading...
+                </>
               ) : isPlaying ? (
-                <Pause className="w-4 h-4" />
+                <>
+                  <Pause className="w-4 h-4" />
+                  Pause
+                </>
               ) : (
-                <Play className="w-4 h-4" />
+                <>
+                  <Play className="w-4 h-4" />
+                  {audioEnded ? "Replay" : "Play"}
+                </>
               )}
-              {isPlaying ? "Pause" : "Replay"}
             </Button>
           </div>
 
@@ -381,14 +430,7 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
             {tourSlides.map((_, index) => (
               <button
                 key={index}
-                onClick={() => {
-                  if (audioRef.current) {
-                    audioRef.current.pause();
-                    audioRef.current = null;
-                  }
-                  setIsPlaying(false);
-                  setCurrentSlide(index);
-                }}
+                onClick={() => handleDotClick(index)}
                 className={`h-2 rounded-full transition-all ${
                   index === currentSlide 
                     ? 'bg-primary w-6' 
