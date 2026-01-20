@@ -78,6 +78,18 @@ export function AdminMessaging() {
   const [messageTitle, setMessageTitle] = useState("");
   const [messageContent, setMessageContent] = useState("");
   const [sendToAll, setSendToAll] = useState(false);
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  
+  // Filter users for dropdown
+  const filteredDropdownUsers = users.filter(u => {
+    if (!userSearchQuery.trim()) return true;
+    const query = userSearchQuery.toLowerCase();
+    return (
+      u.name?.toLowerCase().includes(query) ||
+      u.email?.toLowerCase().includes(query) ||
+      u.user_id.toLowerCase().includes(query)
+    );
+  });
 
   useEffect(() => {
     fetchMessages();
@@ -366,22 +378,40 @@ export function AdminMessaging() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Recipient</label>
                   <div className="flex items-center gap-2">
-                    <Select 
-                      value={selectedUserId} 
-                      onValueChange={setSelectedUserId}
-                      disabled={sendToAll}
-                    >
-                      <SelectTrigger className="flex-1">
-                        <SelectValue placeholder="Select a user..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {users.map(u => (
-                          <SelectItem key={u.user_id} value={u.user_id}>
-                            {u.name || u.email || u.user_id.slice(0, 8)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex-1 space-y-2">
+                      <Input
+                        placeholder="Search users..."
+                        value={userSearchQuery}
+                        onChange={(e) => setUserSearchQuery(e.target.value)}
+                        disabled={sendToAll}
+                        className="h-9"
+                      />
+                      <Select 
+                        value={selectedUserId} 
+                        onValueChange={setSelectedUserId}
+                        disabled={sendToAll}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={`Select a user (${filteredDropdownUsers.length} results)...`} />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60">
+                          {filteredDropdownUsers.length === 0 ? (
+                            <div className="py-2 px-3 text-sm text-muted-foreground">
+                              No users found
+                            </div>
+                          ) : (
+                            filteredDropdownUsers.map(u => (
+                              <SelectItem key={u.user_id} value={u.user_id}>
+                                <div className="flex flex-col">
+                                  <span>{u.name || "Unnamed User"}</span>
+                                  {u.email && <span className="text-xs text-muted-foreground">{u.email}</span>}
+                                </div>
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <Button
                       variant={sendToAll ? "default" : "outline"}
                       size="sm"
