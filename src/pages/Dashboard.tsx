@@ -258,7 +258,32 @@ const Dashboard = () => {
       };
       // Delay prefetch to not compete with main data load
       const prefetchTimer = setTimeout(prefetchDeviData, 1000);
-      return () => clearTimeout(prefetchTimer);
+      
+      // Subscribe to realtime admin messages
+      const channel = supabase
+        .channel('admin-messages-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'admin_messages',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            const newMessage = payload.new as AdminMessage;
+            setAdminMessages(prev => [newMessage, ...prev]);
+            toast.info("New message from DateBetter", {
+              description: newMessage.title,
+            });
+          }
+        )
+        .subscribe();
+      
+      return () => {
+        clearTimeout(prefetchTimer);
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 
