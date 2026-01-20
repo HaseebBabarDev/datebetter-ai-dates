@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
 import { useTour, TourStep } from "./TourContext";
+import { resetFeatureTour } from "@/hooks/useFeatureTour";
 import {
   Tooltip,
   TooltipContent,
@@ -13,21 +14,28 @@ interface TourRestartButtonProps {
   tourId: string;
   tourSteps: TourStep[];
   className?: string;
+  userId?: string; // Optional: if provided, also resets the feature tour
 }
 
 export const TourRestartButton: React.FC<TourRestartButtonProps> = ({
   tourId,
   tourSteps,
   className = "",
+  userId,
 }) => {
-  const { resetTour, startTour, hasCompletedTour } = useTour();
+  const { resetTour, hasCompletedTour } = useTour();
 
   const handleRestart = () => {
+    // Reset the feature tour first (video walkthrough) if userId is provided
+    if (userId) {
+      resetFeatureTour(userId);
+    }
+    
+    // Reset the standard tour
     resetTour(tourId);
-    // Small delay to let state update
-    setTimeout(() => {
-      startTour(tourId, tourSteps);
-    }, 100);
+    
+    // Reload to trigger the feature tour first, then dashboard tour
+    window.location.reload();
   };
 
   // Only show if tour has been completed

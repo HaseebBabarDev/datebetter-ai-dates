@@ -911,7 +911,7 @@ const Dashboard = () => {
             </div>
             <div className="flex items-center gap-1">
               <QuickCandidateSelect candidates={candidates} variant="prominent" />
-              <TourRestartButton tourId="dashboard" tourSteps={DASHBOARD_TOUR_STEPS} />
+              <TourRestartButton tourId="dashboard" tourSteps={DASHBOARD_TOUR_STEPS} userId={user?.id} />
               <TooltipProvider delayDuration={300}>
                 <Tooltip>
                   <TooltipTrigger asChild>
