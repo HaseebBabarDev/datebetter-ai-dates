@@ -92,9 +92,15 @@ export function AdminMessaging() {
   });
 
   useEffect(() => {
-    fetchMessages();
     fetchUsers();
   }, []);
+
+  // Fetch messages after users are loaded
+  useEffect(() => {
+    if (users.length > 0) {
+      fetchMessages();
+    }
+  }, [users]);
 
   const fetchMessages = async () => {
     setLoading(true);
@@ -107,23 +113,41 @@ export function AdminMessaging() {
 
       if (error) throw error;
 
-      // Fetch recipient names
+      // Fetch recipient names - use the users list which has emails too
       const userIds = [...new Set(data?.map(m => m.user_id) || [])];
       const senderIds = [...new Set(data?.map(m => m.sender_id) || [])];
       const allIds = [...new Set([...userIds, ...senderIds])];
       
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, name")
-        .in("user_id", allIds);
+      // Try to get user info from the already-loaded users list first
+      const userMap = new Map<string, { name: string | null; email: string | null }>();
+      users.forEach(u => userMap.set(u.user_id, { name: u.name, email: u.email }));
+      
+      // Fallback to profiles if users list doesn't have them
+      if (userMap.size === 0 || allIds.some(id => !userMap.has(id))) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, name")
+          .in("user_id", allIds);
 
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p.name]) || []);
+        profiles?.forEach(p => {
+          if (!userMap.has(p.user_id)) {
+            userMap.set(p.user_id, { name: p.name, email: null });
+          }
+        });
+      }
+
+      const getDisplayName = (userId: string) => {
+        const userInfo = userMap.get(userId);
+        if (userInfo?.name) return userInfo.name;
+        if (userInfo?.email) return userInfo.email;
+        return userId.slice(0, 8) + "...";
+      };
 
       // Organize messages into threads (parent messages and their replies)
       const messagesWithNames = data?.map(m => ({
         ...m,
-        recipient_name: profileMap.get(m.user_id) || "Unknown",
-        sender_name: profileMap.get(m.sender_id) || "Admin"
+        recipient_name: getDisplayName(m.user_id),
+        sender_name: m.sender_type === 'admin' ? 'Admin' : getDisplayName(m.sender_id)
       })) || [];
 
       // Group replies under parent messages
