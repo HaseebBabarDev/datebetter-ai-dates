@@ -15,9 +15,9 @@ const socialOptions = [
 
 const activityOptions = [
   { value: "sedentary", label: "Sedentary", subtitle: "little exercise" },
-  { value: "light", label: "Light", subtitle: "1-2x/week" },
-  { value: "moderate", label: "Moderate", subtitle: "3-4x/week" },
-  { value: "active", label: "Active", subtitle: "5+/week" },
+  { value: "light", label: "Lightly active", subtitle: "1-2x/week" },
+  { value: "moderate", label: "Moderately active", subtitle: "3-4x/week" },
+  { value: "active", label: "Active", subtitle: "5x/week" },
   { value: "very_active", label: "Very active", subtitle: "daily" },
 ];
 

@@ -29,15 +29,22 @@ const COUNTRY_OPTIONS = [
   { value: "JP", label: "Japan" },
   { value: "KR", label: "South Korea" },
   { value: "SG", label: "Singapore" },
-  { value: "OTHER", label: "Other" },
+  { value: "NZ", label: "New Zealand" },
+  { value: "IE", label: "Ireland" },
+  { value: "SE", label: "Sweden" },
+  { value: "NO", label: "Norway" },
+  { value: "DK", label: "Denmark" },
+  { value: "other", label: "Other" },
 ];
 
 const genderOptions = [
   { value: "woman_cis", label: "Woman" },
   { value: "woman_trans", label: "Woman (transgender)" },
-  { value: "non_binary", label: "Non-binary" },
-  { value: "gender_fluid", label: "Gender-fluid" },
   { value: "man_cis", label: "Man" },
+  { value: "man_trans", label: "Man (transgender)" },
+  { value: "non_binary", label: "Non-binary" },
+  { value: "gender_fluid", label: "Gender fluid" },
+  { value: "self_describe", label: "Prefer to self-describe" },
 ];
 
 const pronounOptions = [

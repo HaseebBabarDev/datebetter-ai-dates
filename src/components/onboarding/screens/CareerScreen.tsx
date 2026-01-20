@@ -25,23 +25,24 @@ import logo from "@/assets/logo.jpg";
 
 const careerOptions = [
   { value: "student", label: "Student", subtitle: "" },
-  { value: "early", label: "Early career", subtitle: "0-5 years" },
-  { value: "established", label: "Established", subtitle: "5-15 years" },
+  { value: "entry_level", label: "Entry Level", subtitle: "0-5 years" },
+  { value: "mid_career", label: "Mid-Career", subtitle: "5-15 years" },
   { value: "senior", label: "Senior/Executive", subtitle: "15+ years" },
   { value: "entrepreneur", label: "Entrepreneur", subtitle: "" },
-  { value: "creator", label: "Content Creator", subtitle: "Creative" },
-  { value: "athlete", label: "Pro Athlete", subtitle: "" },
-  { value: "between", label: "Between jobs", subtitle: "" },
+  { value: "freelance", label: "Freelance/Self-employed", subtitle: "" },
+  { value: "between_jobs", label: "Between Jobs", subtitle: "" },
+  { value: "retired", label: "Retired", subtitle: "" },
 ];
 
 const educationOptions = [
-  { value: "high_school", label: "High school" },
-  { value: "some_college", label: "Some college" },
-  { value: "associates", label: "Associate's degree" },
-  { value: "bachelors", label: "Bachelor's degree" },
-  { value: "masters", label: "Master's degree" },
-  { value: "doctorate", label: "Doctorate/PhD" },
-  { value: "trade_school", label: "Trade/Vocational school" },
+  { value: "high_school", label: "High School" },
+  { value: "some_college", label: "Some College" },
+  { value: "associates", label: "Associate's Degree" },
+  { value: "bachelors", label: "Bachelor's Degree" },
+  { value: "masters", label: "Master's Degree" },
+  { value: "doctorate", label: "Doctorate" },
+  { value: "trade_school", label: "Trade/Vocational" },
+  { value: "other", label: "Other" },
 ];
 
 const incomeOptions = [
