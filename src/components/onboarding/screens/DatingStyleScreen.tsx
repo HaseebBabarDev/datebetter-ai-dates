@@ -42,12 +42,12 @@ const SelectableCard: React.FC<{
   </button>
 );
 
-// Scenario-based questions for male heterosexual users
+// Scenario-based questions for all users
 const HONESTY_OPTIONS = [
   { 
     value: "fully_honest", 
     label: "I'm an open book", 
-    description: "I tell her everything, even if it's awkward",
+    description: "I share everything, even if it's awkward",
     icon: Heart 
   },
   { 
@@ -65,8 +65,8 @@ const HONESTY_OPTIONS = [
 ];
 
 const BLOCKER_OPTIONS = [
-  { value: "retroactive_jealousy", label: "Her past bothers me", description: "I think about her exes/body count" },
-  { value: "enjoying_youth", label: "Not ready to settle", description: "I want to enjoy being young" },
+  { value: "past_hurt", label: "Past hurt", description: "Still processing previous relationships" },
+  { value: "enjoying_life", label: "Not ready to settle", description: "Want to enjoy being single for now" },
   { value: "financial", label: "Money situation", description: "Need to get my finances right first" },
   { value: "career_focus", label: "Career comes first", description: "Building my career is priority #1" },
   { value: "trust_issues", label: "Trust issues", description: "Been burned before, hard to trust" },
@@ -86,10 +86,10 @@ const SKILL_CHALLENGES = [
   { value: "interview_mode", label: "Conversations feel like interviews", description: "I ask too many questions, hard to flow" },
   { value: "oversharing", label: "I overshare too soon", description: "I dump my life story too early" },
   { value: "defensive", label: "I get defensive", description: "I take things personally or shut down" },
-  { value: "reading_signals", label: "Hard to read signals", description: "I miss or misinterpret her cues" },
+  { value: "reading_signals", label: "Hard to read signals", description: "I miss or misinterpret cues" },
   { value: "texting_games", label: "Texting is confusing", description: "Don't know when/how much to text" },
   { value: "physical_escalation", label: "Physical escalation", description: "Not sure when to make a move" },
-  { value: "none", label: "I'm pretty good with women", description: "Just need the right match" },
+  { value: "none", label: "I'm pretty good at dating", description: "Just need the right match" },
 ];
 
 const DatingStyleScreen = () => {
@@ -205,7 +205,7 @@ const DatingStyleScreen = () => {
 
         {/* Dating Skill Challenges */}
         <div className="space-y-3">
-          <Label className="text-base font-medium">Where do you struggle with women?</Label>
+          <Label className="text-base font-medium">Where do you struggle in dating?</Label>
           <p className="text-sm text-muted-foreground">No judgment—this helps D.E.V.I. coach you better</p>
           <div className="space-y-2">
             {SKILL_CHALLENGES.map((option) => (
@@ -220,15 +220,25 @@ const DatingStyleScreen = () => {
           </div>
         </div>
 
-        {/* Continue Button */}
-        <Button
-          onClick={handleContinue}
-          disabled={!isValid}
-          className="w-full"
-          size="lg"
-        >
-          Continue
-        </Button>
+        {/* Continue & Skip Buttons */}
+        <div className="space-y-3">
+          <Button
+            onClick={handleContinue}
+            disabled={!isValid}
+            className="w-full"
+            size="lg"
+          >
+            Continue
+          </Button>
+          <Button
+            onClick={() => nextStep()}
+            variant="ghost"
+            className="w-full text-muted-foreground"
+            size="sm"
+          >
+            Skip for now
+          </Button>
+        </div>
       </div>
     </OnboardingLayout>
   );

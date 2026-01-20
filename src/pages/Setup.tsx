@@ -41,10 +41,6 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
   const { currentStep, loading, data, updateData, goToStep } = useOnboarding();
   const [initialized, setInitialized] = useState(false);
 
-  // Check if user is a heterosexual male (man seeking women)
-  const isMaleHetero = (data.genderIdentity === 'man_cis' || data.genderIdentity === 'man_trans') && 
-                       data.interestedIn?.includes('women');
-
   // Handle setup mode from URL params - skip WelcomeScreen if already chosen
   // Note: step 1 is now AppearanceScreen, step 2 is BasicIdentityScreen
   useEffect(() => {
@@ -78,46 +74,35 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
     return <QuickStartScreen />;
   }
 
-  // Build screens array dynamically based on user profile
-  // DatingStyleScreen is inserted after DatingMotivationScreen for male hetero users
-  const baseScreens = [
+  // Build screens array - DatingStyleScreen is now included for all users
+  const screens = [
     <WelcomeScreen key={0} />,
     <AppearanceScreen key={1} />,
     <BasicIdentityScreen key={2} />,
     <DatingPreferencesScreen key={3} />,
     <HormoneCycleScreen key={4} />,
     <DatingMotivationScreen key={5} />,
+    <DatingStyleScreen key={6} />,
+    <RelationshipGoalsScreen key={7} />,
+    <KidsFamilyScreen key={8} />,
+    <FaithValuesScreen key={9} />,
+    <PoliticsScreen key={10} />,
+    <CareerScreen key={11} />,
+    <LocationScheduleScreen key={12} />,
+    <SocialActivityScreen key={13} />,
+    <PhysicalPreferencesScreen key={14} />,
+    <CommunicationScreen key={15} />,
+    <PastPatternsScreen key={16} />,
+    <PersonalSectionIntroScreen key={17} />,
+    <RelationshipTraumaScreen key={18} />,
+    <HealingAssessmentScreen key={19} />,
+    <FamilyUpbringingScreen key={20} />,
+    <BoundariesScreen key={21} />,
+    <MentalHealthScreen key={22} />,
+    <SafetyIntimacyScreen key={23} />,
+    <DeviStyleScreen key={24} />,
+    <CompletionScreen key={25} />,
   ];
-
-  // Insert DatingStyleScreen for male heterosexual users
-  if (isMaleHetero) {
-    baseScreens.push(<DatingStyleScreen key="dating-style" />);
-  }
-
-  // Continue with remaining screens
-  const remainingScreens = [
-    <RelationshipGoalsScreen key={6} />,
-    <KidsFamilyScreen key={7} />,
-    <FaithValuesScreen key={8} />,
-    <PoliticsScreen key={9} />,
-    <CareerScreen key={10} />,
-    <LocationScheduleScreen key={11} />,
-    <SocialActivityScreen key={12} />,
-    <PhysicalPreferencesScreen key={13} />,
-    <CommunicationScreen key={14} />,
-    <PastPatternsScreen key={15} />,
-    <PersonalSectionIntroScreen key={16} />,
-    <RelationshipTraumaScreen key={17} />,
-    <HealingAssessmentScreen key={18} />,
-    <FamilyUpbringingScreen key={19} />,
-    <BoundariesScreen key={20} />,
-    <MentalHealthScreen key={21} />,
-    <SafetyIntimacyScreen key={22} />,
-    <DeviStyleScreen key={23} />,
-    <CompletionScreen key={24} />,
-  ];
-
-  const screens = [...baseScreens, ...remainingScreens];
 
   return screens[currentStep] || screens[0];
 };
