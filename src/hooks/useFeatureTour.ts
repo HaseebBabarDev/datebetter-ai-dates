@@ -1,23 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 const TOUR_VIEW_KEY = "feature_tour_views";
 const MAX_TOUR_VIEWS = 2;
 
+// Static function to reset feature tour for a user (can be called without the hook)
+export function resetFeatureTour(userId: string) {
+  const localKey = `${TOUR_VIEW_KEY}_${userId}`;
+  localStorage.removeItem(localKey);
+}
+
 export function useFeatureTour(userId: string | undefined) {
   const [showTour, setShowTour] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (!userId) {
-      setIsLoading(false);
-      return;
-    }
-
-    checkTourStatus();
-  }, [userId]);
-
-  const checkTourStatus = async () => {
+  const checkTourStatus = useCallback(async () => {
+    if (!userId) return;
+    
     try {
       // Check local storage first for quick access
       const localKey = `${TOUR_VIEW_KEY}_${userId}`;
@@ -46,9 +45,18 @@ export function useFeatureTour(userId: string | undefined) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId]);
 
-  const completeTour = () => {
+  useEffect(() => {
+    if (!userId) {
+      setIsLoading(false);
+      return;
+    }
+
+    checkTourStatus();
+  }, [userId, checkTourStatus]);
+
+  const completeTour = useCallback(() => {
     if (!userId) return;
     
     const localKey = `${TOUR_VIEW_KEY}_${userId}`;
@@ -58,11 +66,19 @@ export function useFeatureTour(userId: string | undefined) {
     // Increment view count
     localStorage.setItem(localKey, String(viewCount + 1));
     setShowTour(false);
-  };
+  }, [userId]);
+
+  const restartTour = useCallback(() => {
+    if (!userId) return;
+    
+    resetFeatureTour(userId);
+    setShowTour(true);
+  }, [userId]);
 
   return {
     showTour,
     isLoading,
     completeTour,
+    restartTour,
   };
 }
