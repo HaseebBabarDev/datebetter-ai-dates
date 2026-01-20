@@ -476,6 +476,41 @@ const PATTERN_RECOGNITION_OPTIONS = [
   "Difficulty with vulnerability",
 ];
 
+// Dating Style options (from DatingStyleScreen)
+const HONESTY_OPTIONS = [
+  { value: "fully_honest", label: "I'm an open book" },
+  { value: "mostly_honest", label: "Honest about the important stuff" },
+  { value: "strategic", label: "I play my cards close" },
+];
+
+const BLOCKER_OPTIONS = [
+  { value: "past_hurt", label: "Past hurt" },
+  { value: "enjoying_life", label: "Not ready to settle" },
+  { value: "financial", label: "Money situation" },
+  { value: "career_focus", label: "Career comes first" },
+  { value: "trust_issues", label: "Trust issues" },
+  { value: "commitment_fear", label: "Commitment scares me" },
+  { value: "emotional_unavailable", label: "Emotionally closed off" },
+  { value: "none", label: "Nothing's blocking me" },
+];
+
+const TIMELINE_OPTIONS = [
+  { value: "now", label: "I'm ready now" },
+  { value: "6_months", label: "Within 6 months" },
+  { value: "1_year", label: "About a year" },
+  { value: "uncertain", label: "Not sure when" },
+];
+
+const SKILL_CHALLENGE_OPTIONS = [
+  { value: "interview_mode", label: "Conversations feel like interviews" },
+  { value: "oversharing", label: "I overshare too soon" },
+  { value: "defensive", label: "I get defensive" },
+  { value: "reading_signals", label: "Hard to read signals" },
+  { value: "texting_games", label: "Texting is confusing" },
+  { value: "physical_escalation", label: "Physical escalation" },
+  { value: "none", label: "I'm pretty good at dating" },
+];
+
 // Family & Upbringing options
 const PARENT_STATUS_OPTIONS = [
   { value: "married_together", label: "Married Together" },
@@ -675,7 +710,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
     }
   };
 
-  const SECTION_ORDER = ["identity", "motivation", "relationship", "partner_prefs", "kids", "faith", "politics", "career", "income", "lifestyle", "physical", "communication", "mental_health", "neurodivergence", "past_relationships", "attachment", "family", "healing", "boundaries", "intimacy", "devi", "cycle"];
+  const SECTION_ORDER = ["identity", "motivation", "dating_style", "relationship", "partner_prefs", "kids", "faith", "politics", "career", "income", "lifestyle", "physical", "communication", "mental_health", "neurodivergence", "past_relationships", "attachment", "family", "healing", "boundaries", "intimacy", "devi", "cycle"];
   
   const SECTION_CONFIG: Record<string, { 
     label: string; 
@@ -684,6 +719,7 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
   }> = {
     identity: { label: "Basic Identity", icon: <User className="w-3.5 h-3.5" />, requiredFields: ["name", "gender_identity", "birth_date"] },
     motivation: { label: "Dating Motivation", icon: <Target className="w-3.5 h-3.5" />, requiredFields: ["dating_motivation"] },
+    dating_style: { label: "Dating Style", icon: <Heart className="w-3.5 h-3.5" />, requiredFields: [] },
     relationship: { label: "Relationship Goals", icon: <Heart className="w-3.5 h-3.5" />, requiredFields: ["relationship_goal", "relationship_structure"] },
     partner_prefs: { label: "Partner Preferences", icon: <Users className="w-3.5 h-3.5" />, requiredFields: ["interested_in", "height_preference"] },
     kids: { label: "Kids & Family", icon: <Baby className="w-3.5 h-3.5" />, requiredFields: ["kids_status", "kids_desire"] },
@@ -972,7 +1008,128 @@ export const ProfilePreferencesEditor: React.FC<ProfilePreferencesEditorProps> =
           </AccordionContent>
         </AccordionItem>
 
-        {/* Relationship Goals */}
+        {/* Dating Style */}
+        <AccordionItem value="dating_style" data-value="dating_style" className="border rounded-lg px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2 flex-1">
+              <Heart className="w-4 h-4 text-rose-500" />
+              <span className="font-medium">Dating Style</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pb-4">
+            <div className="space-y-2">
+              <Label>How do you approach honesty in dating?</Label>
+              <Select
+                value={(formData as any).dating_honesty_intent || ""}
+                onValueChange={(v) => updateField("dating_honesty_intent" as any, v)}
+              >
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  {HONESTY_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>What's keeping you from wanting a relationship?</Label>
+              <p className="text-xs text-muted-foreground">Select all that apply</p>
+              <div className="flex flex-wrap gap-2">
+                {BLOCKER_OPTIONS.map(opt => {
+                  const currentBlockers = ((formData as any).relationship_blockers as string[] | null) || [];
+                  const isSelected = currentBlockers.includes(opt.value);
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => {
+                        let updated: string[];
+                        if (opt.value === "none") {
+                          updated = isSelected ? [] : ["none"];
+                        } else {
+                          const filtered = currentBlockers.filter(b => b !== "none");
+                          updated = isSelected
+                            ? filtered.filter(b => b !== opt.value)
+                            : [...filtered, opt.value];
+                        }
+                        updateField("relationship_blockers" as any, updated);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        isSelected 
+                          ? "bg-primary text-primary-foreground border-primary" 
+                          : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* Timeline - only show if blockers exist and not "none" */}
+            {((formData as any).relationship_blockers as string[] || []).length > 0 && 
+             !((formData as any).relationship_blockers as string[] || []).includes("none") && (
+              <div className="space-y-2">
+                <Label>When do you think that might change?</Label>
+                <Select
+                  value={(formData as any).relationship_blocker_timeline || ""}
+                  onValueChange={(v) => updateField("relationship_blocker_timeline" as any, v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {TIMELINE_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label>Where do you struggle in dating?</Label>
+              <p className="text-xs text-muted-foreground">No judgment—this helps D.E.V.I. coach you better</p>
+              <div className="flex flex-wrap gap-2">
+                {SKILL_CHALLENGE_OPTIONS.map(opt => {
+                  const currentChallenges = ((formData as any).dating_skill_challenges as string[] | null) || [];
+                  const isSelected = currentChallenges.includes(opt.value);
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => {
+                        let updated: string[];
+                        if (opt.value === "none") {
+                          updated = isSelected ? [] : ["none"];
+                        } else {
+                          const filtered = currentChallenges.filter(c => c !== "none");
+                          updated = isSelected
+                            ? filtered.filter(c => c !== opt.value)
+                            : [...filtered, opt.value];
+                        }
+                        updateField("dating_skill_challenges" as any, updated);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        isSelected 
+                          ? "bg-primary text-primary-foreground border-primary" 
+                          : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={(e) => goToNextSection("dating_style", e)}>
+              Next
+            </Button>
+          </AccordionContent>
+        </AccordionItem>
+
+
         <AccordionItem value="relationship" data-value="relationship" className={`border rounded-lg px-4 ${isSectionComplete("relationship") ? "border-green-500/30 bg-green-500/5" : ""}`}>
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2 flex-1">
