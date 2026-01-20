@@ -65,8 +65,16 @@ type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
 
+type AdminMessage = {
+  id: string;
+  title: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+};
+
 type RecentActivityItem = {
-  type: "matched" | "interacted" | "ended" | "no_contact" | "notification";
+  type: "matched" | "interacted" | "ended" | "no_contact" | "notification" | "admin_message";
   candidate?: Candidate;
   interaction?: Interaction;
   date: Date;
@@ -76,6 +84,7 @@ type RecentActivityItem = {
     message: string;
     icon: "flame" | "alert" | "heart" | "trending" | "clock" | "lightbulb";
   };
+  adminMessage?: AdminMessage;
 };
 
 interface CandidateRecap {
@@ -102,6 +111,7 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
+  const [adminMessages, setAdminMessages] = useState<AdminMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("home");
   const [sortBy, setSortBy] = useState<SortOption>("status");
@@ -248,15 +258,17 @@ const Dashboard = () => {
 
   const fetchData = useCallback(async () => {
     try {
-      const [profileRes, candidatesRes, interactionsRes] = await Promise.all([
+      const [profileRes, candidatesRes, interactionsRes, adminMsgsRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", user!.id).single(),
         supabase.from("candidates").select("*").eq("user_id", user!.id).order("updated_at", { ascending: false }),
         supabase.from("interactions").select("*").eq("user_id", user!.id).order("interaction_date", { ascending: false }).limit(50),
+        supabase.from("admin_messages").select("*").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(10),
       ]);
 
       if (profileRes.data) setProfile(profileRes.data);
       if (candidatesRes.data) setCandidates(candidatesRes.data);
       if (interactionsRes.data) setInteractions(interactionsRes.data);
+      if (adminMsgsRes.data) setAdminMessages(adminMsgsRes.data as AdminMessage[]);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -684,6 +696,15 @@ const Dashboard = () => {
       }
     });
 
+    // Add admin messages as activity items
+    adminMessages.forEach((msg) => {
+      activityItems.push({
+        type: "admin_message",
+        date: new Date(msg.created_at),
+        adminMessage: msg,
+      });
+    });
+
     // Sort by date and take top 8 (increased to show more items)
     const recentActivity = activityItems
       .sort((a, b) => b.date.getTime() - a.date.getTime())
@@ -708,7 +729,7 @@ const Dashboard = () => {
       badCandidates,
       neutralCandidates,
     };
-  }, [candidates, interactions]);
+  }, [candidates, interactions, adminMessages]);
 
   const filteredAndSortedCandidates = useMemo(() => {
     let filtered = [...candidates];
@@ -1309,6 +1330,50 @@ const Dashboard = () => {
                           </div>
                           <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
                         </button>
+                      );
+                    }
+
+                    // Admin message notification
+                    if (item.type === "admin_message" && item.adminMessage) {
+                      const handleMarkAsRead = async (e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        if (!item.adminMessage!.is_read) {
+                          await supabase
+                            .from("admin_messages")
+                            .update({ is_read: true })
+                            .eq("id", item.adminMessage!.id);
+                          setAdminMessages(prev => 
+                            prev.map(m => m.id === item.adminMessage!.id ? { ...m, is_read: true } : m)
+                          );
+                        }
+                      };
+                      return (
+                        <div
+                          key={`admin-msg-${item.adminMessage.id}`}
+                          onClick={handleMarkAsRead}
+                          className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors cursor-pointer ${
+                            item.adminMessage.is_read 
+                              ? 'bg-muted/50 hover:bg-muted' 
+                              : 'bg-primary/10 hover:bg-primary/20 border border-primary/20'
+                          }`}
+                        >
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                            item.adminMessage.is_read ? 'bg-muted' : 'bg-primary/20'
+                          }`}>
+                            <Bell className={`w-4 h-4 ${item.adminMessage.is_read ? 'text-muted-foreground' : 'text-primary'}`} />
+                          </div>
+                          <div className="flex-1 text-left min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className={`text-sm font-medium ${item.adminMessage.is_read ? 'text-foreground' : 'text-primary'}`}>
+                                {item.adminMessage.title}
+                              </p>
+                              {!item.adminMessage.is_read && (
+                                <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate">{item.adminMessage.message}</p>
+                          </div>
+                        </div>
                       );
                     }
 
