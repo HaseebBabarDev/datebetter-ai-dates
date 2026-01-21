@@ -868,7 +868,8 @@ CANDIDATE PROFILE (${candidate.nickname}):
 - Location: ${candidate.city || "Not specified"}, ${candidate.country || "Not specified"}
 - Distance from you: ${formatEnumValue(candidate.distance_approximation)}
 - Relationship Status: ${formatEnumValue(candidate.their_relationship_status)}
-- Relationship Goal: ${formatEnumValue(candidate.their_relationship_goal)}
+- Their Relationship Goal (what THEY are looking for): ${formatEnumValue(candidate.their_relationship_goal)}
+- YOUR Goal for ${candidate.nickname} (what YOU want with them): ${formatEnumValue((candidate as any).user_goal_for_candidate) || "Not specified"}
 - Religion: ${formatEnumValue(candidate.their_religion)}
 - Politics: ${formatEnumValue(candidate.their_politics)}
 - Kids Status: ${formatEnumValue(candidate.their_kids_status)}
@@ -951,6 +952,14 @@ WRITING STYLE FOR ADVICE - IMPORTANT:
 - Make advice actionable and situation-specific - not generic "communicate more"
 - Show empathy - "I know it's not what you want to hear, but..."
 - NEVER use underscores or technical enum values in your output
+
+GOAL ALIGNMENT SCORING (CRITICAL - factor this into compatibility):
+- If the user has specified a goal for this candidate, compare it with what the candidate is looking for:
+  * Perfect match (both want same thing) = +15 to future_goals
+  * User wants MORE commitment than candidate (e.g., user wants marriage, they want casual) = -40 to future_goals, and FLAG this prominently in concerns
+  * User wants LESS commitment than candidate (e.g., user wants casual, they want marriage) = -25 to future_goals (potential for hurt feelings on their end)
+  * One or both are "unsure" = neutral, but note they should clarify intentions
+- This is fundamental! If goals don't align, the relationship has limited potential regardless of chemistry.
 
 Consider these factors when adjusting lifestyle scores:
 - Distance/location compatibility (same city is best, long distance reduces score if they prefer nearby)
