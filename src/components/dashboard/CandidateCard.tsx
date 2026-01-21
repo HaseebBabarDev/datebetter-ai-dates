@@ -18,7 +18,11 @@ import {
   Car,
   Plane,
   Globe,
-  Ban
+  Ban,
+  Target,
+  Check,
+  X,
+  HelpCircle
 } from "lucide-react";
 import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
 
@@ -68,6 +72,39 @@ const zodiacConfig: Record<string, { emoji: string; label: string }> = {
   capricorn: { emoji: "♑", label: "Capricorn" },
   aquarius: { emoji: "♒", label: "Aquarius" },
   pisces: { emoji: "♓", label: "Pisces" },
+};
+
+// Goal alignment helper
+type GoalAlignment = "match" | "mismatch" | "partial" | "unknown";
+
+const goalHierarchy: Record<string, number> = {
+  casual: 1,
+  situationship: 2,
+  dating: 3,
+  serious: 4,
+  marriage: 5,
+  unsure: 0,
+};
+
+const getGoalAlignment = (userGoal: string | null | undefined, theirGoal: string | null | undefined): GoalAlignment => {
+  if (!userGoal || !theirGoal) return "unknown";
+  if (userGoal === "unsure" || theirGoal === "unsure") return "partial";
+  if (userGoal === theirGoal) return "match";
+  
+  const userLevel = goalHierarchy[userGoal] || 0;
+  const theirLevel = goalHierarchy[theirGoal] || 0;
+  
+  // If difference is 1 level, it's partial (close enough)
+  if (Math.abs(userLevel - theirLevel) === 1) return "partial";
+  
+  return "mismatch";
+};
+
+const goalAlignmentConfig: Record<GoalAlignment, { label: string; icon: typeof Check; color: string }> = {
+  match: { label: "Goals align", icon: Check, color: "text-emerald-600 bg-emerald-500/10" },
+  partial: { label: "Goals close", icon: HelpCircle, color: "text-amber-600 bg-amber-500/10" },
+  mismatch: { label: "Goals differ", icon: X, color: "text-rose-600 bg-rose-500/10" },
+  unknown: { label: "", icon: Target, color: "" },
 };
 
 interface NextStepParams {
@@ -233,6 +270,24 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
               return (
                 <span className={`text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1 ${config.color}`}>
                   <DistIcon className="w-3 h-3" />
+                  {config.label}
+                </span>
+              );
+            })()}
+            {(() => {
+              const alignment = getGoalAlignment(
+                (candidate as any).user_goal_for_candidate,
+                candidate.their_relationship_goal
+              );
+              if (alignment === "unknown") return null;
+              const config = goalAlignmentConfig[alignment];
+              const AlignIcon = config.icon;
+              return (
+                <span 
+                  className={`text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1 ${config.color}`}
+                  title={`You: ${(candidate as any).user_goal_for_candidate || 'Not set'} | They: ${candidate.their_relationship_goal || 'Unknown'}`}
+                >
+                  <AlignIcon className="w-3 h-3" />
                   {config.label}
                 </span>
               );
