@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VoicePlayButton } from "./VoicePlayButton";
+import { Button } from "@/components/ui/button";
 
 interface Message {
   id: string;
@@ -203,13 +204,17 @@ interface ChatGPTMessageProps {
   isLoading?: boolean;
 }
 
+// Threshold for showing "Read more" - approximately 2 short paragraphs
+const COLLAPSE_THRESHOLD = 300;
+
 export const ChatGPTMessage: React.FC<ChatGPTMessageProps> = ({ 
   message, 
   isLast, 
   onQuickReply, 
   isLoading 
 }) => {
-  const [expanded, setExpanded] = useState(true); // Default to expanded in ChatGPT style
+  const isLongMessage = message.role === 'assistant' && message.content.length > COLLAPSE_THRESHOLD;
+  const [expanded, setExpanded] = useState(!isLongMessage); // Collapse long messages by default
   const showQuickReplies = message.role === 'assistant' && isLast && !isLoading && onQuickReply;
 
   if (message.role === 'user') {
@@ -254,9 +259,44 @@ export const ChatGPTMessage: React.FC<ChatGPTMessageProps> = ({
             className="max-w-full rounded-lg mb-4 max-h-64 object-cover"
           />
         )}
-        <div className="text-foreground">
-          {renderChatGPTContent(message.content)}
+        <div className={cn(
+          "text-foreground",
+          isLongMessage && !expanded && "relative"
+        )}>
+          {isLongMessage && !expanded ? (
+            <>
+              {/* Show truncated content with fade */}
+              <div className="line-clamp-6">
+                {renderChatGPTContent(message.content)}
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-background to-transparent" />
+            </>
+          ) : (
+            renderChatGPTContent(message.content)
+          )}
         </div>
+        
+        {/* Read more / Show less button */}
+        {isLongMessage && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setExpanded(!expanded)}
+            className="mt-2 text-muted-foreground hover:text-foreground gap-1 px-0"
+          >
+            {expanded ? (
+              <>
+                <ChevronUp className="w-4 h-4" />
+                Show less
+              </>
+            ) : (
+              <>
+                <ChevronDown className="w-4 h-4" />
+                Keep reading
+              </>
+            )}
+          </Button>
+        )}
         
         {/* Voice playback blob - centered under message */}
         {!isLoading && message.content && (
