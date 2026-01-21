@@ -17,22 +17,46 @@ import {
   ChevronRight,
   Sparkles,
   Home,
-  Gift
+  Gift,
+  Bell,
+  Reply,
+  MessageSquare,
+  Send,
+  Loader2
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { differenceInDays } from "date-fns";
 
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
 type Referral = Tables<"referrals">;
 
+interface AdminMessage {
+  id: string;
+  title: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+  sender_type?: string;
+  reply_to?: string | null;
+}
+
 interface Notification {
   id: string;
-  type: "warning" | "info" | "success" | "urgent" | "advice" | "oxytocin" | "no-contact" | "low-score" | "referral";
+  type: "warning" | "info" | "success" | "urgent" | "advice" | "oxytocin" | "no-contact" | "low-score" | "referral" | "admin-message";
   icon: React.ReactNode;
   title: string;
   message: string;
   candidateId?: string;
   time?: string;
+  adminMessage?: AdminMessage;
 }
 
 const Notifications = () => {
@@ -41,7 +65,12 @@ const Notifications = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [referrals, setReferrals] = useState<Referral[]>([]);
+  const [adminMessages, setAdminMessages] = useState<AdminMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [replyDialogOpen, setReplyDialogOpen] = useState(false);
+  const [replyingToMessage, setReplyingToMessage] = useState<AdminMessage | null>(null);
+  const [replyContent, setReplyContent] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -51,20 +80,51 @@ const Notifications = () => {
 
   const fetchData = async () => {
     try {
-      const [candidatesRes, interactionsRes, adviceRes, referralsRes] = await Promise.all([
+      const [candidatesRes, interactionsRes, adviceRes, referralsRes, adminMsgsRes] = await Promise.all([
         supabase.from("candidates").select("*").eq("user_id", user!.id),
         supabase.from("interactions").select("*").eq("user_id", user!.id).order("interaction_date", { ascending: false }).limit(50),
         supabase.from("advice_tracking").select("*").eq("user_id", user!.id),
         supabase.from("referrals").select("*").eq("referrer_id", user!.id).eq("status", "converted").order("converted_at", { ascending: false }),
+        supabase.from("admin_messages").select("*").eq("user_id", user!.id).order("created_at", { ascending: false }),
       ]);
 
       if (candidatesRes.data) setCandidates(candidatesRes.data);
       if (interactionsRes.data) setInteractions(interactionsRes.data);
       if (referralsRes.data) setReferrals(referralsRes.data);
+      if (adminMsgsRes.data) setAdminMessages(adminMsgsRes.data as AdminMessage[]);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendReply = async () => {
+    if (!replyingToMessage || !replyContent.trim() || !user) return;
+    
+    setSendingReply(true);
+    try {
+      const { error } = await supabase
+        .from("admin_messages")
+        .insert({
+          user_id: user.id,
+          sender_id: user.id,
+          sender_type: 'user',
+          title: `Re: ${replyingToMessage.title}`,
+          message: replyContent.trim(),
+          reply_to: replyingToMessage.id,
+        });
+      
+      if (error) throw error;
+      
+      setReplyContent("");
+      setReplyDialogOpen(false);
+      setReplyingToMessage(null);
+      fetchData(); // Refresh to show the reply
+    } catch (error) {
+      console.error("Error sending reply:", error);
+    } finally {
+      setSendingReply(false);
     }
   };
 
@@ -192,8 +252,23 @@ const Notifications = () => {
       }
     });
 
+    // Admin messages
+    adminMessages.forEach((msg) => {
+      const daysSince = differenceInDays(today, new Date(msg.created_at));
+      const isFromAdmin = msg.sender_type !== 'user';
+      notifs.push({
+        id: `admin-msg-${msg.id}`,
+        type: "admin-message",
+        icon: isFromAdmin ? <Bell className="w-4 h-4" /> : <MessageSquare className="w-4 h-4" />,
+        title: msg.title,
+        message: msg.message,
+        time: daysSince === 0 ? "Today" : `${daysSince}d ago`,
+        adminMessage: msg,
+      });
+    });
+
     return notifs;
-  }, [candidates, interactions, referrals]);
+  }, [candidates, interactions, referrals, adminMessages]);
 
   if (authLoading || loading) {
     return (
@@ -207,7 +282,12 @@ const Notifications = () => {
     return <Navigate to="/auth" replace />;
   }
 
-  const getTypeStyles = (type: Notification["type"]) => {
+  const getTypeStyles = (type: Notification["type"], adminMessage?: AdminMessage) => {
+    if (type === "admin-message" && adminMessage) {
+      return adminMessage.is_read 
+        ? "bg-muted/50 text-foreground border-border" 
+        : "bg-primary/10 text-primary border-primary/20";
+    }
     switch (type) {
       case "oxytocin":
         return "bg-pink-500/10 text-pink-600 border-pink-500/20";
@@ -230,7 +310,10 @@ const Notifications = () => {
     }
   };
 
-  const getIconBg = (type: Notification["type"]) => {
+  const getIconBg = (type: Notification["type"], adminMessage?: AdminMessage) => {
+    if (type === "admin-message" && adminMessage) {
+      return adminMessage.is_read ? "bg-muted" : "bg-primary/20";
+    }
     switch (type) {
       case "oxytocin": return "bg-pink-500/20";
       case "no-contact": return "bg-slate-500/20";
@@ -274,32 +357,136 @@ const Notifications = () => {
           </div>
         ) : (
           <div className="space-y-2">
-            {notifications.map((notif) => (
-              <button
-                key={notif.id}
-                onClick={() => notif.candidateId && navigate(`/candidate/${notif.candidateId}`)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${getTypeStyles(notif.type)}`}
-              >
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${getIconBg(notif.type)}`}>
-                  {notif.icon}
-                </div>
-                <div className="flex-1 min-w-0 text-left">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-sm truncate">{notif.title}</p>
-                    {notif.time && (
-                      <span className="text-[10px] opacity-60 shrink-0">{notif.time}</span>
+            {notifications.map((notif) => {
+              // Special rendering for admin messages
+              if (notif.type === "admin-message" && notif.adminMessage) {
+                const msg = notif.adminMessage;
+                const isFromAdmin = msg.sender_type !== 'user';
+                
+                const handleMarkAsRead = async () => {
+                  if (!msg.is_read) {
+                    await supabase
+                      .from("admin_messages")
+                      .update({ is_read: true })
+                      .eq("id", msg.id);
+                    setAdminMessages(prev => 
+                      prev.map(m => m.id === msg.id ? { ...m, is_read: true } : m)
+                    );
+                  }
+                };
+                
+                return (
+                  <div
+                    key={notif.id}
+                    onClick={handleMarkAsRead}
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${getTypeStyles(notif.type, msg)}`}
+                  >
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${getIconBg(notif.type, msg)}`}>
+                      {notif.icon}
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <div className="flex items-center gap-2">
+                        <p className={`font-medium text-sm truncate ${msg.is_read ? 'text-foreground' : 'text-primary'}`}>
+                          {notif.title}
+                        </p>
+                        {!msg.is_read && (
+                          <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                        )}
+                        {!isFromAdmin && (
+                          <span className="text-xs text-muted-foreground">(Your reply)</span>
+                        )}
+                        {notif.time && (
+                          <span className="text-[10px] opacity-60 shrink-0">{notif.time}</span>
+                        )}
+                      </div>
+                      <p className="text-xs opacity-70 truncate">{notif.message}</p>
+                    </div>
+                    {isFromAdmin && !msg.reply_to && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setReplyingToMessage(msg);
+                          setReplyDialogOpen(true);
+                        }}
+                        className="shrink-0 text-xs h-7 px-2 text-muted-foreground hover:text-primary"
+                      >
+                        <Reply className="w-3 h-3 mr-1" />
+                        Reply
+                      </Button>
                     )}
                   </div>
-                  <p className="text-xs opacity-70 truncate">{notif.message}</p>
-                </div>
-                {notif.candidateId && (
-                  <ChevronRight className="w-4 h-4 opacity-40 shrink-0" />
-                )}
-              </button>
-            ))}
+                );
+              }
+              
+              // Standard notification rendering
+              return (
+                <button
+                  key={notif.id}
+                  onClick={() => notif.candidateId && navigate(`/candidate/${notif.candidateId}`)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${getTypeStyles(notif.type)}`}
+                >
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${getIconBg(notif.type)}`}>
+                    {notif.icon}
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-sm truncate">{notif.title}</p>
+                      {notif.time && (
+                        <span className="text-[10px] opacity-60 shrink-0">{notif.time}</span>
+                      )}
+                    </div>
+                    <p className="text-xs opacity-70 truncate">{notif.message}</p>
+                  </div>
+                  {notif.candidateId && (
+                    <ChevronRight className="w-4 h-4 opacity-40 shrink-0" />
+                  )}
+                </button>
+              );
+            })}
           </div>
         )}
       </main>
+
+      {/* Reply Dialog */}
+      <Dialog open={replyDialogOpen} onOpenChange={setReplyDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reply to Message</DialogTitle>
+            <DialogDescription>
+              {replyingToMessage?.title}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-3 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground">{replyingToMessage?.message}</p>
+            </div>
+            <Textarea
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              placeholder="Write your reply..."
+              rows={4}
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setReplyDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSendReply} 
+                disabled={sendingReply || !replyContent.trim()}
+              >
+                {sendingReply ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4 mr-2" />
+                )}
+                Send
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -775,14 +775,7 @@ const Dashboard = () => {
       }
     });
 
-    // Add admin messages as activity items
-    adminMessages.forEach((msg) => {
-      activityItems.push({
-        type: "admin_message",
-        date: new Date(msg.created_at),
-        adminMessage: msg,
-      });
-    });
+    // NOTE: Admin messages are now shown in a separate Messages section, not in Recent Activity
 
     // Sort by date and take top 8 (increased to show more items)
     const recentActivity = activityItems
@@ -1414,75 +1407,7 @@ const Dashboard = () => {
                       );
                     }
 
-                    // Admin message notification
-                    if (item.type === "admin_message" && item.adminMessage) {
-                      const handleMarkAsRead = async (e: React.MouseEvent) => {
-                        e.stopPropagation();
-                        if (!item.adminMessage!.is_read) {
-                          await supabase
-                            .from("admin_messages")
-                            .update({ is_read: true })
-                            .eq("id", item.adminMessage!.id);
-                          setAdminMessages(prev => 
-                            prev.map(m => m.id === item.adminMessage!.id ? { ...m, is_read: true } : m)
-                          );
-                        }
-                      };
-                      
-                      const isFromAdmin = item.adminMessage.sender_type !== 'user';
-                      
-                      return (
-                        <div
-                          key={`admin-msg-${item.adminMessage.id}`}
-                          onClick={handleMarkAsRead}
-                          className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors cursor-pointer ${
-                            item.adminMessage.is_read 
-                              ? 'bg-muted/50 hover:bg-muted' 
-                              : 'bg-primary/10 hover:bg-primary/20 border border-primary/20'
-                          }`}
-                        >
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                            item.adminMessage.is_read ? 'bg-muted' : 'bg-primary/20'
-                          }`}>
-                            {isFromAdmin ? (
-                              <Bell className={`w-4 h-4 ${item.adminMessage.is_read ? 'text-muted-foreground' : 'text-primary'}`} />
-                            ) : (
-                              <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                            )}
-                          </div>
-                          <div className="flex-1 text-left min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className={`text-sm font-medium ${item.adminMessage.is_read ? 'text-foreground' : 'text-primary'}`}>
-                                {item.adminMessage.title}
-                              </p>
-                              {!item.adminMessage.is_read && (
-                                <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
-                              )}
-                              {!isFromAdmin && (
-                                <span className="text-xs text-muted-foreground">(Your reply)</span>
-                              )}
-                            </div>
-                            <p className="text-xs text-muted-foreground truncate">{item.adminMessage.message}</p>
-                          </div>
-                          {isFromAdmin && !item.adminMessage.reply_to && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setReplyingToMessage(item.adminMessage!);
-                                setReplyDialogOpen(true);
-                              }}
-                              className="shrink-0 text-xs h-7 px-2 text-muted-foreground hover:text-primary"
-                            >
-                              <Reply className="w-3 h-3 mr-1" />
-                              Reply
-                            </Button>
-                          )}
-                        </div>
-                      );
-                    }
-
+                    // Admin messages are now shown in a separate Messages section
                     return null;
                   })}
                   
@@ -1494,6 +1419,124 @@ const Dashboard = () => {
                     >
                       <ChevronDown className={`w-4 h-4 transition-transform ${showAllActivity ? 'rotate-180' : ''}`} />
                       {showAllActivity ? 'See Less' : `See ${recap.recentActivity.length - 5} More`}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Messages from DateBetter */}
+            {adminMessages.length > 0 && (
+              <div className="rounded-2xl bg-card border border-border overflow-hidden">
+                <div className="px-4 py-3 bg-[image:var(--gradient-subtle)] border-b border-border/50">
+                  <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-primary" />
+                    Messages
+                    {adminMessages.filter(m => !m.is_read).length > 0 && (
+                      <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-primary text-primary-foreground">
+                        {adminMessages.filter(m => !m.is_read).length} new
+                      </span>
+                    )}
+                  </h3>
+                </div>
+                <div className="p-3 space-y-2">
+                  {adminMessages.slice(0, 3).map((msg) => {
+                    const isFromAdmin = msg.sender_type !== 'user';
+                    const handleMarkAsRead = async (e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      if (!msg.is_read) {
+                        await supabase
+                          .from("admin_messages")
+                          .update({ is_read: true })
+                          .eq("id", msg.id);
+                        setAdminMessages(prev => 
+                          prev.map(m => m.id === msg.id ? { ...m, is_read: true } : m)
+                        );
+                      }
+                    };
+
+                    const handleClearMessage = async (e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      // Mark as read first, then remove from local state
+                      if (!msg.is_read) {
+                        await supabase
+                          .from("admin_messages")
+                          .update({ is_read: true })
+                          .eq("id", msg.id);
+                      }
+                      setAdminMessages(prev => prev.filter(m => m.id !== msg.id));
+                      toast.success("Message cleared");
+                    };
+
+                    return (
+                      <div
+                        key={msg.id}
+                        onClick={handleMarkAsRead}
+                        className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors cursor-pointer ${
+                          msg.is_read 
+                            ? 'bg-muted/50 hover:bg-muted' 
+                            : 'bg-primary/10 hover:bg-primary/20 border border-primary/20'
+                        }`}
+                      >
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                          msg.is_read ? 'bg-muted' : 'bg-primary/20'
+                        }`}>
+                          {isFromAdmin ? (
+                            <Bell className={`w-4 h-4 ${msg.is_read ? 'text-muted-foreground' : 'text-primary'}`} />
+                          ) : (
+                            <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="flex-1 text-left min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className={`text-sm font-medium ${msg.is_read ? 'text-foreground' : 'text-primary'}`}>
+                              {msg.title}
+                            </p>
+                            {!msg.is_read && (
+                              <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                            )}
+                            {!isFromAdmin && (
+                              <span className="text-xs text-muted-foreground">(Your reply)</span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">{msg.message}</p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {isFromAdmin && !msg.reply_to && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setReplyingToMessage(msg);
+                                setReplyDialogOpen(true);
+                              }}
+                              className="text-xs h-7 px-2 text-muted-foreground hover:text-primary"
+                            >
+                              <Reply className="w-3 h-3 mr-1" />
+                              Reply
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={handleClearMessage}
+                            className="text-xs h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  
+                  {adminMessages.length > 3 && (
+                    <button
+                      onClick={() => navigate("/notifications")}
+                      className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                    >
+                      See All Messages
+                      <ChevronRight className="w-4 h-4" />
                     </button>
                   )}
                 </div>
