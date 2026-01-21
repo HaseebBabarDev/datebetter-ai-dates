@@ -132,12 +132,22 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
     setIsPlaying(false);
   }, []);
 
-  const playAudio = useCallback(async () => {
-    if (isPlaying) {
-      stopAudio();
+  const togglePlayPause = useCallback(async () => {
+    // If currently playing, just pause (don't reset)
+    if (isPlaying && audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
       return;
     }
 
+    // If we have an existing audio that was paused, resume it
+    if (!isPlaying && audioRef.current && audioRef.current.currentTime > 0) {
+      await audioRef.current.play();
+      setIsPlaying(true);
+      return;
+    }
+
+    // Otherwise, start fresh
     if (!text || text.trim().length === 0) {
       toast.error("No text to play");
       return;
@@ -192,7 +202,7 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [text, isPlaying, stopAudio, playbackSpeed, userVoice]);
+  }, [text, isPlaying, playbackSpeed, userVoice]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -208,7 +218,7 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
   if (variant === "blob") {
     return (
       <div className={cn("flex flex-col items-center gap-3 py-4", className)}>
-        <FloatingBlob isPlaying={isPlaying} onClick={playAudio} isLoading={isLoading} />
+        <FloatingBlob isPlaying={isPlaying} onClick={togglePlayPause} isLoading={isLoading} />
         <div className="flex items-center gap-3">
           <span className="text-sm text-muted-foreground">
             {isLoading ? "Generating..." : isPlaying ? "Tap to pause" : "Tap to listen"}
@@ -248,7 +258,7 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
   if (variant === "bar") {
     return (
       <button
-        onClick={playAudio}
+        onClick={togglePlayPause}
         disabled={disabled || isLoading}
         className={cn(
           "w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl transition-all",
@@ -303,7 +313,7 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
             isPlaying ? "px-2" : "w-6",
             iconStyles.button,
           )}
-          onClick={playAudio}
+          onClick={togglePlayPause}
           disabled={disabled || isLoading}
           title={isPlaying ? "Pause" : "Listen"}
         >
@@ -355,7 +365,7 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
         !isPlaying && "text-muted-foreground hover:text-foreground hover:bg-muted",
         className
       )}
-      onClick={playAudio}
+      onClick={togglePlayPause}
       disabled={disabled || isLoading}
     >
       {isLoading ? (
