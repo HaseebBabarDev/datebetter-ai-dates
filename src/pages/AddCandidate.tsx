@@ -88,6 +88,15 @@ const RELATIONSHIP_GOAL_OPTIONS: { value: Enums<"relationship_goal"> | "unknown"
   { value: "unsure", label: "Unsure" },
 ];
 
+const USER_GOAL_OPTIONS = [
+  { value: "casual", label: "Casual / Fun" },
+  { value: "situationship", label: "Situationship" },
+  { value: "dating", label: "Dating / Getting to Know" },
+  { value: "serious", label: "Serious Relationship" },
+  { value: "marriage", label: "Long-term / Marriage" },
+  { value: "unsure", label: "Still Figuring It Out" },
+];
+
 const RELATIONSHIP_STATUS_OPTIONS = [
   { value: "unknown", label: "I don't know" },
   { value: "single", label: "Single" },
@@ -348,6 +357,7 @@ const THEIR_ISSUE_OPTIONS = [
   const [theirReligion, setTheirReligion] = useState("");
   const [theirPolitics, setTheirPolitics] = useState("");
   const [theirRelationshipStatus, setTheirRelationshipStatus] = useState("");
+  const [userGoalForCandidate, setUserGoalForCandidate] = useState("");
   const [theirRelationshipGoal, setTheirRelationshipGoal] = useState("");
   const [theirKidsDesire, setTheirKidsDesire] = useState("");
   const [theirKidsStatus, setTheirKidsStatus] = useState("");
@@ -470,6 +480,7 @@ const THEIR_ISSUE_OPTIONS = [
         setTheirPolitics(data.their_politics || "");
         setTheirRelationshipStatus((data as any).their_relationship_status || "");
         setTheirRelationshipGoal(data.their_relationship_goal || "");
+        setUserGoalForCandidate((data as any).user_goal_for_candidate || "");
         setTheirKidsDesire(data.their_kids_desire || "");
         setTheirKidsStatus(data.their_kids_status || "");
         setTheirAttachmentStyle(data.their_attachment_style || "");
@@ -552,6 +563,7 @@ const THEIR_ISSUE_OPTIONS = [
         their_politics: theirPolitics && theirPolitics !== "unknown" ? theirPolitics : null,
         their_relationship_status: theirRelationshipStatus && theirRelationshipStatus !== "unknown" ? theirRelationshipStatus : null,
         their_relationship_goal: theirRelationshipGoal && theirRelationshipGoal !== "unknown" ? theirRelationshipGoal : null,
+        user_goal_for_candidate: userGoalForCandidate || null,
         their_kids_desire: theirKidsDesire && theirKidsDesire !== "unknown" ? theirKidsDesire : null,
         their_kids_status: theirKidsStatus && theirKidsStatus !== "unknown" ? theirKidsStatus : null,
         their_attachment_style: theirAttachmentStyle && theirAttachmentStyle !== "unknown" ? theirAttachmentStyle : null,
@@ -880,6 +892,22 @@ const THEIR_ISSUE_OPTIONS = [
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Your goal for them</Label>
+                  <Select value={userGoalForCandidate} onValueChange={setUserGoalForCandidate}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="What are you looking for?" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {USER_GOAL_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -1300,6 +1328,20 @@ const THEIR_ISSUE_OPTIONS = [
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Your goal for them</Label>
+                    <Select value={userGoalForCandidate} onValueChange={setUserGoalForCandidate}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="What are you looking for?" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {USER_GOAL_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">

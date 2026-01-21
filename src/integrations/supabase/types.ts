@@ -220,6 +220,7 @@ export type Database = {
           their_social_style: string | null
           their_socioeconomic_background: string | null
           updated_at: string | null
+          user_goal_for_candidate: string | null
           user_id: string
           zodiac_sign: string | null
         }
@@ -301,6 +302,7 @@ export type Database = {
           their_social_style?: string | null
           their_socioeconomic_background?: string | null
           updated_at?: string | null
+          user_goal_for_candidate?: string | null
           user_id: string
           zodiac_sign?: string | null
         }
@@ -382,6 +384,7 @@ export type Database = {
           their_social_style?: string | null
           their_socioeconomic_background?: string | null
           updated_at?: string | null
+          user_goal_for_candidate?: string | null
           user_id?: string
           zodiac_sign?: string | null
         }

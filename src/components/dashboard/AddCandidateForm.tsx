@@ -102,6 +102,15 @@ const RELATIONSHIP_GOAL_OPTIONS: { value: Enums<"relationship_goal">; label: str
   { value: "unsure", label: "Unsure" },
 ];
 
+const USER_GOAL_OPTIONS = [
+  { value: "casual", label: "Casual / Fun" },
+  { value: "situationship", label: "Situationship" },
+  { value: "dating", label: "Dating / Getting to Know" },
+  { value: "serious", label: "Serious Relationship" },
+  { value: "marriage", label: "Long-term / Marriage" },
+  { value: "unsure", label: "Still Figuring It Out" },
+];
+
 const KIDS_DESIRE_OPTIONS: { value: Enums<"kids_desire">; label: string }[] = [
   { value: "definitely_yes", label: "Wants Kids" },
   { value: "maybe", label: "Maybe/Open" },
@@ -291,6 +300,7 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
 
   // Relationship Goals
   const [relationshipGoal, setRelationshipGoal] = useState<Enums<"relationship_goal"> | "">("");
+  const [userGoalForCandidate, setUserGoalForCandidate] = useState("");
   const [kidsDesire, setKidsDesire] = useState<Enums<"kids_desire"> | "">("");
   const [kidsStatus, setKidsStatus] = useState<Enums<"kids_status"> | "">("");
 
@@ -347,6 +357,7 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
     setReligion("");
     setPolitics("");
     setRelationshipGoal("");
+    setUserGoalForCandidate("");
     setKidsDesire("");
     setKidsStatus("");
     setCareerStage("");
@@ -403,6 +414,7 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
         their_religion: religion || null,
         their_politics: politics || null,
         their_relationship_goal: relationshipGoal || null,
+        user_goal_for_candidate: userGoalForCandidate || null,
         their_kids_desire: kidsDesire || null,
         their_kids_status: kidsStatus || null,
         their_career_stage: careerStage || null,
@@ -699,6 +711,17 @@ export const AddCandidateForm: React.FC<AddCandidateFormProps> = ({
                     <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
                     <SelectContent>
                       {RELATIONSHIP_GOAL_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Your goal for them</Label>
+                  <Select value={userGoalForCandidate} onValueChange={setUserGoalForCandidate}>
+                    <SelectTrigger><SelectValue placeholder="What are you looking for?" /></SelectTrigger>
+                    <SelectContent>
+                      {USER_GOAL_OPTIONS.map((opt) => (
                         <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                       ))}
                     </SelectContent>
