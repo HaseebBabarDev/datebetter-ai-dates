@@ -4,7 +4,7 @@ import { Tables, Enums } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Calendar, MapPin, User, Briefcase, Heart, Users, Church, Vote, Wine, Cigarette, Dumbbell, Brain, Home } from "lucide-react";
+import { Pencil, Calendar, MapPin, User, Briefcase, Heart, Users, Church, Vote, Wine, Cigarette, Dumbbell, Brain, Home, Target } from "lucide-react";
 import { CandidatePhotoUpload } from "./CandidatePhotoUpload";
 
 type Candidate = Tables<"candidates">;
@@ -62,6 +62,15 @@ const RELATIONSHIP_GOAL_OPTIONS: { value: Enums<"relationship_goal">; label: str
   { value: "serious", label: "Serious Relationship" },
   { value: "marriage", label: "Marriage" },
   { value: "unsure", label: "Unsure" },
+];
+
+const USER_GOAL_OPTIONS = [
+  { value: "casual", label: "Casual / Fun" },
+  { value: "situationship", label: "Situationship" },
+  { value: "dating", label: "Dating / Getting to Know" },
+  { value: "serious", label: "Serious Relationship" },
+  { value: "marriage", label: "Long-term / Marriage" },
+  { value: "unsure", label: "Still Figuring It Out" },
 ];
 
 const RELATIONSHIP_STATUS_OPTIONS = [
@@ -304,7 +313,18 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
             Relationship Goals
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-3">
+          {/* Your goal for them */}
+          {(candidate as any).user_goal_for_candidate && (
+            <div className="p-2 rounded-lg bg-primary/5 border border-primary/20">
+              <p className="text-xs text-muted-foreground mb-1">Your goal for {candidate.nickname}</p>
+              <Badge className="gap-1 bg-primary/10 text-primary hover:bg-primary/20">
+                <Target className="w-3 h-3" />
+                {formatLabel((candidate as any).user_goal_for_candidate, USER_GOAL_OPTIONS)}
+              </Badge>
+            </div>
+          )}
+          
           <div className="flex flex-wrap gap-2">
             {(candidate as any).their_relationship_status && (
               <Badge variant="outline" className="gap-1">
@@ -315,7 +335,7 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
             {candidate.their_relationship_goal && (
               <Badge variant="outline" className="gap-1">
                 <Heart className="w-3 h-3" />
-                {formatLabel(candidate.their_relationship_goal, RELATIONSHIP_GOAL_OPTIONS)}
+                They want: {formatLabel(candidate.their_relationship_goal, RELATIONSHIP_GOAL_OPTIONS)}
               </Badge>
             )}
             {candidate.their_kids_desire && (
@@ -329,7 +349,7 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                 {formatLabel(candidate.their_kids_status, KIDS_STATUS_OPTIONS)}
               </Badge>
             )}
-            {!candidate.their_relationship_goal && !candidate.their_kids_desire && (
+            {!candidate.their_relationship_goal && !candidate.their_kids_desire && !(candidate as any).user_goal_for_candidate && (
               <p className="text-sm text-muted-foreground">No relationship goals recorded</p>
             )}
           </div>
