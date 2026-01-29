@@ -1879,6 +1879,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_tester_status: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          tester_type: Database["public"]["Enums"]["tester_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          tester_type?: Database["public"]["Enums"]["tester_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          tester_type?: Database["public"]["Enums"]["tester_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       willingness_to_pay_surveys: {
         Row: {
           candidate_count_at_survey: number
@@ -2089,6 +2116,7 @@ export type Database = {
         | "dating_often"
         | "dating_more"
         | "unlimited"
+      tester_type: "internal" | "external"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2350,6 +2378,7 @@ export const Constants = {
         "dating_more",
         "unlimited",
       ],
+      tester_type: ["internal", "external"],
     },
   },
 } as const

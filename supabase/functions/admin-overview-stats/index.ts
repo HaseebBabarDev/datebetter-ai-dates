@@ -56,6 +56,17 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Parse request body for tester filter
+    let testerFilter: 'all' | 'internal' | 'external' = 'all';
+    try {
+      const body = await req.json();
+      if (body?.testerFilter && ['all', 'internal', 'external'].includes(body.testerFilter)) {
+        testerFilter = body.testerFilter;
+      }
+    } catch {
+      // No body or invalid JSON, use default
+    }
+
     // Calculate date ranges
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -72,10 +83,60 @@ Deno.serve(async (req) => {
       throw usersError;
     }
 
+    // Fetch tester statuses
+    const { data: testerStatuses } = await supabaseClient
+      .from("user_tester_status")
+      .select("user_id, tester_type");
+
+    const testerStatusMap = new Map<string, string>(
+      testerStatuses?.map(s => [s.user_id, s.tester_type]) || []
+    );
+
     const allUsers = authUsers.users || [];
-    const totalUsers = allUsers.length;
-    const newUsersToday = allUsers.filter(u => new Date(u.created_at) >= today).length;
-    const newUsersThisWeek = allUsers.filter(u => new Date(u.created_at) >= weekAgo).length;
+    
+    // Get user IDs for internal and external testers
+    const internalUserIds = new Set<string>();
+    const externalUserIds = new Set<string>();
+    
+    allUsers.forEach(user => {
+      const testerType = testerStatusMap.get(user.id) || 'external';
+      if (testerType === 'internal') {
+        internalUserIds.add(user.id);
+      } else {
+        externalUserIds.add(user.id);
+      }
+    });
+
+    // Determine which user IDs to filter by
+    let filteredUserIds: Set<string> | null = null;
+    if (testerFilter === 'internal') {
+      filteredUserIds = internalUserIds;
+    } else if (testerFilter === 'external') {
+      filteredUserIds = externalUserIds;
+    }
+
+    const filteredUsers = filteredUserIds 
+      ? allUsers.filter(u => filteredUserIds!.has(u.id))
+      : allUsers;
+
+    const totalUsers = filteredUsers.length;
+    const newUsersToday = filteredUsers.filter(u => new Date(u.created_at) >= today).length;
+    const newUsersThisWeek = filteredUsers.filter(u => new Date(u.created_at) >= weekAgo).length;
+
+    // Build queries based on filter
+    const buildFilteredQuery = (tableName: string, userIdColumn: string = 'user_id') => {
+      let query = supabaseClient.from(tableName).select("*", { count: "exact", head: true });
+      if (filteredUserIds) {
+        const userIdsArray = Array.from(filteredUserIds);
+        if (userIdsArray.length > 0) {
+          query = query.in(userIdColumn, userIdsArray);
+        } else {
+          // No users match, return empty
+          return supabaseClient.from(tableName).select("*", { count: "exact", head: true }).eq(userIdColumn, 'no-match-uuid');
+        }
+      }
+      return query;
+    };
 
     // Fetch counts using service role (bypasses RLS)
     const [
@@ -87,13 +148,13 @@ Deno.serve(async (req) => {
       postsResult,
       commentsResult,
     ] = await Promise.all([
-      supabaseClient.from("user_roles").select("*", { count: "exact", head: true }).eq("role", "admin"),
-      supabaseClient.from("candidates").select("*", { count: "exact", head: true }),
-      supabaseClient.from("interactions").select("*", { count: "exact", head: true }),
-      supabaseClient.from("devi_conversations").select("*", { count: "exact", head: true }),
-      supabaseClient.from("devi_messages").select("*", { count: "exact", head: true }),
-      supabaseClient.from("forum_posts").select("*", { count: "exact", head: true }),
-      supabaseClient.from("forum_comments").select("*", { count: "exact", head: true }),
+      buildFilteredQuery("user_roles", "user_id").eq("role", "admin"),
+      buildFilteredQuery("candidates"),
+      buildFilteredQuery("interactions"),
+      buildFilteredQuery("devi_conversations"),
+      buildFilteredQuery("devi_messages"),
+      buildFilteredQuery("forum_posts"),
+      buildFilteredQuery("forum_comments"),
     ]);
 
     const stats = {
@@ -107,6 +168,8 @@ Deno.serve(async (req) => {
       totalComments: commentsResult.count || 0,
       newUsersToday,
       newUsersThisWeek,
+      internalUsers: internalUserIds.size,
+      externalUsers: externalUserIds.size,
     };
 
     return new Response(
