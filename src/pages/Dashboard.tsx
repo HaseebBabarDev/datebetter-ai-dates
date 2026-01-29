@@ -143,6 +143,7 @@ const Dashboard = () => {
   const [replyingToMessage, setReplyingToMessage] = useState<AdminMessage | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
+  const [deviChatCount, setDeviChatCount] = useState(0);
   
   // Devi wins tracking
   const { wins, refetch: refetchWins } = useDeviWins(user?.id);
@@ -337,17 +338,19 @@ const Dashboard = () => {
 
   const fetchData = useCallback(async () => {
     try {
-      const [profileRes, candidatesRes, interactionsRes, adminMsgsRes] = await Promise.all([
+      const [profileRes, candidatesRes, interactionsRes, adminMsgsRes, deviConversationsRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", user!.id).single(),
         supabase.from("candidates").select("*").eq("user_id", user!.id).order("updated_at", { ascending: false }),
         supabase.from("interactions").select("*").eq("user_id", user!.id).order("interaction_date", { ascending: false }).limit(50),
         supabase.from("admin_messages").select("*").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(10),
+        supabase.from("devi_conversations").select("id", { count: "exact" }).eq("user_id", user!.id),
       ]);
 
       if (profileRes.data) setProfile(profileRes.data);
       if (candidatesRes.data) setCandidates(candidatesRes.data);
       if (interactionsRes.data) setInteractions(interactionsRes.data);
       if (adminMsgsRes.data) setAdminMessages(adminMsgsRes.data as AdminMessage[]);
+      if (deviConversationsRes.count !== null) setDeviChatCount(deviConversationsRes.count);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -993,14 +996,19 @@ const Dashboard = () => {
                   <TooltipTrigger asChild>
                     <Button
                       onClick={() => navigate("/devi")}
-                      className="h-11 gap-2 bg-gradient-to-br from-secondary to-primary text-primary-foreground rounded-xl shadow-sm transition-all duration-200 active:scale-[0.98]"
+                      className="h-11 gap-2 bg-gradient-to-br from-secondary to-primary text-primary-foreground rounded-xl shadow-sm transition-all duration-200 active:scale-[0.98] relative"
                     >
                       <Sparkles className="w-4 h-4" />
                       <span className="text-xs font-medium">Ask D.E.V.I.</span>
+                      {deviChatCount > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center px-1 text-[10px] font-bold bg-background text-primary rounded-full border-2 border-primary shadow-sm">
+                          {deviChatCount > 99 ? "99+" : deviChatCount}
+                        </span>
+                      )}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="max-w-[200px]">
-                    <p className="text-xs">Get personalized dating advice from your AI coach</p>
+                    <p className="text-xs">Get personalized dating advice from your AI coach{deviChatCount > 0 ? ` • ${deviChatCount} chat${deviChatCount !== 1 ? 's' : ''}` : ''}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
