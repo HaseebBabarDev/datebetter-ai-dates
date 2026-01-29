@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, 
   Heart, 
@@ -10,8 +11,11 @@ import {
   Calendar,
   Activity,
   Shield,
-  Loader2
+  Loader2,
+  FlaskConical,
+  UserCheck
 } from "lucide-react";
+import { useTesterFilter } from "@/hooks/useTesterFilter";
 
 interface OverviewStats {
   totalUsers: number;
@@ -25,17 +29,21 @@ interface OverviewStats {
   newUsersToday: number;
   newUsersThisWeek: number;
   activeUsersToday: number;
+  internalUsers: number;
+  externalUsers: number;
 }
 
 export function AdminOverview() {
   const [stats, setStats] = useState<OverviewStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const { filter: testerFilter, setFilter: setTesterFilter } = useTesterFilter();
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [testerFilter]);
 
   const fetchStats = async () => {
+    setLoading(true);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
@@ -50,6 +58,7 @@ export function AdminOverview() {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        body: { testerFilter },
       });
 
       if (response.error) {
@@ -71,6 +80,8 @@ export function AdminOverview() {
           newUsersToday: data.stats.newUsersToday || 0,
           newUsersThisWeek: data.stats.newUsersThisWeek || 0,
           activeUsersToday: 0,
+          internalUsers: data.stats.internalUsers || 0,
+          externalUsers: data.stats.externalUsers || 0,
         });
       }
     } catch (error) {
@@ -97,6 +108,20 @@ export function AdminOverview() {
       icon: Users, 
       color: "text-blue-500",
       bgColor: "bg-blue-500/10"
+    },
+    { 
+      title: "Internal Testers", 
+      value: stats.internalUsers, 
+      icon: FlaskConical, 
+      color: "text-indigo-500",
+      bgColor: "bg-indigo-500/10"
+    },
+    { 
+      title: "External Testers", 
+      value: stats.externalUsers, 
+      icon: UserCheck, 
+      color: "text-emerald-500",
+      bgColor: "bg-emerald-500/10"
     },
     { 
       title: "Admin Users", 
@@ -165,14 +190,34 @@ export function AdminOverview() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-2">Dashboard Overview</h2>
-        <p className="text-muted-foreground">
-          Real-time statistics across all dateBetter systems
-        </p>
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold mb-2">Dashboard Overview</h2>
+          <p className="text-muted-foreground">
+            {testerFilter === 'all' ? 'All users' : testerFilter === 'internal' ? 'Internal testers only' : 'External testers only'}
+          </p>
+        </div>
+        
+        {/* Tester Type Filter */}
+        <Tabs value={testerFilter} onValueChange={(v) => setTesterFilter(v as 'all' | 'internal' | 'external')}>
+          <TabsList>
+            <TabsTrigger value="all" className="gap-1.5">
+              <Users className="w-3.5 h-3.5" />
+              All
+            </TabsTrigger>
+            <TabsTrigger value="internal" className="gap-1.5">
+              <FlaskConical className="w-3.5 h-3.5" />
+              Internal
+            </TabsTrigger>
+            <TabsTrigger value="external" className="gap-1.5">
+              <UserCheck className="w-3.5 h-3.5" />
+              External
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
         {statCards.map((stat) => (
           <Card key={stat.title} className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
