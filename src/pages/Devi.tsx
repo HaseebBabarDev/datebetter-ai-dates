@@ -438,8 +438,37 @@ const Devi = () => {
   // Mode: "general" = no candidate, "candidate" = specific candidate
   const chatMode = selectedCandidate ? "candidate" : "general";
 
+  // Track if this is an initial load vs new message
+  const isInitialLoadRef = useRef(true);
+  const prevMessagesLengthRef = useRef(0);
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messages.length === 0) {
+      isInitialLoadRef.current = true;
+      prevMessagesLengthRef.current = 0;
+      return;
+    }
+
+    // Determine if this is initial load (loading existing conversation) or a new message
+    const isInitialLoad = isInitialLoadRef.current;
+    const isNewMessage = messages.length > prevMessagesLengthRef.current && prevMessagesLengthRef.current > 0;
+    
+    // Use requestAnimationFrame + setTimeout to ensure DOM is fully rendered
+    const scrollToBottom = () => {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ 
+            behavior: isInitialLoad ? "instant" : "smooth" 
+          });
+        }, 0);
+      });
+    };
+
+    scrollToBottom();
+    
+    // Update refs after scroll
+    isInitialLoadRef.current = false;
+    prevMessagesLengthRef.current = messages.length;
   }, [messages]);
 
   // Fetch candidates, user profile, and conversations in parallel
@@ -607,6 +636,10 @@ const Devi = () => {
     
     // Reset soft warning when loading a conversation
     setSoftWarningDismissed(false);
+    
+    // Mark as initial load so scroll uses "instant" behavior
+    isInitialLoadRef.current = true;
+    prevMessagesLengthRef.current = 0;
     
     const { data: messagesData } = await supabase
       .from("devi_messages")
