@@ -62,7 +62,7 @@ export default function Terms() {
           </p>
           <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc">
             <li>Candidate tracking and management for your dating life</li>
-            <li>AI-generated compatibility analysis and insights via "Devi" AI coach</li>
+            <li>AI-generated compatibility analysis and insights via "D.E.V.I." AI assistant</li>
             <li>Pattern recognition and behavioral analysis</li>
             <li>Red and green flag detection</li>
             <li>Menstrual cycle tracking with hormone-aware insights (optional)</li>
@@ -179,7 +179,7 @@ export default function Terms() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-foreground">AI Usage & Fair Use</h2>
           <p className="text-sm text-foreground leading-relaxed">
-            AI features, including the Devi AI coach, are included in your subscription tier. While we do not impose hard limits on AI usage, excessive or abusive use may result in temporary rate limiting. We reserve the right to modify AI feature availability based on system capacity.
+            AI features, including the D.E.V.I. AI assistant, are included in your subscription tier. While we do not impose hard limits on AI usage, excessive or abusive use may result in temporary rate limiting. We reserve the right to modify AI feature availability based on system capacity.
           </p>
         </section>
 
@@ -198,7 +198,7 @@ export default function Terms() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-foreground">Intellectual Property</h2>
           <p className="text-sm text-foreground leading-relaxed">
-            The Service, including its original content, features, functionality, branding, and AI algorithms, is owned by the Company and is protected by international copyright, trademark, patent, trade secret, and other intellectual property laws. "dateBetter", "Devi", and associated logos are trademarks of IdeaaHaus.
+            The Service, including its original content, features, functionality, branding, and AI algorithms, is owned by the Company and is protected by international copyright, trademark, patent, trade secret, and other intellectual property laws. "dateBetter", "D.E.V.I.", and associated logos are trademarks of IdeaaHaus.
           </p>
         </section>
 

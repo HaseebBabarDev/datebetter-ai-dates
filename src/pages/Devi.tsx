@@ -1466,7 +1466,7 @@ const Devi = () => {
               size="icon"
               onClick={() => navigate("/settings?tab=preferences")}
               className="rounded-lg shrink-0 h-8 w-8"
-              title="Adjust Devi's Tone"
+              title="Adjust D.E.V.I.'s Tone"
             >
               <SlidersHorizontal className="w-4 h-4" />
             </Button>
