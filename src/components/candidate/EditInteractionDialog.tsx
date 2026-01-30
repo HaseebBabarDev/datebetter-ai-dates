@@ -57,11 +57,14 @@ export const EditInteractionDialog: React.FC<EditInteractionDialogProps> = ({
   // Initialize form when interaction changes
   useEffect(() => {
     if (interaction) {
-      setInteractionDate(
-        interaction.interaction_date
-          ? new Date(interaction.interaction_date)
-          : new Date()
-      );
+      // Parse date string correctly to avoid timezone issues
+      // interaction_date is stored as "YYYY-MM-DD" string
+      if (interaction.interaction_date) {
+        const [year, month, day] = interaction.interaction_date.split("-").map(Number);
+        setInteractionDate(new Date(year, month - 1, day));
+      } else {
+        setInteractionDate(new Date());
+      }
       setNotes(interaction.notes || "");
     }
   }, [interaction]);
