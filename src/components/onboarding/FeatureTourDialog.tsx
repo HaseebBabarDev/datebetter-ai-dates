@@ -86,26 +86,46 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
   const [audioEnded, setAudioEnded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const currentSlideRef = useRef(currentSlide);
+  const isMutedRef = useRef(isMuted);
+  const isPlayingRef = useRef(false);
   
-  // Keep ref in sync with state
+  // Keep refs in sync with state
   useEffect(() => {
     currentSlideRef.current = currentSlide;
   }, [currentSlide]);
+  
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
   
   const slide = tourSlides[currentSlide];
   const IconComponent = slide.icon;
   const isLastSlide = currentSlide === tourSlides.length - 1;
 
-  const playVoice = useCallback(async (slideIndex: number) => {
-    if (isMuted) return;
-    
-    // Stop any currently playing audio
+  // Cleanup function to stop audio
+  const stopAudio = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.onended = null;
+      audioRef.current.onerror = null;
       URL.revokeObjectURL(audioRef.current.src);
       audioRef.current = null;
     }
+    isPlayingRef.current = false;
+    setIsPlaying(false);
+    setIsLoadingAudio(false);
+  }, []);
 
+  const playVoice = useCallback(async (slideIndex: number) => {
+    // Check muted state from ref for accuracy
+    if (isMutedRef.current) return;
+    
+    // Prevent double-playing
+    if (isPlayingRef.current) {
+      stopAudio();
+    }
+
+    isPlayingRef.current = true;
     setIsLoadingAudio(true);
     setIsPlaying(true);
     setAudioEnded(false);
@@ -126,6 +146,14 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
         }
       );
 
+      // Check if we should still play (user might have navigated away)
+      if (currentSlideRef.current !== slideIndex || isMutedRef.current) {
+        setIsLoadingAudio(false);
+        setIsPlaying(false);
+        isPlayingRef.current = false;
+        return;
+      }
+
       if (!response.ok) {
         throw new Error("Failed to generate speech");
       }
@@ -133,24 +161,37 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
       
+      // Double-check we should still play
+      if (currentSlideRef.current !== slideIndex || isMutedRef.current) {
+        URL.revokeObjectURL(audioUrl);
+        setIsLoadingAudio(false);
+        setIsPlaying(false);
+        isPlayingRef.current = false;
+        return;
+      }
+      
       const audio = new Audio(audioUrl);
       audioRef.current = audio;
       
       audio.onended = () => {
+        isPlayingRef.current = false;
         setIsPlaying(false);
         setAudioEnded(true);
         URL.revokeObjectURL(audioUrl);
         
         // Auto-advance to next slide after voice finishes
         const currentIdx = currentSlideRef.current;
-        if (currentIdx < tourSlides.length - 1) {
+        if (currentIdx < tourSlides.length - 1 && currentIdx === slideIndex) {
           setTimeout(() => {
-            setCurrentSlide(currentIdx + 1);
+            if (currentSlideRef.current === slideIndex) {
+              setCurrentSlide(currentIdx + 1);
+            }
           }, 800);
         }
       };
       
       audio.onerror = () => {
+        isPlayingRef.current = false;
         setIsPlaying(false);
         setIsLoadingAudio(false);
         setAudioEnded(true);
@@ -160,22 +201,29 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
       await audio.play();
     } catch (error) {
       console.error("Voice playback error:", error);
+      isPlayingRef.current = false;
       setIsPlaying(false);
       setIsLoadingAudio(false);
       setAudioEnded(true);
     }
-  }, [isMuted]);
+  }, [stopAudio]);
 
   // Auto-play voice when slide changes
   useEffect(() => {
-    if (open && !isMuted) {
-      // Small delay to let animation settle
-      const timer = setTimeout(() => {
-        playVoice(currentSlide);
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [currentSlide, open, isMuted, playVoice]);
+    if (!open || isMuted) return;
+    
+    // Stop any existing audio first
+    stopAudio();
+    
+    // Small delay to let animation settle
+    const timer = setTimeout(() => {
+      playVoice(currentSlide);
+    }, 300);
+    
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [currentSlide, open, isMuted, playVoice, stopAudio]);
 
   // Reset when dialog opens
   useEffect(() => {
