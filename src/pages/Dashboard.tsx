@@ -242,15 +242,15 @@ const Dashboard = () => {
     }
   };
 
-  // Only start dashboard tour AFTER feature tour is complete (not showing)
+  // Only start dashboard tour AFTER feature tour AND Devi intro popup are both closed
   useEffect(() => {
-    if (!loading && profile && !showTour && !hasCompletedTour("dashboard")) {
+    if (!loading && profile && !showTour && !showDeviIntro && !hasCompletedTour("dashboard")) {
       const timer = setTimeout(() => {
         startTour("dashboard", DASHBOARD_TOUR_STEPS);
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [loading, profile, showTour, startTour, hasCompletedTour]);
+  }, [loading, profile, showTour, showDeviIntro, startTour, hasCompletedTour]);
 
   useEffect(() => {
     if (user) {
