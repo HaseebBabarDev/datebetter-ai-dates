@@ -18,6 +18,7 @@ import {
 import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, RotateCcw, Gift, Copy, Share2, Users, ScrollText, Sparkles, Heart, Brain, MessageCircle } from "lucide-react";
 import { ThemeSelector } from "@/components/settings/ThemeSelector";
 import { ZodiacModeSettings } from "@/components/settings/ZodiacModeSettings";
+import { DeviSettings } from "@/components/settings/DeviSettings";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { ProfilePhotoUpload } from "@/components/settings/ProfilePhotoUpload";
@@ -735,6 +736,9 @@ const Settings = () => {
 
             {/* Zodiac Mode */}
             <ZodiacModeSettings />
+
+            {/* D.E.V.I. Preferences */}
+            <DeviSettings userId={user.id} />
 
             {/* Self-Discovery Quizzes */}
             <Card 
