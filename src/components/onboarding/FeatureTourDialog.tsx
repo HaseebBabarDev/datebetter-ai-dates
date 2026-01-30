@@ -92,6 +92,8 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
   const currentSlideRef = useRef(currentSlide);
   const isMutedRef = useRef(isMuted);
   const isPlayingRef = useRef(false);
+  const voicePreferenceRef = useRef(userVoicePreference);
+  const isLoadingRef = useRef(false);
 
   // Load user's preferred voice (from Settings) so the tour respects it.
   useEffect(() => {
@@ -132,6 +134,10 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
   useEffect(() => {
     isMutedRef.current = isMuted;
   }, [isMuted]);
+
+  useEffect(() => {
+    voicePreferenceRef.current = userVoicePreference;
+  }, [userVoicePreference]);
   
   const slide = tourSlides[currentSlide];
   const IconComponent = slide.icon;
@@ -147,6 +153,7 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
       audioRef.current = null;
     }
     isPlayingRef.current = false;
+    isLoadingRef.current = false;
     setIsPlaying(false);
     setIsLoadingAudio(false);
   }, []);
@@ -155,11 +162,12 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
     // Check muted state from ref for accuracy
     if (isMutedRef.current) return;
     
-    // Prevent double-playing
-    if (isPlayingRef.current) {
+    // Prevent concurrent loading/playing
+    if (isLoadingRef.current || isPlayingRef.current) {
       stopAudio();
     }
 
+    isLoadingRef.current = true;
     isPlayingRef.current = true;
     setIsLoadingAudio(true);
     setIsPlaying(true);
@@ -178,7 +186,7 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
             "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text: scriptToPlay, voicePreference: userVoicePreference }),
+          body: JSON.stringify({ text: scriptToPlay, voicePreference: voicePreferenceRef.current }),
         }
       );
 
@@ -187,6 +195,7 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
         setIsLoadingAudio(false);
         setIsPlaying(false);
         isPlayingRef.current = false;
+        isLoadingRef.current = false;
         return;
       }
 
@@ -203,6 +212,7 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
         setIsLoadingAudio(false);
         setIsPlaying(false);
         isPlayingRef.current = false;
+        isLoadingRef.current = false;
         return;
       }
       
@@ -211,6 +221,7 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
       
       audio.onended = () => {
         isPlayingRef.current = false;
+        isLoadingRef.current = false;
         setIsPlaying(false);
         setAudioEnded(true);
         URL.revokeObjectURL(audioUrl);
@@ -228,6 +239,7 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
       
       audio.onerror = () => {
         isPlayingRef.current = false;
+        isLoadingRef.current = false;
         setIsPlaying(false);
         setIsLoadingAudio(false);
         setAudioEnded(true);
@@ -238,11 +250,12 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
     } catch (error) {
       console.error("Voice playback error:", error);
       isPlayingRef.current = false;
+      isLoadingRef.current = false;
       setIsPlaying(false);
       setIsLoadingAudio(false);
       setAudioEnded(true);
     }
-  }, [stopAudio, userVoicePreference]);
+  }, [stopAudio]); // Removed userVoicePreference - using ref instead
 
   // Auto-play voice when slide changes
   useEffect(() => {
