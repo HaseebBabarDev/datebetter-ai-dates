@@ -198,11 +198,17 @@ export const EditInteractionDialog: React.FC<EditInteractionDialogProps> = ({
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0 z-50" align="start">
                   <Calendar
                     mode="single"
                     selected={interactionDate}
-                    onSelect={(date) => date && setInteractionDate(date)}
+                    onSelect={(date) => {
+                      if (date) {
+                        // Create a new date at noon to avoid timezone issues
+                        const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+                        setInteractionDate(normalizedDate);
+                      }
+                    }}
                     disabled={(date) => date > new Date()}
                     initialFocus
                   />
