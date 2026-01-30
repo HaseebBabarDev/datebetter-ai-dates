@@ -48,12 +48,14 @@ serve(async (req) => {
 
     // Clean the text - remove markdown formatting for cleaner speech
     const cleanText = text
-      .replace(/\*\*(.+?)\*\*/g, '$1')  // Remove bold
-      .replace(/__(.+?)__/g, '$1')       // Remove underline
+      .replace(/D\.E\.V\.I\./g, 'Devi')   // Pronounce D.E.V.I. as "Devi"
+      .replace(/\*\*(.+?)\*\*/g, '$1')    // Remove bold
+      .replace(/__(.+?)__/g, '$1')         // Remove underline
       .replace(/\[RECALCULATE_HEALING_SCORE\]/g, '') // Remove special markers
-      .replace(/#+\s*/g, '')              // Remove markdown headers
-      .replace(/[-*•]\s+/g, '')           // Remove bullet points
-      .replace(/\d+[.)]\s+/g, '')         // Remove numbered list markers
+      .replace(/\[SET_\w+:\d+\]/g, '')     // Remove profile update markers
+      .replace(/#+\s*/g, '')               // Remove markdown headers
+      .replace(/[-*•]\s+/g, '')            // Remove bullet points
+      .replace(/\d+[.)]\s+/g, '')          // Remove numbered list markers
       .trim();
 
     if (!cleanText) {
