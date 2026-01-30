@@ -3,6 +3,7 @@ import { Tables, Enums } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
 import {
   Coffee,
   Utensils,
@@ -23,6 +24,7 @@ import {
   Pencil,
 } from "lucide-react";
 import { EditInteractionDialog } from "./EditInteractionDialog";
+import { parseDateOnly } from "@/lib/dateOnly";
 
 type Interaction = Tables<"interactions">;
 type DeviMessage = Tables<"devi_messages">;
@@ -118,7 +120,7 @@ export const InteractionHistory: React.FC<InteractionHistoryProps> = ({
       type: "interaction",
       data: interaction,
       date: interaction.interaction_date 
-        ? new Date(interaction.interaction_date) 
+        ? (parseDateOnly(interaction.interaction_date) ?? new Date(interaction.interaction_date))
         : new Date(interaction.created_at || Date.now()),
     })),
     ...deviMessages.map((msg): TimelineItem => ({
@@ -149,6 +151,7 @@ export const InteractionHistory: React.FC<InteractionHistoryProps> = ({
       {displayedItems.map((item, index) => {
         if (item.type === "interaction") {
           const interaction = item.data as Interaction;
+          const parsedInteractionDate = parseDateOnly(interaction.interaction_date);
           return (
             <Card key={`interaction-${interaction.id}`} className="group relative">
               <CardContent className="p-4">
@@ -168,7 +171,10 @@ export const InteractionHistory: React.FC<InteractionHistoryProps> = ({
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {interaction.interaction_date
-                          ? new Date(interaction.interaction_date).toLocaleDateString()
+                          ? format(
+                              parsedInteractionDate ?? new Date(interaction.interaction_date),
+                              "M/d/yyyy"
+                            )
                           : "No date"}
                         {interaction.duration && ` · ${interaction.duration}`}
                       </p>

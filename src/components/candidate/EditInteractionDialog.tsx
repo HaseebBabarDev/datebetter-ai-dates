@@ -32,6 +32,7 @@ import { CalendarIcon, Shield, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { formatDateOnly, parseDateOnly } from "@/lib/dateOnly";
 
 type Interaction = Tables<"interactions">;
 
@@ -57,14 +58,8 @@ export const EditInteractionDialog: React.FC<EditInteractionDialogProps> = ({
   // Initialize form when interaction changes
   useEffect(() => {
     if (interaction) {
-      // Parse date string correctly to avoid timezone issues
-      // interaction_date is stored as "YYYY-MM-DD" string
-      if (interaction.interaction_date) {
-        const [year, month, day] = interaction.interaction_date.split("-").map(Number);
-        setInteractionDate(new Date(year, month - 1, day));
-      } else {
-        setInteractionDate(new Date());
-      }
+      const parsed = parseDateOnly(interaction.interaction_date);
+      setInteractionDate(parsed ?? new Date());
       setNotes(interaction.notes || "");
     }
   }, [interaction]);
@@ -95,7 +90,7 @@ export const EditInteractionDialog: React.FC<EditInteractionDialogProps> = ({
       const { error } = await supabase
         .from("interactions")
         .update({
-          interaction_date: format(interactionDate, "yyyy-MM-dd"),
+          interaction_date: formatDateOnly(interactionDate),
           notes: notes || null,
         })
         .eq("id", interaction.id)
@@ -204,9 +199,8 @@ export const EditInteractionDialog: React.FC<EditInteractionDialogProps> = ({
                     selected={interactionDate}
                     onSelect={(date) => {
                       if (date) {
-                        // Create a new date at noon to avoid timezone issues
-                        const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
-                        setInteractionDate(normalizedDate);
+                        // Normalize to local noon to avoid timezone/DST shifts.
+                        setInteractionDate(new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0));
                       }
                     }}
                     disabled={(date) => date > new Date()}
