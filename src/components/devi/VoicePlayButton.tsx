@@ -93,6 +93,36 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
   const [userVoice, setUserVoice] = useState<string | undefined>(voicePreference);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const fetchDeviVoiceNoStore = useCallback(async (): Promise<
+    "mature" | "younger" | undefined
+  > => {
+    if (!user) return undefined;
+
+    // Use an authenticated REST call with `cache: 'no-store'` to avoid any browser/service-worker caching.
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    if (!accessToken) return undefined;
+
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/profiles?select=devi_voice&user_id=eq.${encodeURIComponent(
+      user.id
+    )}&limit=1`;
+
+    const res = await fetch(url, {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/json",
+      },
+    });
+
+    if (!res.ok) return undefined;
+    const rows = (await res.json().catch(() => [])) as Array<{ devi_voice?: string | null }>;
+    const v = rows?.[0]?.devi_voice;
+    return v === "younger" ? "younger" : v === "mature" ? "mature" : undefined;
+  }, [user]);
+
   // Keep local state in sync with explicit prop
   useEffect(() => {
     if (voicePreference) setUserVoice(voicePreference);
@@ -103,36 +133,21 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
     if (voicePreference || !user) return;
     
     const fetchVoicePref = async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("devi_voice")
-        .eq("user_id", user.id)
-        .single();
-      
-      if (data?.devi_voice) {
-        setUserVoice(data.devi_voice);
-      }
+      const v = await fetchDeviVoiceNoStore();
+      if (v) setUserVoice(v);
     };
     
     fetchVoicePref();
-  }, [user, voicePreference]);
+  }, [user, voicePreference, fetchDeviVoiceNoStore]);
 
   const fetchLatestVoicePreference = useCallback(async () => {
     if (voicePreference) return voicePreference;
     if (!user) return undefined;
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("devi_voice")
-      .eq("user_id", user.id)
-      .single();
-
-    if (error) return userVoice;
-
-    const next = data?.devi_voice ?? undefined;
+    const next = await fetchDeviVoiceNoStore();
     if (next) setUserVoice(next);
-    return next;
-  }, [user, voicePreference, userVoice]);
+    return next ?? userVoice;
+  }, [user, voicePreference, userVoice, fetchDeviVoiceNoStore]);
 
   const cycleSpeed = useCallback(() => {
     const currentIndex = SPEED_OPTIONS.indexOf(playbackSpeed);

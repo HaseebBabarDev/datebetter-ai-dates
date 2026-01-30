@@ -56,7 +56,7 @@ export const DeviSettings: React.FC<DeviSettingsProps> = ({ userId }) => {
         .from("profiles")
         .select("devi_style, devi_voice")
         .eq("user_id", userId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       if (data?.devi_style) {
