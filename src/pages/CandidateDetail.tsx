@@ -153,14 +153,7 @@ const CandidateDetail = () => {
     
     return null;
   }, [candidate, interactions]);
-  useEffect(() => {
-    if (!loading && candidate && !hasCompletedTour("candidate-detail")) {
-      const timer = setTimeout(() => {
-        startTour("candidate-detail", CANDIDATE_DETAIL_TOUR_STEPS);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [loading, candidate, startTour, hasCompletedTour]);
+  
 
   useEffect(() => {
     if (user && id) {
@@ -416,6 +409,25 @@ const CandidateDetail = () => {
       fetchData();
     }, 1500);
   }, [location.state, candidate, navigate, location.pathname]);
+
+  // Start the tour only if not showing new candidate dialog
+  useEffect(() => {
+    // Don't start tour if new candidate dialog is showing or will show
+    if (!loading && candidate && !hasCompletedTour("candidate-detail") && !showNewCandidateDialog) {
+      // Check if this is a new candidate that will show the welcome dialog
+      const state = location.state as { isNewCandidate?: boolean } | null;
+      const isNewCandidateFlow = state?.isNewCandidate && !hasHandledNewCandidateFlowRef.current;
+      const completeness = calculateProfileCompleteness(candidate);
+      const willShowNewCandidateDialog = isNewCandidateFlow && completeness < 80;
+      
+      if (!willShowNewCandidateDialog) {
+        const timer = setTimeout(() => {
+          startTour("candidate-detail", CANDIDATE_DETAIL_TOUR_STEPS);
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [loading, candidate, startTour, hasCompletedTour, showNewCandidateDialog, location.state]);
 
   // Handle showing rating dialog after new candidate dialog closes
   // Only show if user has 3+ interactions and a score has been generated
