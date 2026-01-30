@@ -210,7 +210,11 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
 
   // Auto-play voice when slide changes
   useEffect(() => {
-    if (!open || isMuted) return;
+    if (!open || isMuted) {
+      // If dialog closed or muted, stop audio
+      stopAudio();
+      return;
+    }
     
     // Stop any existing audio first
     stopAudio();
@@ -222,6 +226,8 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
     
     return () => {
       clearTimeout(timer);
+      // Stop audio on cleanup (when dialog closes or slide changes)
+      stopAudio();
     };
   }, [currentSlide, open, isMuted, playVoice, stopAudio]);
 
@@ -233,13 +239,9 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
       setIsPlaying(false);
     } else {
       // Cleanup audio when closing
-      if (audioRef.current) {
-        audioRef.current.pause();
-        URL.revokeObjectURL(audioRef.current.src);
-        audioRef.current = null;
-      }
+      stopAudio();
     }
-  }, [open]);
+  }, [open, stopAudio]);
 
   const handleReplay = () => {
     playVoice(currentSlide);
