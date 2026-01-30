@@ -390,6 +390,59 @@ export type Database = {
         }
         Relationships: []
       }
+      celibacy_tracking: {
+        Row: {
+          candidate_id: string | null
+          created_at: string
+          current_streak_days: number | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          longest_streak_days: number | null
+          notes: string | null
+          reason: string | null
+          start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          candidate_id?: string | null
+          created_at?: string
+          current_streak_days?: number | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          longest_streak_days?: number | null
+          notes?: string | null
+          reason?: string | null
+          start_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          candidate_id?: string | null
+          created_at?: string
+          current_streak_days?: number | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          longest_streak_days?: number | null
+          notes?: string | null
+          reason?: string | null
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "celibacy_tracking_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       devi_conversations: {
         Row: {
           candidate_id: string | null

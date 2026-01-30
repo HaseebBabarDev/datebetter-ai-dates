@@ -11,12 +11,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban, Home, XCircle, RefreshCw, AlertTriangle, Pencil } from "lucide-react";
+import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban, Home, XCircle, RefreshCw, AlertTriangle, Pencil, HeartOff } from "lucide-react";
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
 import { FlagsSection } from "@/components/candidate/FlagsSection";
 import { AddInteractionForm } from "@/components/candidate/AddInteractionForm";
 import { NoContactMode } from "@/components/candidate/NoContactMode";
+import { CelibacyTracker } from "@/components/candidate/CelibacyTracker";
 import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
 import { ProfileCompleteness } from "@/components/candidate/ProfileCompleteness";
 import { HoroscopeCompatibility } from "@/components/candidate/HoroscopeCompatibility";
@@ -958,12 +959,12 @@ const CandidateDetail = () => {
         </AlertDialog>
 
         <Tabs value={defaultTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 h-auto p-1">
+          <TabsList className="grid w-full grid-cols-6 h-auto p-1">
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger data-tour="insights-tab" value="profile" className="flex-col gap-0.5 py-2 px-1">
+                <TabsTrigger data-tour="insights-tab" value="profile" className="flex-col gap-0.5 py-2 px-0.5">
                   <Sparkles className="w-4 h-4" />
-                  <span className="text-[10px] font-medium">Insights</span>
+                  <span className="text-[9px] font-medium">Insights</span>
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-[180px]">
@@ -972,9 +973,9 @@ const CandidateDetail = () => {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger data-tour="overview-tab" value="overview" className="flex-col gap-0.5 py-2 px-1">
+                <TabsTrigger data-tour="overview-tab" value="overview" className="flex-col gap-0.5 py-2 px-0.5">
                   <User className="w-4 h-4" />
-                  <span className="text-[10px] font-medium">Overview</span>
+                  <span className="text-[9px] font-medium">Overview</span>
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-[180px]">
@@ -983,9 +984,9 @@ const CandidateDetail = () => {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger data-tour="history-tab" value="interactions" className="flex-col gap-0.5 py-2 px-1">
+                <TabsTrigger data-tour="history-tab" value="interactions" className="flex-col gap-0.5 py-2 px-0.5">
                   <Clock className="w-4 h-4" />
-                  <span className="text-[10px] font-medium">History</span>
+                  <span className="text-[9px] font-medium">History</span>
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-[180px]">
@@ -994,9 +995,9 @@ const CandidateDetail = () => {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger data-tour="flags-tab" value="flags" className="flex-col gap-0.5 py-2 px-1">
+                <TabsTrigger data-tour="flags-tab" value="flags" className="flex-col gap-0.5 py-2 px-0.5">
                   <Flag className="w-4 h-4" />
-                  <span className="text-[10px] font-medium">Flags</span>
+                  <span className="text-[9px] font-medium">Flags</span>
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-[180px]">
@@ -1005,13 +1006,24 @@ const CandidateDetail = () => {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger data-tour="nc-tab" value="no-contact" className={`flex-col gap-0.5 py-2 px-1 ${candidate.no_contact_active ? "text-primary" : ""}`}>
+                <TabsTrigger data-tour="nc-tab" value="no-contact" className={`flex-col gap-0.5 py-2 px-0.5 ${candidate.no_contact_active ? "text-primary" : ""}`}>
                   <Ban className="w-4 h-4" />
-                  <span className="text-[10px] font-medium">NC</span>
+                  <span className="text-[9px] font-medium">NC</span>
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-[180px]">
                 <p className="text-xs">No Contact mode for healing & moving on</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger value="celibacy" className="flex-col gap-0.5 py-2 px-0.5">
+                  <HeartOff className="w-4 h-4" />
+                  <span className="text-[9px] font-medium">Celibacy</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-[180px]">
+                <p className="text-xs">Track your celibacy journey & milestones</p>
               </TooltipContent>
             </Tooltip>
           </TabsList>
@@ -1088,6 +1100,13 @@ const CandidateDetail = () => {
             <NoContactMode
               candidate={candidate}
               onUpdate={handleUpdateCandidate}
+            />
+          </TabsContent>
+
+          <TabsContent value="celibacy" className="mt-4">
+            <CelibacyTracker
+              candidateId={candidate.id}
+              candidateName={candidate.nickname}
             />
           </TabsContent>
         </Tabs>
