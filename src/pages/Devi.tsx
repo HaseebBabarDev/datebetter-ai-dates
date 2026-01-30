@@ -441,17 +441,26 @@ const Devi = () => {
   // Track if this is an initial load vs new message
   const isInitialLoadRef = useRef(true);
   const prevMessagesLengthRef = useRef(0);
-
+  const lastMessageIdRef = useRef<string | null>(null);
+  
+  // Only scroll to bottom when messages actually change (new message added or initial load)
   useEffect(() => {
     if (messages.length === 0) {
       isInitialLoadRef.current = true;
       prevMessagesLengthRef.current = 0;
+      lastMessageIdRef.current = null;
       return;
     }
 
+    const lastMessageId = messages[messages.length - 1]?.id;
+    
+    // Skip if the last message hasn't changed (prevents scroll on unrelated re-renders)
+    if (lastMessageId === lastMessageIdRef.current) {
+      return;
+    }
+    
     // Determine if this is initial load (loading existing conversation) or a new message
     const isInitialLoad = isInitialLoadRef.current;
-    const isNewMessage = messages.length > prevMessagesLengthRef.current && prevMessagesLengthRef.current > 0;
     
     // Use requestAnimationFrame + setTimeout to ensure DOM is fully rendered
     const scrollToBottom = () => {
@@ -469,6 +478,7 @@ const Devi = () => {
     // Update refs after scroll
     isInitialLoadRef.current = false;
     prevMessagesLengthRef.current = messages.length;
+    lastMessageIdRef.current = lastMessageId;
   }, [messages]);
 
   // Fetch candidates, user profile, and conversations in parallel
