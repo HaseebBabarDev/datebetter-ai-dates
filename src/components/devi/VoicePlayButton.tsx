@@ -93,6 +93,11 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
   const [userVoice, setUserVoice] = useState<string | undefined>(voicePreference);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Keep local state in sync with explicit prop
+  useEffect(() => {
+    if (voicePreference) setUserVoice(voicePreference);
+  }, [voicePreference]);
+
   // Fetch user's voice preference if not explicitly provided
   useEffect(() => {
     if (voicePreference || !user) return;
@@ -111,6 +116,23 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
     
     fetchVoicePref();
   }, [user, voicePreference]);
+
+  const fetchLatestVoicePreference = useCallback(async () => {
+    if (voicePreference) return voicePreference;
+    if (!user) return undefined;
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("devi_voice")
+      .eq("user_id", user.id)
+      .single();
+
+    if (error) return userVoice;
+
+    const next = data?.devi_voice ?? undefined;
+    if (next) setUserVoice(next);
+    return next;
+  }, [user, voicePreference, userVoice]);
 
   const cycleSpeed = useCallback(() => {
     const currentIndex = SPEED_OPTIONS.indexOf(playbackSpeed);
@@ -156,6 +178,9 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
     setIsLoading(true);
 
     try {
+      // Ensure we use the latest saved preference (important if user just changed it in Settings)
+      const latestVoicePreference = await fetchLatestVoicePreference();
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
         {
@@ -165,7 +190,7 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text, voicePreference: userVoice }),
+          body: JSON.stringify({ text, voicePreference: latestVoicePreference ?? userVoice }),
         }
       );
 
@@ -202,7 +227,7 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [text, isPlaying, playbackSpeed, userVoice]);
+  }, [text, isPlaying, playbackSpeed, userVoice, fetchLatestVoicePreference]);
 
   // Cleanup on unmount
   useEffect(() => {
