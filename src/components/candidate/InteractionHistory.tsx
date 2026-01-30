@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Tables, Enums } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Coffee,
   Utensils,
@@ -19,7 +20,9 @@ import {
   Sparkles,
   User,
   ChevronDown,
+  Pencil,
 } from "lucide-react";
+import { EditInteractionDialog } from "./EditInteractionDialog";
 
 type Interaction = Tables<"interactions">;
 type DeviMessage = Tables<"devi_messages">;
@@ -27,6 +30,7 @@ type DeviMessage = Tables<"devi_messages">;
 interface InteractionHistoryProps {
   interactions: Interaction[];
   deviMessages?: DeviMessage[];
+  onInteractionUpdated?: () => void;
 }
 
 const INTERACTION_ICONS: Record<Enums<"interaction_type">, React.ReactNode> = {
@@ -78,9 +82,12 @@ type TimelineItem =
 export const InteractionHistory: React.FC<InteractionHistoryProps> = ({
   interactions,
   deviMessages = [],
+  onInteractionUpdated,
 }) => {
   const [showAll, setShowAll] = useState(false);
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
+  const [editingInteraction, setEditingInteraction] = useState<Interaction | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const toggleExpanded = (id: string) => {
     setExpandedMessages(prev => {
@@ -92,6 +99,17 @@ export const InteractionHistory: React.FC<InteractionHistoryProps> = ({
       }
       return next;
     });
+  };
+
+  const handleEditInteraction = (interaction: Interaction) => {
+    setEditingInteraction(interaction);
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    if (onInteractionUpdated) {
+      onInteractionUpdated();
+    }
   };
 
   // Combine interactions and D.E.V.I. messages into a unified timeline
@@ -132,7 +150,7 @@ export const InteractionHistory: React.FC<InteractionHistoryProps> = ({
         if (item.type === "interaction") {
           const interaction = item.data as Interaction;
           return (
-            <Card key={`interaction-${interaction.id}`}>
+            <Card key={`interaction-${interaction.id}`} className="group relative">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -156,11 +174,21 @@ export const InteractionHistory: React.FC<InteractionHistoryProps> = ({
                       </p>
                     </div>
                   </div>
-                  {interaction.who_initiated && (
-                    <Badge variant="outline" className="text-xs">
-                      {interaction.who_initiated === "me" ? "I initiated" : "They initiated"}
-                    </Badge>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {interaction.who_initiated && (
+                      <Badge variant="outline" className="text-xs">
+                        {interaction.who_initiated === "me" ? "I initiated" : "They initiated"}
+                      </Badge>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => handleEditInteraction(interaction)}
+                    >
+                      <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                    </Button>
+                  </div>
                 </div>
 
                 {interaction.notes && (
@@ -262,6 +290,17 @@ export const InteractionHistory: React.FC<InteractionHistoryProps> = ({
           {showAll ? 'See Less' : `See ${timelineItems.length - 5} More`}
         </button>
       )}
+
+      {/* Edit Interaction Dialog */}
+      <EditInteractionDialog
+        interaction={editingInteraction}
+        open={editDialogOpen}
+        onOpenChange={(open) => {
+          setEditDialogOpen(open);
+          if (!open) setEditingInteraction(null);
+        }}
+        onSuccess={handleEditSuccess}
+      />
     </div>
   );
 };
