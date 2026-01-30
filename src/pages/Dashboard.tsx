@@ -75,6 +75,8 @@ import { SelfDiscoveryCTA } from "@/components/dashboard/SelfDiscoveryCTA";
 import { AIDisclosure } from "@/components/AIDisclosure";
 import { FeatureTourDialog } from "@/components/onboarding/FeatureTourDialog";
 import { useFeatureTour } from "@/hooks/useFeatureTour";
+import { DeviIntroDialog } from "@/components/devi/DeviIntroDialog";
+import { useDeviIntro } from "@/hooks/useDeviIntro";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -149,6 +151,9 @@ const Dashboard = () => {
   
   // Feature tour for new users
   const { showTour, completeTour } = useFeatureTour(user?.id);
+  
+  // Devi intro popup for new users who haven't chatted yet
+  const { showDeviIntro, setShowDeviIntro, dismissDeviIntro } = useDeviIntro(user?.id);
 
   const handleReopenRelationship = async (candidateId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -1691,6 +1696,13 @@ const Dashboard = () => {
           <AIDisclosure variant="compact" className="justify-center" />
         </div>
       </div>
+      
+      {/* Devi Intro Dialog for new users */}
+      <DeviIntroDialog
+        open={showDeviIntro && !showTour}
+        onOpenChange={setShowDeviIntro}
+        onDismiss={dismissDeviIntro}
+      />
     </div>
   );
 };
