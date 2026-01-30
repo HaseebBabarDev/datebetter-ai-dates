@@ -1087,7 +1087,7 @@ const Dashboard = () => {
                   icon: <Flame className="w-3 h-3" />,
                   label: `${candidate.nickname}`,
                   sub: daysSince <= 2 ? "🔥 Bonding high" : "Clearing",
-                  color: daysSince <= 2 ? "bg-pink-500/20 text-pink-600 border-pink-500/30" : "bg-amber-500/20 text-amber-600 border-amber-500/30",
+                  color: daysSince <= 2 ? "bg-pink-500/20 text-pink-600 dark:text-pink-400 border-pink-500/30" : "bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30",
                   onClick: () => navigate(`/candidate/${candidate.id}`),
                 });
               });
@@ -1099,7 +1099,7 @@ const Dashboard = () => {
                   icon: <AlertTriangle className="w-3 h-3" />,
                   label: candidate.nickname,
                   sub: "⚠️ Love bombing?",
-                  color: "bg-orange-500/20 text-orange-600 border-orange-500/30",
+                  color: "bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30",
                   onClick: () => navigate(`/candidate/${candidate.id}`),
                 });
               });
