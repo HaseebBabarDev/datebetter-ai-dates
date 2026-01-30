@@ -202,13 +202,13 @@ All colors MUST be HSL.
      ======================================== */
   .theme-blue.dark {
     --background: 215 20% 8%;
-    --foreground: 210 15% 95%;
+    --foreground: 0 0% 95%;
 
     --card: 215 20% 10%;
-    --card-foreground: 210 15% 95%;
+    --card-foreground: 0 0% 95%;
 
     --popover: 215 20% 10%;
-    --popover-foreground: 210 15% 95%;
+    --popover-foreground: 0 0% 95%;
 
     --primary: 210 80% 55%;
     --primary-foreground: 0 0% 100%;
@@ -218,10 +218,10 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 100%;
 
     --muted: 215 20% 15%;
-    --muted-foreground: 210 15% 60%;
+    --muted-foreground: 210 15% 70%;
 
     --accent: 200 75% 60%;
-    --accent-foreground: 215 20% 20%;
+    --accent-foreground: 0 0% 95%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
@@ -248,11 +248,11 @@ All colors MUST be HSL.
     --shadow-elegant: 0 10px 40px -10px hsl(210 80% 55% / 0.3);
 
     --sidebar-background: 215 20% 10%;
-    --sidebar-foreground: 210 15% 95%;
+    --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 210 80% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 215 20% 15%;
-    --sidebar-accent-foreground: 210 15% 95%;
+    --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 215 20% 18%;
     --sidebar-ring: 210 80% 55%;
   }
