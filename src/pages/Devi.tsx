@@ -1048,14 +1048,18 @@ const Devi = () => {
 
           textBuffer += decoder.decode(value, { stream: true });
 
-          // Process complete lines
-          let newlineIndex: number;
-          while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
-            let line = textBuffer.slice(0, newlineIndex);
-            textBuffer = textBuffer.slice(newlineIndex + 1);
-
-            if (line.endsWith('\r')) line = line.slice(0, -1);
-            if (line.startsWith(':') || line.trim() === '') continue;
+          // Process complete SSE lines
+          const lines = textBuffer.split('\n');
+          // Keep the last incomplete line in the buffer
+          textBuffer = lines.pop() || '';
+          
+          for (const rawLine of lines) {
+            const line = rawLine.replace(/\r$/, '');
+            
+            // Skip empty lines and comments
+            if (!line || line.startsWith(':')) continue;
+            
+            // Only process data lines
             if (!line.startsWith('data: ')) continue;
 
             const jsonStr = line.slice(6).trim();
@@ -1067,10 +1071,8 @@ const Devi = () => {
               if (content) {
                 fullContent += content;
                 
-                // Stream content progressively - show all accumulated content
-                // This provides smooth streaming without jarring re-renders
+                // Stream content progressively
                 if (!messageAdded) {
-                  // Add the message bubble on first content
                   messageAdded = true;
                   setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: fullContent }]);
                 } else {
@@ -1083,10 +1085,29 @@ const Devi = () => {
                   );
                 }
               }
-            } catch {
-              // Incomplete JSON chunk - skip and continue, don't put back to buffer
-              // This prevents infinite loops on malformed data
+            } catch (parseError) {
+              // Log parse errors for debugging but continue processing
+              console.warn('SSE parse error:', parseError, 'Line:', jsonStr.substring(0, 100));
               continue;
+            }
+          }
+        }
+        
+        // Process any remaining content in the buffer after stream ends
+        if (textBuffer.trim()) {
+          const line = textBuffer.replace(/\r$/, '');
+          if (line.startsWith('data: ')) {
+            const jsonStr = line.slice(6).trim();
+            if (jsonStr !== '[DONE]') {
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const content = parsed.choices?.[0]?.delta?.content;
+                if (content) {
+                  fullContent += content;
+                }
+              } catch {
+                // Final chunk parse error - ignore
+              }
             }
           }
         }
@@ -1094,9 +1115,20 @@ const Devi = () => {
         reader.releaseLock();
       }
 
-      // Ensure final content is displayed if stream ended mid-update
-      if (fullContent && !messageAdded) {
-        setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: fullContent }]);
+      // Ensure final content is displayed correctly
+      if (fullContent) {
+        if (!messageAdded) {
+          setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: fullContent }]);
+        } else {
+          // Final update to ensure complete content is shown
+          setMessages(prev => 
+            prev.map(m => 
+              m.id === assistantMessageId 
+                ? { ...m, content: fullContent }
+                : m
+            )
+          );
+        }
       }
 
       // Save the single assistant message after streaming completes
