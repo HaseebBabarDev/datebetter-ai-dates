@@ -91,7 +91,7 @@ export default function PrivacyPolicy() {
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-foreground">AI Conversation Data</h3>
             <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc">
-              <li>Conversations with Devi AI coach</li>
+              <li>Conversations with D.E.V.I. AI assistant</li>
               <li>Questions, concerns, and context you share</li>
               <li>AI-generated responses and recommendations</li>
             </ul>
@@ -150,7 +150,7 @@ export default function PrivacyPolicy() {
           <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc">
             <li>Profile and preference data is used to calculate compatibility scores</li>
             <li>Interaction logs are analyzed to detect patterns and potential red/green flags</li>
-            <li>Conversations with Devi are processed to provide contextual advice</li>
+            <li>Conversations with D.E.V.I. are processed to provide contextual advice</li>
             <li>Forum content is processed for moderation purposes</li>
           </ul>
           <p className="text-sm text-foreground/80 leading-relaxed mt-2">

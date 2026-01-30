@@ -34,7 +34,7 @@ const tourSlides = [
     icon: Sparkles,
     title: "This isn't a dating app",
     subtitle: "It's your AI dating assistant",
-    description: "Whether you're newly dating or already in a relationship, Devi is here for you. Get personalized insights, track compatibility, and make smarter decisions at every stage.",
+    description: "Whether you're newly dating or already in a relationship, D.E.V.I. is here for you. Get personalized insights, track compatibility, and make smarter decisions at every stage.",
     voiceScript: "Hey! Welcome to DateBetter. I'm Devi, your personal dating assistant. This isn't a dating app — whether you're just starting to date someone new or you're already in a relationship, I'm here to guide you. Let me show you how I can help.",
     color: "from-primary to-pink-500",
   },
@@ -49,7 +49,7 @@ const tourSlides = [
   {
     icon: Camera,
     title: "Upload Screenshots",
-    subtitle: "Let Devi analyze conversations",
+    subtitle: "Let D.E.V.I. analyze conversations",
     description: "Share text conversations and I'll help decode mixed signals, identify red flags, and suggest your next move.",
     voiceScript: "Got a confusing text? Send me a screenshot. I'll decode the mixed signals, spot the red flags, and tell you exactly what to say next.",
     color: "from-cyan-500 to-blue-500",
@@ -72,7 +72,7 @@ const tourSlides = [
   },
   {
     icon: Heart,
-    title: "Let Devi guide you",
+    title: "Let D.E.V.I. guide you",
     subtitle: "From first date to committed relationship",
     description: "Get real-time alerts, compatibility scores, and personalized advice as your relationship evolves.",
     voiceScript: "I'll be with you every step of the way — from first date jitters to something more serious. Real-time alerts, compatibility scores, and honest advice. Let's get started!",
@@ -483,7 +483,7 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
                       />
                     ))}
                   </div>
-                  <span className="text-xs text-white/70 ml-2">Devi speaking</span>
+                  <span className="text-xs text-white/70 ml-2">D.E.V.I. speaking</span>
                 </motion.div>
               )}
             </div>

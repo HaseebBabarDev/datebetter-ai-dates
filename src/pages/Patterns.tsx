@@ -1285,7 +1285,7 @@ const Patterns = () => {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Users className="w-5 h-5" />
-                      Devi Chats by Candidate
+                      D.E.V.I. Chats by Candidate
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
