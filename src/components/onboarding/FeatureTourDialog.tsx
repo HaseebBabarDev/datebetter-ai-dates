@@ -4,6 +4,8 @@ import {
   DialogContent,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   Sparkles, 
   Camera, 
@@ -79,15 +81,48 @@ const tourSlides = [
 ];
 
 export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
+  const { user } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [audioEnded, setAudioEnded] = useState(false);
+  const [userVoicePreference, setUserVoicePreference] = useState<"mature" | "younger" | undefined>(undefined);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const currentSlideRef = useRef(currentSlide);
   const isMutedRef = useRef(isMuted);
   const isPlayingRef = useRef(false);
+
+  // Load user's preferred voice (from Settings) so the tour respects it.
+  useEffect(() => {
+    if (!open) return;
+
+    let cancelled = false;
+
+    const loadVoice = async () => {
+      if (!user) {
+        if (!cancelled) setUserVoicePreference(undefined);
+        return;
+      }
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("devi_voice")
+        .eq("user_id", user.id)
+        .single();
+
+      const pref = (data?.devi_voice === "younger" ? "younger" : "mature") as
+        | "mature"
+        | "younger";
+
+      if (!cancelled) setUserVoicePreference(pref);
+    };
+
+    loadVoice();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, user]);
   
   // Keep refs in sync with state
   useEffect(() => {
@@ -137,12 +172,13 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
         {
           method: "POST",
+          cache: "no-store",
           headers: {
             "Content-Type": "application/json",
             "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text: scriptToPlay }),
+          body: JSON.stringify({ text: scriptToPlay, voicePreference: userVoicePreference }),
         }
       );
 
@@ -206,7 +242,7 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
       setIsLoadingAudio(false);
       setAudioEnded(true);
     }
-  }, [stopAudio]);
+  }, [stopAudio, userVoicePreference]);
 
   // Auto-play voice when slide changes
   useEffect(() => {
