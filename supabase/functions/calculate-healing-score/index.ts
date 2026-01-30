@@ -147,12 +147,12 @@ serve(async (req) => {
         // Build the comprehensive prompt for AI-driven scoring
         const scoringPrompt = `You are D.E.V.I., an expert AI dating coach specializing in relationship healing and readiness assessment.
 
-Analyze the following user data and calculate a HEALING SCORE from 0-100, where:
+Analyze the following user data and calculate a HEALING SCORE from 0-98 (MAXIMUM 98 - no one is ever 100% healed), where:
 - 0-40: Significant healing work needed before dating
 - 41-60: Making progress but should proceed cautiously
 - 61-75: Good progress, can date while continuing to heal
 - 76-90: Ready to date with healthy awareness
-- 91-100: Fully healed and emotionally available
+- 91-98: Fully healed and emotionally available (98 is the maximum possible)
 
 ## HEALING ASSESSMENT DATA:
 
@@ -247,7 +247,8 @@ Do not include any other text, markdown, or explanation outside the JSON.`;
             }
 
             const parsed = JSON.parse(cleanContent);
-            healingScore = Math.max(0, Math.min(100, Math.round(parsed.score)));
+            // Cap at 98% - no one is 100% healed
+            healingScore = Math.max(0, Math.min(98, Math.round(parsed.score)));
             aiInsights = parsed.insight || "";
             console.log("AI calculated score:", healingScore);
           } catch (parseError) {
@@ -371,5 +372,6 @@ function calculateFallbackScore(profile: any, traumaCount: number): number {
     baseScore -= 15;
   }
 
-  return Math.max(0, Math.min(100, baseScore));
+  // Cap at 98% - no one is 100% healed
+  return Math.max(0, Math.min(98, baseScore));
 }

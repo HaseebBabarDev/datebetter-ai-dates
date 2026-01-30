@@ -1157,7 +1157,8 @@ const Devi = () => {
         // Parse direct value markers
         const healingMatch = fullContent.match(/\[SET_HEALING_SCORE:(\d+)\]/);
         if (healingMatch) {
-          const value = Math.min(100, Math.max(0, parseInt(healingMatch[1])));
+          // Cap at 98% - no one is 100% healed
+          const value = Math.min(98, Math.max(0, parseInt(healingMatch[1])));
           profileUpdates.healing_score = value;
           hasUpdates = true;
           toast.success(`Healing score updated to ${value}%`);
