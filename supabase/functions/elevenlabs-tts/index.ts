@@ -8,7 +8,7 @@ const corsHeaders = {
 
 // Voice options for D.E.V.I.
 const VOICE_IDS = {
-  mature: "EXAVITQu4vr4xnSDxMaL",  // Sarah - warm, friendly female voice
+  mature: "sNLQ1mXur3j7xaL3YIA9",  // Custom cloned voice - natural, fluid
   younger: "pFZP5JQG7iQjIQuC4Bku", // Lily - energetic, youthful voice
 };
 const DEFAULT_VOICE_ID = VOICE_IDS.mature;
