@@ -1152,6 +1152,7 @@ const Devi = () => {
           .replace(/\[SET_LOVE_BOMBING_SENSITIVITY:\d+\]/g, '')
           .replace(/\[SET_OVER_EX_LEVEL:\d+\]/g, '')
           .replace(/\[SET_ATTACHMENT_TO_PAST:\d+\]/g, '')
+          .replace(/\[LOG_INTERACTION:[^\]]+\]/g, '')
           .trim();
           
         await saveMessage(convId, {
@@ -1257,6 +1258,67 @@ const Devi = () => {
           }
         }
         
+        // Process interaction logging marker
+        const interactionMatch = fullContent.match(/\[LOG_INTERACTION:([^\]]+)\]/);
+        if (interactionMatch && selectedCandidate && user) {
+          const parts = interactionMatch[1].split('|');
+          if (parts.length >= 2) {
+            const [type, date, notes, feeling] = parts;
+            const interactionType = type || 'other';
+            const interactionDate = date || new Date().toISOString().split('T')[0];
+            const interactionNotes = notes || null;
+            const overallFeeling = feeling ? Math.min(5, Math.max(1, parseInt(feeling))) : null;
+            
+            try {
+              // Insert the interaction
+              const { error: insertError } = await supabase
+                .from('interactions')
+                .insert({
+                  user_id: user.id,
+                  candidate_id: selectedCandidate.id,
+                  interaction_type: interactionType as any,
+                  interaction_date: interactionDate,
+                  notes: interactionNotes,
+                  overall_feeling: overallFeeling,
+                });
+              
+              if (insertError) {
+                console.error('Failed to log interaction:', insertError);
+              } else {
+                console.log('Interaction logged from D.E.V.I. chat:', { type: interactionType, date: interactionDate });
+                toast.success(`Logged ${interactionType.replace('_', ' ')} with ${selectedCandidate.nickname}`, {
+                  description: 'Compatibility score will be updated',
+                });
+                
+                // Trigger compatibility score recalculation
+                try {
+                  const { error: scoreError } = await supabase.functions.invoke('calculate-compatibility', {
+                    body: { candidateId: selectedCandidate.id },
+                  });
+                  if (scoreError) {
+                    console.error('Failed to recalculate compatibility:', scoreError);
+                  }
+                } catch (scoreErr) {
+                  console.error('Error calling compatibility function:', scoreErr);
+                }
+                
+                // Refresh interactions list
+                const { data: updatedInteractions } = await supabase
+                  .from('interactions')
+                  .select('*')
+                  .eq('candidate_id', selectedCandidate.id)
+                  .order('interaction_date', { ascending: false });
+                
+                if (updatedInteractions) {
+                  setInteractions(updatedInteractions);
+                }
+              }
+            } catch (err) {
+              console.error('Error logging interaction:', err);
+            }
+          }
+        }
+        
         // Update the displayed content to remove all markers
         const hasMarkers = fullContent.includes('[RECALCULATE_HEALING_SCORE]') ||
           fullContent.includes('[SET_HEALING_SCORE:') ||
@@ -1264,7 +1326,8 @@ const Devi = () => {
           fullContent.includes('[SET_RED_FLAG_SENSITIVITY:') ||
           fullContent.includes('[SET_LOVE_BOMBING_SENSITIVITY:') ||
           fullContent.includes('[SET_OVER_EX_LEVEL:') ||
-          fullContent.includes('[SET_ATTACHMENT_TO_PAST:');
+          fullContent.includes('[SET_ATTACHMENT_TO_PAST:') ||
+          fullContent.includes('[LOG_INTERACTION:');
           
         if (hasMarkers) {
           setMessages(prev => 
