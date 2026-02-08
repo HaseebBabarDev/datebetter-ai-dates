@@ -22,6 +22,13 @@ import {
   User,
   ChevronDown,
   Pencil,
+  Ghost,
+  Swords,
+  Gem,
+  PackageOpen,
+  Map,
+  UserPlus,
+  HelpCircle,
 } from "lucide-react";
 import { EditInteractionDialog } from "./EditInteractionDialog";
 import { parseDateOnly } from "@/lib/dateOnly";
@@ -49,6 +56,16 @@ const INTERACTION_ICONS: Record<Enums<"interaction_type">, React.ReactNode> = {
   trip: <Plane className="w-4 h-4" />,
   event: <Calendar className="w-4 h-4" />,
   intimate: <Heart className="w-4 h-4" />,
+  date: <Calendar className="w-4 h-4" />,
+  video_call: <Video className="w-4 h-4" />,
+  met_friends: <Users className="w-4 h-4" />,
+  met_family: <UserPlus className="w-4 h-4" />,
+  trip_together: <Map className="w-4 h-4" />,
+  moved_in: <PackageOpen className="w-4 h-4" />,
+  engaged: <Gem className="w-4 h-4" />,
+  ghosted: <Ghost className="w-4 h-4" />,
+  argument: <Swords className="w-4 h-4" />,
+  other: <HelpCircle className="w-4 h-4" />,
 };
 
 const INTERACTION_LABELS: Record<Enums<"interaction_type">, string> = {
@@ -65,6 +82,16 @@ const INTERACTION_LABELS: Record<Enums<"interaction_type">, string> = {
   trip: "Trip",
   event: "Event",
   intimate: "Intimate",
+  date: "Date",
+  video_call: "Video Call",
+  met_friends: "Met Their Friends",
+  met_family: "Met Their Family",
+  trip_together: "Trip Together",
+  moved_in: "Moved In",
+  engaged: "Got Engaged",
+  ghosted: "Ghosted/No Response",
+  argument: "Argument/Conflict",
+  other: "Other",
 };
 
 const getFeelingEmoji = (feeling: number | null) => {
