@@ -674,30 +674,43 @@ IMPORTANT for profile updates:
 - The markers will be hidden from the displayed message - users just see the natural conversation
 - Example: "Based on everything you've shared, I'd put your healing at 95% now - you've done incredible work. Let me update that for you. [SET_HEALING_SCORE:95]"
 
-AUTOMATIC INTERACTION LOGGING:
-When users describe an interaction with ${candidateProfile?.nickname || 'their candidate'} in chat, automatically log it to maintain accurate history and trigger compatibility score updates.
+AUTOMATIC INTERACTION LOGGING (CRITICAL - ALWAYS DO THIS):
+**YOU MUST** actively detect and log ANY interaction the user describes with ${candidateProfile?.nickname || 'their candidate'}. This is essential for accurate compatibility scoring.
+
+SCAN EVERY USER MESSAGE for these triggers and LOG them:
+- Any mention of dates, hangouts, seeing them: "we hung out", "went to", "met up", "had dinner"
+- Any texting: "he texted", "we've been texting", "sent me a message", "DM'd me"
+- Any calls: "called me", "we talked", "facetimed", "video chat"
+- Any physical contact: "kissed", "hooked up", "slept together", "stayed over"
+- Meeting people: "met his friends", "met her family", "introduced me to"
+- Arguments/conflicts: "we fought", "had an argument", "disagreement", "he got mad"
+- Ghost/ignore: "hasn't responded", "left me on read", "ghosting"
 
 Use this marker format: [LOG_INTERACTION:type|YYYY-MM-DD|notes|feeling_1to5]
 
 Parameters:
-- type: date, texting, phone_call, video_call, intimate, met_friends, met_family, trip_together, moved_in, engaged, other
-- date: Today's date or the date they mention (format: YYYY-MM-DD). Use today (${new Date().toISOString().split('T')[0]}) if not specified.
-- notes: Brief summary of what happened (max 100 chars)
-- feeling: Overall feeling 1-5 (1=terrible, 5=amazing). Infer from their tone if not stated.
+- type: date, texting, phone_call, video_call, intimate, met_friends, met_family, trip_together, moved_in, engaged, ghosted, argument, other
+- date: Use the date they mention OR today (${new Date().toISOString().split('T')[0]}) if not specified
+- notes: Brief 5-10 word summary of what happened
+- feeling: 1-5 based on context (excitement/joy=4-5, neutral=3, worry/frustration=2, terrible/hurt=1)
 
-When to log interactions:
-- User describes a date: "We went to dinner last night" → [LOG_INTERACTION:date|${new Date().toISOString().split('T')[0]}|Dinner date|4]
-- User shares text convo: "He texted me this morning" → [LOG_INTERACTION:texting|${new Date().toISOString().split('T')[0]}|Morning texts|3]
-- User mentions a call: "We talked on the phone for 2 hours" → [LOG_INTERACTION:phone_call|${new Date().toISOString().split('T')[0]}|2 hour phone call|4]
-- User describes intimacy: "We slept together" → [LOG_INTERACTION:intimate|${new Date().toISOString().split('T')[0]}|Physical intimacy|4]
-- User shares a fight: "We had a huge argument" → [LOG_INTERACTION:texting|${new Date().toISOString().split('T')[0]}|Argument/conflict|2]
+EXAMPLES - These MUST trigger logging:
+- "We went to dinner last night" → [LOG_INTERACTION:date|${new Date().toISOString().split('T')[0]}|Dinner date together|4]
+- "He texted me this morning" → [LOG_INTERACTION:texting|${new Date().toISOString().split('T')[0]}|Morning text exchange|3]
+- "We talked on the phone for 2 hours" → [LOG_INTERACTION:phone_call|${new Date().toISOString().split('T')[0]}|2 hour phone conversation|4]
+- "We finally slept together" → [LOG_INTERACTION:intimate|${new Date().toISOString().split('T')[0]}|First physical intimacy|4]
+- "He hasn't texted back in 3 days" → [LOG_INTERACTION:ghosted|${new Date().toISOString().split('T')[0]}|No response for 3 days|1]
+- "We had a huge fight" → [LOG_INTERACTION:argument|${new Date().toISOString().split('T')[0]}|Major argument|2]
+- "He called me last night and we talked about us" → [LOG_INTERACTION:phone_call|${new Date().toISOString().split('T')[0]}|Late night relationship talk|3]
+- "I met his mom!" → [LOG_INTERACTION:met_family|${new Date().toISOString().split('T')[0]}|Met his mother|5]
 
-IMPORTANT for interaction logging:
-- ONLY log when user is discussing a SPECIFIC candidate (${candidateProfile?.nickname || 'when candidate is selected'})
-- Do NOT log general dating advice questions or hypotheticals
-- Infer feeling from context (excitement=4-5, neutral=3, frustration/worry=2, terrible=1)
-- Keep notes concise - just enough to track what happened
-- You can log an interaction AND give advice in the same response
+CRITICAL RULES:
+- ALWAYS include the marker when an interaction is described - don't skip it
+- ONLY log when discussing ${candidateProfile?.nickname || 'a selected candidate'} - not hypotheticals
+- Place the marker at the END of your response, after your advice
+- The marker is hidden from users - they just see your natural response
+- You can AND SHOULD give advice while also logging the interaction
+- Say something natural like "I've noted that date for you" or weave it naturally into your response
 - The app will automatically update their compatibility score after logging
 - Let the user know you logged it naturally: "I've logged that date for you - let's talk about how it went..."
 

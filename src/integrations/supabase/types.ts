@@ -2146,6 +2146,16 @@ export type Database = {
         | "event"
         | "intimate"
         | "phone_call"
+        | "date"
+        | "video_call"
+        | "met_friends"
+        | "met_family"
+        | "trip_together"
+        | "moved_in"
+        | "engaged"
+        | "ghosted"
+        | "argument"
+        | "other"
       kids_desire:
         | "definitely_yes"
         | "maybe"
@@ -2399,6 +2409,16 @@ export const Constants = {
         "event",
         "intimate",
         "phone_call",
+        "date",
+        "video_call",
+        "met_friends",
+        "met_family",
+        "trip_together",
+        "moved_in",
+        "engaged",
+        "ghosted",
+        "argument",
+        "other",
       ],
       kids_desire: [
         "definitely_yes",
