@@ -22,7 +22,8 @@ import {
   Brain,
   Activity,
   FlaskConical,
-  UserCheck
+  UserCheck,
+  MapPin
 } from "lucide-react";
 import { 
   Select,
@@ -42,12 +43,20 @@ interface UserUsage {
   last_ai_message: string | null;
 }
 
+interface LoginLocation {
+  city?: string;
+  region?: string;
+  country?: string;
+  countryCode?: string;
+}
+
 interface UserProfile {
   user_id: string;
   name: string | null;
   email: string | null;
   created_at: string;
   last_sign_in_at?: string | null;
+  last_login_location?: LoginLocation;
   isAdmin: boolean;
   testerType: 'internal' | 'external';
   usage?: UserUsage;
@@ -102,12 +111,13 @@ export function AdminUserManagement() {
       // Use edge function to get users with emails and usage data
       const { data: { session } } = await supabase.auth.getSession();
       
-      let usersFromApi: Array<{
+        let usersFromApi: Array<{
         user_id: string;
         name: string | null;
         email: string | null;
         created_at: string;
         last_sign_in_at?: string | null;
+        last_login_location?: LoginLocation;
         usage?: UserUsage;
       }> = [];
       
@@ -585,10 +595,16 @@ export function AdminUserManagement() {
                           </Badge>
                         )}
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2 flex-wrap">
                         <span>Joined: {new Date(userProfile.created_at).toLocaleDateString()}</span>
                         {userProfile.last_sign_in_at && (
                           <span>• Last login: {new Date(userProfile.last_sign_in_at).toLocaleDateString()}</span>
+                        )}
+                        {userProfile.last_login_location?.city && userProfile.last_login_location?.country && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {userProfile.last_login_location.city}, {userProfile.last_login_location.countryCode || userProfile.last_login_location.country}
+                          </span>
                         )}
                       </div>
                     </div>

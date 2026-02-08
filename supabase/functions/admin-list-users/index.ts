@@ -120,6 +120,26 @@ Deno.serve(async (req) => {
       .from("devi_messages")
       .select("user_id, created_at");
 
+    // Get most recent login location for each user
+    const { data: loginHistory } = await supabaseClient
+      .from("user_login_history")
+      .select("user_id, city, region, country, country_code, logged_in_at")
+      .order("logged_in_at", { ascending: false });
+
+    // Build login location map (most recent per user)
+    const lastLoginLocationMap = new Map<string, { city?: string; region?: string; country?: string; countryCode?: string; loggedInAt?: string }>();
+    loginHistory?.forEach(login => {
+      if (!lastLoginLocationMap.has(login.user_id)) {
+        lastLoginLocationMap.set(login.user_id, {
+          city: login.city || undefined,
+          region: login.region || undefined,
+          country: login.country || undefined,
+          countryCode: login.country_code || undefined,
+          loggedInAt: login.logged_in_at || undefined,
+        });
+      }
+    });
+
     // Build usage maps
     const candidateCountMap = new Map<string, number>();
     candidates?.forEach(c => {
@@ -155,6 +175,12 @@ Deno.serve(async (req) => {
       name: string | null;
       created_at: string;
       last_sign_in_at: string | null | undefined;
+      last_login_location?: {
+        city?: string;
+        region?: string;
+        country?: string;
+        countryCode?: string;
+      };
       usage: {
         candidates: number;
         interactions: number;
@@ -166,12 +192,19 @@ Deno.serve(async (req) => {
     
     const users: UserData[] = allAuthUsers.map(authUser => {
       const profile = profilesMap.get(authUser.id);
+      const lastLoginLocation = lastLoginLocationMap.get(authUser.id);
       return {
         user_id: authUser.id,
         email: authUser.email,
         name: profile?.name || authUser.user_metadata?.name || null,
         created_at: profile?.created_at || authUser.created_at,
         last_sign_in_at: authUser.last_sign_in_at,
+        last_login_location: lastLoginLocation ? {
+          city: lastLoginLocation.city,
+          region: lastLoginLocation.region,
+          country: lastLoginLocation.country,
+          countryCode: lastLoginLocation.countryCode,
+        } : undefined,
         usage: {
           candidates: candidateCountMap.get(authUser.id) || 0,
           interactions: interactionCountMap.get(authUser.id) || 0,

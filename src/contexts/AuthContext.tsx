@@ -60,10 +60,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
+    
+    // Track login location if successful
+    if (!error && data.session) {
+      try {
+        await supabase.functions.invoke("track-login");
+      } catch (trackError) {
+        // Don't block login if tracking fails
+        console.error("Failed to track login:", trackError);
+      }
+    }
+    
     return { error };
   };
 

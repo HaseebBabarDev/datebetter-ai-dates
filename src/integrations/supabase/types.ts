@@ -1854,6 +1854,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_login_history: {
+        Row: {
+          city: string | null
+          country: string | null
+          country_code: string | null
+          id: string
+          ip_address: string | null
+          isp: string | null
+          logged_in_at: string
+          region: string | null
+          timezone: string | null
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          country_code?: string | null
+          id?: string
+          ip_address?: string | null
+          isp?: string | null
+          logged_in_at?: string
+          region?: string | null
+          timezone?: string | null
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          country_code?: string | null
+          id?: string
+          ip_address?: string | null
+          isp?: string | null
+          logged_in_at?: string
+          region?: string | null
+          timezone?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_pins: {
         Row: {
           created_at: string
