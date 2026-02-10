@@ -1292,11 +1292,20 @@ const Devi = () => {
                 
                 // Trigger compatibility score recalculation
                 try {
-                  const { error: scoreError } = await supabase.functions.invoke('calculate-compatibility', {
+                  const { data: scoreData, error: scoreError } = await supabase.functions.invoke('calculate-compatibility', {
                     body: { candidateId: selectedCandidate.id },
                   });
                   if (scoreError) {
                     console.error('Failed to recalculate compatibility:', scoreError);
+                  } else if (scoreData?.overall_score !== undefined) {
+                    // Update local candidate state with the new score
+                    setSelectedCandidate(prev => prev ? {
+                      ...prev,
+                      compatibility_score: scoreData.overall_score,
+                      score_breakdown: scoreData,
+                      last_score_update: new Date().toISOString(),
+                    } : prev);
+                    console.log(`Compatibility score updated: ${scoreData.overall_score}%`);
                   }
                 } catch (scoreErr) {
                   console.error('Error calling compatibility function:', scoreErr);
