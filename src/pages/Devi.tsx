@@ -48,6 +48,7 @@ import { ChatGPTMessage } from "@/components/devi/ChatGPTMessage";
 import { AIDisclosure } from "@/components/AIDisclosure";
 import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
+import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -355,6 +356,7 @@ const Devi = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
   const [pendingImage, setPendingImage] = useState<{ data: string; type: string } | null>(null);
   const [textScreenshotRightSide, setTextScreenshotRightSide] = useState<"me" | "them">("me");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -989,6 +991,7 @@ const Devi = () => {
       if (!convId) {
         toast.error("Failed to create conversation");
         setIsLoading(false);
+        setIsThinking(false);
         return;
       }
     }
@@ -1050,6 +1053,7 @@ const Devi = () => {
       const assistantMessageId = crypto.randomUUID();
       let fullContent = "";
       let messageAdded = false;
+      setIsThinking(true);
 
       try {
         while (true) {
@@ -1095,6 +1099,7 @@ const Devi = () => {
                 
                 if (!messageAdded) {
                   messageAdded = true;
+                  setIsThinking(false);
                   setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: displayContent }]);
                 } else {
                   setMessages(prev => 
@@ -1373,6 +1378,7 @@ const Devi = () => {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      setIsThinking(false);
     }
   };
 
@@ -1982,7 +1988,8 @@ const Devi = () => {
               )}
             </div>
           ) : (
-            messages.map((msg, index) => (
+          <>
+            {messages.map((msg, index) => (
               chatLayout === "chatgpt" ? (
                 <ChatGPTMessage 
                   key={msg.id} 
@@ -2000,7 +2007,9 @@ const Devi = () => {
                   isLoading={isLoading}
                 />
               )
-            ))
+            ))}
+            <DeviThinkingIndicator isVisible={isThinking} />
+          </>
           )}
           
           {/* Soft warning at 30 messages */}
