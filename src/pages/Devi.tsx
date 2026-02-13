@@ -1081,15 +1081,26 @@ const Devi = () => {
               if (content) {
                 fullContent += content;
                 
-                // Stream content progressively
+                // Stream content progressively - strip markers before displaying
+                const displayContent = fullContent
+                  .replace(/\[RECALCULATE_HEALING_SCORE\]/g, '')
+                  .replace(/\[SET_HEALING_SCORE:\d+\]/g, '')
+                  .replace(/\[SET_BOUNDARY_STRENGTH:\d+\]/g, '')
+                  .replace(/\[SET_RED_FLAG_SENSITIVITY:\d+\]/g, '')
+                  .replace(/\[SET_LOVE_BOMBING_SENSITIVITY:\d+\]/g, '')
+                  .replace(/\[SET_OVER_EX_LEVEL:\d+\]/g, '')
+                  .replace(/\[SET_ATTACHMENT_TO_PAST:\d+\]/g, '')
+                  .replace(/\[LOG_INTERACTION:[^\]]*\]?/g, '')
+                  .trim();
+                
                 if (!messageAdded) {
                   messageAdded = true;
-                  setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: fullContent }]);
+                  setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: displayContent }]);
                 } else {
                   setMessages(prev => 
                     prev.map(m => 
                       m.id === assistantMessageId 
-                        ? { ...m, content: fullContent }
+                        ? { ...m, content: displayContent }
                         : m
                     )
                   );
