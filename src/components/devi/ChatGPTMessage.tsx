@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronUp, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VoicePlayButton } from "./VoicePlayButton";
 import { Button } from "@/components/ui/button";
@@ -201,7 +201,9 @@ interface ChatGPTMessageProps {
   message: Message;
   isLast?: boolean;
   onQuickReply?: (reply: string) => void;
+  onLogInteraction?: () => void;
   isLoading?: boolean;
+  hasCandidate?: boolean;
 }
 
 // Threshold for showing "Read more" - approximately 2 short paragraphs
@@ -211,11 +213,14 @@ export const ChatGPTMessage: React.FC<ChatGPTMessageProps> = ({
   message, 
   isLast, 
   onQuickReply, 
-  isLoading 
+  onLogInteraction,
+  isLoading,
+  hasCandidate,
 }) => {
   const isLongMessage = message.role === 'assistant' && message.content.length > COLLAPSE_THRESHOLD;
-  const [expanded, setExpanded] = useState(!isLongMessage); // Collapse long messages by default
+  const [expanded, setExpanded] = useState(!isLongMessage);
   const showQuickReplies = message.role === 'assistant' && isLast && !isLoading && onQuickReply;
+  const showLogButton = message.role === 'assistant' && isLast && !isLoading && onLogInteraction && hasCandidate;
 
   if (message.role === 'user') {
     // User messages - simple right-aligned bubbles (similar to current)
@@ -303,6 +308,21 @@ export const ChatGPTMessage: React.FC<ChatGPTMessageProps> = ({
           <VoicePlayButton text={message.content} variant="blob" />
         )}
       </div>
+      
+      {/* Log interaction button */}
+      {showLogButton && (
+        <div className="pl-9 mt-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onLogInteraction}
+            className="gap-2 rounded-full border-primary/30 text-primary hover:bg-primary/10"
+          >
+            <ClipboardList className="w-4 h-4" />
+            Log this as an interaction
+          </Button>
+        </div>
+      )}
       
       {/* Quick replies */}
       {showQuickReplies && (

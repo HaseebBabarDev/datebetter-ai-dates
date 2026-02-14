@@ -80,6 +80,7 @@ const CandidateDetail = () => {
   const [hasPendingAdvice, setHasPendingAdvice] = useState(false);
   const [successfulRelationship, setSuccessfulRelationship] = useState<{ show: boolean; interactionDays: number }>({ show: false, interactionDays: 0 });
   const initialTab = (location.state as { tab?: string })?.tab;
+  const prefillNotes = (location.state as { prefillNotes?: string })?.prefillNotes || "";
   const [activeTab, setActiveTab] = useState<string | undefined>(initialTab);
 
   // Sync tab state when navigating to this page with a different tab in location state
@@ -1063,6 +1064,8 @@ const CandidateDetail = () => {
                 isNoContact={candidate.no_contact_active || false}
                 onBrokeContact={handleBrokeContact}
                 hasPendingAdvice={hasPendingAdvice}
+                prefillNotes={prefillNotes}
+                autoOpen={!!prefillNotes}
                 triggerButton={
                   <Button className="w-full gap-2">
                     <Clock className="h-4 w-4" />
