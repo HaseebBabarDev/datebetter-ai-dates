@@ -1054,6 +1054,24 @@ const Devi = () => {
       const assistantMessageId = crypto.randomUUID();
       let fullContent = "";
       let messageAdded = false;
+      
+      // Minimum thinking display time (1.8s) so users see the research phases
+      const thinkingStartTime = Date.now();
+      const MIN_THINKING_MS = 1800;
+      
+      const stripMarkers = (text: string) => text
+        .replace(/\[RECALCULATE_HEALING_SCORE\]/g, '')
+        .replace(/\[SET_HEALING_SCORE:\d+\]/g, '')
+        .replace(/\[SET_BOUNDARY_STRENGTH:\d+\]/g, '')
+        .replace(/\[SET_RED_FLAG_SENSITIVITY:\d+\]/g, '')
+        .replace(/\[SET_LOVE_BOMBING_SENSITIVITY:\d+\]/g, '')
+        .replace(/\[SET_OVER_EX_LEVEL:\d+\]/g, '')
+        .replace(/\[SET_ATTACHMENT_TO_PAST:\d+\]/g, '')
+        .replace(/\[LOG_INTERACTION:[^\]]*\]?/g, '')
+        .replace(/\[[A-Z_]+:[^\]]*\]?/g, '')
+        .replace(/\[[A-Z_]{3,}\]/g, '')
+        .trim();
+
       try {
         while (true) {
           const { done, value } = await reader.read();
@@ -1084,17 +1102,14 @@ const Devi = () => {
               if (content) {
                 fullContent += content;
                 
-                // Stream content progressively - strip markers before displaying
-                const displayContent = fullContent
-                  .replace(/\[RECALCULATE_HEALING_SCORE\]/g, '')
-                  .replace(/\[SET_HEALING_SCORE:\d+\]/g, '')
-                  .replace(/\[SET_BOUNDARY_STRENGTH:\d+\]/g, '')
-                  .replace(/\[SET_RED_FLAG_SENSITIVITY:\d+\]/g, '')
-                  .replace(/\[SET_LOVE_BOMBING_SENSITIVITY:\d+\]/g, '')
-                  .replace(/\[SET_OVER_EX_LEVEL:\d+\]/g, '')
-                  .replace(/\[SET_ATTACHMENT_TO_PAST:\d+\]/g, '')
-                  .replace(/\[LOG_INTERACTION:[^\]]*\]?/g, '')
-                  .trim();
+                const displayContent = stripMarkers(fullContent);
+                
+                // Don't show message until minimum thinking time has elapsed
+                const elapsed = Date.now() - thinkingStartTime;
+                if (elapsed < MIN_THINKING_MS) {
+                  // Buffer content but keep thinking indicator visible
+                  continue;
+                }
                 
                 if (!messageAdded) {
                   messageAdded = true;
@@ -1108,6 +1123,8 @@ const Devi = () => {
                         : m
                     )
                   );
+                  // Keep scrolled to bottom during streaming
+                  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
                 }
               }
             } catch (parseError) {
@@ -1140,35 +1157,31 @@ const Devi = () => {
         reader.releaseLock();
       }
 
-      // Ensure final content is displayed correctly
+      // Ensure final content is displayed correctly with markers stripped
       if (fullContent) {
+        const finalDisplay = stripMarkers(fullContent);
         if (!messageAdded) {
-          setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: fullContent }]);
+          setIsThinking(false);
+          setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: finalDisplay }]);
         } else {
-          // Final update to ensure complete content is shown
           setMessages(prev => 
             prev.map(m => 
               m.id === assistantMessageId 
-                ? { ...m, content: fullContent }
+                ? { ...m, content: finalDisplay }
                 : m
             )
           );
         }
+        // Final scroll to bottom
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
       }
 
       // Save the single assistant message after streaming completes
       if (convId && fullContent) {
-        // Remove all markers before saving/displaying
-        let cleanContent = fullContent
-          .replace(/\[RECALCULATE_HEALING_SCORE\]/g, '')
-          .replace(/\[SET_HEALING_SCORE:\d+\]/g, '')
-          .replace(/\[SET_BOUNDARY_STRENGTH:\d+\]/g, '')
-          .replace(/\[SET_RED_FLAG_SENSITIVITY:\d+\]/g, '')
-          .replace(/\[SET_LOVE_BOMBING_SENSITIVITY:\d+\]/g, '')
-          .replace(/\[SET_OVER_EX_LEVEL:\d+\]/g, '')
-          .replace(/\[SET_ATTACHMENT_TO_PAST:\d+\]/g, '')
-          .replace(/\[LOG_INTERACTION:[^\]]+\]/g, '')
-          .trim();
+        // Remove all markers before saving
+        let cleanContent = stripMarkers(fullContent);
           
         await saveMessage(convId, {
           id: assistantMessageId,
