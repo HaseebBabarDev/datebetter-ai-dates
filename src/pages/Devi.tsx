@@ -406,6 +406,7 @@ const Devi = () => {
   const feelingPromptHandled = useRef(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
@@ -468,9 +469,13 @@ const Devi = () => {
     const scrollToBottom = () => {
       requestAnimationFrame(() => {
         setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ 
-            behavior: isInitialLoad ? "instant" : "smooth" 
-          });
+          const container = scrollContainerRef.current;
+          if (container) {
+            container.scrollTo({
+              top: container.scrollHeight,
+              behavior: isInitialLoad ? "instant" : "smooth"
+            });
+          }
         }, 0);
       });
     };
@@ -1124,7 +1129,10 @@ const Devi = () => {
                     )
                   );
                   // Keep scrolled to bottom during streaming
-                  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+                  const container = scrollContainerRef.current;
+                  if (container) {
+                    container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+                  }
                 }
               }
             } catch (parseError) {
@@ -1174,7 +1182,10 @@ const Devi = () => {
         }
         // Final scroll to bottom
         setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+          const container = scrollContainerRef.current;
+          if (container) {
+            container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+          }
         }, 100);
       }
 
@@ -1900,7 +1911,7 @@ const Devi = () => {
       </Dialog>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0">
         <div className={`container mx-auto px-4 py-4 ${chatLayout === "chatgpt" ? "max-w-2xl" : "max-w-lg"} space-y-4`}>
           {messages.length === 0 ? (
             <div className="py-4">
