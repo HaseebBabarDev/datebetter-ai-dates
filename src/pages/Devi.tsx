@@ -983,6 +983,7 @@ const Devi = () => {
     setInput("");
     setPendingImage(null);
     setIsLoading(true);
+    setIsThinking(true);
 
     // Create or use existing conversation
     let convId = currentConversationId;
@@ -1053,8 +1054,6 @@ const Devi = () => {
       const assistantMessageId = crypto.randomUUID();
       let fullContent = "";
       let messageAdded = false;
-      setIsThinking(true);
-
       try {
         while (true) {
           const { done, value } = await reader.read();
