@@ -2019,7 +2019,18 @@ const Devi = () => {
                   message={msg} 
                   isLast={index === messages.length - 1}
                   onQuickReply={(reply) => sendMessage(reply)}
+                  onLogInteraction={() => {
+                    if (selectedCandidate) {
+                      // Find the last user message before this assistant message
+                      const userMessages = messages.slice(0, index).filter(m => m.role === 'user');
+                      const lastUserMessage = userMessages[userMessages.length - 1]?.content || '';
+                      navigate(`/candidate/${selectedCandidate.id}`, { 
+                        state: { tab: "interactions", prefillNotes: lastUserMessage } 
+                      });
+                    }
+                  }}
                   isLoading={isLoading}
+                  hasCandidate={!!selectedCandidate}
                 />
               ) : (
                 <MessageBubble 

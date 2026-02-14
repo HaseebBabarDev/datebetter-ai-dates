@@ -58,7 +58,9 @@ interface AddInteractionFormProps {
   hasPendingAdvice?: boolean;
   defaultType?: Enums<"interaction_type">;
   triggerButton?: React.ReactNode;
-  navigateToInsights?: boolean; // If true, navigate to candidate insights after logging
+  navigateToInsights?: boolean;
+  prefillNotes?: string;
+  autoOpen?: boolean;
 }
 
 const INTERACTION_TYPES: { value: Enums<"interaction_type">; label: string }[] = [
@@ -96,12 +98,22 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   defaultType = "coffee",
   triggerButton,
   navigateToInsights = false,
+  prefillNotes = "",
+  autoOpen = false,
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { canUseUpdate, getRemainingUpdates, subscription, refetch, incrementUsage } = useSubscription();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(autoOpen);
+  const autoOpenHandled = React.useRef(false);
+  
+  React.useEffect(() => {
+    if (autoOpen && !autoOpenHandled.current) {
+      autoOpenHandled.current = true;
+      setOpen(true);
+    }
+  }, [autoOpen]);
   const [showBrokeContactDialog, setShowBrokeContactDialog] = useState(false);
   const [showPendingAdviceDialog, setShowPendingAdviceDialog] = useState(false);
   const [showCrisisDialog, setShowCrisisDialog] = useState(false);
@@ -118,7 +130,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   const [whoInitiated, setWhoInitiated] = useState("");
   const [overallFeeling, setOverallFeeling] = useState(3);
   const [gutFeeling, setGutFeeling] = useState("");
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(prefillNotes);
   const [wasIntimate, setWasIntimate] = useState(defaultType === "intimate");
 
   const resetForm = () => {
