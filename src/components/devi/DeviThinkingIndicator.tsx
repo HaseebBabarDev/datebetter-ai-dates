@@ -3,10 +3,10 @@ import { Sparkles, BookOpen, Brain, Search, FlaskConical } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const THINKING_PHASES = [
-  { icon: Search, text: "Searching clinical resources…" },
-  { icon: BookOpen, text: "Reviewing attachment theory research…" },
-  { icon: FlaskConical, text: "Cross-referencing behavioral patterns…" },
-  { icon: Brain, text: "Synthesizing personalized insights…" },
+  { icon: Search, text: "Thinking and researching…" },
+  { icon: BookOpen, text: "Reviewing clinical journals…" },
+  { icon: FlaskConical, text: "Cross-referencing resources…" },
+  { icon: Brain, text: "Synthesizing insights…" },
 ];
 
 interface DeviThinkingIndicatorProps {
