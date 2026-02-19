@@ -453,6 +453,7 @@ export type Database = {
           id: string
           is_unlocked: boolean
           plan_data: Json | null
+          practice_checks: Json
           status: string
           unlocked_at: string | null
           updated_at: string
@@ -467,6 +468,7 @@ export type Database = {
           id?: string
           is_unlocked?: boolean
           plan_data?: Json | null
+          practice_checks?: Json
           status?: string
           unlocked_at?: string | null
           updated_at?: string
@@ -481,6 +483,7 @@ export type Database = {
           id?: string
           is_unlocked?: boolean
           plan_data?: Json | null
+          practice_checks?: Json
           status?: string
           unlocked_at?: string | null
           updated_at?: string
