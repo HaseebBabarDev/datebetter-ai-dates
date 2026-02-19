@@ -103,9 +103,13 @@ export function PaymentSheet({ open, onOpenChange, planName, price, onPaymentSuc
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Subscribe to {planName}</DialogTitle>
+          <DialogTitle>
+            {planName === "Detachment Plan" ? "Unlock" : "Subscribe to"} {planName}
+          </DialogTitle>
           <DialogDescription>
-            {price}/month • Cancel anytime
+            {planName === "Detachment Plan"
+              ? `${price} one-time purchase • No recurring charges`
+              : `${price}/month • Cancel anytime`}
           </DialogDescription>
         </DialogHeader>
 
