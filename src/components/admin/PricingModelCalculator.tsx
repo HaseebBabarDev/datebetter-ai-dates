@@ -74,6 +74,13 @@ const DEFAULT: Inputs = {
 const n = (s: string) => parseFloat(s) || 0;
 const fmt = (v: number) =>
   v.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
+// For per-user costs that can be sub-cent, show more precision
+const fmtUser = (v: number) => {
+  if (v === 0) return "$0.00";
+  if (v < 0.01) return `$${v.toFixed(4)}`;
+  if (v < 0.10) return `$${v.toFixed(3)}`;
+  return fmt(v);
+};
 const fmtPct = (v: number) => `${v.toFixed(1)}%`;
 
 function InfoTip({ text }: { text: string }) {
@@ -348,7 +355,7 @@ export const PricingModelCalculator = () => {
                   {[
                     { label: "Net Margin", value: fmtPct(margin) },
                     { label: "Revenue/Paid User", value: fmt(revenuePerUser) },
-                    { label: "AI Cost/MAU", value: fmt((geminiCost + ttsCost) / Math.max(mau, 1)) },
+                    { label: "AI Cost/MAU", value: fmtUser((geminiCost + ttsCost) / Math.max(mau, 1)) },
                     { label: "Platform Fee %", value: fmtPct(grossRevenue > 0 ? (platformFees / grossRevenue) * 100 : 0) },
                   ].map((kpi) => (
                     <div key={kpi.label} className="text-center p-2 rounded-lg bg-background border border-border">
@@ -379,7 +386,7 @@ export const PricingModelCalculator = () => {
                     <div key={item.label}>
                       <div className="flex justify-between mb-0.5">
                         <span className="text-muted-foreground">{item.label}</span>
-                        <span className="font-mono">{fmt(perUser)}/user</span>
+                        <span className="font-mono">{fmtUser(perUser)}/user</span>
                       </div>
                       <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                         <div
