@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink, Zap } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -452,6 +452,13 @@ const Devi = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const isFree = subscription?.plan === "free";
+  // Free users get 1 trial conversation with max 5 user→AI exchanges (10 messages total)
+  const FREE_EXCHANGE_LIMIT = 5;
+  const freeExchangesUsed = isFree
+    ? Math.floor(messages.filter(m => m.role === "user").length)
+    : 0;
+  const freeExchangesRemaining = Math.max(0, FREE_EXCHANGE_LIMIT - freeExchangesUsed);
+  const freeTrialExhausted = isFree && freeExchangesUsed >= FREE_EXCHANGE_LIMIT;
   const candidateIdFromState = (location.state as { candidateId?: string })?.candidateId;
 
   // Start tour for new users
@@ -1008,6 +1015,12 @@ const Devi = () => {
     }
     if (chatMode === "general" && !canChatGeneral) {
       setShowProfileDialog(true);
+      return;
+    }
+
+    // Free trial gate: 5 exchanges max
+    if (freeTrialExhausted) {
+      navigate("/subscription");
       return;
     }
 
@@ -2156,6 +2169,22 @@ const Devi = () => {
           )}
           
           {/* Soft warning at 30 messages */}
+          {/* Free trial exchange counter */}
+          {isFree && !freeTrialExhausted && freeExchangesUsed > 0 && (
+            <div className="mt-3 flex items-center gap-2 text-xs bg-primary/5 border border-primary/20 rounded-lg px-3 py-2">
+              <Sparkles className="w-3 h-3 text-primary shrink-0" />
+              <span className="flex-1 text-muted-foreground">
+                <span className="text-foreground font-medium">{freeExchangesRemaining} of {FREE_EXCHANGE_LIMIT}</span> free exchanges remaining
+              </span>
+              <button
+                onClick={() => navigate("/subscription")}
+                className="text-primary font-medium hover:underline"
+              >
+                Upgrade
+              </button>
+            </div>
+          )}
+
           {messages.length >= SOFT_LIMIT_MESSAGES && messages.length < MAX_CONVERSATION_MESSAGES && !isLoading && !softWarningDismissed && (
             <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
               <MessageSquare className="w-3 h-3 shrink-0" />
@@ -2258,7 +2287,21 @@ const Devi = () => {
           )}
           
           {/* Show locked state if requirements not met */}
-          {!hasFullProfile ? (
+          {freeTrialExhausted ? (
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex flex-col items-center gap-3 text-center">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm text-foreground">You've used your 5 free exchanges</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Upgrade to keep chatting with D.E.V.I.</p>
+              </div>
+              <Button size="sm" onClick={() => navigate("/subscription")} className="gap-1.5">
+                <Zap className="w-3.5 h-3.5" />
+                See Plans
+              </Button>
+            </div>
+          ) : !hasFullProfile ? (
             <button
               onClick={() => setShowProfileDialog(true)}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-border bg-muted/50 text-muted-foreground hover:bg-muted transition-colors"
