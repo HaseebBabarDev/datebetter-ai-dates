@@ -443,6 +443,42 @@ export type Database = {
           },
         ]
       }
+      detachment_plans: {
+        Row: {
+          candidate_id: string
+          created_at: string
+          generated_at: string | null
+          id: string
+          is_unlocked: boolean
+          plan_data: Json | null
+          unlocked_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string
+          generated_at?: string | null
+          id?: string
+          is_unlocked?: boolean
+          plan_data?: Json | null
+          unlocked_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string
+          generated_at?: string | null
+          id?: string
+          is_unlocked?: boolean
+          plan_data?: Json | null
+          unlocked_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       devi_conversations: {
         Row: {
           candidate_id: string | null
