@@ -743,7 +743,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, imageData, imageType, textScreenshotRightSide, userProfile, candidateProfile, interactions } = await req.json();
+    const { messages, imageData, imagesData, imageType, textScreenshotRightSide, userProfile, candidateProfile, interactions } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -780,19 +780,19 @@ serve(async (req) => {
       }
     }
 
-    // If there's a new image being sent
-    if (imageData) {
+    // If there's one or more new images being sent
+    const allImages: string[] = imagesData && imagesData.length > 0 ? imagesData : (imageData ? [imageData] : []);
+    if (allImages.length > 0) {
       const lastMessage = aiMessages[aiMessages.length - 1];
       if (lastMessage.role === 'user' && typeof lastMessage.content === 'string') {
+        const textPart = { type: 'text', text: lastMessage.content || getImagePrompt(imageType, textScreenshotRightSide) };
+        const imageParts = allImages.map((img: string) => ({
+          type: 'image_url',
+          image_url: { url: img }
+        }));
         aiMessages[aiMessages.length - 1] = {
           role: 'user',
-          content: [
-            { type: 'text', text: lastMessage.content || getImagePrompt(imageType, textScreenshotRightSide) },
-            {
-              type: 'image_url',
-              image_url: { url: imageData }
-            }
-          ]
+          content: [textPart, ...imageParts]
         };
       }
     }
