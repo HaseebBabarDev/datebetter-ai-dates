@@ -188,6 +188,37 @@ export const PricingModelCalculator = () => {
   const margin = totalRevenue > 0 ? (netRevenue / totalRevenue) * 100 : 0;
   const revenuePerUser = paidUsers > 0 ? netRevenue / paidUsers : 0;
 
+  // ─── Per-Tier Breakdown ────────────────────────────────────────────────
+  // Fixed cost per month (ElevenLabs + infra + support + other)
+  const fixedCosts = ttsCost + supportCost + otherCost;
+  const fixedCostsLabel = `ElevenLabs $${n(inp.elMonthlyBase).toFixed(0)} + Ops $${(supportCost + otherCost).toFixed(0)}`;
+
+  const TIERS = [
+    { name: "Starter",   price: 9.99  },
+    { name: "Unlimited", price: 19.99 },
+    { name: "Detach",    price: 9.99  },
+  ];
+
+  const blendedPlatformRate =
+    (n(inp.appleFeeRate) / 100) * (n(inp.iosShare) / 100) +
+    (n(inp.googleFeeRate) / 100) * (1 - n(inp.iosShare) / 100);
+
+  const geminiCostPerUser = paidUsers > 0 ? geminiCost / paidUsers : GEMINI_COST_PER_AI_MSG * n(inp.aiMsgsPerUser);
+
+  const tierBreakdown = TIERS.map((t) => {
+    const platformFee = t.price * blendedPlatformRate;
+    const gemini = geminiCostPerUser;
+    const variableCost = platformFee + gemini;
+    const contribution = t.price - variableCost;
+    const marginPct = t.price > 0 ? (contribution / t.price) * 100 : 0;
+    return { ...t, platformFee, gemini, variableCost, contribution, marginPct };
+  });
+
+  // Breakeven: fixed costs / avg contribution margin per paid user
+  const avgContribution =
+    tierBreakdown.reduce((s, t) => s + t.contribution, 0) / tierBreakdown.length;
+  const breakeven = avgContribution > 0 ? Math.ceil(fixedCosts / avgContribution) : 0;
+
   // ─── Projections ───────────────────────────────────────────────────────
   const growthRate = n(inp.growth) / 100;
   const projMonths = Math.min(Math.max(Math.round(n(inp.months)), 1), 36);
@@ -528,7 +559,94 @@ export const PricingModelCalculator = () => {
           </div>
         </div>
 
-        {/* Projections Chart */}
+        {/* ── Per-Tier Breakdown Table (from image reference) ── */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <DollarSign className="w-4 h-4 text-primary" />
+              Per-Tier Unit Economics
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-muted-foreground text-xs">
+                    <th className="text-left py-2 pr-4 font-medium">Metric</th>
+                    {tierBreakdown.map((t) => (
+                      <th key={t.name} className="text-right py-2 pr-4 font-medium">{t.name}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="text-xs">
+                  <tr className="border-b border-border/50">
+                    <td className="py-2 pr-4 text-muted-foreground">Price</td>
+                    {tierBreakdown.map((t) => (
+                      <td key={t.name} className="text-right py-2 pr-4 font-mono">{fmt(t.price)}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-border/50">
+                    <td className="py-2 pr-4 text-muted-foreground">
+                      Apple / Google ({fmtPct(blendedPlatformRate * 100)} blended)
+                    </td>
+                    {tierBreakdown.map((t) => (
+                      <td key={t.name} className="text-right py-2 pr-4 font-mono text-destructive">-{fmt(t.platformFee)}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-border/50">
+                    <td className="py-2 pr-4 text-muted-foreground">Gemini AI</td>
+                    {tierBreakdown.map((t) => (
+                      <td key={t.name} className="text-right py-2 pr-4 font-mono text-destructive">-{fmtUser(t.gemini)}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-border bg-muted/30 font-semibold">
+                    <td className="py-2 pr-4">Variable Cost</td>
+                    {tierBreakdown.map((t) => (
+                      <td key={t.name} className="text-right py-2 pr-4 font-mono text-destructive">{fmt(t.variableCost)}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-border/50 font-semibold">
+                    <td className="py-2 pr-4">Contribution</td>
+                    {tierBreakdown.map((t) => (
+                      <td key={t.name} className="text-right py-2 pr-4 font-mono text-primary">{fmt(t.contribution)}</td>
+                    ))}
+                  </tr>
+                  <tr className="font-bold text-sm">
+                    <td className="py-2 pr-4">Margin</td>
+                    {tierBreakdown.map((t) => (
+                      <td key={t.name} className="text-right py-2 pr-4 font-mono text-primary">{fmtPct(t.marginPct)}</td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-border space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="font-semibold text-muted-foreground">Fixed Costs / Month</span>
+                <span className="font-mono font-semibold">{fmt(fixedCosts)}</span>
+              </div>
+              <div className="pl-3 text-muted-foreground space-y-0.5">
+                <div className="flex justify-between">
+                  <span>{fixedCostsLabel}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Marketing</span>
+                  <span className="font-mono">{fmt(marketingSpend)}</span>
+                </div>
+              </div>
+              <div className="flex justify-between pt-1 border-t border-border/50">
+                <span className="font-semibold">
+                  Breakeven Subscribers
+                  <InfoTip text="Minimum paid subscribers needed for monthly fixed costs to be covered by avg contribution margin across tiers." />
+                </span>
+                <span className="font-mono font-bold text-primary">~{breakeven.toLocaleString()} paid users</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm flex items-center gap-2">

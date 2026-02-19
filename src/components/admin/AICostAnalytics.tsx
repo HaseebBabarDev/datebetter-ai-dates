@@ -63,6 +63,8 @@ interface UserCostRow {
   userId: string;
   messages: number;
   estimatedCost: number;
+  monthlyMessages: number;
+  monthlyCost: number;
 }
 
 interface AllTimeStats {
@@ -235,12 +237,18 @@ export const AICostAnalytics = () => {
 
       setMonthlyData(monthly);
 
-      // Top 10 users by cost
+      // Top 10 users by cost — using 6-month window messages
+      // Determine how many months are in the 6-month window (up to 6)
+      const windowMonths = Math.min(6, Math.max(1,
+        Math.ceil((Date.now() - sixMonthsAgo.getTime()) / (30 * 24 * 60 * 60 * 1000))
+      ));
       const userRows: UserCostRow[] = Array.from(userMessageCounts.entries())
         .map(([userId, count]) => ({
           userId: userId.slice(0, 8) + "…",
           messages: count,
           estimatedCost: calcGeminiCost(count) + calcTTSCost(Math.round(count * TTS_RATE), 0),
+          monthlyMessages: Math.round(count / windowMonths),
+          monthlyCost: (calcGeminiCost(count) + calcTTSCost(Math.round(count * TTS_RATE), 0)) / windowMonths,
         }))
         .sort((a, b) => b.estimatedCost - a.estimatedCost)
         .slice(0, 10);
@@ -570,37 +578,46 @@ export const AICostAnalytics = () => {
         {/* Top Users by AI Cost */}
         {topUsers.length > 0 && (
           <Card>
-            <CardHeader className="pb-3">
+          <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Users className="w-4 h-4 text-primary" />
                 Top 10 Users by Estimated AI Cost
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {topUsers.map((user, i) => (
-                  <div
-                    key={user.userId}
-                    className="flex items-center gap-3 text-xs"
-                  >
-                    <span className="text-muted-foreground w-4 shrink-0">
-                      {i + 1}.
-                    </span>
-                    <span className="font-mono text-muted-foreground flex-1">
-                      {user.userId}
-                    </span>
-                    <span className="text-muted-foreground">
-                      {user.messages} msgs
-                    </span>
-                    <Badge variant="secondary" className="font-mono">
-                      {fmt(user.estimatedCost)}
-                    </Badge>
-                  </div>
-                ))}
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-border text-muted-foreground">
+                      <th className="text-left py-2 pr-2 font-medium w-5">#</th>
+                      <th className="text-left py-2 pr-3 font-medium">User ID</th>
+                      <th className="text-right py-2 pr-3 font-medium">Total Msgs</th>
+                      <th className="text-right py-2 pr-3 font-medium">Msgs / Mo</th>
+                      <th className="text-right py-2 pr-3 font-medium">6-Mo Cost</th>
+                      <th className="text-right py-2 font-medium">Cost / Mo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topUsers.map((user, i) => (
+                      <tr key={user.userId} className="border-b border-border/50">
+                        <td className="py-2 pr-2 text-muted-foreground">{i + 1}.</td>
+                        <td className="py-2 pr-3 font-mono text-muted-foreground">{user.userId}</td>
+                        <td className="py-2 pr-3 text-right tabular-nums">{user.messages.toLocaleString()}</td>
+                        <td className="py-2 pr-3 text-right tabular-nums text-muted-foreground">{user.monthlyMessages.toLocaleString()}</td>
+                        <td className="py-2 pr-3 text-right tabular-nums text-muted-foreground">{fmt(user.estimatedCost)}</td>
+                        <td className="py-2 text-right">
+                          <Badge variant="secondary" className="font-mono">
+                            {fmt(user.monthlyCost)}/mo
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
               <p className="text-xs text-muted-foreground mt-4 italic">
-                User IDs are truncated for privacy. Costs are estimates based on
-                message counts and average token assumptions.
+                User IDs are truncated for privacy. "Cost / Mo" = 6-month estimate ÷ months in window.
+                Costs based on message counts and average token assumptions.
               </p>
             </CardContent>
           </Card>
