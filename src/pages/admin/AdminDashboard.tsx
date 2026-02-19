@@ -25,6 +25,7 @@ import {
   Calendar
 } from "lucide-react";
 import { RevenueAnalytics } from "@/components/admin/RevenueAnalytics";
+import { AICostAnalytics } from "@/components/admin/AICostAnalytics";
 import { AIUsageAnalytics } from "@/components/admin/AIUsageAnalytics";
 import { WTPSurveyAnalytics } from "@/components/admin/WTPSurveyAnalytics";
 import { AdminUserManagement } from "@/components/admin/AdminUserManagement";
@@ -155,7 +156,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-7xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-9 h-auto gap-1 bg-muted/50 p-1 rounded-xl">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 h-auto gap-1 bg-muted/50 p-1 rounded-xl">
             <TabsTrigger value="overview" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -175,6 +176,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="ai" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
               <Brain className="w-4 h-4" />
               <span className="hidden sm:inline">AI Usage</span>
+            </TabsTrigger>
+            <TabsTrigger value="ai-costs" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
+              <DollarSign className="w-4 h-4" />
+              <span className="hidden sm:inline">AI Costs</span>
             </TabsTrigger>
             <TabsTrigger value="community" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
               <Activity className="w-4 h-4" />
@@ -223,6 +228,10 @@ const AdminDashboard = () => {
                 <WTPSurveyAnalytics />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="ai-costs" className="space-y-6">
+            <AICostAnalytics />
           </TabsContent>
 
           <TabsContent value="community" className="space-y-6">
