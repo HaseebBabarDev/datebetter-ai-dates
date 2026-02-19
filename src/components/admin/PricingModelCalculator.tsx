@@ -13,6 +13,7 @@ import {
   Mic,
   Megaphone,
   Info,
+  Radio,
 } from "lucide-react";
 import {
   Tooltip,
@@ -52,6 +53,12 @@ interface Inputs {
   otherCost: string;          // Other fixed costs/month
   growth: string;             // Monthly growth % for projections
   months: string;             // Projection months
+  // Ad Revenue (AppLovin / AdMob / etc.)
+  adEnabled: string;          // "1" = enabled, "0" = disabled
+  adEcpm: string;             // effective CPM ($) — revenue per 1,000 impressions
+  adImprPerUserDay: string;   // avg ad impressions per free user per day
+  adFillRate: string;         // % of impressions actually filled by network
+  adFreeUserPct: string;      // % of MAU that are free (see ads)
 }
 
 const DEFAULT: Inputs = {
@@ -69,6 +76,12 @@ const DEFAULT: Inputs = {
   otherCost: "200",
   growth: "10",
   months: "12",
+  // Ad Revenue defaults (off by default — no numbers yet)
+  adEnabled: "0",
+  adEcpm: "8",          // AppLovin typical dating-app eCPM range $6–$15
+  adImprPerUserDay: "3", // ~3 interstitial/banner impressions per session/day
+  adFillRate: "85",      // typical AppLovin fill rate ~80–90%
+  adFreeUserPct: "70",   // 70% of MAU are free tier
 };
 
 const n = (s: string) => parseFloat(s) || 0;
@@ -162,9 +175,17 @@ export const PricingModelCalculator = () => {
   const supportCost = n(inp.supportCost);
   const otherCost = n(inp.otherCost);
 
+  // ─── Ad Revenue ─────────────────────────────────────────────────────────
+  const adEnabled = inp.adEnabled === "1";
+  const freeUsers = mau * (n(inp.adFreeUserPct) / 100);
+  const monthlyImpressions = freeUsers * n(inp.adImprPerUserDay) * 30;
+  const filledImpressions = monthlyImpressions * (n(inp.adFillRate) / 100);
+  const adRevenue = adEnabled ? (filledImpressions / 1000) * n(inp.adEcpm) : 0;
+
+  const totalRevenue = grossRevenue + adRevenue;
   const totalCosts = platformFees + geminiCost + ttsCost + marketingSpend + supportCost + otherCost;
-  const netRevenue = grossRevenue - totalCosts;
-  const margin = grossRevenue > 0 ? (netRevenue / grossRevenue) * 100 : 0;
+  const netRevenue = totalRevenue - totalCosts;
+  const margin = totalRevenue > 0 ? (netRevenue / totalRevenue) * 100 : 0;
   const revenuePerUser = paidUsers > 0 ? netRevenue / paidUsers : 0;
 
   // ─── Projections ───────────────────────────────────────────────────────
@@ -180,11 +201,15 @@ export const PricingModelCalculator = () => {
     const projPlatform = projGross * ((n(inp.appleFeeRate) / 100 * n(inp.iosShare) / 100) + (n(inp.googleFeeRate) / 100 * (1 - n(inp.iosShare) / 100)));
     const projAI = projMAU * n(inp.aiMsgsPerUser) * GEMINI_COST_PER_AI_MSG;
     const projTTS = n(inp.elMonthlyBase) + Math.max(0, projMAU * n(inp.aiMsgsPerUser) * (n(inp.ttsRatePercent) / 100) * 300 - 500_000) / 1000 * 0.12;
+    const projFreeUsers = projMAU * (n(inp.adFreeUserPct) / 100);
+    const projAdRevenue = adEnabled
+      ? (projFreeUsers * n(inp.adImprPerUserDay) * 30 * (n(inp.adFillRate) / 100) / 1000) * n(inp.adEcpm)
+      : 0;
     const projCosts = projPlatform + projAI + projTTS + marketingSpend + supportCost + otherCost;
-    const projNet = projGross - projCosts;
+    const projNet = projGross + projAdRevenue - projCosts;
     return {
       month: `Mo ${mth}`,
-      Revenue: Math.round(projGross),
+      Revenue: Math.round(projGross + projAdRevenue),
       "Net Profit": Math.round(projNet),
       Costs: Math.round(projCosts),
     };
@@ -278,6 +303,91 @@ export const PricingModelCalculator = () => {
               </CardContent>
             </Card>
 
+            {/* Ad Revenue */}
+            <Card className={adEnabled ? "border-primary/30 bg-primary/5" : ""}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs text-muted-foreground flex items-center gap-2">
+                  <Radio className="w-3 h-3" />
+                  Ad Revenue (AppLovin / AdMob / etc.)
+                  <button
+                    onClick={() => setInp(i => ({ ...i, adEnabled: i.adEnabled === "1" ? "0" : "1" }))}
+                    className={`ml-auto text-[10px] px-2 py-0.5 rounded-full font-medium border transition-colors ${
+                      adEnabled
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-muted text-muted-foreground border-border hover:border-primary/50"
+                    }`}
+                  >
+                    {adEnabled ? "ON" : "OFF — click to enable"}
+                  </button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {!adEnabled && (
+                  <p className="text-xs text-muted-foreground italic">
+                    Toggle ON to model ad revenue from AppLovin, AdMob, or other networks. Fill in your actual eCPM once you have numbers.
+                  </p>
+                )}
+                {adEnabled && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field
+                      label="eCPM ($)"
+                      value={inp.adEcpm}
+                      onChange={set("adEcpm")}
+                      suffix="$"
+                      step="0.50"
+                      tip="Effective Cost Per Mille — revenue earned per 1,000 filled ad impressions. AppLovin dating apps typically range $6–$15 eCPM."
+                    />
+                    <Field
+                      label="Impressions / Free User / Day"
+                      value={inp.adImprPerUserDay}
+                      onChange={set("adImprPerUserDay")}
+                      step="0.5"
+                      tip="How many ad impressions (banner + interstitial) a free user sees per day on average."
+                    />
+                    <Field
+                      label="Fill Rate"
+                      value={inp.adFillRate}
+                      onChange={set("adFillRate")}
+                      suffix="%"
+                      step="1"
+                      tip="% of ad requests that are filled by the network. AppLovin typically 80–92%."
+                    />
+                    <Field
+                      label="Free User %"
+                      value={inp.adFreeUserPct}
+                      onChange={set("adFreeUserPct")}
+                      suffix="%"
+                      step="1"
+                      tip="% of MAU on the free tier who see ads. Should roughly equal 100% minus your paid conversion rate."
+                    />
+                    <div className="col-span-2 rounded-lg bg-muted/60 p-2 space-y-1 text-xs">
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Free users seeing ads</span>
+                        <span className="font-mono">{Math.round(freeUsers).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Monthly impressions</span>
+                        <span className="font-mono">{Math.round(monthlyImpressions).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Filled impressions</span>
+                        <span className="font-mono">{Math.round(filledImpressions).toLocaleString()}</span>
+                      </div>
+                      <Separator className="my-1" />
+                      <div className="flex justify-between font-semibold text-primary">
+                        <span>Est. Ad Revenue</span>
+                        <span className="font-mono">+{fmt(adRevenue)}/mo</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Ad revenue per free user</span>
+                        <span className="font-mono">{fmtUser(freeUsers > 0 ? adRevenue / freeUsers : 0)}/user</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Projections */}
             <Card>
               <CardHeader className="pb-2">
@@ -305,7 +415,7 @@ export const PricingModelCalculator = () => {
               </CardHeader>
               <CardContent>
                 {/* Revenue */}
-                <ResultRow label="Gross Revenue" value={fmt(grossRevenue)} highlight />
+                <ResultRow label="Subscription Revenue" value={fmt(grossRevenue)} highlight />
                 <div className="pl-3 space-y-0.5 text-xs text-muted-foreground mb-1">
                   <div className="flex justify-between">
                     <span>Paid Users</span><span className="font-mono">{Math.round(paidUsers).toLocaleString()}</span>
@@ -314,6 +424,20 @@ export const PricingModelCalculator = () => {
                     <span>Avg Price</span><span className="font-mono">{fmt(n(inp.avgSubPrice))}/mo</span>
                   </div>
                 </div>
+                {adEnabled && (
+                  <>
+                    <ResultRow label="Ad Revenue" value={`+${fmt(adRevenue)}`} />
+                    <div className="pl-3 space-y-0.5 text-xs text-muted-foreground mb-1">
+                      <div className="flex justify-between">
+                        <span>eCPM</span><span className="font-mono">${n(inp.adEcpm).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Filled impressions</span><span className="font-mono">{Math.round(filledImpressions).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+                <ResultRow label="Total Revenue" value={fmt(totalRevenue)} highlight />
                 <Separator className="my-2" />
 
                 {/* Platform Fees */}
@@ -356,7 +480,9 @@ export const PricingModelCalculator = () => {
                     { label: "Net Margin", value: fmtPct(margin) },
                     { label: "Revenue/Paid User", value: fmt(revenuePerUser) },
                     { label: "AI Cost/MAU", value: fmtUser((geminiCost + ttsCost) / Math.max(mau, 1)) },
-                    { label: "Platform Fee %", value: fmtPct(grossRevenue > 0 ? (platformFees / grossRevenue) * 100 : 0) },
+                    { label: "Platform Fee %", value: fmtPct(totalRevenue > 0 ? (platformFees / totalRevenue) * 100 : 0) },
+                    ...(adEnabled ? [{ label: "Ad Rev/Free User", value: fmtUser(freeUsers > 0 ? adRevenue / freeUsers : 0) }] : []),
+                    ...(adEnabled ? [{ label: "Ad % of Revenue", value: fmtPct(totalRevenue > 0 ? (adRevenue / totalRevenue) * 100 : 0) }] : []),
                   ].map((kpi) => (
                     <div key={kpi.label} className="text-center p-2 rounded-lg bg-background border border-border">
                       <div className="text-sm font-bold text-primary font-mono">{kpi.value}</div>
