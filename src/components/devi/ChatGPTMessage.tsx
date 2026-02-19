@@ -10,6 +10,7 @@ interface Message {
   content: string;
   imageData?: string;
   imageType?: string;
+  imagesData?: string[];
   candidateId?: string;
 }
 
@@ -223,16 +224,26 @@ export const ChatGPTMessage: React.FC<ChatGPTMessageProps> = ({
   const showLogButton = message.role === 'assistant' && isLast && !isLoading && onLogInteraction && hasCandidate;
 
   if (message.role === 'user') {
-    // User messages - simple right-aligned bubbles (similar to current)
+    // User messages - simple right-aligned bubbles
+    const images = message.imagesData && message.imagesData.length > 0
+      ? message.imagesData
+      : message.imageData ? [message.imageData] : [];
+
     return (
       <div className="flex justify-end mb-6">
         <div className="max-w-[85%] rounded-2xl p-4 bg-muted rounded-br-md">
-          {message.imageData && (
-            <img 
-              src={message.imageData} 
-              alt="Uploaded" 
-              className="max-w-full rounded-lg mb-3 max-h-48 object-cover"
-            />
+          {images.length > 0 && (
+            <div className={`flex gap-2 mb-3 ${images.length > 1 ? 'flex-wrap' : ''}`}>
+              {images.map((src, idx) => (
+                <img
+                  key={idx}
+                  src={src}
+                  alt={`Screenshot ${idx + 1}`}
+                  className="rounded-lg object-cover max-h-48 max-w-full"
+                  style={images.length > 1 ? { maxWidth: '48%' } : {}}
+                />
+              ))}
+            </div>
           )}
           <p className="text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
         </div>

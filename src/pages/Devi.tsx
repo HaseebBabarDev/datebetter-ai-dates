@@ -57,8 +57,9 @@ interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  imageData?: string;
+  imageData?: string;      // kept for backward-compat (single, stored in DB)
   imageType?: string;
+  imagesData?: string[];   // multiple images for a single message
   candidateId?: string;
 }
 
@@ -374,7 +375,7 @@ const Devi = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
-  const [pendingImage, setPendingImage] = useState<{ data: string; type: string } | null>(null);
+  const [pendingImages, setPendingImages] = useState<{ data: string; type: string }[]>([]);
   const [textScreenshotRightSide, setTextScreenshotRightSide] = useState<"me" | "them">("me");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
@@ -867,34 +868,41 @@ const Devi = () => {
   };
 
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error("Please upload an image file");
-      return;
-    }
-
-    if (file.size > 20 * 1024 * 1024) {
-      toast.error("Image must be less than 20MB");
-      return;
-    }
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
     const imageType = e.target.getAttribute('data-type') || 'general';
-    
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result as string;
-      setPendingImage({ data: base64, type: imageType });
-      
-      // Set a default prompt based on image type
+    const newImages: { data: string; type: string }[] = [];
+
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name} is not an image`);
+        continue;
+      }
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error(`${file.name} exceeds 20MB`);
+        continue;
+      }
+
+      await new Promise<void>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          newImages.push({ data: reader.result as string, type: imageType });
+          resolve();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (newImages.length > 0) {
+      setPendingImages(prev => [...prev, ...newImages]);
+      // Set a default prompt based on image type if input is empty
       const prompt = QUICK_PROMPTS.find(p => p.type === imageType);
       if (prompt && !input) {
         setInput(prompt.prompt + (selectedCandidate ? ` for ${selectedCandidate.nickname}` : ''));
       }
-    };
-    reader.readAsDataURL(file);
-    
+    }
+
     // Reset the input
     e.target.value = '';
   };
@@ -971,7 +979,7 @@ const Devi = () => {
 
   const sendMessage = async (messageText?: string) => {
     const textToSend = messageText || input.trim();
-    if ((!textToSend && !pendingImage) || isLoading) return;
+    if ((!textToSend && pendingImages.length === 0) || isLoading) return;
     
     // Check chat requirements based on mode
     if (chatMode === "candidate" && !canChatWithCandidate) {
@@ -996,17 +1004,20 @@ const Devi = () => {
       // Crisis content shows alert but allows sending
     }
 
+    const firstImage = pendingImages[0] ?? null;
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: 'user',
-      content: textToSend || (pendingImage ? getImagePrompt(pendingImage.type, textScreenshotRightSide) : ''),
-      imageData: pendingImage?.data,
-      imageType: pendingImage?.type,
+      content: textToSend || (firstImage ? getImagePrompt(firstImage.type, textScreenshotRightSide) : ''),
+      // keep backward compat: first image stored in imageData for DB / history display
+      imageData: firstImage?.data,
+      imageType: firstImage?.type,
+      imagesData: pendingImages.length > 0 ? pendingImages.map(i => i.data) : undefined,
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInput("");
-    setPendingImage(null);
+    setPendingImages([]);
     setIsLoading(true);
     setIsThinking(true);
 
@@ -1053,6 +1064,7 @@ const Devi = () => {
           body: JSON.stringify({
             messages: apiMessages,
             imageData: userMessage.imageData,
+            imagesData: userMessage.imagesData,
             imageType: userMessage.imageType,
             textScreenshotRightSide:
               userMessage.imageType === "text_screenshot" ? textScreenshotRightSide : undefined,
@@ -1442,7 +1454,7 @@ const Devi = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey && (input.trim() || pendingImage)) {
+    if (e.key === 'Enter' && !e.shiftKey && (input.trim() || pendingImages.length > 0)) {
       e.preventDefault();
       sendMessage();
     }
@@ -2167,27 +2179,31 @@ const Devi = () => {
       {/* Input */}
       <div className="shrink-0 bg-background border-t border-border pb-16 safe-area-bottom">
         <div className={`container mx-auto px-4 py-3 ${chatLayout === "chatgpt" ? "max-w-2xl" : "max-w-lg"}`}>
-          {/* Pending Image Preview */}
-          {pendingImage && (
+          {/* Pending Images Preview */}
+          {pendingImages.length > 0 && (
             <div className="mb-2">
-              <div className="relative inline-block">
-                <img 
-                  src={pendingImage.data} 
-                  alt="To upload" 
-                  className="h-20 rounded-lg object-cover"
-                />
-                <button
-                  onClick={() => setPendingImage(null)}
-                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+              <div className="flex gap-2 flex-wrap">
+                {pendingImages.map((img, idx) => (
+                  <div key={idx} className="relative inline-block">
+                    <img
+                      src={img.data}
+                      alt={`Screenshot ${idx + 1}`}
+                      className="h-20 w-20 rounded-lg object-cover border border-border"
+                    />
+                    <button
+                      onClick={() => setPendingImages(prev => prev.filter((_, i) => i !== idx))}
+                      className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
               </div>
 
-              {pendingImage.type === "text_screenshot" && (
+              {pendingImages.some(i => i.type === "text_screenshot") && (
                 <div className="mt-2">
                   <p className="text-xs text-muted-foreground mb-1">
-                    In this screenshot, messages on the right are from:
+                    In these screenshots, messages on the right are from:
                   </p>
                   <ToggleGroup
                     type="single"
@@ -2259,7 +2275,7 @@ const Devi = () => {
                     <Button
                       size="icon"
                       onClick={() => sendMessage()}
-                      disabled={(!input.trim() && !pendingImage) || isLoading}
+                      disabled={(!input.trim() && pendingImages.length === 0) || isLoading}
                       className="shrink-0 bg-[image:var(--gradient-hero)]"
                     >
                       {isLoading ? (
@@ -2286,6 +2302,7 @@ const Devi = () => {
         ref={fileInputRef}
         type="file"
         accept="image/*"
+        multiple
         onChange={onFileChange}
         className="hidden"
       />
