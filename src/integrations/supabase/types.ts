@@ -147,6 +147,8 @@ export type Database = {
         Row: {
           age: number | null
           ai_description: string | null
+          auto_disqualify_override: boolean | null
+          auto_disqualify_reasons: Json | null
           city: string | null
           compatibility_score: number | null
           cons: Json | null
@@ -163,6 +165,7 @@ export type Database = {
           humor_compatibility: number | null
           id: string
           intellectual_connection: number | null
+          is_auto_disqualified: boolean | null
           last_score_update: string | null
           met_app: string | null
           met_via: string | null
@@ -228,6 +231,8 @@ export type Database = {
         Insert: {
           age?: number | null
           ai_description?: string | null
+          auto_disqualify_override?: boolean | null
+          auto_disqualify_reasons?: Json | null
           city?: string | null
           compatibility_score?: number | null
           cons?: Json | null
@@ -246,6 +251,7 @@ export type Database = {
           humor_compatibility?: number | null
           id?: string
           intellectual_connection?: number | null
+          is_auto_disqualified?: boolean | null
           last_score_update?: string | null
           met_app?: string | null
           met_via?: string | null
@@ -311,6 +317,8 @@ export type Database = {
         Update: {
           age?: number | null
           ai_description?: string | null
+          auto_disqualify_override?: boolean | null
+          auto_disqualify_reasons?: Json | null
           city?: string | null
           compatibility_score?: number | null
           cons?: Json | null
@@ -329,6 +337,7 @@ export type Database = {
           humor_compatibility?: number | null
           id?: string
           intellectual_connection?: number | null
+          is_auto_disqualified?: boolean | null
           last_score_update?: string | null
           met_app?: string | null
           met_via?: string | null
@@ -947,6 +956,7 @@ export type Database = {
           attachment_tendencies: Json | null
           attachment_to_past: number | null
           attraction_importance: number | null
+          auto_disqualify_rules: Json | null
           avatar_url: string | null
           behavioral_monitoring: number | null
           birth_date: string | null
@@ -1109,6 +1119,7 @@ export type Database = {
           attachment_tendencies?: Json | null
           attachment_to_past?: number | null
           attraction_importance?: number | null
+          auto_disqualify_rules?: Json | null
           avatar_url?: string | null
           behavioral_monitoring?: number | null
           birth_date?: string | null
@@ -1273,6 +1284,7 @@ export type Database = {
           attachment_tendencies?: Json | null
           attachment_to_past?: number | null
           attraction_importance?: number | null
+          auto_disqualify_rules?: Json | null
           avatar_url?: string | null
           behavioral_monitoring?: number | null
           birth_date?: string | null
