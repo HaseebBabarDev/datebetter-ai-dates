@@ -2064,88 +2064,91 @@ const Devi = () => {
             </div>
           ) : (
           <>
-            {messages.map((msg, index) => (
-              chatLayout === "chatgpt" ? (
-                <ChatGPTMessage 
-                  key={msg.id} 
-                  message={msg} 
-                  isLast={index === messages.length - 1}
-                  onQuickReply={(reply) => sendMessage(reply)}
-                  onLogInteraction={() => {
-                    if (selectedCandidate) {
-                      // Find the last user message before this assistant message
-                      const userMessages = messages.slice(0, index).filter(m => m.role === 'user');
-                      const lastUserMessage = userMessages[userMessages.length - 1]?.content || '';
-                      navigate(`/candidate/${selectedCandidate.id}`, { 
-                        state: { tab: "interactions", prefillNotes: lastUserMessage } 
-                      });
-                    }
-                  }}
-                  isLoading={isLoading}
-                  hasCandidate={!!selectedCandidate}
-                />
-              ) : (
-                <MessageBubble 
-                  key={msg.id} 
-                  message={msg} 
-                  isLast={index === messages.length - 1}
-                  onQuickReply={(reply) => sendMessage(reply)}
-                  isLoading={isLoading}
-                />
-              )
-            ))}
-
-            {/* Detachment Plan CTA — shown when D.E.V.I. senses emotional distress and a candidate is selected */}
             {(() => {
-              const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant');
-              const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+              // Pre-compute detachment detection once for the whole message list
+              const lastAssistantMsgIdx = [...messages].map((m, i) => m.role === 'assistant' ? i : -1).filter(i => i >= 0).pop() ?? -1;
+              const lastAssistantMsg = lastAssistantMsgIdx >= 0 ? messages[lastAssistantMsgIdx] : null;
+              const lastUserMsg = [...messages].slice(0, lastAssistantMsgIdx >= 0 ? lastAssistantMsgIdx : messages.length).reverse().find(m => m.role === 'user') ?? null;
               const userContent = lastUserMsg?.content ?? '';
               const assistantContent = lastAssistantMsg?.content ?? '';
               const isActiveRequest = detectsDetachmentIntent(userContent) || detectsDetachmentIntent(assistantContent);
-              const bothDetect = isActiveRequest ||
-                                 detectsDetachmentNeed(userContent) ||
-                                 detectsDetachmentNeed(assistantContent);
-              if (!isLoading && !detachmentCtaDismissed && selectedCandidate && bothDetect && messages.length >= 2) {
-                const title = isActiveRequest
-                  ? "Ready to start your Detachment Plan?"
-                  : "D.E.V.I. senses you're having a hard time";
-                const subtitle = isActiveRequest
-                  ? `Your personalized 4-phase plan will guide you through emotionally separating from ${selectedCandidate.nickname} — at your own pace.`
-                  : `A personalized Detachment Plan could help you emotionally separate from ${selectedCandidate.nickname} — phase by phase, at your own pace.`;
-                const buttonLabel = isActiveRequest
-                  ? "Start My Detachment Plan"
-                  : "View My Detachment Plan";
-                return (
-                  <div className="mt-4 rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                        <Sparkles className="w-4 h-4 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold">{title}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                          {subtitle}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => setDetachmentCtaDismissed(true)}
-                        className="p-1 text-muted-foreground hover:text-foreground rounded transition-colors shrink-0"
-                        aria-label="Dismiss"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+              const showDetachmentCTA = !isLoading && !detachmentCtaDismissed && selectedCandidate && messages.length >= 2 &&
+                (isActiveRequest || detectsDetachmentNeed(userContent) || detectsDetachmentNeed(assistantContent));
+
+              const detachmentCTANode = showDetachmentCTA ? (
+                <div className="mt-5 mb-2 rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <Unlink className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold">
+                        {isActiveRequest ? "Ready to start your Detachment Plan?" : "D.E.V.I. senses you're having a hard time"}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                        {isActiveRequest
+                          ? `Your AI-powered 4-phase plan guides you through emotionally separating from ${selectedCandidate!.nickname} — Awareness, Distance, Reclaim, and Freedom.`
+                          : `While working through these feelings, a personalized Detachment Plan can help you emotionally separate from ${selectedCandidate!.nickname} — phase by phase, at your own pace.`}
+                      </p>
                     </div>
                     <button
-                      onClick={() => navigate(`/detachment-plan/${selectedCandidate.id}`)}
-                      className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium py-2.5 hover:bg-primary/90 transition-colors"
+                      onClick={() => setDetachmentCtaDismissed(true)}
+                      className="p-1 text-muted-foreground hover:text-foreground rounded transition-colors shrink-0"
+                      aria-label="Dismiss"
                     >
-                      <Unlink className="w-4 h-4" />
-                      {buttonLabel}
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
-                );
-              }
-              return null;
+                  <button
+                    onClick={() => navigate(`/detachment-plan/${selectedCandidate!.id}`)}
+                    className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium py-2.5 hover:bg-primary/90 transition-colors"
+                  >
+                    <Unlink className="w-4 h-4" />
+                    {isActiveRequest ? "Start My Detachment Plan" : "View My Detachment Plan"}
+                  </button>
+                </div>
+              ) : null;
+
+              return (
+                <>
+                  {messages.map((msg, index) => {
+                    const isLastMsg = index === messages.length - 1;
+                    // Inject CTA right after the last assistant message that triggered detection
+                    const injectCTA = showDetachmentCTA && index === lastAssistantMsgIdx;
+
+                    return (
+                      <React.Fragment key={msg.id}>
+                        {chatLayout === "chatgpt" ? (
+                          <ChatGPTMessage 
+                            message={msg} 
+                            isLast={isLastMsg}
+                            onQuickReply={(reply) => sendMessage(reply)}
+                            onLogInteraction={() => {
+                              if (selectedCandidate) {
+                                const userMessages = messages.slice(0, index).filter(m => m.role === 'user');
+                                const lastUserMessage = userMessages[userMessages.length - 1]?.content || '';
+                                navigate(`/candidate/${selectedCandidate.id}`, { 
+                                  state: { tab: "interactions", prefillNotes: lastUserMessage } 
+                                });
+                              }
+                            }}
+                            isLoading={isLoading}
+                            hasCandidate={!!selectedCandidate}
+                          />
+                        ) : (
+                          <MessageBubble 
+                            message={msg} 
+                            isLast={isLastMsg}
+                            onQuickReply={(reply) => sendMessage(reply)}
+                            isLoading={isLoading}
+                          />
+                        )}
+                        {injectCTA && detachmentCTANode}
+                      </React.Fragment>
+                    );
+                  })}
+                </>
+              );
             })()}
 
             <DeviThinkingIndicator isVisible={isThinking} />
