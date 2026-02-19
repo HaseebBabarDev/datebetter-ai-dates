@@ -34,6 +34,7 @@ import {
   Clock,
   Bell,
   XCircle,
+  X,
   RefreshCw,
   Lightbulb,
   ChevronDown,
@@ -141,6 +142,9 @@ const Dashboard = () => {
   const [showAllActivity, setShowAllActivity] = useState(false);
   const [showWtpSurvey, setShowWtpSurvey] = useState(false);
   const [surveyChecked, setSurveyChecked] = useState(false);
+  const [pipelineOverflowDismissed, setPipelineOverflowDismissed] = useState(() => {
+    try { return localStorage.getItem("pipeline_overflow_dismissed") === "true"; } catch { return false; }
+  });
   const [replyDialogOpen, setReplyDialogOpen] = useState(false);
   const [replyingToMessage, setReplyingToMessage] = useState<AdminMessage | null>(null);
   const [replyContent, setReplyContent] = useState("");
@@ -513,6 +517,11 @@ const Dashboard = () => {
     ];
     
     candidates.forEach((candidate) => {
+      // Skip love bombing check for candidates already in a serious/established status
+      // — once you're actively dating someone, that early "intensity" is no longer a red flag
+      const earlyStages = ["just_matched", "texting", "planning_date"];
+      if (!earlyStages.includes(candidate.status || "")) return;
+
       const candidateInteractions = interactions.filter((i) => i.candidate_id === candidate.id);
       
       // Check candidate notes for love bombing language
@@ -521,7 +530,7 @@ const Dashboard = () => {
       
       if (hasLoveBombingInCandidateNotes) {
         alerts.push({ candidate, reason: "Love bombing signs in notes" });
-        return; // Already flagged
+        return;
       }
       
       // Check interaction notes
@@ -533,8 +542,8 @@ const Dashboard = () => {
         return;
       }
       
-      // Check for rapid interaction frequency (original logic)
-      if (candidateInteractions.length < 3) return;
+      // Check for rapid interaction frequency — raised threshold to reduce false positives
+      if (candidateInteractions.length < 5) return;
       
       const firstInteractionDate = candidateInteractions.length > 0 
         ? new Date(candidateInteractions[candidateInteractions.length - 1].interaction_date || candidate.created_at || "")
@@ -542,16 +551,13 @@ const Dashboard = () => {
       
       if (firstInteractionDate) {
         const daysSinceFirst = differenceInDays(new Date(), firstInteractionDate);
-        const interactionsPerWeek = candidateInteractions.length / Math.max(1, daysSinceFirst / 7);
-        
-        if (daysSinceFirst <= 14 && candidateInteractions.length >= 7) {
-          alerts.push({ candidate, reason: "Very intense start — 7+ interactions in 2 weeks" });
-        } else if (interactionsPerWeek >= 5 && daysSinceFirst <= 30) {
-          alerts.push({ candidate, reason: "Rapid escalation detected" });
+        // Raised from 7 to 10 interactions and from 5/week to 7/week to reduce false positives
+        if (daysSinceFirst <= 14 && candidateInteractions.length >= 10) {
+          alerts.push({ candidate, reason: "Very intense start — 10+ interactions in 2 weeks" });
         }
       }
     });
-    
+
     return alerts;
   }, [candidates, interactions]);
 
@@ -1191,6 +1197,36 @@ const Dashboard = () => {
               </button>
             </div>
 
+            {/* Pipeline Overflow Warning */}
+            {activeCandidateCount >= 10 && !pipelineOverflowDismissed && (
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 flex items-start gap-3">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-600">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-amber-600">Pipeline overloaded</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    You have {activeCandidateCount} active leads. It&apos;s hard to give everyone quality attention — consider archiving anyone you&apos;re no longer pursuing.
+                  </p>
+                  <button
+                    onClick={() => { setActiveTab("manage"); setStatusFilter("active"); }}
+                    className="text-xs text-amber-600 font-medium mt-1.5 hover:underline"
+                  >
+                    Triage now →
+                  </button>
+                </div>
+                <button
+                  onClick={() => {
+                    setPipelineOverflowDismissed(true);
+                    try { localStorage.setItem("pipeline_overflow_dismissed", "true"); } catch {}
+                  }}
+                  className="shrink-0 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
             {/* Healing Score Card */}
             <HealingScoreCard />
 
@@ -1207,6 +1243,7 @@ const Dashboard = () => {
                   : undefined
               }
             />
+
 
             {/* Candidate Recap */}
             {candidates.length > 0 && (
