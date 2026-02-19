@@ -144,6 +144,7 @@ const SOFT_LIMIT_MESSAGES = 30; // Soft warning
 const MAX_CONVERSATION_MESSAGES = 40; // Hard nudge to start new chat
 
 // Phrases that suggest a user is struggling and might benefit from a detachment plan
+// Phrases that indicate passive distress / struggling emotionally
 const DETACHMENT_DISTRESS_PHRASES = [
   "can't stop thinking about", "can't move on", "can't let go", "obsessing",
   "keeps coming back to mind", "miss them so much", "heartbroken", "devastated",
@@ -155,9 +156,28 @@ const DETACHMENT_DISTRESS_PHRASES = [
   "hard to detach", "hard to let go", "so attached",
 ];
 
+// Phrases where the user is explicitly asking for help detaching / moving on
+const DETACHMENT_INTENT_PHRASES = [
+  "help me detach", "help me move on", "help me let go", "help me get over",
+  "want to detach", "want to move on", "want to let go", "want to get over",
+  "need to detach", "need to move on", "need to let go", "need to get over",
+  "ready to move on", "ready to let go", "ready to detach",
+  "trying to move on", "trying to let go", "trying to detach",
+  "how do i detach", "how to detach", "how to let go", "how to move on",
+  "detach from", "detachment plan", "steps to move on", "process of letting go",
+  "stop having feelings", "get over them", "get over him", "get over her",
+  "stop thinking about", "stop loving", "fall out of love",
+];
+
 const detectsDetachmentNeed = (content: string): boolean => {
   const lower = content.toLowerCase();
-  return DETACHMENT_DISTRESS_PHRASES.some(phrase => lower.includes(phrase));
+  return DETACHMENT_DISTRESS_PHRASES.some(phrase => lower.includes(phrase)) ||
+         DETACHMENT_INTENT_PHRASES.some(phrase => lower.includes(phrase));
+};
+
+const detectsDetachmentIntent = (content: string): boolean => {
+  const lower = content.toLowerCase();
+  return DETACHMENT_INTENT_PHRASES.some(phrase => lower.includes(phrase));
 };
 
 // Format assistant messages with better structure
@@ -2079,9 +2099,22 @@ const Devi = () => {
             {(() => {
               const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant');
               const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
-              const bothDetect = (lastAssistantMsg && detectsDetachmentNeed(lastAssistantMsg.content)) ||
-                                 (lastUserMsg && detectsDetachmentNeed(lastUserMsg.content));
+              const userContent = lastUserMsg?.content ?? '';
+              const assistantContent = lastAssistantMsg?.content ?? '';
+              const isActiveRequest = detectsDetachmentIntent(userContent) || detectsDetachmentIntent(assistantContent);
+              const bothDetect = isActiveRequest ||
+                                 detectsDetachmentNeed(userContent) ||
+                                 detectsDetachmentNeed(assistantContent);
               if (!isLoading && !detachmentCtaDismissed && selectedCandidate && bothDetect && messages.length >= 2) {
+                const title = isActiveRequest
+                  ? "Ready to start your Detachment Plan?"
+                  : "D.E.V.I. senses you're having a hard time";
+                const subtitle = isActiveRequest
+                  ? `Your personalized 4-phase plan will guide you through emotionally separating from ${selectedCandidate.nickname} — at your own pace.`
+                  : `A personalized Detachment Plan could help you emotionally separate from ${selectedCandidate.nickname} — phase by phase, at your own pace.`;
+                const buttonLabel = isActiveRequest
+                  ? "Start My Detachment Plan"
+                  : "View My Detachment Plan";
                 return (
                   <div className="mt-4 rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
                     <div className="flex items-start gap-3">
@@ -2089,9 +2122,9 @@ const Devi = () => {
                         <Sparkles className="w-4 h-4 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold">D.E.V.I. senses you're having a hard time</p>
+                        <p className="text-sm font-semibold">{title}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                          A personalized Detachment Plan could help you emotionally separate from {selectedCandidate.nickname} — phase by phase, at your own pace.
+                          {subtitle}
                         </p>
                       </div>
                       <button
@@ -2107,7 +2140,7 @@ const Devi = () => {
                       className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium py-2.5 hover:bg-primary/90 transition-colors"
                     >
                       <Unlink className="w-4 h-4" />
-                      View My Detachment Plan
+                      {buttonLabel}
                     </button>
                   </div>
                 );
