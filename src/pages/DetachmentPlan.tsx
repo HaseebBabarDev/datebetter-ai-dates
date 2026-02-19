@@ -9,6 +9,16 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PaymentSheet } from "@/components/subscription/PaymentSheet";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   ArrowLeft,
   Lock,
   Sparkles,
@@ -24,6 +34,9 @@ import {
   CheckCircle2,
   Calendar,
   BookOpen,
+  Trophy,
+  XCircle,
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -53,6 +66,8 @@ interface DetachmentPlanData {
   phases: Phase[];
   closing_message: string;
 }
+
+type PlanStatus = 'active' | 'completed' | 'quit';
 
 const PHASE_ICONS = [Eye, Flame, Shield, Star];
 const PHASE_COLORS: Record<string, { bg: string; border: string; icon: string; badge: string; progress: string }> = {
@@ -94,12 +109,15 @@ const DetachmentPlan = () => {
   const { user } = useAuth();
 
   const [candidate, setCandidate] = useState<{ nickname: string; photo_url?: string | null } | null>(null);
-  const [planRecord, setPlanRecord] = useState<{ id: string; is_unlocked: boolean; plan_data: DetachmentPlanData | null } | null>(null);
+  const [planRecord, setPlanRecord] = useState<{ id: string; is_unlocked: boolean; plan_data: DetachmentPlanData | null; status: PlanStatus; current_phase: number; completed_at?: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [expandedPhases, setExpandedPhases] = useState<Set<number>>(new Set([1]));
   const [currentPhase, setCurrentPhase] = useState(1);
+  const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+  const [showQuitDialog, setShowQuitDialog] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!user || !candidateId) return;
@@ -108,7 +126,7 @@ const DetachmentPlan = () => {
     try {
       const [candResult, planResult] = await Promise.all([
         supabase.from("candidates").select("nickname, photo_url").eq("id", candidateId).eq("user_id", user.id).single(),
-        supabase.from("detachment_plans").select("id, is_unlocked, plan_data").eq("user_id", user.id).eq("candidate_id", candidateId).maybeSingle(),
+        supabase.from("detachment_plans").select("id, is_unlocked, plan_data, status, current_phase, completed_at").eq("user_id", user.id).eq("candidate_id", candidateId).maybeSingle(),
       ]);
 
       if (candResult.data) setCandidate(candResult.data);
@@ -117,7 +135,11 @@ const DetachmentPlan = () => {
             id: planResult.data.id,
             is_unlocked: planResult.data.is_unlocked,
             plan_data: planResult.data.plan_data as unknown as DetachmentPlanData | null,
+            status: (planResult.data.status as PlanStatus) || 'active',
+            current_phase: planResult.data.current_phase || 1,
+            completed_at: planResult.data.completed_at,
           });
+          setCurrentPhase(planResult.data.current_phase || 1);
         }
     } catch (e) {
       console.error("Error fetching detachment plan:", e);
@@ -170,6 +192,47 @@ const DetachmentPlan = () => {
     }
   };
 
+  const handleUpdateStatus = async (newStatus: PlanStatus) => {
+    if (!planRecord?.id) return;
+    setUpdatingStatus(true);
+    try {
+      await supabase
+        .from("detachment_plans")
+        .update({
+          status: newStatus,
+          completed_at: newStatus !== 'active' ? new Date().toISOString() : null,
+        })
+        .eq("id", planRecord.id);
+      await fetchData();
+      if (newStatus === 'completed') toast.success("🎉 Congratulations on completing your detachment plan!");
+      if (newStatus === 'quit') toast.info("Plan marked as quit. You can regenerate anytime.");
+      if (newStatus === 'active') toast.success("Plan reactivated!");
+    } catch (e) {
+      console.error("Error updating plan status:", e);
+      toast.error("Failed to update plan status.");
+    } finally {
+      setUpdatingStatus(false);
+      setShowCompleteDialog(false);
+      setShowQuitDialog(false);
+    }
+  };
+
+  const handlePhaseAdvance = async (phase: number) => {
+    if (!planRecord?.id || !planRecord.is_unlocked) return;
+    const newPhase = Math.min(phase + 1, planRecord.plan_data?.phases.length || 4);
+    try {
+      await supabase
+        .from("detachment_plans")
+        .update({ current_phase: newPhase })
+        .eq("id", planRecord.id);
+      setCurrentPhase(newPhase);
+      setPlanRecord(prev => prev ? { ...prev, current_phase: newPhase } : prev);
+      toast.success(`Moving to Phase ${newPhase}!`);
+    } catch (e) {
+      console.error("Error advancing phase:", e);
+    }
+  };
+
   const togglePhase = (phaseNum: number) => {
     setExpandedPhases(prev => {
       const next = new Set(prev);
@@ -191,6 +254,10 @@ const DetachmentPlan = () => {
 
   const plan = planRecord?.plan_data;
   const isUnlocked = planRecord?.is_unlocked ?? false;
+  const planStatus = planRecord?.status ?? 'active';
+  const isCompleted = planStatus === 'completed';
+  const isQuit = planStatus === 'quit';
+  const isFinished = isCompleted || isQuit;
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -205,7 +272,7 @@ const DetachmentPlan = () => {
             <p className="text-xs text-muted-foreground truncate">For {candidate.nickname}</p>
           )}
         </div>
-        {plan && isUnlocked && (
+        {plan && isUnlocked && !isFinished && (
           <Button
             variant="ghost"
             size="sm"
@@ -218,6 +285,39 @@ const DetachmentPlan = () => {
           </Button>
         )}
       </div>
+
+      {/* Completed / Quit banner */}
+      {isFinished && plan && (
+        <div className={cn(
+          "px-4 py-3 flex items-center gap-3 border-b border-border",
+          isCompleted ? "bg-primary/10" : "bg-muted/50"
+        )}>
+          {isCompleted ? (
+            <Trophy className="w-5 h-5 text-primary shrink-0" />
+          ) : (
+            <XCircle className="w-5 h-5 text-muted-foreground shrink-0" />
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold">
+              {isCompleted ? "Plan Completed 🎉" : "Plan Quit"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {isCompleted
+                ? "You did the work. So proud of you."
+                : "You stepped away from this plan."}
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs shrink-0"
+            onClick={() => handleUpdateStatus('active')}
+            disabled={updatingStatus}
+          >
+            Restart
+          </Button>
+        </div>
+      )}
 
       <div className="px-4 py-4 space-y-4">
         {/* No plan yet */}
@@ -494,6 +594,29 @@ const DetachmentPlan = () => {
                 <p className="text-[10px] text-muted-foreground">One-time purchase for this candidate</p>
               </div>
             )}
+
+            {/* Complete / Quit actions (only when unlocked and active) */}
+            {isUnlocked && !isFinished && (
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1 gap-2 border-destructive/30 text-destructive hover:bg-destructive/10"
+                  onClick={() => setShowQuitDialog(true)}
+                  disabled={updatingStatus}
+                >
+                  <XCircle className="w-4 h-4" />
+                  Quit Plan
+                </Button>
+                <Button
+                  className="flex-1 gap-2"
+                  onClick={() => setShowCompleteDialog(true)}
+                  disabled={updatingStatus}
+                >
+                  <Trophy className="w-4 h-4" />
+                  Mark Complete
+                </Button>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -506,6 +629,55 @@ const DetachmentPlan = () => {
         price="$9.99"
         onPaymentSuccess={handleUnlockSuccess}
       />
+
+      {/* Complete confirmation dialog */}
+      <AlertDialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <div className="mx-auto w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+              <Trophy className="w-7 h-7 text-primary" />
+            </div>
+            <AlertDialogTitle className="text-center">Mark Plan as Complete?</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              This means you've done the work. You should be incredibly proud of yourself. 💪
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Not yet</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleUpdateStatus('completed')}
+              disabled={updatingStatus}
+            >
+              Yes, I completed it!
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Quit confirmation dialog */}
+      <AlertDialog open={showQuitDialog} onOpenChange={setShowQuitDialog}>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <div className="mx-auto w-14 h-14 rounded-full bg-muted flex items-center justify-center mb-2">
+              <XCircle className="w-7 h-7 text-muted-foreground" />
+            </div>
+            <AlertDialogTitle className="text-center">Quit this plan?</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              You can always come back and restart it. Your progress and plan data will be saved.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep going</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleUpdateStatus('quit')}
+              disabled={updatingStatus}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Quit plan
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

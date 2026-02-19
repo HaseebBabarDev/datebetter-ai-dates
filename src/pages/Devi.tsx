@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -141,6 +141,23 @@ const QUICK_REPLIES = [
 const MAX_MESSAGE_LENGTH = 400;
 const SOFT_LIMIT_MESSAGES = 30; // Soft warning
 const MAX_CONVERSATION_MESSAGES = 40; // Hard nudge to start new chat
+
+// Phrases that suggest a user is struggling and might benefit from a detachment plan
+const DETACHMENT_DISTRESS_PHRASES = [
+  "can't stop thinking about", "can't move on", "can't let go", "obsessing",
+  "keeps coming back to mind", "miss them so much", "heartbroken", "devastated",
+  "can't get over", "still not over", "hurts so much", "it hurts",
+  "crying", "feel lost without", "don't know how to move on", "how do i move on",
+  "can't stop thinking about him", "can't stop thinking about her",
+  "stuck", "can't heal", "can't heal from", "spiraling", "ruminating",
+  "shouldn't have feelings for", "still love them", "still have feelings",
+  "hard to detach", "hard to let go", "so attached",
+];
+
+const detectsDetachmentNeed = (content: string): boolean => {
+  const lower = content.toLowerCase();
+  return DETACHMENT_DISTRESS_PHRASES.some(phrase => lower.includes(phrase));
+};
 
 // Format assistant messages with better structure
 const formatAssistantMessage = (content: string): React.ReactNode => {
@@ -391,6 +408,9 @@ const Devi = () => {
   
   // Profile sections nudge dismissal state
   const [profileNudgeDismissed, setProfileNudgeDismissed] = useState(false);
+
+  // Detachment plan CTA dismissal
+  const [detachmentCtaDismissed, setDetachmentCtaDismissed] = useState(false);
   
   // Chat layout style - chatgpt (default) or bubble
   const [chatLayout, setChatLayout] = useState<"bubble" | "chatgpt">(() => {
@@ -2042,6 +2062,47 @@ const Devi = () => {
                 />
               )
             ))}
+
+            {/* Detachment Plan CTA — shown when D.E.V.I. senses emotional distress and a candidate is selected */}
+            {(() => {
+              const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant');
+              const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+              const bothDetect = (lastAssistantMsg && detectsDetachmentNeed(lastAssistantMsg.content)) ||
+                                 (lastUserMsg && detectsDetachmentNeed(lastUserMsg.content));
+              if (!isLoading && !detachmentCtaDismissed && selectedCandidate && bothDetect && messages.length >= 2) {
+                return (
+                  <div className="mt-4 rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <Sparkles className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold">D.E.V.I. senses you're having a hard time</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                          A personalized Detachment Plan could help you emotionally separate from {selectedCandidate.nickname} — phase by phase, at your own pace.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setDetachmentCtaDismissed(true)}
+                        className="p-1 text-muted-foreground hover:text-foreground rounded transition-colors shrink-0"
+                        aria-label="Dismiss"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => navigate(`/detachment-plan/${selectedCandidate.id}`)}
+                      className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium py-2.5 hover:bg-primary/90 transition-colors"
+                    >
+                      <Unlink className="w-4 h-4" />
+                      View My Detachment Plan
+                    </button>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
             <DeviThinkingIndicator isVisible={isThinking} />
           </>
           )}

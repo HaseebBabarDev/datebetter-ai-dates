@@ -23,6 +23,7 @@ import { ProfileCompleteness } from "@/components/candidate/ProfileCompleteness"
 import { HoroscopeCompatibility } from "@/components/candidate/HoroscopeCompatibility";
 import { AppRatingDialog, shouldShowRatingDialog } from "@/components/candidate/AppRatingDialog";
 import { SuccessfulRelationshipCTA, checkSuccessfulRelationship } from "@/components/candidate/SuccessfulRelationshipCTA";
+import { DetachmentPlanInsight } from "@/components/candidate/DetachmentPlanInsight";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -1045,23 +1046,8 @@ const CandidateDetail = () => {
               candidateZodiacSign={(candidate as any).zodiac_sign}
             />
 
-            {/* Detachment Plan CTA */}
-            <div
-              className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4 flex items-center gap-3 cursor-pointer hover:border-primary/40 transition-all"
-              onClick={() => navigate(`/detachment-plan/${candidate.id}`)}
-            >
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                <Unlink className="w-5 h-5 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold">Detachment Plan</p>
-                <p className="text-xs text-muted-foreground">AI-powered 4-phase plan to emotionally detach</p>
-              </div>
-              <div className="flex items-center gap-1 shrink-0">
-                <Sparkles className="w-3.5 h-3.5 text-primary" />
-                <span className="text-xs text-primary font-medium">$9.99</span>
-              </div>
-            </div>
+            {/* Detachment Plan CTA / Progress */}
+            <DetachmentPlanInsight candidateId={candidate.id} onNavigate={() => navigate(`/detachment-plan/${candidate.id}`)} />
           </TabsContent>
 
           <TabsContent value="overview" className="mt-4 space-y-4">
