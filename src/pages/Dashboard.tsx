@@ -824,7 +824,9 @@ const Dashboard = () => {
 
     if (statusFilter !== "all") {
       if (statusFilter === "active") {
-        filtered = filtered.filter((c) => c.status !== "archived" && c.status !== "no_contact");
+        filtered = filtered.filter((c) => c.status !== "archived" && c.status !== "no_contact" && !(c as any).is_auto_disqualified);
+      } else if (statusFilter === "disqualified") {
+        filtered = filtered.filter((c) => (c as any).is_auto_disqualified && !(c as any).auto_disqualify_override);
       } else {
         filtered = filtered.filter((c) => c.status === statusFilter);
       }

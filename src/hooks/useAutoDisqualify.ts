@@ -22,6 +22,7 @@ export function useAutoDisqualify({ candidateId, candidate }: UseAutoDisqualifyO
   const [disqualifyReasons, setDisqualifyReasons] = useState<string[]>([]);
   const [isOverridden, setIsOverridden] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [newlyDisqualified, setNewlyDisqualified] = useState(false);
 
   const evaluate = useCallback(async () => {
     if (!user || !candidate) { setLoading(false); return; }
@@ -77,6 +78,11 @@ export function useAutoDisqualify({ candidateId, candidate }: UseAutoDisqualifyO
         .eq("id", candidateId);
     }
 
+    // Signal a new disqualification event (was clean, now DQ'd, not already overridden)
+    if (!prevDQ && disqualified && !override) {
+      setNewlyDisqualified(true);
+    }
+
     setLoading(false);
   }, [user, candidateId, candidate]);
 
@@ -98,5 +104,7 @@ export function useAutoDisqualify({ candidateId, candidate }: UseAutoDisqualifyO
     setIsOverridden(false);
   }, [candidateId]);
 
-  return { isAutoDisqualified, disqualifyReasons, isOverridden, loading, override, removeOverride };
+  const dismissNewlyDisqualified = useCallback(() => setNewlyDisqualified(false), []);
+
+  return { isAutoDisqualified, disqualifyReasons, isOverridden, loading, override, removeOverride, newlyDisqualified, dismissNewlyDisqualified };
 }
