@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Check, Crown, Sparkles, Heart, ArrowLeft, Zap, ShoppingBag } from "lucide-react";
+import { Check, Crown, Sparkles, Heart, ArrowLeft, Zap, ShoppingBag, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PaymentSheet } from "@/components/subscription/PaymentSheet";
@@ -29,6 +29,25 @@ const SUBSCRIPTION_PLANS = [
     ],
     color: "bg-muted",
     textColor: "text-foreground",
+    popular: false,
+    badge: null,
+  },
+  {
+    id: "dating_often",
+    name: "Basic",
+    priceMonthly: 4.99,
+    priceYearly: 47.88, // ~$3.99/mo, 20% off
+    description: "Try D.E.V.I. with one candidate",
+    icon: MessageCircle,
+    features: [
+      "1 candidate",
+      "5 AI message exchanges / month",
+      "Compatibility scoring",
+      "Red flag detection",
+      "Cycle tracking",
+    ],
+    color: "bg-muted/60",
+    textColor: "text-muted-foreground",
     popular: false,
     badge: null,
   },
@@ -133,6 +152,7 @@ export default function Subscription() {
     setLoading(selectedPlan.id);
     try {
       const planLimits: Record<string, { candidates: number; updates: number }> = {
+        dating_often: { candidates: 1, updates: 5 },   // Basic $4.99: 1 candidate, 5 AI exchanges
         new_to_dating: { candidates: 10, updates: 30 },
         unlimited: { candidates: 999, updates: 999 },
       };
@@ -198,8 +218,8 @@ export default function Subscription() {
           )}
         </div>
 
-        {/* Plans Grid — 3 columns */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+        {/* Plans Grid — 4 columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {SUBSCRIPTION_PLANS.map((plan) => {
             const Icon = plan.icon;
             const isCurrentPlan = currentPlan === plan.id;
