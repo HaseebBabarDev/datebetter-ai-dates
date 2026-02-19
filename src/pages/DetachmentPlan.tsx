@@ -40,6 +40,7 @@ import {
   ChevronRight,
   ArrowRight,
   PartyPopper,
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -118,6 +119,7 @@ const DetachmentPlan = () => {
     status: PlanStatus;
     current_phase: number;
     completed_at?: string | null;
+    unlocked_at?: string | null;
     practice_checks: PracticeChecks;
   } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -138,7 +140,7 @@ const DetachmentPlan = () => {
     try {
       const [candResult, planResult] = await Promise.all([
         supabase.from("candidates").select("nickname, photo_url").eq("id", candidateId).eq("user_id", user.id).single(),
-        supabase.from("detachment_plans").select("id, is_unlocked, plan_data, status, current_phase, completed_at, practice_checks").eq("user_id", user.id).eq("candidate_id", candidateId).maybeSingle(),
+        supabase.from("detachment_plans").select("id, is_unlocked, plan_data, status, current_phase, completed_at, unlocked_at, practice_checks").eq("user_id", user.id).eq("candidate_id", candidateId).maybeSingle(),
       ]);
       if (candResult.data) setCandidate(candResult.data);
       if (planResult.data) {
@@ -149,6 +151,7 @@ const DetachmentPlan = () => {
           status: (planResult.data.status as PlanStatus) || 'active',
           current_phase: planResult.data.current_phase || 1,
           completed_at: planResult.data.completed_at,
+          unlocked_at: planResult.data.unlocked_at,
           practice_checks: (planResult.data.practice_checks as PracticeChecks) || {},
         });
         setCurrentPhase(planResult.data.current_phase || 1);
@@ -174,8 +177,61 @@ const DetachmentPlan = () => {
     }
   }, [planRecord?.id]);
 
+  // ── Time-gating helpers ──────────────────────────────────────────────────
+  // Parse "Days 1-7" → { start: 1, end: 7 }
+  const parsePhaseDays = (duration: string): { start: number; end: number } | null => {
+    const match = duration.match(/(\d+)[–\-](\d+)/);
+    if (!match) return null;
+    return { start: parseInt(match[1], 10), end: parseInt(match[2], 10) };
+  };
+
+  // How many full days have elapsed since the plan was unlocked
+  const daysElapsedSinceUnlock = (): number => {
+    if (!planRecord?.unlocked_at) return 0;
+    const ms = Date.now() - new Date(planRecord.unlocked_at).getTime();
+    return Math.floor(ms / (1000 * 60 * 60 * 24));
+  };
+
+  // Can the user interact with (check off tasks in) this phase?
+  const isPhaseTimeOpen = (phase: Phase): boolean => {
+    if (!planRecord?.is_unlocked) return phase.number === 1; // preview: only phase 1
+    const range = parsePhaseDays(phase.duration);
+    if (!range) return true; // fallback: allow if we can't parse
+    const elapsed = daysElapsedSinceUnlock();
+    return elapsed >= range.start - 1; // phase starts on day `start`, so elapsed >= start-1
+  };
+
+  // Days remaining before this phase's window ends (returns 0 if window has passed)
+  const daysUntilPhaseEnd = (phase: Phase): number => {
+    const range = parsePhaseDays(phase.duration);
+    if (!range) return 0;
+    const elapsed = daysElapsedSinceUnlock();
+    return Math.max(0, range.end - elapsed);
+  };
+
+  // Can the user advance past this phase? Requires the full day window to have elapsed.
+  const canAdvancePhase = (phase: Phase): boolean => {
+    if (!planRecord?.is_unlocked) return false;
+    const range = parsePhaseDays(phase.duration);
+    if (!range) return true;
+    const elapsed = daysElapsedSinceUnlock();
+    return elapsed >= range.end;
+  };
+  // ─────────────────────────────────────────────────────────────────────────
+
   const handleCheckToggle = (phaseNum: number, practiceIdx: number) => {
     if (!planRecord) return;
+
+    // Time gate: only allow checking if this phase's time window has started
+    const phase = planRecord.plan_data?.phases[phaseNum - 1];
+    if (phase && !isPhaseTimeOpen(phase)) {
+      const range = parsePhaseDays(phase.duration);
+      toast.error(`Phase ${phaseNum} hasn't started yet.`, {
+        description: range ? `This phase begins on Day ${range.start} of your plan.` : "Wait until this phase's window opens.",
+      });
+      return;
+    }
+
     const key = String(phaseNum);
     const phaseLen = planRecord.plan_data?.phases[phaseNum - 1]?.practices.length ?? 0;
     const current = planRecord.practice_checks[key] ?? Array(phaseLen).fill(false);
@@ -250,10 +306,20 @@ const DetachmentPlan = () => {
     }
   };
 
-  const handlePhaseAdvance = async (phase: number) => {
+  const handlePhaseAdvance = async (phaseNum: number) => {
     if (!planRecord?.id || !planRecord.is_unlocked) return;
+    const phase = planRecord.plan_data?.phases[phaseNum - 1];
+    if (phase && !canAdvancePhase(phase)) {
+      const remaining = daysUntilPhaseEnd(phase);
+      toast.error("Not yet — stay the course!", {
+        description: remaining > 0
+          ? `You have ${remaining} day${remaining !== 1 ? "s" : ""} remaining in this phase. Accountability matters. 💪`
+          : "Complete this phase's full duration before moving on.",
+      });
+      return;
+    }
     const totalPhases = planRecord.plan_data?.phases.length || 4;
-    const newPhase = Math.min(phase + 1, totalPhases);
+    const newPhase = Math.min(phaseNum + 1, totalPhases);
     try {
       await supabase.from("detachment_plans").update({ current_phase: newPhase }).eq("id", planRecord.id);
       setCurrentPhase(newPhase);
@@ -482,6 +548,9 @@ const DetachmentPlan = () => {
                 const totalPractices = phase.practices.length;
                 const phaseComplete = donePractices === totalPractices && totalPractices > 0;
                 const isCelebrating = phaseCompleteCelebration === phase.number;
+                const phaseTimeOpen = isPhaseTimeOpen(phase);
+                const phaseAdvanceReady = canAdvancePhase(phase);
+                const remainingDays = daysUntilPhaseEnd(phase);
 
                 return (
                   <motion.div
@@ -554,25 +623,51 @@ const DetachmentPlan = () => {
                               <div className="space-y-2">
                                 <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground flex items-center gap-1">
                                   <BookOpen className="w-3 h-3" /> Daily Practices
-                                  <span className="ml-auto normal-case font-normal">{donePractices}/{totalPractices} done</span>
+                                  {phaseTimeOpen
+                                    ? <span className="ml-auto normal-case font-normal">{donePractices}/{totalPractices} done</span>
+                                    : <span className="ml-auto normal-case font-normal flex items-center gap-1"><Clock className="w-3 h-3" />Not started yet</span>
+                                  }
                                 </p>
+
+                                {/* Time-lock notice if phase hasn't started */}
+                                {!phaseTimeOpen && (
+                                  <div className="rounded-xl border border-border bg-muted/40 p-3 flex items-center gap-2">
+                                    <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+                                    <div>
+                                      <p className="text-xs font-medium">Phase not yet unlocked</p>
+                                      <p className="text-[11px] text-muted-foreground">
+                                        {(() => {
+                                          const range = parsePhaseDays(phase.duration);
+                                          if (!range) return "Complete the previous phase's days first.";
+                                          const elapsed = daysElapsedSinceUnlock();
+                                          const daysToGo = range.start - 1 - elapsed;
+                                          return `Starts in ${daysToGo} day${daysToGo !== 1 ? "s" : ""} (Day ${range.start} of your plan).`;
+                                        })()}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+
                                 {phase.practices.map((practice, pi) => {
                                   const isChecked = checks[pi] ?? false;
+                                  const canCheck = phaseTimeOpen && !isFinished;
                                   return (
                                     <motion.div
                                       key={pi}
                                       animate={isChecked ? { opacity: 1 } : { opacity: 1 }}
                                       className={cn(
-                                        "flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer",
+                                        "flex items-start gap-3 p-3 rounded-xl border transition-all",
+                                        canCheck ? "cursor-pointer" : "cursor-not-allowed opacity-50",
                                         isChecked
                                           ? cn(colors.bg, colors.border)
                                           : "bg-background/50 border-border/50 hover:border-border"
                                       )}
-                                      onClick={() => !isFinished && handleCheckToggle(phase.number, pi)}
+                                      onClick={() => canCheck && handleCheckToggle(phase.number, pi)}
                                     >
                                       <Checkbox
                                         checked={isChecked}
-                                        onCheckedChange={() => !isFinished && handleCheckToggle(phase.number, pi)}
+                                        disabled={!canCheck}
+                                        onCheckedChange={() => canCheck && handleCheckToggle(phase.number, pi)}
                                         className={cn("mt-0.5 shrink-0", isChecked && "border-primary")}
                                         onClick={e => e.stopPropagation()}
                                       />
@@ -619,37 +714,65 @@ const DetachmentPlan = () => {
                                 </div>
                               </div>
 
-                              {/* Advance to next phase CTA — only show on active phase and when phase practices are complete (or even if not — always visible on active) */}
+                              {/* Advance to next phase CTA */}
                               {isActivePhase && !isFinished && phase.number < (plan.phases.length) && (
-                                <Button
-                                  variant={phaseComplete ? "default" : "outline"}
-                                  className={cn("w-full gap-2 text-xs h-9", phaseComplete && "")}
-                                  onClick={() => handlePhaseAdvance(phase.number)}
-                                >
-                                  {phaseComplete ? (
-                                    <>
-                                      <PartyPopper className="w-4 h-4" />
-                                      Advance to Phase {phase.number + 1}: {plan.phases[phase.number]?.name}
-                                      <ArrowRight className="w-3.5 h-3.5 ml-auto" />
-                                    </>
-                                  ) : (
-                                    <>
-                                      <ChevronRight className="w-4 h-4" />
-                                      Move to Phase {phase.number + 1}
-                                      <span className="ml-auto text-muted-foreground">({donePractices}/{totalPractices} done)</span>
-                                    </>
+                                <div className="space-y-2">
+                                  {!phaseAdvanceReady && remainingDays > 0 && (
+                                    <div className="flex items-center gap-2 rounded-lg bg-muted/50 border border-border px-3 py-2">
+                                      <Clock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                                      <p className="text-[11px] text-muted-foreground">
+                                        <span className="font-semibold text-foreground">{remainingDays} day{remainingDays !== 1 ? "s" : ""} remaining</span> — stay the course before advancing.
+                                      </p>
+                                    </div>
                                   )}
-                                </Button>
+                                  <Button
+                                    variant={phaseComplete && phaseAdvanceReady ? "default" : "outline"}
+                                    className={cn("w-full gap-2 text-xs h-9")}
+                                    onClick={() => handlePhaseAdvance(phase.number)}
+                                  >
+                                    {phaseAdvanceReady ? (
+                                      phaseComplete ? (
+                                        <>
+                                          <PartyPopper className="w-4 h-4" />
+                                          Advance to Phase {phase.number + 1}: {plan.phases[phase.number]?.name}
+                                          <ArrowRight className="w-3.5 h-3.5 ml-auto" />
+                                        </>
+                                      ) : (
+                                        <>
+                                          <ChevronRight className="w-4 h-4" />
+                                          Move to Phase {phase.number + 1}
+                                          <span className="ml-auto text-muted-foreground">({donePractices}/{totalPractices} done)</span>
+                                        </>
+                                      )
+                                    ) : (
+                                      <>
+                                        <Clock className="w-4 h-4" />
+                                        {remainingDays > 0 ? `${remainingDays} day${remainingDays !== 1 ? "s" : ""} remaining` : "Complete this phase first"}
+                                        <Lock className="w-3.5 h-3.5 ml-auto opacity-50" />
+                                      </>
+                                    )}
+                                  </Button>
+                                </div>
                               )}
                               {isActivePhase && !isFinished && phase.number === plan.phases.length && (
-                                <Button
-                                  variant={phaseComplete ? "default" : "outline"}
-                                  className="w-full gap-2 text-xs h-9"
-                                  onClick={() => setShowCompleteDialog(true)}
-                                >
-                                  <Trophy className="w-4 h-4" />
-                                  {phaseComplete ? "Mark Plan Complete 🎉" : "Complete Plan Early"}
-                                </Button>
+                                <div className="space-y-2">
+                                  {!phaseAdvanceReady && remainingDays > 0 && (
+                                    <div className="flex items-center gap-2 rounded-lg bg-muted/50 border border-border px-3 py-2">
+                                      <Clock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                                      <p className="text-[11px] text-muted-foreground">
+                                        <span className="font-semibold text-foreground">{remainingDays} day{remainingDays !== 1 ? "s" : ""} remaining</span> — finish strong before completing.
+                                      </p>
+                                    </div>
+                                  )}
+                                  <Button
+                                    variant={phaseComplete && phaseAdvanceReady ? "default" : "outline"}
+                                    className="w-full gap-2 text-xs h-9"
+                                    onClick={() => setShowCompleteDialog(true)}
+                                  >
+                                    <Trophy className="w-4 h-4" />
+                                    {phaseComplete && phaseAdvanceReady ? "Mark Plan Complete 🎉" : phaseAdvanceReady ? "Complete Plan" : `${remainingDays} day${remainingDays !== 1 ? "s" : ""} remaining`}
+                                  </Button>
+                                </div>
                               )}
                             </CardContent>
                           </motion.div>
