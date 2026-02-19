@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, RotateCcw, Gift, Copy, Share2, Users, ScrollText, Sparkles, Heart, Brain, MessageCircle } from "lucide-react";
+import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, RotateCcw, Gift, Copy, Share2, Users, ScrollText, Sparkles, Heart, Brain, MessageCircle, Crown } from "lucide-react";
 import { ThemeSelector } from "@/components/settings/ThemeSelector";
 import { ZodiacModeSettings } from "@/components/settings/ZodiacModeSettings";
 import { DeviSettings } from "@/components/settings/DeviSettings";
@@ -35,18 +35,18 @@ type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more
 
 const PLAN_LIMITS: Record<SubscriptionPlan, { candidates: number; updates: number }> = {
   free: { candidates: 1, updates: 1 },
-  new_to_dating: { candidates: 3, updates: 5 },
-  dating_often: { candidates: 10, updates: 30 },
-  dating_more: { candidates: 12, updates: 20 },
+  new_to_dating: { candidates: 10, updates: 30 },  // Starter $9.99
+  dating_often: { candidates: 1, updates: 5 },      // Basic $4.99
+  dating_more: { candidates: 999, updates: 999 },   // (legacy, maps to unlimited)
   unlimited: { candidates: 999, updates: 999 },
 };
 
 const PLAN_DISPLAY: Record<SubscriptionPlan, { name: string; price: string }> = {
   free: { name: "Free", price: "$0" },
-  new_to_dating: { name: "New to Dating", price: "$9.99" },
-  dating_often: { name: "Dating Often", price: "$19.99" },
-  dating_more: { name: "Dating More", price: "$29.99" },
-  unlimited: { name: "Unlimited", price: "$39.99" },
+  new_to_dating: { name: "Starter", price: "$9.99" },
+  dating_often: { name: "Basic", price: "$4.99" },
+  dating_more: { name: "Unlimited", price: "$19.99" },
+  unlimited: { name: "Unlimited", price: "$19.99" },
 };
 
 const GENDER_OPTIONS = [
@@ -1138,16 +1138,60 @@ const Settings = () => {
             {/* Plans */}
             <div className="space-y-3">
               <h4 className="font-medium text-sm text-muted-foreground">
-                {currentPlan === "free" ? "Upgrade for more candidates & updates" : "Change your plan"}
+                {currentPlan === "free" ? "Upgrade to unlock more features" : "Change your plan"}
               </h4>
-              
-              {/* New to Dating Plan */}
+
+              {/* Basic Plan — $4.99 */}
+              <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "dating_often" ? "border-primary bg-primary/5" : ""}`}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="w-4 h-4 text-muted-foreground" />
+                        <h4 className="font-semibold">Basic</h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground">1 candidate • 5 AI exchanges / month</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold">$4.99</p>
+                      <p className="text-xs text-muted-foreground">/month</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t space-y-1.5">
+                    {["1 candidate profile", "5 AI message exchanges / month", "Compatibility scoring", "Red flag detection", "Cycle tracking"].map((f) => (
+                      <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Check className="w-4 h-4 text-green-500 shrink-0" />
+                        <span>{f}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Button
+                    className="w-full mt-4"
+                    variant={currentPlan === "dating_often" ? "secondary" : "outline"}
+                    disabled={currentPlan === "dating_often" || changingPlan !== null}
+                    onClick={() => handleChangePlan("dating_often")}
+                  >
+                    {changingPlan === "dating_often" ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Upgrading...</>
+                    ) : currentPlan === "dating_often" ? (
+                      <><Check className="w-4 h-4 mr-2" />Current Plan</>
+                    ) : (
+                      "Get Basic"
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Starter Plan — $9.99 */}
               <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "new_to_dating" ? "border-primary bg-primary/5" : ""}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h4 className="font-semibold">New to Dating</h4>
-                      <p className="text-sm text-muted-foreground">3 candidates • 5 updates each</p>
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-primary" />
+                        <h4 className="font-semibold">Starter</h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground">10 candidates • 30 updates each</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold">$9.99</p>
@@ -1155,21 +1199,15 @@ const Settings = () => {
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t space-y-1.5">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>3 candidate profiles</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>5 updates per candidate</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>AI compatibility scoring</span>
-                    </div>
+                    {["Up to 10 candidate profiles", "30 compatibility score updates", "1,000 AI messages / month", "Voice playback insights", "Cycle-aware insights"].map((f) => (
+                      <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Check className="w-4 h-4 text-green-500 shrink-0" />
+                        <span>{f}</span>
+                      </div>
+                    ))}
                   </div>
-                  <Button 
-                    className="w-full mt-4" 
+                  <Button
+                    className="w-full mt-4"
                     variant={currentPlan === "new_to_dating" ? "secondary" : "outline"}
                     disabled={currentPlan === "new_to_dating" || changingPlan !== null}
                     onClick={() => handleChangePlan("new_to_dating")}
@@ -1179,22 +1217,25 @@ const Settings = () => {
                     ) : currentPlan === "new_to_dating" ? (
                       <><Check className="w-4 h-4 mr-2" />Current Plan</>
                     ) : (
-                      "Upgrade to New to Dating"
+                      "Get Starter"
                     )}
                   </Button>
                 </CardContent>
               </Card>
 
-              {/* Dating Often Plan */}
-              <Card className={`cursor-pointer hover:border-primary/50 transition-colors relative overflow-hidden ${currentPlan === "dating_often" ? "border-primary bg-primary/5" : "border-primary/30"}`}>
+              {/* Unlimited Plan — $19.99 */}
+              <Card className={`cursor-pointer hover:border-primary/50 transition-colors relative overflow-hidden ${currentPlan === "unlimited" || currentPlan === "dating_more" ? "border-primary bg-primary/5" : "border-primary/30"}`}>
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-bl">
-                  Best Value
+                  Most Popular
                 </div>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h4 className="font-semibold">Dating Often</h4>
-                      <p className="text-sm text-muted-foreground">7 candidates • 12 updates each</p>
+                      <div className="flex items-center gap-2">
+                        <Crown className="w-4 h-4 text-primary" />
+                        <h4 className="font-semibold">Unlimited</h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground">Unlimited candidates & messages</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold">$19.99</p>
@@ -1202,119 +1243,25 @@ const Settings = () => {
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t space-y-1.5">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>7 candidate profiles</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>12 updates per candidate</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>AI compatibility scoring</span>
-                    </div>
+                    {["Unlimited candidate profiles", "Unlimited AI messages", "Unlimited score updates", "Everything in Starter", "Advanced behavioral analytics", "Priority support"].map((f) => (
+                      <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Check className="w-4 h-4 text-green-500 shrink-0" />
+                        <span>{f}</span>
+                      </div>
+                    ))}
                   </div>
-                  <Button 
+                  <Button
                     className="w-full mt-4"
-                    variant={currentPlan === "dating_often" ? "secondary" : "default"}
-                    disabled={currentPlan === "dating_often" || changingPlan !== null}
-                    onClick={() => handleChangePlan("dating_often")}
-                  >
-                    {changingPlan === "dating_often" ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Upgrading...</>
-                    ) : currentPlan === "dating_often" ? (
-                      <><Check className="w-4 h-4 mr-2" />Current Plan</>
-                    ) : (
-                      "Upgrade to Dating Often"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Dating More Plan */}
-              <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "dating_more" ? "border-primary bg-primary/5" : ""}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-semibold">Dating More</h4>
-                      <p className="text-sm text-muted-foreground">12 candidates • 20 updates each</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-bold">$29.99</p>
-                      <p className="text-xs text-muted-foreground">/month</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 pt-3 border-t space-y-1.5">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>12 candidate profiles</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>20 updates per candidate</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>AI compatibility scoring</span>
-                    </div>
-                  </div>
-                  <Button 
-                    className="w-full mt-4" 
-                    variant={currentPlan === "dating_more" ? "secondary" : "outline"}
-                    disabled={currentPlan === "dating_more" || changingPlan !== null}
-                    onClick={() => handleChangePlan("dating_more")}
-                  >
-                    {changingPlan === "dating_more" ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Upgrading...</>
-                    ) : currentPlan === "dating_more" ? (
-                      <><Check className="w-4 h-4 mr-2" />Current Plan</>
-                    ) : (
-                      "Upgrade to Dating More"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Unlimited Plan */}
-              <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "unlimited" ? "border-primary bg-primary/5" : ""}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-semibold">Unlimited</h4>
-                      <p className="text-sm text-muted-foreground">Unlimited candidates • Unlimited updates</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-bold">$39.99</p>
-                      <p className="text-xs text-muted-foreground">/month</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 pt-3 border-t space-y-1.5">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>Unlimited candidate profiles</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>Unlimited updates per candidate</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span>Priority support & early access</span>
-                    </div>
-                  </div>
-                  <Button 
-                    className="w-full mt-4" 
-                    variant={currentPlan === "unlimited" ? "secondary" : "default"}
-                    disabled={currentPlan === "unlimited" || changingPlan !== null}
+                    variant={currentPlan === "unlimited" || currentPlan === "dating_more" ? "secondary" : "default"}
+                    disabled={currentPlan === "unlimited" || currentPlan === "dating_more" || changingPlan !== null}
                     onClick={() => handleChangePlan("unlimited")}
                   >
                     {changingPlan === "unlimited" ? (
                       <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Upgrading...</>
-                    ) : currentPlan === "unlimited" ? (
+                    ) : currentPlan === "unlimited" || currentPlan === "dating_more" ? (
                       <><Check className="w-4 h-4 mr-2" />Current Plan</>
                     ) : (
-                      "Upgrade to Unlimited"
+                      "Get Unlimited"
                     )}
                   </Button>
                 </CardContent>
