@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { AlertTriangle, Heart, Clock, TrendingUp, Lightbulb, XCircle } from "lucide-react";
+import { AlertTriangle, Heart, Clock, TrendingUp, Lightbulb, XCircle, Ban } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 import { differenceInDays, differenceInHours } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +21,7 @@ interface Alert {
   title: string;
   message: string;
   candidateId?: string;
+  dismissable?: boolean;
 }
 
 interface AdviceStats {
@@ -132,6 +133,24 @@ function generateAlerts(
 ): Alert[] {
   const alerts: Alert[] = [];
   const today = new Date();
+
+  // ── Auto-disqualified candidates (highest priority) ──────────
+  const autoDQ = candidates.filter(
+    (c) => (c as any).is_auto_disqualified && !(c as any).auto_disqualify_override
+  );
+  autoDQ.forEach((c) => {
+    const reasons: string[] = (c as any).auto_disqualify_reasons || [];
+    alerts.push({
+      id: `adq-${c.id}`,
+      type: "urgent",
+      icon: <Ban className="w-4 h-4" />,
+      title: `Auto-Disqualified: ${c.nickname}`,
+      message: reasons.length > 0
+        ? `Reason${reasons.length > 1 ? "s" : ""}: ${reasons.join(", ")} — Tap to review or override`
+        : "Matches a dealbreaker rule — tap to review or override",
+      candidateId: c.id,
+    });
+  });
 
   // Check for recently ended relationships (within last 48 hours)
   const recentlyEnded = archivedCandidates.filter((c) => {

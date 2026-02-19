@@ -22,7 +22,8 @@ import {
   Target,
   Check,
   X,
-  HelpCircle
+  HelpCircle,
+  ShieldX
 } from "lucide-react";
 import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
 
@@ -255,6 +256,19 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
             <Badge variant="secondary" className={`text-xs ${status.color}`}>
               {status.label}
             </Badge>
+            {/* Auto-disqualified badge */}
+            {(candidate as any).is_auto_disqualified && !(candidate as any).auto_disqualify_override && (
+              <Badge variant="destructive" className="text-[10px] px-1.5 py-0 h-4 gap-0.5">
+                <ShieldX className="w-2.5 h-2.5" />
+                DQ'd
+              </Badge>
+            )}
+            {(candidate as any).is_auto_disqualified && (candidate as any).auto_disqualify_override && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 gap-0.5 border-amber-400 text-amber-600">
+                <ShieldX className="w-2.5 h-2.5" />
+                DQ Override
+              </Badge>
+            )}
             {candidate.no_contact_active && candidate.no_contact_day !== null && (
               <Badge variant="outline" className="text-xs bg-slate-500/10 text-slate-600 border-slate-300 gap-1">
                 <Ban className="w-3 h-3" />

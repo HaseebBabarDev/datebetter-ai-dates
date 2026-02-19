@@ -19,6 +19,7 @@ import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Ma
 import { ThemeSelector } from "@/components/settings/ThemeSelector";
 import { ZodiacModeSettings } from "@/components/settings/ZodiacModeSettings";
 import { DeviSettings } from "@/components/settings/DeviSettings";
+import { AutoDisqualifySettings } from "@/components/settings/AutoDisqualifySettings";
 import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { ProfilePhotoUpload } from "@/components/settings/ProfilePhotoUpload";
@@ -739,6 +740,9 @@ const Settings = () => {
 
             {/* D.E.V.I. Preferences */}
             <DeviSettings userId={user.id} />
+
+            {/* Auto-Disqualify Rules */}
+            <AutoDisqualifySettings />
 
             {/* Self-Discovery Quizzes */}
             <Card 
