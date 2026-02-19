@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { 
   Heart, 
   AlertTriangle, 
@@ -23,9 +24,13 @@ import {
   Check,
   X,
   HelpCircle,
-  ShieldX
+  ShieldX,
+  RotateCcw,
 } from "lucide-react";
 import { ScheduleCompatibilityAlert } from "@/components/candidate/ScheduleCompatibilityAlert";
+import { useAutoDisqualify } from "@/hooks/useAutoDisqualify";
+import { AutoDisqualifyDialog, RestoreCandidateDialog } from "@/components/candidate/AutoDisqualifyDialog";
+import { toast } from "sonner";
 
 type Candidate = Tables<"candidates">;
 
@@ -175,6 +180,18 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
   const { user } = useAuth();
   const [userSchedule, setUserSchedule] = useState<string | null>(null);
   const [daysSinceContact, setDaysSinceContact] = useState<number | null>(null);
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+
+  const {
+    isAutoDisqualified,
+    disqualifyReasons,
+    isOverridden,
+    newlyDisqualified,
+    dismissNewlyDisqualified,
+    override: applyOverride,
+  } = useAutoDisqualify({ candidateId: candidate.id, candidate: candidate as Record<string, unknown> });
+
   const status = statusConfig[candidate.status || "just_matched"];
   const redFlagCount = Array.isArray(candidate.red_flags) ? candidate.red_flags.length : 0;
   const greenFlagCount = Array.isArray(candidate.green_flags) ? candidate.green_flags.length : 0;
@@ -185,6 +202,9 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
     redFlagCount,
     alerts,
   });
+
+  // Derived: is this candidate in a visually "disqualified" state?
+  const isDQ = isAutoDisqualified && !isOverridden;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -224,162 +244,247 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
     navigate(`/candidate/${candidate.id}`);
   };
 
-  return (
-    <button
-      onClick={handleClick}
-      className="w-full bg-card rounded-xl border border-border p-4 text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 active:scale-[0.98]"
-    >
-      <div className="flex items-start gap-3">
-        <Avatar className="w-12 h-12 border-2 border-border">
-          <AvatarImage src={candidate.photo_url || undefined} />
-          <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-            {candidate.nickname.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+  const handleKeep = async () => {
+    await applyOverride();
+    dismissNewlyDisqualified();
+    toast.success(`${candidate.nickname} kept active`);
+    onUpdate();
+  };
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <h3 className="font-semibold text-foreground truncate">
-                {candidate.nickname}
-              </h3>
-              {(candidate as any).zodiac_sign && zodiacConfig[(candidate as any).zodiac_sign] && (
-                <span className="text-sm shrink-0" title={zodiacConfig[(candidate as any).zodiac_sign].label}>
-                  {zodiacConfig[(candidate as any).zodiac_sign].emoji}
-                </span>
+  const handleConfirmDQ = () => {
+    dismissNewlyDisqualified();
+    toast.info(`${candidate.nickname} is disqualified. You can find them under "Disqualified" filter.`);
+  };
+
+  const handleRestore = async (explanation: string) => {
+    setRestoring(true);
+    try {
+      await supabase
+        .from("candidates")
+        .update({ auto_disqualify_override: true, notes: explanation || (candidate.notes ?? undefined) } as any)
+        .eq("id", candidate.id);
+      await applyOverride();
+      toast.success(`${candidate.nickname} has been re-added!`);
+      setShowRestoreDialog(false);
+      onUpdate();
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setRestoring(false);
+    }
+  };
+
+  return (
+    <>
+      {/* Auto-DQ Alert Dialog */}
+      <AutoDisqualifyDialog
+        open={newlyDisqualified}
+        candidateName={candidate.nickname}
+        reasons={disqualifyReasons}
+        onConfirm={handleConfirmDQ}
+        onKeep={handleKeep}
+      />
+
+      {/* Restore Dialog */}
+      <RestoreCandidateDialog
+        open={showRestoreDialog}
+        onOpenChange={setShowRestoreDialog}
+        candidateName={candidate.nickname}
+        disqualifyReasons={disqualifyReasons.length > 0 ? disqualifyReasons : ((candidate as any).auto_disqualify_reasons as string[] ?? [])}
+        onRestore={handleRestore}
+        loading={restoring}
+      />
+
+      {/* Disqualified card */}
+      {isDQ ? (
+        <div className="w-full bg-card rounded-xl border border-destructive/30 p-4 text-left opacity-75">
+          <div className="flex items-start gap-3">
+            <Avatar className="w-12 h-12 border-2 border-destructive/30">
+              <AvatarImage src={candidate.photo_url || undefined} />
+              <AvatarFallback className="bg-destructive/10 text-destructive font-semibold">
+                {candidate.nickname.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="font-semibold text-muted-foreground truncate">{candidate.nickname}</h3>
+                <Badge variant="destructive" className="text-[10px] px-1.5 py-0 h-4 gap-0.5 shrink-0">
+                  <ShieldX className="w-2.5 h-2.5" />
+                  Disqualified
+                </Badge>
+              </div>
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {((candidate as any).auto_disqualify_reasons as string[] ?? disqualifyReasons).slice(0, 3).map((r: string, i: number) => (
+                  <span key={i} className="text-[10px] px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive">
+                    {r}
+                  </span>
+                ))}
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="mt-3 h-7 text-xs gap-1 border-primary/40 text-primary"
+                onClick={(e) => { e.stopPropagation(); setShowRestoreDialog(true); }}
+              >
+                <RotateCcw className="w-3 h-3" />
+                Re-add candidate
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={handleClick}
+          className="w-full bg-card rounded-xl border border-border p-4 text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 active:scale-[0.98]"
+        >
+          <div className="flex items-start gap-3">
+            <Avatar className="w-12 h-12 border-2 border-border">
+              <AvatarImage src={candidate.photo_url || undefined} />
+              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                {candidate.nickname.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <h3 className="font-semibold text-foreground truncate">
+                    {candidate.nickname}
+                  </h3>
+                  {(candidate as any).zodiac_sign && zodiacConfig[(candidate as any).zodiac_sign] && (
+                    <span className="text-sm shrink-0" title={zodiacConfig[(candidate as any).zodiac_sign].label}>
+                      {zodiacConfig[(candidate as any).zodiac_sign].emoji}
+                    </span>
+                  )}
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              </div>
+
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <Badge variant="secondary" className={`text-xs ${status.color}`}>
+                  {status.label}
+                </Badge>
+                {/* Auto-disqualified override badge */}
+                {isOverridden && (
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 gap-0.5 border-amber-400 text-amber-600">
+                    <ShieldX className="w-2.5 h-2.5" />
+                    DQ Override
+                  </Badge>
+                )}
+                {candidate.no_contact_active && candidate.no_contact_day !== null && (
+                  <Badge variant="outline" className="text-xs bg-slate-500/10 text-slate-600 border-slate-300 gap-1">
+                    <Ban className="w-3 h-3" />
+                    Day {candidate.no_contact_day}
+                  </Badge>
+                )}
+                {candidate.age && (
+                  <span className="text-xs text-muted-foreground">{candidate.age}y</span>
+                )}
+                {(candidate as any).distance_approximation && distanceConfig[(candidate as any).distance_approximation] && (() => {
+                  const config = distanceConfig[(candidate as any).distance_approximation];
+                  const DistIcon = config.icon;
+                  return (
+                    <span className={`text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1 ${config.color}`}>
+                      <DistIcon className="w-3 h-3" />
+                      {config.label}
+                    </span>
+                  );
+                })()}
+                {(() => {
+                  const alignment = getGoalAlignment(
+                    (candidate as any).user_goal_for_candidate,
+                    candidate.their_relationship_goal
+                  );
+                  if (alignment === "unknown") return null;
+                  const config = goalAlignmentConfig[alignment];
+                  const AlignIcon = config.icon;
+                  return (
+                    <span 
+                      className={`text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1 ${config.color}`}
+                      title={`You: ${(candidate as any).user_goal_for_candidate || 'Not set'} | They: ${candidate.their_relationship_goal || 'Unknown'}`}
+                    >
+                      <AlignIcon className="w-3 h-3" />
+                      {config.label}
+                    </span>
+                  );
+                })()}
+              </div>
+
+              {/* Alert Badges */}
+              {alerts.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {alerts.map((alert, idx) => (
+                    <span
+                      key={idx}
+                      className={`text-xs px-2 py-0.5 rounded-full font-medium ${alert.color}`}
+                    >
+                      {alert.label}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {candidate.compatibility_score && (
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" />
+                      Compatibility
+                    </span>
+                    <span className="text-xs font-medium text-primary">
+                      {candidate.compatibility_score}%
+                    </span>
+                  </div>
+                  <Progress value={candidate.compatibility_score} className="h-1.5" />
+                </div>
+              )}
+
+              <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground flex-wrap">
+                {greenFlagCount > 0 && (
+                  <span className="flex items-center gap-1 text-emerald-600">
+                    <Heart className="w-3 h-3" />
+                    {greenFlagCount}
+                  </span>
+                )}
+                {redFlagCount > 0 && (
+                  <span className="flex items-center gap-1 text-destructive">
+                    <AlertTriangle className="w-3 h-3" />
+                    {redFlagCount}
+                  </span>
+                )}
+                {daysSinceContact !== null && !candidate.no_contact_active && (
+                  <span className={`flex items-center gap-1 ${daysSinceContact > 7 ? 'text-amber-600' : daysSinceContact > 14 ? 'text-destructive' : ''}`}>
+                    <Clock className="w-3 h-3" />
+                    {daysSinceContact === 0 ? 'Today' : daysSinceContact === 1 ? '1 day ago' : `${daysSinceContact}d ago`}
+                  </span>
+                )}
+                {candidate.met_via && (
+                  <span className="flex items-center gap-1">
+                    <MessageCircle className="w-3 h-3" />
+                    {candidate.met_app || candidate.met_via}
+                  </span>
+                )}
+                <ScheduleCompatibilityAlert
+                  userSchedule={userSchedule}
+                  candidateSchedule={(candidate as any).their_schedule_flexibility}
+                  distance={candidate.distance_approximation}
+                  variant="compact"
+                />
+              </div>
+
+              {nextStep && (
+                <div className="mt-3 pt-3 border-t border-border">
+                  <span className="text-xs text-primary/80 flex items-center gap-1.5">
+                    <Zap className="w-3 h-3" />
+                    {nextStep}
+                  </span>
+                </div>
               )}
             </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
           </div>
-
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <Badge variant="secondary" className={`text-xs ${status.color}`}>
-              {status.label}
-            </Badge>
-            {/* Auto-disqualified badge */}
-            {(candidate as any).is_auto_disqualified && !(candidate as any).auto_disqualify_override && (
-              <Badge variant="destructive" className="text-[10px] px-1.5 py-0 h-4 gap-0.5">
-                <ShieldX className="w-2.5 h-2.5" />
-                DQ'd
-              </Badge>
-            )}
-            {(candidate as any).is_auto_disqualified && (candidate as any).auto_disqualify_override && (
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 gap-0.5 border-amber-400 text-amber-600">
-                <ShieldX className="w-2.5 h-2.5" />
-                DQ Override
-              </Badge>
-            )}
-            {candidate.no_contact_active && candidate.no_contact_day !== null && (
-              <Badge variant="outline" className="text-xs bg-slate-500/10 text-slate-600 border-slate-300 gap-1">
-                <Ban className="w-3 h-3" />
-                Day {candidate.no_contact_day}
-              </Badge>
-            )}
-            {candidate.age && (
-              <span className="text-xs text-muted-foreground">{candidate.age}y</span>
-            )}
-            {(candidate as any).distance_approximation && distanceConfig[(candidate as any).distance_approximation] && (() => {
-              const config = distanceConfig[(candidate as any).distance_approximation];
-              const DistIcon = config.icon;
-              return (
-                <span className={`text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1 ${config.color}`}>
-                  <DistIcon className="w-3 h-3" />
-                  {config.label}
-                </span>
-              );
-            })()}
-            {(() => {
-              const alignment = getGoalAlignment(
-                (candidate as any).user_goal_for_candidate,
-                candidate.their_relationship_goal
-              );
-              if (alignment === "unknown") return null;
-              const config = goalAlignmentConfig[alignment];
-              const AlignIcon = config.icon;
-              return (
-                <span 
-                  className={`text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1 ${config.color}`}
-                  title={`You: ${(candidate as any).user_goal_for_candidate || 'Not set'} | They: ${candidate.their_relationship_goal || 'Unknown'}`}
-                >
-                  <AlignIcon className="w-3 h-3" />
-                  {config.label}
-                </span>
-              );
-            })()}
-          </div>
-
-          {/* Alert Badges */}
-          {alerts.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              {alerts.map((alert, idx) => (
-                <span
-                  key={idx}
-                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${alert.color}`}
-                >
-                  {alert.label}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {candidate.compatibility_score && (
-            <div className="mt-3">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" />
-                  Compatibility
-                </span>
-                <span className="text-xs font-medium text-primary">
-                  {candidate.compatibility_score}%
-                </span>
-              </div>
-              <Progress value={candidate.compatibility_score} className="h-1.5" />
-            </div>
-          )}
-
-          <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground flex-wrap">
-            {greenFlagCount > 0 && (
-              <span className="flex items-center gap-1 text-emerald-600">
-                <Heart className="w-3 h-3" />
-                {greenFlagCount}
-              </span>
-            )}
-            {redFlagCount > 0 && (
-              <span className="flex items-center gap-1 text-destructive">
-                <AlertTriangle className="w-3 h-3" />
-                {redFlagCount}
-              </span>
-            )}
-            {daysSinceContact !== null && !candidate.no_contact_active && (
-              <span className={`flex items-center gap-1 ${daysSinceContact > 7 ? 'text-amber-600' : daysSinceContact > 14 ? 'text-destructive' : ''}`}>
-                <Clock className="w-3 h-3" />
-                {daysSinceContact === 0 ? 'Today' : daysSinceContact === 1 ? '1 day ago' : `${daysSinceContact}d ago`}
-              </span>
-            )}
-            {candidate.met_via && (
-              <span className="flex items-center gap-1">
-                <MessageCircle className="w-3 h-3" />
-                {candidate.met_app || candidate.met_via}
-              </span>
-            )}
-            <ScheduleCompatibilityAlert
-              userSchedule={userSchedule}
-              candidateSchedule={(candidate as any).their_schedule_flexibility}
-              distance={candidate.distance_approximation}
-              variant="compact"
-            />
-          </div>
-
-          {nextStep && (
-            <div className="mt-3 pt-3 border-t border-border">
-              <span className="text-xs text-primary/80 flex items-center gap-1.5">
-                <Zap className="w-3 h-3" />
-                {nextStep}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-    </button>
+        </button>
+      )}
+    </>
   );
 };
+

@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Tables } from "@/integrations/supabase/types";
 import { CandidateCard, CandidateAlert } from "./CandidateCard";
 import { supabase } from "@/integrations/supabase/client";
-import { GripVertical } from "lucide-react";
+import { GripVertical, ShieldX } from "lucide-react";
 
 type Candidate = Tables<"candidates">;
 
@@ -153,7 +153,6 @@ const FlatList: React.FC<{
   );
 };
 
-// Grouped view with drag-and-drop for active section
 const GroupedList: React.FC<{
   candidates: Candidate[];
   onUpdate: () => void;
@@ -161,9 +160,13 @@ const GroupedList: React.FC<{
 }> = ({ candidates, onUpdate, candidateAlerts }) => {
   const activeCandidates = candidates.filter(
     (c) => c.status !== "archived" && c.status !== "no_contact"
+      && !((c as any).is_auto_disqualified && !(c as any).auto_disqualify_override)
   );
   const noContactCandidates = candidates.filter((c) => c.status === "no_contact");
   const archivedCandidates = candidates.filter((c) => c.status === "archived");
+  const disqualifiedCandidates = candidates.filter(
+    (c) => (c as any).is_auto_disqualified && !(c as any).auto_disqualify_override
+  );
 
   const sortedActive = [...activeCandidates].sort((a, b) => {
     const aOrder = a.sort_order ?? null;
@@ -228,6 +231,27 @@ const GroupedList: React.FC<{
           </h2>
           <div className="space-y-3 opacity-60">
             {archivedCandidates.map((candidate) => (
+              <CandidateCard
+                key={candidate.id}
+                candidate={candidate}
+                onUpdate={onUpdate}
+                alerts={candidateAlerts[candidate.id]}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {disqualifiedCandidates.length > 0 && (
+        <section>
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldX className="w-3.5 h-3.5 text-destructive" />
+            <h2 className="text-sm font-medium text-destructive uppercase tracking-wide">
+              Disqualified ({disqualifiedCandidates.length})
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {disqualifiedCandidates.map((candidate) => (
               <CandidateCard
                 key={candidate.id}
                 candidate={candidate}

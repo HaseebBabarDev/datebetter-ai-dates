@@ -9,7 +9,7 @@ import {
 import { ArrowUpDown, Filter } from "lucide-react";
 
 export type SortOption = "score" | "status" | "date_added" | "date_updated";
-export type StatusFilter = "all" | "active" | "just_matched" | "texting" | "planning_date" | "dating" | "dating_casually" | "getting_serious" | "serious_relationship" | "no_contact" | "archived";
+export type StatusFilter = "all" | "active" | "just_matched" | "texting" | "planning_date" | "dating" | "dating_casually" | "getting_serious" | "serious_relationship" | "no_contact" | "archived" | "disqualified";
 
 interface CandidateFiltersProps {
   sortBy: SortOption;
@@ -37,6 +37,7 @@ const statusOptions: { value: StatusFilter; label: string }[] = [
   { value: "dating", label: "Situationship" },
   { value: "no_contact", label: "No Contact" },
   { value: "archived", label: "Archived" },
+  { value: "disqualified", label: "Disqualified" },
 ];
 
 export const CandidateFilters: React.FC<CandidateFiltersProps> = ({
