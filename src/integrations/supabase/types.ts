@@ -179,6 +179,7 @@ export type Database = {
           red_flags: Json | null
           relationship_ended_at: string | null
           score_breakdown: Json | null
+          sort_order: number | null
           status: Database["public"]["Enums"]["candidate_status"] | null
           their_ambition_level: number | null
           their_attachment_style:
@@ -261,6 +262,7 @@ export type Database = {
           red_flags?: Json | null
           relationship_ended_at?: string | null
           score_breakdown?: Json | null
+          sort_order?: number | null
           status?: Database["public"]["Enums"]["candidate_status"] | null
           their_ambition_level?: number | null
           their_attachment_style?:
@@ -343,6 +345,7 @@ export type Database = {
           red_flags?: Json | null
           relationship_ended_at?: string | null
           score_breakdown?: Json | null
+          sort_order?: number | null
           status?: Database["public"]["Enums"]["candidate_status"] | null
           their_ambition_level?: number | null
           their_attachment_style?:

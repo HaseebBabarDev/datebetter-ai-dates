@@ -1409,12 +1409,13 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
 });
 
 // Calculate deterministic base scores from profile matching
-// HARSHER SCORING: Start at 40 instead of 50, require positive evidence to go up
+// BALANCED SCORING: Start at 50 — neutral profiles deserve a neutral score, not a failing grade
 function calculateBaseScores(profile: any, candidate: any) {
-  let valuesScore = 40;
-  let lifestyleScore = 40;
-  let emotionalScore = 40;
-  let futureGoalsScore = 40;
+  let valuesScore = 50;
+  let lifestyleScore = 50;
+  let emotionalScore = 50;
+  let futureGoalsScore = 50;
+
   
   // Values alignment (religion, politics) - HARSHER for mismatches
   if (profile.religion && candidate.their_religion) {

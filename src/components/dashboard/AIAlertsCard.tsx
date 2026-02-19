@@ -39,6 +39,9 @@ interface Alert {
   candidateId?: string;
 }
 
+// Generate dismissed alerts key per user
+const getDismissedKey = (userId?: string) => userId ? `ai_alerts_dismissed_${userId}` : "ai_alerts_dismissed";
+
 interface AIAlertsData {
   blindSpotAlerts: Alert[];
   predictiveAlerts: Alert[];
@@ -75,6 +78,7 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
 }) => {
   const CACHE_KEY = getCacheKey(userId);
   const HISTORY_KEY = getHistoryKey(userId);
+  const DISMISSED_KEY = getDismissedKey(userId);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -83,6 +87,12 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
   const [showAll, setShowAll] = useState(false);
   const [expandedAlerts, setExpandedAlerts] = useState<Set<string>>(new Set());
   const [history, setHistory] = useState<HistoricAlert[]>([]);
+  const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem(getDismissedKey(userId));
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch { return new Set(); }
+  });
 
   // Load history from localStorage
   useEffect(() => {
@@ -223,11 +233,23 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
     }
   }, [lastInteractionTime, candidateCount, interactionCount, fetchAlerts]);
 
+  const dismissAlert = (alertKey: string) => {
+    setDismissedKeys(prev => {
+      const newSet = new Set(prev);
+      newSet.add(alertKey);
+      try {
+        localStorage.setItem(DISMISSED_KEY, JSON.stringify([...newSet]));
+      } catch {}
+      return newSet;
+    });
+  };
+
   const toggleExpanded = (alertKey: string) => {
     setExpandedAlerts(prev => {
       const newSet = new Set(prev);
       if (newSet.has(alertKey)) {
         newSet.delete(alertKey);
+
       } else {
         newSet.add(alertKey);
       }
@@ -270,12 +292,17 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
     ...(data?.predictiveAlerts || []).map(a => ({ ...a, type: "predictive" as const })),
   ];
 
-  const hasAlerts = allAlerts.length > 0;
-  const displayedAlerts = showAll ? allAlerts : allAlerts.slice(0, INITIAL_DISPLAY_COUNT);
-  const hasMoreAlerts = allAlerts.length > INITIAL_DISPLAY_COUNT;
+  // Filter out dismissed alerts
+  const getAlertDismissKey = (alert: typeof allAlerts[0]) => `${alert.title}|${alert.message}`;
+  const visibleAlerts = allAlerts.filter(a => !dismissedKeys.has(getAlertDismissKey(a)));
+
+  const hasAlerts = visibleAlerts.length > 0;
+  const displayedAlerts = showAll ? visibleAlerts : visibleAlerts.slice(0, INITIAL_DISPLAY_COUNT);
+  const hasMoreAlerts = visibleAlerts.length > INITIAL_DISPLAY_COUNT;
 
   const renderAlert = (alert: typeof allAlerts[0], idx: number, isHistory = false, generatedAt?: string) => {
     const alertKey = `${alert.type}-${idx}-${isHistory ? 'history' : 'current'}`;
+    const dismissKey = getAlertDismissKey(alert);
     const styles = getSeverityStyles(alert.severity);
     const isExpanded = expandedAlerts.has(alertKey);
     
@@ -306,6 +333,15 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
                 <span className="text-[9px] text-muted-foreground ml-auto">
                   {new Date(generatedAt).toLocaleDateString()}
                 </span>
+              )}
+              {!isHistory && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); dismissAlert(dismissKey); }}
+                  className="ml-auto p-0.5 rounded text-muted-foreground hover:text-foreground hover:bg-background/50 transition-colors"
+                  title="Dismiss this alert"
+                >
+                  <X className="w-2.5 h-2.5" />
+                </button>
               )}
             </div>
             <div className="flex items-start justify-between gap-1">
@@ -355,6 +391,7 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
       </div>
     );
   };
+
 
   return (
     <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/5">
