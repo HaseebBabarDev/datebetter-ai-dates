@@ -64,7 +64,7 @@ interface Inputs {
 const DEFAULT: Inputs = {
   mau: "500",
   paidConvRate: "30",
-  avgSubPrice: "19.99",
+  avgSubPrice: "14.99",  // blended avg: Starter $9.99 + Unlimited $19.99
   appleFeeRate: "30",
   googleFeeRate: "15",
   iosShare: "60",
@@ -193,10 +193,32 @@ export const PricingModelCalculator = () => {
   const fixedCosts = ttsCost + supportCost + otherCost;
   const fixedCostsLabel = `ElevenLabs $${n(inp.elMonthlyBase).toFixed(0)} + Ops $${(supportCost + otherCost).toFixed(0)}`;
 
+  // Detachment Plan is one-time, not recurring — excluded from MAU revenue calc
   const TIERS = [
-    { name: "Starter",   price: 9.99  },
-    { name: "Unlimited", price: 19.99 },
-    { name: "Detach",    price: 9.99  },
+    {
+      name: "Starter",
+      price: 9.99,
+      recurring: true,
+      badge: null,
+      aiMsgsLimit: "1,000 msgs/mo",
+      candidatesLimit: "10 candidates / 30 score updates",
+    },
+    {
+      name: "Unlimited",
+      price: 19.99,
+      recurring: true,
+      badge: "Most Popular",
+      aiMsgsLimit: "Unlimited",
+      candidatesLimit: "Unlimited",
+    },
+    {
+      name: "Detach Plan",
+      price: 9.99,
+      recurring: false,
+      badge: "One-Time",
+      aiMsgsLimit: "Included",
+      candidatesLimit: "Per candidate",
+    },
   ];
 
   const blendedPlatformRate =
@@ -574,15 +596,46 @@ export const PricingModelCalculator = () => {
                   <tr className="border-b border-border text-muted-foreground text-xs">
                     <th className="text-left py-2 pr-4 font-medium">Metric</th>
                     {tierBreakdown.map((t) => (
-                      <th key={t.name} className="text-right py-2 pr-4 font-medium">{t.name}</th>
+                      <th key={t.name} className="text-right py-2 pr-4 font-medium">
+                        <div className="flex flex-col items-end gap-0.5">
+                          <span>{t.name}</span>
+                          {t.badge && (
+                            <Badge variant="secondary" className="text-[9px] py-0 px-1.5 h-4">
+                              {t.badge}
+                            </Badge>
+                          )}
+                        </div>
+                      </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="text-xs">
                   <tr className="border-b border-border/50">
+                    <td className="py-2 pr-4 text-muted-foreground">Billing Type</td>
+                    {tierBreakdown.map((t) => (
+                      <td key={t.name} className="text-right py-2 pr-4 text-muted-foreground">
+                        {t.recurring ? "Monthly" : "One-Time"}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-border/50">
                     <td className="py-2 pr-4 text-muted-foreground">Price</td>
                     {tierBreakdown.map((t) => (
-                      <td key={t.name} className="text-right py-2 pr-4 font-mono">{fmt(t.price)}</td>
+                      <td key={t.name} className="text-right py-2 pr-4 font-mono font-semibold">
+                        {fmt(t.price)}{t.recurring ? "/mo" : ""}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-border/50">
+                    <td className="py-2 pr-4 text-muted-foreground">Candidates</td>
+                    {tierBreakdown.map((t) => (
+                      <td key={t.name} className="text-right py-2 pr-4 text-muted-foreground">{t.candidatesLimit}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-border/50">
+                    <td className="py-2 pr-4 text-muted-foreground">AI Messages</td>
+                    {tierBreakdown.map((t) => (
+                      <td key={t.name} className="text-right py-2 pr-4 text-muted-foreground">{t.aiMsgsLimit}</td>
                     ))}
                   </tr>
                   <tr className="border-b border-border/50">
@@ -594,27 +647,37 @@ export const PricingModelCalculator = () => {
                     ))}
                   </tr>
                   <tr className="border-b border-border/50">
-                    <td className="py-2 pr-4 text-muted-foreground">Gemini AI</td>
+                    <td className="py-2 pr-4 text-muted-foreground">Gemini AI Cost</td>
                     {tierBreakdown.map((t) => (
-                      <td key={t.name} className="text-right py-2 pr-4 font-mono text-destructive">-{fmtUser(t.gemini)}</td>
+                      <td key={t.name} className={`text-right py-2 pr-4 font-mono ${t.recurring ? "text-destructive" : "text-muted-foreground"}`}>
+                        {t.recurring ? `-${fmtUser(t.gemini)}` : "N/A"}
+                      </td>
                     ))}
                   </tr>
                   <tr className="border-b border-border bg-muted/30 font-semibold">
                     <td className="py-2 pr-4">Variable Cost</td>
                     {tierBreakdown.map((t) => (
-                      <td key={t.name} className="text-right py-2 pr-4 font-mono text-destructive">{fmt(t.variableCost)}</td>
+                      <td key={t.name} className={`text-right py-2 pr-4 font-mono ${t.recurring ? "text-destructive" : "text-muted-foreground"}`}>
+                        {t.recurring ? fmt(t.variableCost) : "—"}
+                      </td>
                     ))}
                   </tr>
                   <tr className="border-b border-border/50 font-semibold">
                     <td className="py-2 pr-4">Contribution</td>
                     {tierBreakdown.map((t) => (
-                      <td key={t.name} className="text-right py-2 pr-4 font-mono text-primary">{fmt(t.contribution)}</td>
+                      <td key={t.name} className="text-right py-2 pr-4 font-mono text-primary">
+                        {t.recurring ? fmt(t.contribution) : fmt(t.price - t.platformFee)}
+                      </td>
                     ))}
                   </tr>
                   <tr className="font-bold text-sm">
                     <td className="py-2 pr-4">Margin</td>
                     {tierBreakdown.map((t) => (
-                      <td key={t.name} className="text-right py-2 pr-4 font-mono text-primary">{fmtPct(t.marginPct)}</td>
+                      <td key={t.name} className="text-right py-2 pr-4 font-mono text-primary">
+                        {t.recurring
+                          ? fmtPct(t.marginPct)
+                          : fmtPct(((t.price - t.platformFee) / t.price) * 100)}
+                      </td>
                     ))}
                   </tr>
                 </tbody>
