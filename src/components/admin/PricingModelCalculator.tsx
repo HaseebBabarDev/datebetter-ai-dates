@@ -1,0 +1,443 @@
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  Calculator,
+  TrendingUp,
+  DollarSign,
+  Smartphone,
+  Brain,
+  Mic,
+  Megaphone,
+  Info,
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend,
+} from "recharts";
+
+// ─── Defaults ───────────────────────────────────────────────────────────────
+// Gemini 2.5 Flash pricing
+const GEMINI_COST_PER_AI_MSG = (1200 / 1_000_000) * 0.075 + (500 / 1_000_000) * 0.30;
+// ElevenLabs turbo, 300 chars/msg, overage only
+const TTS_COST_PER_PLAY = (300 / 1000) * 0.12;
+
+interface Inputs {
+  mau: string;                // Monthly Active Users
+  paidConvRate: string;       // % of MAU that are paid
+  avgSubPrice: string;        // avg subscription price (blended)
+  appleFeeRate: string;       // App Store fee %
+  googleFeeRate: string;      // Play Store fee %
+  iosShare: string;           // % of revenue from iOS
+  aiMsgsPerUser: string;      // avg AI messages per user/month
+  ttsRatePercent: string;     // % of messages with voice playback
+  elMonthlyBase: string;      // ElevenLabs monthly plan cost
+  marketingSpend: string;     // Total monthly marketing $
+  supportCost: string;        // Support/ops cost/month
+  otherCost: string;          // Other fixed costs/month
+  growth: string;             // Monthly growth % for projections
+  months: string;             // Projection months
+}
+
+const DEFAULT: Inputs = {
+  mau: "500",
+  paidConvRate: "30",
+  avgSubPrice: "19.99",
+  appleFeeRate: "30",
+  googleFeeRate: "15",
+  iosShare: "60",
+  aiMsgsPerUser: "20",
+  ttsRatePercent: "40",
+  elMonthlyBase: "99",
+  marketingSpend: "2000",
+  supportCost: "500",
+  otherCost: "200",
+  growth: "10",
+  months: "12",
+};
+
+const n = (s: string) => parseFloat(s) || 0;
+const fmt = (v: number) =>
+  v.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
+const fmtPct = (v: number) => `${v.toFixed(1)}%`;
+
+function InfoTip({ text }: { text: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger>
+        <Info className="w-3 h-3 text-muted-foreground inline ml-1" />
+      </TooltipTrigger>
+      <TooltipContent className="max-w-xs text-xs">{text}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  suffix,
+  tip,
+  min = "0",
+  step = "1",
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  suffix?: string;
+  tip?: string;
+  min?: string;
+  step?: string;
+}) {
+  return (
+    <div className="space-y-1">
+      <Label className="text-xs text-muted-foreground">
+        {label}
+        {tip && <InfoTip text={tip} />}
+      </Label>
+      <div className="relative">
+        <Input
+          type="number"
+          min={min}
+          step={step}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-8 text-sm pr-8"
+        />
+        {suffix && (
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+            {suffix}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export const PricingModelCalculator = () => {
+  const [inp, setInp] = useState<Inputs>(DEFAULT);
+  const set = (key: keyof Inputs) => (v: string) => setInp((i) => ({ ...i, [key]: v }));
+
+  // ─── Calculations ──────────────────────────────────────────────────────
+  const mau = n(inp.mau);
+  const paidUsers = mau * (n(inp.paidConvRate) / 100);
+  const grossRevenue = paidUsers * n(inp.avgSubPrice);
+
+  const iosRevenue = grossRevenue * (n(inp.iosShare) / 100);
+  const androidRevenue = grossRevenue * (1 - n(inp.iosShare) / 100);
+  const appleFee = iosRevenue * (n(inp.appleFeeRate) / 100);
+  const googleFee = androidRevenue * (n(inp.googleFeeRate) / 100);
+  const platformFees = appleFee + googleFee;
+
+  const aiMsgs = mau * n(inp.aiMsgsPerUser);
+  const geminiCost = aiMsgs * GEMINI_COST_PER_AI_MSG;
+
+  const ttsPlays = aiMsgs * (n(inp.ttsRatePercent) / 100);
+  const ttsOverage = Math.max(0, ttsPlays * 300 - 500_000); // chars over included
+  const ttsCost = n(inp.elMonthlyBase) + (ttsOverage / 1000) * 0.12;
+
+  const marketingSpend = n(inp.marketingSpend);
+  const supportCost = n(inp.supportCost);
+  const otherCost = n(inp.otherCost);
+
+  const totalCosts = platformFees + geminiCost + ttsCost + marketingSpend + supportCost + otherCost;
+  const netRevenue = grossRevenue - totalCosts;
+  const margin = grossRevenue > 0 ? (netRevenue / grossRevenue) * 100 : 0;
+  const revenuePerUser = paidUsers > 0 ? netRevenue / paidUsers : 0;
+
+  // ─── Projections ───────────────────────────────────────────────────────
+  const growthRate = n(inp.growth) / 100;
+  const projMonths = Math.min(Math.max(Math.round(n(inp.months)), 1), 36);
+
+  const projections = Array.from({ length: projMonths }, (_, i) => {
+    const mth = i + 1;
+    const gFactor = Math.pow(1 + growthRate, mth);
+    const projMAU = mau * gFactor;
+    const projPaid = projMAU * (n(inp.paidConvRate) / 100);
+    const projGross = projPaid * n(inp.avgSubPrice);
+    const projPlatform = projGross * ((n(inp.appleFeeRate) / 100 * n(inp.iosShare) / 100) + (n(inp.googleFeeRate) / 100 * (1 - n(inp.iosShare) / 100)));
+    const projAI = projMAU * n(inp.aiMsgsPerUser) * GEMINI_COST_PER_AI_MSG;
+    const projTTS = n(inp.elMonthlyBase) + Math.max(0, projMAU * n(inp.aiMsgsPerUser) * (n(inp.ttsRatePercent) / 100) * 300 - 500_000) / 1000 * 0.12;
+    const projCosts = projPlatform + projAI + projTTS + marketingSpend + supportCost + otherCost;
+    const projNet = projGross - projCosts;
+    return {
+      month: `Mo ${mth}`,
+      Revenue: Math.round(projGross),
+      "Net Profit": Math.round(projNet),
+      Costs: Math.round(projCosts),
+    };
+  });
+
+  const ResultRow = ({ label, value, highlight = false, isNeg = false }: { label: string; value: string; highlight?: boolean; isNeg?: boolean }) => (
+    <div className={`flex justify-between items-center py-1.5 text-sm ${highlight ? "font-semibold" : ""}`}>
+      <span className={highlight ? "text-foreground" : "text-muted-foreground"}>{label}</span>
+      <span className={`font-mono ${isNeg ? "text-destructive" : highlight ? "text-primary" : ""}`}>
+        {value}
+      </span>
+    </div>
+  );
+
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <Calculator className="w-5 h-5 text-primary" />
+          <h2 className="text-lg font-semibold">Pricing Model Calculator</h2>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* ── LEFT: Inputs ── */}
+          <div className="space-y-4">
+
+            {/* Users & Revenue */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs text-muted-foreground flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" />Users & Revenue
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-3">
+                <Field label="Monthly Active Users" value={inp.mau} onChange={set("mau")}
+                  tip="Total users who open the app at least once per month." />
+                <Field label="Paid Conversion Rate" value={inp.paidConvRate} onChange={set("paidConvRate")} suffix="%"
+                  tip="% of MAU on a paid plan." min="0" step="0.1" />
+                <Field label="Avg Subscription Price" value={inp.avgSubPrice} onChange={set("avgSubPrice")} suffix="$"
+                  tip="Blended average monthly price across all paid tiers." step="0.01" />
+              </CardContent>
+            </Card>
+
+            {/* Platform Fees */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Smartphone className="w-3 h-3" />App Store Fees
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-3">
+                <Field label="Apple App Store Fee" value={inp.appleFeeRate} onChange={set("appleFeeRate")} suffix="%"
+                  tip="30% standard, 15% for small business program (<$1M/yr revenue)." step="0.1" />
+                <Field label="Google Play Fee" value={inp.googleFeeRate} onChange={set("googleFeeRate")} suffix="%"
+                  tip="15% for first $1M, 30% thereafter." step="0.1" />
+                <Field label="iOS Revenue Share" value={inp.iosShare} onChange={set("iosShare")} suffix="%"
+                  tip="What % of your paid subscriptions come via iOS (App Store)." step="1" />
+              </CardContent>
+            </Card>
+
+            {/* AI Costs */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Brain className="w-3 h-3" />AI Costs
+                  <InfoTip text="Gemini 2.5 Flash @ $0.075/1M input + $0.30/1M output tokens, avg 1200 input + 500 output per message." />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-3">
+                <Field label="AI Msgs / User / Month" value={inp.aiMsgsPerUser} onChange={set("aiMsgsPerUser")}
+                  tip="Average number of D.E.V.I. AI responses generated per MAU per month." />
+                <Field label="Voice Playback Rate" value={inp.ttsRatePercent} onChange={set("ttsRatePercent")} suffix="%"
+                  tip="% of AI messages where the user plays the voice audio (ElevenLabs turbo)." step="1" />
+                <Field label="ElevenLabs Plan ($)" value={inp.elMonthlyBase} onChange={set("elMonthlyBase")} suffix="$"
+                  tip="Fixed monthly ElevenLabs subscription cost (Pro = $99/mo, 500k chars included)." />
+              </CardContent>
+            </Card>
+
+            {/* Marketing & Other Costs */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Megaphone className="w-3 h-3" />Marketing & Operating Costs
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-3">
+                <Field label="Marketing Spend ($)" value={inp.marketingSpend} onChange={set("marketingSpend")}
+                  step="10" />
+                <Field label="Support / Ops ($)" value={inp.supportCost} onChange={set("supportCost")} step="10" />
+                <Field label="Other Fixed Costs ($)" value={inp.otherCost} onChange={set("otherCost")} step="10" />
+              </CardContent>
+            </Card>
+
+            {/* Projections */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs text-muted-foreground flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" />Growth Projections
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-3">
+                <Field label="Monthly Growth Rate" value={inp.growth} onChange={set("growth")} suffix="%"
+                  tip="Expected compound monthly user growth rate." step="0.5" />
+                <Field label="Projection Months" value={inp.months} onChange={set("months")}
+                  tip="How many months to project forward (max 36)." min="1" />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* ── RIGHT: Results ── */}
+          <div className="space-y-4">
+            <Card className="bg-primary/5 border-primary/20">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <DollarSign className="w-4 h-4 text-primary" />
+                  Monthly P&L Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* Revenue */}
+                <ResultRow label="Gross Revenue" value={fmt(grossRevenue)} highlight />
+                <div className="pl-3 space-y-0.5 text-xs text-muted-foreground mb-1">
+                  <div className="flex justify-between">
+                    <span>Paid Users</span><span className="font-mono">{Math.round(paidUsers).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Avg Price</span><span className="font-mono">{fmt(n(inp.avgSubPrice))}/mo</span>
+                  </div>
+                </div>
+                <Separator className="my-2" />
+
+                {/* Platform Fees */}
+                <ResultRow label="Platform Fees" value={`-${fmt(platformFees)}`} isNeg />
+                <div className="pl-3 space-y-0.5 text-xs text-muted-foreground mb-1">
+                  <div className="flex justify-between"><span>Apple App Store</span><span className="font-mono">-{fmt(appleFee)}</span></div>
+                  <div className="flex justify-between"><span>Google Play</span><span className="font-mono">-{fmt(googleFee)}</span></div>
+                </div>
+
+                {/* AI */}
+                <ResultRow label="AI Infrastructure" value={`-${fmt(geminiCost + ttsCost)}`} isNeg />
+                <div className="pl-3 space-y-0.5 text-xs text-muted-foreground mb-1">
+                  <div className="flex justify-between">
+                    <span className="flex items-center gap-1"><Brain className="w-3 h-3" />Gemini (chat)</span>
+                    <span className="font-mono">-{fmt(geminiCost)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="flex items-center gap-1"><Mic className="w-3 h-3" />ElevenLabs (TTS)</span>
+                    <span className="font-mono">-{fmt(ttsCost)}</span>
+                  </div>
+                </div>
+
+                {/* Other */}
+                <ResultRow label="Marketing" value={`-${fmt(marketingSpend)}`} isNeg />
+                <ResultRow label="Support / Ops" value={`-${fmt(supportCost)}`} isNeg />
+                <ResultRow label="Other Costs" value={`-${fmt(otherCost)}`} isNeg />
+                <Separator className="my-2" />
+                <ResultRow label="Total Costs" value={`-${fmt(totalCosts)}`} isNeg highlight />
+                <Separator className="my-2" />
+                <ResultRow
+                  label="Net Profit"
+                  value={fmt(netRevenue)}
+                  highlight
+                  isNeg={netRevenue < 0}
+                />
+
+                {/* KPIs */}
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  {[
+                    { label: "Net Margin", value: fmtPct(margin) },
+                    { label: "Revenue/Paid User", value: fmt(revenuePerUser) },
+                    { label: "AI Cost/MAU", value: fmt((geminiCost + ttsCost) / Math.max(mau, 1)) },
+                    { label: "Platform Fee %", value: fmtPct(grossRevenue > 0 ? (platformFees / grossRevenue) * 100 : 0) },
+                  ].map((kpi) => (
+                    <div key={kpi.label} className="text-center p-2 rounded-lg bg-background border border-border">
+                      <div className="text-sm font-bold text-primary font-mono">{kpi.value}</div>
+                      <div className="text-[10px] text-muted-foreground">{kpi.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Per-User Breakdown */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs text-muted-foreground">Per-User Cost Breakdown (per MAU)</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-xs">
+                {[
+                  { label: "Gemini AI", cost: geminiCost },
+                  { label: "ElevenLabs TTS", cost: ttsCost },
+                  { label: "Platform Fees (apportioned)", cost: platformFees },
+                  { label: "Marketing", cost: marketingSpend },
+                  { label: "Support / Other", cost: supportCost + otherCost },
+                ].map((item) => {
+                  const perUser = mau > 0 ? item.cost / mau : 0;
+                  const pct = totalCosts > 0 ? (item.cost / totalCosts) * 100 : 0;
+                  return (
+                    <div key={item.label}>
+                      <div className="flex justify-between mb-0.5">
+                        <span className="text-muted-foreground">{item.label}</span>
+                        <span className="font-mono">{fmt(perUser)}/user</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-primary/60"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Projections Chart */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-primary" />
+              {projMonths}-Month Revenue Projection ({n(inp.growth)}% monthly growth)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[260px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={projections}>
+                  <defs>
+                    <linearGradient id="gRev" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="gNet" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="month" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} interval={Math.floor(projMonths / 6)} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} width={60} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                  <RTooltip
+                    contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }}
+                    formatter={(v: number, n: string) => [fmt(v), n]}
+                  />
+                  <Legend wrapperStyle={{ fontSize: "11px" }} />
+                  <Area type="monotone" dataKey="Revenue" stroke="hsl(var(--primary))" fill="url(#gRev)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="Net Profit" stroke="hsl(var(--chart-2))" fill="url(#gNet)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <p className="text-xs text-muted-foreground italic text-center">
+          Estimates only. Actual costs vary with usage patterns, negotiated rates, and plan changes.
+          Platform fees based on published Apple/Google policies as of 2025.
+        </p>
+      </div>
+    </TooltipProvider>
+  );
+};

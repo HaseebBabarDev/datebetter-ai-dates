@@ -22,10 +22,14 @@ import {
   DollarSign,
   Activity,
   TrendingUp,
-  Calendar
+  Calendar,
+  Calculator
 } from "lucide-react";
 import { RevenueAnalytics } from "@/components/admin/RevenueAnalytics";
 import { AICostAnalytics } from "@/components/admin/AICostAnalytics";
+import { CACCalculator } from "@/components/admin/CACCalculator";
+import { PricingModelCalculator } from "@/components/admin/PricingModelCalculator";
+import { CalculatorPasswordGate } from "@/components/admin/CalculatorPasswordGate";
 import { AIUsageAnalytics } from "@/components/admin/AIUsageAnalytics";
 import { WTPSurveyAnalytics } from "@/components/admin/WTPSurveyAnalytics";
 import { AdminUserManagement } from "@/components/admin/AdminUserManagement";
@@ -156,8 +160,9 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-7xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 h-auto gap-1 bg-muted/50 p-1 rounded-xl">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-11 h-auto gap-1 bg-muted/50 p-1 rounded-xl">
             <TabsTrigger value="overview" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
+
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
@@ -180,6 +185,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="ai-costs" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
               <DollarSign className="w-4 h-4" />
               <span className="hidden sm:inline">AI Costs</span>
+            </TabsTrigger>
+            <TabsTrigger value="calculators" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
+              <Calculator className="w-4 h-4" />
+              <span className="hidden sm:inline">Calculators</span>
             </TabsTrigger>
             <TabsTrigger value="community" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
               <Activity className="w-4 h-4" />
@@ -248,6 +257,17 @@ const AdminDashboard = () => {
 
           <TabsContent value="legal" className="space-y-6">
             <AdminAgreementsSection />
+          </TabsContent>
+
+          <TabsContent value="calculators" className="space-y-6">
+            <CalculatorPasswordGate>
+              <div className="space-y-10">
+                <CACCalculator />
+                <div className="border-t border-border pt-8">
+                  <PricingModelCalculator />
+                </div>
+              </div>
+            </CalculatorPasswordGate>
           </TabsContent>
         </Tabs>
       </main>

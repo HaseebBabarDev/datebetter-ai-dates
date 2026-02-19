@@ -65,6 +65,15 @@ interface UserCostRow {
   estimatedCost: number;
 }
 
+interface AllTimeStats {
+  totalGeminiCost: number;
+  totalTTSCost: number;
+  totalMessages: number;
+  totalUsers: number;
+  avgCostPerUser: number;
+  elPlanCostTotal: number; // $99 × months since first message
+}
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 function calcGeminiCost(messages: number): number {
   const inputTokens = messages * AVG_INPUT_TOKENS_PER_MSG;
@@ -85,6 +94,7 @@ function calcTTSCost(playbacks: number, includedCharsRemaining: number): number 
 export const AICostAnalytics = () => {
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [topUsers, setTopUsers] = useState<UserCostRow[]>([]);
+  const [allTimeStats, setAllTimeStats] = useState<AllTimeStats | null>(null);
   const [totalStats, setTotalStats] = useState({
     totalGeminiCost: 0,
     totalTTSCost: 0,
@@ -101,9 +111,41 @@ export const AICostAnalytics = () => {
   const fetchCostData = async () => {
     setLoading(true);
     try {
-      // Fetch last 6 months of AI assistant messages
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+      // Fetch ALL-TIME messages for cumulative stats
+      const { data: allMessages } = await supabase
+        .from("devi_messages")
+        .select("user_id, role, created_at")
+        .eq("role", "assistant")
+        .order("created_at", { ascending: true });
+
+      // Compute all-time stats
+      if (allMessages && allMessages.length > 0) {
+        const allTimeMsgs = allMessages.length;
+        const allTimeUsers = new Set(allMessages.map((m) => m.user_id)).size;
+        const atGemini = calcGeminiCost(allTimeMsgs);
+        const atTTSPlays = Math.round(allTimeMsgs * 0.4);
+        const atTTSChars = atTTSPlays * AVG_TTS_CHARS_PER_PLAYBACK;
+        const firstDate = new Date(allMessages[0].created_at);
+        const monthsActive = Math.max(1, Math.round(
+          (Date.now() - firstDate.getTime()) / (30 * 24 * 60 * 60 * 1000)
+        ));
+        const atTTSOverage = Math.max(0, atTTSChars - EL_INCLUDED_CHARS * monthsActive);
+        const atTTSCost = EL_PLAN_MONTHLY_COST * monthsActive + (atTTSOverage / 1000) * EL_OVERAGE_PER_1000_CHARS;
+
+        setAllTimeStats({
+          totalGeminiCost: atGemini,
+          totalTTSCost: atTTSCost,
+          totalMessages: allTimeMsgs,
+          totalUsers: allTimeUsers,
+          avgCostPerUser: allTimeUsers > 0 ? (atGemini + atTTSCost) / allTimeUsers : 0,
+          elPlanCostTotal: EL_PLAN_MONTHLY_COST * monthsActive,
+        });
+      }
+
+      // Filter to 6 months for monthly chart
 
       const { data: messages } = await supabase
         .from("devi_messages")
