@@ -44,6 +44,7 @@ const Community = lazy(() => import("./pages/Community"));
 const SelfDiscovery = lazy(() => import("./pages/SelfDiscovery"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const DetachmentPlan = lazy(() => import("./pages/DetachmentPlan"));
+const Website = lazy(() => import("./pages/Website"));
 
 // Minimal loading fallback for lazy routes
 const RouteLoader = () => (
@@ -126,6 +127,7 @@ function AppContent() {
             <Route path="/community" element={<Community />} />
             <Route path="/self-discovery" element={<SelfDiscovery />} />
             <Route path="/detachment-plan/:candidateId" element={<DetachmentPlan />} />
+            <Route path="/website" element={<Website />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <BottomNavigation />
