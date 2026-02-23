@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { Tables } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -308,7 +309,13 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
 
       {/* Disqualified card */}
       {isDQ ? (
-        <div className="w-full bg-card rounded-xl border border-destructive/30 p-4 text-left opacity-75">
+        <motion.div
+          initial={{ opacity: 0, y: 16, scale: 0.97 }}
+          whileInView={{ opacity: 0.75, y: 0, scale: 1 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="w-full bg-card rounded-xl border border-destructive/30 p-4 text-left"
+        >
           <div className="flex items-start gap-3">
             <Avatar className="w-12 h-12 border-2 border-destructive/30">
               <AvatarImage src={candidate.photo_url || undefined} />
@@ -342,11 +349,17 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
               </Button>
             </div>
           </div>
-        </div>
+        </motion.div>
       ) : (
-        <button
+        <motion.button
+          initial={{ opacity: 0, y: 16, scale: 0.97 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          whileHover={{ scale: 1.01, y: -2 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleClick}
-          className="w-full bg-card rounded-xl border border-border p-4 text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 active:scale-[0.98]"
+          className="w-full bg-card rounded-xl border border-border p-4 text-left transition-shadow duration-200 hover:shadow-lg hover:border-primary/30"
         >
           <div className="flex items-start gap-3">
             <Avatar className="w-12 h-12 border-2 border-border">
@@ -502,7 +515,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
               )}
             </div>
           </div>
-        </button>
+        </motion.button>
       )}
     </>
   );

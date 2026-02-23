@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { motion } from "framer-motion";
 import { Tables } from "@/integrations/supabase/types";
 import { CandidateCard, CandidateAlert } from "./CandidateCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -204,7 +205,12 @@ const GroupedList: React.FC<{
   return (
     <div className="space-y-6">
       {activeList.length > 0 && (
-        <section>
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
               Active ({activeList.length})
@@ -221,11 +227,16 @@ const GroupedList: React.FC<{
             onUpdate={onUpdate}
             ranks={ranks}
           />
-        </section>
+        </motion.section>
       )}
 
       {noContactCandidates.length > 0 && (
-        <section>
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.4, delay: 0.05, ease: "easeOut" }}
+        >
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
             No Contact ({noContactCandidates.length})
           </h2>
@@ -239,11 +250,16 @@ const GroupedList: React.FC<{
               />
             ))}
           </div>
-        </section>
+        </motion.section>
       )}
 
       {archivedCandidates.length > 0 && (
-        <section>
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+        >
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
             Archived ({archivedCandidates.length})
           </h2>
@@ -257,11 +273,16 @@ const GroupedList: React.FC<{
               />
             ))}
           </div>
-        </section>
+        </motion.section>
       )}
 
       {disqualifiedCandidates.length > 0 && (
-        <section>
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.4, delay: 0.15, ease: "easeOut" }}
+        >
           <div className="flex items-center gap-2 mb-3">
             <ShieldX className="w-3.5 h-3.5 text-destructive" />
             <h2 className="text-sm font-medium text-destructive uppercase tracking-wide">
@@ -278,7 +299,7 @@ const GroupedList: React.FC<{
               />
             ))}
           </div>
-        </section>
+        </motion.section>
       )}
     </div>
   );
