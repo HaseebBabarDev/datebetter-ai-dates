@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { Tables } from "@/integrations/supabase/types";
 import { CandidateCard, CandidateAlert } from "./CandidateCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,17 @@ interface CandidatesListProps {
   showGroupHeaders?: boolean;
   candidateAlerts?: Record<string, CandidateAlert[]>;
 }
+
+// Compute ranks for candidates with compatibility scores
+const computeRanks = (candidates: Candidate[]): Record<string, number> => {
+  const scorable = candidates
+    .filter(c => c.compatibility_score != null && c.status !== "archived" && c.status !== "no_contact" && !((c as any).is_auto_disqualified && !(c as any).auto_disqualify_override))
+    .sort((a, b) => (b.compatibility_score ?? 0) - (a.compatibility_score ?? 0));
+  
+  const ranks: Record<string, number> = {};
+  scorable.forEach((c, i) => { ranks[c.id] = i + 1; });
+  return ranks;
+};
 
 const statusOrder: Record<string, number> = {
   getting_serious: 1,
@@ -38,6 +49,7 @@ interface DraggableListProps {
   onReorder: (reordered: Candidate[]) => void;
   candidateAlerts: Record<string, CandidateAlert[]>;
   onUpdate: () => void;
+  ranks: Record<string, number>;
 }
 
 const DraggableList: React.FC<DraggableListProps> = ({
@@ -45,6 +57,7 @@ const DraggableList: React.FC<DraggableListProps> = ({
   onReorder,
   candidateAlerts,
   onUpdate,
+  ranks,
 }) => {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
@@ -117,6 +130,7 @@ const DraggableList: React.FC<DraggableListProps> = ({
                 candidate={candidate}
                 onUpdate={onUpdate}
                 alerts={candidateAlerts[candidate.id]}
+                rank={ranks[candidate.id] ?? null}
               />
             </div>
           </div>
@@ -131,7 +145,8 @@ const FlatList: React.FC<{
   candidates: Candidate[];
   onUpdate: () => void;
   candidateAlerts: Record<string, CandidateAlert[]>;
-}> = ({ candidates, onUpdate, candidateAlerts }) => {
+  ranks: Record<string, number>;
+}> = ({ candidates, onUpdate, candidateAlerts, ranks }) => {
   if (candidates.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -147,6 +162,7 @@ const FlatList: React.FC<{
           candidate={candidate}
           onUpdate={onUpdate}
           alerts={candidateAlerts[candidate.id]}
+          rank={ranks[candidate.id] ?? null}
         />
       ))}
     </div>
@@ -157,7 +173,8 @@ const GroupedList: React.FC<{
   candidates: Candidate[];
   onUpdate: () => void;
   candidateAlerts: Record<string, CandidateAlert[]>;
-}> = ({ candidates, onUpdate, candidateAlerts }) => {
+  ranks: Record<string, number>;
+}> = ({ candidates, onUpdate, candidateAlerts, ranks }) => {
   const activeCandidates = candidates.filter(
     (c) => c.status !== "archived" && c.status !== "no_contact"
       && !((c as any).is_auto_disqualified && !(c as any).auto_disqualify_override)
@@ -202,6 +219,7 @@ const GroupedList: React.FC<{
             onReorder={setActiveList}
             candidateAlerts={candidateAlerts}
             onUpdate={onUpdate}
+            ranks={ranks}
           />
         </section>
       )}
@@ -272,12 +290,15 @@ export const CandidatesList: React.FC<CandidatesListProps> = ({
   showGroupHeaders = true,
   candidateAlerts = {},
 }) => {
+  const ranks = useMemo(() => computeRanks(candidates), [candidates]);
+
   if (!showGroupHeaders) {
     return (
       <FlatList
         candidates={candidates}
         onUpdate={onUpdate}
         candidateAlerts={candidateAlerts}
+        ranks={ranks}
       />
     );
   }
@@ -287,6 +308,7 @@ export const CandidatesList: React.FC<CandidatesListProps> = ({
       candidates={candidates}
       onUpdate={onUpdate}
       candidateAlerts={candidateAlerts}
+      ranks={ranks}
     />
   );
 };
