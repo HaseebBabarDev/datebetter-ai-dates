@@ -13,38 +13,48 @@ interface TopCandidatesSpotlightProps {
   candidates: Candidate[];
 }
 
-const rankConfig = [
-  { 
-    label: "Top Match", 
-    icon: Crown, 
+const getScoreConfig = (score: number) => {
+  if (score >= 65) return {
+    label: "Top Match",
+    icon: Crown,
     gradient: "from-amber-400/20 via-yellow-300/10 to-amber-500/20",
     border: "border-amber-400/40",
     iconColor: "text-amber-500",
     badgeBg: "bg-amber-500/15 text-amber-600 border-amber-400/40",
     glow: "shadow-[0_0_20px_-5px_hsl(45,93%,47%,0.3)]",
     emoji: "👑",
-  },
-  { 
-    label: "Strong Match", 
-    icon: Trophy, 
+  };
+  if (score >= 45) return {
+    label: "Promising",
+    icon: Trophy,
     gradient: "from-sky-400/15 via-blue-300/5 to-sky-500/15",
     border: "border-sky-400/30",
     iconColor: "text-sky-500",
     badgeBg: "bg-sky-500/15 text-sky-600 border-sky-400/40",
     glow: "",
-    emoji: "🥈",
-  },
-  { 
-    label: "Great Match", 
-    icon: Medal, 
+    emoji: "💫",
+  };
+  if (score >= 30) return {
+    label: "Needs Work",
+    icon: Medal,
     gradient: "from-orange-400/15 via-amber-300/5 to-orange-500/15",
     border: "border-orange-400/30",
     iconColor: "text-orange-500",
     badgeBg: "bg-orange-500/15 text-orange-600 border-orange-400/40",
     glow: "",
-    emoji: "🥉",
-  },
-];
+    emoji: "⚠️",
+  };
+  return {
+    label: "Consider DQ",
+    icon: AlertTriangle,
+    gradient: "from-destructive/10 via-destructive/5 to-destructive/10",
+    border: "border-destructive/30",
+    iconColor: "text-destructive",
+    badgeBg: "bg-destructive/15 text-destructive border-destructive/40",
+    glow: "",
+    emoji: "🚩",
+  };
+};
 
 export const TopCandidatesSpotlight: React.FC<TopCandidatesSpotlightProps> = ({ candidates }) => {
   const navigate = useNavigate();
@@ -91,9 +101,9 @@ export const TopCandidatesSpotlight: React.FC<TopCandidatesSpotlightProps> = ({ 
       <div className="space-y-2.5">
         <AnimatePresence>
           {topCandidates.map((candidate, idx) => {
-            const config = rankConfig[idx] || rankConfig[2];
-            const RankIcon = config.icon;
             const score = candidate.compatibility_score ?? 0;
+            const config = getScoreConfig(score);
+            const RankIcon = config.icon;
             const redFlagCount = Array.isArray(candidate.red_flags) ? candidate.red_flags.length : 0;
             const greenFlagCount = Array.isArray(candidate.green_flags) ? candidate.green_flags.length : 0;
 
