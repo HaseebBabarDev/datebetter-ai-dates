@@ -980,9 +980,14 @@ const Dashboard = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="home" className="space-y-3 mt-0 animate-fade-in">
+          <TabsContent value="home" className="space-y-3 mt-0">
             {/* Quick Actions Grid */}
-            <div className="grid grid-cols-2 gap-2">
+            <motion.div 
+              className="grid grid-cols-2 gap-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
               <TooltipProvider delayDuration={400}>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -1037,7 +1042,7 @@ const Dashboard = () => {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            </div>
+            </motion.div>
 
             {/* ===== TOP CANDIDATES SPOTLIGHT ===== */}
             <TopCandidatesSpotlight candidates={candidates} />
@@ -1113,19 +1118,27 @@ const Dashboard = () => {
               if (alerts.length === 0) return null;
 
               return (
-                <div data-tour="cycle-status">
+                <motion.div 
+                  data-tour="cycle-status"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.1 }}
+                >
                 <Carousel className="w-full" opts={{ align: "start", dragFree: true }}>
                   <CarouselContent className="-ml-2">
-                    {alerts.map((alert) => (
+                    {alerts.map((alert, i) => (
                       <CarouselItem key={alert.key} className="pl-2 basis-auto">
-                        <button
+                        <motion.button
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.3, delay: i * 0.06 }}
                           onClick={alert.onClick}
                           className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs font-medium transition-all hover:scale-[1.02] active:scale-[0.98] ${alert.color}`}
                         >
                           {alert.icon}
                           <span>{alert.label}</span>
                           {alert.sub && <span className="opacity-60">• {alert.sub}</span>}
-                        </button>
+                        </motion.button>
                       </CarouselItem>
                     ))}
                     <CarouselItem className="pl-2 basis-auto">
@@ -1139,46 +1152,76 @@ const Dashboard = () => {
                     </CarouselItem>
                   </CarouselContent>
                 </Carousel>
-                </div>
+                </motion.div>
               );
             })()}
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-2">
-              <button 
-                className="rounded-xl p-3 bg-card border border-border text-center transition-all duration-200 active:scale-[0.98]" 
+            <motion.div 
+              className="grid grid-cols-3 gap-2"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.15 }}
+            >
+              <motion.button 
+                className="rounded-xl p-3 bg-card border border-border text-center transition-all duration-200" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter(null); }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
               >
-                <div className="text-xl font-bold text-primary">{activeCandidateCount}</div>
+                <motion.div 
+                  className="text-xl font-bold text-primary"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.2 }}
+                >
+                  {activeCandidateCount}
+                </motion.div>
                 <div className="text-[10px] text-muted-foreground">Active</div>
-              </button>
-              <button 
-                className="rounded-xl p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-center transition-all duration-200 active:scale-[0.98]" 
+              </motion.button>
+              <motion.button 
+                className="rounded-xl p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-center transition-all duration-200" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter("good"); }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
               >
-                <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{recap.goodCandidates.length}</div>
+                <motion.div 
+                  className="text-xl font-bold text-emerald-600 dark:text-emerald-400"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.3 }}
+                >
+                  {recap.goodCandidates.length}
+                </motion.div>
                 <div className="text-[10px] text-muted-foreground">Good Vibes</div>
-              </button>
-              <button 
-                className="rounded-xl p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-center transition-all duration-200 active:scale-[0.98]" 
+              </motion.button>
+              <motion.button 
+                className="rounded-xl p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-center transition-all duration-200" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter("bad"); }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
               >
-                <div className="text-xl font-bold text-rose-600 dark:text-rose-400">{recap.badCandidates.length}</div>
+                <motion.div 
+                  className="text-xl font-bold text-rose-600 dark:text-rose-400"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.4 }}
+                >
+                  {recap.badCandidates.length}
+                </motion.div>
                 <div className="text-[10px] text-muted-foreground">Watch Out</div>
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
 
             {/* ===== AI PREDICTIONS - ENHANCED ===== */}
             <motion.section
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
             >
               <div className="relative overflow-hidden rounded-2xl">
-                {/* Animated background shimmer */}
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-secondary/10 to-primary/5 animate-[shimmer_3s_ease-in-out_infinite]" />
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-secondary/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                {/* Animated shimmer background */}
+                <div className="absolute inset-0 bg-[length:200%_100%] bg-gradient-to-r from-transparent via-primary/8 to-transparent animate-shimmer pointer-events-none" />
                 
                 <div className="relative">
                   <AIAlertsCard 
@@ -1198,6 +1241,11 @@ const Dashboard = () => {
             </motion.section>
 
             {/* Log How I'm Feeling CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
             <Card 
               className="overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-md active:scale-[0.99] border-primary/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5"
               onClick={() => navigate("/devi?prompt=feeling")}
@@ -1215,6 +1263,7 @@ const Dashboard = () => {
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
 
             {/* Candidate Recap / Recent Activity */}
             {candidates.length > 0 && (
