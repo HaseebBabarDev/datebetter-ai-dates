@@ -1045,7 +1045,7 @@ const Dashboard = () => {
             </motion.div>
 
             {/* ===== TOP CANDIDATES SPOTLIGHT ===== */}
-            <TopCandidatesSpotlight candidates={candidates} />
+            <TopCandidatesSpotlight key={candidates.length > 0 ? "loaded" : "empty"} candidates={candidates} />
 
             {/* Alerts Carousel */}
             {(() => {
