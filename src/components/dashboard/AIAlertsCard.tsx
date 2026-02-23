@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
@@ -65,29 +64,20 @@ const CACHE_DURATION_MS = 1000 * 60 * 30;
 const MAX_HISTORY_ITEMS = 50;
 const INITIAL_DISPLAY_COUNT = 3;
 
-const severityConfig = {
+const severityStyles = {
   urgent: {
-    bg: "bg-destructive/10",
-    border: "border-destructive/30",
-    icon: "text-destructive",
-    iconBg: "bg-destructive/20",
-    glow: "shadow-[0_0_15px_-3px_hsl(0,72%,51%,0.3)]",
-    dot: "bg-destructive",
+    pill: "bg-destructive/15 text-destructive",
+    accent: "border-l-destructive",
+    dot: "bg-destructive animate-pulse",
   },
   warning: {
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/30",
-    icon: "text-amber-600",
-    iconBg: "bg-amber-500/20",
-    glow: "shadow-[0_0_15px_-3px_hsl(40,90%,50%,0.3)]",
-    dot: "bg-amber-500",
+    pill: "bg-caution/15 text-caution-foreground",
+    accent: "border-l-caution",
+    dot: "bg-caution",
   },
   info: {
-    bg: "bg-primary/10",
-    border: "border-primary/30",
-    icon: "text-primary",
-    iconBg: "bg-primary/20",
-    glow: "",
+    pill: "bg-primary/10 text-primary",
+    accent: "border-l-primary",
     dot: "bg-primary",
   },
 };
@@ -242,258 +232,201 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
   const renderAlert = (alert: typeof allAlerts[0], idx: number, isHistory = false, generatedAt?: string) => {
     const alertKey = `${alert.type}-${idx}-${isHistory ? 'history' : 'current'}`;
     const dismissKey = getAlertDismissKey(alert);
-    const styles = severityConfig[alert.severity] || severityConfig.info;
+    const styles = severityStyles[alert.severity] || severityStyles.info;
     const isExpanded = expandedAlerts.has(alertKey);
     
     return (
       <motion.div
         key={alertKey}
-        initial={{ opacity: 0, y: 8 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.3, delay: idx * 0.05, ease: "easeOut" }}
-        className={`w-full rounded-xl p-3 border transition-all duration-200 ${styles.bg} ${styles.border} hover:shadow-sm`}
+        initial={{ opacity: 0, x: -6 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: 6 }}
+        transition={{ duration: 0.2, delay: idx * 0.04 }}
+        className={`border-l-[3px] ${styles.accent} bg-card/60 backdrop-blur-sm rounded-r-lg px-3 py-2.5 group`}
       >
-        <div className="flex items-start gap-2.5">
-          <div className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${styles.iconBg} ${styles.icon}`}>
-            {alert.type === "blind_spot" ? (
-              <Eye className="w-4 h-4" />
-            ) : (
-              <TrendingUp className="w-4 h-4" />
+        {/* Top row: type pill + meta */}
+        <div className="flex items-center gap-1.5 mb-1">
+          <span className={`inline-flex items-center gap-1 text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded-full ${styles.pill}`}>
+            {alert.type === "blind_spot" ? <Eye className="w-2.5 h-2.5" /> : <TrendingUp className="w-2.5 h-2.5" />}
+            {alert.type === "blind_spot" ? "Blind Spot" : "Prediction"}
+          </span>
+          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${styles.dot}`} />
+          {alert.candidateNickname && (
+            <span className="text-[10px] text-muted-foreground truncate">{alert.candidateNickname}</span>
+          )}
+          <div className="ml-auto flex items-center gap-0.5 shrink-0">
+            {isHistory && generatedAt && (
+              <span className="text-[9px] text-muted-foreground">{new Date(generatedAt).toLocaleDateString()}</span>
             )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className={`text-[10px] uppercase tracking-wider font-bold ${styles.icon}`}>
-                {alert.type === "blind_spot" ? "Blind Spot" : "Prediction"}
-              </span>
-              {/* Severity dot */}
-              <span 
-                className={`w-1.5 h-1.5 rounded-full ${styles.dot} ${alert.severity === "urgent" ? "animate-pulse" : ""}`}
-              />
-              {alert.candidateNickname && (
-                <span className="text-[10px] text-muted-foreground font-medium">
-                  • {alert.candidateNickname}
-                </span>
-              )}
-              {isHistory && generatedAt && (
-                <span className="text-[10px] text-muted-foreground ml-auto">
-                  {new Date(generatedAt).toLocaleDateString()}
-                </span>
-              )}
-              {!isHistory && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); dismissAlert(dismissKey); }}
-                  className="ml-auto p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-background/60 transition-colors"
-                  title="Dismiss"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-            </div>
-            <div className="flex items-start justify-between gap-1 mt-0.5">
-              <p className="text-sm font-semibold text-foreground leading-snug">
-                {alert.title}
-              </p>
-              <VoicePlayButton 
-                text={`${alert.title}. ${alert.message}`} 
-                size="sm" 
-                variant="icon" 
-                className="shrink-0 opacity-60 hover:opacity-100 transition-opacity"
-              />
-            </div>
-            <p className={`text-xs text-muted-foreground leading-relaxed mt-0.5 ${isExpanded ? '' : 'line-clamp-2'}`}>
-              {alert.message}
-            </p>
-            
-            {(alert.message.length > 100 || alert.candidateId) && (
-              <div className="flex items-center gap-3 mt-1.5">
-                {alert.message.length > 100 && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); toggleExpanded(alertKey); }}
-                    className="text-[10px] text-primary font-medium hover:underline flex items-center gap-0.5"
-                  >
-                    {isExpanded ? <>Less <ChevronUp className="w-3 h-3" /></> : <>More <ChevronDown className="w-3 h-3" /></>}
-                  </button>
-                )}
-                {alert.candidateId && (
-                  <button
-                    onClick={() => navigate(`/candidate/${alert.candidateId}`)}
-                    className="text-[10px] text-primary font-medium hover:underline flex items-center ml-auto gap-0.5"
-                  >
-                    View Profile <ChevronRight className="w-3 h-3" />
-                  </button>
-                )}
-              </div>
+            <VoicePlayButton 
+              text={`${alert.title}. ${alert.message}`} 
+              size="sm" 
+              variant="icon" 
+              className="opacity-0 group-hover:opacity-70 transition-opacity w-6 h-6"
+            />
+            {!isHistory && (
+              <button
+                onClick={(e) => { e.stopPropagation(); dismissAlert(dismissKey); }}
+                className="opacity-0 group-hover:opacity-70 transition-opacity p-0.5 rounded text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-3 h-3" />
+              </button>
             )}
           </div>
         </div>
+
+        {/* Title */}
+        <p className="text-[13px] font-semibold text-foreground leading-tight">{alert.title}</p>
+
+        {/* Message */}
+        <p className={`text-xs text-muted-foreground leading-relaxed mt-0.5 ${isExpanded ? '' : 'line-clamp-2'}`}>
+          {alert.message}
+        </p>
+        
+        {/* Actions row */}
+        {(alert.message.length > 100 || alert.candidateId) && (
+          <div className="flex items-center gap-3 mt-1.5">
+            {alert.message.length > 100 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleExpanded(alertKey); }}
+                className="text-[10px] text-primary font-medium hover:underline flex items-center gap-0.5"
+              >
+                {isExpanded ? <>Less <ChevronUp className="w-3 h-3" /></> : <>More <ChevronDown className="w-3 h-3" /></>}
+              </button>
+            )}
+            {alert.candidateId && (
+              <button
+                onClick={() => navigate(`/candidate/${alert.candidateId}`)}
+                className="text-[10px] text-primary font-medium hover:underline flex items-center ml-auto gap-0.5"
+              >
+                View <ChevronRight className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        )}
       </motion.div>
     );
   };
 
   return (
-    <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/5 relative">
-      {/* Subtle glow accents */}
-      <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none opacity-50" />
-      <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/5 rounded-full blur-3xl pointer-events-none opacity-40" />
-      
-      {/* Header */}
-      <div className="relative py-3 px-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div 
-              className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center shadow-[var(--shadow-soft)]"
-            >
-              <Brain className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm font-bold text-foreground">AI Insights</span>
-                <Sparkles className="w-3 h-3 text-primary" />
-              </div>
-              <p className="text-[10px] text-muted-foreground font-medium leading-none mt-0.5">
-                Blind spots & predictions powered by AI
-              </p>
-            </div>
+    <section className="space-y-1.5">
+      {/* Header row */}
+      <div className="flex items-center justify-between px-0.5">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center">
+            <Brain className="w-3.5 h-3.5 text-primary-foreground" />
           </div>
-          <div className="flex items-center gap-0.5">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-lg" disabled={history.length === 0}>
-                  <History className="w-3.5 h-3.5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[70vh]">
-                <SheetHeader className="pb-3">
-                  <SheetTitle className="flex items-center gap-2 text-sm">
-                    <History className="w-4 h-4" />
-                    Insight History
-                  </SheetTitle>
-                </SheetHeader>
-                <ScrollArea className="h-[calc(70vh-70px)]">
-                  {history.length === 0 ? (
-                    <div className="text-center py-6">
-                      <p className="text-xs text-muted-foreground">No history yet</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2 pr-4">
-                      {history.map((alert, idx) => renderAlert(
-                        { ...alert, type: alert.type }, idx, true, alert.generatedAt
-                      ))}
-                    </div>
-                  )}
-                </ScrollArea>
-              </SheetContent>
-            </Sheet>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => fetchAlerts(true)}
-              disabled={loading}
-              className="h-7 w-7 p-0 rounded-lg"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
+          <div>
+            <h3 className="text-sm font-bold text-foreground leading-none">AI Predictions</h3>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Blind spots & pattern alerts</p>
           </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" disabled={history.length === 0}>
+                <History className="w-3.5 h-3.5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[70vh]">
+              <SheetHeader className="pb-3">
+                <SheetTitle className="flex items-center gap-2 text-sm">
+                  <History className="w-4 h-4" /> Insight History
+                </SheetTitle>
+              </SheetHeader>
+              <ScrollArea className="h-[calc(70vh-70px)]">
+                {history.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-6">No history yet</p>
+                ) : (
+                  <div className="space-y-1.5 pr-4">
+                    {history.map((alert, idx) => renderAlert({ ...alert, type: alert.type }, idx, true, alert.generatedAt))}
+                  </div>
+                )}
+              </ScrollArea>
+            </SheetContent>
+          </Sheet>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => fetchAlerts(true)}
+            disabled={loading}
+            className="h-7 w-7 rounded-lg"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
       </div>
 
-      <CardContent className="space-y-2 pt-0 px-4 pb-3 relative">
+      {/* Body */}
+      <div className="rounded-xl border border-border/60 bg-card/40 backdrop-blur-sm overflow-hidden">
         {interactionCount === 0 ? (
-          <div className="text-center py-6">
-            <div 
-              className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mx-auto mb-3 shadow-[var(--shadow-soft)]"
-            >
-              <Brain className="w-7 h-7 text-primary" />
+          <div className="text-center py-8 px-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center mx-auto mb-3">
+              <Brain className="w-6 h-6 text-primary" />
             </div>
-            <p className="text-sm font-semibold text-foreground mb-1">Log your first interaction</p>
+            <p className="text-sm font-semibold text-foreground mb-0.5">Log your first interaction</p>
             <p className="text-xs text-muted-foreground mb-4 max-w-[200px] mx-auto">
-              AI insights appear after you log interactions with candidates
+              AI insights appear after you log interactions
             </p>
             {onLogInteraction && (
-              <Button size="sm" onClick={onLogInteraction} className="h-9 px-5 text-xs rounded-xl shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                Log Interaction
+              <Button size="sm" onClick={onLogInteraction} className="h-8 px-4 text-xs rounded-lg">
+                <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Log Interaction
               </Button>
             )}
           </div>
         ) : loading && !data ? (
-          <div className="space-y-2">
-            <Skeleton className="h-16 w-full rounded-xl" />
-            <Skeleton className="h-16 w-full rounded-xl" />
+          <div className="p-3 space-y-1.5">
+            <Skeleton className="h-14 w-full rounded-lg" />
+            <Skeleton className="h-14 w-full rounded-lg" />
           </div>
         ) : error && !data ? (
-          <motion.div 
-            className="text-center py-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
+          <div className="text-center py-6 px-4">
             <p className="text-xs text-muted-foreground mb-2">{error}</p>
-            <Button variant="outline" size="sm" onClick={() => fetchAlerts(true)} className="h-8 text-xs rounded-xl">
+            <Button variant="outline" size="sm" onClick={() => fetchAlerts(true)} className="h-7 text-xs rounded-lg">
               Try Again
             </Button>
-          </motion.div>
+          </div>
         ) : hasAlerts ? (
-          <div className="space-y-2">
+          <div className="p-2 space-y-1">
             <AnimatePresence mode="popLayout">
               {displayedAlerts.map((alert, idx) => renderAlert(alert, idx))}
             </AnimatePresence>
             
             {hasMoreAlerts && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAll(!showAll)}
+                className="w-full text-[11px] h-7 rounded-lg text-muted-foreground hover:text-foreground"
               >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowAll(!showAll)}
-                  className="w-full text-xs h-8 rounded-xl hover:bg-primary/5"
-                >
-                  {showAll ? (
-                    <>Show Less <ChevronUp className="w-3.5 h-3.5 ml-1" /></>
-                  ) : (
-                    <>+{visibleAlerts.length - INITIAL_DISPLAY_COUNT} more insights <ChevronDown className="w-3.5 h-3.5 ml-1" /></>
-                  )}
-                </Button>
-              </motion.div>
+                {showAll ? (
+                  <>Show less <ChevronUp className="w-3 h-3 ml-1" /></>
+                ) : (
+                  <>+{visibleAlerts.length - INITIAL_DISPLAY_COUNT} more <ChevronDown className="w-3 h-3 ml-1" /></>
+                )}
+              </Button>
             )}
           </div>
         ) : (
-          <motion.div 
-            className="text-center py-5"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <motion.div 
-              className="w-12 h-12 rounded-2xl bg-emerald-500/15 flex items-center justify-center mx-auto mb-2"
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <Sparkles className="w-5 h-5 text-emerald-600" />
-            </motion.div>
+          <div className="text-center py-6">
+            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center mx-auto mb-2">
+              <Sparkles className="w-5 h-5 text-success" />
+            </div>
             <p className="text-sm font-semibold text-foreground">Looking Good!</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              No concerning patterns detected
-            </p>
-          </motion.div>
+            <p className="text-xs text-muted-foreground mt-0.5">No concerning patterns detected</p>
+          </div>
         )}
 
+        {/* Timestamp footer */}
         {data?.lastGenerated && (
-          <motion.p 
-            className="text-[10px] text-muted-foreground text-center flex items-center justify-center gap-1"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Zap className="w-3 h-3" />
-            Updated {new Date(data.lastGenerated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </motion.p>
+          <div className="border-t border-border/40 px-3 py-1.5 flex items-center justify-center gap-1">
+            <Zap className="w-2.5 h-2.5 text-muted-foreground" />
+            <span className="text-[9px] text-muted-foreground">
+              Updated {new Date(data.lastGenerated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 };
