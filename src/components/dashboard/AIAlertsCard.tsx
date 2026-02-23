@@ -248,35 +248,28 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
     return (
       <motion.div
         key={alertKey}
-        initial={{ opacity: 0, x: -12, scale: 0.97 }}
-        animate={{ opacity: 1, x: 0, scale: 1 }}
-        exit={{ opacity: 0, x: 12, scale: 0.97 }}
-        transition={{ duration: 0.35, delay: idx * 0.08, type: "spring", stiffness: 300, damping: 25 }}
-        className={`w-full rounded-xl p-3 border transition-all duration-300 ${styles.bg} ${styles.border} ${styles.glow} hover:scale-[1.01]`}
+        initial={{ opacity: 0, y: 8 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.3, delay: idx * 0.05, ease: "easeOut" }}
+        className={`w-full rounded-xl p-3 border transition-all duration-200 ${styles.bg} ${styles.border} hover:shadow-sm`}
       >
         <div className="flex items-start gap-2.5">
-          <motion.div 
-            className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${styles.iconBg} ${styles.icon}`}
-            initial={{ rotate: -10, scale: 0 }}
-            animate={{ rotate: 0, scale: 1 }}
-            transition={{ type: "spring", stiffness: 400, damping: 15, delay: idx * 0.08 + 0.15 }}
-          >
+          <div className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${styles.iconBg} ${styles.icon}`}>
             {alert.type === "blind_spot" ? (
               <Eye className="w-4 h-4" />
             ) : (
               <TrendingUp className="w-4 h-4" />
             )}
-          </motion.div>
+          </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className={`text-[10px] uppercase tracking-wider font-bold ${styles.icon}`}>
                 {alert.type === "blind_spot" ? "Blind Spot" : "Prediction"}
               </span>
               {/* Severity dot */}
-              <motion.span 
-                className={`w-1.5 h-1.5 rounded-full ${styles.dot}`}
-                animate={{ scale: alert.severity === "urgent" ? [1, 1.5, 1] : 1 }}
-                transition={{ duration: 1.5, repeat: alert.severity === "urgent" ? Infinity : 0 }}
+              <span 
+                className={`w-1.5 h-1.5 rounded-full ${styles.dot} ${alert.severity === "urgent" ? "animate-pulse" : ""}`}
               />
               {alert.candidateNickname && (
                 <span className="text-[10px] text-muted-foreground font-medium">
@@ -341,46 +334,23 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
 
   return (
     <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/5 relative">
-      {/* Animated glow orbs */}
-      <motion.div
-        className="absolute top-0 right-0 w-40 h-40 bg-primary/8 rounded-full blur-3xl pointer-events-none"
-        animate={{ 
-          x: [0, 15, -10, 0], 
-          y: [0, -10, 5, 0],
-          opacity: [0.4, 0.7, 0.5, 0.4],
-        }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/8 rounded-full blur-3xl pointer-events-none"
-        animate={{ 
-          x: [0, -10, 12, 0], 
-          y: [0, 8, -5, 0],
-          opacity: [0.3, 0.6, 0.4, 0.3],
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-      />
+      {/* Subtle glow accents */}
+      <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none opacity-50" />
+      <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/5 rounded-full blur-3xl pointer-events-none opacity-40" />
       
       {/* Header */}
       <div className="relative py-3 px-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <motion.div 
+            <div 
               className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center shadow-[var(--shadow-soft)]"
-              animate={{ rotate: [0, -3, 3, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             >
               <Brain className="w-4 h-4 text-primary-foreground" />
-            </motion.div>
+            </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-sm font-bold text-foreground">AI Insights</span>
-                <motion.div
-                  animate={{ opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Sparkles className="w-3 h-3 text-primary" />
-                </motion.div>
+                <Sparkles className="w-3 h-3 text-primary" />
               </div>
               <p className="text-[10px] text-muted-foreground font-medium leading-none mt-0.5">
                 Blind spots & predictions powered by AI
@@ -431,32 +401,23 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
 
       <CardContent className="space-y-2 pt-0 px-4 pb-3 relative">
         {interactionCount === 0 ? (
-          <motion.div 
-            className="text-center py-6"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <motion.div 
+          <div className="text-center py-6">
+            <div 
               className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mx-auto mb-3 shadow-[var(--shadow-soft)]"
-              animate={{ y: [0, -5, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             >
               <Brain className="w-7 h-7 text-primary" />
-            </motion.div>
+            </div>
             <p className="text-sm font-semibold text-foreground mb-1">Log your first interaction</p>
             <p className="text-xs text-muted-foreground mb-4 max-w-[200px] mx-auto">
               AI insights appear after you log interactions with candidates
             </p>
             {onLogInteraction && (
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                <Button size="sm" onClick={onLogInteraction} className="h-9 px-5 text-xs rounded-xl shadow-sm">
-                  <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                  Log Interaction
-                </Button>
-              </motion.div>
+              <Button size="sm" onClick={onLogInteraction} className="h-9 px-5 text-xs rounded-xl shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                Log Interaction
+              </Button>
             )}
-          </motion.div>
+          </div>
         ) : loading && !data ? (
           <div className="space-y-2">
             <Skeleton className="h-16 w-full rounded-xl" />

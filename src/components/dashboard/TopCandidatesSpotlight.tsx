@@ -77,25 +77,15 @@ export const TopCandidatesSpotlight: React.FC<TopCandidatesSpotlightProps> = ({ 
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
     >
       <div className="flex items-center gap-2 mb-3">
-        <motion.div
-          animate={{ rotate: [0, -10, 10, -5, 0] }}
-          transition={{ duration: 2, repeat: Infinity, repeatDelay: 4 }}
-        >
-          <Sparkles className="w-4 h-4 text-primary" />
-        </motion.div>
+        <Sparkles className="w-4 h-4 text-primary" />
         <h3 className="text-sm font-semibold text-foreground">Your Top Matches</h3>
-        <motion.div
-          className="h-px flex-1 bg-gradient-to-r from-primary/30 to-transparent"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          style={{ transformOrigin: "left" }}
-        />
+        <div className="h-px flex-1 bg-gradient-to-r from-primary/30 to-transparent" />
       </div>
 
       <div className="space-y-2.5">
@@ -110,13 +100,14 @@ export const TopCandidatesSpotlight: React.FC<TopCandidatesSpotlightProps> = ({ 
             return (
               <motion.button
                 key={candidate.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: idx * 0.12 }}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: idx * 0.08, ease: "easeOut" }}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate(`/candidate/${candidate.id}`)}
-                className={`w-full rounded-xl border ${config.border} ${config.glow} bg-gradient-to-r ${config.gradient} p-3 text-left transition-shadow duration-300 hover:shadow-md`}
+                className={`w-full rounded-xl border ${config.border} bg-gradient-to-r ${config.gradient} p-3 text-left transition-shadow duration-200 hover:shadow-md`}
               >
                 <div className="flex items-center gap-3">
                   {/* Rank indicator */}
@@ -127,14 +118,11 @@ export const TopCandidatesSpotlight: React.FC<TopCandidatesSpotlightProps> = ({ 
                         {candidate.nickname.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <motion.div
+                    <div
                       className={`absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center ${idx === 0 ? 'bg-amber-400' : idx === 1 ? 'bg-sky-400' : 'bg-orange-400'} shadow-sm`}
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 15, delay: idx * 0.12 + 0.3 }}
                     >
                       <span className="text-xs font-bold text-white">#{idx + 1}</span>
-                    </motion.div>
+                    </div>
                   </div>
 
                   {/* Info */}
@@ -149,22 +137,13 @@ export const TopCandidatesSpotlight: React.FC<TopCandidatesSpotlightProps> = ({ 
                     {/* Score bar */}
                     <div className="flex items-center gap-2 mt-1.5">
                       <div className="flex-1">
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: idx * 0.12 + 0.4 }}
-                        >
+                        <div>
                           <Progress value={score} className="h-1.5" />
-                        </motion.div>
+                        </div>
                       </div>
-                      <motion.span 
-                        className="text-xs font-bold text-primary tabular-nums"
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: idx * 0.12 + 0.5, type: "spring" }}
-                      >
+                      <span className="text-xs font-bold text-primary tabular-nums">
                         {score}%
-                      </motion.span>
+                      </span>
                     </div>
 
                     {/* Micro stats */}

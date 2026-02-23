@@ -985,8 +985,9 @@ const Dashboard = () => {
             <motion.div 
               className="grid grid-cols-2 gap-2"
               initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
             >
               <TooltipProvider delayDuration={400}>
                 <Tooltip>
@@ -1121,17 +1122,19 @@ const Dashboard = () => {
                 <motion.div 
                   data-tour="cycle-status"
                   initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.1 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                 >
                 <Carousel className="w-full" opts={{ align: "start", dragFree: true }}>
                   <CarouselContent className="-ml-2">
                     {alerts.map((alert, i) => (
                       <CarouselItem key={alert.key} className="pl-2 basis-auto">
                         <motion.button
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.3, delay: i * 0.06 }}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          whileInView={{ opacity: 1, scale: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.25, delay: i * 0.04, ease: "easeOut" }}
                           onClick={alert.onClick}
                           className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs font-medium transition-all hover:scale-[1.02] active:scale-[0.98] ${alert.color}`}
                         >
@@ -1159,9 +1162,10 @@ const Dashboard = () => {
             {/* Quick Stats */}
             <motion.div 
               className="grid grid-cols-3 gap-2"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.15 }}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
             >
               <motion.button 
                 className="rounded-xl p-3 bg-card border border-border text-center transition-all duration-200" 
@@ -1171,9 +1175,10 @@ const Dashboard = () => {
               >
                 <motion.div 
                   className="text-xl font-bold text-primary"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.2 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                 >
                   {activeCandidateCount}
                 </motion.div>
@@ -1187,9 +1192,10 @@ const Dashboard = () => {
               >
                 <motion.div 
                   className="text-xl font-bold text-emerald-600 dark:text-emerald-400"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.3 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: 0.05, ease: "easeOut" }}
                 >
                   {recap.goodCandidates.length}
                 </motion.div>
@@ -1203,9 +1209,10 @@ const Dashboard = () => {
               >
                 <motion.div 
                   className="text-xl font-bold text-rose-600 dark:text-rose-400"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.4 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: 0.1, ease: "easeOut" }}
                 >
                   {recap.badCandidates.length}
                 </motion.div>
@@ -1215,9 +1222,10 @@ const Dashboard = () => {
 
             {/* ===== AI PREDICTIONS - ENHANCED ===== */}
             <motion.section
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.25 }}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
             >
               <div className="relative overflow-hidden rounded-2xl">
                 {/* Animated shimmer background */}
@@ -1242,9 +1250,10 @@ const Dashboard = () => {
 
             {/* Log How I'm Feeling CTA */}
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
             >
             <Card 
               className="overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-md active:scale-[0.99] border-primary/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5"
