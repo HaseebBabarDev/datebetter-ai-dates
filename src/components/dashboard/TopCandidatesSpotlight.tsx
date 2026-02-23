@@ -60,14 +60,12 @@ export const TopCandidatesSpotlight: React.FC<TopCandidatesSpotlightProps> = ({ 
   const navigate = useNavigate();
 
   const topCandidates = useMemo(() => {
-    const MIN_SCORE = 20; // Don't showcase candidates below this threshold
     return candidates
-      .filter(c => 
-        c.compatibility_score != null && 
-        (c.compatibility_score ?? 0) >= MIN_SCORE &&
-        c.status !== "archived" && 
-        c.status !== "no_contact" &&
-        !(c as any).is_auto_disqualified
+      .filter(
+        (c) =>
+          c.status !== "archived" &&
+          c.status !== "no_contact" &&
+          !(c as any).is_auto_disqualified
       )
       .sort((a, b) => (b.compatibility_score ?? 0) - (a.compatibility_score ?? 0))
       .slice(0, 3);
