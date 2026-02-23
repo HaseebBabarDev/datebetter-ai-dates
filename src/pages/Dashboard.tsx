@@ -1267,7 +1267,13 @@ const Dashboard = () => {
 
             {/* Candidate Recap / Recent Activity */}
             {candidates.length > 0 && (
-              <div className="rounded-2xl bg-card border border-border overflow-hidden">
+              <motion.div 
+                className="rounded-2xl bg-card border border-border overflow-hidden"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
                 <div className="px-4 py-3 bg-[image:var(--gradient-subtle)] border-b border-border/50">
                   <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-primary" />
@@ -1482,18 +1488,38 @@ const Dashboard = () => {
                     </button>
                   )}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Healing Score Card */}
-            <HealingScoreCard />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              <HealingScoreCard />
+            </motion.div>
 
             {/* Self-Discovery Quizzes CTA */}
-            <SelfDiscoveryCTA userId={user.id} variant="compact" />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.5, delay: 0.05, ease: "easeOut" }}
+            >
+              <SelfDiscoveryCTA userId={user.id} variant="compact" />
+            </motion.div>
 
             {/* Messages from DateBetter */}
             {adminMessages.length > 0 && (
-              <div className="rounded-2xl bg-card border border-border overflow-hidden">
+              <motion.div 
+                className="rounded-2xl bg-card border border-border overflow-hidden"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
                 <div className="px-4 py-3 bg-[image:var(--gradient-subtle)] border-b border-border/50">
                   <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                     <MessageSquare className="w-4 h-4 text-primary" />
@@ -1605,7 +1631,7 @@ const Dashboard = () => {
                     </button>
                   )}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             <UpgradeNudge />
@@ -1656,24 +1682,50 @@ const Dashboard = () => {
             )}
 
             {/* D.E.V.I. CTA */}
-            <DeviCTA />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              <DeviCTA />
+            </motion.div>
 
             {/* Wins Stats */}
             {wins.total > 0 && (
-              <WinsStats
-                totalWins={wins.total}
-                thisMonthWins={wins.thisMonth}
-                winsByType={wins.byType}
-              />
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
+                <WinsStats
+                  totalWins={wins.total}
+                  thisMonthWins={wins.thisMonth}
+                  winsByType={wins.byType}
+                />
+              </motion.div>
             )}
 
             {/* Referral CTA at bottom */}
-            <ReferralCard />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              <ReferralCard />
+            </motion.div>
           </TabsContent>
 
           <TabsContent value="manage" className="space-y-4 mt-0">
             {/* Quick Actions for Manage Tab */}
-            <div className="grid grid-cols-2 gap-2">
+            <motion.div 
+              className="grid grid-cols-2 gap-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
               <Button
                 onClick={() => navigate("/add-candidate")}
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
@@ -1685,7 +1737,7 @@ const Dashboard = () => {
                 <TrendingUp className="w-4 h-4 mr-2" />
                 View Patterns
               </Button>
-            </div>
+            </motion.div>
 
             {/* Quality Filter Indicator */}
             {qualityFilter && (
@@ -1704,7 +1756,12 @@ const Dashboard = () => {
 
             {/* Search and Filters */}
             {candidates.length > 0 ? (
-              <div className="space-y-3">
+              <motion.div 
+                className="space-y-3"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+              >
                 <CandidateSearch value={searchQuery} onChange={setSearchQuery} />
                 <CandidateFilters
                   sortBy={sortBy}
@@ -1720,7 +1777,7 @@ const Dashboard = () => {
                     candidateAlerts={candidateAlerts}
                   />
                 </div>
-              </div>
+              </motion.div>
             ) : (
               <div className="rounded-xl bg-card/80 backdrop-blur-sm border border-border border-dashed py-12 text-center">
                 <Users className="w-12 h-12 mx-auto text-muted-foreground/40 mb-4" />
