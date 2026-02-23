@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,6 +68,7 @@ import { FreeUpgradeBanner } from "@/components/subscription/FreeUpgradeBanner";
 import { DeviCTA } from "@/components/dashboard/DeviCTA";
 import { ReferralCard } from "@/components/dashboard/ReferralCard";
 import { AIAlertsCard } from "@/components/dashboard/AIAlertsCard";
+import { TopCandidatesSpotlight } from "@/components/dashboard/TopCandidatesSpotlight";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefresh";
 import { WinsStats, useDeviWins } from "@/components/devi/WinsStats";
@@ -1037,36 +1039,13 @@ const Dashboard = () => {
               </TooltipProvider>
             </div>
 
-            {/* Self-Discovery Quizzes CTA */}
-            <SelfDiscoveryCTA userId={user.id} variant="compact" />
+            {/* ===== TOP CANDIDATES SPOTLIGHT ===== */}
+            <TopCandidatesSpotlight candidates={candidates} />
 
-            <UpgradeNudge />
-            <FreeUpgradeBanner />
-
-            {/* Log How I'm Feeling CTA */}
-            <Card 
-              className="overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-md active:scale-[0.99] border-primary/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5"
-              onClick={() => navigate("/devi?prompt=feeling")}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-                    <Heart className="w-5 h-5 text-primary-foreground" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-foreground">How are you feeling today?</h3>
-                    <p className="text-xs text-muted-foreground">Check in with D.E.V.I. about your emotions</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Alerts */}
+            {/* Alerts Carousel */}
             {(() => {
               const alerts: { key: string; icon: React.ReactNode; label: string; sub?: string; color: string; onClick?: () => void }[] = [];
               
-              // Cycle Setup CTA - only show if not completed onboarding (they haven't consciously skipped it yet) and not male
               if (!isMaleUser && profile?.track_cycle && !profile?.last_period_date && !profile?.onboarding_completed) {
                 alerts.push({
                   key: "cycle-setup",
@@ -1076,8 +1055,6 @@ const Dashboard = () => {
                   onClick: () => navigate("/settings?tab=preferences&section=cycle"),
                 });
               }
-
-              // Cycle Alert
               if (cycleAlerts) {
                 alerts.push({
                   key: "cycle-alert",
@@ -1087,8 +1064,6 @@ const Dashboard = () => {
                   color: "bg-accent/20 text-accent-foreground border-accent/30",
                 });
               }
-
-              // Oxytocin Alerts - bonding hormone high after intimacy
               oxytocinAlerts.forEach(({ candidate, daysSince, phase }) => {
                 alerts.push({
                   key: `oxy-${candidate.id}`,
@@ -1099,8 +1074,6 @@ const Dashboard = () => {
                   onClick: () => navigate(`/candidate/${candidate.id}`),
                 });
               });
-
-              // Love Bombing Alerts - rapid escalation warning
               loveBombingAlerts.forEach(({ candidate, reason }) => {
                 alerts.push({
                   key: `lb-${candidate.id}`,
@@ -1111,8 +1084,6 @@ const Dashboard = () => {
                   onClick: () => navigate(`/candidate/${candidate.id}`),
                 });
               });
-
-              // No Contact Alerts
               candidates.filter(c => c.no_contact_active).forEach((candidate) => {
                 alerts.push({
                   key: `nc-${candidate.id}`,
@@ -1123,8 +1094,6 @@ const Dashboard = () => {
                   onClick: () => navigate(`/candidate/${candidate.id}`),
                 });
               });
-
-              // Recently Ended Relationships (within 48 hours)
               candidates.filter(c => {
                 const endedAt = (c as any).relationship_ended_at;
                 if (!endedAt || c.status !== "archived") return false;
@@ -1199,55 +1168,55 @@ const Dashboard = () => {
               </button>
             </div>
 
-            {/* Pipeline Overflow Warning */}
-            {activeCandidateCount >= 10 && !pipelineOverflowDismissed && (
-              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 flex items-start gap-3">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-600">
-                  <Users className="w-4 h-4" />
+            {/* ===== AI PREDICTIONS - ENHANCED ===== */}
+            <motion.section
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div className="relative overflow-hidden rounded-2xl">
+                {/* Animated background shimmer */}
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-secondary/10 to-primary/5 animate-[shimmer_3s_ease-in-out_infinite]" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-secondary/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                
+                <div className="relative">
+                  <AIAlertsCard 
+                    candidateCount={candidates.length}
+                    lastInteractionTime={interactions[0]?.interaction_date || undefined}
+                    interactionCount={interactions.length}
+                    userId={user?.id}
+                    onLogInteraction={activeCandidates.length === 1 
+                      ? () => navigate(`/candidate/${activeCandidates[0].id}?tab=interactions`)
+                      : activeCandidates.length > 1 
+                        ? () => document.getElementById("log-interaction-trigger")?.click()
+                        : undefined
+                    }
+                  />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-amber-600">Pipeline overloaded</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    You have {activeCandidateCount} active leads. It&apos;s hard to give everyone quality attention — consider archiving anyone you&apos;re no longer pursuing.
-                  </p>
-                  <button
-                    onClick={() => { setActiveTab("manage"); setStatusFilter("active"); }}
-                    className="text-xs text-amber-600 font-medium mt-1.5 hover:underline"
-                  >
-                    Triage now →
-                  </button>
-                </div>
-                <button
-                  onClick={() => {
-                    setPipelineOverflowDismissed(true);
-                    try { localStorage.setItem("pipeline_overflow_dismissed", "true"); } catch {}
-                  }}
-                  className="shrink-0 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="w-4 h-4" />
-                </button>
               </div>
-            )}
+            </motion.section>
 
-            {/* Healing Score Card */}
-            <HealingScoreCard />
+            {/* Log How I'm Feeling CTA */}
+            <Card 
+              className="overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-md active:scale-[0.99] border-primary/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5"
+              onClick={() => navigate("/devi?prompt=feeling")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+                    <Heart className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-semibold text-foreground">How are you feeling today?</h3>
+                    <p className="text-xs text-muted-foreground">Check in with D.E.V.I. about your emotions</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                </div>
+              </CardContent>
+            </Card>
 
-            {/* AI Alerts Card */}
-            <AIAlertsCard 
-              candidateCount={candidates.length}
-              lastInteractionTime={interactions[0]?.interaction_date || undefined}
-              interactionCount={interactions.length}
-              userId={user?.id}
-              onLogInteraction={activeCandidates.length === 1 
-                ? () => navigate(`/candidate/${activeCandidates[0].id}?tab=interactions`)
-                : activeCandidates.length > 1 
-                  ? () => document.getElementById("log-interaction-trigger")?.click()
-                  : undefined
-              }
-            />
-
-
-            {/* Candidate Recap */}
+            {/* Candidate Recap / Recent Activity */}
             {candidates.length > 0 && (
               <div className="rounded-2xl bg-card border border-border overflow-hidden">
                 <div className="px-4 py-3 bg-[image:var(--gradient-subtle)] border-b border-border/50">
@@ -1451,11 +1420,9 @@ const Dashboard = () => {
                       );
                     }
 
-                    // Admin messages are now shown in a separate Messages section
                     return null;
                   })}
                   
-                  {/* See More / See Less Button */}
                   {recap.recentActivity.length > 5 && (
                     <button
                       onClick={() => setShowAllActivity(!showAllActivity)}
@@ -1468,6 +1435,12 @@ const Dashboard = () => {
                 </div>
               </div>
             )}
+
+            {/* Healing Score Card */}
+            <HealingScoreCard />
+
+            {/* Self-Discovery Quizzes CTA */}
+            <SelfDiscoveryCTA userId={user.id} variant="compact" />
 
             {/* Messages from DateBetter */}
             {adminMessages.length > 0 && (
@@ -1501,7 +1474,6 @@ const Dashboard = () => {
 
                     const handleClearMessage = async (e: React.MouseEvent) => {
                       e.stopPropagation();
-                      // Mark as read first, then remove from local state
                       if (!msg.is_read) {
                         await supabase
                           .from("admin_messages")
@@ -1584,6 +1556,39 @@ const Dashboard = () => {
                     </button>
                   )}
                 </div>
+              </div>
+            )}
+
+            <UpgradeNudge />
+            <FreeUpgradeBanner />
+
+            {/* Pipeline Overflow Warning */}
+            {activeCandidateCount >= 10 && !pipelineOverflowDismissed && (
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 flex items-start gap-3">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-600">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-amber-600">Pipeline overloaded</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    You have {activeCandidateCount} active leads. It&apos;s hard to give everyone quality attention — consider archiving anyone you&apos;re no longer pursuing.
+                  </p>
+                  <button
+                    onClick={() => { setActiveTab("manage"); setStatusFilter("active"); }}
+                    className="text-xs text-amber-600 font-medium mt-1.5 hover:underline"
+                  >
+                    Triage now →
+                  </button>
+                </div>
+                <button
+                  onClick={() => {
+                    setPipelineOverflowDismissed(true);
+                    try { localStorage.setItem("pipeline_overflow_dismissed", "true"); } catch {}
+                  }}
+                  className="shrink-0 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             )}
 
