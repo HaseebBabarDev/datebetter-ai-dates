@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Crown, Medal, Trophy, Sparkles, ChevronRight, TrendingUp, Heart, AlertTriangle } from "lucide-react";
 
 type Candidate = Tables<"candidates">;
@@ -78,8 +78,7 @@ export const TopCandidatesSpotlight: React.FC<TopCandidatesSpotlightProps> = ({ 
   return (
     <motion.section
       initial={{ opacity: 0, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
       <div className="flex items-center gap-2 mb-3">
@@ -89,7 +88,6 @@ export const TopCandidatesSpotlight: React.FC<TopCandidatesSpotlightProps> = ({ 
       </div>
 
       <div className="space-y-2.5">
-        <AnimatePresence>
           {topCandidates.map((candidate, idx) => {
             const score = candidate.compatibility_score ?? 0;
             const config = getScoreConfig(score);
@@ -101,8 +99,7 @@ export const TopCandidatesSpotlight: React.FC<TopCandidatesSpotlightProps> = ({ 
               <motion.button
                 key={candidate.id}
                 initial={{ opacity: 0, y: 8 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: idx * 0.08, ease: "easeOut" }}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
@@ -176,7 +173,6 @@ export const TopCandidatesSpotlight: React.FC<TopCandidatesSpotlightProps> = ({ 
               </motion.button>
             );
           })}
-        </AnimatePresence>
       </div>
     </motion.section>
   );
