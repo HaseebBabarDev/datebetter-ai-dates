@@ -48,10 +48,13 @@ interface CandidateCardProps {
   totalRanked?: number;
 }
 
-const rankBadgeConfig: Record<number, { label: string; color: string; emoji: string }> = {
-  1: { label: "Top Match", color: "bg-amber-500/15 text-amber-600 border-amber-400/40", emoji: "👑" },
-  2: { label: "Strong Match", color: "bg-sky-500/15 text-sky-600 border-sky-400/40", emoji: "🥈" },
-  3: { label: "Great Match", color: "bg-orange-500/15 text-orange-600 border-orange-400/40", emoji: "🥉" },
+const getScoreBadge = (score: number | null) => {
+  if (score == null) return null;
+  if (score >= 65) return { label: "Top Match", color: "bg-amber-500/15 text-amber-600 border-amber-400/40", emoji: "👑" };
+  if (score >= 45) return { label: "Promising", color: "bg-sky-500/15 text-sky-600 border-sky-400/40", emoji: "💫" };
+  if (score >= 30) return { label: "Needs Work", color: "bg-orange-500/15 text-orange-600 border-orange-400/40", emoji: "⚠️" };
+  if (score >= 1) return { label: "Consider DQ", color: "bg-destructive/15 text-destructive border-destructive/40", emoji: "🚩" };
+  return null;
 };
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -364,16 +367,15 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
                       {zodiacConfig[(candidate as any).zodiac_sign].emoji}
                     </span>
                   )}
-                  {rank !== null && rank <= 3 && rankBadgeConfig[rank] && (
-                    <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-4 gap-0.5 shrink-0 font-bold ${rankBadgeConfig[rank].color}`}>
-                      {rankBadgeConfig[rank].emoji} {rankBadgeConfig[rank].label}
-                    </Badge>
-                  )}
-                  {rank !== null && rank > 3 && rank <= 5 && (
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 gap-0.5 shrink-0 border-muted-foreground/30 text-muted-foreground">
-                      #{rank}
-                    </Badge>
-                  )}
+                  {(() => {
+                    const badge = getScoreBadge(candidate.compatibility_score);
+                    if (!badge) return null;
+                    return (
+                      <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-4 gap-0.5 shrink-0 font-bold ${badge.color}`}>
+                        {badge.emoji} {badge.label}
+                      </Badge>
+                    );
+                  })()}
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
               </div>
