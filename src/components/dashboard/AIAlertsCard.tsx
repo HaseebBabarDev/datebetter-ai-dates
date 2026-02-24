@@ -66,19 +66,22 @@ const INITIAL_DISPLAY_COUNT = 3;
 
 const severityStyles = {
   urgent: {
-    pill: "bg-destructive/15 text-destructive",
-    accent: "border-l-destructive",
+    pill: "bg-destructive/15 text-destructive border border-destructive/25",
+    accent: "border-l-destructive shadow-[inset_0_0_12px_hsl(var(--destructive)/0.06)]",
     dot: "bg-destructive animate-pulse",
+    card: "shadow-sm shadow-destructive/10",
   },
   warning: {
-    pill: "bg-caution/15 text-caution-foreground",
-    accent: "border-l-caution",
+    pill: "bg-caution/15 text-foreground border border-caution/30",
+    accent: "border-l-caution shadow-[inset_0_0_12px_hsl(var(--caution)/0.08)]",
     dot: "bg-caution",
+    card: "shadow-sm shadow-caution/10",
   },
   info: {
-    pill: "bg-primary/10 text-primary",
-    accent: "border-l-primary",
+    pill: "bg-primary/10 text-primary border border-primary/20",
+    accent: "border-l-primary shadow-[inset_0_0_12px_hsl(var(--primary)/0.05)]",
     dot: "bg-primary",
+    card: "shadow-sm shadow-primary/10",
   },
 };
 
@@ -242,7 +245,7 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 6 }}
         transition={{ duration: 0.2, delay: idx * 0.04 }}
-        className={`border-l-[3px] ${styles.accent} bg-card/60 backdrop-blur-sm rounded-r-lg px-3 py-2.5 group`}
+        className={`border-l-[3px] ${styles.accent} ${(styles as any).card || ''} bg-card/70 backdrop-blur-sm rounded-r-xl px-3 py-2.5 group border border-border/40 hover:border-border/70 transition-all duration-200`}
       >
         {/* Top row: type pill + meta */}
         <div className="flex items-center gap-1.5 mb-1">
@@ -358,7 +361,7 @@ export const AIAlertsCard: React.FC<AIAlertsCardProps> = ({
       </div>
 
       {/* Body */}
-      <div className="rounded-xl border border-border/60 bg-card/40 backdrop-blur-sm overflow-hidden">
+      <div className="rounded-xl border border-border/50 bg-card/60 backdrop-blur-sm overflow-hidden shadow-md shadow-primary/5">
         {interactionCount === 0 ? (
           <div className="text-center py-8 px-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center mx-auto mb-3">
