@@ -236,7 +236,7 @@ serve(async (req) => {
       .slice(0, 10);
 
     // CHECK IF THERE'S NEW DATA SINCE LAST SCORE UPDATE
-    // Score should only change when the USER logs a new interaction.
+    // Score should change when the USER logs a new interaction OR edits the candidate profile.
     const lastScoreUpdate = candidate.last_score_update ? new Date(candidate.last_score_update) : null;
 
     let hasNewDataSinceLastScore = false;
@@ -254,6 +254,20 @@ serve(async (req) => {
         if (interactionCreatedAt && interactionCreatedAt > lastScoreUpdate) {
           hasNewDataSinceLastScore = true;
         }
+      }
+      
+      // Also check if the candidate profile was updated since last score
+      const candidateUpdatedAt = candidate.updated_at ? new Date(candidate.updated_at) : null;
+      if (candidateUpdatedAt && candidateUpdatedAt > lastScoreUpdate) {
+        hasNewDataSinceLastScore = true;
+        console.log(`CANDIDATE PROFILE UPDATED since last score (profile: ${candidateUpdatedAt.toISOString()}, score: ${lastScoreUpdate.toISOString()})`);
+      }
+      
+      // Also check if the user's own profile was updated since last score
+      const profileUpdatedAt = profile.updated_at ? new Date(profile.updated_at) : null;
+      if (profileUpdatedAt && profileUpdatedAt > lastScoreUpdate) {
+        hasNewDataSinceLastScore = true;
+        console.log(`USER PROFILE UPDATED since last score (profile: ${profileUpdatedAt.toISOString()}, score: ${lastScoreUpdate.toISOString()})`);
       }
     }
     
