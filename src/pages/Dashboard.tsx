@@ -573,7 +573,7 @@ const Dashboard = () => {
       alertsMap[candidate.id].push({
         type: "oxytocin",
         label: daysSince <= 2 ? "🔥 Bonding high" : "Oxytocin clearing",
-        color: daysSince <= 2 ? "bg-pink-500/20 text-pink-600" : "bg-amber-500/20 text-amber-600"
+        color: "bg-primary/10 text-primary"
       });
     });
     
@@ -583,7 +583,7 @@ const Dashboard = () => {
       alertsMap[candidate.id].push({
         type: "love_bombing",
         label: "⚠️ Love bombing?",
-        color: "bg-orange-500/20 text-orange-600"
+        color: "bg-muted text-foreground"
       });
     });
     
@@ -1070,13 +1070,13 @@ const Dashboard = () => {
                   color: "bg-accent/20 text-accent-foreground border-accent/30",
                 });
               }
-              oxytocinAlerts.forEach(({ candidate, daysSince, phase }) => {
+               oxytocinAlerts.forEach(({ candidate, daysSince, phase }) => {
                 alerts.push({
                   key: `oxy-${candidate.id}`,
                   icon: <Flame className="w-3 h-3" />,
                   label: `${candidate.nickname}`,
-                  sub: daysSince <= 2 ? "🔥 Bonding high" : "Clearing",
-                  color: daysSince <= 2 ? "bg-pink-500/20 text-pink-600 dark:text-pink-400 border-pink-500/30" : "bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30",
+                  sub: daysSince <= 2 ? "Bonding high" : "Clearing",
+                  color: "bg-primary/10 text-primary border-primary/20",
                   onClick: () => navigate(`/candidate/${candidate.id}`),
                 });
               });
@@ -1085,8 +1085,8 @@ const Dashboard = () => {
                   key: `lb-${candidate.id}`,
                   icon: <AlertTriangle className="w-3 h-3" />,
                   label: candidate.nickname,
-                  sub: "⚠️ Love bombing?",
-                  color: "bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30",
+                  sub: "Love bombing?",
+                  color: "bg-muted text-foreground border-border",
                   onClick: () => navigate(`/candidate/${candidate.id}`),
                 });
               });
@@ -1168,13 +1168,13 @@ const Dashboard = () => {
               transition={{ duration: 0.3, ease: "easeOut" }}
             >
               <motion.button 
-                className="rounded-xl p-3 bg-card border border-border text-center transition-all duration-200" 
+                className="rounded-xl p-3 bg-card/80 backdrop-blur-sm border border-border/60 text-center transition-all duration-200 shadow-sm hover:shadow-md" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter(null); }}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
               >
                 <motion.div 
-                  className="text-xl font-bold text-primary"
+                  className="text-xl font-bold text-foreground"
                   initial={{ opacity: 0, scale: 0.8 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
@@ -1182,16 +1182,16 @@ const Dashboard = () => {
                 >
                   {activeCandidateCount}
                 </motion.div>
-                <div className="text-[10px] text-muted-foreground">Active</div>
+                <div className="text-[10px] text-muted-foreground font-medium">Active</div>
               </motion.button>
               <motion.button 
-                className="rounded-xl p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-center transition-all duration-200" 
+                className="rounded-xl p-3 bg-card/80 backdrop-blur-sm border border-border/60 text-center transition-all duration-200 shadow-sm hover:shadow-md" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter("good"); }}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
               >
                 <motion.div 
-                  className="text-xl font-bold text-emerald-600 dark:text-emerald-400"
+                  className="text-xl font-bold text-foreground"
                   initial={{ opacity: 0, scale: 0.8 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
@@ -1199,16 +1199,16 @@ const Dashboard = () => {
                 >
                   {recap.goodCandidates.length}
                 </motion.div>
-                <div className="text-[10px] text-muted-foreground">Good Vibes</div>
+                <div className="text-[10px] text-muted-foreground font-medium">Good Vibes</div>
               </motion.button>
               <motion.button 
-                className="rounded-xl p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-center transition-all duration-200" 
+                className="rounded-xl p-3 bg-card/80 backdrop-blur-sm border border-border/60 text-center transition-all duration-200 shadow-sm hover:shadow-md" 
                 onClick={() => { setActiveTab("manage"); setStatusFilter("active"); setQualityFilter("bad"); }}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
               >
                 <motion.div 
-                  className="text-xl font-bold text-rose-600 dark:text-rose-400"
+                  className="text-xl font-bold text-foreground"
                   initial={{ opacity: 0, scale: 0.8 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
@@ -1216,7 +1216,7 @@ const Dashboard = () => {
                 >
                   {recap.badCandidates.length}
                 </motion.div>
-                <div className="text-[10px] text-muted-foreground">Watch Out</div>
+                <div className="text-[10px] text-muted-foreground font-medium">Watch Out</div>
               </motion.button>
             </motion.div>
 
@@ -1355,10 +1355,10 @@ const Dashboard = () => {
                           </div>
                           <div className="flex items-center gap-1">
                             {item.interaction.overall_feeling && item.interaction.overall_feeling >= 4 && (
-                              <ThumbsUp className="w-4 h-4 text-emerald-500" />
+                              <ThumbsUp className="w-4 h-4 text-primary" />
                             )}
                             {item.interaction.overall_feeling && item.interaction.overall_feeling <= 2 && (
-                              <ThumbsDown className="w-4 h-4 text-rose-500" />
+                              <ThumbsDown className="w-4 h-4 text-muted-foreground" />
                             )}
                             {item.interaction.overall_feeling === 3 && (
                               <Minus className="w-4 h-4 text-muted-foreground" />
@@ -1445,12 +1445,12 @@ const Dashboard = () => {
                     if (item.type === "notification" && item.notification && item.candidate) {
                       const getNotifStyles = () => {
                         switch (item.notification!.notifType) {
-                          case "oxytocin": return { bg: "bg-pink-500/10 hover:bg-pink-500/20", iconBg: "bg-pink-500/20", text: "text-pink-600" };
-                          case "red_flags": return { bg: "bg-amber-500/10 hover:bg-amber-500/20", iconBg: "bg-amber-500/20", text: "text-amber-600" };
-                          case "high_match": return { bg: "bg-emerald-500/10 hover:bg-emerald-500/20", iconBg: "bg-emerald-500/20", text: "text-emerald-600" };
-                          case "low_match": return { bg: "bg-orange-500/10 hover:bg-orange-500/20", iconBg: "bg-orange-500/20", text: "text-orange-600" };
-                          case "stale": return { bg: "bg-slate-500/10 hover:bg-slate-500/20", iconBg: "bg-slate-500/20", text: "text-slate-600" };
-                          case "advice": return { bg: "bg-purple-500/10 hover:bg-purple-500/20", iconBg: "bg-purple-500/20", text: "text-purple-600" };
+                          case "oxytocin": return { bg: "bg-primary/5 hover:bg-primary/10", iconBg: "bg-primary/10", text: "text-primary" };
+                          case "red_flags": return { bg: "bg-muted hover:bg-muted/80", iconBg: "bg-muted", text: "text-foreground" };
+                          case "high_match": return { bg: "bg-primary/5 hover:bg-primary/10", iconBg: "bg-primary/10", text: "text-primary" };
+                          case "low_match": return { bg: "bg-muted hover:bg-muted/80", iconBg: "bg-muted", text: "text-muted-foreground" };
+                          case "stale": return { bg: "bg-muted hover:bg-muted/80", iconBg: "bg-muted", text: "text-muted-foreground" };
+                          case "advice": return { bg: "bg-primary/5 hover:bg-primary/10", iconBg: "bg-primary/10", text: "text-primary" };
                           default: return { bg: "bg-primary/10 hover:bg-primary/20", iconBg: "bg-primary/20", text: "text-primary" };
                         }
                       };
@@ -1648,8 +1648,8 @@ const Dashboard = () => {
 
             {/* Pipeline Overflow Warning */}
             {activeCandidateCount >= 10 && !pipelineOverflowDismissed && (
-              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 flex items-start gap-3">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-600">
+              <div className="rounded-xl border border-border bg-muted/50 p-3 flex items-start gap-3">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                   <Users className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -1751,7 +1751,7 @@ const Dashboard = () => {
             {/* Quality Filter Indicator */}
             {qualityFilter && (
               <div className="flex items-center gap-2">
-                <span className={`text-xs px-2 py-1 rounded-full ${qualityFilter === "good" ? "bg-emerald-500/20 text-emerald-600" : "bg-rose-500/20 text-rose-600"}`}>
+                <span className={`text-xs px-2 py-1 rounded-full ${qualityFilter === "good" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                   Showing: {qualityFilter === "good" ? "Good Vibes" : "Watch Out"}
                 </span>
                 <button 
