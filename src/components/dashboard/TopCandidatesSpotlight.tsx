@@ -145,7 +145,7 @@ export const TopCandidatesSpotlight: React.FC<TopCandidatesSpotlightProps> = ({ 
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
                       {(candidate.met_app || candidate.met_via) && (
                         <span className="text-[10px] bg-muted/60 text-muted-foreground px-1.5 py-0.5 rounded-full border border-border/50">
-                          {candidate.met_app || candidate.met_via}
+                          {(candidate.met_app || candidate.met_via || "").replace(/_/g, " ")}
                         </span>
                       )}
                       {greenFlagCount > 0 && (
