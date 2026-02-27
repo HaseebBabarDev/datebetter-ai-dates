@@ -244,7 +244,7 @@ const Hero = () => {
   const imgScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
 
   return (
-    <section ref={sectionRef} className="relative min-h-screen flex items-center overflow-hidden">
+    <section ref={sectionRef} className="relative h-screen flex items-center overflow-hidden">
       {/* Parallax background */}
       <motion.div className="absolute inset-0" style={{ y: imgY, scale: imgScale }}>
         <img src={heroImage} alt="" className="w-full h-full object-cover" />
@@ -266,8 +266,8 @@ const Hero = () => {
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" as const }}
       />
 
-      <motion.div style={{ y: textY }} className="relative z-10 max-w-6xl mx-auto px-5 pt-28 pb-20 w-full">
-        <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 items-center">
+      <motion.div style={{ y: textY }} className="relative z-10 max-w-6xl mx-auto px-5 pt-20 pb-12 w-full">
+        <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-8 lg:gap-12 items-center">
           {/* Left: Copy */}
           <motion.div initial="hidden" animate="visible" variants={stagger}>
             <motion.div
@@ -359,7 +359,7 @@ const Hero = () => {
               animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.2, 0.1] }}
               transition={{ duration: 5, repeat: Infinity }}
             />
-            <div className="scale-90 sm:scale-100">
+            <div className="scale-[0.78] lg:scale-[0.82] origin-center">
               <IPhoneMockup>
                 <CompatibilityDemo />
               </IPhoneMockup>
