@@ -278,7 +278,7 @@ const Hero = () => {
               <motion.div animate={{ rotate: [0, 15, -15, 0] }} transition={{ duration: 2, repeat: Infinity }}>
                 <Sparkles className="w-3.5 h-3.5 text-primary" />
               </motion.div>
-              <span className="text-xs font-semibold text-primary">Relationship KPIs — Not Vibes</span>
+              <span className="text-xs font-semibold text-primary">AI-Powered Dating Advisor</span>
             </motion.div>
 
             <motion.h1 variants={fadeUp} className="font-poppins text-4xl sm:text-5xl lg:text-[3.4rem] font-bold text-foreground leading-[1.08] mb-5 tracking-tight">
@@ -287,7 +287,7 @@ const Hero = () => {
               ChatGPT about
               <br />
               <motion.span
-                className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent inline-block"
+                className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent inline-block text-4xl sm:text-5xl lg:text-[3.4rem]"
                 animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
                 transition={{ duration: 5, repeat: Infinity }}
                 style={{ backgroundSize: "200% 200%" }}
@@ -526,39 +526,60 @@ const HowItWorks = () => {
           </motion.p>
         </motion.div>
 
-        <div ref={containerRef} className="relative">
-          {/* Animated connecting line (desktop) */}
-          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-border -translate-x-1/2">
-            <motion.div className="w-full bg-primary rounded-full origin-top" style={{ height: lineHeight }} />
+        <div className="grid lg:grid-cols-[1fr_auto] gap-12 items-start">
+          {/* Steps */}
+          <div ref={containerRef} className="relative">
+            {/* Animated connecting line (desktop) */}
+            <div className="hidden md:block absolute left-6 top-0 bottom-0 w-0.5 bg-border">
+              <motion.div className="w-full bg-primary rounded-full origin-top" style={{ height: lineHeight }} />
+            </div>
+
+            <div className="space-y-10">
+              {[
+                { step: "01", title: "Build Your Profile", desc: "Complete a deep-dive onboarding that captures your values, dealbreakers, attachment style, and relationship goals." },
+                { step: "02", title: "Track & Evaluate", desc: "Log interactions with potential partners. D.E.V.I. analyzes each one and builds a compatibility score in real-time." },
+                { step: "03", title: "Decide With Confidence", desc: "Get AI-powered insights, pattern alerts, and clear recommendations. Keep or disqualify with full context." },
+              ].map((s, i) => (
+                <motion.div
+                  key={s.step}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.7, delay: i * 0.2, ease: [0.25, 0.4, 0.25, 1] as Easing }}
+                  className="relative pl-16"
+                >
+                  {/* Step number circle */}
+                  <motion.div
+                    className="absolute left-0 top-0 w-12 h-12 rounded-full bg-[image:var(--gradient-primary)] flex items-center justify-center shadow-[var(--shadow-soft)]"
+                    animate={{ boxShadow: ["0 0 0 0 hsl(var(--primary) / 0.2)", "0 0 0 8px hsl(var(--primary) / 0)", "0 0 0 0 hsl(var(--primary) / 0)"] }}
+                    transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.5 }}
+                  >
+                    <span className="font-poppins text-sm font-bold text-primary-foreground">{s.step}</span>
+                  </motion.div>
+                  <h3 className="font-poppins font-semibold text-xl text-foreground mb-2">{s.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{s.desc}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { step: "01", title: "Build Your Profile", desc: "Complete a deep-dive onboarding that captures your values, dealbreakers, attachment style, and relationship goals." },
-              { step: "02", title: "Track & Evaluate", desc: "Log interactions with potential partners. D.E.V.I. analyzes each one and builds a compatibility score in real-time." },
-              { step: "03", title: "Decide With Confidence", desc: "Get AI-powered insights, pattern alerts, and clear recommendations. Keep or disqualify with full context." },
-            ].map((s, i) => (
-              <motion.div
-                key={s.step}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.7, delay: i * 0.2, ease: [0.25, 0.4, 0.25, 1] }}
-                className="relative"
-              >
-                {/* Pulsing step number */}
-                <motion.span
-                  className="font-poppins text-6xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent opacity-30 inline-block"
-                  animate={{ opacity: [0.2, 0.4, 0.2] }}
-                  transition={{ duration: 3, repeat: Infinity, delay: i * 0.5 }}
-                >
-                  {s.step}
-                </motion.span>
-                <h3 className="font-poppins font-semibold text-xl text-foreground mb-3 -mt-2">{s.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{s.desc}</p>
-              </motion.div>
-            ))}
-          </div>
+          {/* Score graphic iPhone */}
+          <motion.div
+            className="hidden lg:block relative"
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          >
+            <motion.div
+              className="absolute -inset-10 bg-[image:var(--gradient-hero)] rounded-full blur-[70px] opacity-10"
+              animate={{ scale: [1, 1.1, 1], opacity: [0.08, 0.15, 0.08] }}
+              transition={{ duration: 5, repeat: Infinity }}
+            />
+            <IPhoneMockup>
+              <CompatibilityDemo />
+            </IPhoneMockup>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -881,15 +902,14 @@ const InteractiveShowcase = () => (
         className="text-center max-w-2xl mx-auto mb-14"
       >
         <motion.h2 variants={fadeUp} className="font-poppins text-3xl sm:text-4xl font-bold text-foreground mb-4">
-          See it in <span className="text-primary">action</span>
+          Try <span className="text-primary">D.E.V.I.</span> right now
         </motion.h2>
         <motion.p variants={fadeUp} className="text-muted-foreground text-lg">
-          Interactive previews of the tools that help you date smarter. Try typing in the chat!
+          Type a real dating question below and see how your AI advisor responds.
         </motion.p>
       </motion.div>
 
-      <div className="grid md:grid-cols-2 gap-12 items-center justify-items-center">
-        {/* Compatibility Score Phone */}
+      <div className="flex justify-center">
         <motion.div
           initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -898,34 +918,7 @@ const InteractiveShowcase = () => (
           className="relative"
         >
           <motion.div
-            className="absolute -inset-8 bg-[image:var(--gradient-hero)] rounded-full blur-[60px] opacity-15"
-            animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.2, 0.1] }}
-            transition={{ duration: 5, repeat: Infinity }}
-          />
-          <IPhoneMockup>
-            <CompatibilityDemo />
-          </IPhoneMockup>
-          <motion.p
-            className="text-center mt-4 text-sm font-semibold text-muted-foreground"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5 }}
-          >
-            AI Compatibility Scoring
-          </motion.p>
-        </motion.div>
-
-        {/* Chat Demo Phone */}
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative"
-        >
-          <motion.div
-            className="absolute -inset-8 bg-[image:var(--gradient-hero)] rounded-full blur-[60px] opacity-15"
+            className="absolute -inset-10 bg-[image:var(--gradient-hero)] rounded-full blur-[70px] opacity-15"
             animate={{ scale: [1.1, 1, 1.1], opacity: [0.1, 0.2, 0.1] }}
             transition={{ duration: 6, repeat: Infinity }}
           />
@@ -937,9 +930,9 @@ const InteractiveShowcase = () => (
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.7 }}
+            transition={{ delay: 0.5 }}
           >
-            Try D.E.V.I. — Type a question!
+            Try it — type a question above!
           </motion.p>
         </motion.div>
       </div>
