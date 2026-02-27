@@ -13,6 +13,20 @@ const stagger = { visible: { transition: { staggerChildren: 0.15 } } };
 
 const plans = [
   {
+    name: "Free",
+    price: "$0",
+    period: "",
+    description: "Try it out — no card needed",
+    icon: Zap,
+    features: [
+      "1 candidate profile",
+      "1 interaction log",
+      "Basic compatibility score",
+      "Red flag detection",
+    ],
+    popular: false,
+  },
+  {
     name: "Basic",
     price: "$4.99",
     period: "/mo",
@@ -93,7 +107,7 @@ export const PricingSection: React.FC = () => {
           whileInView="visible"
           viewport={{ once: true }}
           variants={stagger}
-          className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto"
+          className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto"
         >
           {plans.map((plan) => (
             <motion.div
