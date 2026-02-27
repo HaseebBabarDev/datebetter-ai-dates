@@ -27,6 +27,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/website-hero.jpg";
+import { IPhoneMockup } from "@/components/website/IPhoneMockup";
+import { CompatibilityDemo } from "@/components/website/CompatibilityDemo";
+import { ChatDemo } from "@/components/website/ChatDemo";
+import { PricingSection } from "@/components/website/PricingSection";
 
 /* ─── Shared animation variants ─── */
 const fadeUp = {
@@ -198,10 +202,10 @@ const Navbar = () => {
           dateBetter
         </motion.span>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-          {["Features", "How It Works", "D.E.V.I.", "Stories"].map((label, i) => (
+          {["Features", "How It Works", "D.E.V.I.", "Pricing", "Stories"].map((label, i) => (
             <motion.a
               key={label}
-              href={`#${["features", "how-it-works", "devi", "testimonials"][i]}`}
+              href={`#${["features", "how-it-works", "devi", "pricing", "testimonials"][i]}`}
               className="hover:text-foreground transition-colors relative"
               whileHover={{ y: -2 }}
             >
@@ -839,6 +843,89 @@ const Footer = () => {
 };
 
 /* ─── Main Page ─── */
+const InteractiveShowcase = () => (
+  <section className="py-20 relative overflow-hidden">
+    <motion.div
+      className="absolute top-1/3 right-1/4 w-80 h-80 rounded-full bg-primary/5 blur-[120px]"
+      animate={{ scale: [1, 1.2, 1] }}
+      transition={{ duration: 8, repeat: Infinity }}
+    />
+    <div className="max-w-6xl mx-auto px-5 relative z-10">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={stagger}
+        className="text-center max-w-2xl mx-auto mb-14"
+      >
+        <motion.h2 variants={fadeUp} className="font-poppins text-3xl sm:text-4xl font-bold text-foreground mb-4">
+          See it in <span className="text-primary">action</span>
+        </motion.h2>
+        <motion.p variants={fadeUp} className="text-muted-foreground text-lg">
+          Interactive previews of the tools that help you date smarter. Try typing in the chat!
+        </motion.p>
+      </motion.div>
+
+      <div className="grid md:grid-cols-2 gap-12 items-center justify-items-center">
+        {/* Compatibility Score Phone */}
+        <motion.div
+          initial={{ opacity: 0, y: 60 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="relative"
+        >
+          <motion.div
+            className="absolute -inset-8 bg-[image:var(--gradient-hero)] rounded-full blur-[60px] opacity-15"
+            animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 5, repeat: Infinity }}
+          />
+          <IPhoneMockup>
+            <CompatibilityDemo />
+          </IPhoneMockup>
+          <motion.p
+            className="text-center mt-4 text-sm font-semibold text-muted-foreground"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+          >
+            AI Compatibility Scoring
+          </motion.p>
+        </motion.div>
+
+        {/* Chat Demo Phone */}
+        <motion.div
+          initial={{ opacity: 0, y: 60 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="relative"
+        >
+          <motion.div
+            className="absolute -inset-8 bg-[image:var(--gradient-hero)] rounded-full blur-[60px] opacity-15"
+            animate={{ scale: [1.1, 1, 1.1], opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 6, repeat: Infinity }}
+          />
+          <IPhoneMockup>
+            <ChatDemo />
+          </IPhoneMockup>
+          <motion.p
+            className="text-center mt-4 text-sm font-semibold text-muted-foreground"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.7 }}
+          >
+            Try D.E.V.I. — Type a question!
+          </motion.p>
+        </motion.div>
+      </div>
+    </div>
+  </section>
+);
+
+/* ─── Main Page ─── */
 const Website = () => (
   <div className="min-h-screen bg-background">
     <Navbar />
@@ -846,8 +933,10 @@ const Website = () => (
     <StatsBanner />
     <Problem />
     <Features />
+    <InteractiveShowcase />
     <HowItWorks />
     <DeviSection />
+    <PricingSection />
     <Testimonials />
     <FinalCTA />
     <Footer />
