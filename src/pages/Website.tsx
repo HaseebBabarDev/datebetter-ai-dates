@@ -349,7 +349,7 @@ const Hero = () => {
 
           {/* Right: iPhone mockup with compatibility score */}
           <motion.div
-            className="hidden lg:flex justify-center relative"
+            className="flex justify-center relative"
             initial={{ opacity: 0, y: 40, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 1, delay: 0.4, ease: [0.25, 0.4, 0.25, 1] as Easing }}
@@ -400,10 +400,10 @@ const StatsBanner = () => {
             { ref: s3.ref, count: s3.count, suffix: "/7", label: "AI Available" },
           ].map((s) => (
             <motion.div key={s.label} variants={scaleIn}>
-              <span ref={s.ref} className="font-poppins text-3xl sm:text-4xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">
+              <span ref={s.ref} className="font-poppins text-4xl sm:text-5xl lg:text-6xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">
                 {s.count}{s.suffix}
               </span>
-              <p className="text-muted-foreground mt-1">{s.label}</p>
+              <p className="text-muted-foreground mt-1 text-base sm:text-lg font-medium">{s.label}</p>
             </motion.div>
           ))}
         </motion.div>
