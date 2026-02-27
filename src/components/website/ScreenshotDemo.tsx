@@ -7,30 +7,30 @@ const DEMO_MESSAGES: { role: "user" | "assistant"; content: React.ReactNode; del
     role: "user",
     delay: 0.6,
     content: (
-      <div className="space-y-1.5">
-        {/* Fake screenshot thumbnail — mimics a real iMessage thread */}
-        <div className="rounded-lg bg-background/50 border border-border/50 p-1.5 space-y-0.5">
-          <div className="flex gap-1">
-            <div className="w-3 h-3 rounded-full bg-muted/80 shrink-0" />
-            <div className="bg-muted/60 rounded px-1 py-0.5 text-[5.5px] text-muted-foreground leading-tight">Hey sorry I disappeared lol 😅</div>
+      <div className="space-y-1">
+        {/* Fake screenshot thumbnail */}
+        <div className="rounded-md bg-background/50 border border-border/50 p-1 space-y-[3px]">
+          <div className="flex gap-0.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-muted/80 shrink-0" />
+            <div className="bg-muted/60 rounded px-1 py-[2px] text-[5px] text-muted-foreground leading-tight">Hey sorry I disappeared lol 😅</div>
           </div>
           <div className="flex justify-end">
-            <div className="bg-primary/10 rounded px-1 py-0.5 text-[5.5px] text-foreground leading-tight">Still down for dinner?</div>
+            <div className="bg-primary/10 rounded px-1 py-[2px] text-[5px] text-foreground leading-tight">Still down for dinner?</div>
           </div>
-          <div className="flex gap-1">
-            <div className="w-3 h-3 rounded-full bg-muted/80 shrink-0" />
-            <div className="bg-muted/60 rounded px-1 py-0.5 text-[5.5px] text-muted-foreground leading-tight">Definitely!! Let me check 🥰</div>
+          <div className="flex gap-0.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-muted/80 shrink-0" />
+            <div className="bg-muted/60 rounded px-1 py-[2px] text-[5px] text-muted-foreground leading-tight">Definitely!! Let me check 🥰</div>
           </div>
-          <div className="text-center text-[4.5px] text-muted-foreground/40 italic">3 days later...</div>
+          <div className="text-center text-[4px] text-muted-foreground/40 italic">3 days later...</div>
           <div className="flex justify-end">
-            <div className="bg-primary/10 rounded px-1 py-0.5 text-[5.5px] text-foreground leading-tight">Did you check? 😊</div>
+            <div className="bg-primary/10 rounded px-1 py-[2px] text-[5px] text-foreground leading-tight">Did you check? 😊</div>
           </div>
-          <div className="flex gap-1">
-            <div className="w-3 h-3 rounded-full bg-muted/80 shrink-0" />
-            <div className="bg-muted/60 rounded px-1 py-0.5 text-[5.5px] text-muted-foreground leading-tight">Omg yes!! This week is crazy 😭</div>
+          <div className="flex gap-0.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-muted/80 shrink-0" />
+            <div className="bg-muted/60 rounded px-1 py-[2px] text-[5px] text-muted-foreground leading-tight">Omg yes!! This week is crazy 😭</div>
           </div>
         </div>
-        <p className="text-[7px] leading-tight">Analyze this text thread — is this a red flag?</p>
+        <p className="text-[6px] leading-tight">Analyze this text thread — is this a red flag?</p>
       </div>
     ),
   },
@@ -38,26 +38,62 @@ const DEMO_MESSAGES: { role: "user" | "assistant"; content: React.ReactNode; del
     role: "assistant",
     delay: 2.4,
     content: (
-      <div className="space-y-1.5">
-        <p className="text-[7px] leading-relaxed">
-          I see a <strong>breadcrumbing pattern</strong> here. Let me break it down:
+      <div className="space-y-2">
+        {/* Header — matches ChatGPTMessage h3 style */}
+        <p className="text-[7.5px] font-semibold text-foreground">
+          Breadcrumbing Pattern Detected
         </p>
 
-        {/* Flags — matches real ChatGPTMessage style */}
-        <div className="space-y-0.5">
-          <div className="flex items-start gap-1 text-[6.5px]">
-            <AlertTriangle className="w-2 h-2 text-destructive shrink-0 mt-[1px]" />
-            <span><span className="font-semibold text-destructive">Inconsistent follow-through</span> <span className="text-muted-foreground">— promises but never commits</span></span>
+        <p className="text-[6.5px] leading-relaxed text-foreground">
+          I see a clear pattern here — let me break down what's happening and what it means for you.
+        </p>
+
+        {/* Horizontal rule — matches ChatGPTMessage section dividers */}
+        <hr className="border-border" />
+
+        {/* Section header */}
+        <p className="text-[7px] font-semibold text-foreground">
+          What I'm Seeing
+        </p>
+
+        {/* Bullet list — matches ChatGPTMessage ul style with dot + text */}
+        <div className="space-y-1">
+          <div className="flex gap-1 items-start text-[6px] leading-relaxed">
+            <span className="text-muted-foreground mt-[2px] shrink-0">•</span>
+            <span><strong className="font-semibold">Inconsistent follow-through</strong> — enthusiastic responses ("Definitely!!") but zero follow-through on plans</span>
           </div>
-          <div className="flex items-start gap-1 text-[6.5px]">
-            <AlertTriangle className="w-2 h-2 text-destructive shrink-0 mt-[1px]" />
-            <span><span className="font-semibold text-destructive">You're always initiating</span> <span className="text-muted-foreground">— they respond, but never lead</span></span>
+          <div className="flex gap-1 items-start text-[6px] leading-relaxed">
+            <span className="text-muted-foreground mt-[2px] shrink-0">•</span>
+            <span><strong className="font-semibold">You're always initiating</strong> — they respond warmly, but never take the lead on making plans happen</span>
           </div>
-          <div className="flex items-start gap-1 text-[6.5px]">
-            <Heart className="w-2 h-2 text-success shrink-0 mt-[1px]" />
-            <span><span className="font-semibold text-success">Warm tone</span> <span className="text-muted-foreground">— they like you, but not enough to act</span></span>
+          <div className="flex gap-1 items-start text-[6px] leading-relaxed">
+            <span className="text-muted-foreground mt-[2px] shrink-0">•</span>
+            <span><strong className="font-semibold">Excuses without solutions</strong> — "this week is crazy" with no alternative offered</span>
           </div>
         </div>
+
+        <hr className="border-border" />
+
+        {/* Flags section — red/green inline badges */}
+        <p className="text-[7px] font-semibold text-foreground">
+          Flags
+        </p>
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-1 text-[6px]">
+            <AlertTriangle className="w-2 h-2 text-destructive shrink-0" />
+            <span className="text-destructive font-semibold">Breadcrumbing</span>
+          </div>
+          <div className="flex items-center gap-1 text-[6px]">
+            <AlertTriangle className="w-2 h-2 text-destructive shrink-0" />
+            <span className="text-destructive font-semibold">Low effort investment</span>
+          </div>
+          <div className="flex items-center gap-1 text-[6px]">
+            <Heart className="w-2 h-2 text-success shrink-0" />
+            <span className="text-success font-semibold">Warm tone (surface level)</span>
+          </div>
+        </div>
+
+        <hr className="border-border" />
 
         {/* Effort bar */}
         <div className="space-y-0.5">
@@ -75,16 +111,17 @@ const DEMO_MESSAGES: { role: "user" | "assistant"; content: React.ReactNode; del
           </div>
         </div>
 
-        <div className="border-l-2 border-primary/30 pl-1.5">
-          <p className="text-[6.5px] text-foreground leading-relaxed">
-            <strong>My advice:</strong> Stop initiating for 7 days. If they don't reach out with a real plan, you have your answer. You deserve someone who <em>acts</em>, not just talks. 💜
+        {/* Blockquote advice — matches ChatGPTMessage emphasis block */}
+        <div className="border-l-2 border-foreground/20 pl-1.5">
+          <p className="text-[6.5px] font-medium text-foreground leading-relaxed">
+            Stop initiating for 7 days. If they don't reach out with a real plan, you have your answer. You deserve someone who <em>acts</em>, not just talks. 💜
           </p>
         </div>
 
         {/* Quick replies — matches real app */}
-        <div className="flex flex-wrap gap-1 pt-1">
-          {["Tell me more", "What should I do?", "Help me rewire my thoughts"].map((r) => (
-            <div key={r} className="px-1.5 py-0.5 text-[5.5px] font-medium rounded-full border border-border text-foreground">
+        <div className="flex flex-wrap gap-1 pt-0.5">
+          {["Tell me more", "What should I do?", "Help me rewire"].map((r) => (
+            <div key={r} className="px-1.5 py-[3px] text-[5px] font-medium rounded-full border border-border text-foreground">
               {r}
             </div>
           ))}
@@ -109,7 +146,7 @@ export const ScreenshotDemo: React.FC = () => {
 
   return (
     <div ref={ref} className="flex flex-col h-full" style={{ minHeight: 440 }}>
-      {/* Header — matches real Devi.tsx header */}
+      {/* Header — matches real Devi.tsx */}
       <div className="flex items-center gap-1 px-1 py-1.5 border-b border-border">
         <div className="w-5 h-5 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
           <Sparkles className="w-2.5 h-2.5 text-primary-foreground" />
@@ -120,10 +157,10 @@ export const ScreenshotDemo: React.FC = () => {
         </div>
       </div>
 
-      {/* Candidate selector bar — matches real app */}
+      {/* Candidate selector bar */}
       <div className="border-b border-border bg-muted/30 px-2 py-1 flex items-center gap-1">
         <span className="text-[5.5px] text-muted-foreground">Talking about:</span>
-        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded border border-border bg-background text-[6px]">
+        <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-border bg-background text-[6px]">
           <div className="w-3 h-3 rounded-full bg-primary/20 flex items-center justify-center">
             <span className="text-[5px] font-medium">M</span>
           </div>
@@ -131,8 +168,8 @@ export const ScreenshotDemo: React.FC = () => {
         </div>
       </div>
 
-      {/* Chat messages — matches real ChatGPTMessage layout */}
-      <div className="flex-1 overflow-hidden px-2 py-2 space-y-3">
+      {/* Chat messages — ChatGPTMessage layout */}
+      <div className="flex-1 overflow-hidden px-2 py-2 space-y-2">
         <AnimatePresence>
           {DEMO_MESSAGES.slice(0, visibleCount).map((msg, i) => (
             <motion.div
@@ -142,22 +179,22 @@ export const ScreenshotDemo: React.FC = () => {
               transition={{ duration: 0.35 }}
             >
               {msg.role === "user" ? (
-                /* User bubble — right-aligned, bg-muted, rounded-br-md (matches ChatGPTMessage) */
-                <div className="flex justify-end mb-2">
-                  <div className="max-w-[85%] rounded-2xl rounded-br-md p-1.5 bg-muted">
+                <div className="flex justify-end mb-1">
+                  <div className="max-w-[82%] rounded-2xl rounded-br-md p-1.5 bg-muted">
                     {msg.content}
                   </div>
                 </div>
               ) : (
-                /* Assistant — full width, avatar+label then indented content (matches ChatGPTMessage) */
-                <div className="mb-2">
+                <div className="mb-1">
+                  {/* Avatar + label */}
                   <div className="flex items-center gap-1 mb-0.5">
-                    <div className="w-4 h-4 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center">
-                      <Sparkles className="w-2 h-2 text-primary-foreground" />
+                    <div className="w-3.5 h-3.5 rounded-md bg-[image:var(--gradient-hero)] flex items-center justify-center">
+                      <Sparkles className="w-1.5 h-1.5 text-primary-foreground" />
                     </div>
-                    <span className="text-[6.5px] font-medium text-muted-foreground">D.E.V.I.</span>
+                    <span className="text-[6px] font-medium text-muted-foreground">D.E.V.I.</span>
                   </div>
-                  <div className="pl-5">
+                  {/* Content indented past avatar — matches pl-9 at scale */}
+                  <div className="pl-[18px] pr-1">
                     {msg.content}
                   </div>
                 </div>
@@ -168,17 +205,14 @@ export const ScreenshotDemo: React.FC = () => {
 
         {/* Typing indicator */}
         {visibleCount === 1 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <div className="flex items-center gap-1 mb-0.5">
-              <div className="w-4 h-4 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center">
-                <Sparkles className="w-2 h-2 text-primary-foreground" />
+              <div className="w-3.5 h-3.5 rounded-md bg-[image:var(--gradient-hero)] flex items-center justify-center">
+                <Sparkles className="w-1.5 h-1.5 text-primary-foreground" />
               </div>
-              <span className="text-[6.5px] font-medium text-muted-foreground">D.E.V.I.</span>
+              <span className="text-[6px] font-medium text-muted-foreground">D.E.V.I.</span>
             </div>
-            <div className="pl-5 flex items-center gap-0.5">
+            <div className="pl-[18px] flex items-center gap-0.5">
               {[0, 1, 2].map((j) => (
                 <motion.div
                   key={j}
@@ -192,20 +226,20 @@ export const ScreenshotDemo: React.FC = () => {
         )}
       </div>
 
-      {/* Input bar — matches real Devi.tsx input (ImagePlus + Textarea + Send) */}
+      {/* Input bar — matches real app */}
       <div className="border-t border-border px-2 py-1.5">
         <div className="flex gap-1 items-end">
-          <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0">
-            <ImagePlus className="w-3 h-3 text-muted-foreground" />
+          <div className="w-4 h-4 flex items-center justify-center shrink-0">
+            <ImagePlus className="w-2.5 h-2.5 text-muted-foreground" />
           </div>
-          <div className="flex-1 text-[6.5px] px-2 py-1 rounded-md bg-muted text-muted-foreground/50 border border-border min-h-[18px] flex items-center">
+          <div className="flex-1 text-[6px] px-2 py-[4px] rounded-md bg-muted text-muted-foreground/50 border border-border">
             Ask about Marcus T....
           </div>
-          <div className="w-5 h-5 rounded-md bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
-            <Send className="w-2.5 h-2.5 text-primary-foreground" />
+          <div className="w-4 h-4 rounded-md bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
+            <Send className="w-2 h-2 text-primary-foreground" />
           </div>
         </div>
-        <p className="text-center text-[4.5px] text-muted-foreground/40 mt-1">Responses are AI-generated</p>
+        <p className="text-center text-[4px] text-muted-foreground/40 mt-0.5">Responses are AI-generated</p>
       </div>
     </div>
   );
