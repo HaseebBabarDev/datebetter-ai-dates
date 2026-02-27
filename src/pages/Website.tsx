@@ -293,7 +293,7 @@ const Hero = () => {
           </motion.h1>
 
           <motion.p variants={fadeUp} className="text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
-            dateBetter uses AI to help you evaluate, track, and understand your dating patterns — so you can choose partners who actually deserve you.
+            dateBetter uses AI to help you evaluate, track, and understand your dating patterns — so you can choose partners who actually deserve you. Built for everyone.
           </motion.p>
 
           <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
@@ -327,7 +327,7 @@ const Hero = () => {
           <motion.div variants={fadeUp} className="flex items-center gap-6 mt-8 text-sm text-muted-foreground">
             {[
               { icon: Shield, text: "100% Private" },
-              { icon: Heart, text: "Female-Built" },
+              { icon: Users, text: "For Everyone" },
               { icon: Brain, text: "AI-Backed" },
             ].map((item, i) => (
               <motion.span
@@ -461,7 +461,7 @@ const Features = () => (
           { icon: AlertTriangle, title: "Red & Green Flags", desc: "Auto-detect warning signs and positive traits based on interaction logs.", color: "destructive" },
           { icon: Sparkles, title: "D.E.V.I. AI Assistant", desc: "Your 24/7 private advisor who knows your patterns, values, and goals.", color: "primary" },
           { icon: Shield, title: "Auto-Disqualify", desc: "Set your dealbreakers once. Candidates who violate them get flagged instantly.", color: "accent" },
-          { icon: Users, title: "Private Community", desc: "Connect with women who are also dating intentionally. Share, learn, grow.", color: "secondary" },
+          { icon: Users, title: "Private Community", desc: "Connect with people who are also dating intentionally. Share, learn, grow.", color: "secondary" },
         ].map((f) => (
           <MagneticCard key={f.title} className="cursor-default">
             <motion.div
@@ -687,10 +687,10 @@ const Testimonials = () => (
     <div className="max-w-6xl mx-auto px-5">
       <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center max-w-2xl mx-auto mb-14">
         <motion.h2 variants={fadeUp} className="font-poppins text-3xl sm:text-4xl font-bold text-foreground mb-4">
-          Real women. <span className="text-primary">Real clarity.</span>
+          Real people. <span className="text-primary">Real clarity.</span>
         </motion.h2>
         <motion.p variants={fadeUp} className="text-muted-foreground text-lg">
-          Hear from women who stopped guessing and started choosing.
+          Hear from people who stopped guessing and started choosing.
         </motion.p>
       </motion.div>
 
@@ -807,7 +807,7 @@ const Footer = () => {
               dateBetter
             </span>
             <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-              Data for Dating. AI-backed relationship intelligence for women who are serious about getting it right.
+              Data for Dating. AI-backed relationship intelligence for anyone who's serious about getting it right.
             </p>
           </div>
           <div>
@@ -835,7 +835,7 @@ const Footer = () => {
         </div>
         <div className="border-t border-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} dateBetter. All rights reserved.</p>
-          <p className="text-xs text-muted-foreground">Female-built · 100% private · AI-powered</p>
+          <p className="text-xs text-muted-foreground">Built for everyone · 100% private · AI-powered</p>
         </div>
       </div>
     </footer>
