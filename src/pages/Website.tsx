@@ -431,7 +431,7 @@ const Problem = () => (
     <FloatingParticles />
     <div className="max-w-6xl mx-auto px-5 relative z-10">
       <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="text-center max-w-3xl mx-auto">
-        <motion.h2 variants={fadeUp} className="font-poppins text-3xl sm:text-4xl font-bold text-foreground mb-4">
+        <motion.h2 variants={fadeUp} className="font-poppins text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-4">
           Dating apps help you <span className="text-primary">match</span>.
           <br />
           Nobody helps you <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">choose wisely</span>.
