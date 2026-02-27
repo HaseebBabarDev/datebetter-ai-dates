@@ -373,33 +373,35 @@ const Hero = () => {
 
             {/* Floating insight badges around the phone */}
             {[
-              { label: "🚩 Love Bombing", x: -110, y: 60, delay: 1.8, color: "destructive" },
-              { label: "💔 Breadcrumbing", x: 130, y: 120, delay: 2.4, color: "destructive" },
-              { label: "✅ Secure Attachment", x: -120, y: 220, delay: 3.0, color: "success" },
-              { label: "⚠️ Post-Intimacy Clarity", x: 120, y: 280, delay: 3.6, color: "warning" },
-              { label: "💜 Healthy Boundary", x: -100, y: 380, delay: 4.2, color: "success" },
-              { label: "🔄 Anxious Pattern", x: 140, y: 400, delay: 2.1, color: "destructive" },
+              { label: "🚩 Love Bombing", xLg: -110, xSm: -60, yLg: 60, ySm: 30, delay: 1.8 },
+              { label: "💔 Breadcrumbing", xLg: 130, xSm: 70, yLg: 120, ySm: 80, delay: 2.4 },
+              { label: "✅ Secure Attachment", xLg: -120, xSm: -70, yLg: 220, ySm: 160, delay: 3.0 },
+              { label: "⚠️ Post-Intimacy Clarity", xLg: 120, xSm: 60, yLg: 280, ySm: 220, delay: 3.6 },
+              { label: "💜 Healthy Boundary", xLg: -100, xSm: -55, yLg: 380, ySm: 300, delay: 4.2 },
+              { label: "🔄 Anxious Pattern", xLg: 140, xSm: 65, yLg: 400, ySm: 350, delay: 2.1 },
             ].map((badge, i) => (
-              <motion.div
-                key={i}
-                className="absolute hidden lg:flex items-center gap-1 px-2.5 py-1 rounded-full border border-border/50 bg-card/80 backdrop-blur-sm shadow-lg text-xs font-medium whitespace-nowrap z-10"
-                style={{ left: `calc(50% + ${badge.x}px)`, top: badge.y }}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ 
-                  opacity: [0, 1, 1, 0],
-                  scale: [0.8, 1, 1, 0.9],
-                  y: [10, 0, 0, -5],
-                }}
-                transition={{ 
-                  duration: 4,
-                  delay: badge.delay,
-                  repeat: Infinity,
-                  repeatDelay: 8,
-                  ease: "easeInOut",
-                }}
-              >
-                <span className={`text-${badge.color}`}>{badge.label}</span>
-              </motion.div>
+              <React.Fragment key={i}>
+                {/* Desktop */}
+                <motion.div
+                  className="absolute hidden lg:flex items-center gap-1 px-2.5 py-1 rounded-full border border-border/50 bg-card/80 backdrop-blur-sm shadow-lg text-xs font-medium whitespace-nowrap z-10"
+                  style={{ left: `calc(50% + ${badge.xLg}px)`, top: badge.yLg }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: [0, 1, 1, 0], scale: [0.8, 1, 1, 0.9], y: [10, 0, 0, -5] }}
+                  transition={{ duration: 4, delay: badge.delay, repeat: Infinity, repeatDelay: 8, ease: "easeInOut" }}
+                >
+                  {badge.label}
+                </motion.div>
+                {/* Mobile / Tablet */}
+                <motion.div
+                  className="absolute flex lg:hidden items-center gap-1 px-2 py-0.5 rounded-full border border-border/50 bg-card/80 backdrop-blur-sm shadow-lg text-[10px] font-medium whitespace-nowrap z-10"
+                  style={{ left: `calc(50% + ${badge.xSm}px)`, top: badge.ySm }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: [0, 1, 1, 0], scale: [0.8, 1, 1, 0.9], y: [8, 0, 0, -4] }}
+                  transition={{ duration: 4, delay: badge.delay, repeat: Infinity, repeatDelay: 8, ease: "easeInOut" }}
+                >
+                  {badge.label}
+                </motion.div>
+              </React.Fragment>
             ))}
 
             <div className="scale-[0.8] sm:scale-90 lg:scale-100 origin-top">
