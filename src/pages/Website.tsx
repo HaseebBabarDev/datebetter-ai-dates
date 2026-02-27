@@ -373,12 +373,12 @@ const Hero = () => {
 
             {/* Floating insight badges around the phone */}
             {[
-              { label: "🚩 Love Bombing", xLg: -110, xSm: -60, yLg: 60, ySm: 30, delay: 1.8 },
-              { label: "💔 Breadcrumbing", xLg: 130, xSm: 70, yLg: 120, ySm: 80, delay: 2.4 },
-              { label: "✅ Secure Attachment", xLg: -120, xSm: -70, yLg: 220, ySm: 160, delay: 3.0 },
-              { label: "⚠️ Post-Intimacy Clarity", xLg: 120, xSm: 60, yLg: 280, ySm: 220, delay: 3.6 },
-              { label: "💜 Healthy Boundary", xLg: -100, xSm: -55, yLg: 380, ySm: 300, delay: 4.2 },
-              { label: "🔄 Anxious Pattern", xLg: 140, xSm: 65, yLg: 400, ySm: 350, delay: 2.1 },
+              { label: "🚩 Love Bombing", xLg: -200, xSm: -130, yLg: 40, ySm: 20, delay: 1.8 },
+              { label: "💔 Breadcrumbing", xLg: 200, xSm: 120, yLg: 100, ySm: 70, delay: 2.4 },
+              { label: "✅ Secure Attachment", xLg: -210, xSm: -135, yLg: 200, ySm: 150, delay: 3.0 },
+              { label: "⚠️ Post-Intimacy Clarity", xLg: 190, xSm: 110, yLg: 280, ySm: 220, delay: 3.6 },
+              { label: "💜 Healthy Boundary", xLg: -190, xSm: -125, yLg: 380, ySm: 300, delay: 4.2 },
+              { label: "🔄 Anxious Pattern", xLg: 210, xSm: 115, yLg: 420, ySm: 360, delay: 2.1 },
             ].map((badge, i) => (
               <React.Fragment key={i}>
                 {/* Desktop */}
