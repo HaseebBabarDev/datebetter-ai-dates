@@ -248,7 +248,7 @@ const Hero = () => {
       {/* Parallax background */}
       <motion.div className="absolute inset-0" style={{ y: imgY, scale: imgScale }}>
         <img src={heroImage} alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/60" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" />
       </motion.div>
 
@@ -267,81 +267,103 @@ const Hero = () => {
       />
 
       <motion.div style={{ y: textY }} className="relative z-10 max-w-6xl mx-auto px-5 pt-24 pb-16 w-full">
-        <motion.div initial="hidden" animate="visible" variants={stagger} className="max-w-2xl">
-          <motion.div
-            variants={fadeUp}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6"
-            whileHover={{ scale: 1.05, borderColor: "hsl(var(--primary) / 0.5)" }}
-          >
-            <motion.div animate={{ rotate: [0, 15, -15, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
-            </motion.div>
-            <span className="text-xs font-semibold text-primary">AI-Powered Relationship Intelligence</span>
-          </motion.div>
-
-          <motion.h1 variants={fadeUp} className="font-poppins text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-[1.1] mb-5 tracking-tight">
-            Stop guessing.
-            <br />
-            <motion.span
-              className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent inline-block"
-              animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-              transition={{ duration: 5, repeat: Infinity }}
-              style={{ backgroundSize: "200% 200%" }}
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left: Copy */}
+          <motion.div initial="hidden" animate="visible" variants={stagger}>
+            <motion.div
+              variants={fadeUp}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6"
+              whileHover={{ scale: 1.05, borderColor: "hsl(var(--primary) / 0.5)" }}
             >
-              Start knowing.
-            </motion.span>
-          </motion.h1>
-
-          <motion.p variants={fadeUp} className="text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
-            dateBetter uses AI to help you evaluate, track, and understand your dating patterns — so you can choose partners who actually deserve you. Built for everyone.
-          </motion.p>
-
-          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
-            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }}>
-              <Button
-                size="lg"
-                onClick={() => navigate("/onboarding")}
-                className="font-poppins font-semibold h-13 px-8 bg-[image:var(--gradient-primary)] text-primary-foreground border-0 shadow-[var(--shadow-elegant)]"
-              >
-                Create Free Account
-                <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </motion.span>
-              </Button>
+              <motion.div animate={{ rotate: [0, 15, -15, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
+              </motion.div>
+              <span className="text-xs font-semibold text-primary">Relationship KPIs — Not Vibes</span>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }}>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
-                className="font-poppins font-semibold h-13 px-8"
-              >
-                See How It Works
-                <motion.span animate={{ y: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                  <ChevronDown className="w-4 h-4 ml-2" />
-                </motion.span>
-              </Button>
-            </motion.div>
-          </motion.div>
 
-          <motion.div variants={fadeUp} className="flex items-center gap-6 mt-8 text-sm text-muted-foreground">
-            {[
-              { icon: Shield, text: "100% Private" },
-              { icon: Users, text: "For Everyone" },
-              { icon: Brain, text: "AI-Backed" },
-            ].map((item, i) => (
+            <motion.h1 variants={fadeUp} className="font-poppins text-4xl sm:text-5xl lg:text-[3.4rem] font-bold text-foreground leading-[1.08] mb-5 tracking-tight">
+              Stop asking
+              <br />
+              ChatGPT about
+              <br />
               <motion.span
-                key={item.text}
-                className="flex items-center gap-1.5"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.2 + i * 0.15 }}
+                className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent inline-block"
+                animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                transition={{ duration: 5, repeat: Infinity }}
+                style={{ backgroundSize: "200% 200%" }}
               >
-                <item.icon className="w-4 h-4 text-primary" /> {item.text}
+                your situationship.
               </motion.span>
-            ))}
+            </motion.h1>
+
+            <motion.p variants={fadeUp} className="text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
+              Give the group chat a break. dateBetter tracks, scores, and analyzes your dating life with real data — not opinions. No fluff. Just real advice.
+            </motion.p>
+
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
+              <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }}>
+                <Button
+                  size="lg"
+                  onClick={() => navigate("/onboarding")}
+                  className="font-poppins font-semibold h-13 px-8 bg-[image:var(--gradient-primary)] text-primary-foreground border-0 shadow-[var(--shadow-elegant)]"
+                >
+                  Start Free
+                  <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </motion.span>
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }}>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
+                  className="font-poppins font-semibold h-13 px-8"
+                >
+                  See How It Works
+                  <motion.span animate={{ y: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                    <ChevronDown className="w-4 h-4 ml-2" />
+                  </motion.span>
+                </Button>
+              </motion.div>
+            </motion.div>
+
+            <motion.div variants={fadeUp} className="flex items-center gap-6 mt-8 text-sm text-muted-foreground">
+              {[
+                { icon: Shield, text: "100% Private" },
+                { icon: Users, text: "For Everyone" },
+                { icon: Brain, text: "AI-Backed" },
+              ].map((item, i) => (
+                <motion.span
+                  key={item.text}
+                  className="flex items-center gap-1.5"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.2 + i * 0.15 }}
+                >
+                  <item.icon className="w-4 h-4 text-primary" /> {item.text}
+                </motion.span>
+              ))}
+            </motion.div>
           </motion.div>
-        </motion.div>
+
+          {/* Right: iPhone mockup with compatibility score */}
+          <motion.div
+            className="hidden lg:flex justify-center relative"
+            initial={{ opacity: 0, y: 40, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 1, delay: 0.4, ease: [0.25, 0.4, 0.25, 1] as Easing }}
+          >
+            <motion.div
+              className="absolute -inset-12 bg-[image:var(--gradient-hero)] rounded-full blur-[80px] opacity-15"
+              animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.2, 0.1] }}
+              transition={{ duration: 5, repeat: Infinity }}
+            />
+            <IPhoneMockup>
+              <CompatibilityDemo />
+            </IPhoneMockup>
+          </motion.div>
+        </div>
       </motion.div>
 
       {/* Scroll indicator */}
