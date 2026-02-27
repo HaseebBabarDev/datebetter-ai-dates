@@ -786,7 +786,7 @@ const FinalCTA = () => {
           </motion.div>
           <motion.div variants={fadeUp} className="flex items-center justify-center gap-5 mt-6 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5"><Shield className="w-4 h-4" /> No credit card</span>
-            <span className="flex items-center gap-1.5"><Zap className="w-4 h-4" /> Setup in 2 min</span>
+            <span className="flex items-center gap-1.5"><Zap className="w-4 h-4" /> Free to start</span>
             <span className="flex items-center gap-1.5"><Heart className="w-4 h-4" /> 100% private</span>
           </motion.div>
         </motion.div>
