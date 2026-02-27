@@ -255,7 +255,7 @@ const Hero = () => {
   const imgScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
 
   return (
-    <section ref={sectionRef} className="relative h-screen flex items-center overflow-hidden">
+    <section ref={sectionRef} className="relative min-h-screen lg:h-screen flex items-center overflow-hidden">
       {/* Parallax background */}
       <motion.div className="absolute inset-0" style={{ y: imgY, scale: imgScale }}>
         <img src={heroImage} alt="" className="w-full h-full object-cover" />
@@ -277,8 +277,8 @@ const Hero = () => {
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" as const }}
       />
 
-      <motion.div style={{ y: textY }} className="relative z-10 max-w-6xl mx-auto px-5 pt-20 pb-12 w-full">
-        <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-8 lg:gap-12 items-center">
+      <motion.div style={{ y: textY }} className="relative z-10 max-w-6xl mx-auto px-5 pt-24 pb-16 lg:pt-20 lg:pb-12 w-full">
+        <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6 lg:gap-12 items-center">
           {/* Left: Copy */}
           <motion.div initial="hidden" animate="visible" variants={stagger}>
             <motion.div
@@ -292,13 +292,13 @@ const Hero = () => {
               <span className="text-xs font-semibold text-primary">AI-Powered Dating Advisor</span>
             </motion.div>
 
-            <motion.h1 variants={fadeUp} className="font-poppins text-4xl sm:text-5xl lg:text-[3.4rem] font-bold text-foreground leading-[1.08] mb-5 tracking-tight">
+            <motion.h1 variants={fadeUp} className="font-poppins text-3xl sm:text-4xl lg:text-[3.4rem] font-bold text-foreground leading-[1.08] mb-4 lg:mb-5 tracking-tight">
               Stop asking
               <br />
               ChatGPT about
               <br />
               <motion.span
-                className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent inline-block text-4xl sm:text-5xl lg:text-[3.4rem]"
+                className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent inline-block text-3xl sm:text-4xl lg:text-[3.4rem]"
                 animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
                 transition={{ duration: 5, repeat: Infinity }}
                 style={{ backgroundSize: "200% 200%" }}
@@ -307,7 +307,7 @@ const Hero = () => {
               </motion.span>
             </motion.h1>
 
-            <motion.p variants={fadeUp} className="text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
+            <motion.p variants={fadeUp} className="text-base lg:text-lg text-muted-foreground max-w-lg mb-6 lg:mb-8 leading-relaxed">
               Give the group chat a break. dateBetter tracks, scores, and analyzes your dating life with real data — not opinions. No fluff. Just real advice.
             </motion.p>
 
@@ -339,7 +339,7 @@ const Hero = () => {
               </motion.div>
             </motion.div>
 
-            <motion.div variants={fadeUp} className="flex items-center gap-6 mt-8 text-sm text-muted-foreground">
+            <motion.div variants={fadeUp} className="hidden sm:flex items-center gap-6 mt-8 text-sm text-muted-foreground">
               {[
                 { icon: Shield, text: "100% Private" },
                 { icon: Users, text: "For Everyone" },
@@ -358,9 +358,9 @@ const Hero = () => {
             </motion.div>
           </motion.div>
 
-          {/* Right: iPhone mockup with compatibility score */}
+          {/* Right: iPhone mockup */}
           <motion.div
-            className="flex justify-center relative"
+            className="flex justify-center relative mt-4 lg:mt-0"
             initial={{ opacity: 0, y: 40, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 1, delay: 0.4, ease: [0.25, 0.4, 0.25, 1] as Easing }}
@@ -370,9 +370,11 @@ const Hero = () => {
               animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.2, 0.1] }}
               transition={{ duration: 5, repeat: Infinity }}
             />
-            <IPhoneMockup>
-              <ScreenshotDemo />
-            </IPhoneMockup>
+            <div className="scale-[0.8] sm:scale-90 lg:scale-100 origin-top">
+              <IPhoneMockup>
+                <ScreenshotDemo />
+              </IPhoneMockup>
+            </div>
           </motion.div>
         </div>
       </motion.div>
