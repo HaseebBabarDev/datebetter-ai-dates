@@ -358,7 +358,7 @@ const Hero = () => {
             </motion.div>
           </motion.div>
 
-          {/* Right: iPhone mockup */}
+          {/* Right: iPhone mockup with floating badges */}
           <motion.div
             className="flex justify-center relative mt-4 lg:mt-0"
             initial={{ opacity: 0, y: 40, scale: 0.9 }}
@@ -370,6 +370,38 @@ const Hero = () => {
               animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.2, 0.1] }}
               transition={{ duration: 5, repeat: Infinity }}
             />
+
+            {/* Floating insight badges around the phone */}
+            {[
+              { label: "🚩 Love Bombing", x: -110, y: 60, delay: 1.8, color: "destructive" },
+              { label: "💔 Breadcrumbing", x: 130, y: 120, delay: 2.4, color: "destructive" },
+              { label: "✅ Secure Attachment", x: -120, y: 220, delay: 3.0, color: "success" },
+              { label: "⚠️ Post-Intimacy Clarity", x: 120, y: 280, delay: 3.6, color: "warning" },
+              { label: "💜 Healthy Boundary", x: -100, y: 380, delay: 4.2, color: "success" },
+              { label: "🔄 Anxious Pattern", x: 140, y: 400, delay: 2.1, color: "destructive" },
+            ].map((badge, i) => (
+              <motion.div
+                key={i}
+                className="absolute hidden lg:flex items-center gap-1 px-2.5 py-1 rounded-full border border-border/50 bg-card/80 backdrop-blur-sm shadow-lg text-xs font-medium whitespace-nowrap z-10"
+                style={{ left: `calc(50% + ${badge.x}px)`, top: badge.y }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ 
+                  opacity: [0, 1, 1, 0],
+                  scale: [0.8, 1, 1, 0.9],
+                  y: [10, 0, 0, -5],
+                }}
+                transition={{ 
+                  duration: 4,
+                  delay: badge.delay,
+                  repeat: Infinity,
+                  repeatDelay: 8,
+                  ease: "easeInOut",
+                }}
+              >
+                <span className={`text-${badge.color}`}>{badge.label}</span>
+              </motion.div>
+            ))}
+
             <div className="scale-[0.8] sm:scale-90 lg:scale-100 origin-top">
               <IPhoneMockup>
                 <ScreenshotDemo />
