@@ -27,10 +27,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/website-hero.jpg";
+import { Moon, Sun } from "lucide-react";
 import { IPhoneMockup } from "@/components/website/IPhoneMockup";
 import { CompatibilityDemo } from "@/components/website/CompatibilityDemo";
 import { ChatDemo } from "@/components/website/ChatDemo";
+import { ScreenshotDemo } from "@/components/website/ScreenshotDemo";
 import { PricingSection } from "@/components/website/PricingSection";
+import { useTheme } from "@/contexts/ThemeContext";
 
 /* ─── Shared animation variants ─── */
 const fadeUp = {
@@ -176,6 +179,7 @@ const TypingText: React.FC<{ text: string; delay?: number }> = ({ text, delay = 
 const Navbar = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = React.useState(false);
+  const { themeMode, toggleDarkMode } = useTheme();
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -220,6 +224,13 @@ const Navbar = () => {
           ))}
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={toggleDarkMode}
+            className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            aria-label="Toggle dark mode"
+          >
+            {themeMode === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
           <Button variant="ghost" size="sm" onClick={() => navigate("/auth")} className="text-sm font-semibold">
             Log In
           </Button>
@@ -359,11 +370,9 @@ const Hero = () => {
               animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.2, 0.1] }}
               transition={{ duration: 5, repeat: Infinity }}
             />
-            <div className="scale-[0.78] lg:scale-[0.82] origin-center">
-              <IPhoneMockup>
-                <CompatibilityDemo />
-              </IPhoneMockup>
-            </div>
+            <IPhoneMockup>
+              <ScreenshotDemo />
+            </IPhoneMockup>
           </motion.div>
         </div>
       </motion.div>
