@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Lock, Eye, EyeOff, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
+import { Eye, EyeOff, ChevronLeft, ChevronRight, ArrowLeft, Maximize2, Minimize2, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -12,18 +12,48 @@ import { ChatDemo } from "@/components/website/ChatDemo";
 
 const DECK_PASSWORD = "DateBetter2025";
 
+/* ─── Staggered children wrapper ─── */
+const staggerContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.15 } },
+};
+const staggerItem = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] } },
+};
+
+const Stagger = ({ children }: { children: React.ReactNode }) => (
+  <motion.div variants={staggerContainer} initial="hidden" animate="visible">
+    {children}
+  </motion.div>
+);
+
+const FadeUp = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <motion.div variants={staggerItem} className={className}>
+    {children}
+  </motion.div>
+);
+
 /* ─── Reusable styled components ─── */
 const Pill = ({ children }: { children: React.ReactNode }) => (
-  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary uppercase tracking-wider">
+  <motion.div
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.97 }}
+    className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary uppercase tracking-wider backdrop-blur-sm cursor-default"
+  >
     {children}
-  </div>
+  </motion.div>
 );
 
 const MetricCard = ({ metric, label, accent = false }: { metric: string; label: string; accent?: boolean }) => (
-  <div className={`rounded-2xl p-6 text-center transition-all ${accent ? "border-2 border-primary bg-primary/5 shadow-[var(--shadow-soft)]" : "border border-border bg-card"}`}>
+  <motion.div
+    whileHover={{ y: -4, scale: 1.02 }}
+    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    className={`rounded-2xl p-6 text-center transition-colors cursor-default ${accent ? "border-2 border-primary bg-primary/5 shadow-[var(--shadow-soft)]" : "border border-border/60 bg-card/80 backdrop-blur-sm hover:border-primary/30"}`}
+  >
     <p className={`text-3xl font-bold ${accent ? "text-primary" : "text-foreground"}`}>{metric}</p>
     <p className="text-xs text-muted-foreground mt-1.5">{label}</p>
-  </div>
+  </motion.div>
 );
 
 /* ─── Slide data ─── */
@@ -541,6 +571,42 @@ const PasswordGate = ({ onUnlock }: { onUnlock: () => void }) => {
   );
 };
 
+/* ─── Slide Thumbnail Drawer ─── */
+const SlideDrawer = ({ slides: sl, current, onSelect, onClose }: { slides: typeof slides; current: number; onSelect: (i: number) => void; onClose: () => void }) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="fixed inset-0 z-50 bg-background/90 backdrop-blur-xl flex flex-col font-poppins"
+    onClick={onClose}
+  >
+    <div className="flex items-center justify-between px-6 py-4 border-b border-border/40">
+      <h3 className="text-lg font-bold text-foreground">All Slides</h3>
+      <button onClick={onClose} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Close</button>
+    </div>
+    <div className="flex-1 overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
+        {sl.map((s, i) => (
+          <motion.button
+            key={s.id}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.03 }}
+            onClick={() => { onSelect(i); onClose(); }}
+            className={`rounded-xl border-2 p-4 text-left transition-all hover:scale-[1.03] ${
+              i === current ? "border-primary bg-primary/10 shadow-[var(--shadow-glow)]" : "border-border/40 bg-card/60 hover:border-primary/30"
+            }`}
+          >
+            <p className="text-[10px] uppercase tracking-wider text-primary font-bold mb-1">{s.label || "Cover"}</p>
+            <p className="text-xs text-foreground font-medium truncate">{s.title || "dateBetter"}</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Slide {i + 1}</p>
+          </motion.button>
+        ))}
+      </div>
+    </div>
+  </motion.div>
+);
+
 /* ─── Deck Viewer ─── */
 const PitchDeck = () => {
   const navigate = useNavigate();
@@ -548,96 +614,229 @@ const PitchDeck = () => {
     () => sessionStorage.getItem("pitch_unlocked") === "1"
   );
   const [current, setCurrent] = useState(0);
+  const [direction, setDirection] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showDrawer, setShowDrawer] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const controlsTimer = useRef<ReturnType<typeof setTimeout>>();
+  const dragX = useMotionValue(0);
+  const dragOpacity = useTransform(dragX, [-200, 0, 200], [0.5, 1, 0.5]);
+
+  const goTo = useCallback((idx: number) => {
+    setDirection(idx > current ? 1 : -1);
+    setCurrent(idx);
+  }, [current]);
+
+  const next = useCallback(() => {
+    if (current < slides.length - 1) goTo(current + 1);
+  }, [current, goTo]);
+
+  const prev = useCallback(() => {
+    if (current > 0) goTo(current - 1);
+  }, [current, goTo]);
 
   // Keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" || e.key === " ") {
-        e.preventDefault();
-        setCurrent((c) => Math.min(c + 1, slides.length - 1));
-      }
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        setCurrent((c) => Math.max(c - 1, 0));
-      }
+      if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); next(); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+      if (e.key === "Escape" && isFullscreen) toggleFullscreen();
+      if (e.key === "g" || e.key === "G") setShowDrawer((d) => !d);
+      if (e.key === "f" || e.key === "F") toggleFullscreen();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
+  }, [next, prev, isFullscreen]);
+
+  // Auto-hide controls in fullscreen
+  useEffect(() => {
+    if (!isFullscreen) { setShowControls(true); return; }
+    const resetTimer = () => {
+      setShowControls(true);
+      clearTimeout(controlsTimer.current);
+      controlsTimer.current = setTimeout(() => setShowControls(false), 3000);
+    };
+    resetTimer();
+    window.addEventListener("mousemove", resetTimer);
+    window.addEventListener("touchstart", resetTimer);
+    return () => {
+      clearTimeout(controlsTimer.current);
+      window.removeEventListener("mousemove", resetTimer);
+      window.removeEventListener("touchstart", resetTimer);
+    };
+  }, [isFullscreen]);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+    }
   }, []);
+
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
+
+  // Swipe handler
+  const handleDragEnd = (_: any, info: PanInfo) => {
+    const threshold = 50;
+    if (info.offset.x < -threshold && info.velocity.x < 0) next();
+    else if (info.offset.x > threshold && info.velocity.x > 0) prev();
+  };
 
   if (!unlocked) return <PasswordGate onUnlock={() => setUnlocked(true)} />;
 
   const slide = slides[current];
+  const progress = ((current + 1) / slides.length) * 100;
+
+  const slideVariants = {
+    enter: (d: number) => ({ x: d > 0 ? 300 : -300, opacity: 0, scale: 0.95 }),
+    center: { x: 0, opacity: 1, scale: 1 },
+    exit: (d: number) => ({ x: d > 0 ? -300 : 300, opacity: 0, scale: 0.95 }),
+  };
 
   return (
-    <div className="min-h-screen flex flex-col select-none relative font-poppins">
+    <div className={`min-h-screen flex flex-col select-none relative font-poppins ${isFullscreen ? "bg-background" : ""}`}>
       <DeckBackground />
 
+      {/* Progress bar at very top */}
+      <div className="absolute top-0 left-0 right-0 z-30 h-[3px] bg-muted/20">
+        <motion.div
+          className="h-full bg-[image:var(--gradient-primary)] rounded-r-full"
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        />
+      </div>
+
       {/* Top bar */}
-      <div className="relative z-10 flex items-center justify-between px-4 md:px-8 py-3 border-b border-border/40 bg-card/60 backdrop-blur-xl">
+      <motion.div
+        animate={{ opacity: showControls ? 1 : 0, y: showControls ? 0 : -60 }}
+        transition={{ duration: 0.3 }}
+        className="relative z-20 flex items-center justify-between px-4 md:px-8 py-3 border-b border-border/30 bg-card/40 backdrop-blur-xl"
+      >
         <button
           onClick={() => navigate("/")}
-          className="text-muted-foreground hover:text-foreground transition-colors"
+          className="text-muted-foreground hover:text-foreground transition-colors p-1"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="flex items-center gap-2">
-          <img src={logo} alt="" className="w-6 h-6 rounded-md" />
-          <span className="text-xs tracking-widest uppercase text-muted-foreground font-medium">
-            Confidential
-          </span>
+        <div className="flex items-center gap-3">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowDrawer(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/40 hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-all text-xs"
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Slides</span>
+          </motion.button>
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="" className="w-5 h-5 rounded-md" />
+            <span className="text-xs tracking-widest uppercase text-muted-foreground font-medium hidden md:inline">
+              Confidential
+            </span>
+          </div>
         </div>
-        <span className="text-xs text-muted-foreground tabular-nums font-medium">
-          {current + 1} / {slides.length}
-        </span>
-      </div>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-muted-foreground tabular-nums font-medium">
+            {current + 1} / {slides.length}
+          </span>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={toggleFullscreen}
+            className="text-muted-foreground hover:text-foreground transition-colors p-1"
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </motion.button>
+        </div>
+      </motion.div>
 
-      {/* Slide area */}
-      <div className="relative z-10 flex-1 flex items-center justify-center p-6 md:p-16 overflow-hidden">
-        <AnimatePresence mode="wait">
+      {/* Slide area with drag/swipe */}
+      <div className="relative z-10 flex-1 flex items-center justify-center p-4 md:p-16 overflow-hidden">
+        <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={slide.id}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-            className="w-full max-w-5xl"
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.15}
+            onDragEnd={handleDragEnd}
+            style={{ x: dragX, opacity: dragOpacity }}
+            className="w-full max-w-5xl cursor-grab active:cursor-grabbing"
           >
-            {slide.label && (
-              <p className="text-xs uppercase tracking-[0.25em] text-primary mb-4 text-center font-bold">{slide.label}</p>
-            )}
-            {slide.title && (
-              <h2 className="text-3xl md:text-5xl font-bold text-foreground text-center mb-12 leading-tight">
-                {slide.title}
-              </h2>
-            )}
-            {slide.content}
+            <Stagger>
+              {slide.label && (
+                <FadeUp>
+                  <p className="text-xs uppercase tracking-[0.25em] text-primary mb-4 text-center font-bold">{slide.label}</p>
+                </FadeUp>
+              )}
+              {slide.title && (
+                <FadeUp>
+                  <h2 className="text-3xl md:text-5xl font-bold text-foreground text-center mb-12 leading-tight">
+                    {slide.title}
+                  </h2>
+                </FadeUp>
+              )}
+              <FadeUp>{slide.content}</FadeUp>
+            </Stagger>
           </motion.div>
         </AnimatePresence>
+
+        {/* Edge click zones for navigation */}
+        <button
+          onClick={prev}
+          className="absolute left-0 top-0 bottom-0 w-16 md:w-24 z-20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-start pl-2"
+          disabled={current === 0}
+        >
+          {current > 0 && <ChevronLeft className="w-8 h-8 text-muted-foreground/40" />}
+        </button>
+        <button
+          onClick={next}
+          className="absolute right-0 top-0 bottom-0 w-16 md:w-24 z-20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-end pr-2"
+          disabled={current === slides.length - 1}
+        >
+          {current < slides.length - 1 && <ChevronRight className="w-8 h-8 text-muted-foreground/40" />}
+        </button>
       </div>
 
-      {/* Navigation */}
-      <div className="relative z-10 flex items-center justify-center gap-6 pb-8">
+      {/* Bottom navigation */}
+      <motion.div
+        animate={{ opacity: showControls ? 1 : 0, y: showControls ? 0 : 60 }}
+        transition={{ duration: 0.3 }}
+        className="relative z-20 flex items-center justify-center gap-4 pb-6 pt-2"
+      >
         <Button
           variant="ghost"
           size="icon"
           disabled={current === 0}
-          onClick={() => setCurrent((c) => c - 1)}
-          className="text-muted-foreground hover:text-foreground w-10 h-10 rounded-full"
+          onClick={prev}
+          className="text-muted-foreground hover:text-foreground w-10 h-10 rounded-full hover:bg-muted/40"
         >
           <ChevronLeft className="w-5 h-5" />
         </Button>
 
-        {/* Progress bar */}
-        <div className="flex gap-1.5 items-center">
+        {/* Mini progress dots */}
+        <div className="flex gap-1 items-center">
           {slides.map((_, i) => (
-            <button
+            <motion.button
               key={i}
-              onClick={() => setCurrent(i)}
+              onClick={() => goTo(i)}
+              whileHover={{ scale: 1.3 }}
               className={`rounded-full transition-all duration-300 ${
                 i === current
-                  ? "bg-primary w-8 h-2.5 shadow-[var(--shadow-glow)]"
-                  : "w-2.5 h-2.5 bg-muted-foreground/15 hover:bg-muted-foreground/30"
+                  ? "bg-primary w-7 h-2.5 shadow-[var(--shadow-glow)]"
+                  : Math.abs(i - current) <= 3
+                    ? "w-2 h-2 bg-muted-foreground/20 hover:bg-muted-foreground/40"
+                    : "w-1.5 h-1.5 bg-muted-foreground/10"
               }`}
             />
           ))}
@@ -647,12 +846,24 @@ const PitchDeck = () => {
           variant="ghost"
           size="icon"
           disabled={current === slides.length - 1}
-          onClick={() => setCurrent((c) => c + 1)}
-          className="text-muted-foreground hover:text-foreground w-10 h-10 rounded-full"
+          onClick={next}
+          className="text-muted-foreground hover:text-foreground w-10 h-10 rounded-full hover:bg-muted/40"
         >
           <ChevronRight className="w-5 h-5" />
         </Button>
-      </div>
+      </motion.div>
+
+      {/* Slide drawer */}
+      <AnimatePresence>
+        {showDrawer && (
+          <SlideDrawer
+            slides={slides}
+            current={current}
+            onSelect={goTo}
+            onClose={() => setShowDrawer(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
