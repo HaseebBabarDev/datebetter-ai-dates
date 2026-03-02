@@ -1054,11 +1054,11 @@ const Dashboard = () => {
               {candidates.length > 0 && (
                 <button
                   onClick={() => {
-                    const activeCandidates = candidates.filter(c => c.status !== "archived");
-                    if (activeCandidates.length === 1) {
-                      setTextSimCandidate(activeCandidates[0]);
+                    const allCandidates = [...candidates];
+                    if (allCandidates.length === 1) {
+                      setTextSimCandidate(allCandidates[0]);
                       setTextSimOpen(true);
-                    } else if (activeCandidates.length > 0) {
+                    } else if (allCandidates.length > 0) {
                       setTextSimCandidate(null);
                       setTextSimOpen(true);
                     }
@@ -1892,29 +1892,31 @@ const Dashboard = () => {
 
       {/* Text Simulator - candidate picker + simulator */}
       {textSimOpen && !textSimCandidate && candidates.length > 1 && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center">
+        <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm">
           <motion.div
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="bg-background w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl p-4 space-y-3"
-            style={{ maxHeight: "70dvh" }}
+            className="bg-background w-full h-[100dvh] flex flex-col"
           >
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-foreground">Who do you want to text?</h3>
-              <Button variant="ghost" size="icon" onClick={() => setTextSimOpen(false)}>
-                <X className="w-5 h-5" />
-              </Button>
+            <div className="p-4 space-y-3 border-b border-border">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-foreground">Who do you want to text?</h3>
+                <Button variant="ghost" size="icon" onClick={() => setTextSimOpen(false)}>
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Pick a candidate to simulate a conversation with instead of reaching out.</p>
             </div>
-            <p className="text-xs text-muted-foreground">Pick a candidate to simulate a conversation with instead of reaching out.</p>
-            <div className="space-y-1 overflow-y-auto max-h-[50dvh]">
-              {candidates.filter(c => c.status !== "archived").map(c => (
+
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 pb-28 space-y-1">
+              {candidates.map(c => (
                 <button
                   key={c.id}
                   onClick={() => setTextSimCandidate(c)}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-left"
                 >
-                  <div className="w-8 h-8 rounded-full bg-[#007AFF] flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-semibold shrink-0">
                     {c.nickname.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
