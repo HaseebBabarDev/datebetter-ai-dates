@@ -169,8 +169,7 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="bg-background w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl flex flex-col pb-20 sm:pb-0"
-          style={{ maxHeight: "calc(100dvh - 2rem)" }}
+          className="bg-background w-full h-[100dvh] flex flex-col"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
