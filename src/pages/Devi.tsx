@@ -1873,6 +1873,19 @@ const Devi = () => {
                 <Plus className="w-4 h-4" />
                 Start new chat
               </Button>
+
+              {pendingCandidateSelection && (
+                <TextSimulatorCTA
+                  candidateName={pendingCandidateSelection.nickname}
+                  candidateId={pendingCandidateSelection.id}
+                  candidateContext={[
+                    pendingCandidateSelection.notes,
+                    pendingCandidateSelection.status ? `Status: ${pendingCandidateSelection.status}` : null,
+                    pendingCandidateSelection.their_attachment_style ? `Attachment: ${pendingCandidateSelection.their_attachment_style}` : null,
+                  ].filter(Boolean).join(". ")}
+                  userGender={userProfile?.gender_identity?.includes("man") ? "male" : "female"}
+                />
+              )}
             </div>
           </div>
         </DialogContent>
