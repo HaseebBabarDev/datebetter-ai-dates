@@ -100,6 +100,53 @@ const DraggableList: React.FC<DraggableListProps> = ({
     setOverIndex(null);
   }, [dragIndex, overIndex, list, onReorder]);
 
+  const handleTouchStart = useCallback((idx: number, e: React.TouchEvent) => {
+    setDragIndex(idx);
+    const touch = e.touches[0];
+    touchStartY.current = touch.clientY;
+  }, []);
+
+  const touchStartY = useRef<number>(0);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (dragIndex === null) return;
+    const touch = e.touches[0];
+    const elements = itemRefs.current;
+    for (let i = 0; i < elements.length; i++) {
+      const el = elements[i];
+      if (!el) continue;
+      const rect = el.getBoundingClientRect();
+      if (touch.clientY >= rect.top && touch.clientY <= rect.bottom && i !== dragIndex) {
+        setOverIndex(i);
+        break;
+      }
+    }
+  }, [dragIndex]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (dragIndex === null || overIndex === null || dragIndex === overIndex) {
+      setDragIndex(null);
+      setOverIndex(null);
+      return;
+    }
+
+    const reordered = [...list];
+    const [moved] = reordered.splice(dragIndex, 1);
+    reordered.splice(overIndex, 0, moved);
+
+    setList(reordered);
+    onReorder(reordered);
+
+    if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(() => {
+      saveSortOrder(reordered);
+    }, 600);
+
+    setDragIndex(null);
+    setOverIndex(null);
+  }, [dragIndex, overIndex, list, onReorder]);
+
   return (
     <div className="space-y-3">
       {list.map((candidate, idx) => {
@@ -109,11 +156,15 @@ const DraggableList: React.FC<DraggableListProps> = ({
         return (
           <div
             key={candidate.id}
+            ref={(el) => { itemRefs.current[idx] = el; }}
             draggable
             onDragStart={() => handleDragStart(idx)}
             onDragEnter={() => handleDragEnter(idx)}
             onDragEnd={handleDragEnd}
             onDragOver={(e) => e.preventDefault()}
+            onTouchStart={(e) => handleTouchStart(idx, e)}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             className={`group relative transition-all duration-150 ${
               isDragging ? "opacity-40 scale-[0.98]" : "opacity-100"
             } ${isOver ? "translate-y-1" : ""}`}
@@ -122,11 +173,11 @@ const DraggableList: React.FC<DraggableListProps> = ({
               <div className="absolute -top-1.5 left-0 right-0 h-0.5 rounded-full bg-primary z-10" />
             )}
 
-            <div className="absolute left-0 top-0 bottom-0 flex items-center pl-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing">
+            <div className="absolute left-0 top-0 bottom-0 flex items-center pl-1 z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing touch-none">
               <GripVertical className="w-4 h-4 text-muted-foreground/50" />
             </div>
 
-            <div className="pl-4">
+            <div className="pl-5">
               <CandidateCard
                 candidate={candidate}
                 onUpdate={onUpdate}
