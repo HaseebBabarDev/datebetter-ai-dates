@@ -23,7 +23,8 @@ import {
   Activity,
   TrendingUp,
   Calendar,
-  Calculator
+  Calculator,
+  Presentation
 } from "lucide-react";
 import { RevenueAnalytics } from "@/components/admin/RevenueAnalytics";
 import { AICostAnalytics } from "@/components/admin/AICostAnalytics";
@@ -39,6 +40,7 @@ import { AdminReferralsSection } from "@/components/admin/AdminReferralsSection"
 import { AdminAgreementsSection } from "@/components/admin/AdminAgreementsSection";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { AdminMessaging } from "@/components/admin/AdminMessaging";
+import { PitchDeckAnalytics } from "@/components/admin/PitchDeckAnalytics";
 
 const AdminDashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -160,7 +162,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-7xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-11 h-auto gap-1 bg-muted/50 p-1 rounded-xl">
+          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12 h-auto gap-1 bg-muted/50 p-1 rounded-xl">
             <TabsTrigger value="overview" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
 
               <BarChart3 className="w-4 h-4" />
@@ -205,6 +207,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="legal" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
               <ScrollText className="w-4 h-4" />
               <span className="hidden sm:inline">Legal</span>
+            </TabsTrigger>
+            <TabsTrigger value="pitch-deck" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
+              <Presentation className="w-4 h-4" />
+              <span className="hidden sm:inline">Pitch Deck</span>
             </TabsTrigger>
           </TabsList>
 
@@ -268,6 +274,10 @@ const AdminDashboard = () => {
                 </div>
               </div>
             </CalculatorPasswordGate>
+          </TabsContent>
+
+          <TabsContent value="pitch-deck" className="space-y-6">
+            <PitchDeckAnalytics />
           </TabsContent>
         </Tabs>
       </main>

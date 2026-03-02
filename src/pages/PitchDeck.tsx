@@ -10,7 +10,25 @@ import { ScreenshotDemo } from "@/components/website/ScreenshotDemo";
 import { CompatibilityDemo } from "@/components/website/CompatibilityDemo";
 import { ChatDemo } from "@/components/website/ChatDemo";
 
-const DECK_PASSWORD = "DateBetter2025";
+const DECK_PASSWORD = "DB2025Invest";
+
+/* ─── Track view ─── */
+const trackView = async (slidesViewed = 1) => {
+  try {
+    const sessionId = sessionStorage.getItem("pitch_session_id") || crypto.randomUUID();
+    sessionStorage.setItem("pitch_session_id", sessionId);
+    await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/track-pitch-view`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+        body: JSON.stringify({ session_id: sessionId, slides_viewed: slidesViewed }),
+      }
+    );
+  } catch {
+    // silent fail
+  }
+};
 
 /* ─── Staggered children wrapper ─── */
 const staggerContainer = {
@@ -454,6 +472,7 @@ const PasswordGate = ({ onUnlock }: { onUnlock: () => void }) => {
     e.preventDefault();
     if (pw === DECK_PASSWORD) {
       sessionStorage.setItem("pitch_unlocked", "1");
+      trackView(1);
       onUnlock();
     } else {
       setError(true);
