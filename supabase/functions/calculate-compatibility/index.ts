@@ -302,9 +302,15 @@ serve(async (req) => {
     let hasObsessiveContactPattern = false; // User keeps contacting after being ghosted/blocked
     let hasCandidateHarassment = false; // Candidate obsessively contacts/stalks user
     let hasDiscriminatoryBehavior = false; // Fat shaming, racism, degrading remarks
+    let hasManipulationPattern = false; // Gaslighting, manipulation, toxic behavior
     let shouldEndRelationship = false; // When true, score will be capped very low
     let recentPositiveStreak = 0; // Track consecutive positive recent interactions for recovery
     let recoveryBonusFromStreak = 0; // Derived from streak; used to relax caps gradually
+
+    // CHECK 0: Archived candidates with end reasons should be treated as ended relationships
+    if (candidate.status === "archived" || candidate.status === "no_contact") {
+      console.log(`Candidate status is ${candidate.status} - checking for relationship-ending signals`);
+    }
 
     // IMPORTANT: Some relationship-ending patterns (e.g. love bombing) may be present in older
     // interactions that fall outside the "recent 10" window. We still need to honor those
@@ -320,44 +326,93 @@ serve(async (req) => {
         [
           "notes.ilike.%ghost%",
           "notes.ilike.%blocked%",
+          "notes.ilike.%block her%",
+          "notes.ilike.%block him%",
+          "notes.ilike.%i blocked%",
           "notes.ilike.%love bomb%",
           "notes.ilike.%lovebomb%",
           "notes.ilike.%post intimacy%",
           "notes.ilike.%dropped off after sex%",
           "notes.ilike.%changed after intimacy%",
           "notes.ilike.%different after sex%",
+          "notes.ilike.%gaslight%",
+          "notes.ilike.%manipulat%",
+          "notes.ilike.%toxic%",
+          "notes.ilike.%narcissis%",
+          "notes.ilike.%abusive%",
+          "notes.ilike.%unhinged%",
         ].join(",")
       )
       .limit(50);
+
+    // ALSO check D.E.V.I. conversation for relationship-ending signals
+    // D.E.V.I. may have advised blocking/ending that isn't captured in interaction notes
+    const { data: deviEndSignals } = await supabase
+      .from("devi_messages")
+      .select("content, role")
+      .in("conversation_id", 
+        (await supabase
+          .from("devi_conversations")
+          .select("id")
+          .eq("candidate_id", candidateId)
+          .eq("user_id", user.id)
+          .limit(5)
+        ).data?.map((c: any) => c.id) || []
+      )
+      .order("created_at", { ascending: false })
+      .limit(30);
+
+    // Check D.E.V.I. messages for relationship-ending context
+    const deviText = (deviEndSignals || []).map((m: any) => (m.content || "").toLowerCase()).join(" ");
+    const hasDeviEndSignal = 
+      (deviText.includes("block her") || deviText.includes("block him") || deviText.includes("block them") ||
+       deviText.includes("i blocked") || deviText.includes("go block") ||
+       deviText.includes("relationship is officially ended") ||
+       deviText.includes("end this relationship") || deviText.includes("let's end this") ||
+       deviText.includes("gaslighting") || deviText.includes("manipulation") || deviText.includes("manipulative") ||
+       deviText.includes("narcissis") || deviText.includes("toxic"));
+
+    if (hasDeviEndSignal) {
+      console.log("DETECTED: D.E.V.I. conversation contains relationship-ending signals (blocking/ending/manipulation)");
+      shouldEndRelationship = true;
+    }
 
     const historicalFlagText = `${(historicalFlagInteractions || [])
       .map((r: any) => r.notes || "")
       .join(" ")} ${(candidate.notes || "")}`.toLowerCase();
 
     const hasHistoricalGhosting = historicalFlagText.includes("ghost");
-    const hasHistoricalBlocked = historicalFlagText.includes("blocked");
+    const hasHistoricalBlocked = historicalFlagText.includes("blocked") || 
+      historicalFlagText.includes("block her") || historicalFlagText.includes("block him") ||
+      historicalFlagText.includes("i blocked");
     const hasHistoricalLoveBombing = historicalFlagText.includes("love bomb");
     const hasHistoricalPostIntimacy =
       historicalFlagText.includes("post intimacy") ||
       historicalFlagText.includes("dropped off after sex") ||
       historicalFlagText.includes("changed after intimacy") ||
       historicalFlagText.includes("different after sex");
+    const hasHistoricalManipulation = 
+      historicalFlagText.includes("gaslight") || historicalFlagText.includes("manipulat") ||
+      historicalFlagText.includes("narcissis") || historicalFlagText.includes("toxic") ||
+      historicalFlagText.includes("abusive") || historicalFlagText.includes("unhinged");
 
     if (hasHistoricalGhosting) hasGhostingPattern = true;
     if (hasHistoricalBlocked) hasBlockedPattern = true;
     if (hasHistoricalLoveBombing) hasLoveBombingPattern = true;
     if (hasHistoricalPostIntimacy) hasPostIntimacyDropOff = true;
+    if (hasHistoricalManipulation) hasManipulationPattern = true;
 
     // If any historical "relationship-ending" pattern exists, keep low-cap mode on.
     if (
       hasHistoricalGhosting ||
       hasHistoricalBlocked ||
       hasHistoricalLoveBombing ||
-      hasHistoricalPostIntimacy
+      hasHistoricalPostIntimacy ||
+      hasHistoricalManipulation
     ) {
       shouldEndRelationship = true;
       console.log(
-        `HISTORICAL FLAGS: end-mode enabled (ghosting=${hasHistoricalGhosting}, blocked=${hasHistoricalBlocked}, loveBomb=${hasHistoricalLoveBombing}, postIntimacy=${hasHistoricalPostIntimacy})`
+        `HISTORICAL FLAGS: end-mode enabled (ghosting=${hasHistoricalGhosting}, blocked=${hasHistoricalBlocked}, loveBomb=${hasHistoricalLoveBombing}, postIntimacy=${hasHistoricalPostIntimacy}, manipulation=${hasHistoricalManipulation})`
       );
     }
 
@@ -472,8 +527,12 @@ serve(async (req) => {
         console.log("DETECTED: Ghosting pattern - RELATIONSHIP SHOULD END");
       }
       
-      // 2. Blocked detection
-      const blockedIndicators = ["blocked me", "got blocked", "they blocked", "blocked on", "unfriended", "removed me"];
+      // 2. Blocked detection (both directions - they blocked user OR user blocked them)
+      const blockedIndicators = [
+        "blocked me", "got blocked", "they blocked", "blocked on", "unfriended", "removed me",
+        "i blocked", "blocked her", "blocked him", "blocked them", "block her", "block him", "block them",
+        "go block", "should block", "need to block"
+      ];
       hasBlockedPattern = blockedIndicators.some(phrase => combinedNotes.includes(phrase));
       if (hasBlockedPattern) {
         shouldEndRelationship = true;
@@ -503,6 +562,30 @@ serve(async (req) => {
         shouldEndRelationship = true;
         interactionSentiment -= 70; // Severe penalty - this is unacceptable
         console.log("DETECTED: Discriminatory/degrading behavior - RELATIONSHIP SHOULD END IMMEDIATELY");
+      }
+      
+      // 3d. Manipulation/gaslighting/toxic behavior detection
+      const manipulationPhrases = [
+        "gaslighting", "gaslit", "gaslights", "gas lighting",
+        "manipulative", "manipulating", "manipulation", "manipulated",
+        "narcissist", "narcissistic", "narcissism",
+        "toxic", "toxic behavior", "toxic person", "toxic relationship",
+        "abusive", "emotional abuse", "emotionally abusive", "mentally abusive",
+        "unhinged", "crazy behavior", "psycho", "unstable",
+        "controlling", "control freak", "controls me", "controlling behavior",
+        "lying constantly", "compulsive liar", "pathological liar", "keeps lying",
+        "playing mind games", "mind games", "playing games",
+        "weaponizing", "weaponized", "using against me",
+        "false accusations", "falsely accused", "making up stories",
+        "twisting my words", "twists everything", "distorts reality",
+        "blame shifting", "never takes responsibility", "always my fault",
+        "boundary violation", "violates my boundaries", "doesn't respect boundaries",
+      ];
+      hasManipulationPattern = manipulationPhrases.some(phrase => combinedNotes.includes(phrase));
+      if (hasManipulationPattern) {
+        shouldEndRelationship = true;
+        interactionSentiment -= 65; // Very severe - manipulation is a deal-breaker
+        console.log("DETECTED: Manipulation/gaslighting/toxic behavior - RELATIONSHIP SHOULD END");
       }
       
       // 4. Love bombing detection
