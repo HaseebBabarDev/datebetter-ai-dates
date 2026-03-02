@@ -442,6 +442,38 @@ const slides = [
   },
 ];
 
+/* ─── Animated Background ─── */
+const DeckBackground = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 bg-[image:var(--gradient-page)]" />
+    <motion.div
+      className="absolute w-[600px] h-[600px] rounded-full bg-primary/10 blur-[150px]"
+      animate={{ x: [0, 80, -40, 0], y: [0, -60, 40, 0] }}
+      transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+      style={{ top: "-10%", right: "10%" }}
+    />
+    <motion.div
+      className="absolute w-[500px] h-[500px] rounded-full bg-secondary/10 blur-[130px]"
+      animate={{ x: [0, -60, 50, 0], y: [0, 50, -30, 0] }}
+      transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+      style={{ bottom: "-5%", left: "5%" }}
+    />
+    <motion.div
+      className="absolute w-[300px] h-[300px] rounded-full bg-accent/8 blur-[100px]"
+      animate={{ x: [0, 40, -20, 0], y: [0, -40, 20, 0] }}
+      transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+      style={{ top: "40%", left: "40%" }}
+    />
+    <div
+      className="absolute inset-0 opacity-[0.03]"
+      style={{
+        backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`,
+        backgroundSize: "60px 60px",
+      }}
+    />
+  </div>
+);
+
 /* ─── Password Gate ─── */
 const PasswordGate = ({ onUnlock }: { onUnlock: () => void }) => {
   const [pw, setPw] = useState("");
@@ -460,24 +492,22 @@ const PasswordGate = ({ onUnlock }: { onUnlock: () => void }) => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      {/* Glow orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/3 w-72 h-72 rounded-full bg-primary/15 blur-[100px]" />
-        <div className="absolute bottom-1/3 right-1/4 w-56 h-56 rounded-full bg-secondary/15 blur-[80px]" />
-      </div>
+    <div className="min-h-screen flex items-center justify-center p-4 relative font-poppins">
+      <DeckBackground />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-sm relative z-10"
       >
-        <div className="rounded-2xl border border-border bg-card p-8 shadow-[var(--shadow-elegant)]">
-          <div className="flex flex-col items-center mb-6">
-            <img src={logo} alt="DateBetter" className="w-16 h-16 rounded-2xl shadow-[var(--shadow-soft)] mb-4" />
-            <h1 className="text-xl font-semibold font-poppins bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">
+        <div className="rounded-3xl border border-border/60 bg-card/80 backdrop-blur-xl p-10 shadow-[var(--shadow-elegant)]">
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-20 h-20 rounded-2xl shadow-[var(--shadow-glow)] mb-5 overflow-hidden ring-2 ring-primary/20">
+              <img src={logo} alt="DateBetter" className="w-full h-full object-cover" />
+            </div>
+            <h1 className="text-2xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">
               dateBetter Pitch Deck
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">Enter password to continue</p>
+            <p className="text-sm text-muted-foreground mt-2">Enter password to continue</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="relative">
@@ -486,7 +516,7 @@ const PasswordGate = ({ onUnlock }: { onUnlock: () => void }) => {
                 value={pw}
                 onChange={(e) => { setPw(e.target.value); setError(false); }}
                 placeholder="Password"
-                className="pr-10"
+                className="pr-10 h-12 rounded-xl bg-background/60 border-border/60 font-poppins"
               />
               <button
                 type="button"
@@ -500,7 +530,7 @@ const PasswordGate = ({ onUnlock }: { onUnlock: () => void }) => {
             <Button
               type="submit"
               disabled={!pw}
-              className="w-full bg-[image:var(--gradient-primary)] text-primary-foreground border-0 shadow-[var(--shadow-soft)]"
+              className="w-full h-12 rounded-xl bg-[image:var(--gradient-primary)] text-primary-foreground border-0 shadow-[var(--shadow-soft)] text-base font-semibold font-poppins"
             >
               View Deck
             </Button>
@@ -540,15 +570,11 @@ const PitchDeck = () => {
   const slide = slides[current];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col select-none relative">
-      {/* Subtle glow background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-1/4 w-96 h-96 rounded-full bg-primary/8 blur-[120px]" />
-        <div className="absolute bottom-0 left-1/4 w-80 h-80 rounded-full bg-secondary/8 blur-[100px]" />
-      </div>
+    <div className="min-h-screen flex flex-col select-none relative font-poppins">
+      <DeckBackground />
 
       {/* Top bar */}
-      <div className="relative z-10 flex items-center justify-between px-4 md:px-8 py-3 border-b border-border/60 bg-background/80 backdrop-blur-sm">
+      <div className="relative z-10 flex items-center justify-between px-4 md:px-8 py-3 border-b border-border/40 bg-card/60 backdrop-blur-xl">
         <button
           onClick={() => navigate("/")}
           className="text-muted-foreground hover:text-foreground transition-colors"
@@ -561,27 +587,27 @@ const PitchDeck = () => {
             Confidential
           </span>
         </div>
-        <span className="text-xs text-muted-foreground tabular-nums">
+        <span className="text-xs text-muted-foreground tabular-nums font-medium">
           {current + 1} / {slides.length}
         </span>
       </div>
 
       {/* Slide area */}
-      <div className="relative z-10 flex-1 flex items-center justify-center p-6 md:p-12 overflow-hidden">
+      <div className="relative z-10 flex-1 flex items-center justify-center p-6 md:p-16 overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={slide.id}
-            initial={{ opacity: 0, x: 40 }}
+            initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
-            transition={{ duration: 0.3 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
             className="w-full max-w-5xl"
           >
             {slide.label && (
-              <p className="text-xs uppercase tracking-[0.2em] text-primary mb-3 text-center font-semibold">{slide.label}</p>
+              <p className="text-xs uppercase tracking-[0.25em] text-primary mb-4 text-center font-bold">{slide.label}</p>
             )}
             {slide.title && (
-              <h2 className="text-2xl md:text-4xl font-semibold text-foreground text-center mb-10 leading-tight">
+              <h2 className="text-3xl md:text-5xl font-bold text-foreground text-center mb-12 leading-tight">
                 {slide.title}
               </h2>
             )}
@@ -591,25 +617,27 @@ const PitchDeck = () => {
       </div>
 
       {/* Navigation */}
-      <div className="relative z-10 flex items-center justify-center gap-4 pb-6">
+      <div className="relative z-10 flex items-center justify-center gap-6 pb-8">
         <Button
           variant="ghost"
           size="icon"
           disabled={current === 0}
           onClick={() => setCurrent((c) => c - 1)}
-          className="text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground w-10 h-10 rounded-full"
         >
           <ChevronLeft className="w-5 h-5" />
         </Button>
 
-        {/* Progress dots */}
-        <div className="flex gap-1.5">
+        {/* Progress bar */}
+        <div className="flex gap-1.5 items-center">
           {slides.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrent(i)}
-              className={`h-2 rounded-full transition-all ${
-                i === current ? "bg-primary w-6" : "w-2 bg-muted-foreground/20 hover:bg-muted-foreground/40"
+              className={`rounded-full transition-all duration-300 ${
+                i === current
+                  ? "bg-primary w-8 h-2.5 shadow-[var(--shadow-glow)]"
+                  : "w-2.5 h-2.5 bg-muted-foreground/15 hover:bg-muted-foreground/30"
               }`}
             />
           ))}
@@ -620,7 +648,7 @@ const PitchDeck = () => {
           size="icon"
           disabled={current === slides.length - 1}
           onClick={() => setCurrent((c) => c + 1)}
-          className="text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground w-10 h-10 rounded-full"
         >
           <ChevronRight className="w-5 h-5" />
         </Button>
