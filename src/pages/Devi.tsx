@@ -54,6 +54,46 @@ import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
 
+const buildSimulatorContext = (c: Candidate): string => {
+  const flags = (arr: unknown) => Array.isArray(arr) && arr.length > 0 ? arr.join(", ") : null;
+  const parts: (string | null)[] = [
+    c.notes,
+    c.status ? `Current status: ${c.status.replace(/_/g, " ")}` : null,
+    c.their_attachment_style ? `Their attachment style: ${c.their_attachment_style}` : null,
+    c.their_relationship_goal ? `Their relationship goal: ${c.their_relationship_goal.replace(/_/g, " ")}` : null,
+    c.their_relationship_status ? `Their relationship status: ${c.their_relationship_status.replace(/_/g, " ")}` : null,
+    c.end_reason ? `Reason the relationship ended: ${c.end_reason}` : null,
+    flags(c.red_flags) ? `Red flags observed: ${flags(c.red_flags)}` : null,
+    flags(c.green_flags) ? `Green flags observed: ${flags(c.green_flags)}` : null,
+    flags(c.cons) ? `Cons: ${flags(c.cons)}` : null,
+    flags(c.pros) ? `Pros: ${flags(c.pros)}` : null,
+    c.met_via ? `Met via: ${c.met_via}${c.met_app ? ` (${c.met_app})` : ""}` : null,
+    c.their_social_style ? `Social style: ${c.their_social_style}` : null,
+    c.their_in_therapy ? `In therapy: ${c.their_in_therapy}` : null,
+    c.their_mental_health_awareness ? `Mental health awareness: ${c.their_mental_health_awareness}` : null,
+    c.their_drinking ? `Drinking: ${c.their_drinking}` : null,
+    c.their_smoking ? `Smoking: ${c.their_smoking}` : null,
+    c.their_kids_desire ? `Kids desire: ${c.their_kids_desire.replace(/_/g, " ")}` : null,
+    c.their_religion ? `Religion: ${c.their_religion}` : null,
+    c.their_politics ? `Politics: ${c.their_politics}` : null,
+    c.their_career_stage ? `Career stage: ${c.their_career_stage}` : null,
+    c.their_education_level ? `Education: ${c.their_education_level}` : null,
+    c.their_schedule_flexibility ? `Schedule flexibility: ${c.their_schedule_flexibility}` : null,
+    c.their_family_stability ? `Family stability: ${c.their_family_stability}` : null,
+    c.their_parents_relationship ? `Parents relationship: ${c.their_parents_relationship}` : null,
+    flags(c.their_parent_wounds) ? `Parent wounds: ${flags(c.their_parent_wounds)}` : null,
+    flags(c.their_generational_patterns) ? `Generational patterns: ${flags(c.their_generational_patterns)}` : null,
+    c.their_family_notes ? `Family notes: ${c.their_family_notes}` : null,
+    c.their_relationship_notes ? `Relationship notes: ${c.their_relationship_notes}` : null,
+    c.user_goal_for_candidate ? `User's goal for this person: ${c.user_goal_for_candidate}` : null,
+    c.no_contact_active ? `Currently in no-contact mode (day ${c.no_contact_day || 0})` : null,
+    c.ai_description ? `AI description: ${c.ai_description}` : null,
+    c.distance_approximation ? `Distance: ${c.distance_approximation}` : null,
+    c.age ? `Age: ${c.age}` : null,
+    c.zodiac_sign ? `Zodiac: ${c.zodiac_sign}` : null,
+  ];
+  return parts.filter(Boolean).join(". ");
+};
 interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -1903,11 +1943,7 @@ const Devi = () => {
           }}
           candidateName={pendingCandidateSelection.nickname}
           candidateId={pendingCandidateSelection.id}
-          candidateContext={[
-            pendingCandidateSelection.notes,
-            pendingCandidateSelection.status ? `Status: ${pendingCandidateSelection.status}` : null,
-            pendingCandidateSelection.their_attachment_style ? `Attachment: ${pendingCandidateSelection.their_attachment_style}` : null,
-          ].filter(Boolean).join(". ")}
+           candidateContext={buildSimulatorContext(pendingCandidateSelection)}
           userGender={userProfile?.gender_identity?.includes("man") ? "male" : "female"}
         />
       )}
@@ -2080,11 +2116,7 @@ const Devi = () => {
                       <TextSimulatorCTA
                         candidateName={selectedCandidate.nickname}
                         candidateId={selectedCandidate.id}
-                        candidateContext={[
-                          selectedCandidate.notes,
-                          selectedCandidate.status ? `Status: ${selectedCandidate.status}` : null,
-                          selectedCandidate.their_attachment_style ? `Attachment: ${selectedCandidate.their_attachment_style}` : null,
-                        ].filter(Boolean).join(". ")}
+                        candidateContext={buildSimulatorContext(selectedCandidate)}
                         userGender={userProfile?.gender_identity?.includes("man") ? "male" : "female"}
                       />
                     </div>
