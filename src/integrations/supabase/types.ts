@@ -1867,6 +1867,47 @@ export type Database = {
         }
         Relationships: []
       }
+      text_simulator_sessions: {
+        Row: {
+          candidate_id: string
+          created_at: string
+          id: string
+          is_complete: boolean
+          messages: Json
+          turn_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          messages?: Json
+          turn_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          messages?: Json
+          turn_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "text_simulator_sessions_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usage_tracking: {
         Row: {
           candidate_id: string
