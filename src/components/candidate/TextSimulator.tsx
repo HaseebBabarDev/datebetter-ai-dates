@@ -265,22 +265,35 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
               <motion.div
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center py-4 space-y-2"
+                className="text-center py-4 space-y-3 px-4"
               >
-                <p className="text-xs text-muted-foreground leading-relaxed px-4">
-                  You've had a good conversation. The goal was closure — and you've said what you needed to say. 💜
-                </p>
-                <p className="text-[10px] text-muted-foreground">
-                  If you need more support, talk to D.E.V.I. or a trusted friend.
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  We recommend closing it out here. You've said what you needed to say — and that takes courage. 💜
                 </p>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => onOpenChange(false)}
-                  className="text-xs"
+                  className="text-xs w-full"
                 >
                   Close & Move Forward
                 </Button>
+                <div className="pt-1 border-t border-border mt-2">
+                  <p className="text-[10px] text-muted-foreground leading-relaxed mb-2">
+                    Want unlimited daily access to the Text Simulator?
+                  </p>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => {
+                      onOpenChange(false);
+                      window.location.href = "/subscription";
+                    }}
+                    className="text-xs w-full bg-[#007AFF] hover:bg-[#0066DD] text-white"
+                  >
+                    Unlock Daily Access · $29.99/mo
+                  </Button>
+                </div>
               </motion.div>
             )}
           </div>
