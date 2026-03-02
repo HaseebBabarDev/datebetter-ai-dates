@@ -944,6 +944,48 @@ export type Database = {
           },
         ]
       }
+      pitch_deck_views: {
+        Row: {
+          city: string | null
+          country: string | null
+          country_code: string | null
+          id: string
+          region: string | null
+          session_id: string | null
+          slides_viewed: number | null
+          user_agent: string | null
+          viewed_at: string
+          viewer_email: string | null
+          viewer_ip: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          country_code?: string | null
+          id?: string
+          region?: string | null
+          session_id?: string | null
+          slides_viewed?: number | null
+          user_agent?: string | null
+          viewed_at?: string
+          viewer_email?: string | null
+          viewer_ip?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          country_code?: string | null
+          id?: string
+          region?: string | null
+          session_id?: string | null
+          slides_viewed?: number | null
+          user_agent?: string | null
+          viewed_at?: string
+          viewer_email?: string | null
+          viewer_ip?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           abuse_history: Json | null
