@@ -86,6 +86,7 @@ import { TextSimulator } from "@/components/candidate/TextSimulator";
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
+type SimulatorSession = Tables<"text_simulator_sessions">;
 
 type AdminMessage = {
   id: string;
@@ -155,6 +156,7 @@ const Dashboard = () => {
   const [sendingReply, setSendingReply] = useState(false);
   const [textSimOpen, setTextSimOpen] = useState(false);
   const [textSimCandidate, setTextSimCandidate] = useState<Candidate | null>(null);
+  const [simSessions, setSimSessions] = useState<SimulatorSession[]>([]);
   
   // Devi wins tracking
   const { wins, refetch: refetchWins } = useDeviWins(user?.id);
@@ -352,17 +354,19 @@ const Dashboard = () => {
 
   const fetchData = useCallback(async () => {
     try {
-      const [profileRes, candidatesRes, interactionsRes, adminMsgsRes] = await Promise.all([
+      const [profileRes, candidatesRes, interactionsRes, adminMsgsRes, simSessionsRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", user!.id).single(),
         supabase.from("candidates").select("*").eq("user_id", user!.id).order("updated_at", { ascending: false }),
         supabase.from("interactions").select("*").eq("user_id", user!.id).order("interaction_date", { ascending: false }).limit(50),
         supabase.from("admin_messages").select("*").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(10),
+        supabase.from("text_simulator_sessions").select("*").eq("user_id", user!.id).order("created_at", { ascending: false }),
       ]);
 
       if (profileRes.data) setProfile(profileRes.data);
       if (candidatesRes.data) setCandidates(candidatesRes.data);
       if (interactionsRes.data) setInteractions(interactionsRes.data);
       if (adminMsgsRes.data) setAdminMessages(adminMsgsRes.data as AdminMessage[]);
+      if (simSessionsRes.data) setSimSessions(simSessionsRes.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -1188,7 +1192,7 @@ const Dashboard = () => {
 
             {/* Quick Stats */}
             <motion.div 
-              className="grid grid-cols-3 gap-2"
+              className="grid grid-cols-4 gap-2"
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -1244,6 +1248,34 @@ const Dashboard = () => {
                   {recap.badCandidates.length}
                 </motion.div>
                 <div className="text-[10px] text-muted-foreground font-medium">Watch Out</div>
+              </motion.button>
+              <motion.button 
+                className="rounded-xl p-3 bg-card/80 backdrop-blur-sm border border-border/60 text-center transition-all duration-200 shadow-sm hover:shadow-md" 
+                onClick={() => {
+                  if (candidates.length > 0) {
+                    const allCandidates = [...candidates];
+                    if (allCandidates.length === 1) {
+                      setTextSimCandidate(allCandidates[0]);
+                      setTextSimOpen(true);
+                    } else {
+                      setTextSimCandidate(null);
+                      setTextSimOpen(true);
+                    }
+                  }
+                }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                <motion.div 
+                  className="text-xl font-bold text-foreground"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: 0.15, ease: "easeOut" }}
+                >
+                  {simSessions.length}
+                </motion.div>
+                <div className="text-[10px] text-muted-foreground font-medium">Closure</div>
               </motion.button>
             </motion.div>
 

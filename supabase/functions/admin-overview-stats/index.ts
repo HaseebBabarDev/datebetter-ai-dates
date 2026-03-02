@@ -147,6 +147,7 @@ Deno.serve(async (req) => {
       messagesResult,
       postsResult,
       commentsResult,
+      simSessionsResult,
     ] = await Promise.all([
       buildFilteredQuery("user_roles", "user_id").eq("role", "admin"),
       buildFilteredQuery("candidates"),
@@ -155,6 +156,7 @@ Deno.serve(async (req) => {
       buildFilteredQuery("devi_messages"),
       buildFilteredQuery("forum_posts"),
       buildFilteredQuery("forum_comments"),
+      buildFilteredQuery("text_simulator_sessions"),
     ]);
 
     const stats = {
@@ -166,6 +168,7 @@ Deno.serve(async (req) => {
       totalMessages: messagesResult.count || 0,
       totalPosts: postsResult.count || 0,
       totalComments: commentsResult.count || 0,
+      totalSimSessions: simSessionsResult.count || 0,
       newUsersToday,
       newUsersThisWeek,
       internalUsers: internalUserIds.size,

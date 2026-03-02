@@ -13,7 +13,8 @@ import {
   Shield,
   Loader2,
   FlaskConical,
-  UserCheck
+  UserCheck,
+  MessageCircle
 } from "lucide-react";
 import { useTesterFilter } from "@/hooks/useTesterFilter";
 
@@ -26,6 +27,7 @@ interface OverviewStats {
   totalMessages: number;
   totalPosts: number;
   totalComments: number;
+  totalSimSessions: number;
   newUsersToday: number;
   newUsersThisWeek: number;
   activeUsersToday: number;
@@ -82,6 +84,7 @@ export function AdminOverview() {
           activeUsersToday: 0,
           internalUsers: data.stats.internalUsers || 0,
           externalUsers: data.stats.externalUsers || 0,
+          totalSimSessions: data.stats.totalSimSessions || 0,
         });
       }
     } catch (error) {
@@ -185,6 +188,13 @@ export function AdminOverview() {
       icon: MessageSquare, 
       color: "text-amber-500",
       bgColor: "bg-amber-500/10"
+    },
+    { 
+      title: "Simulator Sessions", 
+      value: stats.totalSimSessions, 
+      icon: MessageCircle, 
+      color: "text-teal-500",
+      bgColor: "bg-teal-500/10"
     },
   ];
 
