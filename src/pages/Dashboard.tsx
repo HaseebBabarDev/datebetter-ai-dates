@@ -44,6 +44,7 @@ import {
   Send,
   Loader2,
   MessageSquare,
+  MessageCircle,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -80,6 +81,7 @@ import { FeatureTourDialog } from "@/components/onboarding/FeatureTourDialog";
 import { useFeatureTour } from "@/hooks/useFeatureTour";
 import { DeviIntroDialog } from "@/components/devi/DeviIntroDialog";
 import { useDeviIntro } from "@/hooks/useDeviIntro";
+import { TextSimulator } from "@/components/candidate/TextSimulator";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -151,6 +153,8 @@ const Dashboard = () => {
   const [replyingToMessage, setReplyingToMessage] = useState<AdminMessage | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
+  const [textSimOpen, setTextSimOpen] = useState(false);
+  const [textSimCandidate, setTextSimCandidate] = useState<Candidate | null>(null);
   
   // Devi wins tracking
   const { wins, refetch: refetchWins } = useDeviWins(user?.id);
@@ -1042,7 +1046,37 @@ const Dashboard = () => {
                     <p className="text-xs">Discover trends in your dating behaviors and preferences</p>
                   </TooltipContent>
                 </Tooltip>
-              </TooltipProvider>
+               </TooltipProvider>
+              {candidates.length > 0 && (
+                <TooltipProvider delayDuration={400}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          // If only one candidate, open directly; otherwise pick first active
+                          const activeCandidates = candidates.filter(c => c.status !== "archived");
+                          if (activeCandidates.length === 1) {
+                            setTextSimCandidate(activeCandidates[0]);
+                            setTextSimOpen(true);
+                          } else if (activeCandidates.length > 0) {
+                            // Show candidate picker via QuickCandidateSelect-style approach
+                            setTextSimCandidate(null);
+                            setTextSimOpen(true);
+                          }
+                        }}
+                        className="h-11 gap-2 rounded-xl border-[#007AFF]/20 bg-[#007AFF]/5 text-foreground hover:bg-[#007AFF]/10 transition-all duration-200 active:scale-[0.98]"
+                      >
+                        <MessageCircle className="w-4 h-4 text-[#007AFF]" />
+                        <span className="text-xs font-medium">Text Simulator</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-[200px]">
+                      <p className="text-xs">Simulate a text conversation with a candidate for closure instead of reaching out</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </motion.div>
 
             {/* ===== TOP CANDIDATES SPOTLIGHT ===== */}
@@ -1862,6 +1896,63 @@ const Dashboard = () => {
         onOpenChange={setShowDeviIntro}
         onDismiss={dismissDeviIntro}
       />
+
+      {/* Text Simulator - candidate picker + simulator */}
+      {textSimOpen && !textSimCandidate && candidates.length > 1 && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center">
+          <motion.div
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="bg-background w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl p-4 space-y-3"
+            style={{ maxHeight: "70dvh" }}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-foreground">Who do you want to text?</h3>
+              <Button variant="ghost" size="icon" onClick={() => setTextSimOpen(false)}>
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">Pick a candidate to simulate a conversation with instead of reaching out.</p>
+            <div className="space-y-1 overflow-y-auto max-h-[50dvh]">
+              {candidates.filter(c => c.status !== "archived").map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => setTextSimCandidate(c)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-left"
+                >
+                  <div className="w-8 h-8 rounded-full bg-[#007AFF] flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                    {c.nickname.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{c.nickname}</p>
+                    <p className="text-[10px] text-muted-foreground capitalize">{(c.status || "").replace(/_/g, " ")}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {textSimCandidate && (
+        <TextSimulator
+          open={textSimOpen}
+          onOpenChange={(open) => {
+            setTextSimOpen(open);
+            if (!open) setTextSimCandidate(null);
+          }}
+          candidateName={textSimCandidate.nickname}
+          candidateId={textSimCandidate.id}
+          candidateContext={[
+            textSimCandidate.notes,
+            textSimCandidate.end_reason ? `Ended because: ${textSimCandidate.end_reason}` : null,
+            textSimCandidate.status ? `Status: ${textSimCandidate.status}` : null,
+            textSimCandidate.their_attachment_style ? `Attachment: ${textSimCandidate.their_attachment_style}` : null,
+          ].filter(Boolean).join(". ")}
+          userGender={profile?.gender_identity?.includes("man") ? "male" : "female"}
+        />
+      )}
     </div>
   );
 };

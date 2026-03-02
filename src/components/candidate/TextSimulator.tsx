@@ -146,7 +146,7 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
         className="bg-background w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl flex flex-col"
-        style={{ maxHeight: "85vh" }}
+        style={{ maxHeight: "calc(100dvh - 2rem)" }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
@@ -175,7 +175,7 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
         </div>
 
         {/* Messages — iMessage style */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-1.5 min-h-[200px]" style={{ maxHeight: "50vh" }}>
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-1.5 min-h-[200px]">
           {messages.length === 0 && (
             <div className="space-y-3 py-4">
               <p className="text-xs text-muted-foreground text-center">
