@@ -46,7 +46,7 @@ import { ProfileSectionsNudge } from "@/components/devi/ProfileSectionsNudge";
 import { HealingJourney } from "@/components/devi/HealingJourney";
 import { ChatGPTMessage } from "@/components/devi/ChatGPTMessage";
 import { AIDisclosure } from "@/components/AIDisclosure";
-import { TextSimulatorCTA } from "@/components/candidate/TextSimulator";
+import TextSimulator, { TextSimulatorCTA } from "@/components/candidate/TextSimulator";
 import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
@@ -414,6 +414,7 @@ const Devi = () => {
   
   // Conversation choice dialog state
   const [showConversationChoice, setShowConversationChoice] = useState(false);
+  const [showTextSimFromDialog, setShowTextSimFromDialog] = useState(false);
   const [pendingCandidateSelection, setPendingCandidateSelection] = useState<Candidate | null>(null);
   const [existingConversationForChoice, setExistingConversationForChoice] = useState<Conversation | null>(null);
   
@@ -1875,21 +1876,41 @@ const Devi = () => {
               </Button>
 
               {pendingCandidateSelection && (
-                <TextSimulatorCTA
-                  candidateName={pendingCandidateSelection.nickname}
-                  candidateId={pendingCandidateSelection.id}
-                  candidateContext={[
-                    pendingCandidateSelection.notes,
-                    pendingCandidateSelection.status ? `Status: ${pendingCandidateSelection.status}` : null,
-                    pendingCandidateSelection.their_attachment_style ? `Attachment: ${pendingCandidateSelection.their_attachment_style}` : null,
-                  ].filter(Boolean).join(". ")}
-                  userGender={userProfile?.gender_identity?.includes("man") ? "male" : "female"}
-                />
+                <Button
+                  variant="outline"
+                  className="w-full gap-2 justify-start border-[#007AFF]/20 text-[#007AFF] hover:bg-[#007AFF]/10"
+                  onClick={() => {
+                    setShowConversationChoice(false);
+                    setShowTextSimFromDialog(true);
+                  }}
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Text Simulator — Get closure
+                </Button>
               )}
             </div>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Text Simulator opened from conversation choice dialog */}
+      {pendingCandidateSelection && (
+        <TextSimulator
+          open={showTextSimFromDialog}
+          onOpenChange={(open) => {
+            setShowTextSimFromDialog(open);
+            if (!open) setPendingCandidateSelection(null);
+          }}
+          candidateName={pendingCandidateSelection.nickname}
+          candidateId={pendingCandidateSelection.id}
+          candidateContext={[
+            pendingCandidateSelection.notes,
+            pendingCandidateSelection.status ? `Status: ${pendingCandidateSelection.status}` : null,
+            pendingCandidateSelection.their_attachment_style ? `Attachment: ${pendingCandidateSelection.their_attachment_style}` : null,
+          ].filter(Boolean).join(". ")}
+          userGender={userProfile?.gender_identity?.includes("man") ? "male" : "female"}
+        />
+      )}
 
       {/* Crisis Alert Dialog */}
       <CrisisAlertDialog
