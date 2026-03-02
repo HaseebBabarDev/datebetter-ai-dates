@@ -41,6 +41,7 @@ import {
 import { toast } from "sonner";
 import { Edit, Info } from "lucide-react";
 import { AIDisclosure } from "@/components/AIDisclosure";
+import { TextSimulatorCTA } from "@/components/candidate/TextSimulator";
 
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
@@ -883,6 +884,17 @@ const CandidateDetail = () => {
               <Sparkles className="w-4 h-4" />
               Ask D.E.V.I.
             </Button>
+            <TextSimulatorCTA
+              variant="card"
+              candidateName={candidate.nickname}
+              candidateId={candidate.id}
+              candidateContext={[
+                candidate.notes,
+                candidate.end_reason ? `Ended because: ${candidate.end_reason}` : null,
+                candidate.status ? `Status: ${candidate.status}` : null,
+                candidate.their_attachment_style ? `Attachment: ${candidate.their_attachment_style}` : null,
+              ].filter(Boolean).join(". ")}
+            />
             <Button 
               variant="ghost" 
               className="w-full gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"

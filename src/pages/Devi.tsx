@@ -46,6 +46,7 @@ import { ProfileSectionsNudge } from "@/components/devi/ProfileSectionsNudge";
 import { HealingJourney } from "@/components/devi/HealingJourney";
 import { ChatGPTMessage } from "@/components/devi/ChatGPTMessage";
 import { AIDisclosure } from "@/components/AIDisclosure";
+import { TextSimulatorCTA } from "@/components/candidate/TextSimulator";
 import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
@@ -2032,15 +2033,27 @@ const Devi = () => {
                     ))}
                   </div>
                   
-                  {/* Upload hint - only for candidate mode */}
+                  {/* Upload hint and Text Simulator - only for candidate mode */}
                   {selectedCandidate && (
-                    <button
-                      onClick={() => handleImageUpload('text_screenshot')}
-                      className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 mt-3"
-                    >
-                      <Camera className="w-3 h-3" />
-                      or send a screenshot
-                    </button>
+                    <div className="flex items-center gap-3 mt-3">
+                      <button
+                        onClick={() => handleImageUpload('text_screenshot')}
+                        className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                      >
+                        <Camera className="w-3 h-3" />
+                        or send a screenshot
+                      </button>
+                      <TextSimulatorCTA
+                        candidateName={selectedCandidate.nickname}
+                        candidateId={selectedCandidate.id}
+                        candidateContext={[
+                          selectedCandidate.notes,
+                          selectedCandidate.status ? `Status: ${selectedCandidate.status}` : null,
+                          selectedCandidate.their_attachment_style ? `Attachment: ${selectedCandidate.their_attachment_style}` : null,
+                        ].filter(Boolean).join(". ")}
+                        userGender={userProfile?.gender_identity?.includes("man") ? "male" : "female"}
+                      />
+                    </div>
                   )}
                 </div>
               )}
