@@ -891,8 +891,12 @@ const Devi = () => {
   const handleStartNewConversation = useCallback(() => {
     if (!pendingCandidateSelection) return;
     
+    // Set the ref to match the stateKey format used by the auto-load effect
+    // so it won't re-load the old conversation
+    const stateKey = `${pendingCandidateSelection.id}-${conversations.length}`;
+    lastLoadedCandidateRef.current = stateKey;
+    
     setSelectedCandidate(pendingCandidateSelection);
-    lastLoadedCandidateRef.current = pendingCandidateSelection.id;
     setMessages([]);
     setCurrentConversationId(null);
     
@@ -900,7 +904,7 @@ const Devi = () => {
     setShowConversationChoice(false);
     setPendingCandidateSelection(null);
     setExistingConversationForChoice(null);
-  }, [pendingCandidateSelection]);
+  }, [pendingCandidateSelection, conversations.length]);
 
   // Delete conversation
   const deleteConversation = useCallback(async (conversationId: string) => {
