@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.generate-detachment-plan]
 verify_jwt = false
+
+[functions.text-simulator]
+verify_jwt = false
