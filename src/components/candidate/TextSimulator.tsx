@@ -3,13 +3,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, AlertTriangle, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AIDisclosure } from "@/components/AIDisclosure";
+import { detectCrisisContent } from "@/lib/crisisDetection";
+import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
 
 interface TextSimulatorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   candidateName: string;
   candidateId?: string;
-  candidateContext?: string; // notes, status, end_reason etc.
+  candidateContext?: string;
   userGender?: string;
 }
 
@@ -26,6 +28,8 @@ const STARTER_PROMPTS = [
   "Was any of it real?",
 ];
 
+const MAX_TURNS = 12; // Max user messages before closure nudge
+
 export const TextSimulator: React.FC<TextSimulatorProps> = ({
   open,
   onOpenChange,
@@ -37,8 +41,14 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
   const [messages, setMessages] = useState<SimMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [crisisOpen, setCrisisOpen] = useState(false);
+  const [crisisSeverity, setCrisisSeverity] = useState<"moderate" | "severe">("moderate");
+  const [crisisCategory, setCrisisCategory] = useState<"crisis" | "harmful_content" | "emergency">("crisis");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const userTurnCount = messages.filter(m => m.role === "user").length;
+  const isAtLimit = userTurnCount >= MAX_TURNS;
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -54,7 +64,20 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
 
   const sendMessage = useCallback(async (text?: string) => {
     const msgText = (text || input).trim();
-    if (!msgText || isLoading) return;
+    if (!msgText || isLoading || isAtLimit) return;
+
+    // Crisis detection guardrails
+    const crisisResult = detectCrisisContent(msgText);
+    if (crisisResult.detected) {
+      setCrisisSeverity(crisisResult.severity);
+      setCrisisCategory(crisisResult.category || "crisis");
+      setCrisisOpen(true);
+      // Block harmful content entirely
+      if (crisisResult.category === "harmful_content") {
+        return;
+      }
+      // For crisis/emergency, show resources but allow continuing
+    }
 
     const userMsg: SimMessage = {
       id: crypto.randomUUID(),
@@ -85,6 +108,7 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
             candidateName,
             candidateContext,
             userGender,
+            turnCount: userTurnCount + 1,
           }),
         }
       );
@@ -97,7 +121,6 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
       let assistantContent = "";
       const assistantId = crypto.randomUUID();
 
-      // Create placeholder
       setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: "" }]);
 
       while (true) {
@@ -134,135 +157,175 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, messages, candidateName, candidateContext, userGender]);
+  }, [input, isLoading, messages, candidateName, candidateContext, userGender, userTurnCount, isAtLimit]);
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center">
-      <motion.div
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "100%" }}
-        transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="bg-background w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl flex flex-col"
-        style={{ maxHeight: "calc(100dvh - 2rem)" }}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-[#007AFF] flex items-center justify-center text-white text-sm font-semibold">
-              {candidateName.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">{candidateName}</p>
-              <p className="text-[10px] text-muted-foreground">Simulated · Not real</p>
-            </div>
-          </div>
-          <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
-            <X className="w-5 h-5" />
-          </Button>
-        </div>
-
-        {/* Disclaimer */}
-        <div className="px-4 py-2 bg-muted/50 border-b border-border">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
-            <p className="text-[10px] text-muted-foreground leading-relaxed">
-              This is a <strong>simulated</strong> conversation. {candidateName} is not seeing or responding to these messages. This is designed to help you process emotions and find closure.
-            </p>
-          </div>
-        </div>
-
-        {/* Messages — iMessage style */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-1.5 min-h-[200px]">
-          {messages.length === 0 && (
-            <div className="space-y-3 py-4">
-              <p className="text-xs text-muted-foreground text-center">
-                Say what you've been holding back
-              </p>
-              <div className="flex flex-wrap gap-2 justify-center">
-                {STARTER_PROMPTS.map(prompt => (
-                  <button
-                    key={prompt}
-                    onClick={() => sendMessage(prompt)}
-                    className="px-3 py-1.5 text-xs rounded-full border border-border text-foreground hover:bg-muted transition-colors"
-                  >
-                    {prompt}
-                  </button>
-                ))}
+    <>
+      <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center">
+        <motion.div
+          initial={{ y: "100%" }}
+          animate={{ y: 0 }}
+          exit={{ y: "100%" }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="bg-background w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl flex flex-col"
+          style={{ maxHeight: "calc(100dvh - 2rem)" }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-[#007AFF] flex items-center justify-center text-white text-sm font-semibold">
+                {candidateName.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">{candidateName}</p>
+                <p className="text-[10px] text-muted-foreground">Simulated · Not real</p>
               </div>
             </div>
-          )}
+            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
 
-          <AnimatePresence>
-            {messages.map((msg) => (
-              <motion.div
-                key={msg.id}
-                initial={{ opacity: 0, y: 6, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.2 }}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[80%] px-3 py-2 text-sm leading-relaxed ${
-                    msg.role === "user"
-                      ? "bg-[#007AFF] text-white rounded-2xl rounded-br-md"
-                      : "bg-[hsl(var(--muted))] text-foreground rounded-2xl rounded-bl-md"
-                  }`}
+          {/* Disclaimer */}
+          <div className="px-4 py-2 bg-muted/50 border-b border-border">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                This is a <strong>simulated</strong> closure conversation. {candidateName} is not seeing or responding. This exists only to help you process emotions and <strong>find closure</strong> — not to replace real communication.
+              </p>
+            </div>
+          </div>
+
+          {/* Messages */}
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-1.5 min-h-[200px]">
+            {messages.length === 0 && (
+              <div className="space-y-3 py-4">
+                <p className="text-xs text-muted-foreground text-center">
+                  Say what you've been holding back
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {STARTER_PROMPTS.map(prompt => (
+                    <button
+                      key={prompt}
+                      onClick={() => sendMessage(prompt)}
+                      className="px-3 py-1.5 text-xs rounded-full border border-border text-foreground hover:bg-muted transition-colors"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <AnimatePresence>
+              {messages.map((msg) => (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.2 }}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  {msg.content || (
-                    <span className="flex gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:0ms]" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:150ms]" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:300ms]" />
-                    </span>
-                  )}
+                  <div
+                    className={`max-w-[80%] px-3 py-2 text-sm leading-relaxed ${
+                      msg.role === "user"
+                        ? "bg-[#007AFF] text-white rounded-2xl rounded-br-md"
+                        : "bg-[hsl(var(--muted))] text-foreground rounded-2xl rounded-bl-md"
+                    }`}
+                  >
+                    {msg.content || (
+                      <span className="flex gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:0ms]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:150ms]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:300ms]" />
+                      </span>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {isLoading && messages[messages.length - 1]?.role === "user" && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex justify-start"
+              >
+                <div className="bg-[hsl(var(--muted))] rounded-2xl rounded-bl-md px-3 py-2 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:0ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:150ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:300ms]" />
                 </div>
               </motion.div>
-            ))}
-          </AnimatePresence>
+            )}
 
-          {isLoading && messages[messages.length - 1]?.role === "user" && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex justify-start"
-            >
-              <div className="bg-[hsl(var(--muted))] rounded-2xl rounded-bl-md px-3 py-2 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:0ms]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:150ms]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:300ms]" />
-              </div>
-            </motion.div>
-          )}
-        </div>
-
-        {/* Input — iMessage style */}
-        <div className="px-4 py-3 border-t border-border safe-area-bottom">
-          <div className="flex items-center gap-2">
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && sendMessage()}
-              placeholder="iMessage"
-              disabled={isLoading}
-              className="flex-1 text-sm px-4 py-2 rounded-full bg-muted border border-border outline-none placeholder:text-muted-foreground/60 text-foreground focus:border-[#007AFF] transition-colors"
-            />
-            <button
-              onClick={() => sendMessage()}
-              disabled={!input.trim() || isLoading}
-              className="w-8 h-8 rounded-full bg-[#007AFF] flex items-center justify-center shrink-0 disabled:opacity-40 transition-opacity"
-            >
-              <Send className="w-4 h-4 text-white" />
-            </button>
+            {/* Closure complete nudge */}
+            {isAtLimit && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-4 space-y-2"
+              >
+                <p className="text-xs text-muted-foreground leading-relaxed px-4">
+                  You've had a good conversation. The goal was closure — and you've said what you needed to say. 💜
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  If you need more support, talk to D.E.V.I. or a trusted friend.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onOpenChange(false)}
+                  className="text-xs"
+                >
+                  Close & Move Forward
+                </Button>
+              </motion.div>
+            )}
           </div>
-          <AIDisclosure variant="compact" className="justify-center mt-2" />
-        </div>
-      </motion.div>
-    </div>
+
+          {/* Input */}
+          <div className="px-4 py-3 border-t border-border safe-area-bottom">
+            {isAtLimit ? (
+              <p className="text-[10px] text-muted-foreground text-center py-1">
+                This simulation has ended. You got your closure. 💜
+              </p>
+            ) : (
+              <div className="flex items-center gap-2">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && sendMessage()}
+                  placeholder="iMessage"
+                  disabled={isLoading}
+                  className="flex-1 text-sm px-4 py-2 rounded-full bg-muted border border-border outline-none placeholder:text-muted-foreground/60 text-foreground focus:border-[#007AFF] transition-colors"
+                />
+                <button
+                  onClick={() => sendMessage()}
+                  disabled={!input.trim() || isLoading}
+                  className="w-8 h-8 rounded-full bg-[#007AFF] flex items-center justify-center shrink-0 disabled:opacity-40 transition-opacity"
+                >
+                  <Send className="w-4 h-4 text-white" />
+                </button>
+              </div>
+            )}
+            <AIDisclosure variant="compact" className="justify-center mt-2" />
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Crisis Alert Dialog — same guardrails as D.E.V.I. chat */}
+      <CrisisAlertDialog
+        open={crisisOpen}
+        onClose={() => setCrisisOpen(false)}
+        severity={crisisSeverity}
+        category={crisisCategory}
+      />
+    </>
   );
 };
 
