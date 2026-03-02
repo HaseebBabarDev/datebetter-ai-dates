@@ -351,7 +351,7 @@ CANDIDATE PROFILE (the person they're dating):
 - Their Career Stage: ${candidateProfile.their_career_stage || 'Unknown'}
 - Their Education: ${candidateProfile.their_education_level || 'Unknown'}
 - Their Social Style: ${candidateProfile.their_social_style || 'Unknown'}
-- Compatibility Score: ${candidateProfile.compatibility_score || 'Not calculated'}%
+- Compatibility Score: ${candidateProfile.compatibility_score || 'Not calculated'}% (CRITICAL: This is the ONLY correct score. NEVER invent, estimate, or state a different number. Always use THIS exact value when referencing their compatibility.)
 - Red Flags Noted: ${formatArray(candidateProfile.red_flags)}
 - Green Flags Noted: ${formatArray(candidateProfile.green_flags)}
 - Notes: ${candidateProfile.notes || 'None'}
