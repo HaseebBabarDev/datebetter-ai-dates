@@ -163,13 +163,13 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center">
+      <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center">
         <motion.div
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="bg-background w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl flex flex-col"
+          className="bg-background w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl flex flex-col pb-20 sm:pb-0"
           style={{ maxHeight: "calc(100dvh - 2rem)" }}
         >
           {/* Header */}
