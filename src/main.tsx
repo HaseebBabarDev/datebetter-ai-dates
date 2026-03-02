@@ -3,26 +3,46 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
-// Handle chunk loading failures from stale PWA cache
-window.addEventListener("error", (event) => {
-  if (
-    event.message?.includes("Failed to fetch dynamically imported module") ||
-    event.message?.includes("Importing a module script failed") ||
-    event.message?.includes("error loading dynamically imported module")
-  ) {
-    // Clear service workers and caches, then reload
+// Auto-recover from stale PWA cache / chunk loading failures
+const handleChunkError = () => {
+  const reloadKey = "chunk-error-reload";
+  // Prevent infinite reload loops — only auto-reload once
+  if (sessionStorage.getItem(reloadKey)) return;
+  sessionStorage.setItem(reloadKey, "1");
+
+  const cleanup = async () => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        registrations.forEach((r) => r.unregister());
-      });
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((r) => r.unregister()));
     }
     if ("caches" in window) {
-      caches.keys().then((names) => {
-        names.forEach((name) => caches.delete(name));
-      });
+      const names = await caches.keys();
+      await Promise.all(names.map((name) => caches.delete(name)));
     }
-    // Reload after a brief delay to let cleanup finish
-    setTimeout(() => window.location.reload(), 500);
+    window.location.reload();
+  };
+
+  cleanup().catch(() => window.location.reload());
+};
+
+const isChunkError = (msg: string) =>
+  msg.includes("Failed to fetch dynamically imported module") ||
+  msg.includes("Importing a module script failed") ||
+  msg.includes("error loading dynamically imported module") ||
+  msg.includes("Loading chunk") ||
+  msg.includes("Loading CSS chunk");
+
+window.addEventListener("error", (event) => {
+  if (event.message && isChunkError(event.message)) {
+    handleChunkError();
+  }
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+  const msg = event.reason?.message || String(event.reason || "");
+  if (isChunkError(msg)) {
+    event.preventDefault();
+    handleChunkError();
   }
 });
 
