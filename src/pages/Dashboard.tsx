@@ -1841,7 +1841,7 @@ const Dashboard = () => {
                   <CandidatesList
                     candidates={filteredAndSortedCandidates}
                     onUpdate={fetchData}
-                    showGroupHeaders={statusFilter === "all" && sortBy === "status" && !qualityFilter}
+                    showGroupHeaders={!searchQuery && sortBy === "status"}
                     candidateAlerts={candidateAlerts}
                   />
                 </div>
