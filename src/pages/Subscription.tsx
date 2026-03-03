@@ -1,24 +1,22 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Check, Crown, Sparkles, Heart, ArrowLeft, Zap, ShoppingBag, MessageCircle } from "lucide-react";
+import { Check, Crown, Sparkles, Heart, ArrowLeft, Zap, ShoppingBag, MessageCircle, Settings, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { PaymentSheet } from "@/components/subscription/PaymentSheet";
+import { STRIPE_PLANS, STRIPE_ONE_TIME } from "@/lib/stripeConfig";
 
 const SUBSCRIPTION_PLANS = [
   {
     id: "free",
+    stripeKey: null,
     name: "Free",
-    priceMonthly: 0,
-    priceYearly: 0,
+    price: 0,
     description: "Try it out",
     icon: Heart,
     features: [
@@ -33,10 +31,10 @@ const SUBSCRIPTION_PLANS = [
     badge: null,
   },
   {
-    id: "dating_often",
+    id: "basic",
+    stripeKey: "basic" as const,
     name: "Basic",
-    priceMonthly: 4.99,
-    priceYearly: 47.88, // ~$3.99/mo, 20% off
+    price: 9.99,
     description: "Try D.E.V.I. with one candidate",
     icon: MessageCircle,
     features: [
@@ -52,10 +50,10 @@ const SUBSCRIPTION_PLANS = [
     badge: null,
   },
   {
-    id: "new_to_dating",
+    id: "starter",
+    stripeKey: "starter" as const,
     name: "Starter",
-    priceMonthly: 9.99,
-    priceYearly: 95.88, // ~$7.99/mo, 20% off
+    price: 15.99,
     description: "Everything you need to date smarter",
     icon: Sparkles,
     features: [
@@ -74,9 +72,9 @@ const SUBSCRIPTION_PLANS = [
   },
   {
     id: "unlimited",
+    stripeKey: "unlimited" as const,
     name: "Unlimited",
-    priceMonthly: 19.99,
-    priceYearly: 191.88, // ~$15.99/mo, 20% off
+    price: 29.99,
     description: "No limits, ever",
     icon: Crown,
     features: [
@@ -96,37 +94,23 @@ const SUBSCRIPTION_PLANS = [
 
 export default function Subscription() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { subscription, refetch } = useSubscription();
-  const [loading, setLoading] = useState<string | null>(null);
-  const [paymentOpen, setPaymentOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<typeof SUBSCRIPTION_PLANS[0] | null>(null);
-  const [isYearly, setIsYearly] = useState(false);
-  const [detachPaymentOpen, setDetachPaymentOpen] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
 
-  const getDisplayPrice = (plan: typeof SUBSCRIPTION_PLANS[0]) => {
-    if (plan.priceMonthly === 0) return "$0";
-    if (isYearly) {
-      const monthlyEquivalent = plan.priceYearly / 12;
-      return `$${monthlyEquivalent.toFixed(2)}`;
+  // Handle return from Stripe Checkout
+  useEffect(() => {
+    if (searchParams.get("success") === "true") {
+      toast.success("Payment successful! Your subscription is now active.");
+      refetch();
+    } else if (searchParams.get("canceled") === "true") {
+      toast.info("Payment canceled. No charges were made.");
     }
-    return `$${plan.priceMonthly.toFixed(2)}`;
-  };
+  }, [searchParams, refetch]);
 
-  const getTotalPrice = (plan: typeof SUBSCRIPTION_PLANS[0]) => {
-    if (plan.priceMonthly === 0) return "$0";
-    if (isYearly) return `$${plan.priceYearly.toFixed(2)}`;
-    return `$${plan.priceMonthly.toFixed(2)}`;
-  };
-
-  const getSavingsPercent = (plan: typeof SUBSCRIPTION_PLANS[0]) => {
-    if (plan.priceMonthly === 0) return 0;
-    const yearlyTotal = plan.priceYearly;
-    const monthlyTotal = plan.priceMonthly * 12;
-    return Math.round(((monthlyTotal - yearlyTotal) / monthlyTotal) * 100);
-  };
-
-  const handleSelectPlan = (planId: string) => {
+  const handleCheckout = async (planId: string, stripeKey: string | null) => {
     if (!user) {
       toast.error("Please sign in first");
       navigate("/auth");
@@ -140,47 +124,72 @@ export default function Subscription() {
       toast.info("You're already on this plan");
       return;
     }
-    const plan = SUBSCRIPTION_PLANS.find((p) => p.id === planId);
-    if (plan) {
-      setSelectedPlan(plan);
-      setPaymentOpen(true);
-    }
-  };
+    if (!stripeKey) return;
 
-  const handlePaymentSuccess = async () => {
-    if (!selectedPlan || !user) return;
-    setLoading(selectedPlan.id);
+    setCheckoutLoading(planId);
     try {
-      const planLimits: Record<string, { candidates: number; updates: number }> = {
-        dating_often: { candidates: 1, updates: 5 },   // Basic $4.99: 1 candidate, 5 AI exchanges
-        new_to_dating: { candidates: 10, updates: 30 },
-        unlimited: { candidates: 999, updates: 999 },
-      };
-      const limits = planLimits[selectedPlan.id];
-      if (limits) {
-        const { error } = await supabase
-          .from("user_subscriptions")
-          .update({
-            plan: selectedPlan.id as "free" | "new_to_dating" | "dating_often" | "dating_more" | "unlimited",
-            candidates_limit: limits.candidates,
-            updates_per_candidate: limits.updates,
-          })
-          .eq("user_id", user.id);
-        if (error) throw error;
-        refetch();
-        navigate("/dashboard");
+      const stripePlan = STRIPE_PLANS[stripeKey as keyof typeof STRIPE_PLANS];
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId: stripePlan.price_id, mode: "subscription" },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL returned");
       }
     } catch (error) {
-      console.error("Error updating subscription:", error);
-      toast.error("Failed to update subscription. Please try again.");
+      console.error("Checkout error:", error);
+      toast.error("Failed to start checkout. Please try again.");
     } finally {
-      setLoading(null);
+      setCheckoutLoading(null);
     }
   };
 
-  const handleDetachPaymentSuccess = () => {
-    toast.success("Detachment Plan unlocked! Find it on any candidate's profile.");
-    setDetachPaymentOpen(false);
+  const handleDetachmentCheckout = async () => {
+    if (!user) {
+      toast.error("Please sign in first");
+      navigate("/auth");
+      return;
+    }
+
+    setCheckoutLoading("detachment");
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId: STRIPE_ONE_TIME.detachment_plan.price_id, mode: "payment" },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL returned");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error("Failed to start checkout. Please try again.");
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    setPortalLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("customer-portal");
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No portal URL returned");
+      }
+    } catch (error) {
+      console.error("Portal error:", error);
+      toast.error("Failed to open subscription management. Please try again.");
+    } finally {
+      setPortalLoading(false);
+    }
   };
 
   const currentPlan = subscription?.plan || "free";
@@ -202,23 +211,27 @@ export default function Subscription() {
           </p>
         </div>
 
-        {/* Billing Toggle */}
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <Label htmlFor="billing-toggle" className={`text-sm ${!isYearly ? "font-semibold" : "text-muted-foreground"}`}>
-            Monthly
-          </Label>
-          <Switch id="billing-toggle" checked={isYearly} onCheckedChange={setIsYearly} />
-          <Label htmlFor="billing-toggle" className={`text-sm ${isYearly ? "font-semibold" : "text-muted-foreground"}`}>
-            Yearly
-          </Label>
-          {isYearly && (
-            <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-              Save 20%
-            </Badge>
-          )}
-        </div>
+        {/* Manage subscription button for active subscribers */}
+        {subscription?.subscribed && (
+          <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-lg flex items-center justify-between">
+            <div>
+              <p className="font-medium text-foreground">
+                You're on the <span className="text-primary capitalize">{currentPlan}</span> plan
+              </p>
+              {subscription.subscription_end && (
+                <p className="text-xs text-muted-foreground">
+                  Renews {new Date(subscription.subscription_end).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+            <Button variant="outline" size="sm" onClick={handleManageSubscription} disabled={portalLoading}>
+              {portalLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Settings className="w-4 h-4 mr-1" />}
+              Manage
+            </Button>
+          </div>
+        )}
 
-        {/* Plans Grid — 4 columns */}
+        {/* Plans Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {SUBSCRIPTION_PLANS.map((plan) => {
             const Icon = plan.icon;
@@ -253,21 +266,11 @@ export default function Subscription() {
                     <CardTitle className="text-base sm:text-lg">{plan.name}</CardTitle>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-2xl sm:text-3xl font-bold">{getDisplayPrice(plan)}</span>
+                    <span className="text-2xl sm:text-3xl font-bold">${plan.price.toFixed(2)}</span>
                     {isPaidPlan && (
                       <span className="text-xs sm:text-sm text-muted-foreground">/mo</span>
                     )}
                   </div>
-                  {isPaidPlan && isYearly && (
-                    <p className="text-xs text-muted-foreground">
-                      Billed {getTotalPrice(plan)}/year
-                    </p>
-                  )}
-                  {isPaidPlan && isYearly && getSavingsPercent(plan) > 0 && (
-                    <Badge variant="outline" className="mt-1 text-xs text-green-600 border-green-600 w-fit">
-                      Save {getSavingsPercent(plan)}%
-                    </Badge>
-                  )}
                   <CardDescription className="text-xs sm:text-sm mt-1">{plan.description}</CardDescription>
                 </CardHeader>
 
@@ -284,16 +287,18 @@ export default function Subscription() {
                   <Button
                     className="w-full text-sm"
                     variant={plan.popular ? "default" : "outline"}
-                    disabled={isCurrentPlan || loading !== null}
-                    onClick={() => handleSelectPlan(plan.id)}
+                    disabled={isCurrentPlan || checkoutLoading !== null}
+                    onClick={() => handleCheckout(plan.id, plan.stripeKey)}
                   >
-                    {loading === plan.id
-                      ? "Processing..."
-                      : isCurrentPlan
-                      ? "Current Plan"
-                      : plan.id === "free"
-                      ? "Downgrade"
-                      : "Get Started"}
+                    {checkoutLoading === plan.id ? (
+                      <><Loader2 className="w-4 h-4 animate-spin mr-1" /> Processing...</>
+                    ) : isCurrentPlan ? (
+                      "Current Plan"
+                    ) : plan.id === "free" ? (
+                      "Downgrade"
+                    ) : (
+                      "Get Started"
+                    )}
                   </Button>
                 </CardContent>
               </Card>
@@ -311,7 +316,6 @@ export default function Subscription() {
         <Card className="border-dashed border-2 border-primary/30 hover:border-primary/60 hover:shadow-md transition-all duration-200">
           <CardContent className="p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-              {/* Icon + title */}
               <div className="flex items-center gap-3 shrink-0">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                   <ShoppingBag className="w-6 h-6 text-primary" />
@@ -325,7 +329,6 @@ export default function Subscription() {
                 </div>
               </div>
 
-              {/* Features */}
               <ul className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
                 {[
                   "AI-personalized recovery timeline",
@@ -340,7 +343,6 @@ export default function Subscription() {
                 ))}
               </ul>
 
-              {/* Price + CTA */}
               <div className="flex sm:flex-col items-center sm:items-end gap-3 shrink-0">
                 <div className="text-right">
                   <div className="text-2xl font-bold text-foreground">$9.99</div>
@@ -349,12 +351,14 @@ export default function Subscription() {
                 <Button
                   variant="default"
                   className="shrink-0"
-                  onClick={() => {
-                    if (!user) { toast.error("Please sign in first"); navigate("/auth"); return; }
-                    setDetachPaymentOpen(true);
-                  }}
+                  disabled={checkoutLoading !== null}
+                  onClick={handleDetachmentCheckout}
                 >
-                  <Zap className="w-4 h-4 mr-1.5" />
+                  {checkoutLoading === "detachment" ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                  ) : (
+                    <Zap className="w-4 h-4 mr-1.5" />
+                  )}
                   Unlock
                 </Button>
               </div>
@@ -362,33 +366,12 @@ export default function Subscription() {
           </CardContent>
         </Card>
 
-        {/* Footer */}
         <p className="mt-8 text-xs sm:text-sm text-muted-foreground text-center">
           All plans include cycle tracking, hormone-aware insights, and basic pattern detection.
           <br className="hidden sm:block" />
-          {" "}Cancel anytime. No hidden fees.
+          {" "}Cancel anytime. No hidden fees. Powered by Stripe.
         </p>
       </div>
-
-      {/* Subscription Payment Sheet */}
-      {selectedPlan && (
-        <PaymentSheet
-          open={paymentOpen}
-          onOpenChange={setPaymentOpen}
-          planName={`${selectedPlan.name}${isYearly ? " (Yearly)" : ""}`}
-          price={getTotalPrice(selectedPlan)}
-          onPaymentSuccess={handlePaymentSuccess}
-        />
-      )}
-
-      {/* Detachment Plan Payment Sheet */}
-      <PaymentSheet
-        open={detachPaymentOpen}
-        onOpenChange={setDetachPaymentOpen}
-        planName="Detachment Plan"
-        price="$9.99"
-        onPaymentSuccess={handleDetachPaymentSuccess}
-      />
     </div>
   );
 }

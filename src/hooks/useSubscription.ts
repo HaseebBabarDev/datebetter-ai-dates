@@ -1,95 +1,56 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more" | "unlimited";
+export type SubscriptionPlan = "free" | "basic" | "starter" | "unlimited";
 
-interface Subscription {
+interface StripeSubscription {
+  subscribed: boolean;
   plan: SubscriptionPlan;
-  candidates_limit: number;
-  updates_per_candidate: number;
+  product_id: string | null;
+  price_id: string | null;
+  subscription_end: string | null;
+  day_pass_active: boolean;
+  detachment_plan_candidates: string[];
 }
-
-interface UsageTracking {
-  candidate_id: string;
-  updates_used: number;
-}
-
-const PLAN_LIMITS: Record<SubscriptionPlan, { candidates: number; updates: number }> = {
-  free: { candidates: 1, updates: 1 },
-  new_to_dating: { candidates: 3, updates: 5 },
-  dating_often: { candidates: 10, updates: 30 },
-  dating_more: { candidates: 12, updates: 20 },
-  unlimited: { candidates: 999, updates: 999 },
-};
 
 export function useSubscription() {
   const { user } = useAuth();
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [usage, setUsage] = useState<UsageTracking[]>([]);
+  const [subscription, setSubscription] = useState<StripeSubscription | null>(null);
   const [candidateCount, setCandidateCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      fetchSubscriptionAndUsage();
+  const checkSubscription = useCallback(async () => {
+    if (!user) {
+      setSubscription(null);
+      setLoading(false);
+      return;
     }
-  }, [user]);
-
-  const fetchSubscriptionAndUsage = async () => {
-    if (!user) return;
 
     try {
-      // Fetch subscription
-      const { data: subData, error: subError } = await supabase
-        .from("user_subscriptions")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      const { data, error } = await supabase.functions.invoke("check-subscription");
 
-      if (subError) {
-        console.error("Error fetching subscription:", subError);
-      }
-
-      // If no subscription exists, create one with dating_often as default
-      if (!subData) {
-        const { data: newSub, error: insertError } = await supabase
-          .from("user_subscriptions")
-          .insert({
-            user_id: user.id,
-            plan: "dating_often",
-            candidates_limit: 10,
-            updates_per_candidate: 30,
-          })
-          .select()
-          .single();
-
-        if (!insertError && newSub) {
-          setSubscription({
-            plan: newSub.plan as SubscriptionPlan,
-            candidates_limit: newSub.candidates_limit,
-            updates_per_candidate: newSub.updates_per_candidate,
-          });
-        }
+      if (error) {
+        console.error("Error checking subscription:", error);
+        setSubscription({
+          subscribed: false,
+          plan: "free",
+          product_id: null,
+          price_id: null,
+          subscription_end: null,
+          day_pass_active: false,
+          detachment_plan_candidates: [],
+        });
       } else {
         setSubscription({
-          plan: subData.plan as SubscriptionPlan,
-          candidates_limit: subData.candidates_limit,
-          updates_per_candidate: subData.updates_per_candidate,
+          subscribed: data.subscribed || false,
+          plan: (data.plan as SubscriptionPlan) || "free",
+          product_id: data.product_id || null,
+          price_id: data.price_id || null,
+          subscription_end: data.subscription_end || null,
+          day_pass_active: data.day_pass_active || false,
+          detachment_plan_candidates: data.detachment_plan_candidates || [],
         });
-      }
-
-      // Fetch actual usage tracking for D.E.V.I. calculations
-      const { data: usageData } = await supabase
-        .from("usage_tracking")
-        .select("candidate_id, updates_used")
-        .eq("user_id", user.id);
-
-      if (usageData) {
-        setUsage(usageData.map(u => ({
-          candidate_id: u.candidate_id,
-          updates_used: u.updates_used,
-        })));
       }
 
       // Fetch candidate count
@@ -100,77 +61,74 @@ export function useSubscription() {
 
       setCandidateCount(count || 0);
     } catch (error) {
-      console.error("Error in fetchSubscriptionAndUsage:", error);
+      console.error("Error in checkSubscription:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  const incrementUsage = async (candidateId: string) => {
+  useEffect(() => {
+    checkSubscription();
+  }, [checkSubscription]);
+
+  // Auto-refresh every 60 seconds
+  useEffect(() => {
     if (!user) return;
+    const interval = setInterval(checkSubscription, 60000);
+    return () => clearInterval(interval);
+  }, [user, checkSubscription]);
 
-    try {
-      // Check if usage record exists
-      const { data: existing } = await supabase
-        .from("usage_tracking")
-        .select("id, updates_used")
-        .eq("user_id", user.id)
-        .eq("candidate_id", candidateId)
-        .maybeSingle();
-
-      if (existing) {
-        // Update existing record
-        await supabase
-          .from("usage_tracking")
-          .update({ updates_used: existing.updates_used + 1 })
-          .eq("id", existing.id);
-      } else {
-        // Create new record - first analysis counts as 1 usage
-        await supabase
-          .from("usage_tracking")
-          .insert({
-            user_id: user.id,
-            candidate_id: candidateId,
-            updates_used: 1,
-          });
-      }
-
-      // Refetch to update state
-      await fetchSubscriptionAndUsage();
-    } catch (error) {
-      console.error("Error incrementing usage:", error);
+  const getPlanLimits = (plan: SubscriptionPlan) => {
+    switch (plan) {
+      case "free": return { candidates: 1, updates: 1, aiMessages: 0 };
+      case "basic": return { candidates: 1, updates: 5, aiMessages: 5 };
+      case "starter": return { candidates: 10, updates: 30, aiMessages: 1000 };
+      case "unlimited": return { candidates: 999, updates: 999, aiMessages: 999999 };
+      default: return { candidates: 1, updates: 1, aiMessages: 0 };
     }
   };
 
   const canAddCandidate = () => {
     if (!subscription) return false;
-    return candidateCount < subscription.candidates_limit;
+    const limits = getPlanLimits(subscription.plan);
+    return candidateCount < limits.candidates;
   };
 
-  const canUseUpdate = (candidateId: string) => {
-    if (!subscription) return true; // Allow while loading
-    const candidateUsage = usage.find((u) => u.candidate_id === candidateId);
-    const usedUpdates = candidateUsage?.updates_used || 0;
-    return usedUpdates < subscription.updates_per_candidate;
+  const canUseUpdate = (_candidateId: string) => {
+    if (!subscription) return true;
+    // For unlimited plan, always allow
+    if (subscription.plan === "unlimited") return true;
+    // For day pass, allow
+    if (subscription.day_pass_active) return true;
+    return subscription.plan !== "free";
   };
 
-  const getRemainingUpdates = (candidateId: string) => {
-    if (!subscription) return 1; // Show 1 while loading
-    const candidateUsage = usage.find((u) => u.candidate_id === candidateId);
-    const usedUpdates = candidateUsage?.updates_used || 0;
-    return Math.max(0, subscription.updates_per_candidate - usedUpdates);
+  const getRemainingUpdates = (_candidateId: string) => {
+    if (!subscription) return 1;
+    const limits = getPlanLimits(subscription.plan);
+    return limits.updates;
+  };
+
+  const hasDetachmentPlan = (candidateId: string) => {
+    return subscription?.detachment_plan_candidates?.includes(candidateId) || false;
+  };
+
+  // Legacy incrementUsage - now a no-op since Stripe tracks usage
+  const incrementUsage = async (_candidateId: string) => {
+    // Usage is now tracked via Stripe checkout sessions
+    // This is kept for backward compatibility with existing components
   };
 
   return {
     subscription,
-    usage,
     candidateCount,
     loading,
     canAddCandidate,
     canUseUpdate,
     getRemainingUpdates,
+    hasDetachmentPlan,
     incrementUsage,
-    refetch: fetchSubscriptionAndUsage,
-    planLimits: PLAN_LIMITS,
+    refetch: checkSubscription,
+    getPlanLimits,
   };
 }
