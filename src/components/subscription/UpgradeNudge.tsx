@@ -11,11 +11,12 @@ interface UpgradeNudgeProps {
 
 export function UpgradeNudge({ candidateId, onDismiss }: UpgradeNudgeProps) {
   const navigate = useNavigate();
-  const { subscription, candidateCount, getRemainingUpdates } = useSubscription();
+  const { subscription, candidateCount, getRemainingUpdates, getPlanLimits } = useSubscription();
 
   if (!subscription) return null;
 
-  const candidatesRemaining = subscription.candidates_limit - candidateCount;
+  const limits = getPlanLimits(subscription.plan as any);
+  const candidatesRemaining = limits.candidates - candidateCount;
   const updatesRemaining = candidateId ? getRemainingUpdates(candidateId) : null;
 
   // Show nudge when near limit (1 remaining) or at 80%+ usage
