@@ -57,7 +57,7 @@ const Pill = ({ children }: { children: React.ReactNode }) => (
   <motion.div
     whileHover={{ scale: 1.05 }}
     whileTap={{ scale: 0.97 }}
-    className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary uppercase tracking-wider backdrop-blur-sm cursor-default"
+    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-semibold text-primary uppercase tracking-wider backdrop-blur-sm cursor-default"
   >
     {children}
   </motion.div>
@@ -69,16 +69,16 @@ const MetricCard = ({ metric, label, accent = false }: { metric: string; label: 
     transition={{ type: "spring", stiffness: 300, damping: 20 }}
     className={`rounded-2xl p-6 text-center transition-colors cursor-default ${accent ? "border-2 border-primary bg-primary/5 shadow-[var(--shadow-soft)]" : "border border-border/60 bg-card/80 backdrop-blur-sm hover:border-primary/30"}`}
   >
-    <p className={`text-3xl font-bold ${accent ? "text-primary" : "text-foreground"}`}>{metric}</p>
-    <p className="text-xs text-muted-foreground mt-1.5">{label}</p>
+    <p className={`text-4xl font-bold ${accent ? "text-primary" : "text-foreground"}`}>{metric}</p>
+    <p className="text-sm text-muted-foreground mt-1.5">{label}</p>
   </motion.div>
 );
 
 /* ─── Info badge ─── */
 const InfoBadge = ({ label, value }: { label: string; value: string }) => (
   <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm px-4 py-3">
-    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">{label}</p>
-    <p className="text-sm font-bold text-foreground">{value}</p>
+    <p className="text-xs uppercase tracking-wider text-muted-foreground mb-0.5">{label}</p>
+    <p className="text-base font-bold text-foreground">{value}</p>
   </div>
 );
 
@@ -89,10 +89,10 @@ const slides = [
     content: (
       <div className="flex flex-col items-center justify-center h-full gap-6 text-center">
         <motion.img src={logo} alt="DateBetter" className="w-24 h-24 rounded-3xl shadow-[var(--shadow-elegant)] ring-2 ring-primary/20" whileHover={{ scale: 1.05, rotate: 2 }} />
-        <h2 className="text-4xl md:text-6xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent leading-tight tracking-tight">DateBetter</h2>
-        <p className="text-xl md:text-2xl font-light text-foreground/80 max-w-xl leading-relaxed">Relationship Intelligence for Modern Dating</p>
+        <h2 className="text-5xl md:text-7xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent leading-tight tracking-tight">DateBetter</h2>
+        <p className="text-2xl md:text-3xl font-light text-foreground/80 max-w-xl leading-relaxed">Relationship Intelligence for Modern Dating</p>
         <div className="w-20 h-px bg-primary/30 my-1" />
-        <p className="text-lg text-muted-foreground max-w-md">Not a dating app. A <span className="font-semibold text-primary">decision engine</span>.</p>
+        <p className="text-xl text-muted-foreground max-w-md">Not a dating app. A <span className="font-semibold text-primary">decision engine</span>.</p>
         <Pill>Raising $500K Pre-Seed</Pill>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 w-full max-w-2xl">
           {[{ l: "Product", v: "Live MVP" }, { l: "Margin", v: "67–82%" }, { l: "Infrastructure", v: "10K Users" }, { l: "Risk", v: "Low Technical" }].map((b) => (
@@ -108,17 +108,17 @@ const slides = [
       <div className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto items-start">
         <div className="space-y-5">
           {["Women paste texts into ChatGPT.", "They crowdsource red flags on Reddit.", "They bring early dating confusion into therapy sessions that cost $200 an hour."].map((t, i) => (
-            <motion.p key={i} whileHover={{ x: 6 }} className="text-lg text-foreground/80 pl-4 border-l-2 border-primary/40 cursor-default">{t}</motion.p>
-          ))}
-          <p className="text-lg font-medium text-foreground pt-2">The behavior is already there — <span className="text-primary">the infrastructure isn't</span>.</p>
-        </div>
-        <div className="space-y-3">
-          <p className="text-xs uppercase tracking-wider text-primary font-bold mb-2">The Gap</p>
-          {["No memory across sessions", "No behavioral pattern detection", "No structured decision framework", "No compatibility scoring", "No dating-specific context"].map((g, i) => (
-            <motion.div key={i} whileHover={{ scale: 1.02 }} className="flex items-center gap-3 rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm px-4 py-3 cursor-default">
-              <div className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />
-              <span className="text-sm text-foreground">{g}</span>
-            </motion.div>
+             <motion.p key={i} whileHover={{ x: 6 }} className="text-xl text-foreground/80 pl-4 border-l-2 border-primary/40 cursor-default">{t}</motion.p>
+           ))}
+           <p className="text-xl font-medium text-foreground pt-2">The behavior is already there — <span className="text-primary">the infrastructure isn't</span>.</p>
+         </div>
+         <div className="space-y-3">
+           <p className="text-sm uppercase tracking-wider text-primary font-bold mb-2">The Gap</p>
+           {["No memory across sessions", "No behavioral pattern detection", "No structured decision framework", "No compatibility scoring", "No dating-specific context"].map((g, i) => (
+             <motion.div key={i} whileHover={{ scale: 1.02 }} className="flex items-center gap-3 rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm px-4 py-3 cursor-default">
+               <div className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />
+               <span className="text-base text-foreground">{g}</span>
+             </motion.div>
           ))}
         </div>
       </div>
@@ -128,22 +128,22 @@ const slides = [
     id: 3, label: "Positioning", title: "We Do Not Compete With Bumble.",
     content: (
       <div className="space-y-8 max-w-4xl mx-auto">
-        <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto">DateBetter occupies an entirely different category. No swiping. No matching. No engagement loops. We sit <span className="font-semibold text-foreground">after the match</span> — in the emotionally volatile space where real decisions happen.</p>
+        <p className="text-xl text-muted-foreground text-center max-w-2xl mx-auto">DateBetter occupies an entirely different category. No swiping. No matching. No engagement loops. We sit <span className="font-semibold text-foreground">after the match</span> — in the emotionally volatile space where real decisions happen.</p>
         <div className="grid grid-cols-2 gap-6">
           <motion.div whileHover={{ y: -4 }} className="rounded-2xl border border-border/60 p-8 text-center bg-card/60 backdrop-blur-sm">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Dating Apps</p>
-            <p className="text-2xl font-bold text-foreground mb-2">Engagement</p>
-            <p className="text-sm text-muted-foreground">More swipes. More matches. More time in-app.</p>
-            <p className="text-xs text-muted-foreground mt-3 font-medium">Success = sessions</p>
+            <p className="text-sm uppercase tracking-wider text-muted-foreground mb-3">Dating Apps</p>
+            <p className="text-3xl font-bold text-foreground mb-2">Engagement</p>
+            <p className="text-base text-muted-foreground">More swipes. More matches. More time in-app.</p>
+            <p className="text-sm text-muted-foreground mt-3 font-medium">Success = sessions</p>
           </motion.div>
           <motion.div whileHover={{ y: -4 }} className="rounded-2xl border-2 border-primary p-8 text-center bg-primary/5 shadow-[var(--shadow-soft)]">
-            <p className="text-xs uppercase tracking-wider text-primary mb-3">DateBetter</p>
-            <p className="text-2xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent mb-2">Decisions</p>
-            <p className="text-sm text-foreground/80">Better clarity. Better choices. Better outcomes.</p>
-            <p className="text-xs text-primary mt-3 font-medium">Success = relationships</p>
+            <p className="text-sm uppercase tracking-wider text-primary mb-3">DateBetter</p>
+            <p className="text-3xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent mb-2">Decisions</p>
+            <p className="text-base text-foreground/80">Better clarity. Better choices. Better outcomes.</p>
+            <p className="text-sm text-primary mt-3 font-medium">Success = relationships</p>
           </motion.div>
         </div>
-        <p className="text-sm text-muted-foreground text-center">The <span className="font-semibold text-foreground">$5B+ dating app market</span> creates our users. We monetize the intelligence layer that comes next.</p>
+        <p className="text-base text-muted-foreground text-center">The <span className="font-semibold text-foreground">$5B+ dating app market</span> creates our users. We monetize the intelligence layer that comes next.</p>
       </div>
     ),
   },
@@ -153,18 +153,18 @@ const slides = [
       <div className="space-y-8 max-w-4xl mx-auto">
         <div className="grid md:grid-cols-3 gap-5">
           {[
-            { icon: "💬", title: "Overanalyzing Texts", desc: "Hours spent dissecting message timing, word choice, and tone with no structured framework to interpret signals accurately." },
-            { icon: "🚩", title: "Ignoring Red Flags", desc: "Early behavioral cues get rationalized away. Attachment forms before clarity. The emotional cost compounds over time." },
-            { icon: "😩", title: "Decision Fatigue", desc: "Repeated cycles of confusion, burnout, and misaligned investment drain high-functioning women who should know better." },
-          ].map((item, i) => (
-            <motion.div key={i} whileHover={{ y: -6 }} className="rounded-2xl border border-border/40 p-6 bg-card/60 backdrop-blur-sm cursor-default">
-              <span className="text-3xl block mb-3">{item.icon}</span>
-              <h3 className="text-base font-bold text-foreground mb-2">{item.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-        <p className="text-lg text-center text-foreground font-medium max-w-2xl mx-auto">High-awareness women want <span className="text-primary">logic before emotional investment</span>. They are already seeking structure. DateBetter gives it to them.</p>
+             { icon: "💬", title: "Overanalyzing Texts", desc: "Hours spent dissecting message timing, word choice, and tone with no structured framework to interpret signals accurately." },
+             { icon: "🚩", title: "Ignoring Red Flags", desc: "Early behavioral cues get rationalized away. Attachment forms before clarity. The emotional cost compounds over time." },
+             { icon: "😩", title: "Decision Fatigue", desc: "Repeated cycles of confusion, burnout, and misaligned investment drain high-functioning women who should know better." },
+           ].map((item, i) => (
+             <motion.div key={i} whileHover={{ y: -6 }} className="rounded-2xl border border-border/40 p-6 bg-card/60 backdrop-blur-sm cursor-default">
+               <span className="text-4xl block mb-3">{item.icon}</span>
+               <h3 className="text-lg font-bold text-foreground mb-2">{item.title}</h3>
+               <p className="text-base text-muted-foreground leading-relaxed">{item.desc}</p>
+             </motion.div>
+           ))}
+         </div>
+         <p className="text-xl text-center text-foreground font-medium max-w-2xl mx-auto">High-awareness women want <span className="text-primary">logic before emotional investment</span>. They are already seeking structure. DateBetter gives it to them.</p>
       </div>
     ),
   },
@@ -173,17 +173,17 @@ const slides = [
     content: (
       <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto items-center">
         <div className="space-y-3">
-          <p className="text-sm text-muted-foreground mb-4 leading-relaxed">D.E.V.I. is not a chatbot. It is a <span className="font-semibold text-foreground">behavioral operating system</span> for your dating life — persistent, structured, and pattern-aware across every interaction you log.</p>
-          {[
-            { title: "Logs Dating Interactions", desc: "Every conversation, date, and behavior is captured with context." },
-            { title: "Maintains Memory", desc: "Cross-session continuity means insights compound over time — not reset." },
-            { title: "Detects Behavioral Patterns", desc: "Identifies consistency, inconsistency, and alignment with stated values." },
-            { title: "Compatibility Scoring", desc: "Generates structured scores based on logged behavioral evidence." },
-          ].map((f, i) => (
-            <motion.div key={i} whileHover={{ x: 4 }} className="flex items-start gap-3 cursor-default">
-              <div className="w-2 h-2 mt-2 rounded-full bg-[image:var(--gradient-primary)] shrink-0" />
-              <div><p className="text-sm font-semibold text-foreground">{f.title}</p><p className="text-xs text-muted-foreground">{f.desc}</p></div>
-            </motion.div>
+           <p className="text-base text-muted-foreground mb-4 leading-relaxed">D.E.V.I. is not a chatbot. It is a <span className="font-semibold text-foreground">behavioral operating system</span> for your dating life — persistent, structured, and pattern-aware across every interaction you log.</p>
+           {[
+             { title: "Logs Dating Interactions", desc: "Every conversation, date, and behavior is captured with context." },
+             { title: "Maintains Memory", desc: "Cross-session continuity means insights compound over time — not reset." },
+             { title: "Detects Behavioral Patterns", desc: "Identifies consistency, inconsistency, and alignment with stated values." },
+             { title: "Compatibility Scoring", desc: "Generates structured scores based on logged behavioral evidence." },
+           ].map((f, i) => (
+             <motion.div key={i} whileHover={{ x: 4 }} className="flex items-start gap-3 cursor-default">
+               <div className="w-2 h-2 mt-2 rounded-full bg-[image:var(--gradient-primary)] shrink-0" />
+               <div><p className="text-base font-semibold text-foreground">{f.title}</p><p className="text-sm text-muted-foreground">{f.desc}</p></div>
+             </motion.div>
           ))}
         </div>
         <div className="flex justify-center scale-[0.65] origin-center"><IPhoneMockup><ScreenshotDemo /></IPhoneMockup></div>
@@ -196,7 +196,7 @@ const slides = [
       <div className="grid md:grid-cols-3 gap-6 items-start max-w-5xl mx-auto">
         {[{ label: "Screenshot Analysis", Demo: ScreenshotDemo }, { label: "Compatibility Engine", Demo: CompatibilityDemo }, { label: "D.E.V.I. Chat", Demo: ChatDemo }].map(({ label, Demo }) => (
           <div key={label} className="text-center">
-            <p className="text-xs font-bold text-primary mb-3 uppercase tracking-wider">{label}</p>
+            <p className="text-sm font-bold text-primary mb-3 uppercase tracking-wider">{label}</p>
             <div className="scale-[0.55] origin-top"><IPhoneMockup><Demo /></IPhoneMockup></div>
           </div>
         ))}
@@ -210,7 +210,7 @@ const slides = [
         <motion.div whileHover={{ scale: 1.01 }} className="rounded-2xl overflow-hidden border-2 border-primary/20 shadow-[var(--shadow-elegant)] bg-black max-w-3xl w-full">
           <video src="/videos/demo.mp4" controls className="w-full aspect-video" playsInline autoPlay muted loop />
         </motion.div>
-        <p className="text-sm text-muted-foreground text-center mt-4">Live product demo — recorded from the beta app</p>
+        <p className="text-base text-muted-foreground text-center mt-4">Live product demo — recorded from the beta app</p>
       </div>
     ),
   },
@@ -225,13 +225,13 @@ const slides = [
         </div>
         <div className="grid md:grid-cols-2 gap-4">
           {["Therapist-reviewed psychology framework ✓", "App Store submission in progress", "10K-scale infrastructure ready ✓", "High-margin SaaS economics modeled ✓"].map((m, i) => (
-            <motion.div key={i} whileHover={{ x: 4 }} className="flex items-center gap-3 text-sm text-foreground/80 cursor-default">
+            <motion.div key={i} whileHover={{ x: 4 }} className="flex items-center gap-3 text-base text-foreground/80 cursor-default">
               <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />{m}
             </motion.div>
           ))}
         </div>
         <div className="rounded-2xl bg-primary/5 border border-primary/20 p-6 text-center">
-          <p className="text-base text-foreground">We are not raising to build — we are raising to <span className="font-bold text-primary">validate paid acquisition and reach $50K MRR</span>.</p>
+          <p className="text-lg text-foreground">We are not raising to build — we are raising to <span className="font-bold text-primary">validate paid acquisition and reach $50K MRR</span>.</p>
         </div>
       </div>
     ),
@@ -247,14 +247,14 @@ const slides = [
             { price: "$29.99", tier: "Premium", desc: "Advanced insights, history depth, and priority features." },
           ].map((p, i) => (
             <motion.div key={i} whileHover={{ y: -6 }} className={`rounded-2xl p-7 text-center ${p.featured ? "border-2 border-primary bg-primary/5 shadow-[var(--shadow-soft)] scale-105" : "border border-border/60 bg-card/60 backdrop-blur-sm"}`}>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{p.tier}</p>
-              <p className={`text-3xl font-bold mb-1 ${p.featured ? "bg-[image:var(--gradient-hero)] bg-clip-text text-transparent" : "text-foreground"}`}>{p.price}</p>
-              <p className="text-[10px] text-muted-foreground">/month</p>
-              <p className="text-xs text-muted-foreground mt-3 leading-relaxed">{p.desc}</p>
+               <p className="text-sm uppercase tracking-wider text-muted-foreground mb-2">{p.tier}</p>
+               <p className={`text-4xl font-bold mb-1 ${p.featured ? "bg-[image:var(--gradient-hero)] bg-clip-text text-transparent" : "text-foreground"}`}>{p.price}</p>
+               <p className="text-xs text-muted-foreground">/month</p>
+               <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{p.desc}</p>
             </motion.div>
           ))}
         </div>
-        <p className="text-center text-lg text-foreground">All tiers provide full D.E.V.I. core features. Blended ARPU: <span className="font-bold text-primary">$15</span></p>
+        <p className="text-center text-xl text-foreground">All tiers provide full D.E.V.I. core features. Blended ARPU: <span className="font-bold text-primary">$15</span></p>
       </div>
     ),
   },
@@ -262,30 +262,30 @@ const slides = [
     id: 10, label: "Unit Economics", title: "Both Apple Fee Scenarios Modeled.",
     content: (
       <div className="space-y-6 max-w-4xl mx-auto">
-        <p className="text-sm text-muted-foreground text-center max-w-2xl mx-auto">Every number accounts for platform fees. Both scenarios modeled transparently — no optimistic assumptions.</p>
+        <p className="text-base text-muted-foreground text-center max-w-2xl mx-auto">Every number accounts for platform fees. Both scenarios modeled transparently — no optimistic assumptions.</p>
         <div className="grid md:grid-cols-2 gap-6">
           <motion.div whileHover={{ y: -4 }} className="rounded-2xl border-2 border-primary p-6 bg-primary/5 shadow-[var(--shadow-soft)]">
-            <p className="text-sm font-bold text-primary mb-4">15% Fee — Year 1 (Small Business)</p>
-            <div className="space-y-2 text-foreground text-sm">
-              <div className="flex justify-between"><span>Net Revenue</span><span className="font-bold">$12.75</span></div>
-              <div className="flex justify-between"><span>Contribution</span><span className="font-bold">$12.25</span></div>
-              <div className="flex justify-between items-center pt-2 border-t border-primary/20"><span>Margin</span><span className="text-2xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">82%</span></div>
-            </div>
-          </motion.div>
-          <motion.div whileHover={{ y: -4 }} className="rounded-2xl border border-border/60 p-6 bg-card/60 backdrop-blur-sm">
-            <p className="text-sm font-bold text-muted-foreground mb-4">30% Fee — Worst Case (&gt;$1M)</p>
-            <div className="space-y-2 text-foreground text-sm">
-              <div className="flex justify-between"><span>Net Revenue</span><span className="font-bold">$10.50</span></div>
-              <div className="flex justify-between"><span>Contribution</span><span className="font-bold">$10.00</span></div>
-              <div className="flex justify-between items-center pt-2 border-t border-border/40"><span>Margin</span><span className="text-2xl font-bold text-foreground">67%</span></div>
-            </div>
+             <p className="text-base font-bold text-primary mb-4">15% Fee — Year 1 (Small Business)</p>
+             <div className="space-y-2 text-foreground text-base">
+               <div className="flex justify-between"><span>Net Revenue</span><span className="font-bold">$12.75</span></div>
+               <div className="flex justify-between"><span>Contribution</span><span className="font-bold">$12.25</span></div>
+               <div className="flex justify-between items-center pt-2 border-t border-primary/20"><span>Margin</span><span className="text-3xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">82%</span></div>
+             </div>
+           </motion.div>
+           <motion.div whileHover={{ y: -4 }} className="rounded-2xl border border-border/60 p-6 bg-card/60 backdrop-blur-sm">
+             <p className="text-base font-bold text-muted-foreground mb-4">30% Fee — Worst Case (&gt;$1M)</p>
+             <div className="space-y-2 text-foreground text-base">
+               <div className="flex justify-between"><span>Net Revenue</span><span className="font-bold">$10.50</span></div>
+               <div className="flex justify-between"><span>Contribution</span><span className="font-bold">$10.00</span></div>
+               <div className="flex justify-between items-center pt-2 border-t border-border/40"><span>Margin</span><span className="text-3xl font-bold text-foreground">67%</span></div>
+             </div>
           </motion.div>
         </div>
-        <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
-          <span>AI: <span className="font-bold text-foreground">$0.15</span>/user</span><span>·</span>
-          <span>Payment + overhead: <span className="font-bold text-foreground">$0.35</span>/user</span><span>·</span>
-          <span>Margin expands as model pricing drops quarterly</span>
-        </div>
+         <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+           <span>AI: <span className="font-bold text-foreground">$0.15</span>/user</span><span>·</span>
+           <span>Payment + overhead: <span className="font-bold text-foreground">$0.35</span>/user</span><span>·</span>
+           <span>Margin expands as model pricing drops quarterly</span>
+         </div>
       </div>
     ),
   },
@@ -300,14 +300,14 @@ const slides = [
             { channel: "Creator / Affiliate", budget: "$50K", cpa: "$25", users: "2,000", highlight: true },
           ].map((c, i) => (
             <motion.div key={i} whileHover={{ x: 4 }} className={`flex items-center justify-between rounded-2xl border p-5 cursor-default ${c.highlight ? "border-primary/40 bg-primary/5" : "border-border/40 bg-card/60 backdrop-blur-sm"}`}>
-              <span className="font-medium text-foreground">{c.channel}</span>
-              <div className="flex gap-5 text-sm text-muted-foreground"><span>{c.budget}</span><span>CPA {c.cpa}</span><span className="font-bold text-primary">{c.users} users</span></div>
+               <span className="font-medium text-lg text-foreground">{c.channel}</span>
+               <div className="flex gap-5 text-base text-muted-foreground"><span>{c.budget}</span><span>CPA {c.cpa}</span><span className="font-bold text-primary">{c.users} users</span></div>
             </motion.div>
           ))}
         </div>
         <div className="rounded-2xl bg-primary/5 border border-primary/20 p-6 text-center shadow-[var(--shadow-soft)]">
-          <p className="text-lg text-foreground">Total Year 1: <span className="font-bold text-primary">8,618 users</span> · Blended CPA ~$44</p>
-          <p className="text-xs text-muted-foreground mt-1">Creator/affiliate offers most efficient CPA — priority for early validation</p>
+           <p className="text-xl text-foreground">Total Year 1: <span className="font-bold text-primary">8,618 users</span> · Blended CPA ~$44</p>
+           <p className="text-sm text-muted-foreground mt-1">Creator/affiliate offers most efficient CPA — priority for early validation</p>
         </div>
       </div>
     ),
@@ -328,14 +328,14 @@ const slides = [
             { scenario: "Upside", cpa: "$30 CPA", mrr: "$100K+ MRR" },
           ].map((s, i) => (
             <motion.div key={i} whileHover={{ y: -4 }} className={`rounded-2xl p-5 text-center ${s.accent ? "border-2 border-primary bg-primary/5 shadow-[var(--shadow-soft)]" : "border border-border/40 bg-card/60"}`}>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{s.scenario}</p>
-              <p className="text-xs text-muted-foreground mb-1">{s.cpa}</p>
-              <p className={`text-xl font-bold ${s.accent ? "text-primary" : "text-foreground"}`}>{s.mrr}</p>
-              {s.sub && <p className="text-xs text-primary mt-1">{s.sub}</p>}
+               <p className="text-sm uppercase tracking-wider text-muted-foreground mb-2">{s.scenario}</p>
+               <p className="text-sm text-muted-foreground mb-1">{s.cpa}</p>
+               <p className={`text-2xl font-bold ${s.accent ? "text-primary" : "text-foreground"}`}>{s.mrr}</p>
+               {s.sub && <p className="text-sm text-primary mt-1">{s.sub}</p>}
             </motion.div>
           ))}
         </div>
-        <p className="text-sm text-center text-muted-foreground">Cash-flow positive by <span className="font-semibold text-foreground">Month 12</span> at base case with capital remaining.</p>
+        <p className="text-base text-center text-muted-foreground">Cash-flow positive by <span className="font-semibold text-foreground">Month 12</span> at base case with capital remaining.</p>
       </div>
     ),
   },
@@ -343,22 +343,22 @@ const slides = [
     id: 13, label: "Moat", title: "Structured Behavioral Data Is the Moat.",
     content: (
       <div className="space-y-8 max-w-4xl mx-auto">
-        <p className="text-base text-muted-foreground text-center max-w-2xl mx-auto">Every interaction logged compounds into a structural advantage generic AI cannot replicate. ChatGPT has no memory of your last relationship. D.E.V.I. has <span className="font-semibold text-foreground">months of yours</span>.</p>
-        <div className="grid grid-cols-2 gap-4">
-          {[
-            { icon: "📊", title: "Logged Decision History", desc: "Every choice, pattern, and outcome stored with full context and timeline." },
-            { icon: "🧠", title: "Emotional Pattern Recognition", desc: "Longitudinal data surfaces behavioral trends invisible in a single session." },
-            { icon: "📈", title: "Compatibility Evolution", desc: "Scores update dynamically as new evidence is logged — not static assessments." },
-            { icon: "🔮", title: "Predictive Insight Layer", desc: "Pattern history enables forward-looking guidance — not just reflection." },
-          ].map((d, i) => (
-            <motion.div key={i} whileHover={{ y: -4 }} className="rounded-2xl border border-border/40 p-5 bg-card/60 backdrop-blur-sm cursor-default">
-              <span className="text-2xl block mb-2">{d.icon}</span>
-              <p className="text-sm font-bold text-foreground mb-1">{d.title}</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">{d.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-        <p className="text-sm text-center text-muted-foreground font-medium">DateBetter's data layer is the product — and it gets <span className="text-primary">stronger with every session</span>.</p>
+         <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto">Every interaction logged compounds into a structural advantage generic AI cannot replicate. ChatGPT has no memory of your last relationship. D.E.V.I. has <span className="font-semibold text-foreground">months of yours</span>.</p>
+         <div className="grid grid-cols-2 gap-4">
+           {[
+             { icon: "📊", title: "Logged Decision History", desc: "Every choice, pattern, and outcome stored with full context and timeline." },
+             { icon: "🧠", title: "Emotional Pattern Recognition", desc: "Longitudinal data surfaces behavioral trends invisible in a single session." },
+             { icon: "📈", title: "Compatibility Evolution", desc: "Scores update dynamically as new evidence is logged — not static assessments." },
+             { icon: "🔮", title: "Predictive Insight Layer", desc: "Pattern history enables forward-looking guidance — not just reflection." },
+           ].map((d, i) => (
+             <motion.div key={i} whileHover={{ y: -4 }} className="rounded-2xl border border-border/40 p-5 bg-card/60 backdrop-blur-sm cursor-default">
+               <span className="text-3xl block mb-2">{d.icon}</span>
+               <p className="text-base font-bold text-foreground mb-1">{d.title}</p>
+               <p className="text-sm text-muted-foreground leading-relaxed">{d.desc}</p>
+             </motion.div>
+           ))}
+         </div>
+         <p className="text-base text-center text-muted-foreground font-medium">DateBetter's data layer is the product — and it gets <span className="text-primary">stronger with every session</span>.</p>
       </div>
     ),
   },
@@ -374,13 +374,13 @@ const slides = [
             { icon: "💪", title: "Self-Optimization Wave", desc: "High-achieving women are investing in tools for personal clarity — fitness, finance, and now relationships." },
           ].map((t, i) => (
             <motion.div key={i} whileHover={{ y: -4 }} className="rounded-2xl border border-border/40 p-6 bg-card/60 backdrop-blur-sm cursor-default">
-              <span className="text-2xl block mb-2">{t.icon}</span>
-              <p className="text-sm font-bold text-foreground mb-1">{t.title}</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">{t.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-        <p className="text-lg font-semibold text-primary text-center pt-2">Relationship intelligence is an emerging category. The window to define and own it is open now.</p>
+               <span className="text-3xl block mb-2">{t.icon}</span>
+               <p className="text-base font-bold text-foreground mb-1">{t.title}</p>
+               <p className="text-sm text-muted-foreground leading-relaxed">{t.desc}</p>
+             </motion.div>
+           ))}
+         </div>
+         <p className="text-xl font-semibold text-primary text-center pt-2">Relationship intelligence is an emerging category. The window to define and own it is open now.</p>
       </div>
     ),
   },
@@ -388,21 +388,21 @@ const slides = [
     id: 15, label: "Valuation", title: "$500K for 15% Equity. ~$3.3M Post-Money.",
     content: (
       <div className="space-y-8 max-w-4xl mx-auto">
-        <p className="text-base text-muted-foreground text-center max-w-2xl mx-auto">This is not a concept raise. DateBetter enters this round with a live product, a validated psychology framework, and infrastructure capable of supporting 10,000 users.</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { l: "Live Product", v: "MVP deployed. Beta users active." },
-            { l: "67–82% Margin", v: "Modeled under both Apple fee scenarios." },
-            { l: "10K Infrastructure", v: "No architectural rebuild required." },
-            { l: "Low Technical Risk", v: "Framework validated. Stack proven." },
-          ].map((v, i) => (
-            <motion.div key={i} whileHover={{ y: -4 }} className="rounded-2xl border border-primary/20 bg-primary/5 p-4 cursor-default">
-              <p className="text-xs font-bold text-primary mb-1">{v.l}</p>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">{v.v}</p>
-            </motion.div>
-          ))}
-        </div>
-        <p className="text-lg text-center text-foreground">Capital accelerates <span className="font-bold text-primary">scale</span> — not development. The hard product risk is behind us.</p>
+         <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto">This is not a concept raise. DateBetter enters this round with a live product, a validated psychology framework, and infrastructure capable of supporting 10,000 users.</p>
+         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+           {[
+             { l: "Live Product", v: "MVP deployed. Beta users active." },
+             { l: "67–82% Margin", v: "Modeled under both Apple fee scenarios." },
+             { l: "10K Infrastructure", v: "No architectural rebuild required." },
+             { l: "Low Technical Risk", v: "Framework validated. Stack proven." },
+           ].map((v, i) => (
+             <motion.div key={i} whileHover={{ y: -4 }} className="rounded-2xl border border-primary/20 bg-primary/5 p-4 cursor-default">
+               <p className="text-sm font-bold text-primary mb-1">{v.l}</p>
+               <p className="text-sm text-muted-foreground leading-relaxed">{v.v}</p>
+             </motion.div>
+           ))}
+         </div>
+         <p className="text-xl text-center text-foreground">Capital accelerates <span className="font-bold text-primary">scale</span> — not development. The hard product risk is behind us.</p>
       </div>
     ),
   },
@@ -411,20 +411,20 @@ const slides = [
     content: (
       <div className="flex flex-col items-center justify-center gap-8 text-center max-w-3xl mx-auto">
         <motion.img src={logo} alt="DateBetter" className="w-16 h-16 rounded-2xl shadow-[var(--shadow-soft)]" whileHover={{ scale: 1.05 }} />
-        <h3 className="text-2xl md:text-3xl font-bold text-foreground">Building the Operating System for <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">Relationship Decisions</span>.</h3>
-        <div className="grid grid-cols-3 gap-5 w-full">
-          {[
-            { title: "$500K Raise", desc: "15% equity. ~$3.3M post-money. 12–15 months of focused runway." },
-            { title: "One Objective", desc: "Validate paid CAC at scale. Prove $44 blended CPA holds. Reach $50K–$100K MRR." },
-            { title: "One Category", desc: "Relationship intelligence does not yet have a market leader. DateBetter is positioned to define and own it." },
-          ].map((a, i) => (
-            <motion.div key={i} whileHover={{ y: -4 }} className="rounded-2xl border border-primary/20 bg-primary/5 p-5 text-left cursor-default">
-              <p className="text-sm font-bold text-primary mb-2">{a.title}</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">{a.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-        <p className="text-sm text-muted-foreground">datebetter.ai · $500K Pre-Seed</p>
+         <h3 className="text-3xl md:text-4xl font-bold text-foreground">Building the Operating System for <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">Relationship Decisions</span>.</h3>
+         <div className="grid grid-cols-3 gap-5 w-full">
+           {[
+             { title: "$500K Raise", desc: "15% equity. ~$3.3M post-money. 12–15 months of focused runway." },
+             { title: "One Objective", desc: "Validate paid CAC at scale. Prove $44 blended CPA holds. Reach $50K–$100K MRR." },
+             { title: "One Category", desc: "Relationship intelligence does not yet have a market leader. DateBetter is positioned to define and own it." },
+           ].map((a, i) => (
+             <motion.div key={i} whileHover={{ y: -4 }} className="rounded-2xl border border-primary/20 bg-primary/5 p-5 text-left cursor-default">
+               <p className="text-base font-bold text-primary mb-2">{a.title}</p>
+               <p className="text-sm text-muted-foreground leading-relaxed">{a.desc}</p>
+             </motion.div>
+           ))}
+         </div>
+         <p className="text-base text-muted-foreground">datebetter.ai · $500K Pre-Seed</p>
       </div>
     ),
   },
@@ -735,14 +735,14 @@ const PitchDeck = () => {
             <Stagger>
               {slide.label && (
                 <FadeUp>
-                  <p className="text-xs uppercase tracking-[0.25em] text-primary mb-4 text-center font-bold">{slide.label}</p>
-                </FadeUp>
-              )}
-              {slide.title && (
-                <FadeUp>
-                  <h2 className="text-3xl md:text-5xl font-bold text-foreground text-center mb-12 leading-tight">
-                    {slide.title}
-                  </h2>
+                   <p className="text-sm uppercase tracking-[0.25em] text-primary mb-4 text-center font-bold">{slide.label}</p>
+                 </FadeUp>
+               )}
+               {slide.title && (
+                 <FadeUp>
+                   <h2 className="text-4xl md:text-6xl font-bold text-foreground text-center mb-12 leading-tight">
+                     {slide.title}
+                   </h2>
                 </FadeUp>
               )}
               <FadeUp>{slide.content}</FadeUp>
