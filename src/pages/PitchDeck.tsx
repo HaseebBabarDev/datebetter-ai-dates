@@ -207,12 +207,10 @@ const slides = [
     id: 7, label: "Live Demo", title: "App Walkthrough",
     content: (
       <div className="flex flex-col items-center">
-        <div className="scale-[0.85] origin-top">
-          <IPhoneMockup>
-            <video src="/videos/demo.mp4" controls className="w-full h-full object-cover" playsInline autoPlay muted loop />
-          </IPhoneMockup>
-        </div>
-        <p className="text-sm text-muted-foreground text-center mt-2">Live product demo — recorded from the beta app</p>
+        <motion.div whileHover={{ scale: 1.01 }} className="rounded-2xl overflow-hidden border-2 border-primary/20 shadow-[var(--shadow-elegant)] bg-black max-w-3xl w-full">
+          <video src="/videos/demo.mp4" controls className="w-full aspect-video" playsInline autoPlay muted loop />
+        </motion.div>
+        <p className="text-sm text-muted-foreground text-center mt-4">Live product demo — recorded from the beta app</p>
       </div>
     ),
   },
