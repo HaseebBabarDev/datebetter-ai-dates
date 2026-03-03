@@ -19,33 +19,29 @@ interface UpgradeLimitDialogProps {
 
 const PLAN_OPTIONS = [
   {
-    id: "new_to_dating",
-    name: "New to Dating",
+    id: "basic",
+    name: "Basic",
     price: "$9.99",
-    candidates: 3,
+    candidates: 1,
     updates: 5,
+    aiMessages: 5,
   },
   {
-    id: "dating_often",
-    name: "Dating Often",
-    price: "$19.99",
-    candidates: 7,
-    updates: 12,
+    id: "starter",
+    name: "Starter",
+    price: "$15.99",
+    candidates: 10,
+    updates: 30,
+    aiMessages: 1000,
     recommended: true,
-  },
-  {
-    id: "dating_more",
-    name: "Dating More",
-    price: "$29.99",
-    candidates: 12,
-    updates: 20,
   },
   {
     id: "unlimited",
     name: "Unlimited",
-    price: "$39.99",
+    price: "$29.99",
     candidates: "Unlimited",
     updates: "Unlimited",
+    aiMessages: "Unlimited",
   },
 ];
 
@@ -64,9 +60,8 @@ export function UpgradeLimitDialog({
 
   const availablePlans = PLAN_OPTIONS.filter((plan) => {
     if (currentPlan === "free") return true;
-    if (currentPlan === "new_to_dating") return plan.id !== "new_to_dating";
-    if (currentPlan === "dating_often") return plan.id === "dating_more" || plan.id === "unlimited";
-    if (currentPlan === "dating_more") return plan.id === "unlimited";
+    if (currentPlan === "basic") return plan.id !== "basic";
+    if (currentPlan === "starter") return plan.id === "unlimited";
     return false;
   });
 
@@ -112,11 +107,15 @@ export function UpgradeLimitDialog({
               <div className="space-y-1 text-sm text-muted-foreground mb-3">
                 <div className="flex items-center gap-2">
                   <Check className="w-3 h-3 text-green-500" />
-                  <span>{plan.candidates} candidates</span>
+                  <span>{plan.candidates} candidate{plan.candidates !== 1 ? "s" : ""}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-3 h-3 text-green-500" />
-                  <span>{plan.updates} updates each</span>
+                  <span>{plan.updates} updates</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-3 h-3 text-green-500" />
+                  <span>{plan.aiMessages} AI messages</span>
                 </div>
               </div>
               <Button

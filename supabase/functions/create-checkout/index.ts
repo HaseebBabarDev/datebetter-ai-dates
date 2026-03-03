@@ -32,7 +32,7 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { priceId, mode, candidateId } = await req.json();
+    const { priceId, mode, candidateId, successUrl } = await req.json();
     if (!priceId) throw new Error("priceId is required");
     logStep("Request params", { priceId, mode, candidateId });
 
@@ -55,7 +55,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: mode || "subscription",
-      success_url: `${origin}/subscription?success=true`,
+      success_url: successUrl || `${origin}/subscription?success=true`,
       cancel_url: `${origin}/subscription?canceled=true`,
       metadata: {
         user_id: user.id,

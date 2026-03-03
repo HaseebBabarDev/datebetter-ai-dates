@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { ProfilePhotoUpload } from "@/components/settings/ProfilePhotoUpload";
 import { Badge } from "@/components/ui/badge";
-import { PaymentSheet } from "@/components/subscription/PaymentSheet";
+import { STRIPE_PLANS } from "@/lib/stripeConfig";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { format, parse } from "date-fns";
 import { useTour, SETTINGS_TOUR_STEPS, TourRestartButton } from "@/components/tour";
@@ -32,22 +32,13 @@ import { BetaNdaDialog } from "@/components/auth/BetaNdaDialog";
 import { useNdaAgreement } from "@/hooks/useNdaAgreement";
 
 type Profile = Tables<"profiles">;
-type SubscriptionPlan = "free" | "new_to_dating" | "dating_often" | "dating_more" | "unlimited";
+type SubscriptionPlan = "free" | "basic" | "starter" | "unlimited";
 
-const PLAN_LIMITS: Record<SubscriptionPlan, { candidates: number; updates: number }> = {
-  free: { candidates: 1, updates: 1 },
-  new_to_dating: { candidates: 10, updates: 30 },  // Starter $9.99
-  dating_often: { candidates: 1, updates: 5 },      // Basic $4.99
-  dating_more: { candidates: 999, updates: 999 },   // (legacy, maps to unlimited)
-  unlimited: { candidates: 999, updates: 999 },
-};
-
-const PLAN_DISPLAY: Record<SubscriptionPlan, { name: string; price: string }> = {
+const PLAN_DISPLAY: Record<SubscriptionPlan, { name: string; price: string; stripeKey?: keyof typeof STRIPE_PLANS }> = {
   free: { name: "Free", price: "$0" },
-  new_to_dating: { name: "Starter", price: "$9.99" },
-  dating_often: { name: "Basic", price: "$4.99" },
-  dating_more: { name: "Unlimited", price: "$19.99" },
-  unlimited: { name: "Unlimited", price: "$19.99" },
+  basic: { name: "Basic", price: "$9.99/mo", stripeKey: "basic" },
+  starter: { name: "Starter", price: "$15.99/mo", stripeKey: "starter" },
+  unlimited: { name: "Unlimited", price: "$29.99/mo", stripeKey: "unlimited" },
 };
 
 const GENDER_OPTIONS = [
@@ -109,14 +100,13 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<SubscriptionPlan>("free");
-  const [changingPlan, setChangingPlan] = useState<SubscriptionPlan | null>(null);
+  
   const [isAdmin, setIsAdmin] = useState(false);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
   const [togglingRole, setTogglingRole] = useState<string | null>(null);
-  const [paymentOpen, setPaymentOpen] = useState(false);
-  const [selectedPlanForPayment, setSelectedPlanForPayment] = useState<SubscriptionPlan | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [referralStats, setReferralStats] = useState<{ total: number; converted: number; trialEarned: boolean }>({ total: 0, converted: 0, trialEarned: false });
   const [copiedReferral, setCopiedReferral] = useState(false);
   const [showBetaNda, setShowBetaNda] = useState(false);
@@ -167,9 +157,9 @@ const Settings = () => {
         setScreenName(data.screen_name || "");
       }
 
-      // Process subscription
+      // Process subscription - map from Stripe plan names
       if (subscriptionRes.data?.plan) {
-        const validPlans: SubscriptionPlan[] = ["free", "new_to_dating", "dating_often", "dating_more", "unlimited"];
+        const validPlans: SubscriptionPlan[] = ["free", "basic", "starter", "unlimited"];
         const plan = validPlans.includes(subscriptionRes.data.plan as SubscriptionPlan) 
           ? subscriptionRes.data.plan as SubscriptionPlan 
           : "free";
@@ -369,68 +359,32 @@ const Settings = () => {
 
   const handleChangePlan = async (newPlan: SubscriptionPlan) => {
     if (newPlan === currentPlan) return;
-    
-    // For paid plans, show payment sheet first
-    if (newPlan !== "free") {
-      setSelectedPlanForPayment(newPlan);
-      setPaymentOpen(true);
+    if (newPlan === "free") {
+      // Redirect to customer portal for downgrade
+      navigate("/subscription");
       return;
     }
-    
-    // For downgrade to free
-    await processUpgrade(newPlan);
-  };
 
-  const processUpgrade = async (newPlan: SubscriptionPlan) => {
-    setChangingPlan(newPlan);
+    const planInfo = PLAN_DISPLAY[newPlan];
+    if (!planInfo?.stripeKey) return;
+
+    setCheckoutLoading(newPlan);
     try {
-      const limits = PLAN_LIMITS[newPlan];
-      
-      // Check if subscription exists
-      const { data: existing } = await supabase
-        .from("user_subscriptions")
-        .select("id")
-        .eq("user_id", user!.id)
-        .maybeSingle();
-
-      if (existing) {
-        const { error } = await supabase
-          .from("user_subscriptions")
-          .update({
-            plan: newPlan,
-            candidates_limit: limits.candidates,
-            updates_per_candidate: limits.updates,
-          })
-          .eq("user_id", user!.id);
-
-        if (error) throw error;
+      const stripePlan = STRIPE_PLANS[planInfo.stripeKey];
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId: stripePlan.price_id, mode: "subscription" },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
       } else {
-        const { error } = await supabase
-          .from("user_subscriptions")
-          .insert({
-            user_id: user!.id,
-            plan: newPlan,
-            candidates_limit: limits.candidates,
-            updates_per_candidate: limits.updates,
-          });
-
-        if (error) throw error;
+        throw new Error("No checkout URL returned");
       }
-
-      setCurrentPlan(newPlan);
-      toast.success(`Upgraded to ${PLAN_DISPLAY[newPlan]?.name || newPlan}!`);
     } catch (error) {
-      console.error("Error changing plan:", error);
-      toast.error("Failed to change plan");
+      console.error("Checkout error:", error);
+      toast.error("Failed to start checkout. Please try again.");
     } finally {
-      setChangingPlan(null);
-    }
-  };
-
-  const handlePaymentSuccess = () => {
-    if (selectedPlanForPayment) {
-      processUpgrade(selectedPlanForPayment);
-      setSelectedPlanForPayment(null);
+      setCheckoutLoading(null);
     }
   };
 
@@ -1066,7 +1020,7 @@ const Settings = () => {
                 </div>
                 <h3 className="text-xl font-bold">{PLAN_DISPLAY[currentPlan]?.name || "Free"}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {PLAN_LIMITS[currentPlan]?.candidates || 1} candidate{(PLAN_LIMITS[currentPlan]?.candidates || 1) > 1 ? "s" : ""} • {PLAN_LIMITS[currentPlan]?.updates || 1} update{(PLAN_LIMITS[currentPlan]?.updates || 1) > 1 ? "s" : ""} each
+                  {PLAN_DISPLAY[currentPlan]?.price || "$0"}
                 </p>
               </CardContent>
             </Card>
@@ -1145,8 +1099,8 @@ const Settings = () => {
                 {currentPlan === "free" ? "Upgrade to unlock more features" : "Change your plan"}
               </h4>
 
-              {/* Basic Plan — $4.99 */}
-              <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "dating_often" ? "border-primary bg-primary/5" : ""}`}>
+              {/* Basic Plan — $9.99 */}
+              <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "basic" ? "border-primary bg-primary/5" : ""}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -1157,7 +1111,7 @@ const Settings = () => {
                       <p className="text-sm text-muted-foreground">1 candidate • 5 AI exchanges / month</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold">$4.99</p>
+                      <p className="text-xl font-bold">$9.99</p>
                       <p className="text-xs text-muted-foreground">/month</p>
                     </div>
                   </div>
@@ -1171,13 +1125,13 @@ const Settings = () => {
                   </div>
                   <Button
                     className="w-full mt-4"
-                    variant={currentPlan === "dating_often" ? "secondary" : "outline"}
-                    disabled={currentPlan === "dating_often" || changingPlan !== null}
-                    onClick={() => handleChangePlan("dating_often")}
+                    variant={currentPlan === "basic" ? "secondary" : "outline"}
+                    disabled={currentPlan === "basic" || checkoutLoading !== null}
+                    onClick={() => handleChangePlan("basic")}
                   >
-                    {changingPlan === "dating_often" ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Upgrading...</>
-                    ) : currentPlan === "dating_often" ? (
+                    {checkoutLoading === "basic" ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
+                    ) : currentPlan === "basic" ? (
                       <><Check className="w-4 h-4 mr-2" />Current Plan</>
                     ) : (
                       "Get Basic"
@@ -1186,8 +1140,8 @@ const Settings = () => {
                 </CardContent>
               </Card>
 
-              {/* Starter Plan — $9.99 */}
-              <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "new_to_dating" ? "border-primary bg-primary/5" : ""}`}>
+              {/* Starter Plan — $15.99 */}
+              <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "starter" ? "border-primary bg-primary/5" : ""}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -1195,10 +1149,10 @@ const Settings = () => {
                         <Sparkles className="w-4 h-4 text-primary" />
                         <h4 className="font-semibold">Starter</h4>
                       </div>
-                      <p className="text-sm text-muted-foreground">10 candidates • 30 updates each</p>
+                      <p className="text-sm text-muted-foreground">10 candidates • 1,000 AI messages</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold">$9.99</p>
+                      <p className="text-xl font-bold">$15.99</p>
                       <p className="text-xs text-muted-foreground">/month</p>
                     </div>
                   </div>
@@ -1212,13 +1166,13 @@ const Settings = () => {
                   </div>
                   <Button
                     className="w-full mt-4"
-                    variant={currentPlan === "new_to_dating" ? "secondary" : "outline"}
-                    disabled={currentPlan === "new_to_dating" || changingPlan !== null}
-                    onClick={() => handleChangePlan("new_to_dating")}
+                    variant={currentPlan === "starter" ? "secondary" : "outline"}
+                    disabled={currentPlan === "starter" || checkoutLoading !== null}
+                    onClick={() => handleChangePlan("starter")}
                   >
-                    {changingPlan === "new_to_dating" ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Upgrading...</>
-                    ) : currentPlan === "new_to_dating" ? (
+                    {checkoutLoading === "starter" ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
+                    ) : currentPlan === "starter" ? (
                       <><Check className="w-4 h-4 mr-2" />Current Plan</>
                     ) : (
                       "Get Starter"
@@ -1227,8 +1181,8 @@ const Settings = () => {
                 </CardContent>
               </Card>
 
-              {/* Unlimited Plan — $19.99 */}
-              <Card className={`cursor-pointer hover:border-primary/50 transition-colors relative overflow-hidden ${currentPlan === "unlimited" || currentPlan === "dating_more" ? "border-primary bg-primary/5" : "border-primary/30"}`}>
+              {/* Unlimited Plan — $29.99 */}
+              <Card className={`cursor-pointer hover:border-primary/50 transition-colors relative overflow-hidden ${currentPlan === "unlimited" ? "border-primary bg-primary/5" : "border-primary/30"}`}>
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-bl">
                   Most Popular
                 </div>
@@ -1242,7 +1196,7 @@ const Settings = () => {
                       <p className="text-sm text-muted-foreground">Unlimited candidates & messages</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold">$19.99</p>
+                      <p className="text-xl font-bold">$29.99</p>
                       <p className="text-xs text-muted-foreground">/month</p>
                     </div>
                   </div>
@@ -1256,13 +1210,13 @@ const Settings = () => {
                   </div>
                   <Button
                     className="w-full mt-4"
-                    variant={currentPlan === "unlimited" || currentPlan === "dating_more" ? "secondary" : "default"}
-                    disabled={currentPlan === "unlimited" || currentPlan === "dating_more" || changingPlan !== null}
+                    variant={currentPlan === "unlimited" ? "secondary" : "default"}
+                    disabled={currentPlan === "unlimited" || checkoutLoading !== null}
                     onClick={() => handleChangePlan("unlimited")}
                   >
-                    {changingPlan === "unlimited" ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Upgrading...</>
-                    ) : currentPlan === "unlimited" || currentPlan === "dating_more" ? (
+                    {checkoutLoading === "unlimited" ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
+                    ) : currentPlan === "unlimited" ? (
                       <><Check className="w-4 h-4 mr-2" />Current Plan</>
                     ) : (
                       "Get Unlimited"
@@ -1276,16 +1230,7 @@ const Settings = () => {
         </Tabs>
       </main>
 
-      {/* Payment Sheet */}
-      {selectedPlanForPayment && (
-        <PaymentSheet
-          open={paymentOpen}
-          onOpenChange={setPaymentOpen}
-          planName={PLAN_DISPLAY[selectedPlanForPayment].name}
-          price={PLAN_DISPLAY[selectedPlanForPayment].price}
-          onPaymentSuccess={handlePaymentSuccess}
-        />
-      )}
+      {/* Payment now handled via Stripe Checkout redirect */}
 
       {/* Beta NDA Dialog - View Only */}
       <BetaNdaDialog

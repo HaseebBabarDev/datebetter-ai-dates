@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
-import { PaymentSheet } from "@/components/subscription/PaymentSheet";
+import { STRIPE_ONE_TIME } from "@/lib/stripeConfig";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +41,7 @@ import {
   ArrowRight,
   PartyPopper,
   Clock,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -124,7 +125,7 @@ const DetachmentPlan = () => {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [showPayment, setShowPayment] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [expandedPhases, setExpandedPhases] = useState<Set<number>>(new Set([1]));
   const [currentPhase, setCurrentPhase] = useState(1);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
@@ -275,14 +276,50 @@ const DetachmentPlan = () => {
     }
   }, [user, candidateId, fetchData]);
 
-  const handleUnlockSuccess = async () => {
-    if (!planRecord?.id) return;
+  const handleUnlockCheckout = async () => {
+    if (!user) {
+      toast.error("Please sign in first");
+      return;
+    }
+    setCheckoutLoading(true);
     try {
-      await supabase.from("detachment_plans").update({ is_unlocked: true, unlocked_at: new Date().toISOString() }).eq("id", planRecord.id);
-      await fetchData();
-      toast.success("Your Detachment Plan is unlocked! 🎉");
-    } catch (e) { console.error("Error unlocking plan:", e); }
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: {
+          priceId: STRIPE_ONE_TIME.detachment_plan.price_id,
+          mode: "payment",
+          candidateId,
+          successUrl: `${window.location.origin}/detachment-plan/${candidateId}?success=true`,
+        },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL returned");
+      }
+    } catch (e) {
+      console.error("Checkout error:", e);
+      toast.error("Failed to start checkout. Please try again.");
+    } finally {
+      setCheckoutLoading(false);
+    }
   };
+
+  // Check if returning from successful payment
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "true" && planRecord?.id && !planRecord.is_unlocked) {
+      (async () => {
+        try {
+          await supabase.from("detachment_plans").update({ is_unlocked: true, unlocked_at: new Date().toISOString() }).eq("id", planRecord.id);
+          await fetchData();
+          toast.success("Your Detachment Plan is unlocked! 🎉");
+          // Clean URL
+          window.history.replaceState({}, "", window.location.pathname);
+        } catch (e) { console.error("Error unlocking plan:", e); }
+      })();
+    }
+  }, [planRecord?.id, planRecord?.is_unlocked, fetchData]);
 
   const handleUpdateStatus = async (newStatus: PlanStatus) => {
     if (!planRecord?.id) return;
@@ -525,8 +562,8 @@ const DetachmentPlan = () => {
                       <p className="text-sm font-semibold">Preview Mode</p>
                       <p className="text-xs text-muted-foreground">You can see Phase 1. Unlock all 4 phases for $9.99</p>
                     </div>
-                    <Button size="sm" className="h-8 text-xs gap-1 shrink-0" onClick={() => setShowPayment(true)}>
-                      <Zap className="w-3 h-3" />
+                    <Button size="sm" className="h-8 text-xs gap-1 shrink-0" onClick={handleUnlockCheckout} disabled={checkoutLoading}>
+                      {checkoutLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
                       Unlock
                     </Button>
                   </div>
@@ -799,8 +836,8 @@ const DetachmentPlan = () => {
             {!isUnlocked && (
               <div className="text-center space-y-3 py-4">
                 <p className="text-xs text-muted-foreground">Unlock all 4 phases, daily practices & milestones</p>
-                <Button size="lg" className="gap-2 h-12 px-8" onClick={() => setShowPayment(true)}>
-                  <Lock className="w-4 h-4" />
+                <Button size="lg" className="gap-2 h-12 px-8" onClick={handleUnlockCheckout} disabled={checkoutLoading}>
+                  {checkoutLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
                   Unlock Full Plan — $9.99
                 </Button>
                 <p className="text-[10px] text-muted-foreground">One-time purchase for this candidate</p>
@@ -833,14 +870,7 @@ const DetachmentPlan = () => {
         )}
       </div>
 
-      {/* Payment */}
-      <PaymentSheet
-        open={showPayment}
-        onOpenChange={setShowPayment}
-        planName={`Detachment Plan for ${candidate?.nickname}`}
-        price="$9.99"
-        onPaymentSuccess={handleUnlockSuccess}
-      />
+      {/* Payment now handled via Stripe Checkout redirect */}
 
       {/* Complete dialog */}
       <AlertDialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
