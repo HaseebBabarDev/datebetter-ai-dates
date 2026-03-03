@@ -10,7 +10,7 @@ import { ScreenshotDemo } from "@/components/website/ScreenshotDemo";
 import { CompatibilityDemo } from "@/components/website/CompatibilityDemo";
 import { ChatDemo } from "@/components/website/ChatDemo";
 
-const DECK_PASSWORD = "DB2025Invest";
+const DECK_PASSWORD = "DateBetter2025";
 
 /* ─── Track view ─── */
 const trackView = async (slidesViewed = 1) => {
