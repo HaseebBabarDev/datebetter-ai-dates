@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Mail, Lock, ArrowLeft, Sparkles, Heart, Shield, CheckCircle2, Bot } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, Sparkles, Heart, Shield, CheckCircle2, Bot, Apple } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import authBg from "@/assets/auth-bg.jpg";
 import { BetaNdaDialog } from "@/components/auth/BetaNdaDialog";
 import { BetaWelcomeDialog } from "@/components/auth/BetaWelcomeDialog";
@@ -22,6 +23,7 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(searchParams.get("mode") === "signup" || !!referralCode);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
   const [email, setEmail] = useState("");
@@ -466,6 +468,47 @@ const Auth = () => {
               </Button>
 
             </form>
+
+            {/* Divider */}
+            {!isForgotPassword && (
+              <div className="flex items-center gap-3 my-5">
+                <div className="flex-1 h-px bg-border/50" />
+                <span className="text-xs text-muted-foreground">or continue with</span>
+                <div className="flex-1 h-px bg-border/50" />
+              </div>
+            )}
+
+            {/* Apple Sign In */}
+            {!isForgotPassword && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-12 rounded-xl bg-foreground text-background hover:bg-foreground/90 border-0 text-base font-semibold gap-2"
+                disabled={appleLoading}
+                onClick={async () => {
+                  setAppleLoading(true);
+                  try {
+                    const { error } = await lovable.auth.signInWithOAuth("apple", {
+                      redirect_uri: window.location.origin,
+                    });
+                    if (error) {
+                      toast({ title: error.message || "Apple sign in failed", variant: "destructive" });
+                    }
+                  } catch (err) {
+                    toast({ title: "Apple sign in failed", variant: "destructive" });
+                  } finally {
+                    setAppleLoading(false);
+                  }
+                }}
+              >
+                {appleLoading ? (
+                  <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Apple className="w-5 h-5" />
+                )}
+                Sign in with Apple
+              </Button>
+            )}
 
             {/* Toggle Sign In/Up */}
             <div className="mt-6 pt-4 border-t border-border/30">

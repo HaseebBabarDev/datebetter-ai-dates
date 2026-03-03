@@ -60,7 +60,7 @@ export default defineConfig(({ mode }) => ({
         skipWaiting: true,
         clientsClaim: true,
         navigateFallback: "index.html",
-        navigateFallbackDenylist: [/^\/api/, /^\/functions/],
+        navigateFallbackDenylist: [/^\/api/, /^\/functions/, /^\/~oauth/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
