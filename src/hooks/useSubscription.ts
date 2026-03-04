@@ -12,6 +12,8 @@ interface StripeSubscription {
   subscription_end: string | null;
   day_pass_active: boolean;
   detachment_plan_candidates: string[];
+  trial_active: boolean;
+  trial_ends_at: string | null;
 }
 
 export function useSubscription() {
