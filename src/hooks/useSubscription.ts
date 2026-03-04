@@ -54,6 +54,8 @@ export function useSubscription() {
           subscription_end: data.subscription_end || null,
           day_pass_active: data.day_pass_active || false,
           detachment_plan_candidates: data.detachment_plan_candidates || [],
+          trial_active: data.trial_active || false,
+          trial_ends_at: data.trial_ends_at || null,
         });
       }
 
