@@ -1183,6 +1183,7 @@ const Devi = () => {
         .replace(/\[SET_LOVE_BOMBING_SENSITIVITY:\d+\]/g, '')
         .replace(/\[SET_OVER_EX_LEVEL:\d+\]/g, '')
         .replace(/\[SET_ATTACHMENT_TO_PAST:\d+\]/g, '')
+        .replace(/\[SET_COMPATIBILITY_SCORE:\d+\]/g, '')
         .replace(/\[LOG_INTERACTION:[^\]]*\]?/g, '')
         .replace(/\[[A-Z_]+:[^\]]*\]?/g, '')
         .replace(/\[[A-Z_]{3,}\]/g, '')
