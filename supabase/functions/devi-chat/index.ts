@@ -667,6 +667,13 @@ Use these markers to trigger updates (the app will execute them automatically):
    - Use: [SET_ATTACHMENT_TO_PAST:X] where X is 1-10 (10 = very attached, 1 = moved on)
    - Triggers: Discussing overall relationship patterns and growth
 
+7. COMPATIBILITY SCORE - When you and the user agree on a specific compatibility score for the current candidate:
+   - Use: [SET_COMPATIBILITY_SCORE:X] where X is 0-100
+   - Example: If you both agree Michelle is a 96% match, include [SET_COMPATIBILITY_SCORE:96] in your response
+   - Triggers: User agrees to your compatibility assessment, you discuss and agree on a score, user asks to update the score
+   - CRITICAL: Whenever you mention or agree on a specific compatibility percentage for the candidate, YOU MUST include this marker to keep the dashboard in sync
+   - This updates the candidate's score on the dashboard immediately
+
 IMPORTANT for profile updates:
 - When suggesting an update, explain WHY you're recommending that specific value
 - Get user agreement before updating when possible, or clearly state what you're updating
