@@ -12,12 +12,30 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
-// Map Stripe product IDs to internal plan names
 const PRODUCT_TO_PLAN: Record<string, string> = {
   "prod_U5BaepUGcVqsIg": "basic",
   "prod_U5Ba3aovhb68xI": "starter",
   "prod_U5Ba2gOJLLzLpj": "unlimited",
 };
+
+function safeTimestamp(val: any): string | null {
+  if (!val) return null;
+  try {
+    // If it's a number (unix seconds), convert
+    if (typeof val === "number") {
+      const d = new Date(val * 1000);
+      if (!isNaN(d.getTime())) return d.toISOString();
+    }
+    // If it's already a string, try parsing
+    if (typeof val === "string") {
+      const d = new Date(val);
+      if (!isNaN(d.getTime())) return d.toISOString();
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -74,50 +92,44 @@ serve(async (req) => {
 
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      productId = subscription.items.data[0].price.product as string;
-      priceId = subscription.items.data[0].price.id;
+      subscriptionEnd = safeTimestamp(subscription.current_period_end);
+      productId = subscription.items.data[0]?.price?.product as string;
+      priceId = subscription.items.data[0]?.price?.id;
       plan = PRODUCT_TO_PLAN[productId] || "unknown";
       logStep("Active subscription found", { plan, productId, priceId, endDate: subscriptionEnd });
     } else {
       logStep("No active subscription");
     }
 
-    // Also check for one-time purchases (Day Pass, Detachment Plan)
-    const charges = await stripe.charges.list({
-      customer: customerId,
-      limit: 100,
-    });
-
-    const oneTimePurchases: string[] = [];
-    for (const charge of charges.data) {
-      if (charge.paid && !charge.refunded && charge.metadata?.user_id === user.id) {
-        // Track purchased product types
-      }
-    }
-
-    // Check for completed checkout sessions for one-time purchases
-    const sessions = await stripe.checkout.sessions.list({
-      customer: customerId,
-      limit: 50,
-    });
-
-    const detachmentPlanCandidates: string[] = [];
+    // Check for one-time purchases (Day Pass, Detachment Plan)
+    let detachmentPlanCandidates: string[] = [];
     let hasDayPass = false;
-    const now = new Date();
 
-    for (const session of sessions.data) {
-      if (session.payment_status === "paid" && session.mode === "payment") {
-        if (session.metadata?.candidate_id) {
-          detachmentPlanCandidates.push(session.metadata.candidate_id);
-        }
-        // Day pass: check if purchased within last 24 hours
-        const sessionDate = new Date(session.created * 1000);
-        const hoursDiff = (now.getTime() - sessionDate.getTime()) / (1000 * 60 * 60);
-        if (hoursDiff <= 24) {
-          hasDayPass = true;
+    try {
+      const sessions = await stripe.checkout.sessions.list({
+        customer: customerId,
+        limit: 50,
+      });
+
+      const now = Date.now();
+
+      for (const session of sessions.data) {
+        if (session.payment_status === "paid" && session.mode === "payment") {
+          if (session.metadata?.candidate_id) {
+            detachmentPlanCandidates.push(session.metadata.candidate_id);
+          }
+          // Day pass: check if purchased within last 24 hours
+          const createdMs = typeof session.created === "number" ? session.created * 1000 : 0;
+          if (createdMs > 0) {
+            const hoursDiff = (now - createdMs) / (1000 * 60 * 60);
+            if (hoursDiff <= 24) {
+              hasDayPass = true;
+            }
+          }
         }
       }
+    } catch (e) {
+      logStep("Error fetching checkout sessions (non-fatal)", { message: String(e) });
     }
 
     return new Response(JSON.stringify({
