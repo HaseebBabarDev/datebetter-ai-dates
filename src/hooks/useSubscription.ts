@@ -12,6 +12,8 @@ interface StripeSubscription {
   subscription_end: string | null;
   day_pass_active: boolean;
   detachment_plan_candidates: string[];
+  trial_active: boolean;
+  trial_ends_at: string | null;
 }
 
 export function useSubscription() {
@@ -40,6 +42,8 @@ export function useSubscription() {
           subscription_end: null,
           day_pass_active: false,
           detachment_plan_candidates: [],
+          trial_active: false,
+          trial_ends_at: null,
         });
       } else {
         setSubscription({
@@ -50,6 +54,8 @@ export function useSubscription() {
           subscription_end: data.subscription_end || null,
           day_pass_active: data.day_pass_active || false,
           detachment_plan_candidates: data.detachment_plan_candidates || [],
+          trial_active: data.trial_active || false,
+          trial_ends_at: data.trial_ends_at || null,
         });
       }
 
