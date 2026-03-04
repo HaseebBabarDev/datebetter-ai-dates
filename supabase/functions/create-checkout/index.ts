@@ -40,13 +40,22 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Check for existing Stripe customer
+    // Check for existing Stripe customer, create one if not found
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
+      logStep("Found existing customer", { customerId });
+    } else {
+      // Always create customer with the authenticated user's email
+      // This prevents email mismatch when checking subscription later
+      const newCustomer = await stripe.customers.create({
+        email: user.email,
+        metadata: { supabase_user_id: user.id },
+      });
+      customerId = newCustomer.id;
+      logStep("Created new customer", { customerId });
     }
-    logStep("Customer lookup", { customerId: customerId || "new" });
 
     const origin = req.headers.get("origin") || "https://datebetter-ai-dates.lovable.app";
 
