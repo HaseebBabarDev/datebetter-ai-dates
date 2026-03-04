@@ -61,7 +61,6 @@ serve(async (req) => {
 
     const sessionParams: any = {
       customer: customerId,
-      customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: mode || "subscription",
       success_url: successUrl || `${origin}/subscription?success=true`,
