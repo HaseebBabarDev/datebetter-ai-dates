@@ -67,8 +67,46 @@ serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
 
+    // Check for active trial in user_subscriptions
+    let trialActive = false;
+    let trialEndsAt: string | null = null;
+    try {
+      const { data: subData } = await supabaseClient
+        .from("user_subscriptions")
+        .select("trial_ends_at, plan, candidates_limit, updates_per_candidate")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (subData?.trial_ends_at) {
+        const trialEnd = new Date(subData.trial_ends_at);
+        if (trialEnd > new Date()) {
+          trialActive = true;
+          trialEndsAt = trialEnd.toISOString();
+          logStep("Active trial found", { trialEndsAt });
+        }
+      }
+    } catch (e) {
+      logStep("Error checking trial (non-fatal)", { message: String(e) });
+    }
+
     if (customers.data.length === 0) {
       logStep("No Stripe customer found");
+      if (trialActive) {
+        return new Response(JSON.stringify({
+          subscribed: true,
+          plan: "starter",
+          product_id: null,
+          price_id: null,
+          subscription_end: trialEndsAt,
+          trial_active: true,
+          trial_ends_at: trialEndsAt,
+          day_pass_active: false,
+          detachment_plan_candidates: [],
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
       return new Response(JSON.stringify({ subscribed: false, plan: "free" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
