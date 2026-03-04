@@ -42,6 +42,8 @@ export function useSubscription() {
           subscription_end: null,
           day_pass_active: false,
           detachment_plan_candidates: [],
+          trial_active: false,
+          trial_ends_at: null,
         });
       } else {
         setSubscription({
