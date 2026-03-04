@@ -773,53 +773,107 @@ const DeviSection = () => {
 };
 
 /* ─── Testimonials ─── */
-const Testimonials = () => (
-  <section id="testimonials" className="py-20 bg-muted/30">
-    <div className="max-w-6xl mx-auto px-5">
-      <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center max-w-2xl mx-auto mb-14">
-        <motion.h2 variants={fadeUp} className="font-poppins text-3xl sm:text-4xl font-bold text-foreground mb-4">
-          Real people. <span className="text-primary">Real clarity.</span>
-        </motion.h2>
-        <motion.p variants={fadeUp} className="text-muted-foreground text-lg">
-          Hear from people who stopped guessing and started choosing.
-        </motion.p>
-      </motion.div>
+const REVIEWS = [
+  { name: "Erin M.", quote: "Great reading, I avoided making a decision that could have cost me with his advice.", stars: 5 },
+  { name: "Nakita", quote: "Great reading, very accurate and direct to the point.", stars: 5 },
+  { name: "Kae", quote: "One of the best readings I have had, it wasn't a lot of fluff.", stars: 5 },
+  { name: "Jasmine R.", quote: "D.E.V.I. caught a pattern I'd been blind to for years. I finally feel like I'm dating with my eyes open.", stars: 5 },
+  { name: "Alicia M.", quote: "The compatibility scoring alone saved me months. I used to waste so much time on people who didn't align with my values.", stars: 5 },
+  { name: "Tara K.", quote: "I love the auto-disqualify feature. It's like having a best friend who remembers all your dealbreakers and holds you accountable.", stars: 5 },
+];
 
-      <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="grid md:grid-cols-3 gap-6">
-        {[
-          { name: "Jasmine R.", quote: "D.E.V.I. caught a pattern I'd been blind to for years. I finally feel like I'm dating with my eyes open.", stars: 5 },
-          { name: "Alicia M.", quote: "The compatibility scoring alone saved me months. I used to waste so much time on people who didn't align with my values.", stars: 5 },
-          { name: "Tara K.", quote: "I love the auto-disqualify feature. It's like having a best friend who remembers all your dealbreakers and holds you accountable.", stars: 5 },
-        ].map((t) => (
-          <MagneticCard key={t.name} className="cursor-default">
+const Testimonials = () => {
+  const [current, setCurrent] = React.useState(0);
+  const [direction, setDirection] = React.useState(0);
+
+  const paginate = (newDirection: number) => {
+    setDirection(newDirection);
+    setCurrent((prev) => (prev + newDirection + REVIEWS.length) % REVIEWS.length);
+  };
+
+  // Auto-advance every 5 seconds
+  React.useEffect(() => {
+    const timer = setInterval(() => paginate(1), 5000);
+    return () => clearInterval(timer);
+  }, [current]);
+
+  return (
+    <section id="testimonials" className="py-20 bg-muted/30">
+      <div className="max-w-6xl mx-auto px-5">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center max-w-2xl mx-auto mb-14">
+          <motion.h2 variants={fadeUp} className="font-poppins text-3xl sm:text-4xl font-bold text-foreground mb-4">
+            Real people. <span className="text-primary">Real clarity.</span>
+          </motion.h2>
+          <motion.p variants={fadeUp} className="text-muted-foreground text-lg">
+            Hear from people who stopped guessing and started choosing.
+          </motion.p>
+        </motion.div>
+
+        {/* Carousel */}
+        <div className="relative max-w-2xl mx-auto">
+          <div className="overflow-hidden rounded-2xl">
             <motion.div
-              variants={fadeUp}
-              className="p-6 rounded-2xl bg-card border border-border h-full"
-              whileHover={{ y: -6, boxShadow: "var(--shadow-soft)" }}
+              key={current}
+              initial={{ opacity: 0, x: direction > 0 ? 100 : -100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: direction > 0 ? -100 : 100 }}
+              transition={{ duration: 0.4, ease: [0.25, 0.4, 0.25, 1] }}
+              className="p-8 sm:p-10 rounded-2xl bg-card border border-border text-center"
             >
-              <div className="flex gap-0.5 mb-4">
-                {Array.from({ length: t.stars }).map((_, i) => (
+              <div className="flex justify-center gap-1 mb-5">
+                {Array.from({ length: REVIEWS[current].stars }).map((_, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, scale: 0 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.3 + i * 0.1, type: "spring", stiffness: 400 }}
+                    initial={{ opacity: 0, scale: 0, rotate: -30 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    transition={{ delay: i * 0.08, type: "spring", stiffness: 500 }}
                   >
-                    <Star className="w-4 h-4 fill-primary text-primary" />
+                    <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
                   </motion.div>
                 ))}
               </div>
-              <p className="text-foreground leading-relaxed mb-5 italic">"{t.quote}"</p>
-              <p className="font-poppins font-semibold text-foreground">{t.name}</p>
-              <p className="text-xs text-muted-foreground">Beta Tester</p>
+              <p className="text-foreground text-lg sm:text-xl leading-relaxed mb-6 italic font-medium">
+                "{REVIEWS[current].quote}"
+              </p>
+              <p className="font-poppins font-bold text-foreground text-lg">{REVIEWS[current].name}</p>
+              <p className="text-sm text-muted-foreground mt-1">Verified User</p>
             </motion.div>
-          </MagneticCard>
-        ))}
-      </motion.div>
-    </div>
-  </section>
-);
+          </div>
+
+          {/* Navigation arrows */}
+          <button
+            onClick={() => paginate(-1)}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 sm:-translate-x-12 w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors shadow-sm"
+            aria-label="Previous review"
+          >
+            <ArrowRight className="w-4 h-4 rotate-180" />
+          </button>
+          <button
+            onClick={() => paginate(1)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 sm:translate-x-12 w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors shadow-sm"
+            aria-label="Next review"
+          >
+            <ArrowRight className="w-4 h-4" />
+          </button>
+
+          {/* Dots */}
+          <div className="flex justify-center gap-2 mt-6">
+            {REVIEWS.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => { setDirection(i > current ? 1 : -1); setCurrent(i); }}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                  i === current ? "bg-primary w-6" : "bg-border hover:bg-muted-foreground/50"
+                }`}
+                aria-label={`Go to review ${i + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 /* ─── Final CTA ─── */
 const FinalCTA = () => {
