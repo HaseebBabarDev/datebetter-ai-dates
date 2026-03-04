@@ -170,12 +170,19 @@ serve(async (req) => {
       logStep("Error fetching checkout sessions (non-fatal)", { message: String(e) });
     }
 
+    // If no active Stripe sub but trial is active, grant starter access
+    const effectiveSubscribed = hasActiveSub || trialActive;
+    const effectivePlan = hasActiveSub ? plan : (trialActive ? "starter" : "free");
+    const effectiveEnd = hasActiveSub ? subscriptionEnd : (trialActive ? trialEndsAt : null);
+
     return new Response(JSON.stringify({
-      subscribed: hasActiveSub,
-      plan,
+      subscribed: effectiveSubscribed,
+      plan: effectivePlan,
       product_id: productId,
       price_id: priceId,
-      subscription_end: subscriptionEnd,
+      subscription_end: effectiveEnd,
+      trial_active: trialActive,
+      trial_ends_at: trialEndsAt,
       day_pass_active: hasDayPass,
       detachment_plan_candidates: detachmentPlanCandidates,
     }), {
