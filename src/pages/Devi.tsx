@@ -1183,6 +1183,7 @@ const Devi = () => {
         .replace(/\[SET_LOVE_BOMBING_SENSITIVITY:\d+\]/g, '')
         .replace(/\[SET_OVER_EX_LEVEL:\d+\]/g, '')
         .replace(/\[SET_ATTACHMENT_TO_PAST:\d+\]/g, '')
+        .replace(/\[SET_COMPATIBILITY_SCORE:\d+\]/g, '')
         .replace(/\[LOG_INTERACTION:[^\]]*\]?/g, '')
         .replace(/\[[A-Z_]+:[^\]]*\]?/g, '')
         .replace(/\[[A-Z_]{3,}\]/g, '')
@@ -1363,6 +1364,36 @@ const Devi = () => {
           profileUpdates.attachment_to_past = value;
           hasUpdates = true;
           toast.success(`Attachment to past updated to ${value}/10`);
+        }
+        
+        // Parse compatibility score marker for candidate
+        const compatScoreMatch = fullContent.match(/\[SET_COMPATIBILITY_SCORE:(\d+)\]/);
+        if (compatScoreMatch && selectedCandidate && user) {
+          const value = Math.min(100, Math.max(0, parseInt(compatScoreMatch[1])));
+          try {
+            const { error } = await supabase
+              .from('candidates')
+              .update({ 
+                compatibility_score: value,
+                last_score_update: new Date().toISOString(),
+              })
+              .eq('id', selectedCandidate.id)
+              .eq('user_id', user.id);
+            
+            if (!error) {
+              setSelectedCandidate(prev => prev ? {
+                ...prev,
+                compatibility_score: value,
+                last_score_update: new Date().toISOString(),
+              } : prev);
+              toast.success(`${selectedCandidate.nickname}'s compatibility score updated to ${value}%`);
+            } else {
+              console.error('Failed to update compatibility score:', error);
+              toast.error('Failed to update compatibility score');
+            }
+          } catch (err) {
+            console.error('Compatibility score update error:', err);
+          }
         }
         
         // Apply profile updates to database
