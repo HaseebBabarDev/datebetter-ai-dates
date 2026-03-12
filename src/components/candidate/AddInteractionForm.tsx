@@ -235,7 +235,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
       setShowPendingAdviceDialog(true);
     } else if (newOpen && isNoContact) {
       setShowBrokeContactDialog(true);
-    } else if (newOpen && !canUseUpdate(candidateId)) {
+    } else if (newOpen && !canLogInteraction()) {
       setShowUpgradeDialog(true);
     } else {
       setOpen(newOpen);
