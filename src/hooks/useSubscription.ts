@@ -160,10 +160,13 @@ export function useSubscription() {
   return {
     subscription,
     candidateCount,
+    interactionCount,
     loading,
     canAddCandidate,
+    canLogInteraction,
     canUseUpdate,
     getRemainingUpdates,
+    getRemainingInteractions,
     hasDetachmentPlan,
     incrementUsage,
     refetch: checkSubscription,
