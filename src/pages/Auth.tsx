@@ -142,8 +142,12 @@ const Auth = () => {
             variant: "destructive" 
           });
         } else {
-          toast({ title: "Account created! Welcome to dateBetter" });
-          
+          const hasReferral = !!referralCode;
+          toast({ 
+            title: hasReferral 
+              ? "Account created! You got 30 days free 🎉" 
+              : "Account created! Welcome to dateBetter" 
+          });
           // Handle referral
           if (referralCode && data?.user) {
             const referrerIdPrefix = referralCode.replace("DEVI-", "").toLowerCase();
@@ -154,6 +158,7 @@ const Auth = () => {
               .limit(1);
             
             if (referrers && referrers.length > 0) {
+              // Record referral as converted
               await supabase.from("referrals").insert({
                 referrer_id: referrers[0].user_id,
                 referred_id: data.user.id,
@@ -161,6 +166,29 @@ const Auth = () => {
                 status: "converted",
                 converted_at: new Date().toISOString()
               });
+              
+              // Grant 30-day free trial to the referred user
+              const trialEnd = new Date();
+              trialEnd.setDate(trialEnd.getDate() + 30);
+              
+              // Small delay to ensure the trigger has created the subscription row
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              
+              const { error: trialError } = await supabase
+                .from("user_subscriptions")
+                .update({ trial_ends_at: trialEnd.toISOString() })
+                .eq("user_id", data.user.id);
+              
+              // If update failed (row not yet created), try upsert
+              if (trialError) {
+                await supabase.from("user_subscriptions").upsert({
+                  user_id: data.user.id,
+                  plan: "free",
+                  candidates_limit: 1,
+                  updates_per_candidate: 5,
+                  trial_ends_at: trialEnd.toISOString(),
+                }, { onConflict: "user_id" });
+              }
               
               await supabase.functions.invoke("notify-referrer", {
                 body: { 
