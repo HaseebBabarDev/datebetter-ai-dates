@@ -150,17 +150,20 @@ export default function Subscription() {
     }
   };
 
-  const handleDetachmentCheckout = async () => {
+  const handleOneTimeCheckout = async (type: "day_pass" | "detachment") => {
     if (!user) {
       toast.error("Please sign in first");
       navigate("/auth");
       return;
     }
 
-    setCheckoutLoading("detachment");
+    setCheckoutLoading(type === "day_pass" ? "daypass" : "detachment");
     try {
+      const priceId = type === "day_pass" 
+        ? STRIPE_ONE_TIME.day_pass.price_id 
+        : STRIPE_ONE_TIME.detachment_plan.price_id;
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId: STRIPE_ONE_TIME.detachment_plan.price_id, mode: "payment" },
+        body: { priceId, mode: "payment" },
       });
 
       if (error) throw error;
