@@ -15,7 +15,7 @@ const REMINDER_TIMES: ReminderTime[] = [
 const STORAGE_KEY = "datebetter_last_reminders";
 
 export function useScheduledReminders() {
-  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const checkIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const getShownReminders = useCallback((): Record<string, string> => {
     try {
