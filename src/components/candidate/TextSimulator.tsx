@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, AlertTriangle, MessageCircle, ChevronLeft, Lock } from "lucide-react";
+import { X, Send, AlertTriangle, MessageCircle, ChevronLeft, Lock, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AIDisclosure } from "@/components/AIDisclosure";
 import { detectCrisisContent } from "@/lib/crisisDetection";
