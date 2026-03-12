@@ -40,7 +40,8 @@ const SUBSCRIPTION_PLANS = [
     description: "Try D.E.V.I. with one candidate",
     icon: MessageCircle,
     features: [
-      "1 candidate",
+      "Up to 5 candidates",
+      "300 interaction logs",
       "5 AI message exchanges / month",
       "Compatibility scoring",
       "Red flag detection",

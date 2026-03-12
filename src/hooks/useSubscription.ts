@@ -109,7 +109,7 @@ export function useSubscription() {
       case "basic": return { candidates: 5, updates: 300, aiMessages: 5, textSimSessions: 3 };
       case "starter": return { candidates: 10, updates: 30, aiMessages: 1000, textSimSessions: 999 };
       case "unlimited": return { candidates: 999, updates: 999, aiMessages: 999999, textSimSessions: 999 };
-      default: return { candidates: 5, updates: interactionLimit, aiMessages: 5, textSimSessions: 3 };
+      default: return { candidates: 1, updates: interactionLimit, aiMessages: 5, textSimSessions: 3 };
     }
   };
 
