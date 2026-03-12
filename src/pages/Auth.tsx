@@ -142,8 +142,12 @@ const Auth = () => {
             variant: "destructive" 
           });
         } else {
-          toast({ title: "Account created! Welcome to dateBetter" });
-          
+          const hasReferral = !!referralCode;
+          toast({ 
+            title: hasReferral 
+              ? "Account created! You got 30 days free 🎉" 
+              : "Account created! Welcome to dateBetter" 
+          });
           // Handle referral
           if (referralCode && data?.user) {
             const referrerIdPrefix = referralCode.replace("DEVI-", "").toLowerCase();
