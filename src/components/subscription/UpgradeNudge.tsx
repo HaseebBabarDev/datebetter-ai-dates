@@ -26,8 +26,8 @@ export function UpgradeNudge({ candidateId, onDismiss }: UpgradeNudgeProps) {
 
   if (!nearCandidateLimit && !nearInteractionLimit) return null;
 
-  const message = nearUpdateLimit
-    ? `Only ${updatesRemaining} update${updatesRemaining === 1 ? "" : "s"} left for this candidate`
+  const message = nearInteractionLimit
+    ? `Only ${interactionsRemaining} free interaction${interactionsRemaining === 1 ? "" : "s"} remaining`
     : `Only 1 candidate slot remaining`;
 
   return (
