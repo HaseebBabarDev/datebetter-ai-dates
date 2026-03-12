@@ -104,7 +104,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { canUseUpdate, getRemainingUpdates, subscription, refetch, incrementUsage } = useSubscription();
+  const { canUseUpdate, getRemainingUpdates, subscription, refetch, incrementUsage, canLogInteraction, getRemainingInteractions, interactionCount } = useSubscription();
   const [open, setOpen] = useState(autoOpen);
   const autoOpenHandled = React.useRef(false);
   
