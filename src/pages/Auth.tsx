@@ -166,10 +166,25 @@ const Auth = () => {
               // Grant 30-day free trial to the referred user
               const trialEnd = new Date();
               trialEnd.setDate(trialEnd.getDate() + 30);
-              await supabase
+              
+              // Small delay to ensure the trigger has created the subscription row
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              
+              const { error: trialError } = await supabase
                 .from("user_subscriptions")
                 .update({ trial_ends_at: trialEnd.toISOString() })
                 .eq("user_id", data.user.id);
+              
+              // If update failed (row not yet created), try upsert
+              if (trialError) {
+                await supabase.from("user_subscriptions").upsert({
+                  user_id: data.user.id,
+                  plan: "free",
+                  candidates_limit: 1,
+                  updates_per_candidate: 5,
+                  trial_ends_at: trialEnd.toISOString(),
+                }, { onConflict: "user_id" });
+              }
               
               await supabase.functions.invoke("notify-referrer", {
                 body: { 
