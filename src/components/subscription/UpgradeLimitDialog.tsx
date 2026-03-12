@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 interface UpgradeLimitDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  limitType: "candidates" | "updates";
+  limitType: "candidates" | "updates" | "interactions";
   currentPlan?: string;
 }
 
