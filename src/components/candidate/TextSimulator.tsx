@@ -98,9 +98,9 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
       setSessions(loaded);
       setSessionsLoaded(true);
 
-      // Check if at limit
+      // Check if at limit (paid users bypass)
       const completed = loaded.filter(s => s.is_complete).length;
-      if (completed >= MAX_FREE_SESSIONS) {
+      if (!hasPaidAccess && completed >= MAX_FREE_SESSIONS) {
         setView("paywall");
       } else if (loaded.length > 0) {
         setView("history");
