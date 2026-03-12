@@ -20,8 +20,8 @@ const SUBSCRIPTION_PLANS = [
     description: "Try it out",
     icon: Heart,
     features: [
-      "Up to 5 candidates",
-      "300 interaction logs",
+      "1 candidate",
+      "5 interaction logs",
       "3 text simulator sessions",
       "5 AI messages per conversation",
       "Basic compatibility insights",
@@ -40,7 +40,8 @@ const SUBSCRIPTION_PLANS = [
     description: "Try D.E.V.I. with one candidate",
     icon: MessageCircle,
     features: [
-      "1 candidate",
+      "Up to 5 candidates",
+      "300 interaction logs",
       "5 AI message exchanges / month",
       "Compatibility scoring",
       "Red flag detection",
