@@ -904,6 +904,58 @@ const Settings = () => {
           )}
 
           <TabsContent value="billing" className="space-y-4">
+            {/* Subscription Management */}
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="pt-6 space-y-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-muted-foreground">Current Plan</span>
+                  <Badge variant="secondary" className="bg-primary/10 text-primary">
+                    {currentPlan === "free" ? "Free" : "Active"}
+                  </Badge>
+                </div>
+                <h3 className="text-xl font-bold">{PLAN_DISPLAY[currentPlan]?.name || "Free"}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {PLAN_DISPLAY[currentPlan]?.price || "$0"}
+                </p>
+                <div className="flex gap-2">
+                  {currentPlan !== "free" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      disabled={checkoutLoading === "portal"}
+                      onClick={async () => {
+                        setCheckoutLoading("portal");
+                        try {
+                          const { data, error } = await supabase.functions.invoke("customer-portal");
+                          if (error) throw error;
+                          if (data?.url) {
+                            window.location.href = data.url;
+                          }
+                        } catch (e) {
+                          console.error("Portal error:", e);
+                          toast.error("Failed to open billing portal.");
+                        } finally {
+                          setCheckoutLoading(null);
+                        }
+                      }}
+                    >
+                      {checkoutLoading === "portal" ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
+                      Manage Subscription
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => navigate("/subscription")}
+                  >
+                    <Crown className="w-4 h-4" />
+                    {currentPlan === "free" ? "Upgrade" : "View Plans"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
             {/* Legal & App Info Section */}
             <Card>
               <CardHeader className="pb-3">
@@ -1009,21 +1061,7 @@ const Settings = () => {
               </CardContent>
             </Card>
 
-            {/* Current Plan */}
-            <Card className="border-primary/20 bg-primary/5">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Current Plan</span>
-                  <Badge variant="secondary" className="bg-primary/10 text-primary">
-                    {currentPlan === "free" ? "Trial" : "Active"}
-                  </Badge>
-                </div>
-                <h3 className="text-xl font-bold">{PLAN_DISPLAY[currentPlan]?.name || "Free"}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {PLAN_DISPLAY[currentPlan]?.price || "$0"}
-                </p>
-              </CardContent>
-            </Card>
+
 
             {/* Referral Section */}
             <Card className="border-accent/30 bg-gradient-to-r from-accent/5 to-primary/5">

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, AlertTriangle, MessageCircle, ChevronLeft, Lock } from "lucide-react";
+import { X, Send, AlertTriangle, MessageCircle, ChevronLeft, Lock, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AIDisclosure } from "@/components/AIDisclosure";
 import { detectCrisisContent } from "@/lib/crisisDetection";
@@ -8,6 +8,100 @@ import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { STRIPE_PLANS, STRIPE_ONE_TIME } from "@/lib/stripeConfig";
+import { toast } from "sonner";
+
+// Extracted paywall component that initiates real Stripe checkout
+const PaywallView: React.FC<{
+  candidateName: string;
+  sessions: SessionRecord[];
+  onViewHistory: () => void;
+}> = ({ candidateName, sessions, onViewHistory }) => {
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+
+  const handleCheckout = async (type: "unlimited" | "day_pass") => {
+    setCheckoutLoading(type);
+    try {
+      const priceId = type === "unlimited"
+        ? STRIPE_PLANS.unlimited.price_id
+        : STRIPE_ONE_TIME.day_pass.price_id;
+      const mode = type === "unlimited" ? "subscription" : "payment";
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId, mode },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL returned");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error("Failed to start checkout. Please try again.");
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-6">
+      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+        <Lock className="w-8 h-8 text-primary" />
+      </div>
+      <div className="text-center space-y-2">
+        <h3 className="text-lg font-semibold text-foreground">
+          You've used all 3 free conversations
+        </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
+          You've had meaningful closure conversations with {candidateName}. Want to continue processing?
+        </p>
+      </div>
+
+      <div className="w-full max-w-xs space-y-3">
+        <button
+          onClick={() => handleCheckout("unlimited")}
+          disabled={checkoutLoading !== null}
+          className="w-full p-4 rounded-xl border-2 border-primary bg-primary/5 hover:bg-primary/10 transition-colors text-left disabled:opacity-60"
+        >
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm font-semibold text-foreground">
+              {checkoutLoading === "unlimited" ? (
+                <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Processing...</span>
+              ) : "Unlimited Monthly"}
+            </span>
+            <span className="text-sm font-bold text-primary">$29.99/mo</span>
+          </div>
+          <p className="text-xs text-muted-foreground">Unlimited conversations with all candidates, every day</p>
+        </button>
+
+        <button
+          onClick={() => handleCheckout("day_pass")}
+          disabled={checkoutLoading !== null}
+          className="w-full p-4 rounded-xl border border-border hover:bg-muted/50 transition-colors text-left disabled:opacity-60"
+        >
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm font-semibold text-foreground">
+              {checkoutLoading === "day_pass" ? (
+                <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Processing...</span>
+              ) : "Day Pass"}
+            </span>
+            <span className="text-sm font-bold text-foreground">$5.99/day</span>
+          </div>
+          <p className="text-xs text-muted-foreground">Unlimited conversations for 24 hours</p>
+        </button>
+      </div>
+
+      {sessions.length > 0 && (
+        <button
+          onClick={onViewHistory}
+          className="text-xs text-muted-foreground underline"
+        >
+          View past conversations
+        </button>
+      )}
+    </div>
+  );
+};
 
 interface TextSimulatorProps {
   open: boolean;
@@ -98,9 +192,9 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
       setSessions(loaded);
       setSessionsLoaded(true);
 
-      // Check if at limit
+      // Check if at limit (paid users bypass)
       const completed = loaded.filter(s => s.is_complete).length;
-      if (completed >= MAX_FREE_SESSIONS) {
+      if (!hasPaidAccess && completed >= MAX_FREE_SESSIONS) {
         setView("paywall");
       } else if (loaded.length > 0) {
         setView("history");
@@ -386,52 +480,11 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
 
           {/* PAYWALL VIEW */}
           {view === "paywall" && (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-6">
-              <div className="w-16 h-16 rounded-full bg-[#007AFF]/10 flex items-center justify-center">
-                <Lock className="w-8 h-8 text-[#007AFF]" />
-              </div>
-              <div className="text-center space-y-2">
-                <h3 className="text-lg font-semibold text-foreground">
-                  You've used all 3 free conversations
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
-                  You've had meaningful closure conversations with {candidateName}. Want to continue processing?
-                </p>
-              </div>
-
-              <div className="w-full max-w-xs space-y-3">
-                <button
-                  onClick={() => window.location.href = "/subscription"}
-                  className="w-full p-4 rounded-xl border-2 border-[#007AFF] bg-[#007AFF]/5 hover:bg-[#007AFF]/10 transition-colors text-left"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold text-foreground">Unlimited Monthly</span>
-                    <span className="text-sm font-bold text-[#007AFF]">$29.99/mo</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Unlimited conversations with all candidates, every day</p>
-                </button>
-
-                <button
-                  onClick={() => window.location.href = "/subscription"}
-                  className="w-full p-4 rounded-xl border border-border hover:bg-muted/50 transition-colors text-left"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold text-foreground">Day Pass</span>
-                    <span className="text-sm font-bold text-foreground">$5.99/day</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Unlimited conversations for 24 hours</p>
-                </button>
-              </div>
-
-              {sessions.length > 0 && (
-                <button
-                  onClick={() => setView("history")}
-                  className="text-xs text-muted-foreground underline"
-                >
-                  View past conversations
-                </button>
-              )}
-            </div>
+            <PaywallView
+              candidateName={candidateName}
+              sessions={sessions}
+              onViewHistory={() => setView("history")}
+            />
           )}
 
           {/* CHAT VIEW */}
