@@ -130,11 +130,15 @@ serve(async (req) => {
 
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
-      subscriptionEnd = safeTimestamp(subscription.current_period_end);
+      // Try multiple ways to get the period end — basil API may differ
+      const periodEnd = subscription.current_period_end 
+        ?? (subscription as any).currentPeriodEnd
+        ?? subscription.items?.data?.[0]?.current_period_end;
+      subscriptionEnd = safeTimestamp(periodEnd);
       productId = subscription.items.data[0]?.price?.product as string;
       priceId = subscription.items.data[0]?.price?.id;
       plan = PRODUCT_TO_PLAN[productId] || "unknown";
-      logStep("Active subscription found", { plan, productId, priceId, endDate: subscriptionEnd });
+      logStep("Active subscription found", { plan, productId, priceId, endDate: subscriptionEnd, rawPeriodEnd: periodEnd });
     } else {
       logStep("No active subscription");
     }
