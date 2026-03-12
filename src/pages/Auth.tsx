@@ -154,6 +154,7 @@ const Auth = () => {
               .limit(1);
             
             if (referrers && referrers.length > 0) {
+              // Record referral as converted
               await supabase.from("referrals").insert({
                 referrer_id: referrers[0].user_id,
                 referred_id: data.user.id,
@@ -161,6 +162,14 @@ const Auth = () => {
                 status: "converted",
                 converted_at: new Date().toISOString()
               });
+              
+              // Grant 30-day free trial to the referred user
+              const trialEnd = new Date();
+              trialEnd.setDate(trialEnd.getDate() + 30);
+              await supabase
+                .from("user_subscriptions")
+                .update({ trial_ends_at: trialEnd.toISOString() })
+                .eq("user_id", data.user.id);
               
               await supabase.functions.invoke("notify-referrer", {
                 body: { 
