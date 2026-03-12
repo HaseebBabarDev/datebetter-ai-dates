@@ -104,7 +104,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { canUseUpdate, getRemainingUpdates, subscription, refetch, incrementUsage } = useSubscription();
+  const { canUseUpdate, getRemainingUpdates, subscription, refetch, incrementUsage, canLogInteraction, getRemainingInteractions, interactionCount } = useSubscription();
   const [open, setOpen] = useState(autoOpen);
   const autoOpenHandled = React.useRef(false);
   
@@ -235,7 +235,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
       setShowPendingAdviceDialog(true);
     } else if (newOpen && isNoContact) {
       setShowBrokeContactDialog(true);
-    } else if (newOpen && !canUseUpdate(candidateId)) {
+    } else if (newOpen && !canLogInteraction()) {
       setShowUpgradeDialog(true);
     } else {
       setOpen(newOpen);
@@ -251,7 +251,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
       setShowPendingAdviceDialog(true);
     } else if (isNoContact) {
       setShowBrokeContactDialog(true);
-    } else if (!canUseUpdate(candidateId)) {
+    } else if (!canLogInteraction()) {
       setShowUpgradeDialog(true);
     } else {
       setOpen(true);
@@ -414,14 +414,14 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
       <Sheet open={open} onOpenChange={handleOpenChange}>
         <SheetTrigger asChild>
           {triggerButton ? (
-            canUseUpdate(candidateId) ? triggerButton : (
+            canLogInteraction() ? triggerButton : (
               <Button className="w-full gap-2" variant="outline">
                 <Lock className="h-4 w-4" />
                 Upgrade to Log More
               </Button>
             )
           ) : (
-            canUseUpdate(candidateId) ? (
+            canLogInteraction() ? (
               <Button className="w-full gap-2">
                 <Plus className="h-4 w-4" />
                 Log Interaction
@@ -596,7 +596,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
       <UpgradeLimitDialog
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
-        limitType="updates"
+        limitType="interactions"
         currentPlan={subscription?.plan}
       />
     </>

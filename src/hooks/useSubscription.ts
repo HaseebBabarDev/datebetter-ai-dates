@@ -16,10 +16,15 @@ interface StripeSubscription {
   trial_ends_at: string | null;
 }
 
+// Interaction limit for the test user (nak@j.co) — everyone else gets 300
+const TEST_USER_INTERACTION_LIMIT = 5;
+const DEFAULT_FREE_INTERACTION_LIMIT = 300;
+
 export function useSubscription() {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState<StripeSubscription | null>(null);
   const [candidateCount, setCandidateCount] = useState(0);
+  const [interactionCount, setInteractionCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const checkSubscription = useCallback(async () => {
@@ -60,12 +65,20 @@ export function useSubscription() {
       }
 
       // Fetch candidate count
-      const { count } = await supabase
+      const { count: candCount } = await supabase
         .from("candidates")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id);
 
-      setCandidateCount(count || 0);
+      setCandidateCount(candCount || 0);
+
+      // Fetch total interaction count across all candidates
+      const { count: intCount } = await supabase
+        .from("interactions")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id);
+
+      setInteractionCount(intCount || 0);
     } catch (error) {
       console.error("Error in checkSubscription:", error);
     } finally {
@@ -84,13 +97,19 @@ export function useSubscription() {
     return () => clearInterval(interval);
   }, [user, checkSubscription]);
 
+  const getInteractionLimit = () => {
+    if (user?.email === "nak@j.co") return TEST_USER_INTERACTION_LIMIT;
+    return DEFAULT_FREE_INTERACTION_LIMIT;
+  };
+
   const getPlanLimits = (plan: SubscriptionPlan) => {
+    const interactionLimit = getInteractionLimit();
     switch (plan) {
-      case "free": return { candidates: 1, updates: 1, aiMessages: 0 };
-      case "basic": return { candidates: 1, updates: 5, aiMessages: 5 };
-      case "starter": return { candidates: 10, updates: 30, aiMessages: 1000 };
-      case "unlimited": return { candidates: 999, updates: 999, aiMessages: 999999 };
-      default: return { candidates: 1, updates: 1, aiMessages: 0 };
+      case "free": return { candidates: 5, updates: interactionLimit, aiMessages: 5, textSimSessions: 3 };
+      case "basic": return { candidates: 1, updates: 5, aiMessages: 5, textSimSessions: 3 };
+      case "starter": return { candidates: 10, updates: 30, aiMessages: 1000, textSimSessions: 999 };
+      case "unlimited": return { candidates: 999, updates: 999, aiMessages: 999999, textSimSessions: 999 };
+      default: return { candidates: 5, updates: interactionLimit, aiMessages: 5, textSimSessions: 3 };
     }
   };
 
@@ -100,19 +119,32 @@ export function useSubscription() {
     return candidateCount < limits.candidates;
   };
 
-  const canUseUpdate = (_candidateId: string) => {
+  const canLogInteraction = () => {
     if (!subscription) return true;
     // For unlimited plan, always allow
     if (subscription.plan === "unlimited") return true;
     // For day pass, allow
     if (subscription.day_pass_active) return true;
-    return subscription.plan !== "free";
+    // For paid plans (not free), allow
+    if (subscription.plan !== "free") return true;
+    // Free plan: check total interaction count
+    const limits = getPlanLimits(subscription.plan);
+    return interactionCount < limits.updates;
+  };
+
+  const canUseUpdate = (_candidateId: string) => {
+    return canLogInteraction();
+  };
+
+  const getRemainingInteractions = () => {
+    if (!subscription) return 1;
+    if (subscription.plan !== "free") return 999;
+    const limits = getPlanLimits(subscription.plan);
+    return Math.max(0, limits.updates - interactionCount);
   };
 
   const getRemainingUpdates = (_candidateId: string) => {
-    if (!subscription) return 1;
-    const limits = getPlanLimits(subscription.plan);
-    return limits.updates;
+    return getRemainingInteractions();
   };
 
   const hasDetachmentPlan = (candidateId: string) => {
@@ -128,10 +160,13 @@ export function useSubscription() {
   return {
     subscription,
     candidateCount,
+    interactionCount,
     loading,
     canAddCandidate,
+    canLogInteraction,
     canUseUpdate,
     getRemainingUpdates,
+    getRemainingInteractions,
     hasDetachmentPlan,
     incrementUsage,
     refetch: checkSubscription,

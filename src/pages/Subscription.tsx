@@ -20,8 +20,10 @@ const SUBSCRIPTION_PLANS = [
     description: "Try it out",
     icon: Heart,
     features: [
-      "1 candidate",
-      "1 interaction log per candidate",
+      "Up to 5 candidates",
+      "300 interaction logs",
+      "3 text simulator sessions",
+      "5 AI messages per conversation",
       "Basic compatibility insights",
       "Cycle tracking",
     ],

@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 interface UpgradeLimitDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  limitType: "candidates" | "updates";
+  limitType: "candidates" | "updates" | "interactions";
   currentPlan?: string;
 }
 
@@ -23,7 +23,7 @@ const PLAN_OPTIONS = [
     name: "Basic",
     price: "$9.99",
     candidates: 1,
-    updates: 5,
+    updates: "Unlimited",
     aiMessages: 5,
   },
   {
@@ -31,7 +31,7 @@ const PLAN_OPTIONS = [
     name: "Starter",
     price: "$15.99",
     candidates: 10,
-    updates: 30,
+    updates: "Unlimited",
     aiMessages: 1000,
     recommended: true,
   },
@@ -73,12 +73,12 @@ export function UpgradeLimitDialog({
             <Zap className="w-5 h-5 text-primary" />
             {limitType === "candidates"
               ? "Candidate Limit Reached"
-              : "Update Limit Reached"}
+              : "Free Interaction Limit Reached"}
           </DialogTitle>
           <DialogDescription>
             {limitType === "candidates"
               ? "You've reached your maximum number of candidates. Upgrade to add more."
-              : "You've used all updates for this candidate. Upgrade for more updates."}
+              : "You've used all your free interactions. Upgrade to a paid plan or purchase a Day Pass to continue logging interactions."}
           </DialogDescription>
         </DialogHeader>
 
