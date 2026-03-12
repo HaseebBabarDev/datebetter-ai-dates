@@ -7,6 +7,7 @@ import { detectCrisisContent } from "@/lib/crisisDetection";
 import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface TextSimulatorProps {
   open: boolean;
