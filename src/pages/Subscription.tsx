@@ -312,65 +312,122 @@ export default function Subscription() {
           })}
         </div>
 
-        {/* Detachment Plan — One-Time Add-On */}
+        {/* Add-Ons */}
         <Separator className="mb-8" />
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-foreground mb-1">Add-On</h2>
-          <p className="text-sm text-muted-foreground">Available on any subscription, purchased once per candidate.</p>
+          <h2 className="text-lg font-semibold text-foreground mb-1">Add-Ons</h2>
+          <p className="text-sm text-muted-foreground">One-time purchases to unlock extra features.</p>
         </div>
 
-        <Card className="border-dashed border-2 border-primary/30 hover:border-primary/60 hover:shadow-md transition-all duration-200">
-          <CardContent className="p-5 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-              <div className="flex items-center gap-3 shrink-0">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <ShoppingBag className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-foreground text-base">Detachment Plan</span>
-                    <Badge variant="outline" className="text-[10px] px-1.5">One-Time</Badge>
+        <div className="space-y-4">
+          {/* Day Pass */}
+          <Card className="border-dashed border-2 border-accent/30 hover:border-accent/60 hover:shadow-md transition-all duration-200">
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                <div className="flex items-center gap-3 shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
+                    <Zap className="w-6 h-6 text-accent" />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">Break free from emotional attachment</p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-foreground text-base">Day Pass</span>
+                      <Badge variant="outline" className="text-[10px] px-1.5">24 Hours</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">Unlimited access for a full day</p>
+                  </div>
+                </div>
+
+                <ul className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
+                  {[
+                    "Unlimited interactions for 24 hours",
+                    "Unlimited text simulator sessions",
+                    "Unlimited AI messages",
+                    "All premium features unlocked",
+                  ].map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <Check className="w-3.5 h-3.5 text-accent mt-0.5 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="flex sm:flex-col items-center sm:items-end gap-3 shrink-0">
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-foreground">$5.99</div>
+                    <div className="text-xs text-muted-foreground">one-time</div>
+                  </div>
+                  <Button
+                    variant="default"
+                    className="shrink-0"
+                    disabled={checkoutLoading !== null}
+                    onClick={() => handleOneTimeCheckout("day_pass")}
+                  >
+                    {checkoutLoading === "daypass" ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                    ) : (
+                      <Zap className="w-4 h-4 mr-1.5" />
+                    )}
+                    Get Day Pass
+                  </Button>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <ul className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
-                {[
-                  "AI-personalized recovery timeline",
-                  "4-phase detachment program",
-                  "Tailored to your specific candidate",
-                  "One-time purchase per candidate",
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <Check className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="flex sm:flex-col items-center sm:items-end gap-3 shrink-0">
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-foreground">$9.99</div>
-                  <div className="text-xs text-muted-foreground">per candidate</div>
+          {/* Detachment Plan */}
+          <Card className="border-dashed border-2 border-primary/30 hover:border-primary/60 hover:shadow-md transition-all duration-200">
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                <div className="flex items-center gap-3 shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <ShoppingBag className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-foreground text-base">Detachment Plan</span>
+                      <Badge variant="outline" className="text-[10px] px-1.5">One-Time</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">Break free from emotional attachment</p>
+                  </div>
                 </div>
-                <Button
-                  variant="default"
-                  className="shrink-0"
-                  disabled={checkoutLoading !== null}
-                  onClick={handleDetachmentCheckout}
-                >
-                  {checkoutLoading === "detachment" ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
-                  ) : (
-                    <Zap className="w-4 h-4 mr-1.5" />
-                  )}
-                  Unlock
-                </Button>
+
+                <ul className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
+                  {[
+                    "AI-personalized recovery timeline",
+                    "4-phase detachment program",
+                    "Tailored to your specific candidate",
+                    "One-time purchase per candidate",
+                  ].map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <Check className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="flex sm:flex-col items-center sm:items-end gap-3 shrink-0">
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-foreground">$9.99</div>
+                    <div className="text-xs text-muted-foreground">per candidate</div>
+                  </div>
+                  <Button
+                    variant="default"
+                    className="shrink-0"
+                    disabled={checkoutLoading !== null}
+                    onClick={() => handleOneTimeCheckout("detachment")}
+                  >
+                    {checkoutLoading === "detachment" ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                    ) : (
+                      <Zap className="w-4 h-4 mr-1.5" />
+                    )}
+                    Unlock
+                  </Button>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
         <p className="mt-8 text-xs sm:text-sm text-muted-foreground text-center">
           All plans include cycle tracking, hormone-aware insights, and basic pattern detection.
