@@ -1061,21 +1061,7 @@ const Settings = () => {
               </CardContent>
             </Card>
 
-            {/* Current Plan */}
-            <Card className="border-primary/20 bg-primary/5">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Current Plan</span>
-                  <Badge variant="secondary" className="bg-primary/10 text-primary">
-                    {currentPlan === "free" ? "Trial" : "Active"}
-                  </Badge>
-                </div>
-                <h3 className="text-xl font-bold">{PLAN_DISPLAY[currentPlan]?.name || "Free"}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {PLAN_DISPLAY[currentPlan]?.price || "$0"}
-                </p>
-              </CardContent>
-            </Card>
+
 
             {/* Referral Section */}
             <Card className="border-accent/30 bg-gradient-to-r from-accent/5 to-primary/5">
