@@ -596,7 +596,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
       <UpgradeLimitDialog
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
-        limitType="updates"
+        limitType="interactions"
         currentPlan={subscription?.plan}
       />
     </>
