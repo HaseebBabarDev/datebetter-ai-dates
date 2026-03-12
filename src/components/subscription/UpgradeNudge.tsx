@@ -11,19 +11,20 @@ interface UpgradeNudgeProps {
 
 export function UpgradeNudge({ candidateId, onDismiss }: UpgradeNudgeProps) {
   const navigate = useNavigate();
-  const { subscription, candidateCount, getRemainingUpdates, getPlanLimits } = useSubscription();
+  const { subscription, candidateCount, getRemainingInteractions, getPlanLimits, interactionCount } = useSubscription();
 
   if (!subscription) return null;
+  if (subscription.plan !== "free") return null;
 
   const limits = getPlanLimits(subscription.plan as any);
   const candidatesRemaining = limits.candidates - candidateCount;
-  const updatesRemaining = candidateId ? getRemainingUpdates(candidateId) : null;
+  const interactionsRemaining = getRemainingInteractions();
 
-  // Show nudge when near limit (1 remaining) or at 80%+ usage
+  // Show nudge when near interaction limit (20% remaining) or near candidate limit
   const nearCandidateLimit = candidatesRemaining === 1 && candidateCount > 0;
-  const nearUpdateLimit = updatesRemaining !== null && updatesRemaining <= 2 && updatesRemaining > 0;
+  const nearInteractionLimit = interactionsRemaining > 0 && interactionsRemaining <= Math.ceil(limits.updates * 0.2);
 
-  if (!nearCandidateLimit && !nearUpdateLimit) return null;
+  if (!nearCandidateLimit && !nearInteractionLimit) return null;
 
   const message = nearUpdateLimit
     ? `Only ${updatesRemaining} update${updatesRemaining === 1 ? "" : "s"} left for this candidate`
