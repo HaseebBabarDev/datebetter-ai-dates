@@ -386,52 +386,11 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
 
           {/* PAYWALL VIEW */}
           {view === "paywall" && (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-6">
-              <div className="w-16 h-16 rounded-full bg-[#007AFF]/10 flex items-center justify-center">
-                <Lock className="w-8 h-8 text-[#007AFF]" />
-              </div>
-              <div className="text-center space-y-2">
-                <h3 className="text-lg font-semibold text-foreground">
-                  You've used all 3 free conversations
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
-                  You've had meaningful closure conversations with {candidateName}. Want to continue processing?
-                </p>
-              </div>
-
-              <div className="w-full max-w-xs space-y-3">
-                <button
-                  onClick={() => window.location.href = "/subscription"}
-                  className="w-full p-4 rounded-xl border-2 border-[#007AFF] bg-[#007AFF]/5 hover:bg-[#007AFF]/10 transition-colors text-left"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold text-foreground">Unlimited Monthly</span>
-                    <span className="text-sm font-bold text-[#007AFF]">$29.99/mo</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Unlimited conversations with all candidates, every day</p>
-                </button>
-
-                <button
-                  onClick={() => window.location.href = "/subscription"}
-                  className="w-full p-4 rounded-xl border border-border hover:bg-muted/50 transition-colors text-left"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold text-foreground">Day Pass</span>
-                    <span className="text-sm font-bold text-foreground">$5.99/day</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Unlimited conversations for 24 hours</p>
-                </button>
-              </div>
-
-              {sessions.length > 0 && (
-                <button
-                  onClick={() => setView("history")}
-                  className="text-xs text-muted-foreground underline"
-                >
-                  View past conversations
-                </button>
-              )}
-            </div>
+            <PaywallView
+              candidateName={candidateName}
+              sessions={sessions}
+              onViewHistory={() => setView("history")}
+            />
           )}
 
           {/* CHAT VIEW */}
