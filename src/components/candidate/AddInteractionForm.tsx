@@ -414,14 +414,14 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
       <Sheet open={open} onOpenChange={handleOpenChange}>
         <SheetTrigger asChild>
           {triggerButton ? (
-            canUseUpdate(candidateId) ? triggerButton : (
+            canLogInteraction() ? triggerButton : (
               <Button className="w-full gap-2" variant="outline">
                 <Lock className="h-4 w-4" />
                 Upgrade to Log More
               </Button>
             )
           ) : (
-            canUseUpdate(candidateId) ? (
+            canLogInteraction() ? (
               <Button className="w-full gap-2">
                 <Plus className="h-4 w-4" />
                 Log Interaction
