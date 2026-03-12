@@ -7,6 +7,7 @@ import { detectCrisisContent } from "@/lib/crisisDetection";
 import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface TextSimulatorProps {
   open: boolean;
@@ -50,6 +51,7 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
   userGender,
 }) => {
   const { user } = useAuth();
+  const { subscription } = useSubscription();
   const [messages, setMessages] = useState<SimMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -65,10 +67,13 @@ export const TextSimulator: React.FC<TextSimulatorProps> = ({
   const [view, setView] = useState<"history" | "chat" | "paywall">("chat");
   const [sessionsLoaded, setSessionsLoaded] = useState(false);
 
+  // Bypass session limit for paid users or day pass holders
+  const hasPaidAccess = subscription?.plan === "unlimited" || subscription?.plan === "starter" || subscription?.day_pass_active;
+
   const userTurnCount = messages.filter(m => m.role === "user").length;
   const isAtLimit = userTurnCount >= MAX_TURNS;
   const completedSessions = sessions.filter(s => s.is_complete).length;
-  const isAtSessionLimit = completedSessions >= MAX_FREE_SESSIONS && !currentSessionId;
+  const isAtSessionLimit = !hasPaidAccess && completedSessions >= MAX_FREE_SESSIONS && !currentSessionId;
 
   // Load sessions for this candidate
   useEffect(() => {
