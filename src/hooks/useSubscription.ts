@@ -16,10 +16,15 @@ interface StripeSubscription {
   trial_ends_at: string | null;
 }
 
+// Interaction limit for the test user (nak@j.co) — everyone else gets 300
+const TEST_USER_INTERACTION_LIMIT = 5;
+const DEFAULT_FREE_INTERACTION_LIMIT = 300;
+
 export function useSubscription() {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState<StripeSubscription | null>(null);
   const [candidateCount, setCandidateCount] = useState(0);
+  const [interactionCount, setInteractionCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const checkSubscription = useCallback(async () => {
@@ -60,12 +65,20 @@ export function useSubscription() {
       }
 
       // Fetch candidate count
-      const { count } = await supabase
+      const { count: candCount } = await supabase
         .from("candidates")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id);
 
-      setCandidateCount(count || 0);
+      setCandidateCount(candCount || 0);
+
+      // Fetch total interaction count across all candidates
+      const { count: intCount } = await supabase
+        .from("interactions")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id);
+
+      setInteractionCount(intCount || 0);
     } catch (error) {
       console.error("Error in checkSubscription:", error);
     } finally {
