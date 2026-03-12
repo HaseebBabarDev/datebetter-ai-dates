@@ -23,7 +23,7 @@ const PLAN_OPTIONS = [
     name: "Basic",
     price: "$9.99",
     candidates: 1,
-    updates: 5,
+    updates: "Unlimited",
     aiMessages: 5,
   },
   {
@@ -31,7 +31,7 @@ const PLAN_OPTIONS = [
     name: "Starter",
     price: "$15.99",
     candidates: 10,
-    updates: 30,
+    updates: "Unlimited",
     aiMessages: 1000,
     recommended: true,
   },
