@@ -5,13 +5,13 @@ export const STRIPE_PLANS = {
   basic: {
     product_id: "prod_U9ISjhAFg6VNmq",
     price_id: "price_1TAzrPCzzhGXp07lxdJWFeFz",
-    name: "Basic",
+    name: "Starter",
     priceMonthly: 9.99,
   },
   starter: {
     product_id: "prod_U5Ba3aovhb68xI",
     price_id: "price_1T71DJCzzhGXp07lK69zDge2",
-    name: "Starter",
+    name: "Plus",
     priceMonthly: 15.99,
   },
   unlimited: {

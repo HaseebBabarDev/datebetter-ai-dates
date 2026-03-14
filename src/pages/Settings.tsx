@@ -36,8 +36,8 @@ type SubscriptionPlan = "free" | "basic" | "starter" | "unlimited";
 
 const PLAN_DISPLAY: Record<SubscriptionPlan, { name: string; price: string; stripeKey?: keyof typeof STRIPE_PLANS }> = {
   free: { name: "Free", price: "$0" },
-  basic: { name: "Basic", price: "$9.99/mo", stripeKey: "basic" },
-  starter: { name: "Starter", price: "$15.99/mo", stripeKey: "starter" },
+  basic: { name: "Starter", price: "$9.99/mo", stripeKey: "basic" },
+  starter: { name: "Plus", price: "$15.99/mo", stripeKey: "starter" },
   unlimited: { name: "Unlimited", price: "$29.99/mo", stripeKey: "unlimited" },
 };
 
@@ -1137,16 +1137,16 @@ const Settings = () => {
                 {currentPlan === "free" ? "Upgrade to unlock more features" : "Change your plan"}
               </h4>
 
-              {/* Basic Plan — $9.99 */}
+              {/* Starter Plan — $9.99 */}
               <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "basic" ? "border-primary bg-primary/5" : ""}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <MessageCircle className="w-4 h-4 text-muted-foreground" />
-                        <h4 className="font-semibold">Basic</h4>
+                        <h4 className="font-semibold">Starter</h4>
                       </div>
-                      <p className="text-sm text-muted-foreground">1 candidate • 5 AI exchanges / month</p>
+                      <p className="text-sm text-muted-foreground">5 candidates • 300 interactions</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold">$9.99</p>
@@ -1154,7 +1154,7 @@ const Settings = () => {
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["1 candidate profile", "5 AI message exchanges / month", "Compatibility scoring", "Red flag detection", "Cycle tracking"].map((f) => (
+                    {["Up to 5 candidates", "300 total interactions", "Compatibility scoring", "Red flag detection", "Cycle tracking"].map((f) => (
                       <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Check className="w-4 h-4 text-green-500 shrink-0" />
                         <span>{f}</span>
@@ -1172,20 +1172,20 @@ const Settings = () => {
                     ) : currentPlan === "basic" ? (
                       <><Check className="w-4 h-4 mr-2" />Current Plan</>
                     ) : (
-                      "Get Basic"
+                      "Get Starter"
                     )}
                   </Button>
                 </CardContent>
               </Card>
 
-              {/* Starter Plan — $15.99 */}
+              {/* Plus Plan — $15.99 */}
               <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "starter" ? "border-primary bg-primary/5" : ""}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-primary" />
-                        <h4 className="font-semibold">Starter</h4>
+                        <h4 className="font-semibold">Plus</h4>
                       </div>
                       <p className="text-sm text-muted-foreground">10 candidates • 1,000 AI messages</p>
                     </div>
@@ -1213,7 +1213,7 @@ const Settings = () => {
                     ) : currentPlan === "starter" ? (
                       <><Check className="w-4 h-4 mr-2" />Current Plan</>
                     ) : (
-                      "Get Starter"
+                      "Get Plus"
                     )}
                   </Button>
                 </CardContent>

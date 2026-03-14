@@ -34,9 +34,9 @@ const SUBSCRIPTION_PLANS = [
   {
     id: "basic",
     stripeKey: "basic" as const,
-    name: "Basic",
+    name: "Starter",
     price: 9.99,
-    description: "Try D.E.V.I. with one candidate",
+    description: "Start dating with clarity",
     icon: MessageCircle,
     features: [
       "Up to 5 candidates",
@@ -53,7 +53,7 @@ const SUBSCRIPTION_PLANS = [
   {
     id: "starter",
     stripeKey: "starter" as const,
-    name: "Starter",
+    name: "Plus",
     price: 15.99,
     description: "Everything you need to date smarter",
     icon: Sparkles,
@@ -82,7 +82,7 @@ const SUBSCRIPTION_PLANS = [
       "Unlimited candidates",
       "Unlimited AI messages",
       "Unlimited score updates",
-      "Everything in Starter",
+      "Everything in Plus",
       "Advanced behavioral analytics",
       "Priority support",
     ],
