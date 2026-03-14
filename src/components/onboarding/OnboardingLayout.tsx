@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface OnboardingLayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,7 @@ interface OnboardingLayoutProps {
   title?: string;
   subtitle?: string;
   headerGradient?: boolean;
+  emoji?: string;
 }
 
 export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
@@ -23,32 +25,12 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   title,
   subtitle,
   headerGradient = false,
+  emoji,
 }) => {
   const { currentStep, totalSteps, prevStep } = useOnboarding();
   const progress = ((currentStep + 1) / totalSteps) * 100;
-  const [isVisible, setIsVisible] = useState(false);
-  const [displayStep, setDisplayStep] = useState(currentStep);
 
   const handleBack = onBack || prevStep;
-
-  useEffect(() => {
-    // Fade out
-    setIsVisible(false);
-    
-    // After fade out, update content and fade in
-    const timer = setTimeout(() => {
-      setDisplayStep(currentStep);
-      setIsVisible(true);
-    }, 150);
-
-    return () => clearTimeout(timer);
-  }, [currentStep]);
-
-  // Initial mount animation
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col">
@@ -77,7 +59,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
           )}
         </header>
       ) : (
-        <header className="px-4 py-2 pt-safe-top flex items-center justify-between border-b border-border/50">
+        <header className="px-4 py-2 pt-safe-top flex items-center justify-between border-b border-border/30">
           <div className="flex items-center gap-2">
             {showBack && (onBack || currentStep > 0) && (
               <Button
@@ -93,37 +75,67 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
               dateBetter
             </h1>
           </div>
+          {showProgress && currentStep > 0 && (
+            <span className="text-[11px] font-medium text-muted-foreground tabular-nums">
+              {currentStep}/{totalSteps - 1}
+            </span>
+          )}
         </header>
       )}
 
       {/* Progress Bar */}
       {showProgress && currentStep > 0 && (
-        <div className="px-4 py-1">
-          <Progress value={progress} className="h-1 transition-all duration-300" />
+        <div className="px-4 py-1.5">
+          <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-secondary/50">
+            <motion.div
+              className="h-full rounded-full bg-[image:var(--gradient-primary)]"
+              initial={false}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            />
+          </div>
         </div>
       )}
 
       {/* Content with transition */}
       <main className="flex-1 overflow-auto pb-safe-bottom">
-        <div 
-          key={displayStep}
-          className={cn(
-            "max-w-lg mx-auto px-4 py-3 transition-all duration-300 ease-out",
-            isVisible 
-              ? "opacity-100 translate-x-0" 
-              : "opacity-0 translate-x-4"
-          )}
-        >
-          {!headerGradient && title && (
-            <div className="mb-3">
-              <h2 className="text-lg sm:text-xl font-bold text-foreground mb-0.5">{title}</h2>
-              {subtitle && (
-                <p className="text-muted-foreground text-xs sm:text-sm">{subtitle}</p>
-              )}
-            </div>
-          )}
-          {children}
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="max-w-lg mx-auto px-4 py-3"
+          >
+            {!headerGradient && title && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.35 }}
+                className="mb-4"
+              >
+                <div className="flex items-center gap-2">
+                  {emoji && (
+                    <motion.span
+                      initial={{ scale: 0, rotate: -30 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 12, delay: 0.2 }}
+                      className="text-2xl"
+                    >
+                      {emoji}
+                    </motion.span>
+                  )}
+                  <h2 className="text-lg sm:text-xl font-bold text-foreground">{title}</h2>
+                </div>
+                {subtitle && (
+                  <p className="text-muted-foreground text-xs sm:text-sm mt-1">{subtitle}</p>
+                )}
+              </motion.div>
+            )}
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </main>
     </div>
   );
