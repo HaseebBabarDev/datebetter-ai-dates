@@ -21,9 +21,8 @@ const SUBSCRIPTION_PLANS = [
     icon: Heart,
     features: [
       "1 candidate",
-      "5 interaction logs",
+      "5 total interactions",
       "3 text simulator sessions",
-      "5 AI messages per conversation",
       "Basic compatibility insights",
       "Cycle tracking",
     ],
@@ -41,8 +40,8 @@ const SUBSCRIPTION_PLANS = [
     icon: MessageCircle,
     features: [
       "Up to 5 candidates",
-      "300 interaction logs",
-      "5 AI message exchanges / month",
+      "300 total interactions",
+      "5 AI messages per conversation",
       "Compatibility scoring",
       "Red flag detection",
       "Cycle tracking",

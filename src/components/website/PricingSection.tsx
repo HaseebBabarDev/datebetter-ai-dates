@@ -20,7 +20,7 @@ const plans = [
     icon: Zap,
     features: [
       "1 candidate profile",
-      "1 interaction log",
+      "5 total interactions",
       "Basic compatibility score",
       "Red flag detection",
     ],
@@ -33,8 +33,8 @@ const plans = [
     description: "Start dating with clarity",
     icon: Zap,
     features: [
-      "1 candidate profile",
-      "5 AI message exchanges/mo",
+      "Up to 5 candidates",
+      "300 total interactions",
       "Compatibility scoring",
       "Red flag detection",
       "Cycle tracking",
