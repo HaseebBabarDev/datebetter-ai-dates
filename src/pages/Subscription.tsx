@@ -53,7 +53,7 @@ const SUBSCRIPTION_PLANS = [
   {
     id: "starter",
     stripeKey: "starter" as const,
-    name: "Starter",
+    name: "Plus",
     price: 15.99,
     description: "Everything you need to date smarter",
     icon: Sparkles,
