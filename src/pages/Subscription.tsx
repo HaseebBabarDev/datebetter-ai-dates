@@ -34,9 +34,9 @@ const SUBSCRIPTION_PLANS = [
   {
     id: "basic",
     stripeKey: "basic" as const,
-    name: "Basic",
+    name: "Starter",
     price: 9.99,
-    description: "Try D.E.V.I. with one candidate",
+    description: "Start dating with clarity",
     icon: MessageCircle,
     features: [
       "Up to 5 candidates",
