@@ -20,7 +20,7 @@ interface UpgradeLimitDialogProps {
 const PLAN_OPTIONS = [
   {
     id: "basic",
-    name: "Basic",
+    name: "Starter",
     price: "$9.99",
     candidates: 1,
     updates: "Unlimited",
