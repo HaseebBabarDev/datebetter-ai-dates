@@ -41,7 +41,6 @@ const SUBSCRIPTION_PLANS = [
     features: [
       "Up to 5 candidates",
       "300 total interactions",
-      "5 AI messages per conversation",
       "Compatibility scoring",
       "Red flag detection",
       "Cycle tracking",
