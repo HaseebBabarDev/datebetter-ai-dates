@@ -1172,7 +1172,7 @@ const Settings = () => {
                     ) : currentPlan === "basic" ? (
                       <><Check className="w-4 h-4 mr-2" />Current Plan</>
                     ) : (
-                      "Get Basic"
+                      "Get Starter"
                     )}
                   </Button>
                 </CardContent>
