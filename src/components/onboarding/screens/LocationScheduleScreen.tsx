@@ -39,7 +39,7 @@ const LocationScheduleScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
   return (
-    <OnboardingLayout title="Location & Schedule" subtitle="Your availability">
+    <OnboardingLayout title="Location & Schedule" subtitle="Your availability" emoji="📍">
       <div className="space-y-6 animate-fade-in">
         <div className="space-y-3">
           <Label>How far will you travel for love?</Label>

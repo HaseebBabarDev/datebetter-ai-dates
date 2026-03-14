@@ -1,7 +1,7 @@
 import React from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { OnboardingLayout } from "../OnboardingLayout";
-import { Button } from "@/components/ui/button";
+import ContinueButton from "../ContinueButton";
 import { Label } from "@/components/ui/label";
 import { OptionCard } from "../OptionCard";
 import { Heart, Crown, Wallet, Users, Sparkles } from "lucide-react";
@@ -32,6 +32,7 @@ const DatingMotivationScreen = () => {
     <OnboardingLayout
       title="What Are You Looking For?"
       subtitle="Be honest—this helps D.E.V.I. give you realistic advice"
+      emoji="🎯"
     >
       <div className="space-y-6 animate-fade-in">
         {/* Primary Motivation */}
@@ -56,15 +57,7 @@ const DatingMotivationScreen = () => {
           </div>
         </div>
 
-        {/* Continue Button */}
-        <Button
-          onClick={nextStep}
-          disabled={!isValid}
-          className="w-full"
-          size="lg"
-        >
-          Continue
-        </Button>
+        <ContinueButton onClick={nextStep} disabled={!isValid} />
       </div>
     </OnboardingLayout>
   );

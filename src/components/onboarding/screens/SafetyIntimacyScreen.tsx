@@ -24,7 +24,7 @@ const SafetyIntimacyScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
   return (
-    <OnboardingLayout title="Safety & Intimacy" subtitle="Your boundaries are respected here">
+    <OnboardingLayout title="Safety & Intimacy" subtitle="Your boundaries are respected here" emoji="🔒">
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center gap-2 p-3 rounded-lg bg-muted text-sm text-muted-foreground">
           <Lock className="w-4 h-4" /> This information is private and secure

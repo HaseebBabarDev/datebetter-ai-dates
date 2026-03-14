@@ -19,7 +19,7 @@ const PoliticsScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
   return (
-    <OnboardingLayout title="Politics & Social Values" subtitle="Your worldview">
+    <OnboardingLayout title="Politics & Social Values" subtitle="Your worldview" emoji="🗳️">
       <div className="space-y-4 animate-fade-in">
         <div className="space-y-2">
           <Label className="text-sm">Your political views:</Label>

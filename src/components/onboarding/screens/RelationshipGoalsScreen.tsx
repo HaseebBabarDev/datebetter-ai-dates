@@ -1,7 +1,7 @@
 import React from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { OnboardingLayout } from "../OnboardingLayout";
-import { Button } from "@/components/ui/button";
+import ContinueButton from "../ContinueButton";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { OptionCard } from "../OptionCard";
@@ -71,6 +71,7 @@ const RelationshipGoalsScreen = () => {
     <OnboardingLayout
       title="Relationship Goals"
       subtitle="What are you looking for?"
+      emoji="💍"
     >
       <div className="space-y-4 animate-fade-in">
         {/* Current Relationship Status */}
@@ -165,15 +166,7 @@ const RelationshipGoalsScreen = () => {
           </div>
         </div>
 
-        {/* Continue Button */}
-        <Button
-          onClick={nextStep}
-          disabled={!isValid}
-          className="w-full"
-          size="lg"
-        >
-          Continue
-        </Button>
+        <ContinueButton onClick={nextStep} disabled={!isValid} />
       </div>
     </OnboardingLayout>
   );

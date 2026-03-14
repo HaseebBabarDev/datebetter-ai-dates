@@ -18,7 +18,7 @@ const CommunicationScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
   return (
-    <OnboardingLayout title="Communication Style" subtitle="How do you connect?">
+    <OnboardingLayout title="Communication Style" subtitle="How do you connect?" emoji="💬">
       <div className="space-y-4 animate-fade-in">
         <div className="space-y-2">
           <Label className="text-sm">How do you communicate?</Label>

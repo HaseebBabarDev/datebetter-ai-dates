@@ -1,7 +1,7 @@
 import React from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { OnboardingLayout } from "../OnboardingLayout";
-import { Button } from "@/components/ui/button";
+import ContinueButton from "../ContinueButton";
 import { Label } from "@/components/ui/label";
 import { OptionCard } from "../OptionCard";
 import { SliderInput } from "../SliderInput";
@@ -24,7 +24,7 @@ const FaithValuesScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
   return (
-    <OnboardingLayout title="Faith & Values" subtitle="Your spiritual beliefs">
+    <OnboardingLayout title="Faith & Values" subtitle="Your spiritual beliefs" emoji="🙏">
       <div className="space-y-4 animate-fade-in">
         <div className="space-y-2">
           <Label className="text-sm">Your religious/spiritual beliefs:</Label>
@@ -35,7 +35,7 @@ const FaithValuesScreen = () => {
           </div>
         </div>
         <SliderInput label="How important is faith alignment?" value={data.faithImportance || 3} onChange={(v) => updateData({ faithImportance: v })} min={1} max={5} leftLabel="Not important" rightLabel="Must share faith" />
-        <Button onClick={nextStep} disabled={!data.religion} className="w-full" size="lg">Continue</Button>
+        <ContinueButton onClick={nextStep} disabled={!data.religion} />
       </div>
     </OnboardingLayout>
   );

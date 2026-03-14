@@ -1,7 +1,7 @@
 import React from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { OnboardingLayout } from "../OnboardingLayout";
-import { Button } from "@/components/ui/button";
+import ContinueButton from "../ContinueButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OptionCard } from "../OptionCard";
@@ -114,6 +114,7 @@ const BasicIdentityScreen = () => {
     <OnboardingLayout
       title="Basic Identity"
       subtitle="Let's get to know you"
+      emoji="👋"
     >
       <div className="space-y-4 animate-fade-in">
         {/* Date of Birth Section */}
@@ -301,15 +302,7 @@ const BasicIdentityScreen = () => {
           </Select>
         </div>
 
-        {/* Continue Button */}
-        <Button
-          onClick={nextStep}
-          disabled={!isValid}
-          className="w-full"
-          size="lg"
-        >
-          Continue
-        </Button>
+        <ContinueButton onClick={nextStep} disabled={!isValid} />
       </div>
     </OnboardingLayout>
   );
