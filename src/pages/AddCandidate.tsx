@@ -806,7 +806,13 @@ const THEIR_ISSUE_OPTIONS = [
 
         {/* Quick Add Form */}
         {candidateMode === "quick" && (
-          <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
+          <motion.form
+            onSubmit={handleSubmit}
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-4"
+          >
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
