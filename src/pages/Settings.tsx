@@ -1137,7 +1137,7 @@ const Settings = () => {
                 {currentPlan === "free" ? "Upgrade to unlock more features" : "Change your plan"}
               </h4>
 
-              {/* Basic Plan — $9.99 */}
+              {/* Starter Plan — $9.99 */}
               <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "basic" ? "border-primary bg-primary/5" : ""}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
