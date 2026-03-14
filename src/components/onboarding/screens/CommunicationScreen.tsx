@@ -35,7 +35,7 @@ const CommunicationScreen = () => {
           ))}
           </div>
         </div>
-        <Button onClick={nextStep} disabled={!data.communicationStyle} className="w-full" size="lg">Continue</Button>
+        <ContinueButton onClick={nextStep} disabled={!data.communicationStyle} />
       </div>
     </OnboardingLayout>
   );

@@ -265,7 +265,7 @@ const CareerScreen = () => {
               )}
             </div>
           </div>
-          <Button onClick={nextStep} disabled={!data.careerStage || !data.educationLevel} className="w-full" size="lg">Continue</Button>
+          <ContinueButton onClick={nextStep} disabled={!data.careerStage || !data.educationLevel} />
         </div>
       </OnboardingLayout>
     </>
