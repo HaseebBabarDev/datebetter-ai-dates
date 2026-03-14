@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Navigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -680,7 +681,7 @@ const THEIR_ISSUE_OPTIONS = [
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 bg-background/95 backdrop-blur border-b border-border z-10">
+      <header className="sticky top-0 bg-background/95 backdrop-blur border-b border-border/30 z-10">
         <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => {
             if (candidateMode && !isEditMode) {
@@ -711,20 +712,38 @@ const THEIR_ISSUE_OPTIONS = [
       <main className="container mx-auto px-4 py-6 max-w-lg">
         {/* Mode Selection */}
         {!candidateMode && !isEditMode && (
-          <div className="space-y-4 animate-fade-in">
-            <div className="text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-center mb-6"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.15 }}
+                className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3"
+              >
                 <Sparkles className="w-7 h-7 text-primary" />
-              </div>
+              </motion.div>
               <h2 className="text-xl font-semibold mb-1">How much do you know?</h2>
               <p className="text-sm text-muted-foreground">More details = more accurate AI scoring</p>
-            </div>
+            </motion.div>
 
             {/* Full Profile Option - Recommended */}
-            <button
+            <motion.button
               type="button"
               onClick={() => setCandidateMode("full")}
-              className="w-full p-4 rounded-xl bg-[image:var(--gradient-hero)] shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all group text-left"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full p-4 rounded-xl bg-[image:var(--gradient-hero)] shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-shadow group text-left"
             >
               <div className="flex items-start gap-3">
                 <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
@@ -743,13 +762,17 @@ const THEIR_ISSUE_OPTIONS = [
                 </div>
                 <ArrowRight className="w-4 h-4 text-white/70 group-hover:text-white transition-colors shrink-0 mt-3" />
               </div>
-            </button>
+            </motion.button>
 
             {/* Quick Add Option */}
-            <button
+            <motion.button
               type="button"
               onClick={() => setCandidateMode("quick")}
-              className="w-full p-4 rounded-xl border border-border/50 bg-card hover:bg-accent/50 hover:border-primary/30 transition-all group text-left"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full p-4 rounded-xl border-2 border-border/40 bg-card hover:border-primary/30 transition-colors group text-left"
             >
               <div className="flex items-start gap-3">
                 <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
@@ -768,17 +791,28 @@ const THEIR_ISSUE_OPTIONS = [
                 </div>
                 <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-3" />
               </div>
-            </button>
+            </motion.button>
 
-            <p className="text-[10px] text-muted-foreground text-center pt-2">
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-[10px] text-muted-foreground text-center pt-2"
+            >
               You can always add more details later
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
         )}
 
         {/* Quick Add Form */}
         {candidateMode === "quick" && (
-          <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
+          <motion.form
+            onSubmit={handleSubmit}
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-4"
+          >
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -961,23 +995,31 @@ const THEIR_ISSUE_OPTIONS = [
               </CardContent>
             </Card>
 
-            <Button
-              type="submit"
-              className="w-full py-6 bg-[image:var(--gradient-hero)] hover:opacity-90"
-              disabled={loading || !nickname.trim()}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
             >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                  Calculating score...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  Get Score
-                  <Sparkles className="w-4 h-4" />
-                </span>
-              )}
-            </Button>
+              <Button
+                type="submit"
+                className="w-full py-6 rounded-xl bg-[image:var(--gradient-hero)] hover:opacity-90 shadow-[var(--shadow-soft)] h-12 text-base font-semibold"
+                disabled={loading || !nickname.trim()}
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                    Calculating score...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    Get Score
+                    <motion.span animate={{ x: [0, 3, 0] }} transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}>
+                      <Sparkles className="w-4 h-4" />
+                    </motion.span>
+                  </span>
+                )}
+              </Button>
+            </motion.div>
 
             <p className="text-center text-xs text-muted-foreground">
               Want more accurate scoring?{" "}
@@ -989,12 +1031,18 @@ const THEIR_ISSUE_OPTIONS = [
                 Add full profile instead
               </button>
             </p>
-          </form>
+          </motion.form>
         )}
 
         {/* Full Form */}
         {candidateMode === "full" && (
-          <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
+          <motion.form
+            onSubmit={handleSubmit}
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-4"
+          >
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="basics" className="gap-1 text-xs px-1">
@@ -1858,7 +1906,12 @@ const THEIR_ISSUE_OPTIONS = [
                 </Button>
               </div>
             ) : (
-              <Button type="submit" className="w-full" size="lg" disabled={loading}>
+              <Button
+                type="submit"
+                className="w-full rounded-xl h-12 text-base font-semibold bg-[image:var(--gradient-primary)] hover:opacity-90 shadow-[var(--shadow-soft)]"
+                size="lg"
+                disabled={loading}
+              >
                 {loading ? "Saving..." : <><UserPlus className="w-5 h-5 mr-2" />Add Candidate</>}
               </Button>
             )}
@@ -1867,7 +1920,7 @@ const THEIR_ISSUE_OPTIONS = [
               {isEditMode ? "More details = better compatibility insights" : "More details = better AI compatibility analysis"}
             </p>
           </div>
-          </form>
+          </motion.form>
         )}
       </main>
     </div>
