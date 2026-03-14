@@ -82,7 +82,7 @@ const SUBSCRIPTION_PLANS = [
       "Unlimited candidates",
       "Unlimited AI messages",
       "Unlimited score updates",
-      "Everything in Starter",
+      "Everything in Plus",
       "Advanced behavioral analytics",
       "Priority support",
     ],

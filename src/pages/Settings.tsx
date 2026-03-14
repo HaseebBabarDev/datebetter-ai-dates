@@ -36,8 +36,8 @@ type SubscriptionPlan = "free" | "basic" | "starter" | "unlimited";
 
 const PLAN_DISPLAY: Record<SubscriptionPlan, { name: string; price: string; stripeKey?: keyof typeof STRIPE_PLANS }> = {
   free: { name: "Free", price: "$0" },
-  basic: { name: "Basic", price: "$9.99/mo", stripeKey: "basic" },
-  starter: { name: "Starter", price: "$15.99/mo", stripeKey: "starter" },
+  basic: { name: "Starter", price: "$9.99/mo", stripeKey: "basic" },
+  starter: { name: "Plus", price: "$15.99/mo", stripeKey: "starter" },
   unlimited: { name: "Unlimited", price: "$29.99/mo", stripeKey: "unlimited" },
 };
 

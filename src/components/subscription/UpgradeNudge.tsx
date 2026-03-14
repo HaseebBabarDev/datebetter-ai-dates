@@ -54,8 +54,8 @@ export function UpgradeNudge({ candidateId, onDismiss }: UpgradeNudgeProps) {
     }
   }
 
-  const nextPlan = subscription.plan === "free" ? "Basic" 
-    : subscription.plan === "basic" ? "Starter" 
+  const nextPlan = subscription.plan === "free" ? "Starter" 
+    : subscription.plan === "basic" ? "Plus" 
     : "Unlimited";
 
   return (

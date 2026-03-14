@@ -42,7 +42,7 @@ const plans = [
     popular: false,
   },
   {
-    name: "Starter",
+    name: "Plus",
     price: "$9.99",
     period: "/mo",
     description: "For active daters",

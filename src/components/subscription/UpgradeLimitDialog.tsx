@@ -28,7 +28,7 @@ const PLAN_OPTIONS = [
   },
   {
     id: "starter",
-    name: "Starter",
+    name: "Plus",
     price: "$15.99",
     candidates: 10,
     updates: "Unlimited",
