@@ -995,23 +995,31 @@ const THEIR_ISSUE_OPTIONS = [
               </CardContent>
             </Card>
 
-            <Button
-              type="submit"
-              className="w-full py-6 bg-[image:var(--gradient-hero)] hover:opacity-90"
-              disabled={loading || !nickname.trim()}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
             >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                  Calculating score...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  Get Score
-                  <Sparkles className="w-4 h-4" />
-                </span>
-              )}
-            </Button>
+              <Button
+                type="submit"
+                className="w-full py-6 rounded-xl bg-[image:var(--gradient-hero)] hover:opacity-90 shadow-[var(--shadow-soft)] h-12 text-base font-semibold"
+                disabled={loading || !nickname.trim()}
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                    Calculating score...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    Get Score
+                    <motion.span animate={{ x: [0, 3, 0] }} transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}>
+                      <Sparkles className="w-4 h-4" />
+                    </motion.span>
+                  </span>
+                )}
+              </Button>
+            </motion.div>
 
             <p className="text-center text-xs text-muted-foreground">
               Want more accurate scoring?{" "}
@@ -1023,7 +1031,7 @@ const THEIR_ISSUE_OPTIONS = [
                 Add full profile instead
               </button>
             </p>
-          </form>
+          </motion.form>
         )}
 
         {/* Full Form */}
