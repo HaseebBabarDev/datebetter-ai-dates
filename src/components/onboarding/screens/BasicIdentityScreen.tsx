@@ -302,15 +302,7 @@ const BasicIdentityScreen = () => {
           </Select>
         </div>
 
-        {/* Continue Button */}
-        <Button
-          onClick={nextStep}
-          disabled={!isValid}
-          className="w-full"
-          size="lg"
-        >
-          Continue
-        </Button>
+        <ContinueButton onClick={nextStep} disabled={!isValid} />
       </div>
     </OnboardingLayout>
   );

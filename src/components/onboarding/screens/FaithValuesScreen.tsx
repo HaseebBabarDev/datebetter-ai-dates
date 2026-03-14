@@ -35,7 +35,7 @@ const FaithValuesScreen = () => {
           </div>
         </div>
         <SliderInput label="How important is faith alignment?" value={data.faithImportance || 3} onChange={(v) => updateData({ faithImportance: v })} min={1} max={5} leftLabel="Not important" rightLabel="Must share faith" />
-        <Button onClick={nextStep} disabled={!data.religion} className="w-full" size="lg">Continue</Button>
+        <ContinueButton onClick={nextStep} disabled={!data.religion} />
       </div>
     </OnboardingLayout>
   );
