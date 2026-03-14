@@ -115,8 +115,8 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
                 transition={{ delay: 0.08, duration: 0.3 }}
                 className="mb-4"
               >
-                <h2 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
-                  {emoji && <span className="text-xl">{emoji}</span>}
+                <h2 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2 overflow-visible">
+                  {emoji && <span className="text-xl leading-none shrink-0">{emoji}</span>}
                   {title}
                 </h2>
                 {subtitle && (
