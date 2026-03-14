@@ -1036,7 +1036,13 @@ const THEIR_ISSUE_OPTIONS = [
 
         {/* Full Form */}
         {candidateMode === "full" && (
-          <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
+          <motion.form
+            onSubmit={handleSubmit}
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-4"
+          >
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="basics" className="gap-1 text-xs px-1">
