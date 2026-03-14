@@ -1906,7 +1906,12 @@ const THEIR_ISSUE_OPTIONS = [
                 </Button>
               </div>
             ) : (
-              <Button type="submit" className="w-full" size="lg" disabled={loading}>
+              <Button
+                type="submit"
+                className="w-full rounded-xl h-12 text-base font-semibold bg-[image:var(--gradient-primary)] hover:opacity-90 shadow-[var(--shadow-soft)]"
+                size="lg"
+                disabled={loading}
+              >
                 {loading ? "Saving..." : <><UserPlus className="w-5 h-5 mr-2" />Add Candidate</>}
               </Button>
             )}
@@ -1915,7 +1920,7 @@ const THEIR_ISSUE_OPTIONS = [
               {isEditMode ? "More details = better compatibility insights" : "More details = better AI compatibility analysis"}
             </p>
           </div>
-          </form>
+          </motion.form>
         )}
       </main>
     </div>
