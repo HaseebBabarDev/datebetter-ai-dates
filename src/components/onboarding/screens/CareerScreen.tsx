@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { OnboardingLayout } from "../OnboardingLayout";
-import { Button } from "@/components/ui/button";
+import ContinueButton from "../ContinueButton";
 import { Label } from "@/components/ui/label";
 import { OptionCard } from "../OptionCard";
 import { SliderInput } from "../SliderInput";
