@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { OnboardingProvider, useOnboarding } from "@/contexts/OnboardingContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import EngagementInterstitial, { interstitials } from "@/components/onboarding/EngagementInterstitial";
 
 // Import all screens
 import WelcomeScreen from "@/components/onboarding/screens/WelcomeScreen";
@@ -40,17 +41,40 @@ interface SetupContentProps {
 const SetupContent = ({ setupMode }: SetupContentProps) => {
   const { currentStep, loading, data, updateData, goToStep } = useOnboarding();
   const [initialized, setInitialized] = useState(false);
+  const [showInterstitial, setShowInterstitial] = useState(false);
+  const seenInterstitials = useRef<Set<number>>(new Set());
+  const prevStepRef = useRef<number>(currentStep);
+
+  // Show interstitial when arriving at a step that has one (only when moving forward)
+  useEffect(() => {
+    if (!loading && initialized) {
+      const movingForward = currentStep > prevStepRef.current;
+      prevStepRef.current = currentStep;
+
+      if (
+        movingForward &&
+        interstitials[currentStep] &&
+        !seenInterstitials.current.has(currentStep)
+      ) {
+        seenInterstitials.current.add(currentStep);
+        setShowInterstitial(true);
+      }
+    }
+  }, [currentStep, loading, initialized]);
+
+  const handleInterstitialComplete = useCallback(() => {
+    setShowInterstitial(false);
+  }, []);
 
   // Handle setup mode from URL params - skip WelcomeScreen if already chosen
-  // Note: step 1 is now AppearanceScreen, step 2 is BasicIdentityScreen
   useEffect(() => {
     if (!loading && !initialized && currentStep === 0 && setupMode) {
       if (setupMode === "quick") {
         updateData({ quickStartMode: true });
-        goToStep(1); // Go to AppearanceScreen
+        goToStep(1);
       } else if (setupMode === "full") {
         updateData({ quickStartMode: false });
-        goToStep(1); // Go to AppearanceScreen
+        goToStep(1);
       }
       setInitialized(true);
     } else if (!loading && !initialized) {
@@ -66,6 +90,16 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
           <p className="text-muted-foreground">Loading your progress...</p>
         </div>
       </div>
+    );
+  }
+
+  // Show interstitial overlay
+  if (showInterstitial && interstitials[currentStep]) {
+    return (
+      <EngagementInterstitial
+        step={currentStep}
+        onComplete={handleInterstitialComplete}
+      />
     );
   }
 
