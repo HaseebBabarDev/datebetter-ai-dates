@@ -1,7 +1,7 @@
 import React from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { OnboardingLayout } from "../OnboardingLayout";
-import { Button } from "@/components/ui/button";
+import ContinueButton from "../ContinueButton";
 import { Label } from "@/components/ui/label";
 import { OptionCard } from "../OptionCard";
 import { SliderInput } from "../SliderInput";
@@ -30,7 +30,7 @@ const PoliticsScreen = () => {
           </div>
         </div>
         <SliderInput label="How important is political alignment?" value={data.politicsImportance || 3} onChange={(v) => updateData({ politicsImportance: v })} min={1} max={5} leftLabel="Not important" rightLabel="Very important" />
-        <Button onClick={nextStep} disabled={!data.politics} className="w-full" size="lg">Continue</Button>
+        <ContinueButton onClick={nextStep} disabled={!data.politics} />
       </div>
     </OnboardingLayout>
   );

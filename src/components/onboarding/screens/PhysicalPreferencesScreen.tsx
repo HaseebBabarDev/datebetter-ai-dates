@@ -1,7 +1,7 @@
 import React from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { OnboardingLayout } from "../OnboardingLayout";
-import { Button } from "@/components/ui/button";
+import ContinueButton from "../ContinueButton";
 import { Label } from "@/components/ui/label";
 import { SliderInput } from "../SliderInput";
 import { MultiSelectOption } from "../MultiSelectOption";
@@ -171,7 +171,7 @@ const PhysicalPreferencesScreen = () => {
             ))}
           </div>
         </div>
-        <Button onClick={nextStep} disabled={!data.heightPreference || (data.chemistryFactors?.length || 0) === 0} className="w-full" size="lg">Continue</Button>
+        <ContinueButton onClick={nextStep} disabled={!data.heightPreference || (data.chemistryFactors?.length || 0) === 0} />
       </div>
     </OnboardingLayout>
   );

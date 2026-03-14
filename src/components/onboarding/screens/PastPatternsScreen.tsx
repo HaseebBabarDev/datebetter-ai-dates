@@ -1,7 +1,7 @@
 import React from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { OnboardingLayout } from "../OnboardingLayout";
-import { Button } from "@/components/ui/button";
+import ContinueButton from "../ContinueButton";
 import { Label } from "@/components/ui/label";
 import { OptionCard } from "../OptionCard";
 
@@ -27,7 +27,7 @@ const PastPatternsScreen = () => {
           ))}
           </div>
         </div>
-        <Button onClick={nextStep} disabled={!data.attachmentStyle} className="w-full" size="lg">Continue</Button>
+        <ContinueButton onClick={nextStep} disabled={!data.attachmentStyle} />
       </div>
     </OnboardingLayout>
   );

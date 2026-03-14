@@ -98,38 +98,29 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       )}
 
       {/* Content with transition */}
-      <main className="flex-1 overflow-auto pb-safe-bottom">
+      <main className="flex-1 overflow-y-auto overscroll-contain pb-safe-bottom">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="max-w-lg mx-auto px-4 py-3"
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="max-w-lg mx-auto px-4 py-4 pb-8"
           >
             {!headerGradient && title && (
               <motion.div
-                initial={{ opacity: 0, y: -8 }}
+                initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.35 }}
+                transition={{ delay: 0.08, duration: 0.3 }}
                 className="mb-4"
               >
-                <div className="flex items-center gap-2">
-                  {emoji && (
-                    <motion.span
-                      initial={{ scale: 0, rotate: -30 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 12, delay: 0.2 }}
-                      className="text-2xl"
-                    >
-                      {emoji}
-                    </motion.span>
-                  )}
-                  <h2 className="text-lg sm:text-xl font-bold text-foreground">{title}</h2>
-                </div>
+                <h2 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
+                  {emoji && <span className="text-xl">{emoji}</span>}
+                  {title}
+                </h2>
                 {subtitle && (
-                  <p className="text-muted-foreground text-xs sm:text-sm mt-1">{subtitle}</p>
+                  <p className="text-muted-foreground text-xs sm:text-sm mt-0.5">{subtitle}</p>
                 )}
               </motion.div>
             )}
