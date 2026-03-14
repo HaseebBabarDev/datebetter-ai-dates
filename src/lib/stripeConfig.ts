@@ -9,8 +9,8 @@ export const STRIPE_PLANS = {
     priceMonthly: 9.99,
   },
   starter: {
-    product_id: "prod_U5Ba3aovhb68xI",
-    price_id: "price_1T71DJCzzhGXp07lK69zDge2",
+    product_id: "prod_U9Ib7JXLsfmN7S",
+    price_id: "price_1TB00JCzzhGXp07lqMlcjDN1",
     name: "Plus",
     priceMonthly: 15.99,
   },
@@ -42,6 +42,7 @@ export const PRODUCT_ID_TO_PLAN: Record<string, string> = {
   [STRIPE_PLANS.basic.product_id]: "basic",
   "prod_U5BaepUGcVqsIg": "basic", // legacy product ID
   [STRIPE_PLANS.starter.product_id]: "starter",
+  "prod_U5Ba3aovhb68xI": "starter", // legacy product ID
   [STRIPE_PLANS.unlimited.product_id]: "unlimited",
 };
 

@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@18.5.0";
+import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
@@ -15,7 +15,8 @@ const logStep = (step: string, details?: any) => {
 const PRODUCT_TO_PLAN: Record<string, string> = {
   "prod_U9ISjhAFg6VNmq": "basic",
   "prod_U5BaepUGcVqsIg": "basic", // legacy product ID
-  "prod_U5Ba3aovhb68xI": "starter",
+  "prod_U9Ib7JXLsfmN7S": "starter",
+  "prod_U5Ba3aovhb68xI": "starter", // legacy product ID
   "prod_U5Ba2gOJLLzLpj": "unlimited",
 };
 
