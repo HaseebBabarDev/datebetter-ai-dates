@@ -1,6 +1,7 @@
 import React from "react";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface SliderInputProps {
   label: string;
@@ -13,6 +14,7 @@ interface SliderInputProps {
   rightLabel?: string;
   showValue?: boolean;
   className?: string;
+  emoji?: string[];
 }
 
 export const SliderInput: React.FC<SliderInputProps> = ({
@@ -26,14 +28,43 @@ export const SliderInput: React.FC<SliderInputProps> = ({
   rightLabel,
   showValue = true,
   className,
+  emoji,
 }) => {
+  const normalizedIndex = Math.round(((value - min) / (max - min)) * ((emoji?.length || 1) - 1));
+  const currentEmoji = emoji?.[normalizedIndex];
+
   return (
-    <div className={cn("space-y-4", className)}>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className={cn("space-y-3 p-4 rounded-xl bg-card border border-border/40", className)}
+    >
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium text-foreground">{label}</label>
-        {showValue && (
-          <span className="text-sm font-semibold text-primary">{value}</span>
-        )}
+        <div className="flex items-center gap-1.5">
+          {currentEmoji && (
+            <motion.span
+              key={currentEmoji}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 400, damping: 15 }}
+              className="text-lg"
+            >
+              {currentEmoji}
+            </motion.span>
+          )}
+          {showValue && (
+            <motion.span
+              key={value}
+              initial={{ y: -8, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="text-sm font-bold text-primary tabular-nums min-w-[1.5ch] text-center"
+            >
+              {value}
+            </motion.span>
+          )}
+        </div>
       </div>
       <Slider
         value={[value]}
@@ -44,11 +75,11 @@ export const SliderInput: React.FC<SliderInputProps> = ({
         className="w-full"
       />
       {(leftLabel || rightLabel) && (
-        <div className="flex justify-between text-xs text-muted-foreground">
+        <div className="flex justify-between text-[11px] text-muted-foreground">
           <span>{leftLabel}</span>
           <span>{rightLabel}</span>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
