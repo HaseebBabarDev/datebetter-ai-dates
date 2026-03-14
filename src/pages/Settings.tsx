@@ -1154,7 +1154,7 @@ const Settings = () => {
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["1 candidate profile", "5 AI message exchanges / month", "Compatibility scoring", "Red flag detection", "Cycle tracking"].map((f) => (
+                    {["Up to 5 candidates", "300 total interactions", "Compatibility scoring", "Red flag detection", "Cycle tracking"].map((f) => (
                       <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Check className="w-4 h-4 text-green-500 shrink-0" />
                         <span>{f}</span>
