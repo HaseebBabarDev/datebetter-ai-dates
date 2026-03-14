@@ -20,7 +20,7 @@ const plans = [
     icon: Zap,
     features: [
       "1 candidate profile",
-      "1 interaction log",
+      "5 total interactions",
       "Basic compatibility score",
       "Red flag detection",
     ],
