@@ -3,8 +3,8 @@
 
 export const STRIPE_PLANS = {
   basic: {
-    product_id: "prod_U5BaepUGcVqsIg",
-    price_id: "price_1T71D3CzzhGXp07lLETuuc6P",
+    product_id: "prod_U9ISjhAFg6VNmq",
+    price_id: "price_1TAzrPCzzhGXp07lxdJWFeFz",
     name: "Basic",
     priceMonthly: 9.99,
   },
@@ -40,6 +40,7 @@ export const STRIPE_ONE_TIME = {
 // Map Stripe product IDs back to internal plan names
 export const PRODUCT_ID_TO_PLAN: Record<string, string> = {
   [STRIPE_PLANS.basic.product_id]: "basic",
+  "prod_U5BaepUGcVqsIg": "basic", // legacy product ID
   [STRIPE_PLANS.starter.product_id]: "starter",
   [STRIPE_PLANS.unlimited.product_id]: "unlimited",
 };

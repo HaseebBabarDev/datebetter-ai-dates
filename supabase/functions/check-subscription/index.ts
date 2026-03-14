@@ -13,7 +13,8 @@ const logStep = (step: string, details?: any) => {
 };
 
 const PRODUCT_TO_PLAN: Record<string, string> = {
-  "prod_U5BaepUGcVqsIg": "basic",
+  "prod_U9ISjhAFg6VNmq": "basic",
+  "prod_U5BaepUGcVqsIg": "basic", // legacy product ID
   "prod_U5Ba3aovhb68xI": "starter",
   "prod_U5Ba2gOJLLzLpj": "unlimited",
 };
