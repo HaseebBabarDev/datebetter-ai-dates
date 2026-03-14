@@ -1178,7 +1178,7 @@ const Settings = () => {
                 </CardContent>
               </Card>
 
-              {/* Starter Plan — $15.99 */}
+              {/* Plus Plan — $15.99 */}
               <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "starter" ? "border-primary bg-primary/5" : ""}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
