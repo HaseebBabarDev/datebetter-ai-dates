@@ -145,6 +145,7 @@ const HealingAssessmentScreen = () => {
     <OnboardingLayout
       title="Healing Check-In"
       subtitle="Understanding where you are in your healing journey helps D.E.V.I. support you better"
+      emoji="🌱"
     >
       <div className="space-y-6 animate-fade-in">
         {/* Show score result if calculated */}

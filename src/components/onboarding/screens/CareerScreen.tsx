@@ -130,7 +130,7 @@ const CareerScreen = () => {
         </DialogContent>
       </Dialog>
 
-      <OnboardingLayout title="Career & Education" subtitle="Your professional life">
+      <OnboardingLayout title="Career & Education" subtitle="Your professional life" emoji="💼">
         <div className="space-y-4 animate-fade-in">
           <div className="space-y-2">
             <Label className="text-sm">Career status:</Label>

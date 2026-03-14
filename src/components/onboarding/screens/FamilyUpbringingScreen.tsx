@@ -178,6 +178,7 @@ const FamilyUpbringingScreen = () => {
     <OnboardingLayout
       title="Family & Upbringing"
       subtitle="Your early experiences shape relationship patterns"
+      emoji="🏡"
     >
       <div className="space-y-6 animate-fade-in">
         {/* Privacy Notice */}

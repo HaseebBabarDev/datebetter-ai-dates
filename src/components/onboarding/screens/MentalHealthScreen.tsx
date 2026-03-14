@@ -46,7 +46,7 @@ const MentalHealthScreen = () => {
   };
 
   return (
-    <OnboardingLayout title="Mental Health & Neurodivergence" subtitle="Understanding yourself better">
+    <OnboardingLayout title="Mental Health & Neurodivergence" subtitle="Understanding yourself better" emoji="🧠">
       <div className="space-y-6 animate-fade-in">
         {/* Privacy notice */}
         <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">

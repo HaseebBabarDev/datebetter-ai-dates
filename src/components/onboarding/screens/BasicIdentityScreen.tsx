@@ -114,6 +114,7 @@ const BasicIdentityScreen = () => {
     <OnboardingLayout
       title="Basic Identity"
       subtitle="Let's get to know you"
+      emoji="👋"
     >
       <div className="space-y-4 animate-fade-in">
         {/* Date of Birth Section */}

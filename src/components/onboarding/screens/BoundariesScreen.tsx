@@ -55,6 +55,7 @@ const BoundariesScreen = () => {
     <OnboardingLayout
       title="Boundaries & Safety"
       subtitle="What you won't tolerate"
+      emoji="🛡️"
     >
       <div className="space-y-6 animate-fade-in">
         {/* Absolute Dealbreakers */}

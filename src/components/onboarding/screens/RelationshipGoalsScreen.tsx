@@ -71,6 +71,7 @@ const RelationshipGoalsScreen = () => {
     <OnboardingLayout
       title="Relationship Goals"
       subtitle="What are you looking for?"
+      emoji="💍"
     >
       <div className="space-y-4 animate-fade-in">
         {/* Current Relationship Status */}

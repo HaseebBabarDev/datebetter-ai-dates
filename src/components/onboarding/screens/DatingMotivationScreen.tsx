@@ -32,6 +32,7 @@ const DatingMotivationScreen = () => {
     <OnboardingLayout
       title="What Are You Looking For?"
       subtitle="Be honest—this helps D.E.V.I. give you realistic advice"
+      emoji="🎯"
     >
       <div className="space-y-6 animate-fade-in">
         {/* Primary Motivation */}

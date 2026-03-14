@@ -179,6 +179,7 @@ const RelationshipTraumaScreen = () => {
     <OnboardingLayout
       title="Past Relationships"
       subtitle="Understanding your relationship history helps D.E.V.I. support you better"
+      emoji="💔"
     >
       <div className="space-y-6 animate-fade-in">
         {/* Info notice */}

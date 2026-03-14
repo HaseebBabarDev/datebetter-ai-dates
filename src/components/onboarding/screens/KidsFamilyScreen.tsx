@@ -58,7 +58,7 @@ const KidsFamilyScreen = () => {
   const isValid = data.kidsStatus && data.kidsDesire;
 
   return (
-    <OnboardingLayout title="Kids & Family Planning" subtitle="Important for compatibility">
+    <OnboardingLayout title="Kids & Family Planning" subtitle="Important for compatibility" emoji="👶">
       <div className="space-y-4 animate-fade-in">
         <div className="space-y-2">
           <Label className="text-sm">Do you have children?</Label>

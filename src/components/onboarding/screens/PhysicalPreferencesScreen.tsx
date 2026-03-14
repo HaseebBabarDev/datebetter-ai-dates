@@ -58,7 +58,7 @@ const PhysicalPreferencesScreen = () => {
     : null;
 
   return (
-    <OnboardingLayout title="Physical & Attraction" subtitle="What creates chemistry for you?">
+    <OnboardingLayout title="Physical & Attraction" subtitle="What creates chemistry for you?" emoji="✨">
       <div className="space-y-6 animate-fade-in">
         <p className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">These are preferences to help compatibility, not strict requirements</p>
         

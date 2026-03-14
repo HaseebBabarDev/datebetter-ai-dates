@@ -148,6 +148,7 @@ const DatingStyleScreen = () => {
     <OnboardingLayout
       title="Your Dating Style"
       subtitle="Be honest—this helps D.E.V.I. give you better advice"
+      emoji="💘"
     >
       <div className="space-y-8 animate-fade-in pb-20">
         {/* Honesty Intent */}

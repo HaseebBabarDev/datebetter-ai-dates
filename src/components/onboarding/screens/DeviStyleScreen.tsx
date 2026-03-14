@@ -46,6 +46,7 @@ const DeviStyleScreen = () => {
     <OnboardingLayout
       title="How should D.E.V.I. talk to you?"
       subtitle="Choose your preferred communication style for your AI dating coach"
+      emoji="🤖"
     >
       <div className="space-y-6">
         {/* Communication Style */}

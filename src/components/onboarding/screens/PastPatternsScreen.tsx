@@ -17,7 +17,7 @@ const PastPatternsScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
   return (
-    <OnboardingLayout title="Past Patterns & Attachment" subtitle="Understanding your relationship style">
+    <OnboardingLayout title="Past Patterns & Attachment" subtitle="Understanding your relationship style" emoji="🔄">
       <div className="space-y-4 animate-fade-in">
         <div className="space-y-2">
           <Label className="text-sm">In relationships, I tend to be:</Label>

@@ -24,7 +24,7 @@ const FaithValuesScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
 
   return (
-    <OnboardingLayout title="Faith & Values" subtitle="Your spiritual beliefs">
+    <OnboardingLayout title="Faith & Values" subtitle="Your spiritual beliefs" emoji="🙏">
       <div className="space-y-4 animate-fade-in">
         <div className="space-y-2">
           <Label className="text-sm">Your religious/spiritual beliefs:</Label>

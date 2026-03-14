@@ -70,6 +70,7 @@ const HormoneCycleScreen = () => {
     <OnboardingLayout
       title="Hormone & Cycle Profile"
       subtitle="This information helps personalize your experience"
+      emoji="🌙"
     >
       <div className="space-y-6 animate-fade-in">
         {/* Trans Section */}
