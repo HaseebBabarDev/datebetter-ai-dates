@@ -69,6 +69,7 @@ const DatingPreferencesScreen = () => {
     <OnboardingLayout
       title="Dating Preferences"
       subtitle="Who are you looking to date?"
+      emoji="💕"
     >
       <div className="space-y-4 animate-fade-in">
         {/* Sexual Orientation */}
