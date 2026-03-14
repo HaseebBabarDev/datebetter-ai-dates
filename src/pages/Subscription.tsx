@@ -21,9 +21,8 @@ const SUBSCRIPTION_PLANS = [
     icon: Heart,
     features: [
       "1 candidate",
-      "5 interaction logs",
+      "5 total interactions",
       "3 text simulator sessions",
-      "5 AI messages per conversation",
       "Basic compatibility insights",
       "Cycle tracking",
     ],
