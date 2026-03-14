@@ -27,7 +27,7 @@ const plans = [
     popular: false,
   },
   {
-    name: "Basic",
+    name: "Starter",
     price: "$4.99",
     period: "/mo",
     description: "Start dating with clarity",
