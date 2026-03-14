@@ -1185,7 +1185,7 @@ const Settings = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-primary" />
-                        <h4 className="font-semibold">Starter</h4>
+                        <h4 className="font-semibold">Plus</h4>
                       </div>
                       <p className="text-sm text-muted-foreground">10 candidates • 1,000 AI messages</p>
                     </div>
