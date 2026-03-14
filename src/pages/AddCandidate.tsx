@@ -712,20 +712,38 @@ const THEIR_ISSUE_OPTIONS = [
       <main className="container mx-auto px-4 py-6 max-w-lg">
         {/* Mode Selection */}
         {!candidateMode && !isEditMode && (
-          <div className="space-y-4 animate-fade-in">
-            <div className="text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-center mb-6"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.15 }}
+                className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3"
+              >
                 <Sparkles className="w-7 h-7 text-primary" />
-              </div>
+              </motion.div>
               <h2 className="text-xl font-semibold mb-1">How much do you know?</h2>
               <p className="text-sm text-muted-foreground">More details = more accurate AI scoring</p>
-            </div>
+            </motion.div>
 
             {/* Full Profile Option - Recommended */}
-            <button
+            <motion.button
               type="button"
               onClick={() => setCandidateMode("full")}
-              className="w-full p-4 rounded-xl bg-[image:var(--gradient-hero)] shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all group text-left"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full p-4 rounded-xl bg-[image:var(--gradient-hero)] shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-shadow group text-left"
             >
               <div className="flex items-start gap-3">
                 <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
@@ -744,13 +762,17 @@ const THEIR_ISSUE_OPTIONS = [
                 </div>
                 <ArrowRight className="w-4 h-4 text-white/70 group-hover:text-white transition-colors shrink-0 mt-3" />
               </div>
-            </button>
+            </motion.button>
 
             {/* Quick Add Option */}
-            <button
+            <motion.button
               type="button"
               onClick={() => setCandidateMode("quick")}
-              className="w-full p-4 rounded-xl border border-border/50 bg-card hover:bg-accent/50 hover:border-primary/30 transition-all group text-left"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full p-4 rounded-xl border-2 border-border/40 bg-card hover:border-primary/30 transition-colors group text-left"
             >
               <div className="flex items-start gap-3">
                 <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
@@ -769,12 +791,17 @@ const THEIR_ISSUE_OPTIONS = [
                 </div>
                 <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-3" />
               </div>
-            </button>
+            </motion.button>
 
-            <p className="text-[10px] text-muted-foreground text-center pt-2">
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-[10px] text-muted-foreground text-center pt-2"
+            >
               You can always add more details later
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
         )}
 
         {/* Quick Add Form */}
