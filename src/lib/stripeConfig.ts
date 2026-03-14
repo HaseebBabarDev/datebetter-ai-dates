@@ -42,6 +42,7 @@ export const PRODUCT_ID_TO_PLAN: Record<string, string> = {
   [STRIPE_PLANS.basic.product_id]: "basic",
   "prod_U5BaepUGcVqsIg": "basic", // legacy product ID
   [STRIPE_PLANS.starter.product_id]: "starter",
+  "prod_U5Ba3aovhb68xI": "starter", // legacy product ID
   [STRIPE_PLANS.unlimited.product_id]: "unlimited",
 };
 
