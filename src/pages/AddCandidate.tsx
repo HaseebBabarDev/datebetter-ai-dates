@@ -288,6 +288,8 @@ const AddCandidate = () => {
   const [searchParams] = useSearchParams();
   const editId = searchParams.get("edit");
   const isEditMode = !!editId;
+  const { canAddCandidate, subscription } = useSubscription();
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [fetchingCandidate, setFetchingCandidate] = useState(isEditMode);
