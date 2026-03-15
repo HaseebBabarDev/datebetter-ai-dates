@@ -1932,6 +1932,12 @@ const THEIR_ISSUE_OPTIONS = [
           </motion.form>
         )}
       </main>
+      <UpgradeLimitDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        limitType="candidates"
+        currentPlan={subscription?.plan}
+      />
     </div>
   );
 };
