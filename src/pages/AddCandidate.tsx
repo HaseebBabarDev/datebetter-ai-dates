@@ -536,6 +536,11 @@ const THEIR_ISSUE_OPTIONS = [
       return;
     }
 
+    if (!isEditMode && !canAddCandidate()) {
+      setShowUpgradeDialog(true);
+      return;
+    }
+
     if (!nickname.trim()) {
       toast.error("Please enter a nickname");
       return;
