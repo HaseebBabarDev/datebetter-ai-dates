@@ -21,6 +21,8 @@ import { ArrowLeft, UserPlus, Sparkles, Heart, Pencil, User, Brain, Zap, Home, C
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SliderInput } from "@/components/onboarding/SliderInput";
 import { toast } from "sonner";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeLimitDialog } from "@/components/subscription/UpgradeLimitDialog";
 
 const MET_VIA_OPTIONS = [
   { value: "dating_app", label: "Dating App" },
