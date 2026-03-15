@@ -21,6 +21,8 @@ import { ArrowLeft, UserPlus, Sparkles, Heart, Pencil, User, Brain, Zap, Home, C
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SliderInput } from "@/components/onboarding/SliderInput";
 import { toast } from "sonner";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeLimitDialog } from "@/components/subscription/UpgradeLimitDialog";
 
 const MET_VIA_OPTIONS = [
   { value: "dating_app", label: "Dating App" },
@@ -286,6 +288,8 @@ const AddCandidate = () => {
   const [searchParams] = useSearchParams();
   const editId = searchParams.get("edit");
   const isEditMode = !!editId;
+  const { canAddCandidate, subscription } = useSubscription();
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [fetchingCandidate, setFetchingCandidate] = useState(isEditMode);
@@ -532,6 +536,11 @@ const THEIR_ISSUE_OPTIONS = [
       return;
     }
 
+    if (!isEditMode && !canAddCandidate()) {
+      setShowUpgradeDialog(true);
+      return;
+    }
+
     if (!nickname.trim()) {
       toast.error("Please enter a nickname");
       return;
@@ -738,7 +747,7 @@ const THEIR_ISSUE_OPTIONS = [
             {/* Full Profile Option - Recommended */}
             <motion.button
               type="button"
-              onClick={() => setCandidateMode("full")}
+              onClick={() => { if (!canAddCandidate()) { setShowUpgradeDialog(true); return; } setCandidateMode("full"); }}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
@@ -767,7 +776,7 @@ const THEIR_ISSUE_OPTIONS = [
             {/* Quick Add Option */}
             <motion.button
               type="button"
-              onClick={() => setCandidateMode("quick")}
+              onClick={() => { if (!canAddCandidate()) { setShowUpgradeDialog(true); return; } setCandidateMode("quick"); }}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
@@ -1923,6 +1932,12 @@ const THEIR_ISSUE_OPTIONS = [
           </motion.form>
         )}
       </main>
+      <UpgradeLimitDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        limitType="candidates"
+        currentPlan={subscription?.plan}
+      />
     </div>
   );
 };
