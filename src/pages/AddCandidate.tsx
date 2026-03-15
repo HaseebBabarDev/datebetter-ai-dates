@@ -747,7 +747,7 @@ const THEIR_ISSUE_OPTIONS = [
             {/* Full Profile Option - Recommended */}
             <motion.button
               type="button"
-              onClick={() => setCandidateMode("full")}
+              onClick={() => { if (!canAddCandidate()) { setShowUpgradeDialog(true); return; } setCandidateMode("full"); }}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
