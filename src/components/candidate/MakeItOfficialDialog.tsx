@@ -323,6 +323,9 @@ export const MakeItOfficialDialog: React.FC<MakeItOfficialDialogProps> = ({
                     <p className="text-base">
                       You and <span className="font-semibold text-foreground">{candidateName}</span> are officially together!
                     </p>
+                    <p className="text-sm text-muted-foreground">
+                      From now on, Devi's advice will be tailored to help you navigate your relationship and keep it healthy. 💕
+                    </p>
                     <div className="bg-muted/50 rounded-lg p-4 space-y-2">
                       <div className="flex items-start gap-2">
                         <Users className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
