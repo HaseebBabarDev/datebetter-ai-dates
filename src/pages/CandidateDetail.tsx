@@ -348,6 +348,7 @@ const CandidateDetail = () => {
   const [isFirstCandidate, setIsFirstCandidate] = useState(false);
   const [showEndRelationshipDialog, setShowEndRelationshipDialog] = useState(false);
   const [showReopenDialog, setShowReopenDialog] = useState(false);
+  const [showMakeOfficialDialog, setShowMakeOfficialDialog] = useState(false);
   const [endReason, setEndReason] = useState("");
   const [endingRelationship, setEndingRelationship] = useState(false);
 
