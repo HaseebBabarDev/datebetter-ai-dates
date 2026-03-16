@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban, Home, XCircle, RefreshCw, AlertTriangle, Pencil, HeartOff, Unlink } from "lucide-react";
+import { ArrowLeft, Trash2, Heart, User, Sparkles, Clock, Flag, Ban, Home, XCircle, RefreshCw, AlertTriangle, Pencil, HeartOff, Unlink, PartyPopper } from "lucide-react";
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
 import { FlagsSection } from "@/components/candidate/FlagsSection";
@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import { Edit, Info } from "lucide-react";
 import { AIDisclosure } from "@/components/AIDisclosure";
 import { TextSimulatorCTA } from "@/components/candidate/TextSimulator";
+import { MakeItOfficialDialog } from "@/components/candidate/MakeItOfficialDialog";
 
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
@@ -347,6 +348,7 @@ const CandidateDetail = () => {
   const [isFirstCandidate, setIsFirstCandidate] = useState(false);
   const [showEndRelationshipDialog, setShowEndRelationshipDialog] = useState(false);
   const [showReopenDialog, setShowReopenDialog] = useState(false);
+  const [showMakeOfficialDialog, setShowMakeOfficialDialog] = useState(false);
   const [endReason, setEndReason] = useState("");
   const [endingRelationship, setEndingRelationship] = useState(false);
 
@@ -859,6 +861,18 @@ const CandidateDetail = () => {
         {!candidate.no_contact_active && candidate.status !== "archived" && (
           <div className="space-y-2">
             <UpgradeNudge candidateId={candidate.id} />
+
+            {/* Make It Official CTA - show for dating/getting_serious statuses */}
+            {(candidate.status === "dating" || candidate.status === "dating_casually" || candidate.status === "getting_serious") && (
+              <Button
+                className="w-full gap-2 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-md"
+                onClick={() => setShowMakeOfficialDialog(true)}
+              >
+                <PartyPopper className="w-4 h-4" />
+                Make It Official
+              </Button>
+            )}
+
             <div data-tour="quick-log">
               <AddInteractionForm
                 candidateId={candidate.id}
@@ -905,6 +919,16 @@ const CandidateDetail = () => {
             </Button>
           </div>
         )}
+
+        {/* Make It Official Dialog */}
+        <MakeItOfficialDialog
+          open={showMakeOfficialDialog}
+          onOpenChange={setShowMakeOfficialDialog}
+          candidateId={candidate.id}
+          candidateName={candidate.nickname}
+          userId={user!.id}
+          onComplete={fetchData}
+        />
 
         {/* End Relationship Dialog */}
         <AlertDialog open={showEndRelationshipDialog} onOpenChange={setShowEndRelationshipDialog}>
