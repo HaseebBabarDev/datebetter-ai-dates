@@ -846,6 +846,33 @@ const CandidateDetail = () => {
           </div>
         )}
 
+        {/* In Relationship Banner */}
+        {candidate.status === "serious_relationship" && (
+          <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-2">
+            <div className="flex items-center gap-2 text-primary">
+              <Heart className="w-5 h-5" />
+              <span className="font-semibold">In a Relationship</span>
+            </div>
+            <div className="flex flex-wrap gap-2 text-sm">
+              {(candidate as any).relationship_type && (
+                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs capitalize">
+                  {(candidate as any).relationship_type === "committed_no_marriage" ? "Committed" : (candidate as any).relationship_type}
+                </span>
+              )}
+              {(candidate as any).relationship_intention && (
+                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs capitalize">
+                  Goal: {(candidate as any).relationship_intention === "long_term" ? "Long-Term" : (candidate as any).relationship_intention === "committed_no_marriage" ? "Committed, No Marriage" : (candidate as any).relationship_intention?.replace("_", " ")}
+                </span>
+              )}
+              {(candidate as any).relationship_started_at && (() => {
+                const days = Math.floor((Date.now() - new Date((candidate as any).relationship_started_at).getTime()) / (1000 * 60 * 60 * 24));
+                const label = days === 0 ? "Today!" : days === 1 ? "1 day together" : days < 30 ? `${days} days together` : days < 365 ? `${Math.floor(days / 30)} month${Math.floor(days / 30) > 1 ? "s" : ""} together` : `${Math.floor(days / 365)} year${Math.floor(days / 365) > 1 ? "s" : ""} together`;
+                return <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs">💕 {label}</span>;
+              })()}
+            </div>
+          </div>
+        )}
+
         {/* Successful Relationship CTA */}
         {successfulRelationship.show && candidate.compatibility_score && candidate.status !== "archived" && (
           <SuccessfulRelationshipCTA
