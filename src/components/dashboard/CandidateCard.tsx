@@ -178,8 +178,35 @@ const getNextStep = ({ status, updatedAt, compatibilityScore, redFlagCount, aler
       return "Enjoy the moment - keep it light and fun";
     case "getting_serious":
       return "Ready to make it official? 💕";
-    case "serious_relationship":
-      return "Nurture your relationship - plan quality time together";
+    case "serious_relationship": {
+      // Tailor advice based on relationship metadata
+      const relType = (candidate as any)?.relationship_type;
+      const relIntention = (candidate as any)?.relationship_intention;
+      const startedAt = (candidate as any)?.relationship_started_at;
+      
+      // Calculate days together
+      let daysTogether = 0;
+      if (startedAt) {
+        daysTogether = Math.floor((Date.now() - new Date(startedAt).getTime()) / (1000 * 60 * 60 * 24));
+      }
+      
+      if (relIntention === "marriage" && daysTogether > 90) {
+        return "💍 Have you talked about your future together lately?";
+      }
+      if (relIntention === "marriage" && daysTogether <= 90) {
+        return "💍 Building your foundation - enjoy getting to know each other deeper";
+      }
+      if (relType === "open" || relType === "polyamorous") {
+        return "💬 Check in on boundaries and communication regularly";
+      }
+      if (relIntention === "exploring") {
+        return "🌱 Stay curious and keep communicating openly";
+      }
+      if (daysTogether > 30) {
+        return "Plan quality time together - keep the spark alive";
+      }
+      return "Nurture your relationship - the first weeks matter most";
+    }
     case "no_contact":
       return "Stay strong - focus on yourself";
     case "archived":
