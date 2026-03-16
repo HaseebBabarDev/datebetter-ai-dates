@@ -861,6 +861,18 @@ const CandidateDetail = () => {
         {!candidate.no_contact_active && candidate.status !== "archived" && (
           <div className="space-y-2">
             <UpgradeNudge candidateId={candidate.id} />
+
+            {/* Make It Official CTA - show for dating/getting_serious statuses */}
+            {(candidate.status === "dating" || candidate.status === "dating_casually" || candidate.status === "getting_serious") && (
+              <Button
+                className="w-full gap-2 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-md"
+                onClick={() => setShowMakeOfficialDialog(true)}
+              >
+                <PartyPopper className="w-4 h-4" />
+                Make It Official
+              </Button>
+            )}
+
             <div data-tour="quick-log">
               <AddInteractionForm
                 candidateId={candidate.id}
@@ -907,6 +919,16 @@ const CandidateDetail = () => {
             </Button>
           </div>
         )}
+
+        {/* Make It Official Dialog */}
+        <MakeItOfficialDialog
+          open={showMakeOfficialDialog}
+          onOpenChange={setShowMakeOfficialDialog}
+          candidateId={candidate.id}
+          candidateName={candidate.nickname}
+          userId={user!.id}
+          onComplete={fetchData}
+        />
 
         {/* End Relationship Dialog */}
         <AlertDialog open={showEndRelationshipDialog} onOpenChange={setShowEndRelationshipDialog}>

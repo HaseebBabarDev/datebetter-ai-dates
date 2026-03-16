@@ -177,7 +177,9 @@ const getNextStep = ({ status, updatedAt, compatibilityScore, redFlagCount, aler
     case "dating_casually":
       return "Enjoy the moment - keep it light and fun";
     case "getting_serious":
-      return "Have the relationship talk when ready";
+      return "Ready to make it official? 💕";
+    case "serious_relationship":
+      return "Nurture your relationship - plan quality time together";
     case "no_contact":
       return "Stay strong - focus on yourself";
     case "archived":
