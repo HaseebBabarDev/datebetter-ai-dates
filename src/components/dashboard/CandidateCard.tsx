@@ -136,7 +136,7 @@ interface NextStepParams {
   relationshipStartedAt?: string | null;
 }
 
-const getNextStep = ({ status, updatedAt, compatibilityScore, redFlagCount, alerts }: NextStepParams): string | null => {
+const getNextStep = ({ status, updatedAt, compatibilityScore, redFlagCount, alerts, relationshipType, relationshipIntention, relationshipStartedAt }: NextStepParams): string | null => {
   const daysSinceUpdate = updatedAt 
     ? Math.floor((Date.now() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24))
     : 0;
