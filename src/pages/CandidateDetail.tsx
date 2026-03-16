@@ -889,14 +889,16 @@ const CandidateDetail = () => {
           <div className="space-y-2">
             <UpgradeNudge candidateId={candidate.id} />
 
-            {/* Make It Official CTA - show for dating/getting_serious statuses */}
-            {(candidate.status === "dating" || candidate.status === "dating_casually" || candidate.status === "getting_serious") && (
+            {/* Make It Official CTA - show when score is 75%+ and not already in a relationship */}
+            {candidate.status !== "serious_relationship" && 
+             candidate.status !== "no_contact" && 
+             (candidate.compatibility_score ?? 0) >= 75 && (
               <Button
                 className="w-full gap-2 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-md"
                 onClick={() => setShowMakeOfficialDialog(true)}
               >
                 <PartyPopper className="w-4 h-4" />
-                Make It Official
+                Make It Official 💕
               </Button>
             )}
 
