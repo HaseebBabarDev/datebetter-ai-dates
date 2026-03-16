@@ -48,44 +48,9 @@ export const MakeItOfficialDialog: React.FC<MakeItOfficialDialogProps> = ({
   onComplete,
 }) => {
   const [step, setStep] = useState<Step>("confirm");
-  const [relationshipType, setRelationshipType] = useState<string>("");
-  const [relationshipIntention, setRelationshipIntention] = useState<string>("");
+  const [relationshipType, setRelationshipType] = useState("");
   const [archiving, setArchiving] = useState(false);
 
-  const handleConfirm = () => {
-    setStep("type");
-  };
-
-  const handleTypeSelect = (type: string) => {
-    setRelationshipType(type);
-    setStep("intention");
-  };
-
-  const handleIntentionSelect = async (intention: string) => {
-    setRelationshipIntention(intention);
-    try {
-      const { error } = await supabase
-        .from("candidates")
-        .update({
-          status: "serious_relationship",
-          relationship_type: type,
-          relationship_intention: intention,
-          relationship_started_at: new Date().toISOString(),
-        } as any)
-        .eq("id", candidateId);
-
-      if (error) throw error;
-      setStep("celebrate");
-    } catch {
-      toast.error("Something went wrong. Please try again.");
-    }
-
-    // Use closure variable directly since setState is async
-    function type() { return relationshipType; }
-    // Fix: we need the value, not a function
-  };
-
-  // Fix the above - let me use a proper approach
   const saveAndCelebrate = async (type: string, intention: string) => {
     try {
       const { error } = await supabase
@@ -120,7 +85,6 @@ export const MakeItOfficialDialog: React.FC<MakeItOfficialDialogProps> = ({
         .neq("status", "archived");
 
       if (error) throw error;
-
       toast.success("All other candidates have been archived. Focus on your love! 💕");
       resetAndClose();
     } catch {
@@ -139,7 +103,6 @@ export const MakeItOfficialDialog: React.FC<MakeItOfficialDialogProps> = ({
     onOpenChange(false);
     setStep("confirm");
     setRelationshipType("");
-    setRelationshipIntention("");
     onComplete();
   };
 
@@ -147,7 +110,6 @@ export const MakeItOfficialDialog: React.FC<MakeItOfficialDialogProps> = ({
     if (!val) {
       setStep("confirm");
       setRelationshipType("");
-      setRelationshipIntention("");
     }
     onOpenChange(val);
   };
@@ -174,10 +136,7 @@ export const MakeItOfficialDialog: React.FC<MakeItOfficialDialogProps> = ({
             </AlertDialogHeader>
             <AlertDialogFooter className="flex-col sm:flex-row gap-2">
               <AlertDialogCancel className="w-full sm:w-auto">Not Yet</AlertDialogCancel>
-              <Button
-                className="w-full sm:w-auto gap-2"
-                onClick={handleConfirm}
-              >
+              <Button className="w-full sm:w-auto gap-2" onClick={() => setStep("type")}>
                 <Heart className="w-4 h-4" />
                 Let's Go
               </Button>
@@ -188,9 +147,7 @@ export const MakeItOfficialDialog: React.FC<MakeItOfficialDialogProps> = ({
         {step === "type" && (
           <>
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-lg">
-                What kind of relationship?
-              </AlertDialogTitle>
+              <AlertDialogTitle className="text-lg">What kind of relationship?</AlertDialogTitle>
               <AlertDialogDescription>
                 This helps us give you the right advice for your relationship style.
               </AlertDialogDescription>
@@ -199,7 +156,7 @@ export const MakeItOfficialDialog: React.FC<MakeItOfficialDialogProps> = ({
               {RELATIONSHIP_TYPES.map((type) => (
                 <button
                   key={type.value}
-                  onClick={() => handleTypeSelect(type.value)}
+                  onClick={() => { setRelationshipType(type.value); setStep("intention"); }}
                   className="w-full flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary/40 hover:bg-primary/5 transition-all text-left group"
                 >
                   <span className="text-xl">{type.emoji}</span>
@@ -209,9 +166,7 @@ export const MakeItOfficialDialog: React.FC<MakeItOfficialDialogProps> = ({
               ))}
             </div>
             <AlertDialogFooter>
-              <Button variant="ghost" onClick={() => setStep("confirm")} className="text-muted-foreground">
-                Back
-              </Button>
+              <Button variant="ghost" onClick={() => setStep("confirm")} className="text-muted-foreground">Back</Button>
             </AlertDialogFooter>
           </>
         )}
@@ -219,21 +174,14 @@ export const MakeItOfficialDialog: React.FC<MakeItOfficialDialogProps> = ({
         {step === "intention" && (
           <>
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-lg">
-                What's the goal?
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                Where do you see this going with {candidateName}?
-              </AlertDialogDescription>
+              <AlertDialogTitle className="text-lg">What's the goal?</AlertDialogTitle>
+              <AlertDialogDescription>Where do you see this going with {candidateName}?</AlertDialogDescription>
             </AlertDialogHeader>
             <div className="space-y-2 py-2">
               {RELATIONSHIP_INTENTIONS.map((intention) => (
                 <button
                   key={intention.value}
-                  onClick={() => {
-                    setRelationshipIntention(intention.value);
-                    saveAndCelebrate(relationshipType, intention.value);
-                  }}
+                  onClick={() => saveAndCelebrate(relationshipType, intention.value)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary/40 hover:bg-primary/5 transition-all text-left group"
                 >
                   <span className="text-xl">{intention.emoji}</span>
@@ -243,9 +191,7 @@ export const MakeItOfficialDialog: React.FC<MakeItOfficialDialogProps> = ({
               ))}
             </div>
             <AlertDialogFooter>
-              <Button variant="ghost" onClick={() => setStep("type")} className="text-muted-foreground">
-                Back
-              </Button>
+              <Button variant="ghost" onClick={() => setStep("type")} className="text-muted-foreground">Back</Button>
             </AlertDialogFooter>
           </>
         )}
@@ -257,9 +203,7 @@ export const MakeItOfficialDialog: React.FC<MakeItOfficialDialogProps> = ({
                 <div className="p-3 rounded-full bg-primary/10">
                   <PartyPopper className="w-8 h-8 text-primary" />
                 </div>
-                <AlertDialogTitle className="text-xl">
-                  Congratulations! 🎉
-                </AlertDialogTitle>
+                <AlertDialogTitle className="text-xl">Congratulations! 🎉</AlertDialogTitle>
                 <AlertDialogDescription className="space-y-3">
                   <p className="text-base">
                     You and <span className="font-semibold text-foreground">{candidateName}</span> are officially together!
@@ -276,19 +220,11 @@ export const MakeItOfficialDialog: React.FC<MakeItOfficialDialogProps> = ({
               </div>
             </AlertDialogHeader>
             <AlertDialogFooter className="flex-col gap-2">
-              <Button
-                className="w-full gap-2"
-                variant="default"
-                onClick={() => setStep("archive-others")}
-              >
+              <Button className="w-full gap-2" variant="default" onClick={() => setStep("archive-others")}>
                 <XCircle className="w-4 h-4" />
                 Yes, End Other Candidates
               </Button>
-              <Button
-                variant="ghost"
-                className="w-full text-muted-foreground"
-                onClick={handleSkipArchive}
-              >
+              <Button variant="ghost" className="w-full text-muted-foreground" onClick={handleSkipArchive}>
                 No, I'll Manage Them Myself
               </Button>
             </AlertDialogFooter>
@@ -303,23 +239,12 @@ export const MakeItOfficialDialog: React.FC<MakeItOfficialDialogProps> = ({
                 Archive All Other Candidates?
               </AlertDialogTitle>
               <AlertDialogDescription>
-                All candidates except <span className="font-semibold text-foreground">{candidateName}</span> will be archived with "Met someone else" as the reason. You can always reopen them later.
+                All candidates except <span className="font-semibold text-foreground">{candidateName}</span> will be archived. You can always reopen them later.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-              <Button
-                variant="ghost"
-                onClick={handleSkipArchive}
-                disabled={archiving}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleArchiveOthers}
-                disabled={archiving}
-                className="gap-2"
-              >
+              <Button variant="ghost" onClick={handleSkipArchive} disabled={archiving}>Cancel</Button>
+              <Button variant="destructive" onClick={handleArchiveOthers} disabled={archiving} className="gap-2">
                 {archiving ? "Archiving..." : "Archive All Others"}
               </Button>
             </AlertDialogFooter>
