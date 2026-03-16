@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import { Edit, Info } from "lucide-react";
 import { AIDisclosure } from "@/components/AIDisclosure";
 import { TextSimulatorCTA } from "@/components/candidate/TextSimulator";
+import { MakeItOfficialDialog } from "@/components/candidate/MakeItOfficialDialog";
 
 type Candidate = Tables<"candidates">;
 type Interaction = Tables<"interactions">;
