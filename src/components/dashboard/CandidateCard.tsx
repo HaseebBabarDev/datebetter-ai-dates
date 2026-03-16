@@ -243,6 +243,9 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, onUpdat
     compatibilityScore: candidate.compatibility_score,
     redFlagCount,
     alerts,
+    relationshipType: (candidate as any).relationship_type,
+    relationshipIntention: (candidate as any).relationship_intention,
+    relationshipStartedAt: (candidate as any).relationship_started_at,
   });
 
   // Derived: is this candidate in a visually "disqualified" state?
