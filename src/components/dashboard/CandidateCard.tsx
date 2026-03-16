@@ -131,6 +131,9 @@ interface NextStepParams {
   compatibilityScore: number | null;
   redFlagCount: number;
   alerts: CandidateAlert[];
+  relationshipType?: string | null;
+  relationshipIntention?: string | null;
+  relationshipStartedAt?: string | null;
 }
 
 const getNextStep = ({ status, updatedAt, compatibilityScore, redFlagCount, alerts }: NextStepParams): string | null => {
