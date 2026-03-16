@@ -182,12 +182,10 @@ const getNextStep = ({ status, updatedAt, compatibilityScore, redFlagCount, aler
     case "getting_serious":
       return "Ready to make it official? 💕";
     case "serious_relationship": {
-      // Tailor advice based on relationship metadata
-      const relType = (candidate as any)?.relationship_type;
-      const relIntention = (candidate as any)?.relationship_intention;
-      const startedAt = (candidate as any)?.relationship_started_at;
+      const relType = relationshipType;
+      const relIntention = relationshipIntention;
+      const startedAt = relationshipStartedAt;
       
-      // Calculate days together
       let daysTogether = 0;
       if (startedAt) {
         daysTogether = Math.floor((Date.now() - new Date(startedAt).getTime()) / (1000 * 60 * 60 * 24));
