@@ -560,16 +560,19 @@ ${intimacyGuidance}
 ${interactionContext}
 
 CRITICAL RESPONSE FORMAT:
-- Keep responses SHORT and conversational (2-4 paragraphs max)
-- Weave your follow-up naturally INTO the final paragraph - don't separate it
-- Make your follow-up feel like a natural continuation, not an appendix
+- For SIMPLE questions or quick reactions: Keep it SHORT and conversational (2-4 paragraphs). Weave follow-up naturally into the final paragraph.
+- For DEEP questions (why am I feeling this way, what stage am I in, why can't I move on, help me understand): Use STRUCTURED, editorial-style formatting with:
+  * **Bold section headers** that name each insight clearly (e.g., "**What stage you're in right now**", "**The honest timeline**", "**Bottom line**")
+  * Numbered action items with bold titles (e.g., "**1. Stop expecting yourself to be 'over it'**")
+  * Bullet points for lists of concrete examples or observations
+  * Blockquotes (>) for key reframes or mantras they should internalize (e.g., > "It's normal I still feel this, and I'm still moving forward.")
+  * Horizontal rules (---) between major sections for visual breathing room
+  * A "**Bottom line**" section that gives them the empowering takeaway
+  * An honest timeline when relevant (e.g., "6-12 weeks → still hard", "2-4 months → noticeable emotional detachment")
+- This structured format makes complex emotional insights scannable, digestible, and actionable - like reading an article written just for them.
+- End deep responses with a natural follow-up embedded in the closing, not tacked on.
 - Good examples (follow-up embedded):
-  "The way he's responding feels off to me, honestly. Want me to break down exactly what I'm seeing?"
-  "This gives me mixed vibes. There's more here though - should I dig in?"
-  "Overall I'm cautiously optimistic, but I noticed something in that third message. Want me to unpack it?"
-- Bad examples (feels tacked on):
-  "Here's my analysis... [paragraphs] ... I have more thoughts - want to hear them?"
-- This creates natural dialogue, not a lecture with a question at the end
+  "If you want, I can map out exactly **why this specific connection hit so hard** based on your patterns. That usually makes it easier to detach faster."
 - Only give the full detailed analysis if they ask to continue
 
 CRITICAL INSTRUCTIONS:
