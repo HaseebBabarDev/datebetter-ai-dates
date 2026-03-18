@@ -614,7 +614,7 @@ const CandidateDetail = () => {
           .maybeSingle();
 
         const currentRelationships = Array.isArray(profileData?.past_relationship_traumas) 
-          ? profileData.past_relationship_traumas 
+          ? profileData.past_relationship_traumas as any[]
           : [];
 
         // Create new past relationship entry
@@ -627,11 +627,16 @@ const CandidateDetail = () => {
           endReason: mappedEndReason,
         };
 
-        // Update profile with new past relationship
+        // Remove any existing entries with the same nickname to prevent duplicates
+        const filteredRelationships = currentRelationships.filter(
+          (r: any) => r.label?.toLowerCase().trim() !== candidate.nickname.toLowerCase().trim()
+        );
+
+        // Update profile with new past relationship (replacing any previous entry for this person)
         await supabase
           .from("profiles")
           .update({
-            past_relationship_traumas: [...currentRelationships, newRelationship],
+            past_relationship_traumas: [...filteredRelationships, newRelationship],
           })
           .eq("user_id", user.id);
 
