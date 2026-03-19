@@ -51,19 +51,19 @@ const slides = [
   {
     id: 1,
     content: (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center relative overflow-hidden bg-white rounded-2xl">
-        <div className="relative z-10 flex flex-col items-center gap-8">
+      <div className="flex flex-col items-center justify-center text-center relative overflow-hidden">
+        <div className="relative z-10 flex flex-col items-center gap-4">
           <motion.img 
             src={datebetterTextLogo}
             alt="dateBetter"
-            className="w-full max-w-5xl mx-auto px-8"
+            className="w-full max-w-4xl mx-auto"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           />
 
           <motion.p 
-            className="text-xl md:text-2xl text-neutral-500 font-light max-w-xl mx-auto"
+            className="text-xl md:text-2xl text-muted-foreground font-light max-w-xl mx-auto"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}
@@ -72,7 +72,7 @@ const slides = [
           </motion.p>
           
           <motion.span 
-            className="text-sm text-neutral-400 font-medium uppercase tracking-[0.2em]"
+            className="text-sm text-muted-foreground/60 font-medium uppercase tracking-[0.2em]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.8 }}
