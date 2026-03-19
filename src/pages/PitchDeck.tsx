@@ -94,13 +94,34 @@ const slides = [
   {
     id: 2,
     content: (
-      <div className="max-w-3xl mx-auto space-y-8">
-        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">A quick intro.</h2>
-        <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
-          <p>Live product with <span className="font-bold text-primary">40 beta users</span> on a working MVP.</p>
-          <p>Infrastructure built to support <span className="font-bold text-primary">10,000 users</span> — no rebuild needed.</p>
-          <p>Therapist-reviewed psychology framework.</p>
-          <p><span className="font-bold text-primary">67–82% margins</span> modeled under both Apple fee scenarios.</p>
+      <div className="max-w-5xl mx-auto flex items-center gap-12">
+        {/* Left: Text */}
+        <div className="flex-1 space-y-8">
+          <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">A quick intro.</h2>
+          <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
+            <p>Live product with <span className="font-bold text-primary">40 beta users</span> on a working MVP.</p>
+            <p>Infrastructure built to support <span className="font-bold text-primary">10,000 users</span> — no rebuild needed.</p>
+            <p>Therapist-reviewed psychology framework.</p>
+            <p><span className="font-bold text-primary">67–82% margins</span> modeled under both Apple fee scenarios.</p>
+          </div>
+        </div>
+        {/* Right: Phone with chat bubble */}
+        <div className="hidden md:block relative flex-shrink-0">
+          <div className="scale-[0.55] origin-top-right -mb-52">
+            <IPhoneMockup><CompatibilityDemo /></IPhoneMockup>
+          </div>
+          {/* Chat bubble floating out */}
+          <motion.div
+            className="absolute -left-16 top-32 max-w-[220px] rounded-2xl rounded-bl-sm bg-primary px-4 py-3 shadow-xl"
+            initial={{ opacity: 0, x: 20, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <p className="text-sm font-medium text-primary-foreground leading-snug">
+              "You're at 94% compatibility with Jeff — let's move him forward 💕"
+            </p>
+            <div className="absolute -bottom-1 left-2 w-3 h-3 bg-primary rotate-45" />
+          </motion.div>
         </div>
       </div>
     ),
