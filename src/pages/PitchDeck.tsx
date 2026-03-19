@@ -9,6 +9,7 @@ import { IPhoneMockup } from "@/components/website/IPhoneMockup";
 import { ScreenshotDemo } from "@/components/website/ScreenshotDemo";
 import { CompatibilityDemo } from "@/components/website/CompatibilityDemo";
 import { ChatDemo } from "@/components/website/ChatDemo";
+import { HealingScoreDemo } from "@/components/website/HealingScoreDemo";
 
 const DECK_PASSWORD = "DateBetter2025";
 
