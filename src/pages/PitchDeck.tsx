@@ -96,7 +96,7 @@ const slides = [
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.7 }}
           >
-            Investor Deck · 2025
+            Investor Deck · 2026
           </motion.p>
         </div>
       </div>
