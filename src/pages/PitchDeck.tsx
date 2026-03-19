@@ -223,7 +223,7 @@ const slides = [
             <p className="text-sm md:text-base text-muted-foreground">Better clarity. Better choices.<br />Success = relationships.</p>
           </div>
         </div>
-        <p className="text-lg text-muted-foreground text-center">We sit <span className="font-bold text-foreground">after the match</span> — in the emotionally volatile space where real decisions happen.</p>
+        <p className="text-lg md:text-xl text-muted-foreground text-center">We sit <span className="font-bold text-foreground">after the match</span> — in the emotionally volatile space where real decisions happen.</p>
       </div>
     ),
   },
