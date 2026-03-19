@@ -53,14 +53,21 @@ const slides = [
     content: (
       <div className="flex flex-col items-center justify-center text-center relative overflow-hidden">
         <div className="relative z-10 flex flex-col items-center gap-4">
-          <motion.img 
-            src={datebetterTextLogo}
-            alt="dateBetter"
-            className="w-full max-w-4xl mx-auto"
+          <motion.h1 
+            className="font-black leading-none"
+            style={{ 
+              fontSize: "clamp(80px, 18vw, 240px)",
+              background: "linear-gradient(135deg, hsl(340, 82%, 55%), hsl(280, 70%, 55%))",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          />
+          >
+            dateBetter
+          </motion.h1>
 
           <motion.p 
             className="text-xl md:text-2xl text-muted-foreground font-light max-w-xl mx-auto"
