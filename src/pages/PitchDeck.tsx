@@ -480,13 +480,16 @@ const PitchDeck = () => {
 
   return (
     <div className={`min-h-screen flex flex-col select-none relative font-poppins bg-background`}>
-      {/* Simple clean background */}
-      <div className="absolute inset-0 bg-background" />
+      {/* Subtle warm background */}
+      <div className="absolute inset-0 bg-background">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-primary/[0.03] blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-primary/[0.02] blur-[100px]" />
+      </div>
 
       {/* Progress bar */}
       <div className="absolute top-0 left-0 right-0 z-30 h-[2px] bg-border/20">
         <motion.div
-          className="h-full bg-foreground"
+          className="h-full bg-primary"
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.4, ease: "easeOut" }}
         />
