@@ -56,15 +56,15 @@ const slides = [
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/8 blur-[150px] pointer-events-none" />
         
         <div className="relative z-10 space-y-6">
-          <motion.img 
-            src={datebetterTextLogo}
-            alt="dateBetter"
-            className="w-full max-w-4xl mx-auto"
-            style={{ mixBlendMode: 'screen' }}
+          <motion.h2 
+            className="font-black tracking-tight leading-none"
+            style={{ fontSize: "clamp(80px, 18vw, 300px)" }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-          />
+          >
+            <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">dateBetter</span>
+          </motion.h2>
           
           <motion.p 
             className="text-xl md:text-2xl text-muted-foreground font-light max-w-xl mx-auto"
