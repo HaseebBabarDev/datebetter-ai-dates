@@ -51,38 +51,10 @@ const slides = [
   {
     id: 1,
     content: (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center relative overflow-hidden">
-        {/* Ambient glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/8 blur-[150px] pointer-events-none" />
-        
-        <div className="relative z-10 space-y-6">
-          <motion.h2 
-            className="font-black tracking-tight leading-none" style={{ fontSize: "160px" }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">DateBetter</span>
-          </motion.h2>
-          
-          <motion.p 
-            className="text-xl md:text-2xl text-muted-foreground font-light max-w-xl mx-auto"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            AI-powered relationship intelligence for modern dating.
-          </motion.p>
-          
-          <motion.div 
-            className="flex items-center justify-center gap-3 pt-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-          >
-            <img src={logo} alt="DateBetter" className="w-8 h-8 rounded-lg shadow-md ring-1 ring-primary/20" />
-            <span className="text-sm text-muted-foreground/60 font-medium uppercase tracking-[0.2em]">Investor Deck · 2026</span>
-          </motion.div>
+      <div className="flex items-center justify-center h-full w-full relative overflow-hidden rounded-2xl">
+        <img src={pitchTitle} alt="DateBetter — Data for Dating" className="w-full h-full object-cover" />
+        <div className="absolute bottom-4 left-0 right-0 text-center">
+          <span className="text-sm text-white/70 font-medium uppercase tracking-[0.2em]">Investor Deck · 2026</span>
         </div>
       </div>
     ),
