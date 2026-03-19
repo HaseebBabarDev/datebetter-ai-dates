@@ -56,7 +56,7 @@ const slides = [
         
         <div className="relative z-10 space-y-6">
           <motion.h2 
-            className="text-8xl font-black tracking-tight leading-none"
+            className="font-black tracking-tight leading-none" style={{ fontSize: "160px" }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
