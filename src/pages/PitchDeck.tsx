@@ -153,7 +153,7 @@ const slides = [
     content: (
       <div className="max-w-5xl mx-auto space-y-6">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">That's us.</h2>
-        <p className="text-lg md:text-xl text-muted-foreground mb-2">Meet <span className="font-bold text-primary">D.E.V.I.</span> — she logs every interaction, maintains memory, detects patterns, and scores compatibility.</p>
+        <p className="text-lg md:text-xl text-muted-foreground mb-2">Meet <span className="font-bold text-primary">D.E.V.I.</span> — it logs every interaction, maintains memory, detects patterns, and scores compatibility.</p>
         <div className="grid grid-cols-4 gap-3 items-start">
           {[
             { label: "Screenshot Analysis", Demo: ScreenshotDemo },
