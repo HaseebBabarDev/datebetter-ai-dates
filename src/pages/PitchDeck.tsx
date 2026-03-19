@@ -53,46 +53,35 @@ const slides = [
       <div className="flex flex-col items-center justify-center h-full gap-6 text-center relative overflow-hidden">
         {/* Ambient glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/8 blur-[150px] pointer-events-none" />
-        <div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-accent/10 blur-[120px] pointer-events-none" />
         
-        <div className="relative z-10 space-y-5">
-          {/* Logo + Name inline */}
-          <motion.div 
-            className="flex items-center justify-center gap-5"
+        <div className="relative z-10 space-y-6">
+          <motion.h2 
+            className="text-7xl md:text-9xl font-black tracking-tight"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <img src={logo} alt="DateBetter" className="w-16 h-16 rounded-2xl shadow-lg ring-2 ring-primary/20" />
-            <h2 className="text-7xl md:text-9xl font-black tracking-tight">
-              <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">DateBetter</span>
-            </h2>
-          </motion.div>
-          
-          <motion.div 
-            className="w-20 h-1 mx-auto rounded-full bg-primary/40"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          />
+            <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">DateBetter</span>
+          </motion.h2>
           
           <motion.p 
             className="text-xl md:text-2xl text-muted-foreground font-light max-w-xl mx-auto"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
           >
             AI-powered relationship intelligence for modern dating.
           </motion.p>
           
-          <motion.p 
-            className="text-sm text-muted-foreground/60 font-medium uppercase tracking-[0.2em]"
+          <motion.div 
+            className="flex items-center justify-center gap-3 pt-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
           >
-            Investor Deck · 2026
-          </motion.p>
+            <img src={logo} alt="DateBetter" className="w-8 h-8 rounded-lg shadow-md ring-1 ring-primary/20" />
+            <span className="text-sm text-muted-foreground/60 font-medium uppercase tracking-[0.2em]">Investor Deck · 2026</span>
+          </motion.div>
         </div>
       </div>
     ),
