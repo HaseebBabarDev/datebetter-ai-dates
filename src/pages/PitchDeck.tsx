@@ -161,7 +161,7 @@ const slides = [
             { label: "Healing Journey", Demo: HealingScoreDemo },
             { label: "D.E.V.I. Chat", Demo: ChatDemo },
           ].map(({ label, Demo }) => (
-            <div key={label} className="text-center">
+            <div key={label} className="flex flex-col items-center">
               <p className="text-[10px] font-bold text-primary mb-2 uppercase tracking-wider">{label}</p>
               <div className="scale-[0.48] origin-top -mb-44"><IPhoneMockup><Demo /></IPhoneMockup></div>
             </div>
