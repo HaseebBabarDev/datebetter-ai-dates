@@ -96,7 +96,7 @@ const slides = [
     content: (
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">A quick intro.</h2>
-        <div className="space-y-5 text-lg md:text-xl text-foreground/80">
+        <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
           <p>Live product with <span className="font-bold text-primary">40 beta users</span> on a working MVP.</p>
           <p>Infrastructure built to support <span className="font-bold text-primary">10,000 users</span> — no rebuild needed.</p>
           <p>Therapist-reviewed psychology framework.</p>
@@ -142,8 +142,8 @@ const slides = [
     content: (
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">What if instead...</h2>
-        <p className="text-xl md:text-2xl text-muted-foreground">You had an AI that <span className="font-bold text-primary">remembers every conversation</span>, tracks behavioral patterns across candidates, scores compatibility with real evidence, and tells you when something doesn't add up.</p>
-        <p className="text-xl md:text-2xl text-foreground font-medium">Not a chatbot. A behavioral operating system for your dating life.</p>
+        <p className="text-lg md:text-xl text-muted-foreground">You had an AI that <span className="font-bold text-primary">remembers every conversation</span>, tracks behavioral patterns across candidates, scores compatibility with real evidence, and tells you when something doesn't add up.</p>
+        <p className="text-lg md:text-xl text-foreground font-medium">Not a chatbot. A behavioral operating system for your dating life.</p>
       </div>
     ),
   },
@@ -201,7 +201,7 @@ const slides = [
             </div>
           ))}
         </div>
-        <p className="text-lg text-muted-foreground">Live product. Real users. Therapist-reviewed framework. App Store submission in progress.</p>
+        <p className="text-lg md:text-xl text-muted-foreground">Live product. Real users. Therapist-reviewed framework. App Store submission in progress.</p>
       </div>
     ),
   },
@@ -215,15 +215,15 @@ const slides = [
           <div className="space-y-3 rounded-2xl border border-border/50 p-6">
             <p className="text-sm uppercase tracking-wider text-muted-foreground">Dating Apps</p>
             <p className="text-3xl font-black text-foreground">Engagement</p>
-            <p className="text-base text-muted-foreground">More swipes. More time in-app.<br />Success = sessions.</p>
+            <p className="text-sm md:text-base text-muted-foreground">More swipes. More time in-app.<br />Success = sessions.</p>
           </div>
           <div className="space-y-3 rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
             <p className="text-sm uppercase tracking-wider text-primary font-bold">DateBetter</p>
             <p className="text-3xl font-black bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">Decisions</p>
-            <p className="text-base text-muted-foreground">Better clarity. Better choices.<br />Success = relationships.</p>
+            <p className="text-sm md:text-base text-muted-foreground">Better clarity. Better choices.<br />Success = relationships.</p>
           </div>
         </div>
-        <p className="text-lg text-muted-foreground text-center">We sit <span className="font-bold text-foreground">after the match</span> — in the emotionally volatile space where real decisions happen.</p>
+        <p className="text-lg md:text-xl text-muted-foreground text-center">We sit <span className="font-bold text-foreground">after the match</span> — in the emotionally volatile space where real decisions happen.</p>
       </div>
     ),
   },
@@ -289,7 +289,7 @@ const slides = [
             </div>
           ))}
         </div>
-        <div className="space-y-3 text-lg text-muted-foreground">
+        <div className="space-y-3 text-lg md:text-xl text-muted-foreground">
           <p><span className="font-bold text-primary">$300K</span> → CAC validation across 3 channels (Meta, TikTok, AppLovin, Creator)</p>
           <p><span className="font-bold text-primary">$75K</span> → Product polish + App Store launch</p>
           <p><span className="font-bold text-primary">$125K</span> → Runway extension + contingency</p>
@@ -318,13 +318,13 @@ const slides = [
     content: (
       <div className="flex flex-col items-center justify-center h-full gap-6 text-center max-w-2xl mx-auto">
         <motion.img src={logo} alt="DateBetter" className="w-16 h-16 rounded-2xl shadow-lg ring-2 ring-primary/20" whileHover={{ scale: 1.05 }} />
-        <h2 className="text-4xl md:text-5xl font-black leading-tight">
+        <h2 className="text-4xl md:text-6xl font-black leading-tight">
           <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">$500K for 15% equity.</span>
         </h2>
-        <p className="text-xl text-muted-foreground">~$3.3M post-money valuation.</p>
+        <p className="text-lg md:text-xl text-muted-foreground">~$3.3M post-money valuation.</p>
         <div className="w-16 h-px bg-primary/30 my-2" />
-        <p className="text-lg text-muted-foreground max-w-md">Relationship intelligence doesn't have a market leader yet. We intend to be it.</p>
-        <p className="text-base text-foreground font-bold mt-4">datebetterapp.com</p>
+        <p className="text-lg md:text-xl text-muted-foreground max-w-md">Relationship intelligence doesn't have a market leader yet. We intend to be it.</p>
+        <p className="text-lg text-foreground font-bold mt-4">datebetterapp.com</p>
         <p className="text-sm text-muted-foreground">nakita@datebetterapp.com</p>
       </div>
     ),
