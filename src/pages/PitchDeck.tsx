@@ -50,13 +50,14 @@ const slides = [
   {
     id: 1,
     content: (
-      <div className="flex flex-col items-center justify-center h-full gap-6 text-center relative overflow-hidden">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center relative overflow-hidden">
         {/* Ambient glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/8 blur-[150px] pointer-events-none" />
         
         <div className="relative z-10 space-y-6">
           <motion.h2 
-            className="text-7xl md:text-9xl font-black tracking-tight"
+            className="font-black tracking-tight leading-none"
+            style={{ fontSize: "clamp(4rem, 10vw, 9rem)" }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
