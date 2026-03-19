@@ -51,11 +51,12 @@ const slides = [
   {
     id: 1,
     content: (
-      <div className="flex items-center justify-center h-full w-full relative overflow-hidden rounded-2xl">
-        <img src={pitchTitle} alt="DateBetter — Data for Dating" className="w-full h-full object-cover" />
-        <div className="absolute bottom-4 left-0 right-0 text-center">
-          <span className="text-sm text-white/70 font-medium uppercase tracking-[0.2em]">Investor Deck · 2026</span>
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center relative overflow-hidden">
+        <h2 className="font-black tracking-tight leading-none" style={{ fontSize: "min(18vw, 200px)" }}>
+          <span style={{ color: "hsl(var(--primary))" }}>date</span><span className="text-foreground">Better</span>
+        </h2>
+        <p className="text-2xl text-muted-foreground font-medium mt-6">Data for Dating</p>
+        <p className="text-sm text-muted-foreground/50 font-medium uppercase tracking-[0.2em] mt-8">Investor Deck · 2026</p>
       </div>
     ),
   },
