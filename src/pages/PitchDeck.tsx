@@ -56,9 +56,9 @@ const slides = [
         <div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-accent/10 blur-[120px] pointer-events-none" />
         
         <motion.img 
-          src={logo} 
+          src={logoTransparent} 
           alt="DateBetter" 
-          className="w-24 h-24 rounded-3xl shadow-xl ring-2 ring-primary/20 relative z-10" 
+          className="w-24 h-24 relative z-10 drop-shadow-lg" 
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
