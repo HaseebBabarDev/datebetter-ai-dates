@@ -56,7 +56,7 @@ const slides = [
           <motion.h1 
             className="font-black leading-none"
             style={{ 
-              fontSize: "clamp(80px, 18vw, 240px)",
+              fontSize: "clamp(60px, 14vw, 240px)",
               background: "linear-gradient(135deg, hsl(340, 82%, 55%), hsl(280, 70%, 55%))",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
