@@ -110,7 +110,7 @@ const slides = [
     id: 3,
     content: (
       <div className="max-w-3xl mx-auto space-y-8">
-        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">Women are already using AI for dating advice.</h2>
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">People are already using AI for dating advice.</h2>
         <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
           <p>They paste texts into ChatGPT. They crowdsource red flags on Reddit. They bring early dating confusion into <span className="font-bold text-primary">$200/hour therapy sessions</span>.</p>
           <p className="font-medium text-foreground">The behavior is already there — the infrastructure isn't.</p>
@@ -153,7 +153,7 @@ const slides = [
     content: (
       <div className="max-w-5xl mx-auto space-y-6">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">That's us.</h2>
-        <p className="text-lg md:text-xl text-muted-foreground mb-2">Meet <span className="font-bold text-primary">D.E.V.I.</span> — she logs every interaction, maintains memory, detects patterns, and scores compatibility.</p>
+        <p className="text-lg md:text-xl text-muted-foreground mb-2">Meet <span className="font-bold text-primary">D.E.V.I.</span> — it logs every interaction, maintains memory, detects patterns, and scores compatibility.</p>
         <div className="grid grid-cols-4 gap-3 items-start">
           {[
             { label: "Screenshot Analysis", Demo: ScreenshotDemo },
@@ -628,8 +628,8 @@ const PitchDeck = () => {
               onClick={() => goTo(i)}
               className={`rounded-full transition-all duration-300 ${
                 i === current
-                  ? "bg-foreground w-6 h-2"
-                  : "w-1.5 h-1.5 bg-foreground/20 hover:bg-foreground/40"
+                  ? "bg-primary w-6 h-2"
+                  : "w-1.5 h-1.5 bg-primary/20 hover:bg-primary/40"
               }`}
             />
           ))}
