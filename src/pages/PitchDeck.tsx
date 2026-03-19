@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.jpg";
 import logoTransparent from "@/assets/logo-transparent.png";
-import datebetterTextLogo from "@/assets/datebetter-text-logo-nobg.png";
+import datebetterTextLogo from "@/assets/datebetter-text-logo.png";
 import { IPhoneMockup } from "@/components/website/IPhoneMockup";
 import { ScreenshotDemo } from "@/components/website/ScreenshotDemo";
 import { CompatibilityDemo } from "@/components/website/CompatibilityDemo";
@@ -51,49 +51,34 @@ const slides = [
   {
     id: 1,
     content: (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center relative overflow-hidden">
-        {/* Ambient glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary/10 blur-[200px] pointer-events-none" />
-        
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center relative overflow-hidden bg-white rounded-2xl">
         <div className="relative z-10 flex flex-col items-center gap-8">
-          {/* Animated letter-by-letter title */}
-          <div className="flex items-baseline justify-center overflow-hidden">
-            {"dateBetter".split("").map((letter, i) => (
-              <motion.span
-                key={i}
-                className="font-black bg-[image:var(--gradient-hero)] bg-clip-text text-transparent inline-block"
-                style={{ fontSize: "clamp(60px, 15vw, 220px)" }}
-                initial={{ opacity: 0, y: 80, rotateX: 90 }}
-                animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                transition={{
-                  duration: 0.6,
-                  delay: 0.1 + i * 0.05,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-              >
-                {letter}
-              </motion.span>
-            ))}
-          </div>
+          <motion.img 
+            src={datebetterTextLogo}
+            alt="dateBetter"
+            className="w-full max-w-5xl mx-auto px-8"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          />
 
           <motion.p 
-            className="text-xl md:text-2xl text-muted-foreground font-light max-w-xl mx-auto"
+            className="text-xl md:text-2xl text-neutral-500 font-light max-w-xl mx-auto"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
           >
             AI-powered relationship intelligence for modern dating.
           </motion.p>
           
-          <motion.div 
-            className="flex items-center justify-center gap-3 pt-4"
+          <motion.span 
+            className="text-sm text-neutral-400 font-medium uppercase tracking-[0.2em]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 1.1 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
           >
-            <img src={logo} alt="DateBetter" className="w-8 h-8 rounded-lg shadow-md ring-1 ring-primary/20" />
-            <span className="text-sm text-muted-foreground/60 font-medium uppercase tracking-[0.2em]">Investor Deck · 2026</span>
-          </motion.div>
+            Investor Deck · 2026
+          </motion.span>
         </div>
       </div>
     ),
