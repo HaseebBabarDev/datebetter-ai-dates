@@ -289,7 +289,7 @@ const slides = [
             </div>
           ))}
         </div>
-        <div className="space-y-3 text-lg text-muted-foreground">
+        <div className="space-y-3 text-lg md:text-xl text-muted-foreground">
           <p><span className="font-bold text-primary">$300K</span> → CAC validation across 3 channels (Meta, TikTok, AppLovin, Creator)</p>
           <p><span className="font-bold text-primary">$75K</span> → Product polish + App Store launch</p>
           <p><span className="font-bold text-primary">$125K</span> → Runway extension + contingency</p>
