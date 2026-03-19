@@ -110,7 +110,7 @@ const slides = [
     id: 3,
     content: (
       <div className="max-w-3xl mx-auto space-y-8">
-        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">Women are already using AI for dating advice.</h2>
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">People are already using AI for dating advice.</h2>
         <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
           <p>They paste texts into ChatGPT. They crowdsource red flags on Reddit. They bring early dating confusion into <span className="font-bold text-primary">$200/hour therapy sessions</span>.</p>
           <p className="font-medium text-foreground">The behavior is already there — the infrastructure isn't.</p>
