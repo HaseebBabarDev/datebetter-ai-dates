@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.jpg";
+import logoTransparent from "@/assets/logo-transparent.png";
 import { IPhoneMockup } from "@/components/website/IPhoneMockup";
 import { ScreenshotDemo } from "@/components/website/ScreenshotDemo";
 import { CompatibilityDemo } from "@/components/website/CompatibilityDemo";
@@ -55,9 +56,9 @@ const slides = [
         <div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-accent/10 blur-[120px] pointer-events-none" />
         
         <motion.img 
-          src={logo} 
+          src={logoTransparent} 
           alt="DateBetter" 
-          className="w-24 h-24 rounded-3xl shadow-xl ring-2 ring-primary/20 relative z-10" 
+          className="w-24 h-24 relative z-10 drop-shadow-lg" 
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
@@ -328,7 +329,7 @@ const slides = [
     id: 15,
     content: (
       <div className="flex flex-col items-center justify-center h-full gap-6 text-center max-w-2xl mx-auto">
-        <motion.img src={logo} alt="DateBetter" className="w-16 h-16 rounded-2xl shadow-lg ring-2 ring-primary/20" whileHover={{ scale: 1.05 }} />
+        <motion.img src={logoTransparent} alt="DateBetter" className="w-20 h-20 drop-shadow-lg" whileHover={{ scale: 1.05 }} />
         <h2 className="text-4xl md:text-5xl font-black leading-tight">
           <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">$500K for 15% equity.</span>
         </h2>
