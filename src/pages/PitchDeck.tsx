@@ -49,8 +49,10 @@ const slides = [
     id: 1,
     content: (
       <div className="flex flex-col items-center justify-center h-full gap-6 text-center">
-        <img src={logo} alt="DateBetter" className="w-20 h-20 rounded-2xl shadow-lg" />
-        <h2 className="text-5xl md:text-7xl font-black text-foreground tracking-tight">DateBetter</h2>
+        <motion.img src={logo} alt="DateBetter" className="w-20 h-20 rounded-2xl shadow-lg ring-2 ring-primary/20" whileHover={{ scale: 1.05 }} />
+        <h2 className="text-5xl md:text-7xl font-black tracking-tight">
+          <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">DateBetter</span>
+        </h2>
         <p className="text-xl md:text-2xl text-muted-foreground font-light max-w-lg">AI-powered relationship intelligence for modern dating.</p>
       </div>
     ),
@@ -62,10 +64,10 @@ const slides = [
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">A quick intro.</h2>
         <div className="space-y-5 text-lg md:text-xl text-foreground/80">
-          <p>Live product with <span className="font-bold text-foreground">40 beta users</span> on a working MVP.</p>
-          <p>Infrastructure built to support <span className="font-bold text-foreground">10,000 users</span> — no rebuild needed.</p>
+          <p>Live product with <span className="font-bold text-primary">40 beta users</span> on a working MVP.</p>
+          <p>Infrastructure built to support <span className="font-bold text-primary">10,000 users</span> — no rebuild needed.</p>
           <p>Therapist-reviewed psychology framework.</p>
-          <p><span className="font-bold text-foreground">67–82% margins</span> modeled under both Apple fee scenarios.</p>
+          <p><span className="font-bold text-primary">67–82% margins</span> modeled under both Apple fee scenarios.</p>
         </div>
       </div>
     ),
@@ -77,7 +79,7 @@ const slides = [
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">Women are already using AI for dating advice.</h2>
         <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
-          <p>They paste texts into ChatGPT. They crowdsource red flags on Reddit. They bring early dating confusion into <span className="font-bold text-foreground">$200/hour therapy sessions</span>.</p>
+          <p>They paste texts into ChatGPT. They crowdsource red flags on Reddit. They bring early dating confusion into <span className="font-bold text-primary">$200/hour therapy sessions</span>.</p>
           <p className="font-medium text-foreground">The behavior is already there — the infrastructure isn't.</p>
         </div>
       </div>
@@ -89,12 +91,13 @@ const slides = [
     content: (
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">How they solve it today...</h2>
-        <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
-          <p>ChatGPT has <span className="font-bold text-foreground">no memory</span> across sessions.</p>
-          <p>No behavioral pattern detection.</p>
-          <p>No structured decision framework.</p>
-          <p>No compatibility scoring.</p>
-          <p>No dating-specific context.</p>
+        <div className="space-y-4 text-lg md:text-xl text-muted-foreground">
+          {["No memory across sessions", "No behavioral pattern detection", "No structured decision framework", "No compatibility scoring", "No dating-specific context"].map((gap, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-destructive shrink-0" />
+              <p>{gap}</p>
+            </div>
+          ))}
           <p className="text-foreground font-medium pt-4">Generic AI gives generic advice. Dating decisions need <span className="text-primary">structured intelligence</span>.</p>
         </div>
       </div>
@@ -106,7 +109,7 @@ const slides = [
     content: (
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">What if instead...</h2>
-        <p className="text-xl md:text-2xl text-muted-foreground">You had an AI that <span className="font-bold text-foreground">remembers every conversation</span>, tracks behavioral patterns across candidates, scores compatibility with real evidence, and tells you when something doesn't add up.</p>
+        <p className="text-xl md:text-2xl text-muted-foreground">You had an AI that <span className="font-bold text-primary">remembers every conversation</span>, tracks behavioral patterns across candidates, scores compatibility with real evidence, and tells you when something doesn't add up.</p>
         <p className="text-xl md:text-2xl text-foreground font-medium">Not a chatbot. A behavioral operating system for your dating life.</p>
       </div>
     ),
@@ -117,16 +120,16 @@ const slides = [
     content: (
       <div className="max-w-5xl mx-auto space-y-6">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">That's us.</h2>
-        <p className="text-lg md:text-xl text-muted-foreground mb-4">Meet <span className="font-bold text-foreground">D.E.V.I.</span> — she logs every interaction, maintains memory, detects patterns, and scores compatibility.</p>
-        <div className="grid grid-cols-3 gap-6 items-start">
+        <p className="text-lg md:text-xl text-muted-foreground mb-2">Meet <span className="font-bold text-primary">D.E.V.I.</span> — she logs every interaction, maintains memory, detects patterns, and scores compatibility.</p>
+        <div className="grid grid-cols-3 gap-4 items-start">
           {[
             { label: "Screenshot Analysis", Demo: ScreenshotDemo },
             { label: "Compatibility Engine", Demo: CompatibilityDemo },
             { label: "D.E.V.I. Chat", Demo: ChatDemo },
           ].map(({ label, Demo }) => (
             <div key={label} className="text-center">
-              <p className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider">{label}</p>
-              <div className="scale-[0.5] origin-top"><IPhoneMockup><Demo /></IPhoneMockup></div>
+              <p className="text-[10px] font-bold text-primary mb-2 uppercase tracking-wider">{label}</p>
+              <div className="scale-[0.55] origin-top -mb-40"><IPhoneMockup><Demo /></IPhoneMockup></div>
             </div>
           ))}
         </div>
@@ -138,10 +141,10 @@ const slides = [
     id: 7,
     content: (
       <div className="max-w-3xl mx-auto space-y-8">
-        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">We're building the operating system for relationship decisions.</h2>
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">We're building the <span className="text-primary">operating system</span> for relationship decisions.</h2>
         <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
           <p>Dating apps create users. We monetize the <span className="font-bold text-foreground">intelligence layer</span> that comes after the match.</p>
-          <p>The <span className="font-bold text-foreground">$5B+ dating app market</span> generates our demand. We own the decision space nobody else is building for.</p>
+          <p>The <span className="font-bold text-primary">$5B+ dating app market</span> generates our demand. We own the decision space nobody else is building for.</p>
         </div>
       </div>
     ),
@@ -154,12 +157,12 @@ const slides = [
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">So far, so good.</h2>
         <div className="grid grid-cols-3 gap-8 py-4">
           {[
-            { metric: "40", label: "Beta Users" },
+            { metric: "40", label: "Beta Users", accent: true },
             { metric: "10K", label: "Ready Infrastructure" },
             { metric: "$0.15", label: "AI Cost / User" },
           ].map((m, i) => (
             <div key={i}>
-              <p className="text-5xl md:text-6xl font-black text-foreground">{m.metric}</p>
+              <p className={`text-5xl md:text-6xl font-black ${m.accent ? "text-primary" : "text-foreground"}`}>{m.metric}</p>
               <p className="text-sm text-muted-foreground mt-2">{m.label}</p>
             </div>
           ))}
@@ -175,15 +178,15 @@ const slides = [
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">We don't compete with Bumble.</h2>
         <div className="grid grid-cols-2 gap-8 text-center">
-          <div className="space-y-3">
+          <div className="space-y-3 rounded-2xl border border-border/50 p-6">
             <p className="text-sm uppercase tracking-wider text-muted-foreground">Dating Apps</p>
             <p className="text-3xl font-black text-foreground">Engagement</p>
-            <p className="text-base text-muted-foreground">More swipes. More time in-app. Success = sessions.</p>
+            <p className="text-base text-muted-foreground">More swipes. More time in-app.<br />Success = sessions.</p>
           </div>
-          <div className="space-y-3">
-            <p className="text-sm uppercase tracking-wider text-primary">DateBetter</p>
-            <p className="text-3xl font-black text-foreground">Decisions</p>
-            <p className="text-base text-muted-foreground">Better clarity. Better choices. Success = relationships.</p>
+          <div className="space-y-3 rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
+            <p className="text-sm uppercase tracking-wider text-primary font-bold">DateBetter</p>
+            <p className="text-3xl font-black bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">Decisions</p>
+            <p className="text-base text-muted-foreground">Better clarity. Better choices.<br />Success = relationships.</p>
           </div>
         </div>
         <p className="text-lg text-muted-foreground text-center">We sit <span className="font-bold text-foreground">after the match</span> — in the emotionally volatile space where real decisions happen.</p>
@@ -197,10 +200,10 @@ const slides = [
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">The wave we're riding.</h2>
         <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
-          <p><span className="font-bold text-foreground">AI is normalized</span> — consumers already use it for personal advice.</p>
-          <p><span className="font-bold text-foreground">Therapy demand is surging</span> — supply is constrained by cost and access.</p>
-          <p><span className="font-bold text-foreground">Dating burnout is real</span> — users want depth and clarity, not more matches.</p>
-          <p><span className="font-bold text-foreground">Self-optimization is mainstream</span> — fitness, finance, and now relationships.</p>
+          <p><span className="font-bold text-primary">AI is normalized</span> — consumers already use it for personal advice.</p>
+          <p><span className="font-bold text-primary">Therapy demand is surging</span> — supply is constrained by cost and access.</p>
+          <p><span className="font-bold text-primary">Dating burnout is real</span> — users want depth and clarity, not more matches.</p>
+          <p><span className="font-bold text-primary">Self-optimization is mainstream</span> — fitness, finance, and now relationships.</p>
         </div>
       </div>
     ),
@@ -212,9 +215,9 @@ const slides = [
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">Why now?</h2>
         <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
-          <p>AI model costs are dropping <span className="font-bold text-foreground">quarterly</span> — making behavioral AI affordable at scale for the first time.</p>
+          <p>AI model costs are dropping <span className="font-bold text-primary">quarterly</span> — making behavioral AI affordable at scale for the first time.</p>
           <p>ChatGPT normalized AI for personal advice — but <span className="font-bold text-foreground">nobody has built the vertical product</span> for dating decisions.</p>
-          <p>Relationship intelligence is an emerging category. The window to <span className="font-bold text-foreground">define and own it</span> is open now.</p>
+          <p>Relationship intelligence is an emerging category. The window to <span className="font-bold text-primary">define and own it</span> is open now.</p>
         </div>
       </div>
     ),
@@ -229,7 +232,7 @@ const slides = [
           <p>We already <span className="font-bold text-foreground">built the product</span>. Live MVP. Real users. Working AI pipeline.</p>
           <p>We modeled <span className="font-bold text-foreground">both Apple fee scenarios</span> transparently — 67% margin at worst case, 82% at best.</p>
           <p>Infrastructure is ready for <span className="font-bold text-foreground">10,000 users</span> without an architectural rebuild.</p>
-          <p className="font-medium text-foreground">We are not raising to build. We are raising to <span className="text-primary">scale</span>.</p>
+          <p className="font-medium text-foreground">We are not raising to build. We are raising to <span className="text-primary font-bold">scale</span>.</p>
         </div>
       </div>
     ),
@@ -242,20 +245,20 @@ const slides = [
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">Where we'll be in 12 months.</h2>
         <div className="grid grid-cols-3 gap-8 text-center py-4">
           {[
-            { metric: "$50K–$100K", label: "Monthly Recurring Revenue" },
+            { metric: "$50K–$100K", label: "Monthly Recurring Revenue", accent: true },
             { metric: "8,600+", label: "Paid Users" },
             { metric: "$44", label: "Blended CPA" },
           ].map((m, i) => (
             <div key={i}>
-              <p className="text-3xl md:text-4xl font-black text-foreground">{m.metric}</p>
+              <p className={`text-3xl md:text-4xl font-black ${m.accent ? "text-primary" : "text-foreground"}`}>{m.metric}</p>
               <p className="text-sm text-muted-foreground mt-2">{m.label}</p>
             </div>
           ))}
         </div>
         <div className="space-y-3 text-lg text-muted-foreground">
-          <p><span className="font-bold text-foreground">$300K</span> → CAC validation across 3 channels (Meta, TikTok, AppLovin, Creator)</p>
-          <p><span className="font-bold text-foreground">$75K</span> → Product polish + App Store launch</p>
-          <p><span className="font-bold text-foreground">$125K</span> → Runway extension + contingency</p>
+          <p><span className="font-bold text-primary">$300K</span> → CAC validation across 3 channels (Meta, TikTok, AppLovin, Creator)</p>
+          <p><span className="font-bold text-primary">$75K</span> → Product polish + App Store launch</p>
+          <p><span className="font-bold text-primary">$125K</span> → Runway extension + contingency</p>
         </div>
       </div>
     ),
@@ -267,10 +270,10 @@ const slides = [
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">A few more things.</h2>
         <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
-          <p>Every interaction logged compounds into <span className="font-bold text-foreground">structured behavioral data</span> — a moat generic AI cannot replicate.</p>
-          <p>Subscription SaaS at <span className="font-bold text-foreground">$9.99 / $15.99 / $29.99</span> per month. Blended ARPU: $15.</p>
-          <p>Cash-flow positive by <span className="font-bold text-foreground">Month 12</span> at base case with capital remaining.</p>
-          <p>Creator/affiliate channel offers the most efficient CPA at <span className="font-bold text-foreground">$25/user</span>.</p>
+          <p>Every interaction logged compounds into <span className="font-bold text-primary">structured behavioral data</span> — a moat generic AI cannot replicate.</p>
+          <p>Subscription SaaS at <span className="font-bold text-foreground">$9.99 / $15.99 / $29.99</span> per month. Blended ARPU: <span className="font-bold text-primary">$15</span>.</p>
+          <p>Cash-flow positive by <span className="font-bold text-primary">Month 12</span> at base case with capital remaining.</p>
+          <p>Creator/affiliate channel offers the most efficient CPA at <span className="font-bold text-primary">$25/user</span>.</p>
         </div>
       </div>
     ),
@@ -280,10 +283,12 @@ const slides = [
     id: 15,
     content: (
       <div className="flex flex-col items-center justify-center h-full gap-6 text-center max-w-2xl mx-auto">
-        <img src={logo} alt="DateBetter" className="w-16 h-16 rounded-2xl shadow-lg" />
-        <h2 className="text-4xl md:text-5xl font-black text-foreground leading-tight">$500K for 15% equity.</h2>
+        <motion.img src={logo} alt="DateBetter" className="w-16 h-16 rounded-2xl shadow-lg ring-2 ring-primary/20" whileHover={{ scale: 1.05 }} />
+        <h2 className="text-4xl md:text-5xl font-black leading-tight">
+          <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">$500K for 15% equity.</span>
+        </h2>
         <p className="text-xl text-muted-foreground">~$3.3M post-money valuation.</p>
-        <div className="w-16 h-px bg-foreground/20 my-2" />
+        <div className="w-16 h-px bg-primary/30 my-2" />
         <p className="text-lg text-muted-foreground max-w-md">Relationship intelligence doesn't have a market leader yet. We intend to be it.</p>
         <p className="text-base text-foreground font-bold mt-4">datebetterapp.com</p>
         <p className="text-sm text-muted-foreground">nakita@datebetterapp.com</p>
@@ -475,13 +480,16 @@ const PitchDeck = () => {
 
   return (
     <div className={`min-h-screen flex flex-col select-none relative font-poppins bg-background`}>
-      {/* Simple clean background */}
-      <div className="absolute inset-0 bg-background" />
+      {/* Subtle warm background */}
+      <div className="absolute inset-0 bg-background">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-primary/[0.03] blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-primary/[0.02] blur-[100px]" />
+      </div>
 
       {/* Progress bar */}
       <div className="absolute top-0 left-0 right-0 z-30 h-[2px] bg-border/20">
         <motion.div
-          className="h-full bg-foreground"
+          className="h-full bg-primary"
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.4, ease: "easeOut" }}
         />
