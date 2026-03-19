@@ -201,7 +201,7 @@ const slides = [
             </div>
           ))}
         </div>
-        <p className="text-lg text-muted-foreground">Live product. Real users. Therapist-reviewed framework. App Store submission in progress.</p>
+        <p className="text-lg md:text-xl text-muted-foreground">Live product. Real users. Therapist-reviewed framework. App Store submission in progress.</p>
       </div>
     ),
   },
