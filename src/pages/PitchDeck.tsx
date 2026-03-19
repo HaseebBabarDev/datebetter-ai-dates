@@ -318,13 +318,13 @@ const slides = [
     content: (
       <div className="flex flex-col items-center justify-center h-full gap-6 text-center max-w-2xl mx-auto">
         <motion.img src={logo} alt="DateBetter" className="w-16 h-16 rounded-2xl shadow-lg ring-2 ring-primary/20" whileHover={{ scale: 1.05 }} />
-        <h2 className="text-4xl md:text-5xl font-black leading-tight">
+        <h2 className="text-4xl md:text-6xl font-black leading-tight">
           <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">$500K for 15% equity.</span>
         </h2>
-        <p className="text-xl text-muted-foreground">~$3.3M post-money valuation.</p>
+        <p className="text-lg md:text-xl text-muted-foreground">~$3.3M post-money valuation.</p>
         <div className="w-16 h-px bg-primary/30 my-2" />
-        <p className="text-lg text-muted-foreground max-w-md">Relationship intelligence doesn't have a market leader yet. We intend to be it.</p>
-        <p className="text-base text-foreground font-bold mt-4">datebetterapp.com</p>
+        <p className="text-lg md:text-xl text-muted-foreground max-w-md">Relationship intelligence doesn't have a market leader yet. We intend to be it.</p>
+        <p className="text-lg text-foreground font-bold mt-4">datebetterapp.com</p>
         <p className="text-sm text-muted-foreground">nakita@datebetterapp.com</p>
       </div>
     ),
