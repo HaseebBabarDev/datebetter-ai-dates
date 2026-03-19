@@ -215,12 +215,12 @@ const slides = [
           <div className="space-y-3 rounded-2xl border border-border/50 p-6">
             <p className="text-sm uppercase tracking-wider text-muted-foreground">Dating Apps</p>
             <p className="text-3xl font-black text-foreground">Engagement</p>
-            <p className="text-base text-muted-foreground">More swipes. More time in-app.<br />Success = sessions.</p>
+            <p className="text-sm md:text-base text-muted-foreground">More swipes. More time in-app.<br />Success = sessions.</p>
           </div>
           <div className="space-y-3 rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
             <p className="text-sm uppercase tracking-wider text-primary font-bold">DateBetter</p>
             <p className="text-3xl font-black bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">Decisions</p>
-            <p className="text-base text-muted-foreground">Better clarity. Better choices.<br />Success = relationships.</p>
+            <p className="text-sm md:text-base text-muted-foreground">Better clarity. Better choices.<br />Success = relationships.</p>
           </div>
         </div>
         <p className="text-lg text-muted-foreground text-center">We sit <span className="font-bold text-foreground">after the match</span> — in the emotionally volatile space where real decisions happen.</p>
