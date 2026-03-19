@@ -96,7 +96,7 @@ const slides = [
     content: (
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">A quick intro.</h2>
-        <div className="space-y-5 text-lg md:text-xl text-foreground/80">
+        <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
           <p>Live product with <span className="font-bold text-primary">40 beta users</span> on a working MVP.</p>
           <p>Infrastructure built to support <span className="font-bold text-primary">10,000 users</span> — no rebuild needed.</p>
           <p>Therapist-reviewed psychology framework.</p>
