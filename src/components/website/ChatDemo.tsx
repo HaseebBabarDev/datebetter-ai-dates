@@ -27,6 +27,10 @@ interface Message {
 export const ChatDemo: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "Hey! I'm D.E.V.I. — your AI dating advisor. Ask me anything about dating, relationships, or someone you're seeing. 💜" },
+    { role: "user", content: "He said he'd call last night but didn't. Should I text him?" },
+    { role: "assistant", content: "Let's look at the pattern first. This is the 3rd time in 2 weeks he's said he'd reach out and didn't follow through. That's not forgetfulness — that's a consistency issue. I'd wait and see if he acknowledges it himself." },
+    { role: "user", content: "But when we're together it's amazing..." },
+    { role: "assistant", content: "I hear you — chemistry can be strong. But consistency IS the signal. Someone who shows up only when it's convenient is showing you their capacity. Let's track: has he initiated plans in the last 10 days?" },
   ]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
