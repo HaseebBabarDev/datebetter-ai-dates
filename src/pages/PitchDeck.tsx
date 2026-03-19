@@ -56,7 +56,7 @@ const slides = [
         
         <div className="relative z-10 space-y-6">
           <motion.h2 
-            className="font-black tracking-tight leading-none" style={{ fontSize: "160px" }}
+            className="font-black tracking-tight leading-none" style={{ fontSize: "1600px" }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -79,7 +79,7 @@ const slides = [
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.5 }}
           >
-            <img src={logo} alt="DateBetter" style={{ width: '1600px', height: '1600px' }} className="rounded-lg shadow-md ring-1 ring-primary/20" />
+            <img src={logo} alt="DateBetter" className="w-8 h-8 rounded-lg shadow-md ring-1 ring-primary/20" />
             <span className="text-sm text-muted-foreground/60 font-medium uppercase tracking-[0.2em]">Investor Deck · 2026</span>
           </motion.div>
         </div>
