@@ -285,7 +285,8 @@ const slides = [
         <p className="text-xl text-muted-foreground">~$3.3M post-money valuation.</p>
         <div className="w-16 h-px bg-foreground/20 my-2" />
         <p className="text-lg text-muted-foreground max-w-md">Relationship intelligence doesn't have a market leader yet. We intend to be it.</p>
-        <p className="text-base text-foreground font-bold mt-4">datebetter.ai</p>
+        <p className="text-base text-foreground font-bold mt-4">datebetterapp.com</p>
+        <p className="text-sm text-muted-foreground">nakita@datebetterapp.com</p>
       </div>
     ),
   },
