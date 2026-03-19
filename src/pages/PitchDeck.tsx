@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.jpg";
 import logoTransparent from "@/assets/logo-transparent.png";
+import pitchTitle from "@/assets/pitch-title.png";
 import { IPhoneMockup } from "@/components/website/IPhoneMockup";
 import { ScreenshotDemo } from "@/components/website/ScreenshotDemo";
 import { CompatibilityDemo } from "@/components/website/CompatibilityDemo";
