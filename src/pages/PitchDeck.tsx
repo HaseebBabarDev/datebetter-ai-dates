@@ -79,7 +79,7 @@ const slides = [
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.5 }}
           >
-            <img src={logo} alt="DateBetter" className="w-8 h-8 rounded-lg shadow-md ring-1 ring-primary/20" />
+            <img src={logo} alt="DateBetter" style={{ width: '1600px', height: '1600px' }} className="rounded-lg shadow-md ring-1 ring-primary/20" />
             <span className="text-sm text-muted-foreground/60 font-medium uppercase tracking-[0.2em]">Investor Deck · 2026</span>
           </motion.div>
         </div>
