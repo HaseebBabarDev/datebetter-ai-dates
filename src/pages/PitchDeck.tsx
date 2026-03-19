@@ -30,437 +30,266 @@ const trackView = async (slidesViewed = 1) => {
   }
 };
 
-/* ─── Staggered children wrapper ─── */
-const staggerContainer = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.15 } },
-};
-const staggerItem = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] } },
-};
-
-const Stagger = ({ children }: { children: React.ReactNode }) => (
-  <motion.div variants={staggerContainer} initial="hidden" animate="visible">
-    {children}
-  </motion.div>
-);
-
-const FadeUp = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <motion.div variants={staggerItem} className={className}>
-    {children}
-  </motion.div>
-);
-
-/* ─── Reusable styled components ─── */
-const Pill = ({ children }: { children: React.ReactNode }) => (
+/* ─── Simple fade animation ─── */
+const FadeIn = ({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) => (
   <motion.div
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.97 }}
-    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-semibold text-primary uppercase tracking-wider backdrop-blur-sm cursor-default"
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+    className={className}
   >
     {children}
   </motion.div>
 );
 
-const MetricCard = ({ metric, label, accent = false }: { metric: string; label: string; accent?: boolean }) => (
-  <motion.div
-    whileHover={{ y: -4, scale: 1.02 }}
-    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-    className={`rounded-2xl p-6 text-center transition-colors cursor-default ${accent ? "border-2 border-primary bg-primary/5 shadow-[var(--shadow-soft)]" : "border border-border/60 bg-card/80 backdrop-blur-sm hover:border-primary/30"}`}
-  >
-    <p className={`text-4xl font-bold ${accent ? "text-primary" : "text-foreground"}`}>{metric}</p>
-    <p className="text-sm text-muted-foreground mt-1.5">{label}</p>
-  </motion.div>
-);
-
-/* ─── Info badge ─── */
-const InfoBadge = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm px-4 py-3">
-    <p className="text-xs uppercase tracking-wider text-muted-foreground mb-0.5">{label}</p>
-    <p className="text-base font-bold text-foreground">{value}</p>
-  </div>
-);
-
-/* ─── Slide data — rebuilt from Gamma deck ─── */
+/* ─── Slide data — Shaan Puri storytelling format ─── */
 const slides = [
+  // 1. Company Name / Subtitle
   {
     id: 1,
     content: (
       <div className="flex flex-col items-center justify-center h-full gap-6 text-center">
-        <motion.img src={logo} alt="DateBetter" className="w-24 h-24 rounded-3xl shadow-[var(--shadow-elegant)] ring-2 ring-primary/20" whileHover={{ scale: 1.05, rotate: 2 }} />
-        <h2 className="text-5xl md:text-7xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent leading-tight tracking-tight">DateBetter</h2>
-        <p className="text-2xl md:text-3xl font-light text-foreground/80 max-w-xl leading-relaxed">Relationship Intelligence for Modern Dating</p>
-        <div className="w-20 h-px bg-primary/30 my-1" />
-        <p className="text-xl text-muted-foreground max-w-md">Not a dating app. A <span className="font-semibold text-primary">decision engine</span>.</p>
-        <Pill>Raising $500K Pre-Seed</Pill>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 w-full max-w-2xl">
-          {[{ l: "Product", v: "Live MVP" }, { l: "Margin", v: "67–82%" }, { l: "Infrastructure", v: "10K Users" }, { l: "Risk", v: "Low Technical" }].map((b) => (
-            <InfoBadge key={b.l} label={b.l} value={b.v} />
-          ))}
+        <img src={logo} alt="DateBetter" className="w-20 h-20 rounded-2xl shadow-lg" />
+        <h2 className="text-5xl md:text-7xl font-black text-foreground tracking-tight">DateBetter</h2>
+        <p className="text-xl md:text-2xl text-muted-foreground font-light max-w-lg">AI-powered relationship intelligence for modern dating.</p>
+      </div>
+    ),
+  },
+  // 2. A bit of credibility
+  {
+    id: 2,
+    content: (
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">A quick intro.</h2>
+        <div className="space-y-5 text-lg md:text-xl text-foreground/80">
+          <p>Live product with <span className="font-bold text-foreground">40 beta users</span> on a working MVP.</p>
+          <p>Infrastructure built to support <span className="font-bold text-foreground">10,000 users</span> — no rebuild needed.</p>
+          <p>Therapist-reviewed psychology framework.</p>
+          <p><span className="font-bold text-foreground">67–82% margins</span> modeled under both Apple fee scenarios.</p>
         </div>
       </div>
     ),
   },
+  // 3. The Problem — data/personal story
   {
-    id: 2, label: "Behavioral Shift", title: "AI Is Already Being Used for Dating Decisions.",
+    id: 3,
     content: (
-      <div className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto items-start">
-        <div className="space-y-5">
-          {["Women paste texts into ChatGPT.", "They crowdsource red flags on Reddit.", "They bring early dating confusion into therapy sessions that cost $200 an hour."].map((t, i) => (
-             <motion.p key={i} whileHover={{ x: 6 }} className="text-xl text-foreground/80 pl-4 border-l-2 border-primary/40 cursor-default">{t}</motion.p>
-           ))}
-           <p className="text-xl font-medium text-foreground pt-2">The behavior is already there — <span className="text-primary">the infrastructure isn't</span>.</p>
-         </div>
-         <div className="space-y-3">
-           <p className="text-sm uppercase tracking-wider text-primary font-bold mb-2">The Gap</p>
-           {["No memory across sessions", "No behavioral pattern detection", "No structured decision framework", "No compatibility scoring", "No dating-specific context"].map((g, i) => (
-             <motion.div key={i} whileHover={{ scale: 1.02 }} className="flex items-center gap-3 rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm px-4 py-3 cursor-default">
-               <div className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />
-               <span className="text-base text-foreground">{g}</span>
-             </motion.div>
-          ))}
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">Women are already using AI for dating advice.</h2>
+        <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
+          <p>They paste texts into ChatGPT. They crowdsource red flags on Reddit. They bring early dating confusion into <span className="font-bold text-foreground">$200/hour therapy sessions</span>.</p>
+          <p className="font-medium text-foreground">The behavior is already there — the infrastructure isn't.</p>
         </div>
       </div>
     ),
   },
+  // 4. How they solve it today (icky)
   {
-    id: 3, label: "Positioning", title: "We Do Not Compete With Bumble.",
+    id: 4,
     content: (
-      <div className="space-y-8 max-w-4xl mx-auto">
-        <p className="text-xl text-muted-foreground text-center max-w-2xl mx-auto">DateBetter occupies an entirely different category. No swiping. No matching. No engagement loops. We sit <span className="font-semibold text-foreground">after the match</span> — in the emotionally volatile space where real decisions happen.</p>
-        <div className="grid grid-cols-2 gap-6">
-          <motion.div whileHover={{ y: -4 }} className="rounded-2xl border border-border/60 p-8 text-center bg-card/60 backdrop-blur-sm">
-            <p className="text-sm uppercase tracking-wider text-muted-foreground mb-3">Dating Apps</p>
-            <p className="text-3xl font-bold text-foreground mb-2">Engagement</p>
-            <p className="text-base text-muted-foreground">More swipes. More matches. More time in-app.</p>
-            <p className="text-sm text-muted-foreground mt-3 font-medium">Success = sessions</p>
-          </motion.div>
-          <motion.div whileHover={{ y: -4 }} className="rounded-2xl border-2 border-primary p-8 text-center bg-primary/5 shadow-[var(--shadow-soft)]">
-            <p className="text-sm uppercase tracking-wider text-primary mb-3">DateBetter</p>
-            <p className="text-3xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent mb-2">Decisions</p>
-            <p className="text-base text-foreground/80">Better clarity. Better choices. Better outcomes.</p>
-            <p className="text-sm text-primary mt-3 font-medium">Success = relationships</p>
-          </motion.div>
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">How they solve it today...</h2>
+        <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
+          <p>ChatGPT has <span className="font-bold text-foreground">no memory</span> across sessions.</p>
+          <p>No behavioral pattern detection.</p>
+          <p>No structured decision framework.</p>
+          <p>No compatibility scoring.</p>
+          <p>No dating-specific context.</p>
+          <p className="text-foreground font-medium pt-4">Generic AI gives generic advice. Dating decisions need <span className="text-primary">structured intelligence</span>.</p>
         </div>
-        <p className="text-base text-muted-foreground text-center">The <span className="font-semibold text-foreground">$5B+ dating app market</span> creates our users. We monetize the intelligence layer that comes next.</p>
       </div>
     ),
   },
+  // 5. What if instead...
   {
-    id: 4, label: "Problem", title: "Modern Dating Is Emotionally Reactive.",
+    id: 5,
     content: (
-      <div className="space-y-8 max-w-4xl mx-auto">
-        <div className="grid md:grid-cols-3 gap-5">
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">What if instead...</h2>
+        <p className="text-xl md:text-2xl text-muted-foreground">You had an AI that <span className="font-bold text-foreground">remembers every conversation</span>, tracks behavioral patterns across candidates, scores compatibility with real evidence, and tells you when something doesn't add up.</p>
+        <p className="text-xl md:text-2xl text-foreground font-medium">Not a chatbot. A behavioral operating system for your dating life.</p>
+      </div>
+    ),
+  },
+  // 6. That's us. Show the product.
+  {
+    id: 6,
+    content: (
+      <div className="max-w-5xl mx-auto space-y-6">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">That's us.</h2>
+        <p className="text-lg md:text-xl text-muted-foreground mb-4">Meet <span className="font-bold text-foreground">D.E.V.I.</span> — she logs every interaction, maintains memory, detects patterns, and scores compatibility.</p>
+        <div className="grid grid-cols-3 gap-6 items-start">
           {[
-             { icon: "💬", title: "Overanalyzing Texts", desc: "Hours spent dissecting message timing, word choice, and tone with no structured framework to interpret signals accurately." },
-             { icon: "🚩", title: "Ignoring Red Flags", desc: "Early behavioral cues get rationalized away. Attachment forms before clarity. The emotional cost compounds over time." },
-             { icon: "😩", title: "Decision Fatigue", desc: "Repeated cycles of confusion, burnout, and misaligned investment drain high-functioning women who should know better." },
-           ].map((item, i) => (
-             <motion.div key={i} whileHover={{ y: -6 }} className="rounded-2xl border border-border/40 p-6 bg-card/60 backdrop-blur-sm cursor-default">
-               <span className="text-4xl block mb-3">{item.icon}</span>
-               <h3 className="text-lg font-bold text-foreground mb-2">{item.title}</h3>
-               <p className="text-base text-muted-foreground leading-relaxed">{item.desc}</p>
-             </motion.div>
-           ))}
-         </div>
-         <p className="text-xl text-center text-foreground font-medium max-w-2xl mx-auto">High-awareness women want <span className="text-primary">logic before emotional investment</span>. They are already seeking structure. DateBetter gives it to them.</p>
-      </div>
-    ),
-  },
-  {
-    id: 5, label: "Solution", title: "Meet D.E.V.I.",
-    content: (
-      <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto items-center">
-        <div className="space-y-3">
-           <p className="text-base text-muted-foreground mb-4 leading-relaxed">D.E.V.I. is not a chatbot. It is a <span className="font-semibold text-foreground">behavioral operating system</span> for your dating life — persistent, structured, and pattern-aware across every interaction you log.</p>
-           {[
-             { title: "Logs Dating Interactions", desc: "Every conversation, date, and behavior is captured with context." },
-             { title: "Maintains Memory", desc: "Cross-session continuity means insights compound over time — not reset." },
-             { title: "Detects Behavioral Patterns", desc: "Identifies consistency, inconsistency, and alignment with stated values." },
-             { title: "Compatibility Scoring", desc: "Generates structured scores based on logged behavioral evidence." },
-           ].map((f, i) => (
-             <motion.div key={i} whileHover={{ x: 4 }} className="flex items-start gap-3 cursor-default">
-               <div className="w-2 h-2 mt-2 rounded-full bg-[image:var(--gradient-primary)] shrink-0" />
-               <div><p className="text-base font-semibold text-foreground">{f.title}</p><p className="text-sm text-muted-foreground">{f.desc}</p></div>
-             </motion.div>
+            { label: "Screenshot Analysis", Demo: ScreenshotDemo },
+            { label: "Compatibility Engine", Demo: CompatibilityDemo },
+            { label: "D.E.V.I. Chat", Demo: ChatDemo },
+          ].map(({ label, Demo }) => (
+            <div key={label} className="text-center">
+              <p className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider">{label}</p>
+              <div className="scale-[0.5] origin-top"><IPhoneMockup><Demo /></IPhoneMockup></div>
+            </div>
           ))}
         </div>
-        <div className="flex justify-center scale-[0.65] origin-center"><IPhoneMockup><ScreenshotDemo /></IPhoneMockup></div>
       </div>
     ),
   },
+  // 7. State the dream
   {
-    id: 6, label: "Product Demo", title: "See It In Action",
+    id: 7,
     content: (
-      <div className="grid md:grid-cols-3 gap-6 items-start max-w-5xl mx-auto">
-        {[{ label: "Screenshot Analysis", Demo: ScreenshotDemo }, { label: "Compatibility Engine", Demo: CompatibilityDemo }, { label: "D.E.V.I. Chat", Demo: ChatDemo }].map(({ label, Demo }) => (
-          <div key={label} className="text-center">
-            <p className="text-sm font-bold text-primary mb-3 uppercase tracking-wider">{label}</p>
-            <div className="scale-[0.55] origin-top"><IPhoneMockup><Demo /></IPhoneMockup></div>
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">We're building the operating system for relationship decisions.</h2>
+        <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
+          <p>Dating apps create users. We monetize the <span className="font-bold text-foreground">intelligence layer</span> that comes after the match.</p>
+          <p>The <span className="font-bold text-foreground">$5B+ dating app market</span> generates our demand. We own the decision space nobody else is building for.</p>
+        </div>
+      </div>
+    ),
+  },
+  // 8. Traction / "So far, so good..."
+  {
+    id: 8,
+    content: (
+      <div className="max-w-3xl mx-auto space-y-8 text-center">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">So far, so good.</h2>
+        <div className="grid grid-cols-3 gap-8 py-4">
+          {[
+            { metric: "40", label: "Beta Users" },
+            { metric: "10K", label: "Ready Infrastructure" },
+            { metric: "$0.15", label: "AI Cost / User" },
+          ].map((m, i) => (
+            <div key={i}>
+              <p className="text-5xl md:text-6xl font-black text-foreground">{m.metric}</p>
+              <p className="text-sm text-muted-foreground mt-2">{m.label}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-lg text-muted-foreground">Live product. Real users. Therapist-reviewed framework. App Store submission in progress.</p>
+      </div>
+    ),
+  },
+  // 9. Differentiated approach
+  {
+    id: 9,
+    content: (
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">We don't compete with Bumble.</h2>
+        <div className="grid grid-cols-2 gap-8 text-center">
+          <div className="space-y-3">
+            <p className="text-sm uppercase tracking-wider text-muted-foreground">Dating Apps</p>
+            <p className="text-3xl font-black text-foreground">Engagement</p>
+            <p className="text-base text-muted-foreground">More swipes. More time in-app. Success = sessions.</p>
           </div>
-        ))}
-      </div>
-    ),
-  },
-  {
-    id: 7, label: "Live Demo", title: "App Walkthrough",
-    content: (
-      <div className="flex flex-col items-center">
-        <motion.div whileHover={{ scale: 1.01 }} className="rounded-2xl overflow-hidden border-2 border-primary/20 shadow-[var(--shadow-elegant)] bg-black max-w-3xl w-full">
-          <video src="/videos/demo.mp4" controls className="w-full aspect-video" playsInline autoPlay muted loop />
-        </motion.div>
-        <p className="text-base text-muted-foreground text-center mt-4">Live product demo — recorded from the beta app</p>
-      </div>
-    ),
-  },
-  {
-    id: 8, label: "Traction", title: "Live Product. Real Signal. Ready to Scale.",
-    content: (
-      <div className="space-y-8 max-w-4xl mx-auto">
-        <div className="grid grid-cols-3 gap-5">
-          <MetricCard metric="40" label="Beta Users — active on live MVP" accent />
-          <MetricCard metric="10K" label="User Capacity — no rebuild needed" />
-          <MetricCard metric="$0.15" label="AI Cost/User — drops quarterly" />
+          <div className="space-y-3">
+            <p className="text-sm uppercase tracking-wider text-primary">DateBetter</p>
+            <p className="text-3xl font-black text-foreground">Decisions</p>
+            <p className="text-base text-muted-foreground">Better clarity. Better choices. Success = relationships.</p>
+          </div>
         </div>
-        <div className="grid md:grid-cols-2 gap-4">
-          {["Therapist-reviewed psychology framework ✓", "App Store submission in progress", "10K-scale infrastructure ready ✓", "High-margin SaaS economics modeled ✓"].map((m, i) => (
-            <motion.div key={i} whileHover={{ x: 4 }} className="flex items-center gap-3 text-base text-foreground/80 cursor-default">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />{m}
-            </motion.div>
+        <p className="text-lg text-muted-foreground text-center">We sit <span className="font-bold text-foreground">after the match</span> — in the emotionally volatile space where real decisions happen.</p>
+      </div>
+    ),
+  },
+  // 10. Bigger trend / wave
+  {
+    id: 10,
+    content: (
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">The wave we're riding.</h2>
+        <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
+          <p><span className="font-bold text-foreground">AI is normalized</span> — consumers already use it for personal advice.</p>
+          <p><span className="font-bold text-foreground">Therapy demand is surging</span> — supply is constrained by cost and access.</p>
+          <p><span className="font-bold text-foreground">Dating burnout is real</span> — users want depth and clarity, not more matches.</p>
+          <p><span className="font-bold text-foreground">Self-optimization is mainstream</span> — fitness, finance, and now relationships.</p>
+        </div>
+      </div>
+    ),
+  },
+  // 11. Why now?
+  {
+    id: 11,
+    content: (
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">Why now?</h2>
+        <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
+          <p>AI model costs are dropping <span className="font-bold text-foreground">quarterly</span> — making behavioral AI affordable at scale for the first time.</p>
+          <p>ChatGPT normalized AI for personal advice — but <span className="font-bold text-foreground">nobody has built the vertical product</span> for dating decisions.</p>
+          <p>Relationship intelligence is an emerging category. The window to <span className="font-bold text-foreground">define and own it</span> is open now.</p>
+        </div>
+      </div>
+    ),
+  },
+  // 12. Why you?
+  {
+    id: 12,
+    content: (
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">Why us?</h2>
+        <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
+          <p>We already <span className="font-bold text-foreground">built the product</span>. Live MVP. Real users. Working AI pipeline.</p>
+          <p>We modeled <span className="font-bold text-foreground">both Apple fee scenarios</span> transparently — 67% margin at worst case, 82% at best.</p>
+          <p>Infrastructure is ready for <span className="font-bold text-foreground">10,000 users</span> without an architectural rebuild.</p>
+          <p className="font-medium text-foreground">We are not raising to build. We are raising to <span className="text-primary">scale</span>.</p>
+        </div>
+      </div>
+    ),
+  },
+  // 13. Where will we be with this money?
+  {
+    id: 13,
+    content: (
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">Where we'll be in 12 months.</h2>
+        <div className="grid grid-cols-3 gap-8 text-center py-4">
+          {[
+            { metric: "$50K–$100K", label: "Monthly Recurring Revenue" },
+            { metric: "8,600+", label: "Paid Users" },
+            { metric: "$44", label: "Blended CPA" },
+          ].map((m, i) => (
+            <div key={i}>
+              <p className="text-3xl md:text-4xl font-black text-foreground">{m.metric}</p>
+              <p className="text-sm text-muted-foreground mt-2">{m.label}</p>
+            </div>
           ))}
         </div>
-        <div className="rounded-2xl bg-primary/5 border border-primary/20 p-6 text-center">
-          <p className="text-lg text-foreground">We are not raising to build — we are raising to <span className="font-bold text-primary">validate paid acquisition and reach $50K MRR</span>.</p>
+        <div className="space-y-3 text-lg text-muted-foreground">
+          <p><span className="font-bold text-foreground">$300K</span> → CAC validation across 3 channels (Meta, TikTok, AppLovin, Creator)</p>
+          <p><span className="font-bold text-foreground">$75K</span> → Product polish + App Store launch</p>
+          <p><span className="font-bold text-foreground">$125K</span> → Runway extension + contingency</p>
         </div>
       </div>
     ),
   },
+  // 14. Sweeten the pot
   {
-    id: 9, label: "Business Model", title: "Subscription SaaS. Simple. Scalable.",
+    id: 14,
     content: (
-      <div className="space-y-8 max-w-4xl mx-auto">
-        <div className="grid grid-cols-3 gap-5">
-          {[
-            { price: "$9.99", tier: "Core", desc: "Entry tier for new users exploring the platform." },
-            { price: "$15.99", tier: "Full", featured: true, desc: "Full feature set. Primary conversion target." },
-            { price: "$29.99", tier: "Premium", desc: "Advanced insights, history depth, and priority features." },
-          ].map((p, i) => (
-            <motion.div key={i} whileHover={{ y: -6 }} className={`rounded-2xl p-7 text-center ${p.featured ? "border-2 border-primary bg-primary/5 shadow-[var(--shadow-soft)] scale-105" : "border border-border/60 bg-card/60 backdrop-blur-sm"}`}>
-               <p className="text-sm uppercase tracking-wider text-muted-foreground mb-2">{p.tier}</p>
-               <p className={`text-4xl font-bold mb-1 ${p.featured ? "bg-[image:var(--gradient-hero)] bg-clip-text text-transparent" : "text-foreground"}`}>{p.price}</p>
-               <p className="text-xs text-muted-foreground">/month</p>
-               <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{p.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-        <p className="text-center text-xl text-foreground">All tiers provide full D.E.V.I. core features. Blended ARPU: <span className="font-bold text-primary">$15</span></p>
-      </div>
-    ),
-  },
-  {
-    id: 10, label: "Unit Economics", title: "Both Apple Fee Scenarios Modeled.",
-    content: (
-      <div className="space-y-6 max-w-4xl mx-auto">
-        <p className="text-base text-muted-foreground text-center max-w-2xl mx-auto">Every number accounts for platform fees. Both scenarios modeled transparently — no optimistic assumptions.</p>
-        <div className="grid md:grid-cols-2 gap-6">
-          <motion.div whileHover={{ y: -4 }} className="rounded-2xl border-2 border-primary p-6 bg-primary/5 shadow-[var(--shadow-soft)]">
-             <p className="text-base font-bold text-primary mb-4">15% Fee — Year 1 (Small Business)</p>
-             <div className="space-y-2 text-foreground text-base">
-               <div className="flex justify-between"><span>Net Revenue</span><span className="font-bold">$12.75</span></div>
-               <div className="flex justify-between"><span>Contribution</span><span className="font-bold">$12.25</span></div>
-               <div className="flex justify-between items-center pt-2 border-t border-primary/20"><span>Margin</span><span className="text-3xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">82%</span></div>
-             </div>
-           </motion.div>
-           <motion.div whileHover={{ y: -4 }} className="rounded-2xl border border-border/60 p-6 bg-card/60 backdrop-blur-sm">
-             <p className="text-base font-bold text-muted-foreground mb-4">30% Fee — Worst Case (&gt;$1M)</p>
-             <div className="space-y-2 text-foreground text-base">
-               <div className="flex justify-between"><span>Net Revenue</span><span className="font-bold">$10.50</span></div>
-               <div className="flex justify-between"><span>Contribution</span><span className="font-bold">$10.00</span></div>
-               <div className="flex justify-between items-center pt-2 border-t border-border/40"><span>Margin</span><span className="text-3xl font-bold text-foreground">67%</span></div>
-             </div>
-          </motion.div>
-        </div>
-         <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
-           <span>AI: <span className="font-bold text-foreground">$0.15</span>/user</span><span>·</span>
-           <span>Payment + overhead: <span className="font-bold text-foreground">$0.35</span>/user</span><span>·</span>
-           <span>Margin expands as model pricing drops quarterly</span>
-         </div>
-      </div>
-    ),
-  },
-  {
-    id: 11, label: "Growth", title: "$300K Allocated to Acquisition. Fully Mapped.",
-    content: (
-      <div className="space-y-6 max-w-4xl mx-auto">
-        <div className="space-y-4">
-          {[
-            { channel: "Meta / TikTok", budget: "$150K", cpa: "$50", users: "3,000" },
-            { channel: "AppLovin", budget: "$100K", cpa: "$55", users: "1,818" },
-            { channel: "Creator / Affiliate", budget: "$50K", cpa: "$25", users: "2,000", highlight: true },
-          ].map((c, i) => (
-            <motion.div key={i} whileHover={{ x: 4 }} className={`flex items-center justify-between rounded-2xl border p-5 cursor-default ${c.highlight ? "border-primary/40 bg-primary/5" : "border-border/40 bg-card/60 backdrop-blur-sm"}`}>
-               <span className="font-medium text-lg text-foreground">{c.channel}</span>
-               <div className="flex gap-5 text-base text-muted-foreground"><span>{c.budget}</span><span>CPA {c.cpa}</span><span className="font-bold text-primary">{c.users} users</span></div>
-            </motion.div>
-          ))}
-        </div>
-        <div className="rounded-2xl bg-primary/5 border border-primary/20 p-6 text-center shadow-[var(--shadow-soft)]">
-           <p className="text-xl text-foreground">Total Year 1: <span className="font-bold text-primary">8,618 users</span> · Blended CPA ~$44</p>
-           <p className="text-sm text-muted-foreground mt-1">Creator/affiliate offers most efficient CPA — priority for early validation</p>
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">A few more things.</h2>
+        <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
+          <p>Every interaction logged compounds into <span className="font-bold text-foreground">structured behavioral data</span> — a moat generic AI cannot replicate.</p>
+          <p>Subscription SaaS at <span className="font-bold text-foreground">$9.99 / $15.99 / $29.99</span> per month. Blended ARPU: $15.</p>
+          <p>Cash-flow positive by <span className="font-bold text-foreground">Month 12</span> at base case with capital remaining.</p>
+          <p>Creator/affiliate channel offers the most efficient CPA at <span className="font-bold text-foreground">$25/user</span>.</p>
         </div>
       </div>
     ),
   },
+  // 15. The Ask / CTA
   {
-    id: 12, label: "Capital", title: "$500K. Every Dollar Mapped to Outcomes.",
+    id: 15,
     content: (
-      <div className="space-y-8 max-w-4xl mx-auto">
-        <div className="grid grid-cols-3 gap-4">
-          <MetricCard metric="$75K" label="Product polish + App Store launch" />
-          <MetricCard metric="$300K" label="CAC validation + 3-channel growth" accent />
-          <MetricCard metric="$125K" label="Runway extension + contingency" />
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            { scenario: "Conservative", cpa: "$55 CPA", mrr: "~$50K MRR" },
-            { scenario: "Base Case", cpa: "$44 CPA", mrr: "~$77K MRR", sub: "$930K ARR", accent: true },
-            { scenario: "Upside", cpa: "$30 CPA", mrr: "$100K+ MRR" },
-          ].map((s, i) => (
-            <motion.div key={i} whileHover={{ y: -4 }} className={`rounded-2xl p-5 text-center ${s.accent ? "border-2 border-primary bg-primary/5 shadow-[var(--shadow-soft)]" : "border border-border/40 bg-card/60"}`}>
-               <p className="text-sm uppercase tracking-wider text-muted-foreground mb-2">{s.scenario}</p>
-               <p className="text-sm text-muted-foreground mb-1">{s.cpa}</p>
-               <p className={`text-2xl font-bold ${s.accent ? "text-primary" : "text-foreground"}`}>{s.mrr}</p>
-               {s.sub && <p className="text-sm text-primary mt-1">{s.sub}</p>}
-            </motion.div>
-          ))}
-        </div>
-        <p className="text-base text-center text-muted-foreground">Cash-flow positive by <span className="font-semibold text-foreground">Month 12</span> at base case with capital remaining.</p>
-      </div>
-    ),
-  },
-  {
-    id: 13, label: "Moat", title: "Structured Behavioral Data Is the Moat.",
-    content: (
-      <div className="space-y-8 max-w-4xl mx-auto">
-         <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto">Every interaction logged compounds into a structural advantage generic AI cannot replicate. ChatGPT has no memory of your last relationship. D.E.V.I. has <span className="font-semibold text-foreground">months of yours</span>.</p>
-         <div className="grid grid-cols-2 gap-4">
-           {[
-             { icon: "📊", title: "Logged Decision History", desc: "Every choice, pattern, and outcome stored with full context and timeline." },
-             { icon: "🧠", title: "Emotional Pattern Recognition", desc: "Longitudinal data surfaces behavioral trends invisible in a single session." },
-             { icon: "📈", title: "Compatibility Evolution", desc: "Scores update dynamically as new evidence is logged — not static assessments." },
-             { icon: "🔮", title: "Predictive Insight Layer", desc: "Pattern history enables forward-looking guidance — not just reflection." },
-           ].map((d, i) => (
-             <motion.div key={i} whileHover={{ y: -4 }} className="rounded-2xl border border-border/40 p-5 bg-card/60 backdrop-blur-sm cursor-default">
-               <span className="text-3xl block mb-2">{d.icon}</span>
-               <p className="text-base font-bold text-foreground mb-1">{d.title}</p>
-               <p className="text-sm text-muted-foreground leading-relaxed">{d.desc}</p>
-             </motion.div>
-           ))}
-         </div>
-         <p className="text-base text-center text-muted-foreground font-medium">DateBetter's data layer is the product — and it gets <span className="text-primary">stronger with every session</span>.</p>
-      </div>
-    ),
-  },
-  {
-    id: 14, label: "Timing", title: "Why Now",
-    content: (
-      <div className="space-y-6 max-w-4xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-5">
-          {[
-            { icon: "🤖", title: "AI Normalized", desc: "Consumers already use AI for personal advice. The behavioral shift has happened — the product layer hasn't caught up." },
-            { icon: "🧠", title: "Therapy Demand Rising", desc: "Demand for mental health and relationship support is at an all-time high. Supply is constrained by cost and access." },
-            { icon: "💔", title: "Dating Burnout Real", desc: "Users are disenchanted with swipe-based apps. They want depth, clarity, and intelligence — not more matches." },
-            { icon: "💪", title: "Self-Optimization Wave", desc: "High-achieving women are investing in tools for personal clarity — fitness, finance, and now relationships." },
-          ].map((t, i) => (
-            <motion.div key={i} whileHover={{ y: -4 }} className="rounded-2xl border border-border/40 p-6 bg-card/60 backdrop-blur-sm cursor-default">
-               <span className="text-3xl block mb-2">{t.icon}</span>
-               <p className="text-base font-bold text-foreground mb-1">{t.title}</p>
-               <p className="text-sm text-muted-foreground leading-relaxed">{t.desc}</p>
-             </motion.div>
-           ))}
-         </div>
-         <p className="text-xl font-semibold text-primary text-center pt-2">Relationship intelligence is an emerging category. The window to define and own it is open now.</p>
-      </div>
-    ),
-  },
-  {
-    id: 15, label: "Valuation", title: "$500K for 15% Equity. ~$3.3M Post-Money.",
-    content: (
-      <div className="space-y-8 max-w-4xl mx-auto">
-         <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto">This is not a concept raise. DateBetter enters this round with a live product, a validated psychology framework, and infrastructure capable of supporting 10,000 users.</p>
-         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-           {[
-             { l: "Live Product", v: "MVP deployed. Beta users active." },
-             { l: "67–82% Margin", v: "Modeled under both Apple fee scenarios." },
-             { l: "10K Infrastructure", v: "No architectural rebuild required." },
-             { l: "Low Technical Risk", v: "Framework validated. Stack proven." },
-           ].map((v, i) => (
-             <motion.div key={i} whileHover={{ y: -4 }} className="rounded-2xl border border-primary/20 bg-primary/5 p-4 cursor-default">
-               <p className="text-sm font-bold text-primary mb-1">{v.l}</p>
-               <p className="text-sm text-muted-foreground leading-relaxed">{v.v}</p>
-             </motion.div>
-           ))}
-         </div>
-         <p className="text-xl text-center text-foreground">Capital accelerates <span className="font-bold text-primary">scale</span> — not development. The hard product risk is behind us.</p>
-      </div>
-    ),
-  },
-  {
-    id: 16, label: "The Ask", title: "The Ask.",
-    content: (
-      <div className="flex flex-col items-center justify-center gap-8 text-center max-w-3xl mx-auto">
-        <motion.img src={logo} alt="DateBetter" className="w-16 h-16 rounded-2xl shadow-[var(--shadow-soft)]" whileHover={{ scale: 1.05 }} />
-         <h3 className="text-3xl md:text-4xl font-bold text-foreground">Building the Operating System for <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">Relationship Decisions</span>.</h3>
-         <div className="grid grid-cols-3 gap-5 w-full">
-           {[
-             { title: "$500K Raise", desc: "15% equity. ~$3.3M post-money. 12–15 months of focused runway." },
-             { title: "One Objective", desc: "Validate paid CAC at scale. Prove $44 blended CPA holds. Reach $50K–$100K MRR." },
-             { title: "One Category", desc: "Relationship intelligence does not yet have a market leader. DateBetter is positioned to define and own it." },
-           ].map((a, i) => (
-             <motion.div key={i} whileHover={{ y: -4 }} className="rounded-2xl border border-primary/20 bg-primary/5 p-5 text-left cursor-default">
-               <p className="text-base font-bold text-primary mb-2">{a.title}</p>
-               <p className="text-sm text-muted-foreground leading-relaxed">{a.desc}</p>
-             </motion.div>
-           ))}
-         </div>
-         <p className="text-base text-muted-foreground">datebetter.ai · $500K Pre-Seed</p>
+      <div className="flex flex-col items-center justify-center h-full gap-6 text-center max-w-2xl mx-auto">
+        <img src={logo} alt="DateBetter" className="w-16 h-16 rounded-2xl shadow-lg" />
+        <h2 className="text-4xl md:text-5xl font-black text-foreground leading-tight">$500K for 15% equity.</h2>
+        <p className="text-xl text-muted-foreground">~$3.3M post-money valuation.</p>
+        <div className="w-16 h-px bg-foreground/20 my-2" />
+        <p className="text-lg text-muted-foreground max-w-md">Relationship intelligence doesn't have a market leader yet. We intend to be it.</p>
+        <p className="text-base text-foreground font-bold mt-4">datebetter.ai</p>
       </div>
     ),
   },
 ];
-
-/* ─── Animated Background ─── */
-const DeckBackground = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <div className="absolute inset-0 bg-[image:var(--gradient-page)]" />
-    <motion.div
-      className="absolute w-[600px] h-[600px] rounded-full bg-primary/10 blur-[150px]"
-      animate={{ x: [0, 80, -40, 0], y: [0, -60, 40, 0] }}
-      transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-      style={{ top: "-10%", right: "10%" }}
-    />
-    <motion.div
-      className="absolute w-[500px] h-[500px] rounded-full bg-secondary/10 blur-[130px]"
-      animate={{ x: [0, -60, 50, 0], y: [0, 50, -30, 0] }}
-      transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-      style={{ bottom: "-5%", left: "5%" }}
-    />
-    <motion.div
-      className="absolute w-[300px] h-[300px] rounded-full bg-accent/8 blur-[100px]"
-      animate={{ x: [0, 40, -20, 0], y: [0, -40, 20, 0] }}
-      transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-      style={{ top: "40%", left: "40%" }}
-    />
-    <div
-      className="absolute inset-0 opacity-[0.03]"
-      style={{
-        backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`,
-        backgroundSize: "60px 60px",
-      }}
-    />
-  </div>
-);
 
 /* ─── Password Gate ─── */
 const PasswordGate = ({ onUnlock }: { onUnlock: () => void }) => {
@@ -481,21 +310,16 @@ const PasswordGate = ({ onUnlock }: { onUnlock: () => void }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative font-poppins">
-      <DeckBackground />
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background font-poppins">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-sm relative z-10"
+        className="w-full max-w-sm"
       >
-        <div className="rounded-3xl border border-border/60 bg-card/80 backdrop-blur-xl p-10 shadow-[var(--shadow-elegant)]">
+        <div className="rounded-2xl border border-border/60 bg-card p-10 shadow-lg">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-20 h-20 rounded-2xl shadow-[var(--shadow-glow)] mb-5 overflow-hidden ring-2 ring-primary/20">
-              <img src={logo} alt="DateBetter" className="w-full h-full object-cover" />
-            </div>
-            <h1 className="text-2xl font-bold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">
-              dateBetter Pitch Deck
-            </h1>
+            <img src={logo} alt="DateBetter" className="w-16 h-16 rounded-xl shadow-md mb-5" />
+            <h1 className="text-xl font-black text-foreground">DateBetter Pitch Deck</h1>
             <p className="text-sm text-muted-foreground mt-2">Enter password to continue</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -505,7 +329,7 @@ const PasswordGate = ({ onUnlock }: { onUnlock: () => void }) => {
                 value={pw}
                 onChange={(e) => { setPw(e.target.value); setError(false); }}
                 placeholder="Password"
-                className="pr-10 h-12 rounded-xl bg-background/60 border-border/60 font-poppins"
+                className="pr-10 h-12 rounded-xl"
               />
               <button
                 type="button"
@@ -516,11 +340,7 @@ const PasswordGate = ({ onUnlock }: { onUnlock: () => void }) => {
               </button>
             </div>
             {error && <p className="text-xs text-destructive">Incorrect password</p>}
-            <Button
-              type="submit"
-              disabled={!pw}
-              className="w-full h-12 rounded-xl bg-[image:var(--gradient-primary)] text-primary-foreground border-0 shadow-[var(--shadow-soft)] text-base font-semibold font-poppins"
-            >
+            <Button type="submit" disabled={!pw} className="w-full h-12 rounded-xl text-base font-semibold">
               View Deck
             </Button>
           </form>
@@ -536,12 +356,12 @@ const SlideDrawer = ({ slides: sl, current, onSelect, onClose }: { slides: typeo
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
-    className="fixed inset-0 z-50 bg-background/90 backdrop-blur-xl flex flex-col font-poppins"
+    className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col font-poppins"
     onClick={onClose}
   >
     <div className="flex items-center justify-between px-6 py-4 border-b border-border/40">
-      <h3 className="text-lg font-bold text-foreground">All Slides</h3>
-      <button onClick={onClose} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Close</button>
+      <h3 className="text-lg font-black text-foreground">All Slides</h3>
+      <button onClick={onClose} className="text-sm text-muted-foreground hover:text-foreground">Close</button>
     </div>
     <div className="flex-1 overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
@@ -553,12 +373,10 @@ const SlideDrawer = ({ slides: sl, current, onSelect, onClose }: { slides: typeo
             transition={{ delay: i * 0.03 }}
             onClick={() => { onSelect(i); onClose(); }}
             className={`rounded-xl border-2 p-4 text-left transition-all hover:scale-[1.03] ${
-              i === current ? "border-primary bg-primary/10 shadow-[var(--shadow-glow)]" : "border-border/40 bg-card/60 hover:border-primary/30"
+              i === current ? "border-foreground bg-foreground/5" : "border-border/40 hover:border-foreground/30"
             }`}
           >
-            <p className="text-[10px] uppercase tracking-wider text-primary font-bold mb-1">{s.label || "Cover"}</p>
-            <p className="text-xs text-foreground font-medium truncate">{s.title || "dateBetter"}</p>
-            <p className="text-[10px] text-muted-foreground mt-1">Slide {i + 1}</p>
+            <p className="text-xs text-foreground font-medium truncate">Slide {i + 1}</p>
           </motion.button>
         ))}
       </div>
@@ -594,7 +412,6 @@ const PitchDeck = () => {
     if (current > 0) goTo(current - 1);
   }, [current, goTo]);
 
-  // Keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); next(); }
@@ -607,7 +424,6 @@ const PitchDeck = () => {
     return () => window.removeEventListener("keydown", handler);
   }, [next, prev, isFullscreen]);
 
-  // Auto-hide controls in fullscreen
   useEffect(() => {
     if (!isFullscreen) { setShowControls(true); return; }
     const resetTimer = () => {
@@ -639,7 +455,6 @@ const PitchDeck = () => {
     return () => document.removeEventListener("fullscreenchange", handler);
   }, []);
 
-  // Swipe handler
   const handleDragEnd = (_: any, info: PanInfo) => {
     const threshold = 50;
     if (info.offset.x < -threshold && info.velocity.x < 0) next();
@@ -652,29 +467,30 @@ const PitchDeck = () => {
   const progress = ((current + 1) / slides.length) * 100;
 
   const slideVariants = {
-    enter: (d: number) => ({ x: d > 0 ? 300 : -300, opacity: 0, scale: 0.95 }),
-    center: { x: 0, opacity: 1, scale: 1 },
-    exit: (d: number) => ({ x: d > 0 ? -300 : 300, opacity: 0, scale: 0.95 }),
+    enter: (d: number) => ({ x: d > 0 ? 200 : -200, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (d: number) => ({ x: d > 0 ? -200 : 200, opacity: 0 }),
   };
 
   return (
-    <div className={`min-h-screen flex flex-col select-none relative font-poppins ${isFullscreen ? "bg-background" : ""}`}>
-      <DeckBackground />
+    <div className={`min-h-screen flex flex-col select-none relative font-poppins bg-background`}>
+      {/* Simple clean background */}
+      <div className="absolute inset-0 bg-background" />
 
-      {/* Progress bar at very top */}
-      <div className="absolute top-0 left-0 right-0 z-30 h-[3px] bg-muted/20">
+      {/* Progress bar */}
+      <div className="absolute top-0 left-0 right-0 z-30 h-[2px] bg-border/20">
         <motion.div
-          className="h-full bg-[image:var(--gradient-primary)] rounded-r-full"
+          className="h-full bg-foreground"
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.4, ease: "easeOut" }}
         />
       </div>
 
-      {/* Top bar */}
+      {/* Top bar — minimal */}
       <motion.div
         animate={{ opacity: showControls ? 1 : 0, y: showControls ? 0 : -60 }}
         transition={{ duration: 0.3 }}
-        className="relative z-20 flex items-center justify-between px-4 md:px-8 py-3 border-b border-border/30 bg-card/40 backdrop-blur-xl"
+        className="relative z-20 flex items-center justify-between px-4 md:px-8 py-3"
       >
         <button
           onClick={() => navigate("/")}
@@ -690,14 +506,7 @@ const PitchDeck = () => {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/40 hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-all text-xs"
           >
             <LayoutGrid className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Slides</span>
           </motion.button>
-          <div className="flex items-center gap-2">
-            <img src={logo} alt="" className="w-5 h-5 rounded-md" />
-            <span className="text-xs tracking-widest uppercase text-muted-foreground font-medium hidden md:inline">
-              Confidential
-            </span>
-          </div>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-muted-foreground tabular-nums font-medium">
@@ -714,8 +523,8 @@ const PitchDeck = () => {
         </div>
       </motion.div>
 
-      {/* Slide area with drag/swipe */}
-      <div className="relative z-10 flex-1 flex items-center justify-center p-4 md:p-16 overflow-hidden">
+      {/* Slide area */}
+      <div className="relative z-10 flex-1 flex items-center justify-center px-6 md:px-20 py-8 md:py-16 overflow-hidden">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={slide.id}
@@ -724,7 +533,7 @@ const PitchDeck = () => {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.15}
@@ -732,42 +541,28 @@ const PitchDeck = () => {
             style={{ x: dragX, opacity: dragOpacity }}
             className="w-full max-w-5xl cursor-grab active:cursor-grabbing"
           >
-            <Stagger>
-              {slide.label && (
-                <FadeUp>
-                   <p className="text-sm uppercase tracking-[0.25em] text-primary mb-4 text-center font-bold">{slide.label}</p>
-                 </FadeUp>
-               )}
-               {slide.title && (
-                 <FadeUp>
-                   <h2 className="text-4xl md:text-6xl font-bold text-foreground text-center mb-12 leading-tight">
-                     {slide.title}
-                   </h2>
-                </FadeUp>
-              )}
-              <FadeUp>{slide.content}</FadeUp>
-            </Stagger>
+            <FadeIn key={slide.id}>{slide.content}</FadeIn>
           </motion.div>
         </AnimatePresence>
 
-        {/* Edge click zones for navigation */}
+        {/* Edge click zones */}
         <button
           onClick={prev}
           className="absolute left-0 top-0 bottom-0 w-16 md:w-24 z-20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-start pl-2"
           disabled={current === 0}
         >
-          {current > 0 && <ChevronLeft className="w-8 h-8 text-muted-foreground/40" />}
+          {current > 0 && <ChevronLeft className="w-8 h-8 text-muted-foreground/30" />}
         </button>
         <button
           onClick={next}
           className="absolute right-0 top-0 bottom-0 w-16 md:w-24 z-20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-end pr-2"
           disabled={current === slides.length - 1}
         >
-          {current < slides.length - 1 && <ChevronRight className="w-8 h-8 text-muted-foreground/40" />}
+          {current < slides.length - 1 && <ChevronRight className="w-8 h-8 text-muted-foreground/30" />}
         </button>
       </div>
 
-      {/* Bottom navigation */}
+      {/* Bottom navigation — minimal dots */}
       <motion.div
         animate={{ opacity: showControls ? 1 : 0, y: showControls ? 0 : 60 }}
         transition={{ duration: 0.3 }}
@@ -778,24 +573,20 @@ const PitchDeck = () => {
           size="icon"
           disabled={current === 0}
           onClick={prev}
-          className="text-muted-foreground hover:text-foreground w-10 h-10 rounded-full hover:bg-muted/40"
+          className="text-muted-foreground hover:text-foreground w-10 h-10 rounded-full"
         >
           <ChevronLeft className="w-5 h-5" />
         </Button>
 
-        {/* Mini progress dots */}
-        <div className="flex gap-1 items-center">
+        <div className="flex gap-1.5 items-center">
           {slides.map((_, i) => (
-            <motion.button
+            <button
               key={i}
               onClick={() => goTo(i)}
-              whileHover={{ scale: 1.3 }}
               className={`rounded-full transition-all duration-300 ${
                 i === current
-                  ? "bg-primary w-7 h-2.5 shadow-[var(--shadow-glow)]"
-                  : Math.abs(i - current) <= 3
-                    ? "w-2 h-2 bg-muted-foreground/20 hover:bg-muted-foreground/40"
-                    : "w-1.5 h-1.5 bg-muted-foreground/10"
+                  ? "bg-foreground w-6 h-2"
+                  : "w-1.5 h-1.5 bg-foreground/20 hover:bg-foreground/40"
               }`}
             />
           ))}
@@ -806,7 +597,7 @@ const PitchDeck = () => {
           size="icon"
           disabled={current === slides.length - 1}
           onClick={next}
-          className="text-muted-foreground hover:text-foreground w-10 h-10 rounded-full hover:bg-muted/40"
+          className="text-muted-foreground hover:text-foreground w-10 h-10 rounded-full"
         >
           <ChevronRight className="w-5 h-5" />
         </Button>
