@@ -628,8 +628,8 @@ const PitchDeck = () => {
               onClick={() => goTo(i)}
               className={`rounded-full transition-all duration-300 ${
                 i === current
-                  ? "bg-foreground w-6 h-2"
-                  : "w-1.5 h-1.5 bg-foreground/20 hover:bg-foreground/40"
+                  ? "bg-primary w-6 h-2"
+                  : "w-1.5 h-1.5 bg-primary/20 hover:bg-primary/40"
               }`}
             />
           ))}
