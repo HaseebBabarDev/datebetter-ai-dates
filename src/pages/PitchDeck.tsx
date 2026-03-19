@@ -142,8 +142,8 @@ const slides = [
     content: (
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">What if instead...</h2>
-        <p className="text-xl md:text-2xl text-muted-foreground">You had an AI that <span className="font-bold text-primary">remembers every conversation</span>, tracks behavioral patterns across candidates, scores compatibility with real evidence, and tells you when something doesn't add up.</p>
-        <p className="text-xl md:text-2xl text-foreground font-medium">Not a chatbot. A behavioral operating system for your dating life.</p>
+        <p className="text-lg md:text-xl text-muted-foreground">You had an AI that <span className="font-bold text-primary">remembers every conversation</span>, tracks behavioral patterns across candidates, scores compatibility with real evidence, and tells you when something doesn't add up.</p>
+        <p className="text-lg md:text-xl text-foreground font-medium">Not a chatbot. A behavioral operating system for your dating life.</p>
       </div>
     ),
   },
