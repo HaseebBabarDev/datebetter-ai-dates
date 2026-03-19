@@ -52,7 +52,7 @@ const slides = [
     id: 1,
     content: (
       <div className="flex flex-col items-center justify-center text-center relative overflow-hidden">
-        <div className="relative z-10 flex flex-col items-center gap-4">
+        <div className="relative z-10 flex flex-col items-center gap-4 px-4">
           <motion.h1 
             className="font-black leading-none"
             style={{ 
