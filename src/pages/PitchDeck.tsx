@@ -50,42 +50,37 @@ const slides = [
   {
     id: 1,
     content: (
-      <div className="flex flex-col items-center justify-center h-full gap-8 text-center relative overflow-hidden">
+      <div className="flex flex-col items-center justify-center h-full gap-6 text-center relative overflow-hidden">
         {/* Ambient glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/8 blur-[150px] pointer-events-none" />
         <div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-accent/10 blur-[120px] pointer-events-none" />
         
-        <motion.img 
-          src={logo} 
-          alt="DateBetter" 
-          className="w-24 h-24 rounded-3xl shadow-xl ring-2 ring-primary/20 relative z-10" 
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        />
-        
-        <div className="relative z-10 space-y-4">
-          <motion.h2 
-            className="text-6xl md:text-8xl font-black tracking-tight"
+        <div className="relative z-10 space-y-5">
+          {/* Logo + Name inline */}
+          <motion.div 
+            className="flex items-center justify-center gap-5"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.6 }}
           >
-            <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">DateBetter</span>
-          </motion.h2>
+            <img src={logo} alt="DateBetter" className="w-16 h-16 rounded-2xl shadow-lg ring-2 ring-primary/20" />
+            <h2 className="text-7xl md:text-9xl font-black tracking-tight">
+              <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">DateBetter</span>
+            </h2>
+          </motion.div>
           
           <motion.div 
             className="w-20 h-1 mx-auto rounded-full bg-primary/40"
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
           />
           
           <motion.p 
             className="text-xl md:text-2xl text-muted-foreground font-light max-w-xl mx-auto"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
           >
             AI-powered relationship intelligence for modern dating.
           </motion.p>
@@ -94,7 +89,7 @@ const slides = [
             className="text-sm text-muted-foreground/60 font-medium uppercase tracking-[0.2em]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
           >
             Investor Deck · 2026
           </motion.p>
