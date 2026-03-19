@@ -122,15 +122,16 @@ const slides = [
       <div className="max-w-5xl mx-auto space-y-6">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">That's us.</h2>
         <p className="text-lg md:text-xl text-muted-foreground mb-2">Meet <span className="font-bold text-primary">D.E.V.I.</span> — she logs every interaction, maintains memory, detects patterns, and scores compatibility.</p>
-        <div className="grid grid-cols-3 gap-4 items-start">
+        <div className="grid grid-cols-4 gap-3 items-start">
           {[
             { label: "Screenshot Analysis", Demo: ScreenshotDemo },
             { label: "Compatibility Engine", Demo: CompatibilityDemo },
+            { label: "Healing Journey", Demo: HealingScoreDemo },
             { label: "D.E.V.I. Chat", Demo: ChatDemo },
           ].map(({ label, Demo }) => (
             <div key={label} className="text-center">
               <p className="text-[10px] font-bold text-primary mb-2 uppercase tracking-wider">{label}</p>
-              <div className="scale-[0.55] origin-top -mb-40"><IPhoneMockup><Demo /></IPhoneMockup></div>
+              <div className="scale-[0.48] origin-top -mb-44"><IPhoneMockup><Demo /></IPhoneMockup></div>
             </div>
           ))}
         </div>
