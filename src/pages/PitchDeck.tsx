@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.jpg";
 import logoTransparent from "@/assets/logo-transparent.png";
+import datebetterTextLogo from "@/assets/datebetter-text-logo-nobg.png";
 import { IPhoneMockup } from "@/components/website/IPhoneMockup";
 import { ScreenshotDemo } from "@/components/website/ScreenshotDemo";
 import { CompatibilityDemo } from "@/components/website/CompatibilityDemo";
