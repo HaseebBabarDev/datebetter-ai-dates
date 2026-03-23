@@ -39,7 +39,6 @@ const MOODS = [
 interface CandidateJournalProps {
   candidateId: string;
   candidateName: string;
-  hasDetachmentPlan: boolean;
 }
 
 export const CandidateJournal: React.FC<CandidateJournalProps> = ({
