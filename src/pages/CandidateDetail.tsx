@@ -24,6 +24,7 @@ import { HoroscopeCompatibility } from "@/components/candidate/HoroscopeCompatib
 import { AppRatingDialog, shouldShowRatingDialog } from "@/components/candidate/AppRatingDialog";
 import { SuccessfulRelationshipCTA, checkSuccessfulRelationship } from "@/components/candidate/SuccessfulRelationshipCTA";
 import { DetachmentPlanInsight } from "@/components/candidate/DetachmentPlanInsight";
+import { CandidateJournal } from "@/components/candidate/CandidateJournal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UpgradeNudge } from "@/components/subscription/UpgradeNudge";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -1118,6 +1119,13 @@ const CandidateDetail = () => {
 
             {/* Detachment Plan CTA / Progress */}
             <DetachmentPlanInsight candidateId={candidate.id} onNavigate={() => navigate(`/detachment-plan/${candidate.id}`)} />
+
+            {/* Reflection Journal — unlocked with Detachment Plan */}
+            <CandidateJournal
+              candidateId={candidate.id}
+              candidateName={candidate.nickname}
+              hasDetachmentPlan={subscription?.detachment_plan_candidates?.includes(candidate.id) || false}
+            />
           </TabsContent>
 
           <TabsContent value="overview" className="mt-4 space-y-4">

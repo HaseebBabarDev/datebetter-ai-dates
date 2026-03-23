@@ -213,7 +213,7 @@ ${focusAreas || '- General emotional healing and self-work'}
 `;
 };
 
-const buildSystemPrompt = (userProfile: any, candidateProfile: any, interactions: any[]) => {
+const buildSystemPrompt = (userProfile: any, candidateProfile: any, interactions: any[], journalEntries?: any[]) => {
   // Build family background context
   const familyContext = userProfile ? buildFamilyContext(userProfile) : '';
   
@@ -558,6 +558,17 @@ ${healingGuidance}
 ${candidateContext}
 ${intimacyGuidance}
 ${interactionContext}
+${journalEntries && journalEntries.length > 0 ? `
+USER'S JOURNAL ENTRIES (private reflections about this candidate — use these to understand their emotional state and patterns):
+${journalEntries.slice(0, 10).map((e: any) => `- [${e.created_at?.split('T')[0] || 'Unknown date'}]${e.mood ? ` (Mood: ${e.mood})` : ''}: ${e.content}`).join('\n')}
+
+JOURNAL GUIDANCE:
+- Reference journal themes when they align with current conversation
+- Notice emotional patterns across entries (improving? spiraling? stuck?)
+- If they journaled about a concern, gently bring it up when relevant
+- Use journal insights to provide deeper, more personalized advice
+- Never quote journal entries back word-for-word — paraphrase naturally
+` : ''}
 
 CRITICAL RESPONSE FORMAT:
 - For SIMPLE questions or quick reactions: Keep it SHORT and conversational (2-4 paragraphs). Weave follow-up naturally into the final paragraph.
@@ -781,7 +792,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, imageData, imagesData, imageType, textScreenshotRightSide, userProfile, candidateProfile, interactions } = await req.json();
+    const { messages, imageData, imagesData, imageType, textScreenshotRightSide, userProfile, candidateProfile, interactions, journalEntries } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -789,7 +800,7 @@ serve(async (req) => {
     }
 
     // Build personalized system prompt
-    const systemPrompt = buildSystemPrompt(userProfile, candidateProfile, interactions);
+    const systemPrompt = buildSystemPrompt(userProfile, candidateProfile, interactions, journalEntries);
 
     // Build the messages array for the AI
     const aiMessages: any[] = [

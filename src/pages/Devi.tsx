@@ -657,25 +657,35 @@ const Devi = () => {
       .lt("updated_at", thirtyDaysAgo.toISOString());
   }, [user]);
 
-  // Fetch interactions when candidate changes
+  // Fetch interactions and journal entries when candidate changes
+  const [journalEntries, setJournalEntries] = useState<any[]>([]);
   useEffect(() => {
     const fetchInteractions = async () => {
       if (!user || !selectedCandidate) {
         setInteractions([]);
+        setJournalEntries([]);
         return;
       }
       
-      const { data } = await supabase
-        .from("interactions")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("candidate_id", selectedCandidate.id)
-        .order("interaction_date", { ascending: false })
-        .limit(20);
+      const [intRes, journalRes] = await Promise.all([
+        supabase
+          .from("interactions")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("candidate_id", selectedCandidate.id)
+          .order("interaction_date", { ascending: false })
+          .limit(20),
+        supabase
+          .from("journal_entries" as any)
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("candidate_id", selectedCandidate.id)
+          .order("created_at", { ascending: false })
+          .limit(10),
+      ]);
       
-      if (data) {
-        setInteractions(data);
-      }
+      if (intRes.data) setInteractions(intRes.data);
+      if (journalRes.data) setJournalEntries(journalRes.data as any[]);
     };
 
     fetchInteractions();
@@ -1150,6 +1160,7 @@ const Devi = () => {
             userProfile,
             candidateProfile: selectedCandidate,
             interactions,
+            journalEntries,
           }),
         }
       );

@@ -912,6 +912,44 @@ export type Database = {
           },
         ]
       }
+      journal_entries: {
+        Row: {
+          candidate_id: string
+          content: string
+          created_at: string
+          id: string
+          mood: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          candidate_id: string
+          content: string
+          created_at?: string
+          id?: string
+          mood?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          candidate_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          mood?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       no_contact_progress: {
         Row: {
           broke_nc: boolean | null
