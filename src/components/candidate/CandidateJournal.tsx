@@ -39,17 +39,16 @@ const MOODS = [
 interface CandidateJournalProps {
   candidateId: string;
   candidateName: string;
-  hasDetachmentPlan: boolean;
 }
 
 export const CandidateJournal: React.FC<CandidateJournalProps> = ({
   candidateId,
   candidateName,
-  hasDetachmentPlan,
 }) => {
   const { user } = useAuth();
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasDetachmentPlan, setHasDetachmentPlan] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [content, setContent] = useState("");
   const [mood, setMood] = useState<string | null>(null);
@@ -57,7 +56,28 @@ export const CandidateJournal: React.FC<CandidateJournalProps> = ({
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user && candidateId) fetchEntries();
+    if (!user || !candidateId) return;
+    const fetchData = async () => {
+      const [entriesRes, planRes] = await Promise.all([
+        supabase
+          .from("journal_entries" as any)
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("candidate_id", candidateId)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("detachment_plans")
+          .select("is_unlocked")
+          .eq("user_id", user.id)
+          .eq("candidate_id", candidateId)
+          .eq("is_unlocked", true)
+          .maybeSingle(),
+      ]);
+      setEntries((entriesRes.data as any as JournalEntry[]) || []);
+      setHasDetachmentPlan(!!planRes.data);
+      setLoading(false);
+    };
+    fetchData();
   }, [user, candidateId]);
 
   const fetchEntries = async () => {

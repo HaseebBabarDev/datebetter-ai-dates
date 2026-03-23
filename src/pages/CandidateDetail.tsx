@@ -1124,7 +1124,6 @@ const CandidateDetail = () => {
             <CandidateJournal
               candidateId={candidate.id}
               candidateName={candidate.nickname}
-              hasDetachmentPlan={subscription?.detachment_plan_candidates?.includes(candidate.id) || false}
             />
           </TabsContent>
 
