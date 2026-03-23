@@ -1119,6 +1119,13 @@ const CandidateDetail = () => {
 
             {/* Detachment Plan CTA / Progress */}
             <DetachmentPlanInsight candidateId={candidate.id} onNavigate={() => navigate(`/detachment-plan/${candidate.id}`)} />
+
+            {/* Reflection Journal — unlocked with Detachment Plan */}
+            <CandidateJournal
+              candidateId={candidate.id}
+              candidateName={candidate.nickname}
+              hasDetachmentPlan={subscription?.detachment_plan_candidates?.includes(candidate.id) || false}
+            />
           </TabsContent>
 
           <TabsContent value="overview" className="mt-4 space-y-4">
