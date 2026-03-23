@@ -1160,6 +1160,7 @@ const Devi = () => {
             userProfile,
             candidateProfile: selectedCandidate,
             interactions,
+            journalEntries,
           }),
         }
       );
