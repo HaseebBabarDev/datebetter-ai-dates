@@ -558,6 +558,17 @@ ${healingGuidance}
 ${candidateContext}
 ${intimacyGuidance}
 ${interactionContext}
+${journalEntries && journalEntries.length > 0 ? `
+USER'S JOURNAL ENTRIES (private reflections about this candidate — use these to understand their emotional state and patterns):
+${journalEntries.slice(0, 10).map((e: any) => `- [${e.created_at?.split('T')[0] || 'Unknown date'}]${e.mood ? ` (Mood: ${e.mood})` : ''}: ${e.content}`).join('\n')}
+
+JOURNAL GUIDANCE:
+- Reference journal themes when they align with current conversation
+- Notice emotional patterns across entries (improving? spiraling? stuck?)
+- If they journaled about a concern, gently bring it up when relevant
+- Use journal insights to provide deeper, more personalized advice
+- Never quote journal entries back word-for-word — paraphrase naturally
+` : ''}
 
 CRITICAL RESPONSE FORMAT:
 - For SIMPLE questions or quick reactions: Keep it SHORT and conversational (2-4 paragraphs). Weave follow-up naturally into the final paragraph.
