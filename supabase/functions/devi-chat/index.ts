@@ -213,7 +213,7 @@ ${focusAreas || '- General emotional healing and self-work'}
 `;
 };
 
-const buildSystemPrompt = (userProfile: any, candidateProfile: any, interactions: any[]) => {
+const buildSystemPrompt = (userProfile: any, candidateProfile: any, interactions: any[], journalEntries?: any[]) => {
   // Build family background context
   const familyContext = userProfile ? buildFamilyContext(userProfile) : '';
   
