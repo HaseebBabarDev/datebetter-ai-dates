@@ -200,8 +200,6 @@ const Splash = () => {
         
         {/* Footer */}
         <div className="flex items-center justify-center gap-3 mb-4 px-4 py-2 rounded-full bg-black/40 backdrop-blur-sm">
-          <span className="text-xs text-white font-semibold drop-shadow-md">Female-built</span>
-          <span className="w-1 h-1 rounded-full bg-white/60" />
           <span className="text-xs text-white font-semibold drop-shadow-md">100% private</span>
         </div>
 
