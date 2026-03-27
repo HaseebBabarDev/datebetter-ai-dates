@@ -18,6 +18,15 @@ const PRODUCT_TO_PLAN: Record<string, string> = {
   "prod_U5Ba2gOJLLzLpj": "unlimited",
 };
 
+// Map DB enum values to frontend plan names
+const DB_PLAN_TO_FRONTEND: Record<string, string> = {
+  "free": "free",
+  "new_to_dating": "basic",
+  "dating_often": "starter",
+  "dating_more": "starter",
+  "unlimited": "unlimited",
+};
+
 function safeTimestamp(val: any): string | null {
   if (!val) return null;
   try {
