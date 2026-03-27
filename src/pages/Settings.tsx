@@ -1154,7 +1154,7 @@ const Settings = () => {
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["Up to 5 candidates", "300 D.E.V.I. messages", "1 text simulator exchange (trial)", "5 compatibility refreshes / candidate", "Red flag detection", "Cycle tracking"].map((f) => (
+                    {["Up to 5 candidates", "300 D.E.V.I. messages", "1 text simulator exchange (trial)", "5 compatibility refreshes per candidate", "Red flag detection", "Cycle tracking"].map((f) => (
                       <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Check className="w-4 h-4 text-green-500 shrink-0" />
                         <span>{f}</span>
@@ -1195,7 +1195,7 @@ const Settings = () => {
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["Up to 10 candidates", "1,000 D.E.V.I. messages", "5 text simulator conversations", "10 compatibility refreshes / candidate", "Red flag detection", "Voice playback insights"].map((f) => (
+                    {["Up to 10 candidates", "1,000 D.E.V.I. messages", "5 text simulator conversations", "10 compatibility refreshes per candidate", "Red flag detection", "Voice playback insights"].map((f) => (
                       <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Check className="w-4 h-4 text-green-500 shrink-0" />
                         <span>{f}</span>
