@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => ({
         name: "dateBetter - AI-Backed Dating",
         short_name: "dateBetter",
         description: "AI-backed app helping women select better partners with smart insights and compatibility scoring.",
-        theme_color: "#E8D5B7",
+        theme_color: "#10b981",
         background_color: "#1A1A1A",
         display: "standalone",
         orientation: "portrait",
