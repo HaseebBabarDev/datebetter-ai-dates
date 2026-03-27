@@ -207,7 +207,7 @@ const Splash = () => {
         <div className="w-full max-w-xs sm:max-w-sm space-y-2.5">
           <Button
             onClick={() => navigate("/onboarding")}
-            className="w-full font-poppins font-semibold h-12 bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white shadow-lg shadow-pink-500/25"
+            className="w-full font-poppins font-semibold h-12 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-600 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25"
             size="lg"
           >
             Create Account
