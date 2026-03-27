@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Info, Smartphone, Calendar, Code, Shield, CheckCircle } from "lucide-react";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo-db.png";
 
 const APP_VERSION = "1.0.0";
 const BUILD_NUMBER = "1";

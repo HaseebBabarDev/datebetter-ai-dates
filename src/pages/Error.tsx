@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw, Home, Mail, Trash2 } from "lucide-react";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo-db.png";
 
 interface ErrorPageProps {
   error?: Error;

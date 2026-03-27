@@ -4,51 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Users, MessageCircle, Sparkles, ArrowRight, Brain, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-
-const ModernLogo = () => (
-  <div className="relative w-24 h-24 sm:w-28 sm:h-28">
-    {/* Glow effect */}
-    <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-400 blur-2xl opacity-50 animate-pulse" />
-
-    {/* Main logo container */}
-    <div className="relative w-full h-full rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-400 shadow-[var(--shadow-elegant)] flex items-center justify-center overflow-hidden">
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-white/40" />
-        <div className="absolute top-4 right-3 w-2 h-2 rounded-full bg-white/30" />
-        <div className="absolute bottom-3 left-4 w-2 h-2 rounded-full bg-white/30" />
-        <div className="absolute bottom-5 right-2 w-1.5 h-1.5 rounded-full bg-white/40" />
-      </div>
-
-      {/* Heart with chart line */}
-      <svg viewBox="0 0 64 64" className="w-14 h-14 sm:w-16 sm:h-16 relative z-10">
-    {/* Heart shape */}
-        <path
-          d="M32 56 C16 44 8 34 8 24 C8 16 14 10 22 10 C26 10 30 12 32 16 C34 12 38 10 42 10 C50 10 56 16 56 24 C56 34 48 44 32 56Z"
-          fill="white"
-          fillOpacity="0.95"
-        />
-        {/* Data line through heart */}
-        <path
-          d="M12 32 L22 32 L26 24 L30 38 L34 28 L38 34 L42 30 L52 30"
-          stroke="url(#lineGradient)"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-        />
-        {/* Gradient definition */}
-        <defs>
-          <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="hsl(152, 70%, 40%)" />
-            <stop offset="50%" stopColor="hsl(162, 65%, 45%)" />
-            <stop offset="100%" stopColor="hsl(172, 60%, 50%)" />
-          </linearGradient>
-        </defs>
-      </svg>
-    </div>
-  </div>
-);
+import logoDb from "@/assets/logo-db.png";
 
 const Splash = () => {
   const navigate = useNavigate();
@@ -161,9 +117,9 @@ const Splash = () => {
 
       {/* Content - scrollable within safe areas */}
       <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-5 py-6 overflow-y-auto" style={{ paddingTop: 'max(env(safe-area-inset-top), 1.5rem)', paddingBottom: 'max(env(safe-area-inset-bottom), 1.5rem)' }}>
-        {/* Modern Logo */}
+        {/* Logo */}
         <div className="mb-5">
-          <ModernLogo />
+          <img src={logoDb} alt="dateBetter" className="w-24 h-24 sm:w-28 sm:h-28 rounded-full drop-shadow-lg" />
         </div>
 
         {/* Logo Text */}

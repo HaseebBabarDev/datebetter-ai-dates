@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Heart, Shield, Sparkles, Users, Target, Award } from "lucide-react";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo-db.png";
 
 export default function About() {
   const navigate = useNavigate();

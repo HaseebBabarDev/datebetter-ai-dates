@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { WifiOff, RefreshCw } from "lucide-react";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo-db.png";
 
 export default function Offline() {
   const handleRetry = () => {

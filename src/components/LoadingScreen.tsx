@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo-db.png";
 
 interface LoadingScreenProps {
   minDuration?: number;
