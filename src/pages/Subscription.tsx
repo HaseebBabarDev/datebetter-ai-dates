@@ -338,8 +338,8 @@ export default function Subscription() {
                 <ul className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
                   {[
                     "Unlimited interactions for 24 hours",
-                    "Unlimited text simulator sessions",
-                    "Unlimited AI messages",
+                    "20 text simulator conversations",
+                    "Unlimited D.E.V.I. messages",
                     "All premium features unlocked",
                   ].map((f) => (
                     <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground">
