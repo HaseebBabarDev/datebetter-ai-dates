@@ -309,7 +309,7 @@ const Hero = () => {
             </motion.h1>
 
             <motion.p variants={fadeUp} className="text-base lg:text-lg text-muted-foreground max-w-lg mb-6 lg:mb-8 leading-relaxed">
-              Give the group chat a break. dateBetter tracks, scores, and analyzes your dating life with real data — not opinions. No fluff. Just real advice.
+              Give the group chat a break. dateBetter is the relationship intelligence platform that tracks, scores, and analyzes your dating life with structured data — not opinions. Not just a chatbot. A behavioral operating system for your dating life.
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
@@ -429,7 +429,7 @@ const Hero = () => {
 /* ─── Stats banner ─── */
 const StatsBanner = () => {
   const s1 = useCounter(40);
-  const s2 = useCounter(500);
+  const s2 = useCounter(10000);
   const s3 = useCounter(24);
 
   return (
@@ -443,8 +443,8 @@ const StatsBanner = () => {
           className="grid grid-cols-3 gap-6 text-center"
         >
           {[
-            { ref: s1.ref, count: s1.count, suffix: "+", label: "Compatibility Dimensions" },
-            { ref: s2.ref, count: s2.count, suffix: "+", label: "Beta Testers" },
+            { ref: s1.ref, count: s1.count, suffix: "+", label: "Beta Users" },
+            { ref: s2.ref, count: s2.count, suffix: "", label: "Ready Infrastructure" },
             { ref: s3.ref, count: s3.count, suffix: "/7", label: "AI Available" },
           ].map((s) => (
             <motion.div key={s.label} variants={scaleIn}>
@@ -472,16 +472,15 @@ const Problem = () => (
           Nobody helps you <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">choose wisely</span>.
         </motion.h2>
         <motion.p variants={fadeUp} className="text-muted-foreground text-lg leading-relaxed mb-12">
-          After the match, you're on your own. Ignoring red flags, repeating toxic patterns,
-          and hoping this time is different. dateBetter changes that.
+          People are already using AI for dating advice. They paste texts into ChatGPT. They crowdsource red flags on Reddit. They bring early dating confusion into $200/hour therapy sessions. The behavior is already there — the infrastructure isn't.
         </motion.p>
       </motion.div>
 
       <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="grid md:grid-cols-3 gap-6">
         {[
-          { icon: AlertTriangle, title: "Blind Spots", desc: "You miss the same red flags every time because emotions override logic." },
-          { icon: TrendingUp, title: "Repeating Patterns", desc: "Without data, you keep choosing the same type of person who doesn't align with your values." },
-          { icon: MessageCircle, title: "Bad Advice", desc: "Friends mean well, but they don't know your patterns. Generic AI doesn't know you at all." },
+          { icon: AlertTriangle, title: "No Memory", desc: "Generic AI has no memory across sessions and no behavioral pattern detection." },
+          { icon: TrendingUp, title: "No Framework", desc: "No structured decision framework. No compatibility scoring. No dating-specific context." },
+          { icon: MessageCircle, title: "Generic Advice", desc: "Friends mean well, but they don't know your patterns. Generic AI gives generic advice." },
         ].map((item, i) => (
           <MagneticCard key={item.title} className="cursor-default">
             <motion.div
@@ -952,7 +951,7 @@ const Footer = () => {
               dateBetter
             </span>
             <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-              Data for Dating. AI-backed relationship intelligence for anyone who's serious about getting it right.
+              AI-powered relationship intelligence for modern dating. The operating system for relationship decisions.
             </p>
           </div>
           <div>
