@@ -45,7 +45,7 @@ export function ThemeSelector() {
         {/* Color Scheme Selection */}
         <div className="space-y-3">
           <Label className="text-sm font-medium text-muted-foreground">Color Scheme</Label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {colorSchemes.map((scheme) => (
               <button
                 key={scheme.value}
