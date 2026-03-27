@@ -30,8 +30,7 @@ export const DeviCTA = () => {
           </div>
           {!isPaidPlan && (
             <span className="ml-auto flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-white/20 text-primary-foreground">
-              <Lock className="w-3 h-3" />
-              Premium
+              5 free messages
             </span>
           )}
         </div>
@@ -77,20 +76,11 @@ export const DeviCTA = () => {
 
         {/* CTA Button */}
         <Button
-          className={`w-full gap-2 ${isPaidPlan ? "bg-[image:var(--gradient-hero)] hover:opacity-90" : "bg-muted hover:bg-muted/80 text-muted-foreground"}`}
-          onClick={() => isPaidPlan ? navigate("/devi") : navigate("/settings?tab=billing")}
+          className="w-full gap-2 bg-[image:var(--gradient-hero)] hover:opacity-90"
+          onClick={() => navigate("/devi")}
         >
-          {isPaidPlan ? (
-            <>
-              <MessageCircle className="w-4 h-4" />
-              Chat with D.E.V.I.
-            </>
-          ) : (
-            <>
-              <Lock className="w-4 h-4" />
-              Upgrade to Unlock
-            </>
-          )}
+          <MessageCircle className="w-4 h-4" />
+          {isPaidPlan ? "Chat with D.E.V.I." : "Try D.E.V.I. Free"}
           <ArrowRight className="w-4 h-4 ml-auto" />
         </Button>
       </div>
