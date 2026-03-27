@@ -659,16 +659,22 @@ export function AdminUserManagement() {
                     
                     <Select
                       disabled={managingSubscription === userProfile.user_id}
-                      onValueChange={(value) => handleSetTrial(userProfile.user_id, parseInt(value))}
+                      onValueChange={(value) => {
+                        const [days, plan] = value.split(':');
+                        handleSetTrial(userProfile.user_id, parseInt(days), plan || undefined);
+                      }}
                     >
                       <SelectTrigger className="h-9 text-xs">
                         <SelectValue placeholder="Trial" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="30">30 Days</SelectItem>
-                        <SelectItem value="60">60 Days</SelectItem>
-                        <SelectItem value="90">90 Days</SelectItem>
-                        <SelectItem value="0">Remove</SelectItem>
+                        <SelectItem value="30:starter">30d Plus ($15.99)</SelectItem>
+                        <SelectItem value="60:starter">60d Plus ($15.99)</SelectItem>
+                        <SelectItem value="90:starter">90d Plus ($15.99)</SelectItem>
+                        <SelectItem value="30:unlimited">30d Unlimited ($29.99)</SelectItem>
+                        <SelectItem value="60:unlimited">60d Unlimited ($29.99)</SelectItem>
+                        <SelectItem value="90:unlimited">90d Unlimited ($29.99)</SelectItem>
+                        <SelectItem value="0">Remove Trial</SelectItem>
                       </SelectContent>
                     </Select>
                     
