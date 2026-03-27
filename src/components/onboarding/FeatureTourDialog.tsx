@@ -375,7 +375,7 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && handleSkip()}>
-      <DialogContent className="max-w-[320px] sm:max-w-xs p-0 gap-0 overflow-hidden border-0">
+      <DialogContent className="max-w-[320px] sm:max-w-xs p-0 gap-0 overflow-hidden border-0 bg-background backdrop-blur-none">
         {/* Top controls */}
         <div className="absolute top-4 left-4 right-4 z-10 flex justify-between">
           {/* Mute toggle */}
