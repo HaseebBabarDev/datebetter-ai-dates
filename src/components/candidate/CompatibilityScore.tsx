@@ -378,24 +378,24 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   };
 
   const breakdownItems = [
-    { key: "values_alignment", label: "Values", color: "hsl(var(--primary))" },
-    { key: "lifestyle_compatibility", label: "Lifestyle", color: "#f97316" },
-    { key: "emotional_compatibility", label: "Emotional", color: "#a855f7" },
-    { key: "chemistry_score", label: "Chemistry", color: "#fbbf24" },
+    { key: "values_alignment", label: "Values", color: "#34d399" },
+    { key: "lifestyle_compatibility", label: "Lifestyle", color: "#a7f3d0" },
+    { key: "emotional_compatibility", label: "Emotional", color: "#6ee7b7" },
+    { key: "chemistry_score", label: "Chemistry", color: "#10b981" },
   ];
 
-  // Rainbow Arc Component - Feminine pink/purple palette with interactivity
+  // Rainbow Arc Component - Emerald/green palette consistent with app theme
   const RainbowArc = () => {
     const breakdown = scoreData?.breakdown;
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     if (!breakdown) return null;
 
-    // Feminine pink/purple color palette
+    // Emerald/teal color palette matching app theme
     const scores = [
-      { label: "Chemistry", score: breakdown.chemistry_score, color: "#f472b6" },      // Pink 400
-      { label: "Values", score: breakdown.values_alignment, color: "#fb923c" },        // Orange 400
-      { label: "Emotional", score: breakdown.emotional_compatibility, color: "#c4b5fd" }, // Violet 300
-      { label: "Lifestyle", score: breakdown.lifestyle_compatibility, color: "#fda4af" }, // Rose 300
+      { label: "Chemistry", score: breakdown.chemistry_score, color: "#10b981" },      // Emerald 500
+      { label: "Values", score: breakdown.values_alignment, color: "#34d399" },        // Emerald 400
+      { label: "Emotional", score: breakdown.emotional_compatibility, color: "#6ee7b7" }, // Emerald 300
+      { label: "Lifestyle", score: breakdown.lifestyle_compatibility, color: "#a7f3d0" }, // Emerald 200
     ].sort((a, b) => b.score - a.score);
 
     return (
