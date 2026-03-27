@@ -18,12 +18,11 @@ import { ZODIAC_SIGNS, getZodiacFromBirthDate } from "@/lib/zodiacUtils";
 
 const AppearanceScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
-  const { colorScheme, themeMode, setColorScheme, toggleDarkMode } = useTheme();
+  const { themeMode, toggleDarkMode } = useTheme();
   
   const [zodiacModeEnabled, setZodiacModeEnabled] = useState(data.zodiacModeEnabled ?? false);
   const [zodiacSign, setZodiacSign] = useState(data.zodiacSign || "");
 
-  // Auto-calculate zodiac from birth date if available
   useEffect(() => {
     if (data.birthDate && !zodiacSign) {
       const calculated = getZodiacFromBirthDate(data.birthDate);
@@ -50,32 +49,6 @@ const AppearanceScreen = () => {
     });
     nextStep();
   };
-
-  const colorSchemes: { 
-    value: ColorScheme; 
-    label: string; 
-    description: string; 
-    icon: React.ReactNode; 
-    preview: string;
-    gradient: string;
-  }[] = [
-    {
-      value: "original",
-      label: "Rose",
-      description: "Warm pink & rose tones",
-      icon: <Heart className="w-6 h-6" />,
-      preview: "bg-gradient-to-r from-pink-500 to-rose-400",
-      gradient: "from-pink-500/20 to-rose-400/20",
-    },
-    {
-      value: "blue",
-      label: "Ocean",
-      description: "Cool blue & slate tones",
-      icon: <Waves className="w-6 h-6" />,
-      preview: "bg-gradient-to-r from-blue-500 to-cyan-400",
-      gradient: "from-blue-500/20 to-cyan-400/20",
-    },
-  ];
 
   return (
     <OnboardingLayout
