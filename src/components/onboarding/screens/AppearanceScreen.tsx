@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
-import { useTheme, ColorScheme } from "@/contexts/ThemeContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Heart, Waves, Moon, Sun, Sparkles, Star } from "lucide-react";
+import { Moon, Sun, Sparkles, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -88,57 +88,6 @@ const AppearanceScreen = () => {
         <div className="flex justify-center mb-2">
           <div className="w-16 h-16 rounded-2xl bg-[image:var(--gradient-hero)] flex items-center justify-center shadow-[var(--shadow-glow)]">
             <Sparkles className="w-8 h-8 text-primary-foreground" />
-          </div>
-        </div>
-
-        {/* Color Scheme Selection */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium text-muted-foreground block text-center">
-            Color Theme
-          </Label>
-          <div className="grid grid-cols-2 gap-4">
-            {colorSchemes.map((scheme) => (
-              <button
-                key={scheme.value}
-                onClick={() => setColorScheme(scheme.value)}
-                className={cn(
-                  "relative flex flex-col items-center p-5 rounded-2xl border-2 transition-all duration-300",
-                  colorScheme === scheme.value
-                    ? "border-primary bg-primary/5 shadow-lg scale-[1.02]"
-                    : "border-border hover:border-primary/50 hover:bg-muted/50"
-                )}
-              >
-                {/* Preview gradient background */}
-                <div className={cn(
-                  "absolute inset-0 rounded-2xl bg-gradient-to-br opacity-30",
-                  scheme.gradient
-                )} />
-                
-                {/* Preview bar */}
-                <div className={cn("w-full h-2 rounded-full mb-4 relative z-10", scheme.preview)} />
-                
-                <div className={cn(
-                  "w-14 h-14 rounded-xl flex items-center justify-center mb-3 relative z-10 transition-all",
-                  colorScheme === scheme.value 
-                    ? scheme.preview + " text-white shadow-lg" 
-                    : "bg-muted text-muted-foreground"
-                )}>
-                  {scheme.icon}
-                </div>
-                
-                <span className="font-semibold text-base relative z-10">{scheme.label}</span>
-                <span className="text-xs text-muted-foreground mt-1 relative z-10">{scheme.description}</span>
-                
-                {/* Check indicator */}
-                {colorScheme === scheme.value && (
-                  <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-primary flex items-center justify-center shadow-md">
-                    <svg className="w-4 h-4 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                )}
-              </button>
-            ))}
           </div>
         </div>
 
