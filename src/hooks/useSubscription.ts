@@ -108,7 +108,7 @@ export function useSubscription() {
       case "free": return { candidates: 1, updates: interactionLimit, aiMessages: 5, textSimSessions: 0, compatRefreshPerCandidate: 0 };
       case "basic": return { candidates: 5, updates: 300, aiMessages: 300, textSimSessions: 1, compatRefreshPerCandidate: 5 };
       case "starter": return { candidates: 10, updates: 999, aiMessages: 1000, textSimSessions: 5, compatRefreshPerCandidate: 10 };
-      case "unlimited": return { candidates: 999, updates: 999, aiMessages: 999999, textSimSessions: 999, compatRefreshPerCandidate: 999 };
+      case "unlimited": return { candidates: 999, updates: 999, aiMessages: 999999, textSimSessions: 20, compatRefreshPerCandidate: 999 };
       default: return { candidates: 1, updates: interactionLimit, aiMessages: 5, textSimSessions: 0, compatRefreshPerCandidate: 0 };
     }
   };

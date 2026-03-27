@@ -43,7 +43,7 @@ const PLAN_OPTIONS = [
     price: "$29.99",
     candidates: "Unlimited",
     deviMessages: "Unlimited",
-    textSim: "Unlimited",
+    textSim: "20 conversations",
     compatRefresh: "Unlimited",
   },
 ];

@@ -1239,7 +1239,7 @@ const Settings = () => {
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["Unlimited candidates", "Unlimited D.E.V.I. messages", "Unlimited text simulator", "Unlimited compatibility refreshes", "Red flag detection", "Advanced behavioral analytics", "Priority support"].map((f) => (
+                    {["Unlimited candidates", "Unlimited D.E.V.I. messages", "20 text simulator conversations", "Unlimited compatibility refreshes", "Red flag detection", "Priority support"].map((f) => (
                       <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Check className="w-4 h-4 text-green-500 shrink-0" />
                         <span>{f}</span>
