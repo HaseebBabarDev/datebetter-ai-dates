@@ -66,10 +66,9 @@ const plans = [
     features: [
       "Unlimited candidates",
       "Unlimited D.E.V.I. messages",
-      "Unlimited text simulator",
+      "20 text simulator conversations",
       "Unlimited compatibility refreshes",
       "Red flag detection",
-      "Advanced behavioral analytics",
       "Priority support",
     ],
     popular: true,
