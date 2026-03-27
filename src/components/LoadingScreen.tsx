@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import logo from "@/assets/logo-splash.png";
+import logo from "@/assets/logo-db.png";
 
 interface LoadingScreenProps {
   minDuration?: number;
@@ -42,11 +42,11 @@ export function LoadingScreen({ minDuration = 800, onComplete }: LoadingScreenPr
     <div className="fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center safe-area-inset animate-fade-in">
       {/* Logo with pulse animation */}
       <div className="relative mb-8">
-        <div className="absolute inset-0 w-28 h-28 rounded-full bg-primary/20 blur-xl animate-pulse" />
+        <div className="absolute inset-0 w-24 h-24 rounded-full bg-primary/30 blur-xl animate-pulse" />
         <img 
           src={logo} 
           alt="dateBetter" 
-          className="relative w-28 h-28 drop-shadow-lg object-contain"
+          className="relative w-24 h-24 rounded-full shadow-xl ring-2 ring-primary/40 ring-offset-2 ring-offset-background object-cover"
         />
       </div>
 
