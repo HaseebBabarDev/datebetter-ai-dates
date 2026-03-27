@@ -16,18 +16,27 @@ Deno.serve(async (req) => {
       throw new Error('No authorization header');
     }
 
-    const supabaseClient = createClient(
+    // Use anon key client for auth check
+    const anonClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    // Use service role client for admin operations
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { persistSession: false } }
+    );
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError || !user) {
       throw new Error('Unauthorized');
     }
 
-    // Verify requesting user is admin
+    // Verify requesting user is admin using service role client (bypasses RLS)
     const { data: adminCheck } = await supabaseClient
       .from('user_roles')
       .select('role')
