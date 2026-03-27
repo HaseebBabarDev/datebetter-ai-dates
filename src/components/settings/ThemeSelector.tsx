@@ -3,7 +3,7 @@ import { useTheme, ColorScheme, ThemeMode } from "@/contexts/ThemeContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Palette, Moon, Sun, Heart, Waves } from "lucide-react";
+import { Palette, Moon, Sun, Heart, Waves, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function ThemeSelector() {
@@ -12,17 +12,24 @@ export function ThemeSelector() {
   const colorSchemes: { value: ColorScheme; label: string; description: string; icon: React.ReactNode; preview: string }[] = [
     {
       value: "original",
-      label: "Original",
+      label: "Rose",
       description: "Warm pink & rose tones",
       icon: <Heart className="w-5 h-5" />,
       preview: "bg-gradient-to-r from-pink-500 to-rose-400",
     },
     {
       value: "blue",
-      label: "Blue",
+      label: "Ocean",
       description: "Cool blue & slate tones",
       icon: <Waves className="w-5 h-5" />,
       preview: "bg-gradient-to-r from-blue-500 to-cyan-400",
+    },
+    {
+      value: "green",
+      label: "Emerald",
+      description: "Fresh green & teal tones",
+      icon: <Leaf className="w-5 h-5" />,
+      preview: "bg-gradient-to-r from-emerald-500 to-teal-400",
     },
   ];
 
@@ -38,7 +45,7 @@ export function ThemeSelector() {
         {/* Color Scheme Selection */}
         <div className="space-y-3">
           <Label className="text-sm font-medium text-muted-foreground">Color Scheme</Label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {colorSchemes.map((scheme) => (
               <button
                 key={scheme.value}

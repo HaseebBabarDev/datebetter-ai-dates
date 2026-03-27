@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-export type ColorScheme = "original" | "blue";
+export type ColorScheme = "original" | "blue" | "green";
 export type ThemeMode = "light" | "dark";
 
 interface ThemeContextType {
@@ -34,7 +34,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Apply color scheme class
-    document.documentElement.classList.remove("theme-original", "theme-blue");
+    document.documentElement.classList.remove("theme-original", "theme-blue", "theme-green");
     document.documentElement.classList.add(`theme-${colorScheme}`);
     localStorage.setItem(STORAGE_KEY_COLOR, colorScheme);
   }, [colorScheme]);
