@@ -19,7 +19,7 @@ const STORAGE_KEY_MODE = "devi-theme-mode";
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [colorScheme, setColorSchemeState] = useState<ColorScheme>(() => {
     const stored = localStorage.getItem(STORAGE_KEY_COLOR);
-    return (stored as ColorScheme) || "original";
+    return (stored as ColorScheme) || "green";
   });
 
   const [themeMode, setThemeModeState] = useState<ThemeMode>(() => {
