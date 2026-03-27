@@ -93,7 +93,7 @@ serve(async (req) => {
           trialActive = true;
           trialEndsAt = trialEnd.toISOString();
           // Use the plan stored in user_subscriptions for the trial tier
-          trialPlan = subData.plan || "starter";
+          trialPlan = DB_PLAN_TO_FRONTEND[subData.plan] || subData.plan || "starter";
           logStep("Active trial found", { trialEndsAt, trialPlan });
         }
       }

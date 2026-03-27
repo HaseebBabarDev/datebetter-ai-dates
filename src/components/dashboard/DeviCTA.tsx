@@ -14,6 +14,7 @@ export const DeviCTA = () => {
   const { subscription } = useSubscription();
   
   const isPaidPlan = subscription?.plan && subscription.plan !== "free";
+  const isFree = !isPaidPlan;
 
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
