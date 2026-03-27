@@ -117,9 +117,9 @@ const Splash = () => {
 
       {/* Content - scrollable within safe areas */}
       <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-5 py-6 overflow-y-auto" style={{ paddingTop: 'max(env(safe-area-inset-top), 1.5rem)', paddingBottom: 'max(env(safe-area-inset-bottom), 1.5rem)' }}>
-        {/* Modern Logo */}
+        {/* Logo */}
         <div className="mb-5">
-          <ModernLogo />
+          <img src={logoDb} alt="dateBetter" className="w-24 h-24 sm:w-28 sm:h-28 rounded-full drop-shadow-lg" />
         </div>
 
         {/* Logo Text */}
