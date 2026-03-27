@@ -30,12 +30,13 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError || !user) {
       throw new Error('Unauthorized');
     }
 
-    // Verify requesting user is admin
+    // Verify requesting user is admin using service role client (bypasses RLS)
     const { data: adminCheck } = await supabaseClient
       .from('user_roles')
       .select('role')
