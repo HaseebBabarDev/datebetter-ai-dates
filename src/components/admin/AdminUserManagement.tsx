@@ -340,7 +340,7 @@ export function AdminUserManagement() {
     }
   };
 
-  const handleSetTrial = async (userId: string, days: number) => {
+  const handleSetTrial = async (userId: string, days: number, plan?: string) => {
     setManagingSubscription(userId);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -350,6 +350,9 @@ export function AdminUserManagement() {
         return;
       }
 
+      const body: any = { targetUserId: userId, trialDays: days };
+      if (plan) body.plan = plan;
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-manage-subscription`,
         {
@@ -358,7 +361,7 @@ export function AdminUserManagement() {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${session.access_token}`,
           },
-          body: JSON.stringify({ targetUserId: userId, trialDays: days }),
+          body: JSON.stringify(body),
         }
       );
 
