@@ -18,6 +18,15 @@ const PRODUCT_TO_PLAN: Record<string, string> = {
   "prod_U5Ba2gOJLLzLpj": "unlimited",
 };
 
+// Map DB enum values to frontend plan names
+const DB_PLAN_TO_FRONTEND: Record<string, string> = {
+  "free": "free",
+  "new_to_dating": "basic",
+  "dating_often": "starter",
+  "dating_more": "starter",
+  "unlimited": "unlimited",
+};
+
 function safeTimestamp(val: any): string | null {
   if (!val) return null;
   try {
@@ -70,6 +79,7 @@ serve(async (req) => {
     // Check for active trial in user_subscriptions
     let trialActive = false;
     let trialEndsAt: string | null = null;
+    let trialPlan = "starter";
     try {
       const { data: subData } = await supabaseClient
         .from("user_subscriptions")
@@ -82,7 +92,9 @@ serve(async (req) => {
         if (trialEnd > new Date()) {
           trialActive = true;
           trialEndsAt = trialEnd.toISOString();
-          logStep("Active trial found", { trialEndsAt });
+          // Use the plan stored in user_subscriptions for the trial tier
+          trialPlan = DB_PLAN_TO_FRONTEND[subData.plan] || subData.plan || "starter";
+          logStep("Active trial found", { trialEndsAt, trialPlan });
         }
       }
     } catch (e) {
@@ -94,7 +106,7 @@ serve(async (req) => {
       if (trialActive) {
         return new Response(JSON.stringify({
           subscribed: true,
-          plan: "starter",
+          plan: trialPlan,
           product_id: null,
           price_id: null,
           subscription_end: trialEndsAt,
@@ -176,7 +188,7 @@ serve(async (req) => {
 
     // If no active Stripe sub but trial is active, grant starter access
     const effectiveSubscribed = hasActiveSub || trialActive;
-    const effectivePlan = hasActiveSub ? plan : (trialActive ? "starter" : "free");
+    const effectivePlan = hasActiveSub ? plan : (trialActive ? trialPlan : "free");
     const effectiveEnd = hasActiveSub ? subscriptionEnd : (trialActive ? trialEndsAt : null);
 
     return new Response(JSON.stringify({

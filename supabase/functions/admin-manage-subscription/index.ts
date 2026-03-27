@@ -70,24 +70,38 @@ Deno.serve(async (req) => {
     }
 
     if (plan) {
-      updateData.plan = plan;
-      // Set limits based on plan
+      // Note: DB enum is {free, new_to_dating, dating_often, dating_more, unlimited}
+      // but check-subscription reads the plan and returns it as-is for trials
+      // We store the plan name that check-subscription will return
+      // For trial purposes, we just store it in the plan field
+      // The DB enum may not match - so we update limits but keep plan in the DB enum
       switch (plan) {
         case 'free':
+          updateData.plan = 'free';
           updateData.candidates_limit = 1;
           updateData.updates_per_candidate = 1;
           break;
+        case 'basic':
         case 'new_to_dating':
-          updateData.candidates_limit = 3;
+          updateData.plan = 'new_to_dating';
+          updateData.candidates_limit = 5;
           updateData.updates_per_candidate = 3;
           break;
+        case 'starter':
         case 'dating_often':
-          updateData.candidates_limit = 7;
+          updateData.plan = 'dating_often';
+          updateData.candidates_limit = 10;
           updateData.updates_per_candidate = 5;
           break;
         case 'dating_more':
+          updateData.plan = 'dating_more';
           updateData.candidates_limit = 20;
           updateData.updates_per_candidate = 10;
+          break;
+        case 'unlimited':
+          updateData.plan = 'unlimited';
+          updateData.candidates_limit = 999;
+          updateData.updates_per_candidate = 999;
           break;
       }
     }
