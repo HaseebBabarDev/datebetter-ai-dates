@@ -1146,7 +1146,7 @@ const Settings = () => {
                         <MessageCircle className="w-4 h-4 text-muted-foreground" />
                         <h4 className="font-semibold">Starter</h4>
                       </div>
-                      <p className="text-sm text-muted-foreground">5 candidates • 300 interactions</p>
+                      <p className="text-sm text-muted-foreground">5 candidates • 300 D.E.V.I. messages</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold">$9.99</p>
@@ -1154,7 +1154,7 @@ const Settings = () => {
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["Up to 5 candidates", "300 total interactions", "Compatibility scoring", "Red flag detection", "Cycle tracking"].map((f) => (
+                    {["Up to 5 candidates", "300 D.E.V.I. messages", "1 text simulator exchange (trial)", "5 compatibility refreshes / candidate", "Red flag detection", "Cycle tracking"].map((f) => (
                       <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Check className="w-4 h-4 text-green-500 shrink-0" />
                         <span>{f}</span>
@@ -1187,7 +1187,7 @@ const Settings = () => {
                         <Sparkles className="w-4 h-4 text-primary" />
                         <h4 className="font-semibold">Plus</h4>
                       </div>
-                      <p className="text-sm text-muted-foreground">10 candidates • 1,000 AI messages</p>
+                      <p className="text-sm text-muted-foreground">10 candidates • 1,000 D.E.V.I. messages</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold">$15.99</p>
@@ -1195,7 +1195,7 @@ const Settings = () => {
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["Up to 10 candidate profiles", "30 compatibility score updates", "1,000 AI messages / month", "Voice playback insights", "Cycle-aware insights"].map((f) => (
+                    {["Up to 10 candidates", "1,000 D.E.V.I. messages", "5 text simulator conversations", "10 compatibility refreshes / candidate", "Red flag detection", "Voice playback insights"].map((f) => (
                       <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Check className="w-4 h-4 text-green-500 shrink-0" />
                         <span>{f}</span>
@@ -1239,7 +1239,7 @@ const Settings = () => {
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["Unlimited candidate profiles", "Unlimited AI messages", "Unlimited score updates", "Everything in Starter", "Advanced behavioral analytics", "Priority support"].map((f) => (
+                    {["Unlimited candidates", "Unlimited D.E.V.I. messages", "Unlimited text simulator", "Unlimited compatibility refreshes", "Red flag detection", "Advanced behavioral analytics", "Priority support"].map((f) => (
                       <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Check className="w-4 h-4 text-green-500 shrink-0" />
                         <span>{f}</span>

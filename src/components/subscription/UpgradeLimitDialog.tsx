@@ -22,17 +22,19 @@ const PLAN_OPTIONS = [
     id: "basic",
     name: "Starter",
     price: "$9.99",
-    candidates: 1,
-    updates: "Unlimited",
-    aiMessages: 5,
+    candidates: 5,
+    deviMessages: 300,
+    textSim: "1 exchange (trial)",
+    compatRefresh: "5 / candidate",
   },
   {
     id: "starter",
     name: "Plus",
     price: "$15.99",
     candidates: 10,
-    updates: "Unlimited",
-    aiMessages: 1000,
+    deviMessages: "1,000",
+    textSim: "5 conversations",
+    compatRefresh: "10 / candidate",
     recommended: true,
   },
   {
@@ -40,8 +42,9 @@ const PLAN_OPTIONS = [
     name: "Unlimited",
     price: "$29.99",
     candidates: "Unlimited",
-    updates: "Unlimited",
-    aiMessages: "Unlimited",
+    deviMessages: "Unlimited",
+    textSim: "Unlimited",
+    compatRefresh: "Unlimited",
   },
 ];
 
@@ -107,15 +110,19 @@ export function UpgradeLimitDialog({
               <div className="space-y-1 text-sm text-muted-foreground mb-3">
                 <div className="flex items-center gap-2">
                   <Check className="w-3 h-3 text-green-500" />
-                  <span>{plan.candidates} candidate{plan.candidates !== 1 ? "s" : ""}</span>
+                  <span>{plan.candidates} candidate{typeof plan.candidates === "number" && plan.candidates !== 1 ? "s" : ""}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-3 h-3 text-green-500" />
-                  <span>{plan.updates} updates</span>
+                  <span>{plan.deviMessages} D.E.V.I. messages</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-3 h-3 text-green-500" />
-                  <span>{plan.aiMessages} AI messages</span>
+                  <span>Text simulator: {plan.textSim}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-3 h-3 text-green-500" />
+                  <span>{plan.compatRefresh} compatibility refreshes</span>
                 </div>
               </div>
               <Button
