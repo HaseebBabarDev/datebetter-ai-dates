@@ -34,6 +34,7 @@ import { ChatDemo } from "@/components/website/ChatDemo";
 import { ScreenshotDemo } from "@/components/website/ScreenshotDemo";
 import { PricingSection } from "@/components/website/PricingSection";
 import { TextSimulatorDemo } from "@/components/website/TextSimulatorDemo";
+import { HealingScoreDemo } from "@/components/website/HealingScoreDemo";
 import { useTheme } from "@/contexts/ThemeContext";
 
 /* ─── Shared animation variants ─── */
@@ -1077,40 +1078,46 @@ const InteractiveShowcase = () => (
         className="text-center max-w-2xl mx-auto mb-14"
       >
         <motion.h2 variants={fadeUp} className="font-poppins text-3xl sm:text-4xl font-bold text-foreground mb-4">
-          Try <span className="text-primary">D.E.V.I.</span> right now
+          Meet <span className="text-primary">D.E.V.I.</span> — your relationship intelligence engine
         </motion.h2>
         <motion.p variants={fadeUp} className="text-muted-foreground text-lg">
-          Type a real dating question below and see how your AI advisor responds.
+          It logs every interaction, maintains memory, detects patterns, and scores compatibility.
         </motion.p>
       </motion.div>
 
-      <div className="flex justify-center">
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="relative"
-        >
-          <motion.div
-            className="absolute -inset-10 bg-[image:var(--gradient-hero)] rounded-full blur-[70px] opacity-15"
-            animate={{ scale: [1.1, 1, 1.1], opacity: [0.1, 0.2, 0.1] }}
-            transition={{ duration: 6, repeat: Infinity }}
-          />
-          <IPhoneMockup>
-            <ChatDemo />
-          </IPhoneMockup>
-          <motion.p
-            className="text-center mt-4 text-sm font-semibold text-muted-foreground"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5 }}
-          >
-            Try it — type a question above!
-          </motion.p>
-        </motion.div>
-      </div>
+      {/* 4-phone showcase grid from pitch deck */}
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={stagger}
+        className="grid grid-cols-2 lg:grid-cols-4 gap-6 items-start"
+      >
+        {[
+          { label: "Screenshot Analysis", Demo: ScreenshotDemo },
+          { label: "Compatibility Engine", Demo: CompatibilityDemo },
+          { label: "Healing Journey", Demo: HealingScoreDemo },
+          { label: "D.E.V.I. Chat", Demo: ChatDemo },
+        ].map(({ label, Demo }) => (
+          <motion.div key={label} variants={fadeUp} className="flex flex-col items-center">
+            <p className="text-xs font-bold text-primary mb-4 uppercase tracking-wider">{label}</p>
+            <motion.div
+              className="relative"
+              whileHover={{ y: -8 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <motion.div
+                className="absolute -inset-6 bg-[image:var(--gradient-hero)] rounded-full blur-[50px] opacity-10"
+                animate={{ scale: [1, 1.1, 1], opacity: [0.08, 0.15, 0.08] }}
+                transition={{ duration: 5, repeat: Infinity }}
+              />
+              <div className="scale-[0.7] sm:scale-[0.75] lg:scale-[0.8] origin-top">
+                <IPhoneMockup><Demo /></IPhoneMockup>
+              </div>
+            </motion.div>
+          </motion.div>
+        ))}
+      </motion.div>
     </div>
   </section>
 );
