@@ -5,6 +5,7 @@ import { Users, MessageCircle, Sparkles, ArrowRight, Brain, Loader2 } from "luci
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import logoDb from "@/assets/logo-db.png";
+import logoSplash from "@/assets/logo-splash.png";
 
 const Splash = () => {
   const navigate = useNavigate();
@@ -118,8 +119,8 @@ const Splash = () => {
       {/* Content - scrollable within safe areas */}
       <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-5 py-6 overflow-y-auto" style={{ paddingTop: 'max(env(safe-area-inset-top), 1.5rem)', paddingBottom: 'max(env(safe-area-inset-bottom), 1.5rem)' }}>
         {/* Logo */}
-        <div className="mb-5 w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-white shadow-lg flex items-center justify-center">
-          <img src={logoDb} alt="dateBetter" className="w-28 h-28 sm:w-36 sm:h-36 drop-shadow-lg object-contain" />
+        <div className="mb-5">
+          <img src={logoSplash} alt="dateBetter" className="w-32 h-32 sm:w-40 sm:h-40 drop-shadow-lg object-contain" />
         </div>
 
         {/* Logo Text */}
