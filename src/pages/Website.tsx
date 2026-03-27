@@ -34,6 +34,7 @@ import { ChatDemo } from "@/components/website/ChatDemo";
 import { ScreenshotDemo } from "@/components/website/ScreenshotDemo";
 import { PricingSection } from "@/components/website/PricingSection";
 import { TextSimulatorDemo } from "@/components/website/TextSimulatorDemo";
+import { HealingScoreDemo } from "@/components/website/HealingScoreDemo";
 import { useTheme } from "@/contexts/ThemeContext";
 
 /* ─── Shared animation variants ─── */
@@ -309,7 +310,7 @@ const Hero = () => {
             </motion.h1>
 
             <motion.p variants={fadeUp} className="text-base lg:text-lg text-muted-foreground max-w-lg mb-6 lg:mb-8 leading-relaxed">
-              Give the group chat a break. dateBetter tracks, scores, and analyzes your dating life with real data — not opinions. No fluff. Just real advice.
+              Give the group chat a break. dateBetter is the relationship intelligence platform that tracks, scores, and analyzes your dating life with structured data — not opinions. Not just a chatbot. A behavioral operating system for your dating life.
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
@@ -429,7 +430,7 @@ const Hero = () => {
 /* ─── Stats banner ─── */
 const StatsBanner = () => {
   const s1 = useCounter(40);
-  const s2 = useCounter(500);
+  const s2 = useCounter(10000);
   const s3 = useCounter(24);
 
   return (
@@ -443,8 +444,8 @@ const StatsBanner = () => {
           className="grid grid-cols-3 gap-6 text-center"
         >
           {[
-            { ref: s1.ref, count: s1.count, suffix: "+", label: "Compatibility Dimensions" },
-            { ref: s2.ref, count: s2.count, suffix: "+", label: "Beta Testers" },
+            { ref: s1.ref, count: s1.count, suffix: "+", label: "Beta Users" },
+            { ref: s2.ref, count: s2.count, suffix: "", label: "Ready Infrastructure" },
             { ref: s3.ref, count: s3.count, suffix: "/7", label: "AI Available" },
           ].map((s) => (
             <motion.div key={s.label} variants={scaleIn}>
@@ -472,16 +473,15 @@ const Problem = () => (
           Nobody helps you <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">choose wisely</span>.
         </motion.h2>
         <motion.p variants={fadeUp} className="text-muted-foreground text-lg leading-relaxed mb-12">
-          After the match, you're on your own. Ignoring red flags, repeating toxic patterns,
-          and hoping this time is different. dateBetter changes that.
+          People are already using AI for dating advice. They paste texts into ChatGPT. They crowdsource red flags on Reddit. They bring early dating confusion into $200/hour therapy sessions. The behavior is already there — the infrastructure isn't.
         </motion.p>
       </motion.div>
 
       <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="grid md:grid-cols-3 gap-6">
         {[
-          { icon: AlertTriangle, title: "Blind Spots", desc: "You miss the same red flags every time because emotions override logic." },
-          { icon: TrendingUp, title: "Repeating Patterns", desc: "Without data, you keep choosing the same type of person who doesn't align with your values." },
-          { icon: MessageCircle, title: "Bad Advice", desc: "Friends mean well, but they don't know your patterns. Generic AI doesn't know you at all." },
+          { icon: AlertTriangle, title: "No Memory", desc: "Generic AI has no memory across sessions and no behavioral pattern detection." },
+          { icon: TrendingUp, title: "No Framework", desc: "No structured decision framework. No compatibility scoring. No dating-specific context." },
+          { icon: MessageCircle, title: "Generic Advice", desc: "Friends mean well, but they don't know your patterns. Generic AI gives generic advice." },
         ].map((item, i) => (
           <MagneticCard key={item.title} className="cursor-default">
             <motion.div
@@ -952,7 +952,7 @@ const Footer = () => {
               dateBetter
             </span>
             <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-              Data for Dating. AI-backed relationship intelligence for anyone who's serious about getting it right.
+              AI-powered relationship intelligence for modern dating. The operating system for relationship decisions.
             </p>
           </div>
           <div>
@@ -1078,40 +1078,46 @@ const InteractiveShowcase = () => (
         className="text-center max-w-2xl mx-auto mb-14"
       >
         <motion.h2 variants={fadeUp} className="font-poppins text-3xl sm:text-4xl font-bold text-foreground mb-4">
-          Try <span className="text-primary">D.E.V.I.</span> right now
+          Meet <span className="text-primary">D.E.V.I.</span> — your relationship intelligence engine
         </motion.h2>
         <motion.p variants={fadeUp} className="text-muted-foreground text-lg">
-          Type a real dating question below and see how your AI advisor responds.
+          It logs every interaction, maintains memory, detects patterns, and scores compatibility.
         </motion.p>
       </motion.div>
 
-      <div className="flex justify-center">
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="relative"
-        >
-          <motion.div
-            className="absolute -inset-10 bg-[image:var(--gradient-hero)] rounded-full blur-[70px] opacity-15"
-            animate={{ scale: [1.1, 1, 1.1], opacity: [0.1, 0.2, 0.1] }}
-            transition={{ duration: 6, repeat: Infinity }}
-          />
-          <IPhoneMockup>
-            <ChatDemo />
-          </IPhoneMockup>
-          <motion.p
-            className="text-center mt-4 text-sm font-semibold text-muted-foreground"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5 }}
-          >
-            Try it — type a question above!
-          </motion.p>
-        </motion.div>
-      </div>
+      {/* 4-phone showcase grid from pitch deck */}
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={stagger}
+        className="grid grid-cols-2 lg:grid-cols-4 gap-6 items-start"
+      >
+        {[
+          { label: "Screenshot Analysis", Demo: ScreenshotDemo },
+          { label: "Compatibility Engine", Demo: CompatibilityDemo },
+          { label: "Healing Journey", Demo: HealingScoreDemo },
+          { label: "D.E.V.I. Chat", Demo: ChatDemo },
+        ].map(({ label, Demo }) => (
+          <motion.div key={label} variants={fadeUp} className="flex flex-col items-center">
+            <p className="text-xs font-bold text-primary mb-4 uppercase tracking-wider">{label}</p>
+            <motion.div
+              className="relative"
+              whileHover={{ y: -8 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <motion.div
+                className="absolute -inset-6 bg-[image:var(--gradient-hero)] rounded-full blur-[50px] opacity-10"
+                animate={{ scale: [1, 1.1, 1], opacity: [0.08, 0.15, 0.08] }}
+                transition={{ duration: 5, repeat: Infinity }}
+              />
+              <div className="scale-[0.7] sm:scale-[0.75] lg:scale-[0.8] origin-top">
+                <IPhoneMockup><Demo /></IPhoneMockup>
+              </div>
+            </motion.div>
+          </motion.div>
+        ))}
+      </motion.div>
     </div>
   </section>
 );
