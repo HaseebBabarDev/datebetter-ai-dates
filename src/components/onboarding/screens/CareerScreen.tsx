@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { PartyPopper } from "lucide-react";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo-db.png";
 
 const careerOptions = [
   { value: "student", label: "Student", subtitle: "" },

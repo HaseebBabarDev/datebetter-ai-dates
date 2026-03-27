@@ -4,7 +4,7 @@ import { Eye, EyeOff, ChevronLeft, ChevronRight, ArrowLeft, Maximize2, Minimize2
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo-db.png";
 import logoTransparent from "@/assets/logo-transparent.png";
 import datebetterTextLogo from "@/assets/datebetter-text-logo.png";
 import { IPhoneMockup } from "@/components/website/IPhoneMockup";

@@ -39,7 +39,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo-db.png";
 
 type Candidate = Tables<"candidates">;
 type AdviceTracking = Tables<"advice_tracking">;
