@@ -16,10 +16,18 @@ Deno.serve(async (req) => {
       throw new Error('No authorization header');
     }
 
-    const supabaseClient = createClient(
+    // Use anon key client for auth check
+    const anonClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       { global: { headers: { Authorization: authHeader } } }
+    );
+
+    // Use service role client for admin operations
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { persistSession: false } }
     );
 
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
