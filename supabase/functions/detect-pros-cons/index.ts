@@ -137,7 +137,9 @@ Based on all this information, identify:
    - Doubts or hesitations expressed
    - Potential issues raised in D.E.V.I. conversations
 
-Keep each pro/con as a SHORT phrase (3-7 words). Focus on specific, actionable observations rather than vague statements. Write from the user's perspective (e.g., "Makes me laugh" not "Has humor").`;
+Keep each pro/con as a SHORT phrase (3-7 words). Focus on specific, actionable observations rather than vague statements. Write from the user's perspective (e.g., "Makes me laugh" not "Has humor").
+
+ANTI-RACISM GUARDRAIL: NEVER generate pros or cons based on someone's race, ethnicity, or cultural background. Race is never a pro or con. Focus strictly on behaviors, compatibility, and character.`;
 
     console.log("Calling AI gateway for pros/cons detection...");
 
@@ -150,7 +152,7 @@ Keep each pro/con as a SHORT phrase (3-7 words). Focus on specific, actionable o
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are D.E.V.I. (Dating Evaluation & Vetting Intelligence), helping users objectively evaluate dating candidates by identifying pros and cons based on their experiences and conversations." },
+          { role: "system", content: "You are D.E.V.I. (Dating Evaluation & Vetting Intelligence), helping users objectively evaluate dating candidates by identifying pros and cons based on their experiences and conversations. NEVER use racial slurs or generate racially biased pros/cons." },
           { role: "user", content: prompt }
         ],
         tools: [

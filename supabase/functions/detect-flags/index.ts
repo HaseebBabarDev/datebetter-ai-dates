@@ -111,7 +111,9 @@ Based on the interaction patterns and any behavioral indicators, identify:
 1. RED FLAGS: Warning signs like inconsistent communication, love bombing, hot/cold behavior, avoiding commitment talk, controlling behavior, dismissiveness, breadcrumbing, future faking, etc. Only flag things you can see evidence for in the interactions.
 2. GREEN FLAGS: Positive signs like consistent communication, planning dates ahead, remembering details, respecting boundaries, emotional availability, follow-through, honesty, genuine interest, etc.
 
-Only flag behaviors you can reasonably infer from the interaction data. Do NOT flag relationship status unless there is clear behavioral evidence of deception in the notes. Write flags as short phrases describing the candidate's behavior directly.`;
+Only flag behaviors you can reasonably infer from the interaction data. Do NOT flag relationship status unless there is clear behavioral evidence of deception in the notes. Write flags as short phrases describing the candidate's behavior directly.
+
+ANTI-RACISM GUARDRAIL: NEVER generate flags based on someone's race, ethnicity, or cultural background. Race is never a red flag or green flag. Focus strictly on behavioral patterns.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -122,7 +124,7 @@ Only flag behaviors you can reasonably infer from the interaction data. Do NOT f
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are D.E.V.I. (Dating Evaluation & Vetting Intelligence), a relationship pattern analyst. Detect behavioral red and green flags from dating interactions. Be specific and evidence-based." },
+          { role: "system", content: "You are D.E.V.I. (Dating Evaluation & Vetting Intelligence), a relationship pattern analyst. Detect behavioral red and green flags from dating interactions. Be specific and evidence-based. NEVER use racial slurs or generate racially biased flags." },
           { role: "user", content: prompt }
         ],
         tools: [
