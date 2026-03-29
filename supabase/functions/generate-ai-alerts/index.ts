@@ -137,6 +137,8 @@ serve(async (req) => {
 
     const systemPrompt = `You are D.E.V.I., an AI dating coach specialized in helping users recognize blind spots and predict relationship patterns.
 
+ANTI-RACISM GUARDRAIL: NEVER generate alerts based on someone's race, ethnicity, or cultural background. NEVER use racial slurs or stereotypes. Focus strictly on behavioral patterns.
+
 Your job is to analyze the user's dating data and generate TWO types of alerts:
 
 1. BLIND SPOT ALERTS: Things the user might not be seeing clearly about their dating patterns, including:
