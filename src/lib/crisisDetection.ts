@@ -53,6 +53,25 @@ const EXPLICIT_HARMFUL_KEYWORDS = [
   "molest", "molested", "molesting",
 ];
 
+// Racial slurs that should ALWAYS be blocked - zero tolerance
+// Users can discuss race/ethnicity freely, but slurs are never acceptable
+const RACIAL_SLURS = [
+  // Anti-Black slurs
+  "nigger", "nigga", "nigg3r", "n1gger", "n1gga", "nig nog", "coon", "darkie", "jigaboo", "sambo", "spook",
+  // Anti-Asian slurs
+  "chink", "gook", "slant eye", "slanteye", "zipperhead", "ch1nk", "ching chong", "chinaman",
+  // Anti-Latino/Hispanic slurs
+  "wetback", "beaner", "spic", "sp1c",
+  // Anti-Middle Eastern/South Asian slurs
+  "raghead", "towelhead", "sand nigger", "camel jockey",
+  // Anti-White slurs
+  "cracker",
+  // Anti-Indigenous slurs
+  "redskin", "injun", "prairie nigger",
+  // General ethnic slurs
+  "kike", "hymie", "wop", "dago", "polack", "mick",
+];
+
 // Words that are ONLY harmful when combined with sexual/romantic context
 // These MUST be about minors specifically
 const CONTEXT_SENSITIVE_MINOR_TERMS = [
@@ -187,6 +206,13 @@ export function detectCrisisContent(text: string): CrisisDetectionResult {
     }
   }
   
+  // Check for racial slurs (always blocked)
+  for (const slur of RACIAL_SLURS) {
+    if (lowerText.includes(slur.toLowerCase())) {
+      foundHarmful.push(slur);
+    }
+  }
+
   // Check explicit harmful keywords (always blocked - minors/incest)
   for (const keyword of EXPLICIT_HARMFUL_KEYWORDS) {
     if (lowerText.includes(keyword.toLowerCase())) {
