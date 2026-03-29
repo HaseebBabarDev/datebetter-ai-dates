@@ -139,7 +139,7 @@ Based on all this information, identify:
 
 Keep each pro/con as a SHORT phrase (3-7 words). Focus on specific, actionable observations rather than vague statements. Write from the user's perspective (e.g., "Makes me laugh" not "Has humor").
 
-ANTI-RACISM GUARDRAIL: NEVER generate pros or cons based on someone's race, ethnicity, or cultural background. Race is never a pro or con. Focus strictly on behaviors, compatibility, and character.`;
+ANTI-RACISM & ANTI-HOMOPHOBIA GUARDRAIL: NEVER generate pros or cons based on someone's race, ethnicity, sexual orientation, or gender identity. These are never pros or cons. Focus strictly on behaviors, compatibility, and character. NEVER use slurs of any kind.`;
 
     console.log("Calling AI gateway for pros/cons detection...");
 
@@ -152,7 +152,7 @@ ANTI-RACISM GUARDRAIL: NEVER generate pros or cons based on someone's race, ethn
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are D.E.V.I. (Dating Evaluation & Vetting Intelligence), helping users objectively evaluate dating candidates by identifying pros and cons based on their experiences and conversations. NEVER use racial slurs or generate racially biased pros/cons." },
+          { role: "system", content: "You are D.E.V.I. (Dating Evaluation & Vetting Intelligence), helping users objectively evaluate dating candidates by identifying pros and cons based on their experiences and conversations. NEVER use racial or homophobic slurs or generate biased pros/cons based on identity." },
           { role: "user", content: prompt }
         ],
         tools: [
