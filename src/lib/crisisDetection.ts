@@ -70,6 +70,10 @@ const RACIAL_SLURS = [
   "redskin", "injun", "prairie nigger",
   // General ethnic slurs
   "kike", "hymie", "wop", "dago", "polack", "mick",
+  // Anti-LGBTQ+ slurs
+  "faggot", "fag", "f4ggot", "f4g", "dyke", "tranny", "tr4nny", "shemale", "she-male",
+  "homo", "sodomite", "batty boy", "battyboy", "chi chi man", "chichi man",
+  "moffie", "pansy", "fairy", "nancy boy", "poofter", "poof",
 ];
 
 // Words that are ONLY harmful when combined with sexual/romantic context

@@ -137,6 +137,8 @@ APPROVE content that:
 REJECT content that:
 - Contains hate speech, harassment, or personal attacks
 - Contains racial slurs, ethnic slurs, or derogatory terms targeting any race or ethnicity (ZERO TOLERANCE - the N-word, Asian slurs, Latino slurs, etc. are NEVER acceptable)
+- Contains homophobic or transphobic slurs (ZERO TOLERANCE - the F-word for gay people, "tranny," etc. are NEVER acceptable)
+- Contains any language that demeans, mocks, or dehumanizes people based on sexual orientation or gender identity
 - Includes explicit sexual content or solicitation
 - Contains personal identifying information (names, addresses, phone numbers)
 - ENCOURAGES or PROMOTES violence or self-harm to OTHERS
