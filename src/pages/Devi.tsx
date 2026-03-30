@@ -954,12 +954,8 @@ const Devi = () => {
   }, [user, currentConversationId, startNewChat]);
 
   const handleImageUpload = (type: string) => {
-    // For image analysis, we need a candidate selected
-    if (!selectedCandidate) {
-      toast.error("Please select a candidate to analyze images");
-      return;
-    }
-    if (!canChatWithCandidate) {
+    // If a candidate is selected, check profile completion
+    if (selectedCandidate && !canChatWithCandidate) {
       setShowProfileDialog(true);
       return;
     }
