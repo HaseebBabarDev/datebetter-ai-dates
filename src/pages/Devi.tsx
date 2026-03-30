@@ -711,9 +711,15 @@ const Devi = () => {
       lastLoadedCandidateRef.current = stateKey;
       
       // Find most recent conversation for this candidate
-      const candidateConv = conversations.find(c => c.candidate_id === selectedCandidate.id);
+      const candidateConversations = conversations
+        .filter(c => c.candidate_id === selectedCandidate.id)
+        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+      const candidateConv = candidateConversations[0];
       
       if (candidateConv) {
+        // Don't overwrite optimistic UI while a message is actively being sent
+        if (isLoading) return;
+
         // Load the existing conversation
         const { data: messagesData } = await supabase
           .from("devi_messages")
@@ -729,13 +735,13 @@ const Devi = () => {
             imageData: m.image_url || undefined,
           })));
           setCurrentConversationId(candidateConv.id);
-        } else {
-          // Conversation exists but no messages, start fresh
+        } else if (!currentConversationId && messages.length === 0) {
+          // Only reset if we're truly starting fresh, not if user just added unsaved optimistic content
           setMessages([]);
           setCurrentConversationId(null);
         }
-      } else {
-        // No existing conversation, start fresh
+      } else if (!currentConversationId && messages.length === 0) {
+        // No existing conversation, start fresh only when there is no active/optimistic chat state
         setMessages([]);
         setCurrentConversationId(null);
       }
