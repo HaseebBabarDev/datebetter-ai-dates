@@ -241,6 +241,80 @@ Please give me a personalized step-by-step action plan based on where I am right
     );
   }
 
+  // Profile completeness gate — require 60% before giving advice
+  if (isProfileIncomplete) {
+    const completenessRadius = 28;
+    const completenessCirc = 2 * Math.PI * completenessRadius;
+    const completenessOffset = completenessCirc - (profileCompleteness / 100) * completenessCirc;
+    return (
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+        <Card className="border-amber-500/30 bg-card/90 backdrop-blur-sm overflow-hidden">
+          <div className="bg-amber-500/90 px-4 py-4">
+            <div className="flex items-center gap-3">
+              <div className="relative flex-shrink-0">
+                <svg width="64" height="64" className="transform -rotate-90">
+                  <circle cx="32" cy="32" r={completenessRadius} stroke="rgba(255,255,255,0.2)" strokeWidth="4" fill="none" />
+                  <circle
+                    cx="32" cy="32" r={completenessRadius}
+                    stroke="white" strokeWidth="4" fill="none"
+                    strokeDasharray={completenessCirc}
+                    strokeDashoffset={completenessOffset}
+                    strokeLinecap="round"
+                    className="transition-all duration-700"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">{profileCompleteness}%</span>
+                </div>
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">D.E.V.I. needs to know you first</h3>
+                <p className="text-xs text-white/80">Complete at least 60% of your profile for a dating plan</p>
+              </div>
+            </div>
+          </div>
+
+          <CardContent className="p-4 space-y-3">
+            <p className="text-sm text-muted-foreground text-center">
+              Your profile is <span className="font-semibold text-foreground">{profileCompleteness}%</span> complete. 
+              D.E.V.I. can't build a meaningful plan without understanding your goals, attachment style, and preferences.
+            </p>
+
+            <div className="space-y-2">
+              <Button
+                size="sm"
+                className="w-full gap-2 text-xs bg-[image:var(--gradient-hero)] hover:opacity-90"
+                onClick={() => { onDismiss(); navigate("/settings"); }}
+              >
+                <Edit2 className="w-4 h-4" />
+                Complete my profile
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full gap-2 text-xs"
+                onClick={() => { onDismiss(); navigate("/self-discovery"); }}
+              >
+                <Sparkles className="w-4 h-4" />
+                Take self-discovery quizzes
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-xs text-muted-foreground"
+                onClick={onDismiss}
+              >
+                Dismiss
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
+
   // Unhealthy score gate — show redirect instead of plan
   if (isUnhealthy) {
     const candidateName = candidate?.nickname || "this person";
