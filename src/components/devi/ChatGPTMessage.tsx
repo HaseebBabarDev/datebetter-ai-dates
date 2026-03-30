@@ -336,6 +336,49 @@ export const ChatGPTMessage: React.FC<ChatGPTMessageProps> = ({
         </div>
       )}
       
+      {/* "Ready for next step" CTA — detect step prompts in dating plan flow */}
+      {showQuickReplies && (() => {
+        const stepMatch = message.content.match(/Ready for Step (\d)/i) 
+          || message.content.match(/want to (?:move on to|dive into|see) Step (\d)/i)
+          || message.content.match(/shall we (?:move to|go to|look at) Step (\d)/i)
+          || message.content.match(/let'?s (?:move to|go to|head to) Step (\d)/i);
+        const adjustMatch = message.content.match(/want to adjust/i) || message.content.match(/check in on your progress/i);
+        
+        if (stepMatch) {
+          const nextStep = stepMatch[1];
+          return (
+            <div className="pl-9 mt-3">
+              <button
+                onClick={() => onQuickReply!(`Ready for Step ${nextStep}`)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-[image:var(--gradient-hero)] text-primary-foreground text-sm font-semibold shadow-md hover:opacity-90 transition-opacity"
+              >
+                <ArrowRight className="w-4 h-4" />
+                Ready for Step {nextStep}
+              </button>
+            </div>
+          );
+        }
+        if (adjustMatch) {
+          return (
+            <div className="pl-9 mt-3 flex gap-2">
+              <button
+                onClick={() => onQuickReply!("Let's adjust some steps")}
+                className="flex-1 px-4 py-3 rounded-2xl border border-primary/30 text-primary text-sm font-semibold hover:bg-primary/10 transition-colors"
+              >
+                Adjust steps
+              </button>
+              <button
+                onClick={() => onQuickReply!("Check in on my progress in a few days")}
+                className="flex-1 px-4 py-3 rounded-2xl bg-[image:var(--gradient-hero)] text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
+              >
+                Check in later
+              </button>
+            </div>
+          );
+        }
+        return null;
+      })()}
+
       {/* Quick replies */}
       {showQuickReplies && (
         <div className="pl-9 mt-4 flex flex-wrap gap-2">
