@@ -235,8 +235,8 @@ Please give me a personalized step-by-step action plan based on where I am right
               </div>
             </div>
             <div>
-              <h3 className="text-sm font-bold text-primary-foreground">Dating Advisor Mode</h3>
-              <p className="text-xs text-primary-foreground/80">Confirm your goals to get started</p>
+              <h3 className="text-sm font-bold text-primary-foreground">My Dating Plan</h3>
+              <p className="text-xs text-primary-foreground/80">Review your goals to get your step-by-step plan</p>
             </div>
           </div>
         </div>
