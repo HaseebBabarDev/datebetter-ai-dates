@@ -36,6 +36,7 @@ interface DatingAdvisorCardProps {
   candidate?: any;
   onConfirm: (summary: string) => void;
   onDismiss: () => void;
+  existingMessages?: { role: string; content: string }[];
 }
 
 // Thresholds for "not healthy to proceed"
