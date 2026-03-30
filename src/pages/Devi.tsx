@@ -2287,7 +2287,13 @@ const Devi = () => {
                           <MessageBubble 
                             message={msg} 
                             isLast={isLastMsg}
-                            onQuickReply={(reply) => sendMessage(reply)}
+                            onQuickReply={(reply) => {
+                              if (reply === "Be my dating advisor") {
+                                setShowDatingAdvisorCard(true);
+                              } else {
+                                sendMessage(reply);
+                              }
+                            }}
                             isLoading={isLoading}
                           />
                         )}
