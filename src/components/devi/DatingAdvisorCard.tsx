@@ -89,7 +89,7 @@ export const DatingAdvisorCard: React.FC<DatingAdvisorCardProps> = ({
     }
 
     // Build summary for D.E.V.I.
-    const summary = `Be my dating advisor. Here are my confirmed goals:
+    const summary = `Here's my dating plan. My confirmed goals:
 - Relationship Goal: ${currentGoalLabel}
 - Current Status: ${currentStatusLabel}
 - Key Dealbreakers: ${selectedDealbreakers.length > 0 ? selectedDealbreakers.join(", ") : "None specified"}
@@ -235,8 +235,8 @@ Please give me a personalized step-by-step action plan based on where I am right
               </div>
             </div>
             <div>
-              <h3 className="text-sm font-bold text-primary-foreground">Dating Advisor Mode</h3>
-              <p className="text-xs text-primary-foreground/80">Confirm your goals to get started</p>
+              <h3 className="text-sm font-bold text-primary-foreground">My Dating Plan</h3>
+              <p className="text-xs text-primary-foreground/80">Review your goals to get your step-by-step plan</p>
             </div>
           </div>
         </div>
