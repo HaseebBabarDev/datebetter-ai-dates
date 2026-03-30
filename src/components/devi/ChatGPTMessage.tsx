@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Sparkles, ChevronDown, ChevronUp, ClipboardList } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronUp, ClipboardList, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VoicePlayButton } from "./VoicePlayButton";
 import { Button } from "@/components/ui/button";
