@@ -225,6 +225,113 @@ Please give me a personalized step-by-step action plan based on where I am right
     );
   }
 
+  // Unhealthy score gate — show redirect instead of plan
+  if (isUnhealthy) {
+    const candidateName = candidate?.nickname || "this person";
+    return (
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+        <Card className="border-destructive/30 bg-card/90 backdrop-blur-sm overflow-hidden">
+          <div className="bg-destructive/90 px-4 py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0">
+                <ShieldAlert className="w-6 h-6 text-destructive-foreground" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-destructive-foreground">Let's pause here</h3>
+                <p className="text-xs text-destructive-foreground/80">D.E.V.I. cares about your wellbeing first</p>
+              </div>
+            </div>
+          </div>
+
+          <CardContent className="p-4 space-y-4">
+            {hasLowHealing && (
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-destructive/5 border border-destructive/15">
+                <Heart className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Healing Score: {healingScore}%</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Your healing score is very low right now. Pursuing a dating plan when you're still processing past hurt 
+                    can lead to repeating unhealthy patterns. Let's focus on you first.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {hasLowCompatibility && (
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-destructive/5 border border-destructive/15">
+                <AlertTriangle className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Compatibility with {candidateName}: {compatibilityScore}%</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    The compatibility score with {candidateName} is critically low. A dating plan here wouldn't be honest — 
+                    this connection isn't healthy for you based on the data we have.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <p className="text-sm text-foreground font-medium text-center">
+              There's no dating plan here — and that's D.E.V.I. looking out for you. 💜
+            </p>
+
+            {/* Action buttons */}
+            <div className="space-y-2">
+              <Button
+                size="sm"
+                className="w-full gap-2 text-xs"
+                variant="outline"
+                onClick={() => {
+                  onDismiss();
+                  onConfirm("Help me rewire my thoughts. I want to work on my mindset and break unhealthy dating patterns.");
+                }}
+              >
+                <Brain className="w-4 h-4" />
+                Help me rewire my thoughts
+              </Button>
+
+              {candidate && (
+                <Button
+                  size="sm"
+                  className="w-full gap-2 text-xs bg-[image:var(--gradient-hero)] hover:opacity-90"
+                  onClick={() => {
+                    onDismiss();
+                    navigate(`/detachment-plan/${candidate.id}`);
+                  }}
+                >
+                  <Unlink className="w-4 h-4" />
+                  Explore Detachment Plan for {candidateName}
+                </Button>
+              )}
+
+              {hasLowHealing && !candidate && (
+                <Button
+                  size="sm"
+                  className="w-full gap-2 text-xs bg-[image:var(--gradient-hero)] hover:opacity-90"
+                  onClick={() => {
+                    onDismiss();
+                    navigate("/patterns?tab=healing");
+                  }}
+                >
+                  <Heart className="w-4 h-4" />
+                  Work on my healing journey
+                </Button>
+              )}
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-xs text-muted-foreground"
+                onClick={onDismiss}
+              >
+                Dismiss
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
+
   // Review step
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
