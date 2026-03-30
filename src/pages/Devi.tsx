@@ -1560,8 +1560,15 @@ const Devi = () => {
     } catch (error) {
       console.error("Chat error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to send message");
-      // Don't remove the user message on error - keep it visible so user knows what they sent
-      // Just add an error message from the assistant
+
+      // Restore draft so screenshot uploads/text are not lost on failure
+      setInput(draftInput);
+      setPendingImages(draftImages);
+      setTextScreenshotRightSide(draftTextScreenshotRightSide);
+
+      // Remove optimistic user message if the request failed before getting a usable assistant response
+      setMessages(prev => prev.filter(m => m.id !== userMessage.id));
+
       const errorMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
