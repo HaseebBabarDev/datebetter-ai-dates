@@ -33,15 +33,29 @@ const DEALBREAKER_OPTIONS = [
 
 interface DatingAdvisorCardProps {
   userProfile: any;
+  candidate?: any;
   onConfirm: (summary: string) => void;
   onDismiss: () => void;
 }
 
+// Thresholds for "not healthy to proceed"
+const LOW_HEALING_THRESHOLD = 40;
+const LOW_COMPATIBILITY_THRESHOLD = 30;
+
 export const DatingAdvisorCard: React.FC<DatingAdvisorCardProps> = ({
   userProfile,
+  candidate,
   onConfirm,
   onDismiss,
 }) => {
+  const navigate = useNavigate();
+  
+  // Check for low scores
+  const healingScore = userProfile?.healing_score ?? null;
+  const compatibilityScore = candidate?.compatibility_score ?? null;
+  const hasLowHealing = healingScore !== null && healingScore < LOW_HEALING_THRESHOLD;
+  const hasLowCompatibility = candidate && compatibilityScore !== null && compatibilityScore < LOW_COMPATIBILITY_THRESHOLD;
+  const isUnhealthy = hasLowHealing || hasLowCompatibility;
   const [step, setStep] = useState<"review" | "edit-goal" | "edit-status" | "edit-dealbreakers">("review");
   const [selectedGoal, setSelectedGoal] = useState(userProfile?.relationship_goal || "");
   const [selectedStatus, setSelectedStatus] = useState(userProfile?.relationship_status || "");
