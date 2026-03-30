@@ -2309,6 +2309,7 @@ const Devi = () => {
               <DatingAdvisorCard
                 userProfile={userProfile}
                 candidate={selectedCandidate}
+                existingMessages={messages}
                 onConfirm={(summary) => {
                   setShowDatingAdvisorCard(false);
                   sendMessage(summary);

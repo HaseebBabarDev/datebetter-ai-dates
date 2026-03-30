@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Target, Heart, Users, Sparkles, Check, ChevronDown, Edit2, AlertTriangle, Brain, Unlink, ShieldAlert } from "lucide-react";
+import { Target, Heart, Users, Sparkles, Check, ChevronDown, Edit2, AlertTriangle, Brain, Unlink, ShieldAlert, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +36,7 @@ interface DatingAdvisorCardProps {
   candidate?: any;
   onConfirm: (summary: string) => void;
   onDismiss: () => void;
+  existingMessages?: { role: string; content: string }[];
 }
 
 // Thresholds for "not healthy to proceed"
@@ -47,6 +48,7 @@ export const DatingAdvisorCard: React.FC<DatingAdvisorCardProps> = ({
   candidate,
   onConfirm,
   onDismiss,
+  existingMessages = [],
 }) => {
   const navigate = useNavigate();
   
@@ -80,6 +82,38 @@ export const DatingAdvisorCard: React.FC<DatingAdvisorCardProps> = ({
   );
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Detect in-progress dating plan from existing messages
+  const detectPlanProgress = (): { lastStep: number; isComplete: boolean } | null => {
+    if (!existingMessages || existingMessages.length === 0) return null;
+    
+    const assistantMsgs = existingMessages.filter(m => m.role === 'assistant');
+    let lastStep = 0;
+    let isComplete = false;
+    
+    for (const msg of assistantMsgs) {
+      const stepMentions = msg.content.match(/Step (\d)/gi);
+      if (stepMentions) {
+        for (const mention of stepMentions) {
+          const num = parseInt(mention.replace(/Step /i, ''));
+          if (num > lastStep) lastStep = num;
+        }
+      }
+      if (msg.content.match(/check in on your progress/i) || msg.content.match(/adjust any of these steps/i)) {
+        isComplete = true;
+      }
+    }
+    
+    // Only consider it an in-progress plan if we found step references from the dating plan flow
+    const hasPlanTrigger = existingMessages.some(m => 
+      m.role === 'user' && (m.content.includes('dating plan') || m.content.includes('step-by-step action plan'))
+    );
+    
+    if (!hasPlanTrigger || lastStep === 0) return null;
+    return { lastStep, isComplete };
+  };
+  
+  const planProgress = detectPlanProgress();
 
   const formatEnum = (value: string | null | undefined) => {
     if (!value) return "Not set";
@@ -514,6 +548,42 @@ Please give me a personalized step-by-step action plan based on where I am right
             </motion.p>
           )}
 
+          {/* Resume in-progress plan */}
+          {planProgress && !planProgress.isComplete && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-3 rounded-xl bg-primary/5 border border-primary/20"
+            >
+              <p className="text-xs text-muted-foreground mb-2">
+                You have a plan in progress — you left off at <span className="font-semibold text-foreground">Step {planProgress.lastStep}</span>
+              </p>
+              <Button
+                size="sm"
+                className="w-full gap-2 text-xs bg-[image:var(--gradient-hero)] hover:opacity-90"
+                onClick={() => {
+                  onConfirm(`Ready for Step ${Math.min(planProgress.lastStep + 1, 5)}. Pick up where we left off with my dating plan.`);
+                }}
+              >
+                <Play className="w-3.5 h-3.5" />
+                Continue from Step {Math.min(planProgress.lastStep + 1, 5)}
+              </Button>
+            </motion.div>
+          )}
+
+          {planProgress?.isComplete && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-3 rounded-xl bg-primary/5 border border-primary/20"
+            >
+              <p className="text-xs text-muted-foreground mb-2">
+                You completed your last dating plan! 🎉
+              </p>
+              <p className="text-xs text-muted-foreground">Start fresh below with updated goals, or dismiss to continue chatting.</p>
+            </motion.div>
+          )}
+
           {/* Action buttons */}
           <div className="flex gap-2 pt-1">
             <Button
@@ -531,7 +601,7 @@ Please give me a personalized step-by-step action plan based on where I am right
               disabled={saving}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              {saving ? "Starting..." : hasChanges ? "Save & Start" : "Confirm & Start"}
+              {saving ? "Starting..." : planProgress ? "Start Fresh" : hasChanges ? "Save & Start" : "Confirm & Start"}
             </Button>
           </div>
         </CardContent>
