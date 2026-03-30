@@ -50,6 +50,22 @@ export const DatingAdvisorCard: React.FC<DatingAdvisorCardProps> = ({
 }) => {
   const navigate = useNavigate();
   
+  // Profile completeness check (60% required)
+  const PROFILE_COMPLETENESS_FIELDS = [
+    'relationship_goal', 'relationship_status', 'attachment_style', 'communication_style',
+    'love_languages', 'dealbreakers', 'gender_identity', 'interested_in', 'birth_date',
+    'location', 'kids_desire', 'religion', 'politics', 'education_level',
+    'dating_motivation', 'boundary_strength', 'healing_score',
+  ];
+  const filledFields = PROFILE_COMPLETENESS_FIELDS.filter(field => {
+    const val = userProfile?.[field];
+    if (val === null || val === undefined || val === '') return false;
+    if (Array.isArray(val) && val.length === 0) return false;
+    return true;
+  }).length;
+  const profileCompleteness = Math.round((filledFields / PROFILE_COMPLETENESS_FIELDS.length) * 100);
+  const isProfileIncomplete = profileCompleteness < 60;
+
   // Check for low scores
   const healingScore = userProfile?.healing_score ?? null;
   const compatibilityScore = candidate?.compatibility_score ?? null;
