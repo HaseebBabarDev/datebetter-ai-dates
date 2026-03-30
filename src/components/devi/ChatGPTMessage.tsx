@@ -18,6 +18,7 @@ const QUICK_REPLIES = [
   "Tell me more",
   "What should I do?",
   "Explain the science",
+  "Be my dating coach",
   "Help me rewire my thoughts",
 ];
 
