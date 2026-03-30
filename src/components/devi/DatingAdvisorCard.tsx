@@ -83,6 +83,38 @@ export const DatingAdvisorCard: React.FC<DatingAdvisorCardProps> = ({
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
+  // Detect in-progress dating plan from existing messages
+  const detectPlanProgress = (): { lastStep: number; isComplete: boolean } | null => {
+    if (!existingMessages || existingMessages.length === 0) return null;
+    
+    const assistantMsgs = existingMessages.filter(m => m.role === 'assistant');
+    let lastStep = 0;
+    let isComplete = false;
+    
+    for (const msg of assistantMsgs) {
+      const stepMentions = msg.content.match(/Step (\d)/gi);
+      if (stepMentions) {
+        for (const mention of stepMentions) {
+          const num = parseInt(mention.replace(/Step /i, ''));
+          if (num > lastStep) lastStep = num;
+        }
+      }
+      if (msg.content.match(/check in on your progress/i) || msg.content.match(/adjust any of these steps/i)) {
+        isComplete = true;
+      }
+    }
+    
+    // Only consider it an in-progress plan if we found step references from the dating plan flow
+    const hasPlanTrigger = existingMessages.some(m => 
+      m.role === 'user' && (m.content.includes('dating plan') || m.content.includes('step-by-step action plan'))
+    );
+    
+    if (!hasPlanTrigger || lastStep === 0) return null;
+    return { lastStep, isComplete };
+  };
+  
+  const planProgress = detectPlanProgress();
+
   const formatEnum = (value: string | null | undefined) => {
     if (!value) return "Not set";
     return value.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
