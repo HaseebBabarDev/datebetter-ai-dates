@@ -711,9 +711,15 @@ const Devi = () => {
       lastLoadedCandidateRef.current = stateKey;
       
       // Find most recent conversation for this candidate
-      const candidateConv = conversations.find(c => c.candidate_id === selectedCandidate.id);
+      const candidateConversations = conversations
+        .filter(c => c.candidate_id === selectedCandidate.id)
+        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+      const candidateConv = candidateConversations[0];
       
       if (candidateConv) {
+        // Don't overwrite optimistic UI while a message is actively being sent
+        if (isLoading) return;
+
         // Load the existing conversation
         const { data: messagesData } = await supabase
           .from("devi_messages")
@@ -729,20 +735,20 @@ const Devi = () => {
             imageData: m.image_url || undefined,
           })));
           setCurrentConversationId(candidateConv.id);
-        } else {
-          // Conversation exists but no messages, start fresh
+        } else if (!currentConversationId && messages.length === 0) {
+          // Only reset if we're truly starting fresh, not if user just added unsaved optimistic content
           setMessages([]);
           setCurrentConversationId(null);
         }
-      } else {
-        // No existing conversation, start fresh
+      } else if (!currentConversationId && messages.length === 0) {
+        // No existing conversation, start fresh only when there is no active/optimistic chat state
         setMessages([]);
         setCurrentConversationId(null);
       }
     };
     
     loadCandidateConversation();
-  }, [selectedCandidate?.id, user, conversations, conversationsLoading]);
+  }, [selectedCandidate?.id, user, conversations, conversationsLoading, isLoading, currentConversationId, messages.length]);
 
   useEffect(() => {
     if (candidateNameFromState && messages.length === 0 && !currentConversationId) {
@@ -804,19 +810,28 @@ const Devi = () => {
   ) => {
     if (!user) return;
     
-    await supabase.from("devi_messages").insert({
+    const { error: insertError } = await supabase.from("devi_messages").insert({
       conversation_id: conversationId,
       user_id: user.id,
       role: message.role,
       content: message.content,
       image_url: imageUrl || null,
     });
+
+    if (insertError) {
+      console.error("Error saving message:", insertError);
+      throw insertError;
+    }
     
     // Update conversation timestamp
-    await supabase
+    const { error: updateError } = await supabase
       .from("devi_conversations")
       .update({ updated_at: new Date().toISOString() })
       .eq("id", conversationId);
+
+    if (updateError) {
+      console.warn("Error updating conversation timestamp:", updateError);
+    }
   }, [user]);
 
   // Create new conversation
@@ -1090,22 +1105,22 @@ const Devi = () => {
       setCrisisSeverity(crisisResult.severity);
       setCrisisCategory(crisisResult.category || "crisis");
       setShowCrisisAlert(true);
-      // Block harmful content from being sent
       if (crisisResult.category === "harmful_content") {
         return;
       }
-      // Crisis content shows alert but allows sending
     }
 
-    const firstImage = pendingImages[0] ?? null;
+    const draftInput = input;
+    const draftImages = pendingImages;
+    const draftTextScreenshotRightSide = textScreenshotRightSide;
+    const firstImage = draftImages[0] ?? null;
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: 'user',
-      content: textToSend || (firstImage ? getImagePrompt(firstImage.type, textScreenshotRightSide) : ''),
-      // keep backward compat: first image stored in imageData for DB / history display
+      content: textToSend || (firstImage ? getImagePrompt(firstImage.type, draftTextScreenshotRightSide) : ''),
       imageData: firstImage?.data,
       imageType: firstImage?.type,
-      imagesData: pendingImages.length > 0 ? pendingImages.map(i => i.data) : undefined,
+      imagesData: draftImages.length > 0 ? draftImages.map(i => i.data) : undefined,
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -1114,22 +1129,19 @@ const Devi = () => {
     setIsLoading(true);
     setIsThinking(true);
 
-    // Create or use existing conversation
     let convId = currentConversationId;
-    if (!convId) {
-      convId = await createConversation(userMessage.content);
-      if (!convId) {
-        toast.error("Failed to create conversation");
-        setIsLoading(false);
-        setIsThinking(false);
-        return;
-      }
-    }
-
-    // Save user message
-    await saveMessage(convId, userMessage, userMessage.imageData);
-
     try {
+      // Create or use existing conversation
+      if (!convId) {
+        convId = await createConversation(userMessage.content);
+        if (!convId) {
+          throw new Error("Failed to create conversation");
+        }
+      }
+
+      // Save user message
+      await saveMessage(convId, userMessage, userMessage.imageData);
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast.error("Please sign in to chat with D.E.V.I.");
@@ -1548,8 +1560,15 @@ const Devi = () => {
     } catch (error) {
       console.error("Chat error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to send message");
-      // Don't remove the user message on error - keep it visible so user knows what they sent
-      // Just add an error message from the assistant
+
+      // Restore draft so screenshot uploads/text are not lost on failure
+      setInput(draftInput);
+      setPendingImages(draftImages);
+      setTextScreenshotRightSide(draftTextScreenshotRightSide);
+
+      // Remove optimistic user message if the request failed before getting a usable assistant response
+      setMessages(prev => prev.filter(m => m.id !== userMessage.id));
+
       const errorMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
