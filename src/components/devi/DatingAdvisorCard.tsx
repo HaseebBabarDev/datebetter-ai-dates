@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Target, Heart, Users, Sparkles, Check, ChevronDown, Edit2 } from "lucide-react";
+import { Target, Heart, Users, Sparkles, Check, ChevronDown, Edit2, AlertTriangle, Brain, Unlink, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
