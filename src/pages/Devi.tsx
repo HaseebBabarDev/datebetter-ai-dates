@@ -2265,7 +2265,7 @@ const Devi = () => {
                             message={msg} 
                             isLast={isLastMsg}
                             onQuickReply={(reply) => {
-                              if (reply === "Be my dating advisor") {
+                              if (reply === "My dating plan") {
                                 setShowDatingAdvisorCard(true);
                               } else {
                                 sendMessage(reply);
