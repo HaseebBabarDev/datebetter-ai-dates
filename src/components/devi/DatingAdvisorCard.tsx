@@ -48,6 +48,7 @@ export const DatingAdvisorCard: React.FC<DatingAdvisorCardProps> = ({
   candidate,
   onConfirm,
   onDismiss,
+  existingMessages = [],
 }) => {
   const navigate = useNavigate();
   
