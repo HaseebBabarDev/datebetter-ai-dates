@@ -548,6 +548,42 @@ Please give me a personalized step-by-step action plan based on where I am right
             </motion.p>
           )}
 
+          {/* Resume in-progress plan */}
+          {planProgress && !planProgress.isComplete && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-3 rounded-xl bg-primary/5 border border-primary/20"
+            >
+              <p className="text-xs text-muted-foreground mb-2">
+                You have a plan in progress — you left off at <span className="font-semibold text-foreground">Step {planProgress.lastStep}</span>
+              </p>
+              <Button
+                size="sm"
+                className="w-full gap-2 text-xs bg-[image:var(--gradient-hero)] hover:opacity-90"
+                onClick={() => {
+                  onConfirm(`Ready for Step ${Math.min(planProgress.lastStep + 1, 5)}. Pick up where we left off with my dating plan.`);
+                }}
+              >
+                <Play className="w-3.5 h-3.5" />
+                Continue from Step {Math.min(planProgress.lastStep + 1, 5)}
+              </Button>
+            </motion.div>
+          )}
+
+          {planProgress?.isComplete && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-3 rounded-xl bg-primary/5 border border-primary/20"
+            >
+              <p className="text-xs text-muted-foreground mb-2">
+                You completed your last dating plan! 🎉
+              </p>
+              <p className="text-xs text-muted-foreground">Start fresh below with updated goals, or dismiss to continue chatting.</p>
+            </motion.div>
+          )}
+
           {/* Action buttons */}
           <div className="flex gap-2 pt-1">
             <Button
@@ -565,7 +601,7 @@ Please give me a personalized step-by-step action plan based on where I am right
               disabled={saving}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              {saving ? "Starting..." : hasChanges ? "Save & Start" : "Confirm & Start"}
+              {saving ? "Starting..." : planProgress ? "Start Fresh" : hasChanges ? "Save & Start" : "Confirm & Start"}
             </Button>
           </div>
         </CardContent>
