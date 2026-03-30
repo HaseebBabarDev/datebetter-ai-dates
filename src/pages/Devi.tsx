@@ -1105,22 +1105,22 @@ const Devi = () => {
       setCrisisSeverity(crisisResult.severity);
       setCrisisCategory(crisisResult.category || "crisis");
       setShowCrisisAlert(true);
-      // Block harmful content from being sent
       if (crisisResult.category === "harmful_content") {
         return;
       }
-      // Crisis content shows alert but allows sending
     }
 
-    const firstImage = pendingImages[0] ?? null;
+    const draftInput = input;
+    const draftImages = pendingImages;
+    const draftTextScreenshotRightSide = textScreenshotRightSide;
+    const firstImage = draftImages[0] ?? null;
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: 'user',
-      content: textToSend || (firstImage ? getImagePrompt(firstImage.type, textScreenshotRightSide) : ''),
-      // keep backward compat: first image stored in imageData for DB / history display
+      content: textToSend || (firstImage ? getImagePrompt(firstImage.type, draftTextScreenshotRightSide) : ''),
       imageData: firstImage?.data,
       imageType: firstImage?.type,
-      imagesData: pendingImages.length > 0 ? pendingImages.map(i => i.data) : undefined,
+      imagesData: draftImages.length > 0 ? draftImages.map(i => i.data) : undefined,
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -1129,22 +1129,19 @@ const Devi = () => {
     setIsLoading(true);
     setIsThinking(true);
 
-    // Create or use existing conversation
     let convId = currentConversationId;
-    if (!convId) {
-      convId = await createConversation(userMessage.content);
-      if (!convId) {
-        toast.error("Failed to create conversation");
-        setIsLoading(false);
-        setIsThinking(false);
-        return;
-      }
-    }
-
-    // Save user message
-    await saveMessage(convId, userMessage, userMessage.imageData);
-
     try {
+      // Create or use existing conversation
+      if (!convId) {
+        convId = await createConversation(userMessage.content);
+        if (!convId) {
+          throw new Error("Failed to create conversation");
+        }
+      }
+
+      // Save user message
+      await saveMessage(convId, userMessage, userMessage.imageData);
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast.error("Please sign in to chat with D.E.V.I.");
