@@ -476,6 +476,9 @@ const Devi = () => {
   // Detachment plan CTA dismissal
   const [detachmentCtaDismissed, setDetachmentCtaDismissed] = useState(false);
   
+  // Dating advisor interactive card state
+  const [showDatingAdvisorCard, setShowDatingAdvisorCard] = useState(false);
+  
   // Chat layout style - chatgpt (default) or bubble
   const [chatLayout, setChatLayout] = useState<"bubble" | "chatgpt">(() => {
     if (typeof window !== 'undefined') {
