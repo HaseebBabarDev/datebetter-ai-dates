@@ -748,7 +748,7 @@ const Devi = () => {
     };
     
     loadCandidateConversation();
-  }, [selectedCandidate?.id, user, conversations, conversationsLoading]);
+  }, [selectedCandidate?.id, user, conversations, conversationsLoading, isLoading, currentConversationId, messages.length]);
 
   useEffect(() => {
     if (candidateNameFromState && messages.length === 0 && !currentConversationId) {
