@@ -804,19 +804,28 @@ const Devi = () => {
   ) => {
     if (!user) return;
     
-    await supabase.from("devi_messages").insert({
+    const { error: insertError } = await supabase.from("devi_messages").insert({
       conversation_id: conversationId,
       user_id: user.id,
       role: message.role,
       content: message.content,
       image_url: imageUrl || null,
     });
+
+    if (insertError) {
+      console.error("Error saving message:", insertError);
+      throw insertError;
+    }
     
     // Update conversation timestamp
-    await supabase
+    const { error: updateError } = await supabase
       .from("devi_conversations")
       .update({ updated_at: new Date().toISOString() })
       .eq("id", conversationId);
+
+    if (updateError) {
+      console.warn("Error updating conversation timestamp:", updateError);
+    }
   }, [user]);
 
   // Create new conversation
