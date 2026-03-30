@@ -50,6 +50,7 @@ import TextSimulator, { TextSimulatorCTA } from "@/components/candidate/TextSimu
 import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
+import { DatingAdvisorCard } from "@/components/devi/DatingAdvisorCard";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
