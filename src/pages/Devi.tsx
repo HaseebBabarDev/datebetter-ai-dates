@@ -2264,7 +2264,13 @@ const Devi = () => {
                           <ChatGPTMessage 
                             message={msg} 
                             isLast={isLastMsg}
-                            onQuickReply={(reply) => sendMessage(reply)}
+                            onQuickReply={(reply) => {
+                              if (reply === "Be my dating advisor") {
+                                setShowDatingAdvisorCard(true);
+                              } else {
+                                sendMessage(reply);
+                              }
+                            }}
                             onLogInteraction={() => {
                               if (selectedCandidate) {
                                 const userMessages = messages.slice(0, index).filter(m => m.role === 'user');
