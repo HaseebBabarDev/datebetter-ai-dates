@@ -89,7 +89,7 @@ export const DatingAdvisorCard: React.FC<DatingAdvisorCardProps> = ({
     }
 
     // Build summary for D.E.V.I.
-    const summary = `Be my dating advisor. Here are my confirmed goals:
+    const summary = `Here's my dating plan. My confirmed goals:
 - Relationship Goal: ${currentGoalLabel}
 - Current Status: ${currentStatusLabel}
 - Key Dealbreakers: ${selectedDealbreakers.length > 0 ? selectedDealbreakers.join(", ") : "None specified"}
