@@ -2305,6 +2305,17 @@ const Devi = () => {
               );
             })()}
 
+            {showDatingAdvisorCard && userProfile && (
+              <DatingAdvisorCard
+                userProfile={userProfile}
+                onConfirm={(summary) => {
+                  setShowDatingAdvisorCard(false);
+                  sendMessage(summary);
+                }}
+                onDismiss={() => setShowDatingAdvisorCard(false)}
+              />
+            )}
+
             <DeviThinkingIndicator isVisible={isThinking} />
           </>
           )}
