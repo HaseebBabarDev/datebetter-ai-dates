@@ -50,6 +50,7 @@ import TextSimulator, { TextSimulatorCTA } from "@/components/candidate/TextSimu
 import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
+import { DatingAdvisorCard } from "@/components/devi/DatingAdvisorCard";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -474,6 +475,9 @@ const Devi = () => {
 
   // Detachment plan CTA dismissal
   const [detachmentCtaDismissed, setDetachmentCtaDismissed] = useState(false);
+  
+  // Dating advisor interactive card state
+  const [showDatingAdvisorCard, setShowDatingAdvisorCard] = useState(false);
   
   // Chat layout style - chatgpt (default) or bubble
   const [chatLayout, setChatLayout] = useState<"bubble" | "chatgpt">(() => {
@@ -2260,7 +2264,13 @@ const Devi = () => {
                           <ChatGPTMessage 
                             message={msg} 
                             isLast={isLastMsg}
-                            onQuickReply={(reply) => sendMessage(reply)}
+                            onQuickReply={(reply) => {
+                              if (reply === "Be my dating advisor") {
+                                setShowDatingAdvisorCard(true);
+                              } else {
+                                sendMessage(reply);
+                              }
+                            }}
                             onLogInteraction={() => {
                               if (selectedCandidate) {
                                 const userMessages = messages.slice(0, index).filter(m => m.role === 'user');
@@ -2277,7 +2287,13 @@ const Devi = () => {
                           <MessageBubble 
                             message={msg} 
                             isLast={isLastMsg}
-                            onQuickReply={(reply) => sendMessage(reply)}
+                            onQuickReply={(reply) => {
+                              if (reply === "Be my dating advisor") {
+                                setShowDatingAdvisorCard(true);
+                              } else {
+                                sendMessage(reply);
+                              }
+                            }}
                             isLoading={isLoading}
                           />
                         )}
@@ -2288,6 +2304,17 @@ const Devi = () => {
                 </>
               );
             })()}
+
+            {showDatingAdvisorCard && userProfile && (
+              <DatingAdvisorCard
+                userProfile={userProfile}
+                onConfirm={(summary) => {
+                  setShowDatingAdvisorCard(false);
+                  sendMessage(summary);
+                }}
+                onDismiss={() => setShowDatingAdvisorCard(false)}
+              />
+            )}
 
             <DeviThinkingIndicator isVisible={isThinking} />
           </>
