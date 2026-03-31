@@ -57,7 +57,7 @@ const slides = [
             className="font-black leading-none"
             style={{ 
               fontSize: "clamp(60px, 14vw, 240px)",
-              background: "linear-gradient(135deg, hsl(340, 82%, 55%), hsl(280, 70%, 55%))",
+              background: "linear-gradient(135deg, hsl(var(--primary)), hsl(160, 60%, 40%))",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
