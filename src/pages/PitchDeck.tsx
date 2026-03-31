@@ -57,7 +57,7 @@ const slides = [
             className="font-black leading-none"
             style={{ 
               fontSize: "clamp(60px, 14vw, 240px)",
-              background: "linear-gradient(135deg, hsl(340, 82%, 55%), hsl(280, 70%, 55%))",
+              background: "linear-gradient(135deg, hsl(var(--primary)), hsl(160, 60%, 40%))",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -200,6 +200,50 @@ const slides = [
         <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
           <p>Dating apps create users. We monetize the <span className="font-bold text-foreground">intelligence layer</span> that comes after the match.</p>
           <p>The <span className="font-bold text-primary">$5B+ dating app market</span> generates our demand. We own the decision space nobody else is building for.</p>
+        </div>
+      </div>
+    ),
+  },
+  // 7b. TAM / SAM / SOM
+  {
+    id: 16,
+    content: (
+      <div className="max-w-4xl mx-auto space-y-6">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">The market is massive — and underserved.</h2>
+        <div className="grid grid-cols-3 gap-6">
+          {/* TAM */}
+          <div className="rounded-2xl border border-border/50 p-5 space-y-3">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground font-bold">TAM — Total Market</p>
+            <p className="text-3xl md:text-4xl font-black text-primary">$19.3B</p>
+            <p className="text-xs text-muted-foreground">Global dating market by 2033</p>
+            <div className="space-y-2 pt-2 border-t border-border/30">
+              <p className="text-sm text-muted-foreground">• 46% of Americans are single</p>
+              <p className="text-sm text-muted-foreground">• 381M dating app users globally in 2024</p>
+              <p className="text-sm text-muted-foreground">• $11B market in 2025</p>
+            </div>
+          </div>
+          {/* SAM */}
+          <div className="rounded-2xl border border-border/50 p-5 space-y-3">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground font-bold">SAM — Active Daters</p>
+            <p className="text-3xl md:text-4xl font-black text-foreground">60M</p>
+            <p className="text-xs text-muted-foreground">U.S. dating app users</p>
+            <div className="space-y-2 pt-2 border-t border-border/30">
+              <p className="text-sm text-muted-foreground">• 65% of adults 18–29 have used an app</p>
+              <p className="text-sm text-muted-foreground">• 57% of users are men; 38% women</p>
+              <p className="text-sm text-muted-foreground">• 63% of men under 30 are single</p>
+            </div>
+          </div>
+          {/* SOM */}
+          <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5 space-y-3">
+            <p className="text-xs uppercase tracking-wider text-primary font-bold">SOM — Our Target</p>
+            <p className="text-3xl md:text-4xl font-black bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">78%</p>
+            <p className="text-xs text-muted-foreground">Are burned out & want better</p>
+            <div className="space-y-2 pt-2 border-t border-primary/20">
+              <p className="text-sm text-muted-foreground">• 35% already pay for dating subs</p>
+              <p className="text-sm text-muted-foreground">• 1 in 4 lonely adults open to AI tools</p>
+              <p className="text-sm text-foreground font-medium">• Proven willingness to pay</p>
+            </div>
+          </div>
         </div>
       </div>
     ),
