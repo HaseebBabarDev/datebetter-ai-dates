@@ -2,6 +2,9 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { initNativeShell } from "@/lib/capacitor/initNativeShell";
+
+void initNativeShell();
 
 // Auto-recover from stale PWA cache / chunk loading failures
 const handleChunkError = () => {
