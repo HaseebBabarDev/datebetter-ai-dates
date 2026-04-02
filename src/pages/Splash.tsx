@@ -26,7 +26,14 @@ const Splash = () => {
           .maybeSingle();
         
         if (profile?.onboarding_completed) {
-          navigate("/dashboard", { replace: true });
+          const defaultScreen = localStorage.getItem("default_start_screen") || "dashboard";
+          if (defaultScreen === "devi") {
+            navigate("/devi", { replace: true });
+          } else if (defaultScreen === "top-candidate") {
+            navigate("/dashboard?tab=candidates&sort=score", { replace: true });
+          } else {
+            navigate("/dashboard", { replace: true });
+          }
         } else {
           navigate("/setup", { replace: true });
         }

@@ -686,6 +686,39 @@ const Settings = () => {
 
             {/* Theme / Appearance */}
 
+            {/* Default Start Screen */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Home className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground text-sm">Default Start Screen</p>
+                      <p className="text-xs text-muted-foreground">Where the app opens to</p>
+                    </div>
+                  </div>
+                  <Select
+                    value={localStorage.getItem("default_start_screen") || "dashboard"}
+                    onValueChange={(val) => {
+                      localStorage.setItem("default_start_screen", val);
+                      toast.success("Default screen updated");
+                    }}
+                  >
+                    <SelectTrigger className="w-[140px] h-9 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="dashboard">Dashboard</SelectItem>
+                      <SelectItem value="devi">D.E.V.I.</SelectItem>
+                      <SelectItem value="top-candidate">Top Candidate</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Theme / Appearance */}
             <ThemeSelector />
 

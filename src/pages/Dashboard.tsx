@@ -82,6 +82,7 @@ import { useFeatureTour } from "@/hooks/useFeatureTour";
 import { DeviIntroDialog } from "@/components/devi/DeviIntroDialog";
 import { useDeviIntro } from "@/hooks/useDeviIntro";
 import { TextSimulator } from "@/components/candidate/TextSimulator";
+import { DefaultScreenDialog, DefaultScreen } from "@/components/dashboard/DefaultScreenDialog";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
@@ -166,6 +167,16 @@ const Dashboard = () => {
   
   // Devi intro popup for new users who haven't chatted yet
   const { showDeviIntro, setShowDeviIntro, dismissDeviIntro } = useDeviIntro(user?.id);
+  
+  // Default start screen selector
+  const [showScreenPicker, setShowScreenPicker] = useState(() => {
+    try { return !localStorage.getItem("default_start_screen"); } catch { return false; }
+  });
+
+  const handleScreenPickerClose = (selected: DefaultScreen) => {
+    localStorage.setItem("default_start_screen", selected);
+    setShowScreenPicker(false);
+  };
 
   const handleReopenRelationship = async (candidateId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -1921,6 +1932,9 @@ const Dashboard = () => {
         onOpenChange={setShowDeviIntro}
         onDismiss={dismissDeviIntro}
       />
+
+      {/* Default Start Screen Picker */}
+      <DefaultScreenDialog open={showScreenPicker} onClose={handleScreenPickerClose} />
 
       {/* Text Simulator - candidate picker + simulator */}
       {textSimOpen && !textSimCandidate && candidates.length > 1 && (
