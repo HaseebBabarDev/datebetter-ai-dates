@@ -296,7 +296,7 @@ const AddCandidate = () => {
   const [loading, setLoading] = useState(false);
   const [fetchingCandidate, setFetchingCandidate] = useState(isEditMode);
   const [activeTab, setActiveTab] = useState("basics");
-  const [candidateMode, setCandidateMode] = useState<"quick" | "full" | "smart" | null>(isEditMode ? "full" : null);
+  const [candidateMode, setCandidateMode] = useState<"quick" | "full" | "smart" | null>(isEditMode ? "full" : initialMode === "smart" ? "smart" : null);
   const [smartFillApplied, setSmartFillApplied] = useState(false);
   const [zodiacModeEnabled, setZodiacModeEnabled] = useState(false);
 const TABS = ["basics", "about", "family", "history", "chemistry"] as const;
