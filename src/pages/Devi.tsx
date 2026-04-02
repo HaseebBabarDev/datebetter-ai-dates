@@ -1743,6 +1743,17 @@ const Devi = () => {
             >
               <Plus className="w-4 h-4" />
             </Button>
+
+            {/* Add Candidate Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/add-candidate")}
+              className="rounded-lg shrink-0 h-8 w-8"
+              title="Add Candidate"
+            >
+              <User className="w-4 h-4" />
+            </Button>
             
             {/* Adjust Tone Button */}
             <Button

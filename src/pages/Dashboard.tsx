@@ -1933,6 +1933,9 @@ const Dashboard = () => {
         onDismiss={dismissDeviIntro}
       />
 
+      {/* Default Start Screen Picker */}
+      <DefaultScreenDialog open={showScreenPicker} onClose={handleScreenPickerClose} />
+
       {/* Text Simulator - candidate picker + simulator */}
       {textSimOpen && !textSimCandidate && candidates.length > 1 && (
         <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm">
