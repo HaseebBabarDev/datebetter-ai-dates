@@ -82,6 +82,7 @@ import { useFeatureTour } from "@/hooks/useFeatureTour";
 import { DeviIntroDialog } from "@/components/devi/DeviIntroDialog";
 import { useDeviIntro } from "@/hooks/useDeviIntro";
 import { TextSimulator } from "@/components/candidate/TextSimulator";
+import { DefaultScreenDialog, DefaultScreen } from "@/components/dashboard/DefaultScreenDialog";
 
 type Profile = Tables<"profiles">;
 type Candidate = Tables<"candidates">;
