@@ -1749,10 +1749,10 @@ const Devi = () => {
               variant="ghost"
               size="icon"
               onClick={() => navigate("/add-candidate?mode=smart")}
-              className="rounded-lg shrink-0 h-8 w-8"
+              className="rounded-lg shrink-0 h-8 w-8 text-primary"
               title="Add Candidate"
             >
-              <User className="w-4 h-4" />
+              <UserPlus className="w-4 h-4" />
             </Button>
             
             {/* Adjust Tone Button */}
