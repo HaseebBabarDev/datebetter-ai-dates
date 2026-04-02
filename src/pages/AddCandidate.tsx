@@ -850,15 +850,52 @@ const THEIR_ISSUE_OPTIONS = [
               </div>
             </motion.button>
 
+            {/* Smart Fill Option */}
+            <motion.button
+              type="button"
+              onClick={() => { if (!canAddCandidate()) { setShowUpgradeDialog(true); return; } setCandidateMode("smart"); }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full p-4 rounded-xl border-2 border-primary/20 bg-primary/5 hover:border-primary/40 transition-colors group text-left"
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                  <Mic className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">Tell D.E.V.I. Everything</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                      AI ✨
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Talk or type — we'll fill in the profile for you
+                  </p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-3" />
+              </div>
+            </motion.button>
+
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.45 }}
               className="text-[10px] text-muted-foreground text-center pt-2"
             >
               You can always add more details later
             </motion.p>
           </motion.div>
+        )}
+
+        {/* Smart Fill Mode */}
+        {candidateMode === "smart" && (
+          <SmartFillForm
+            onExtracted={handleSmartFillExtracted}
+            onSwitchToManual={() => setCandidateMode("full")}
+          />
         )}
 
         {/* Quick Add Form */}
