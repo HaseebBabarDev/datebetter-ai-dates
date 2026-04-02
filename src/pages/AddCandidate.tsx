@@ -23,6 +23,7 @@ import { SliderInput } from "@/components/onboarding/SliderInput";
 import { toast } from "sonner";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeLimitDialog } from "@/components/subscription/UpgradeLimitDialog";
+import { SmartFillForm, ExtractedCandidate } from "@/components/candidate/SmartFillForm";
 
 const MET_VIA_OPTIONS = [
   { value: "dating_app", label: "Dating App" },
