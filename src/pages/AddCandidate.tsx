@@ -436,7 +436,53 @@ const THEIR_ISSUE_OPTIONS = [
     }));
   };
 
-  // Fetch user's zodiac mode preference
+  const handleSmartFillExtracted = (data: ExtractedCandidate) => {
+    if (data.nickname) setNickname(data.nickname);
+    if (data.age) setAge(data.age.toString());
+    if (data.gender_identity) setGenderIdentity(data.gender_identity);
+    if (data.pronouns) setPronouns(data.pronouns);
+    if (data.met_via) setMetVia(data.met_via);
+    if (data.met_app) setMetApp(data.met_app);
+    if (data.height) setHeight(data.height);
+    if (data.country) setCountry(data.country);
+    if (data.city) setCity(data.city);
+    if (data.distance_approximation) setDistanceApprox(data.distance_approximation);
+    if (data.their_religion) setTheirReligion(data.their_religion);
+    if (data.their_politics) setTheirPolitics(data.their_politics);
+    if (data.their_relationship_status) setTheirRelationshipStatus(data.their_relationship_status);
+    if (data.their_relationship_goal) setTheirRelationshipGoal(data.their_relationship_goal);
+    if (data.their_kids_desire) setTheirKidsDesire(data.their_kids_desire);
+    if (data.their_kids_status) setTheirKidsStatus(data.their_kids_status);
+    if (data.their_attachment_style) setTheirAttachmentStyle(data.their_attachment_style);
+    if (data.their_career_stage) setTheirCareerStage(data.their_career_stage);
+    if (data.their_education_level) setTheirEducationLevel(data.their_education_level);
+    if (data.their_social_style) setTheirSocialStyle(data.their_social_style);
+    if (data.their_drinking) setTheirDrinking(data.their_drinking);
+    if (data.their_smoking) setTheirSmoking(data.their_smoking);
+    if (data.their_exercise) setTheirExercise(data.their_exercise);
+    if (data.their_schedule_flexibility) setTheirSchedule(data.their_schedule_flexibility);
+    if (data.zodiac_sign) setZodiacSign(data.zodiac_sign);
+    if (data.their_parent_status) setTheirParentStatus(data.their_parent_status);
+    if (data.their_mother_status) setTheirMotherStatus(data.their_mother_status);
+    if (data.their_father_status) setTheirFatherStatus(data.their_father_status);
+    if (data.their_siblings !== undefined) setTheirSiblings(data.their_siblings.toString());
+    if (data.their_parents_relationship) setTheirParentsRelationship(data.their_parents_relationship);
+    if (data.their_felt_loved_as_child) setTheirFeltLovedAsChild(data.their_felt_loved_as_child);
+    if (data.their_family_stability) setTheirFamilyStability(data.their_family_stability);
+    if (data.their_healthy_relationship_models !== undefined) setTheirHealthyRelationshipModels(data.their_healthy_relationship_models);
+    if (data.their_family_notes) setTheirFamilyNotes(data.their_family_notes);
+    if (data.their_relationship_notes) setTheirRelationshipNotes(data.their_relationship_notes);
+    if (data.notes) setNotes(data.notes);
+    if (data.their_ambition_level) setTheirAmbitionLevel(data.their_ambition_level);
+    if (data.overall_chemistry) setOverallChemistry(data.overall_chemistry);
+    if (data.physical_attraction) setPhysicalAttraction(data.physical_attraction);
+    if (data.intellectual_connection) setIntellectualConnection(data.intellectual_connection);
+    if (data.humor_compatibility) setHumorCompatibility(data.humor_compatibility);
+    if (data.energy_match) setEnergyMatch(data.energy_match);
+    setSmartFillApplied(true);
+    setCandidateMode("full");
+  };
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (!user) return;
