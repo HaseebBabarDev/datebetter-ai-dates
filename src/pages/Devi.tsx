@@ -1744,11 +1744,11 @@ const Devi = () => {
               <Plus className="w-4 h-4" />
             </Button>
 
-            {/* Add Candidate Button */}
+            {/* Add Candidate Button - goes to smart fill (voice/text) */}
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate("/add-candidate")}
+              onClick={() => navigate("/add-candidate?mode=smart")}
               className="rounded-lg shrink-0 h-8 w-8"
               title="Add Candidate"
             >

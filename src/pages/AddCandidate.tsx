@@ -17,12 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, UserPlus, Sparkles, Heart, Pencil, User, Brain, Zap, Home, Clock, Layers, ArrowRight } from "lucide-react";
+import { ArrowLeft, UserPlus, Sparkles, Heart, Pencil, User, Brain, Zap, Home, Clock, Layers, ArrowRight, Mic } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SliderInput } from "@/components/onboarding/SliderInput";
 import { toast } from "sonner";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeLimitDialog } from "@/components/subscription/UpgradeLimitDialog";
+import { SmartFillForm, ExtractedCandidate } from "@/components/candidate/SmartFillForm";
 
 const MET_VIA_OPTIONS = [
   { value: "dating_app", label: "Dating App" },
@@ -287,6 +288,7 @@ const AddCandidate = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get("edit");
+  const initialMode = searchParams.get("mode");
   const isEditMode = !!editId;
   const { canAddCandidate, subscription } = useSubscription();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
@@ -294,7 +296,8 @@ const AddCandidate = () => {
   const [loading, setLoading] = useState(false);
   const [fetchingCandidate, setFetchingCandidate] = useState(isEditMode);
   const [activeTab, setActiveTab] = useState("basics");
-  const [candidateMode, setCandidateMode] = useState<"quick" | "full" | null>(isEditMode ? "full" : null);
+  const [candidateMode, setCandidateMode] = useState<"quick" | "full" | "smart" | null>(isEditMode ? "full" : initialMode === "smart" ? "smart" : null);
+  const [smartFillApplied, setSmartFillApplied] = useState(false);
   const [zodiacModeEnabled, setZodiacModeEnabled] = useState(false);
 const TABS = ["basics", "about", "family", "history", "chemistry"] as const;
 
@@ -434,7 +437,53 @@ const THEIR_ISSUE_OPTIONS = [
     }));
   };
 
-  // Fetch user's zodiac mode preference
+  const handleSmartFillExtracted = (data: ExtractedCandidate) => {
+    if (data.nickname) setNickname(data.nickname);
+    if (data.age) setAge(data.age.toString());
+    if (data.gender_identity) setGenderIdentity(data.gender_identity);
+    if (data.pronouns) setPronouns(data.pronouns);
+    if (data.met_via) setMetVia(data.met_via);
+    if (data.met_app) setMetApp(data.met_app);
+    if (data.height) setHeight(data.height);
+    if (data.country) setCountry(data.country);
+    if (data.city) setCity(data.city);
+    if (data.distance_approximation) setDistanceApprox(data.distance_approximation);
+    if (data.their_religion) setTheirReligion(data.their_religion);
+    if (data.their_politics) setTheirPolitics(data.their_politics);
+    if (data.their_relationship_status) setTheirRelationshipStatus(data.their_relationship_status);
+    if (data.their_relationship_goal) setTheirRelationshipGoal(data.their_relationship_goal);
+    if (data.their_kids_desire) setTheirKidsDesire(data.their_kids_desire);
+    if (data.their_kids_status) setTheirKidsStatus(data.their_kids_status);
+    if (data.their_attachment_style) setTheirAttachmentStyle(data.their_attachment_style);
+    if (data.their_career_stage) setTheirCareerStage(data.their_career_stage);
+    if (data.their_education_level) setTheirEducationLevel(data.their_education_level);
+    if (data.their_social_style) setTheirSocialStyle(data.their_social_style);
+    if (data.their_drinking) setTheirDrinking(data.their_drinking);
+    if (data.their_smoking) setTheirSmoking(data.their_smoking);
+    if (data.their_exercise) setTheirExercise(data.their_exercise);
+    if (data.their_schedule_flexibility) setTheirSchedule(data.their_schedule_flexibility);
+    if (data.zodiac_sign) setZodiacSign(data.zodiac_sign);
+    if (data.their_parent_status) setTheirParentStatus(data.their_parent_status);
+    if (data.their_mother_status) setTheirMotherStatus(data.their_mother_status);
+    if (data.their_father_status) setTheirFatherStatus(data.their_father_status);
+    if (data.their_siblings !== undefined) setTheirSiblings(data.their_siblings.toString());
+    if (data.their_parents_relationship) setTheirParentsRelationship(data.their_parents_relationship);
+    if (data.their_felt_loved_as_child) setTheirFeltLovedAsChild(data.their_felt_loved_as_child);
+    if (data.their_family_stability) setTheirFamilyStability(data.their_family_stability);
+    if (data.their_healthy_relationship_models !== undefined) setTheirHealthyRelationshipModels(data.their_healthy_relationship_models);
+    if (data.their_family_notes) setTheirFamilyNotes(data.their_family_notes);
+    if (data.their_relationship_notes) setTheirRelationshipNotes(data.their_relationship_notes);
+    if (data.notes) setNotes(data.notes);
+    if (data.their_ambition_level) setTheirAmbitionLevel(data.their_ambition_level);
+    if (data.overall_chemistry) setOverallChemistry(data.overall_chemistry);
+    if (data.physical_attraction) setPhysicalAttraction(data.physical_attraction);
+    if (data.intellectual_connection) setIntellectualConnection(data.intellectual_connection);
+    if (data.humor_compatibility) setHumorCompatibility(data.humor_compatibility);
+    if (data.energy_match) setEnergyMatch(data.energy_match);
+    setSmartFillApplied(true);
+    setCandidateMode("full");
+  };
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (!user) return;
@@ -802,15 +851,52 @@ const THEIR_ISSUE_OPTIONS = [
               </div>
             </motion.button>
 
+            {/* Smart Fill Option */}
+            <motion.button
+              type="button"
+              onClick={() => { if (!canAddCandidate()) { setShowUpgradeDialog(true); return; } setCandidateMode("smart"); }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full p-4 rounded-xl border-2 border-primary/20 bg-primary/5 hover:border-primary/40 transition-colors group text-left"
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                  <Mic className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">Tell D.E.V.I. Everything</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                      AI ✨
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Talk or type — we'll fill in the profile for you
+                  </p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-3" />
+              </div>
+            </motion.button>
+
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.45 }}
               className="text-[10px] text-muted-foreground text-center pt-2"
             >
               You can always add more details later
             </motion.p>
           </motion.div>
+        )}
+
+        {/* Smart Fill Mode */}
+        {candidateMode === "smart" && (
+          <SmartFillForm
+            onExtracted={handleSmartFillExtracted}
+            onSwitchToManual={() => setCandidateMode("full")}
+          />
         )}
 
         {/* Quick Add Form */}
