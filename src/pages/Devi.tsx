@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink, Zap } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, UserPlus, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink, Zap } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -1749,10 +1749,10 @@ const Devi = () => {
               variant="ghost"
               size="icon"
               onClick={() => navigate("/add-candidate?mode=smart")}
-              className="rounded-lg shrink-0 h-8 w-8"
+              className="rounded-lg shrink-0 h-8 w-8 text-primary"
               title="Add Candidate"
             >
-              <User className="w-4 h-4" />
+              <UserPlus className="w-4 h-4" />
             </Button>
             
             {/* Adjust Tone Button */}
