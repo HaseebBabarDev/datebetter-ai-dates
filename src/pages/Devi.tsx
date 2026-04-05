@@ -481,12 +481,6 @@ const Devi = () => {
   // Dating advisor interactive card state
   const [showDatingAdvisorCard, setShowDatingAdvisorCard] = useState(false);
   
-  // First-time user flow
-  const isFirstTime = searchParams.get("firstTime") === "true";
-  const [firstTimeIntakeComplete, setFirstTimeIntakeComplete] = useState(false);
-  const [showProfileNudge, setShowProfileNudge] = useState(false);
-  const firstTimeAnalysisShown = useRef(false);
-  
   // Chat layout style - chatgpt (default) or bubble
   const [chatLayout, setChatLayout] = useState<"bubble" | "chatgpt">(() => {
     if (typeof window !== 'undefined') {
