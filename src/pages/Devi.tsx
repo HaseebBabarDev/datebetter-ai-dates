@@ -2519,6 +2519,14 @@ const Devi = () => {
             </div>
           )}
           
+          {/* Complete profile nudge for first-time users */}
+          {showProfileNudge && (
+            <CompleteProfileNudge 
+              onDismiss={() => setShowProfileNudge(false)} 
+              className="mt-4"
+            />
+          )}
+          
           {/* Win prompt - show after conversation has messages and not loading */}
           {messages.length >= 2 && messages.length < MAX_CONVERSATION_MESSAGES && !isLoading && messages[messages.length - 1]?.role === 'assistant' && (
             <DeviWinPrompt onLogWin={() => setShowWinDialog(true)} className="mt-4" />
