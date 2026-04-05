@@ -1781,16 +1781,7 @@ const Devi = () => {
     setSearchParams(newParams, { replace: true });
   };
   
-  // Show profile nudge after first AI response for first-time users
-  useEffect(() => {
-    if (isFirstTime && !firstTimeAnalysisShown.current && messages.length >= 2) {
-      const lastMsg = messages[messages.length - 1];
-      if (lastMsg?.role === "assistant") {
-        firstTimeAnalysisShown.current = true;
-        setShowProfileNudge(true);
-      }
-    }
-  }, [isFirstTime, messages]);
+  
   
   // Show first-time intake form
   if (isFirstTime && !firstTimeIntakeComplete) {
