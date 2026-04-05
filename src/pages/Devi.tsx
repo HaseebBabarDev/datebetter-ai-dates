@@ -2606,56 +2606,38 @@ const Devi = () => {
             </button>
           ) : (
             <div className="flex gap-2 items-end" data-tour="devi-input">
-              <TooltipProvider delayDuration={400}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleImageUpload('general')}
-                      className="shrink-0"
-                      disabled={isLoading}
-                      data-tour="devi-image-upload"
-                    >
-                      <ImagePlus className="w-5 h-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    <p className="text-xs">Upload text screenshots or dating profiles for analysis</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleImageUpload('general')}
+                className="shrink-0 h-11 w-11 rounded-xl border-primary/30 hover:bg-primary/10"
+                disabled={isLoading}
+                data-tour="devi-image-upload"
+              >
+                <ImagePlus className="w-6 h-6 text-primary" />
+              </Button>
               <Textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={selectedCandidate ? `Ask about ${selectedCandidate.nickname}...` : "Ask me anything about dating..."}
-                className="min-h-[44px] max-h-32 resize-none"
-                rows={1}
+                className="min-h-[52px] max-h-36 resize-none text-sm rounded-xl"
+                rows={2}
                 disabled={isLoading}
               />
-              <TooltipProvider delayDuration={400}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon"
-                      onClick={() => sendMessage()}
-                      disabled={(!input.trim() && pendingImages.length === 0) || isLoading}
-                      className="shrink-0 bg-[image:var(--gradient-hero)]"
-                    >
-                      {isLoading ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        <Send className="w-5 h-5" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    <p className="text-xs">Send your message to D.E.V.I.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Button
+                size="icon"
+                onClick={() => sendMessage()}
+                disabled={(!input.trim() && pendingImages.length === 0) || isLoading}
+                className="shrink-0 h-11 w-11 rounded-xl bg-[image:var(--gradient-hero)]"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+              </Button>
             </div>
           )}
           {/* AI Disclosure - at bottom for App Store compliance */}
