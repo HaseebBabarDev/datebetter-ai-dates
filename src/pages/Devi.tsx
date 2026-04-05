@@ -1667,6 +1667,17 @@ const Devi = () => {
     }
   }, [searchParams, profilesLoading, conversationsLoading, setSearchParams, startNewChat, userProfile]);
 
+  // Show profile nudge after first AI response for first-time users
+  useEffect(() => {
+    if (isFirstTime && !firstTimeAnalysisShown.current && messages.length >= 2) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg?.role === "assistant") {
+        firstTimeAnalysisShown.current = true;
+        setShowProfileNudge(true);
+      }
+    }
+  }, [isFirstTime, messages]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[image:var(--gradient-page)]">
