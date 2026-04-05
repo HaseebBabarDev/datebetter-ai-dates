@@ -116,7 +116,6 @@ export const FirstTimeIntake: React.FC<FirstTimeIntakeProps> = ({
               <Label className="text-xs font-medium">Anything else you want to share?</Label>
               <VoiceInputButton 
                 onTranscript={(text) => setFreeformInfo(prev => prev ? prev + " " + text : text)} 
-                size="sm" 
               />
             </div>
             <textarea
