@@ -1829,13 +1829,27 @@ const Devi = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border safe-area-top">
         <div className="container mx-auto px-2 py-2 max-w-lg">
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-lg shrink-0 h-8 w-8">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="rounded-lg shrink-0 h-8 w-8">
-              <Home className="w-4 h-4" />
-            </Button>
+          <div className="flex items-center gap-1.5">
+            {/* Navigate dropdown — replaces back/home buttons */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-lg shrink-0 h-8 w-8">
+                  <Home className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem onClick={() => navigate("/dashboard")} className="gap-2">
+                  <LayoutGrid className="w-4 h-4" /> Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/community")} className="gap-2">
+                  <Users className="w-4 h-4" /> Community
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/settings")} className="gap-2">
+                  <SlidersHorizontal className="w-4 h-4" /> Settings
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <div className="w-7 h-7 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
                 <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
@@ -1846,139 +1860,108 @@ const Devi = () => {
               </div>
             </div>
             
-            {/* Tour Restart Button */}
-            <TourRestartButton tourId="devi" tourSteps={DEVI_TOUR_STEPS} />
-            
-            {/* New Chat Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={startNewChat}
-              className="rounded-lg shrink-0 h-8 w-8"
-              title="New Chat"
-            >
+            {/* New Chat */}
+            <Button variant="ghost" size="icon" onClick={startNewChat} className="rounded-lg shrink-0 h-8 w-8" title="New Chat">
               <Plus className="w-4 h-4" />
             </Button>
 
-            {/* Add Candidate Button - goes to smart fill (voice/text) */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/add-candidate?mode=smart")}
-              className="rounded-lg shrink-0 h-8 w-8 text-primary"
-              title="Add Candidate"
-            >
+            {/* Add Candidate */}
+            <Button variant="ghost" size="icon" onClick={() => navigate("/add-candidate?mode=smart")} className="rounded-lg shrink-0 h-8 w-8 text-primary" title="Add Candidate">
               <UserPlus className="w-4 h-4" />
             </Button>
             
-            {/* Adjust Tone Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/settings?tab=preferences")}
-              className="rounded-lg shrink-0 h-8 w-8"
-              title="Adjust D.E.V.I.'s Tone"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-            </Button>
-            
-            {/* Layout Toggle Button */}
-            <TooltipProvider delayDuration={400}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      const newLayout = chatLayout === "bubble" ? "chatgpt" : "bubble";
-                      setChatLayout(newLayout);
-                      localStorage.setItem('devi-chat-layout', newLayout);
-                    }}
-                    className="rounded-lg shrink-0 h-8 w-8"
-                    title={chatLayout === "bubble" ? "Switch to Article View" : "Switch to Bubble View"}
-                  >
-                    {chatLayout === "bubble" ? (
-                      <AlignLeft className="w-4 h-4" />
-                    ) : (
-                      <LayoutGrid className="w-4 h-4" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p className="text-xs">{chatLayout === "bubble" ? "Switch to Article View" : "Switch to Bubble View"}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            {/* Chat History Sheet */}
-            <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-lg shrink-0 h-8 w-8" title="Chat History" data-tour="devi-history">
-                  <MessageSquare className="w-4 h-4" />
+            {/* More actions menu — houses layout toggle, chat history, tone, tour */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-lg shrink-0 h-8 w-8" title="More">
+                  <SlidersHorizontal className="w-4 h-4" />
                 </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-80 p-0">
-                <SheetHeader className="p-4 border-b border-border">
-                  <SheetTitle className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    Chat History
-                  </SheetTitle>
-                </SheetHeader>
-                <ScrollArea className="h-[calc(100vh-80px)]">
-                  <div className="p-2 space-y-1">
-                    {conversationsLoading ? (
-                      <div className="p-4 text-center text-muted-foreground text-sm">
-                        <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
-                        Loading...
-                      </div>
-                    ) : conversations.length === 0 ? (
-                      <div className="p-4 text-center text-muted-foreground text-sm">
-                        No conversations yet
-                      </div>
-                    ) : (
-                      conversations.map((conv) => {
-                        const candidate = candidates.find(c => c.id === conv.candidate_id);
-                        return (
-                          <div
-                            key={conv.id}
-                            className={`group flex items-start gap-2 p-3 rounded-lg cursor-pointer hover:bg-muted transition-colors ${
-                              currentConversationId === conv.id ? 'bg-muted' : ''
-                            }`}
-                            onClick={() => loadConversation(conv.id)}
-                          >
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{conv.title || "New conversation"}</p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                {candidate && (
-                                  <span className="text-xs text-primary truncate">{candidate.nickname}</span>
-                                )}
-                                <span className="text-xs text-muted-foreground">
-                                  {format(new Date(conv.updated_at), "MMM d")}
-                                </span>
-                              </div>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteConversation(conv.id);
-                              }}
-                            >
-                              <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
-                            </Button>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                </ScrollArea>
-              </SheetContent>
-            </Sheet>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem onClick={() => setHistoryOpen(true)} className="gap-2">
+                  <Clock className="w-4 h-4" /> Chat History
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    const newLayout = chatLayout === "bubble" ? "chatgpt" : "bubble";
+                    setChatLayout(newLayout);
+                    localStorage.setItem('devi-chat-layout', newLayout);
+                  }}
+                  className="gap-2"
+                >
+                  {chatLayout === "bubble" ? <AlignLeft className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
+                  {chatLayout === "bubble" ? "Article View" : "Bubble View"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/settings?tab=preferences")} className="gap-2">
+                  <Sparkles className="w-4 h-4" /> Adjust D.E.V.I.'s Tone
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
+
+      {/* Chat History Sheet (opened via More menu) */}
+      <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
+        <SheetContent side="right" className="w-80 p-0">
+          <SheetHeader className="p-4 border-b border-border">
+            <SheetTitle className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              Chat History
+            </SheetTitle>
+          </SheetHeader>
+          <ScrollArea className="h-[calc(100vh-80px)]">
+            <div className="p-2 space-y-1">
+              {conversationsLoading ? (
+                <div className="p-4 text-center text-muted-foreground text-sm">
+                  <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
+                  Loading...
+                </div>
+              ) : conversations.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground text-sm">
+                  No conversations yet
+                </div>
+              ) : (
+                conversations.map((conv) => {
+                  const candidate = candidates.find(c => c.id === conv.candidate_id);
+                  return (
+                    <div
+                      key={conv.id}
+                      className={`group flex items-start gap-2 p-3 rounded-lg cursor-pointer hover:bg-muted transition-colors ${
+                        currentConversationId === conv.id ? 'bg-muted' : ''
+                      }`}
+                      onClick={() => loadConversation(conv.id)}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{conv.title || "New conversation"}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {candidate && (
+                            <span className="text-xs text-primary truncate">{candidate.nickname}</span>
+                          )}
+                          <span className="text-xs text-muted-foreground">
+                            {format(new Date(conv.updated_at), "MMM d")}
+                          </span>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteConversation(conv.id);
+                        }}
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
+                      </Button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
 
       {/* Candidate Selector Bar */}
       <div className="border-b border-border bg-muted/30">
