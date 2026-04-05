@@ -1717,6 +1717,111 @@ const Devi = () => {
     );
   }
 
+  // First-time intake submission handler
+  const handleFirstTimeIntake = async (data: {
+    candidateName: string;
+    candidateAge: string;
+    candidateLocation: string;
+    candidateSex: string;
+    freeformInfo: string;
+  }) => {
+    if (!user) return;
+    
+    // Create candidate
+    const { data: newCandidate, error } = await supabase
+      .from("candidates")
+      .insert({
+        user_id: user.id,
+        nickname: data.candidateName,
+        age: data.candidateAge ? parseInt(data.candidateAge) : null,
+        city: data.candidateLocation || null,
+        gender_identity: data.candidateSex as any || null,
+        notes: data.freeformInfo || null,
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      toast.error("Failed to create candidate");
+      return;
+    }
+    
+    if (newCandidate) {
+      setCandidates(prev => [newCandidate, ...prev]);
+      setSelectedCandidate(newCandidate);
+    }
+    
+    setFirstTimeIntakeComplete(true);
+    
+    // Remove firstTime param from URL
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("firstTime");
+    setSearchParams(newParams, { replace: true });
+    
+    // Auto-send a guided message asking for screenshot
+    const goal = localStorage.getItem("onboarding_goal") || "evaluate";
+    const contextParts = [
+      `I just started using the app to ${goal === "detachment" ? "detach from" : goal === "healing" ? "heal from" : "evaluate"} ${data.candidateName}.`,
+      data.candidateAge ? `They're ${data.candidateAge} years old.` : "",
+      data.candidateLocation ? `Based in ${data.candidateLocation}.` : "",
+      data.freeformInfo ? `Here's what I know: ${data.freeformInfo}` : "",
+      "Can you give me an initial analysis? I'll upload screenshots of our conversations next.",
+    ].filter(Boolean).join(" ");
+    
+    // Slight delay to let state settle
+    setTimeout(() => {
+      sendMessage(contextParts);
+    }, 300);
+  };
+  
+  const handleSkipToChat = () => {
+    setFirstTimeIntakeComplete(true);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("firstTime");
+    setSearchParams(newParams, { replace: true });
+  };
+  
+  // Show profile nudge after first AI response for first-time users
+  useEffect(() => {
+    if (isFirstTime && !firstTimeAnalysisShown.current && messages.length >= 2) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg?.role === "assistant") {
+        firstTimeAnalysisShown.current = true;
+        setShowProfileNudge(true);
+      }
+    }
+  }, [isFirstTime, messages]);
+  
+  // Show first-time intake form
+  if (isFirstTime && !firstTimeIntakeComplete) {
+    const userName = localStorage.getItem("onboarding_name") || userProfile?.name || "";
+    const userGoal = localStorage.getItem("onboarding_goal") || "evaluate";
+    
+    return (
+      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border safe-area-top">
+          <div className="container mx-auto px-2 py-2 max-w-lg">
+            <div className="flex items-center gap-1.5">
+              <div className="w-7 h-7 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
+                <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="font-semibold text-sm text-foreground leading-tight">D.E.V.I.</h1>
+                <p className="text-xs text-muted-foreground">Let's get started</p>
+              </div>
+            </div>
+          </div>
+        </header>
+        <FirstTimeIntake
+          userName={userName}
+          userGoal={userGoal}
+          onSubmit={handleFirstTimeIntake}
+          onSkipToChat={handleSkipToChat}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
