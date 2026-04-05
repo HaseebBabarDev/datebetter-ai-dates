@@ -199,8 +199,25 @@ const Auth = () => {
             }
           }
           
-          const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
-          navigate(`/setup${setupQuery}`);
+          if (setupMode === "quick") {
+            // Quick setup: save name + goal to profile, then go straight to D.E.V.I.
+            const quickName = localStorage.getItem("onboarding_name") || "";
+            const quickGoal = localStorage.getItem("onboarding_goal") || "";
+            
+            if (data?.user) {
+              await supabase.from("profiles").update({
+                name: quickName || null,
+                dating_motivation: quickGoal ? [quickGoal] : null,
+                onboarding_completed: true,
+                onboarding_step: 0,
+              }).eq("user_id", data.user.id);
+            }
+            
+            navigate("/devi?firstTime=true");
+          } else {
+            const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
+            navigate(`/setup${setupQuery}`);
+          }
         }
       } else {
         // Sign in flow
@@ -222,8 +239,12 @@ const Auth = () => {
               return;
             }
             
-            const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
-            navigate(`/setup${setupQuery}`);
+            if (setupMode === "quick") {
+              navigate("/devi?firstTime=true");
+            } else {
+              const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
+              navigate(`/setup${setupQuery}`);
+            }
           }
         }
       }

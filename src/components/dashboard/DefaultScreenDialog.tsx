@@ -24,7 +24,7 @@ const OPTIONS: { value: DefaultScreen; label: string; description: string; icon:
 ];
 
 export const DefaultScreenDialog: React.FC<DefaultScreenDialogProps> = ({ open, onClose }) => {
-  const [selected, setSelected] = useState<DefaultScreen>("dashboard");
+  const [selected, setSelected] = useState<DefaultScreen>("devi");
 
   return (
     <Dialog open={open} onOpenChange={() => onClose(selected)}>

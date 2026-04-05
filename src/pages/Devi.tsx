@@ -51,6 +51,8 @@ import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
 import { DatingAdvisorCard } from "@/components/devi/DatingAdvisorCard";
+import { FirstTimeIntake } from "@/components/devi/FirstTimeIntake";
+import { CompleteProfileNudge } from "@/components/devi/CompleteProfileNudge";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -492,6 +494,12 @@ const Devi = () => {
   const initialPromptTypeRef = useRef<string | null>(searchParams.get("prompt"));
   const feelingPromptHandled = useRef(false);
   
+  // First-time user flow
+  const isFirstTime = searchParams.get("firstTime") === "true";
+  const [firstTimeIntakeComplete, setFirstTimeIntakeComplete] = useState(false);
+  const [showProfileNudge, setShowProfileNudge] = useState(false);
+  const firstTimeAnalysisShown = useRef(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -527,9 +535,10 @@ const Devi = () => {
   const missingProfileFields = profileCompletenessResult.missingFields;
   
   // Check if user has full profile - for general chat only profile needed, for candidate chat also need interactions
-  const hasFullProfile = userProfileCompleteness === 100;
+  // First-time users bypass all profile checks
+  const hasFullProfile = isFirstTime || userProfileCompleteness === 100;
   const hasInteractions = interactions.length > 0;
-  const canChatWithCandidate = hasFullProfile && hasInteractions;
+  const canChatWithCandidate = isFirstTime || (hasFullProfile && hasInteractions);
   const canChatGeneral = hasFullProfile; // General chat only needs profile
   
   // Mode: "general" = no candidate, "candidate" = specific candidate
@@ -1658,6 +1667,17 @@ const Devi = () => {
     }
   }, [searchParams, profilesLoading, conversationsLoading, setSearchParams, startNewChat, userProfile]);
 
+  // Show profile nudge after first AI response for first-time users
+  useEffect(() => {
+    if (isFirstTime && !firstTimeAnalysisShown.current && messages.length >= 2) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg?.role === "assistant") {
+        firstTimeAnalysisShown.current = true;
+        setShowProfileNudge(true);
+      }
+    }
+  }, [isFirstTime, messages]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[image:var(--gradient-page)]">
@@ -1704,6 +1724,102 @@ const Devi = () => {
             </Button>
           </div>
         </main>
+      </div>
+    );
+  }
+
+  // First-time intake submission handler
+  const handleFirstTimeIntake = async (data: {
+    candidateName: string;
+    candidateAge: string;
+    candidateLocation: string;
+    candidateSex: string;
+    freeformInfo: string;
+  }) => {
+    if (!user) return;
+    
+    // Create candidate
+    const { data: newCandidate, error } = await supabase
+      .from("candidates")
+      .insert({
+        user_id: user.id,
+        nickname: data.candidateName,
+        age: data.candidateAge ? parseInt(data.candidateAge) : null,
+        city: data.candidateLocation || null,
+        gender_identity: data.candidateSex as any || null,
+        notes: data.freeformInfo || null,
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      toast.error("Failed to create candidate");
+      return;
+    }
+    
+    if (newCandidate) {
+      setCandidates(prev => [newCandidate, ...prev]);
+      setSelectedCandidate(newCandidate);
+    }
+    
+    setFirstTimeIntakeComplete(true);
+    
+    // Remove firstTime param from URL
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("firstTime");
+    setSearchParams(newParams, { replace: true });
+    
+    // Auto-send a guided message asking for screenshot
+    const goal = localStorage.getItem("onboarding_goal") || "evaluate";
+    const contextParts = [
+      `I just started using the app to ${goal === "detachment" ? "detach from" : goal === "healing" ? "heal from" : "evaluate"} ${data.candidateName}.`,
+      data.candidateAge ? `They're ${data.candidateAge} years old.` : "",
+      data.candidateLocation ? `Based in ${data.candidateLocation}.` : "",
+      data.freeformInfo ? `Here's what I know: ${data.freeformInfo}` : "",
+      "Can you give me an initial analysis? I'll upload screenshots of our conversations next.",
+    ].filter(Boolean).join(" ");
+    
+    // Slight delay to let state settle
+    setTimeout(() => {
+      sendMessage(contextParts);
+    }, 300);
+  };
+  
+  const handleSkipToChat = () => {
+    setFirstTimeIntakeComplete(true);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("firstTime");
+    setSearchParams(newParams, { replace: true });
+  };
+  
+  
+  
+  // Show first-time intake form
+  if (isFirstTime && !firstTimeIntakeComplete) {
+    const userName = localStorage.getItem("onboarding_name") || userProfile?.name || "";
+    const userGoal = localStorage.getItem("onboarding_goal") || "evaluate";
+    
+    return (
+      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border safe-area-top">
+          <div className="container mx-auto px-2 py-2 max-w-lg">
+            <div className="flex items-center gap-1.5">
+              <div className="w-7 h-7 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
+                <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="font-semibold text-sm text-foreground leading-tight">D.E.V.I.</h1>
+                <p className="text-xs text-muted-foreground">Let's get started</p>
+              </div>
+            </div>
+          </div>
+        </header>
+        <FirstTimeIntake
+          userName={userName}
+          userGoal={userGoal}
+          onSubmit={handleFirstTimeIntake}
+          onSkipToChat={handleSkipToChat}
+        />
       </div>
     );
   }
@@ -2401,6 +2517,14 @@ const Devi = () => {
                 </div>
               </div>
             </div>
+          )}
+          
+          {/* Complete profile nudge for first-time users */}
+          {showProfileNudge && (
+            <CompleteProfileNudge 
+              onDismiss={() => setShowProfileNudge(false)} 
+              className="mt-4"
+            />
           )}
           
           {/* Win prompt - show after conversation has messages and not loading */}
