@@ -239,8 +239,12 @@ const Auth = () => {
               return;
             }
             
-            const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
-            navigate(`/setup${setupQuery}`);
+            if (setupMode === "quick") {
+              navigate("/devi?firstTime=true");
+            } else {
+              const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
+              navigate(`/setup${setupQuery}`);
+            }
           }
         }
       }
