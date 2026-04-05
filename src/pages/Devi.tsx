@@ -494,6 +494,12 @@ const Devi = () => {
   const initialPromptTypeRef = useRef<string | null>(searchParams.get("prompt"));
   const feelingPromptHandled = useRef(false);
   
+  // First-time user flow
+  const isFirstTime = searchParams.get("firstTime") === "true";
+  const [firstTimeIntakeComplete, setFirstTimeIntakeComplete] = useState(false);
+  const [showProfileNudge, setShowProfileNudge] = useState(false);
+  const firstTimeAnalysisShown = useRef(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
