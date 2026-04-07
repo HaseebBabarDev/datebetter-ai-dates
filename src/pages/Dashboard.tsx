@@ -46,7 +46,7 @@ const FEATURES = [
     icon: AlertTriangle,
     label: "Red Flags",
     desc: "Detected warnings across candidates",
-    path: "/devi?action=flags",
+    path: "/candidates",
     color: "text-red-500",
     bg: "bg-red-500/10",
   },
