@@ -86,7 +86,7 @@ serve(async (req) => {
       const { data: subData } = await supabaseClient
         .from("user_subscriptions")
         .select("trial_ends_at, plan, candidates_limit, updates_per_candidate")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .maybeSingle();
 
       if (subData?.trial_ends_at) {
