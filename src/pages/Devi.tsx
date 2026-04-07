@@ -1256,6 +1256,7 @@ const Devi = () => {
         .replace(/\[SET_ATTACHMENT_TO_PAST:\d+\]/g, '')
         .replace(/\[SET_COMPATIBILITY_SCORE:\d+\]/g, '')
         .replace(/\[LOG_INTERACTION:[^\]]*\]?/g, '')
+        .replace(/\[SET_PROFILE:[^\]]*\]?/g, '')
         .replace(/\[[A-Z_]+:[^\]]*\]?/g, '')
         .replace(/\[[A-Z_]{3,}\]/g, '')
         .trim();
@@ -1437,6 +1438,32 @@ const Devi = () => {
           toast.success(`Attachment to past updated to ${value}/10`);
         }
         
+        // Parse SET_PROFILE markers for onboarding intake
+        const profileFieldMatches = fullContent.matchAll(/\[SET_PROFILE:(\w+):([^\]]+)\]/g);
+        for (const match of profileFieldMatches) {
+          const field = match[1];
+          const value = match[2];
+          
+          // Handle special cases
+          if (field === 'interested_in') {
+            profileUpdates.interested_in = value.split(',').map(v => v.trim());
+          } else if (field === 'faith_importance') {
+            profileUpdates.faith_importance = Math.min(10, Math.max(1, parseInt(value)));
+          } else if (['gender_identity', 'pronouns', 'sexual_orientation', 'relationship_goal', 
+                       'relationship_status', 'relationship_structure', 'religion', 'kids_desire',
+                       'kids_status', 'communication_style', 'attachment_style', 'politics', 
+                       'social_style'].includes(field)) {
+            // Enum fields - set directly
+            (profileUpdates as any)[field] = value;
+          } else if (['name', 'city', 'country', 'conflict_style', 'career_stage', 
+                       'education_level', 'typical_partner_type', 'parents_relationship_dynamic',
+                       'felt_loved_as_child'].includes(field)) {
+            // Free text fields
+            (profileUpdates as any)[field] = value;
+          }
+          hasUpdates = true;
+        }
+        
         // Parse compatibility score marker for candidate
         const compatScoreMatch = fullContent.match(/\[SET_COMPATIBILITY_SCORE:(\d+)\]/);
         if (compatScoreMatch && selectedCandidate && user) {
@@ -1588,7 +1615,8 @@ const Devi = () => {
           fullContent.includes('[SET_LOVE_BOMBING_SENSITIVITY:') ||
           fullContent.includes('[SET_OVER_EX_LEVEL:') ||
           fullContent.includes('[SET_ATTACHMENT_TO_PAST:') ||
-          fullContent.includes('[LOG_INTERACTION:');
+          fullContent.includes('[LOG_INTERACTION:') ||
+          fullContent.includes('[SET_PROFILE:');
           
         if (hasMarkers) {
           setMessages(prev => 
