@@ -24,6 +24,8 @@ import Offline from "./pages/Offline";
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Setup = lazy(() => import("./pages/Setup"));
 const CandidateDetail = lazy(() => import("./pages/CandidateDetail"));
+const CandidatesView = lazy(() => import("./pages/CandidatesView"));
+const CandidateThread = lazy(() => import("./pages/CandidateThread"));
 const Patterns = lazy(() => import("./pages/Patterns"));
 const AddCandidate = lazy(() => import("./pages/AddCandidate"));
 const Settings = lazy(() => import("./pages/Settings"));
@@ -106,6 +108,8 @@ function AppContent() {
             <Route path="/auth" element={<Auth />} />
             <Route path="/setup" element={<Setup />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/candidates" element={<CandidatesView />} />
+            <Route path="/thread/:id" element={<CandidateThread />} />
             <Route path="/candidate/:id" element={<CandidateDetail />} />
             <Route path="/patterns" element={<Patterns />} />
             <Route path="/add-candidate" element={<AddCandidate />} />
