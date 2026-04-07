@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,18 @@ const Onboarding = () => {
   const navigate = useNavigate();
   const [selectedGoal, setSelectedGoal] = useState("");
   const [name, setName] = useState("");
+
+  // Force green theme on pre-auth onboarding screen
+  React.useEffect(() => {
+    const root = document.documentElement;
+    const prevClasses = [...root.classList].filter(c => c.startsWith("theme-"));
+    root.classList.remove(...prevClasses);
+    root.classList.add("theme-green");
+    return () => {
+      root.classList.remove("theme-green");
+      prevClasses.forEach(c => root.classList.add(c));
+    };
+  }, []);
 
   const handleContinue = () => {
     // Store goal + name in localStorage for after signup
