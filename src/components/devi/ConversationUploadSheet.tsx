@@ -6,7 +6,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   Upload,
@@ -38,12 +37,6 @@ const PLATFORMS: Platform[] = [
   { id: "other", label: "Other", icon: "💬", color: "bg-muted text-muted-foreground" },
 ];
 
-const UPLOAD_STEPS = [
-  { num: 1, text: "Open the chat and scroll to the **starting message** you want analyzed" },
-  { num: 2, text: "**Screen record** yourself scrolling through the conversation" },
-  { num: 3, text: "Scroll at **~2 screens per second** so D.E.V.I. can read it" },
-  { num: 4, text: "Tap **Stop** when finished, then upload the recording below" },
-];
 
 interface ConversationUploadSheetProps {
   open: boolean;
@@ -62,7 +55,7 @@ export function ConversationUploadSheet({
   candidateName,
   onSubmit,
 }: ConversationUploadSheetProps) {
-  const [step, setStep] = useState<"platform" | "instructions" | "upload">("platform");
+  const [step, setStep] = useState<"upload" | "platform">("upload");
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
   const [files, setFiles] = useState<{ data: string; type: string; isVideo: boolean; name: string }[]>([]);
   const [perspective, setPerspective] = useState<"me" | "them">("me");
@@ -70,7 +63,7 @@ export function ConversationUploadSheet({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const reset = () => {
-    setStep("platform");
+    setStep("upload");
     setSelectedPlatform(null);
     setFiles([]);
     setPerspective("me");
@@ -84,7 +77,13 @@ export function ConversationUploadSheet({
 
   const handleSelectPlatform = (platform: Platform) => {
     setSelectedPlatform(platform);
-    setStep("instructions");
+    if (files.length === 0) return;
+    onSubmit({
+      platform: platform.id,
+      files: files.map((f) => ({ data: f.data, type: f.type, isVideo: f.isVideo })),
+      perspective,
+    });
+    handleClose(false);
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,28 +128,6 @@ export function ConversationUploadSheet({
     e.target.value = "";
   };
 
-  const handleSubmit = () => {
-    if (files.length === 0) return;
-    onSubmit({
-      platform: selectedPlatform?.id || "other",
-      files: files.map((f) => ({ data: f.data, type: f.type, isVideo: f.isVideo })),
-      perspective,
-    });
-    handleClose(false);
-  };
-
-  const renderBoldText = (text: string) => {
-    const parts = text.split(/\*\*(.*?)\*\*/g);
-    return parts.map((part, i) =>
-      i % 2 === 1 ? (
-        <span key={i} className="font-semibold text-foreground">
-          {part}
-        </span>
-      ) : (
-        <span key={i}>{part}</span>
-      )
-    );
-  };
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
@@ -158,26 +135,25 @@ export function ConversationUploadSheet({
         {/* Header */}
         <SheetHeader className="px-5 pt-5 pb-3 border-b border-border shrink-0">
           <div className="flex items-center gap-3">
-            {step !== "platform" && (
+            {step === "platform" && (
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 shrink-0"
-                onClick={() => setStep(step === "upload" ? "instructions" : "platform")}
+                onClick={() => setStep("upload")}
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
             )}
             <SheetTitle className="text-left">
-              {step === "platform" && "Analyze a Conversation"}
-              {step === "instructions" && "How to Record"}
-              {step === "upload" && "Upload Your Conversation"}
+              {step === "upload" && "Analyze a Conversation"}
+              {step === "platform" && "Where is this from?"}
             </SheetTitle>
           </div>
-          {step === "platform" && (
+          {step === "upload" && (
             <p className="text-sm text-muted-foreground mt-1">
-              D.E.V.I. will analyze the conversation and give you a full breakdown
-              {candidateName ? ` about ${candidateName}` : ""}.
+              Upload a screen recording or screenshots of any conversation
+              {candidateName ? ` with ${candidateName}` : ""} and D.E.V.I. will break it down.
             </p>
           )}
         </SheetHeader>
@@ -206,75 +182,21 @@ export function ConversationUploadSheet({
             </div>
           )}
 
-          {/* STEP 2: Recording Instructions */}
-          {step === "instructions" && (
-            <div className="space-y-6">
-              {/* Platform badge */}
-              <div className="flex items-center gap-2">
-                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center text-base", selectedPlatform?.color)}>
-                  {selectedPlatform?.icon}
-                </div>
-                <span className="text-sm font-medium">{selectedPlatform?.label}</span>
-              </div>
-
-              {/* Method choice */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-4 rounded-xl border border-primary/30 bg-primary/5 text-center space-y-2">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                    <Video className="w-5 h-5 text-primary" />
-                  </div>
-                  <p className="text-sm font-semibold">Screen Recording</p>
-                  <p className="text-xs text-muted-foreground">Best for long convos</p>
-                  <Badge variant="secondary" className="text-xs">Recommended</Badge>
-                </div>
-                <div className="p-4 rounded-xl border border-border text-center space-y-2">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mx-auto">
-                    <ImagePlus className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-semibold">Screenshots</p>
-                  <p className="text-xs text-muted-foreground">Quick snippets</p>
-                </div>
-              </div>
-
-              {/* Steps */}
-              <div className="space-y-4">
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-                  Recording Steps
-                </p>
-                {UPLOAD_STEPS.map((s) => (
-                  <div key={s.num} className="flex gap-3 items-start">
-                    <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
-                      {s.num}
-                    </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed pt-0.5">
-                      {renderBoldText(s.text)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {/* How to screen record tip */}
+          {/* STEP 1: Upload */}
+          {step === "upload" && (
+            <div className="space-y-5">
+              {/* How to tip */}
               <div className="p-3 rounded-xl bg-muted/50 border border-border">
                 <div className="flex items-start gap-2">
                   <Smartphone className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                   <div className="text-xs text-muted-foreground space-y-1">
-                    <p className="font-medium text-foreground">How to screen record:</p>
+                    <p className="font-medium text-foreground">Tip: Screen record the conversation</p>
                     <p><span className="font-medium">iPhone:</span> Swipe down → Control Center → Screen Recording</p>
                     <p><span className="font-medium">Android:</span> Swipe down → Quick Settings → Screen Record</p>
                   </div>
                 </div>
               </div>
 
-              <Button className="w-full gap-2" onClick={() => setStep("upload")}>
-                <Upload className="w-4 h-4" />
-                I'm Ready to Upload
-              </Button>
-            </div>
-          )}
-
-          {/* STEP 3: Upload */}
-          {step === "upload" && (
-            <div className="space-y-5">
               {/* Upload zone */}
               <button
                 onClick={() => fileInputRef.current?.click()}
@@ -373,9 +295,9 @@ export function ConversationUploadSheet({
           <div className="shrink-0 border-t border-border p-4 safe-area-bottom">
             <Button
               className="w-full gap-2 h-12 text-base font-semibold rounded-xl bg-[image:var(--gradient-hero)]"
-              onClick={handleSubmit}
+              onClick={() => setStep("platform")}
             >
-              Analyze Conversation
+              Continue
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
