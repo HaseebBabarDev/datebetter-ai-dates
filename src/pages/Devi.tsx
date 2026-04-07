@@ -978,6 +978,27 @@ const Devi = () => {
     }
   };
 
+  const handleConversationUpload = (data: {
+    platform: string;
+    files: { data: string; type: string; isVideo: boolean }[];
+    perspective: "me" | "them";
+  }) => {
+    // Add all files as pending images with the conversation context
+    const newImages = data.files.map(f => ({
+      data: f.data,
+      type: f.isVideo ? "conversation_video" : "text_screenshot",
+    }));
+    setPendingImages(prev => [...prev, ...newImages]);
+    setTextScreenshotRightSide(data.perspective);
+
+    // Set a smart prompt
+    const platformLabel = data.platform.replace(/_/g, " ");
+    const candidateRef = selectedCandidate ? ` with ${selectedCandidate.nickname}` : "";
+    setInput(
+      `Analyze this ${platformLabel} conversation${candidateRef}. Tell me who's chasing, red/green flags, attachment patterns, and what I should do next.`
+    );
+  };
+
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
