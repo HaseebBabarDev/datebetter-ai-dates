@@ -86,46 +86,87 @@ export function ConversationUploadSheet({
     handleClose(false);
   };
 
+  const compressImage = (file: File, maxDim = 1920): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          let { width, height } = img;
+          if (width > maxDim || height > maxDim) {
+            const ratio = Math.min(maxDim / width, maxDim / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) { reject(new Error("No canvas context")); return; }
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", 0.85));
+        } catch (err) {
+          reject(err);
+        } finally {
+          URL.revokeObjectURL(url);
+        }
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Failed to load image")); };
+      img.src = url;
+    });
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
     if (!selectedFiles.length) return;
 
     setUploading(true);
 
-    for (const file of selectedFiles) {
-      const isVideo = file.type.startsWith("video/");
-      const isImage = file.type.startsWith("image/");
+    try {
+      for (const file of selectedFiles) {
+        const isVideo = file.type.startsWith("video/");
+        const isImage = file.type.startsWith("image/");
 
-      if (!isVideo && !isImage) {
-        toast.error(`${file.name}: Only images and videos are supported`);
-        continue;
-      }
+        if (!isVideo && !isImage) {
+          toast.error(`${file.name}: Only images and videos are supported`);
+          continue;
+        }
 
-      if (file.size > 50 * 1024 * 1024) {
-        toast.error(`${file.name}: File must be under 50MB`);
-        continue;
-      }
+        if (file.size > 50 * 1024 * 1024) {
+          toast.error(`${file.name}: File must be under 50MB`);
+          continue;
+        }
 
-      await new Promise<void>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => {
+        try {
+          let dataUrl: string;
+          if (isImage) {
+            dataUrl = await compressImage(file);
+          } else {
+            dataUrl = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = () => reject(new Error("Failed to read file"));
+              reader.readAsDataURL(file);
+            });
+          }
+
           setFiles((prev) => [
             ...prev,
             {
-              data: reader.result as string,
+              data: dataUrl,
               type: isVideo ? "conversation_video" : "text_screenshot",
               isVideo,
               name: file.name,
             },
           ]);
-          resolve();
-        };
-        reader.readAsDataURL(file);
-      });
+        } catch (err) {
+          console.error("Error processing file:", err);
+          toast.error(`${file.name}: Failed to process`);
+        }
+      }
+    } finally {
+      setUploading(false);
+      if (e.target) e.target.value = "";
     }
-
-    setUploading(false);
-    e.target.value = "";
   };
 
 
