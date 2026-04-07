@@ -13,9 +13,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const NAV_ITEMS = [
-  { path: "/dashboard", label: "Home", icon: Home, description: "View your dashboard and candidates" },
+  { path: "/candidates", label: "Candidates", icon: Users, description: "View and manage your candidates" },
   { path: "/devi", label: "D.E.V.I.", icon: Sparkles, description: "Chat with your AI dating coach" },
-  { path: "/community", label: "Community", icon: Users, description: "Connect with other daters" },
+  { path: "/dashboard", label: "Home", icon: Home, description: "View your dashboard" },
   { path: "/settings", label: "Settings", icon: Settings, description: "Manage your account and preferences" },
 ];
 
