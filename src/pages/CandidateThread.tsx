@@ -380,7 +380,7 @@ const CandidateThread = () => {
                   </div>
                 ) : (
                   <div className="max-w-[85%]">
-                    <ChatGPTMessage content={msg.content} />
+                    <ChatGPTMessage message={{ id: msg.id, role: "assistant", content: msg.content }} />
                   </div>
                 )}
               </div>
@@ -388,7 +388,7 @@ const CandidateThread = () => {
 
             {sending && (
               <div className="flex justify-start">
-                <DeviThinkingIndicator />
+                <DeviThinkingIndicator isVisible={true} />
               </div>
             )}
           </div>
