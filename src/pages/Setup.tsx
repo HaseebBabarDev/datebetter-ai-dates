@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import EngagementInterstitial, { interstitials } from "@/components/onboarding/EngagementInterstitial";
+import OnboardingChoiceScreen from "@/components/onboarding/screens/OnboardingChoiceScreen";
 
 // Import all screens
 import WelcomeScreen from "@/components/onboarding/screens/WelcomeScreen";
