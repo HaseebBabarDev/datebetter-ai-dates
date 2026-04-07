@@ -6,7 +6,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, ImagePlus, X, Sparkles, Flag, BarChart3, BookOpen, Heart } from "lucide-react";
+import { Send, ImagePlus, X, Sparkles, Flag, BarChart3, Heart, TrendingUp, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ThreadHeader } from "@/components/thread/ThreadHeader";
