@@ -196,8 +196,6 @@ const CandidateDetail = () => {
           .eq("user_id", user!.id),
       ]);
 
-      console.log("Candidate response:", candidateRes);
-      console.log("Interactions response:", interactionsRes);
 
       if (candidateRes.data) {
         setCandidate(candidateRes.data);
