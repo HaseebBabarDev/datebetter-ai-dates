@@ -9,7 +9,7 @@ const corsHeaders = {
 // Voice options for D.E.V.I.
 const VOICE_IDS = {
   female: "sNLQ1mXur3j7xaL3YIA9",  // Female voice - warm, reassuring
-  male: "UROTxOkHtIFqWCaTocVv",     // Male voice - calm, grounded
+  male: "JBFqnCBsd6RMkjVDRZzb",    // Male voice - George
   // Legacy mappings
   mature: "sNLQ1mXur3j7xaL3YIA9",
   younger: "UROTxOkHtIFqWCaTocVv",
