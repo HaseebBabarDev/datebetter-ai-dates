@@ -26,7 +26,7 @@ export function BottomNavigation() {
   const [unreadDmCount, setUnreadDmCount] = useState(0);
 
   const hiddenPaths = ["/", "/auth", "/setup", "/website", "/pitch-deck"];
-  const hiddenPrefixes = ["/onboarding", "/admin"];
+  const hiddenPrefixes = ["/onboarding", "/admin", "/thread"];
   const isHidden =
     hiddenPaths.includes(location.pathname) ||
     hiddenPrefixes.some((prefix) => location.pathname.startsWith(prefix));
