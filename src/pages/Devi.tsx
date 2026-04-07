@@ -1815,7 +1815,6 @@ const Devi = () => {
   
   
   // Auto-send onboarding context on first time if available
-  const onboardingContextSent = useRef(false);
   useEffect(() => {
     if (isFirstTime && !onboardingContextSent.current) {
       const uploadContext = localStorage.getItem("onboarding_upload_context");
