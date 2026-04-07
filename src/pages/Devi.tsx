@@ -2100,7 +2100,18 @@ const Devi = () => {
               </DropdownMenu>
             )}
             
-            {/* Update Score Button - only show for candidate mode */}
+            {/* View Profile + Update Score - only show for candidate mode */}
+            {selectedCandidate && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-10 gap-1.5 shrink-0"
+                onClick={() => navigate(`/candidate/${selectedCandidate.id}`)}
+              >
+                <User className="w-3.5 h-3.5" />
+                <span className="text-xs">Profile</span>
+              </Button>
+            )}
             {selectedCandidate && messages.length > 0 && (
               <Button
                 variant="outline"
@@ -2114,7 +2125,7 @@ const Devi = () => {
                 ) : (
                   <RefreshCw className="w-3.5 h-3.5" />
                 )}
-                <span className="text-xs">Update Score</span>
+                <span className="text-xs">Score</span>
               </Button>
             )}
           </div>
