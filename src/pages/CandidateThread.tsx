@@ -52,7 +52,7 @@ const CandidateThread = () => {
     if (!user?.id || !id) return;
 
     const fetchData = async () => {
-      // Fetch candidate
+      // Fetch candidate first (needed for conversation creation)
       const { data: cand } = await supabase
         .from("candidates")
         .select("*")
@@ -66,19 +66,29 @@ const CandidateThread = () => {
       }
       setCandidate(cand);
 
-      // Find or create conversation for this candidate
-      const { data: convos } = await supabase
-        .from("devi_conversations")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("candidate_id", id)
-        .eq("is_active", true)
-        .order("created_at", { ascending: false })
-        .limit(1);
+      // Fetch conversation and interactions in parallel
+      const [convosRes, intsRes] = await Promise.all([
+        supabase
+          .from("devi_conversations")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("candidate_id", id)
+          .eq("is_active", true)
+          .order("created_at", { ascending: false })
+          .limit(1),
+        supabase
+          .from("interactions")
+          .select("*")
+          .eq("candidate_id", id)
+          .eq("user_id", user.id)
+          .order("interaction_date", { ascending: false }),
+      ]);
+
+      if (intsRes.data) setInteractions(intsRes.data);
 
       let convoId: string;
-      if (convos && convos.length > 0) {
-        convoId = convos[0].id;
+      if (convosRes.data && convosRes.data.length > 0) {
+        convoId = convosRes.data[0].id;
       } else {
         const { data: newConvo } = await supabase
           .from("devi_conversations")
@@ -104,16 +114,6 @@ const CandidateThread = () => {
         .order("created_at", { ascending: true });
 
       if (msgs) setMessages(msgs);
-
-      // Fetch interactions
-      const { data: ints } = await supabase
-        .from("interactions")
-        .select("*")
-        .eq("candidate_id", id)
-        .eq("user_id", user.id)
-        .order("interaction_date", { ascending: false });
-
-      if (ints) setInteractions(ints);
       setLoading(false);
     };
 
