@@ -45,8 +45,8 @@ export const FirstTimeIntake: React.FC<FirstTimeIntakeProps> = ({
   const canSubmit = candidateName.trim().length > 0;
 
   return (
-    <div className="flex-1 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-5 animate-fade-in">
+    <div className="flex-1 overflow-y-auto p-4 pb-safe-bottom">
+      <div className="w-full max-w-md mx-auto space-y-5 animate-fade-in">
         {/* Header */}
         <div className="text-center">
           <div className="w-14 h-14 rounded-2xl bg-[image:var(--gradient-hero)] flex items-center justify-center mx-auto mb-3">
