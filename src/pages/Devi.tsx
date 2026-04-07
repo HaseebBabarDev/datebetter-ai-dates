@@ -2539,9 +2539,10 @@ const Devi = () => {
             </div>
           )}
           
-          {/* Complete profile nudge for first-time users */}
+          {/* Progressive onboarding nudge */}
           {showProfileNudge && (
-            <CompleteProfileNudge 
+            <OnboardingProgressCTA 
+              profile={userProfile}
               onDismiss={() => setShowProfileNudge(false)} 
               className="mt-4"
             />
