@@ -30,7 +30,7 @@ const FEATURES = [
     icon: MessageSquare,
     label: "Text Simulator",
     desc: "Practice what to say next",
-    path: "/candidates",
+    path: "/devi?action=textsim",
     color: "text-blue-500",
     bg: "bg-blue-500/10",
   },
