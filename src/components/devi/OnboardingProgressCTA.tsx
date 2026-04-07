@@ -1,15 +1,14 @@
 import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, Sparkles, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { Tables } from "@/integrations/supabase/types";
-import { Progress } from "@/components/ui/progress";
 
 type Profile = Tables<"profiles">;
 
 interface OnboardingProgressCTAProps {
   profile: Profile | null;
   onDismiss: () => void;
+  onAskInChat?: (prompt: string) => void;
   className?: string;
 }
 
@@ -18,80 +17,70 @@ const ONBOARDING_SECTIONS = [
     id: "identity",
     label: "Basic Identity",
     emoji: "👤",
-    route: "/setup?setup=full",
-    step: 2,
+    prompt: "Let's set up my basic identity — ask me about my gender, pronouns, and name.",
     check: (p: Profile) => !!(p.gender_identity && p.pronouns),
   },
   {
     id: "dating_prefs",
     label: "Dating Preferences",
     emoji: "💘",
-    route: "/setup?setup=full",
-    step: 3,
+    prompt: "Ask me about my dating preferences — who I'm interested in, age range, and what I'm attracted to.",
     check: (p: Profile) => !!(p.interested_in && p.interested_in.length > 0),
   },
   {
     id: "goals",
     label: "Relationship Goals",
     emoji: "🎯",
-    route: "/setup?setup=full",
-    step: 7,
+    prompt: "Let's talk about my relationship goals — what I'm looking for and my timeline.",
     check: (p: Profile) => !!(p.relationship_goal),
   },
   {
     id: "values",
     label: "Faith & Values",
     emoji: "🙏",
-    route: "/setup?setup=full",
-    step: 9,
+    prompt: "Ask me about my faith, religion, and core values in relationships.",
     check: (p: Profile) => !!(p.religion || p.faith_importance),
   },
   {
     id: "kids_family",
     label: "Kids & Family",
     emoji: "👶",
-    route: "/setup?setup=full",
-    step: 8,
+    prompt: "Let's talk about kids and family — whether I want them, timeline, and my current situation.",
     check: (p: Profile) => !!(p.kids_desire),
   },
   {
     id: "career",
     label: "Career & Lifestyle",
     emoji: "💼",
-    route: "/setup?setup=full",
-    step: 11,
+    prompt: "Ask me about my career, education, and lifestyle — work schedule, ambition, and finances.",
     check: (p: Profile) => !!(p.career_stage || p.education_level),
   },
   {
     id: "communication",
     label: "Communication Style",
     emoji: "💬",
-    route: "/setup?setup=full",
-    step: 15,
+    prompt: "Let's explore my communication style — how I handle conflict, express feelings, and connect.",
     check: (p: Profile) => !!(p.communication_style || p.conflict_style),
   },
   {
     id: "past_patterns",
     label: "Past Patterns",
     emoji: "🔄",
-    route: "/setup?setup=full",
-    step: 16,
+    prompt: "Ask me about my past relationship patterns — attachment style, typical partners, and what I've learned.",
     check: (p: Profile) => !!(p.attachment_style || p.typical_partner_type),
   },
   {
     id: "family_upbringing",
     label: "Family Background",
     emoji: "🏠",
-    route: "/setup?setup=full",
-    step: 20,
+    prompt: "Let's talk about my family background — parents' relationship, upbringing, and how it shaped me.",
     check: (p: Profile) => !!(p.parents_relationship_dynamic || p.felt_loved_as_child),
   },
   {
     id: "boundaries",
     label: "Boundaries & Safety",
     emoji: "🛡️",
-    route: "/setup?setup=full",
-    step: 21,
+    prompt: "Ask me about my boundaries and dealbreakers — what I won't tolerate and my safety priorities.",
     check: (p: Profile) => !!(p.boundary_strength || (p.dealbreakers && (p.dealbreakers as unknown[]).length > 0)),
   },
 ];
@@ -99,10 +88,9 @@ const ONBOARDING_SECTIONS = [
 export const OnboardingProgressCTA: React.FC<OnboardingProgressCTAProps> = ({
   profile,
   onDismiss,
+  onAskInChat,
   className,
 }) => {
-  const navigate = useNavigate();
-
   const { completed, total, nextSection, percentage } = useMemo(() => {
     if (!profile) return { completed: 0, total: ONBOARDING_SECTIONS.length, nextSection: ONBOARDING_SECTIONS[0], percentage: 0 };
 
@@ -125,7 +113,6 @@ export const OnboardingProgressCTA: React.FC<OnboardingProgressCTAProps> = ({
     };
   }, [profile]);
 
-  // All complete — don't show
   if (completed >= total) return null;
 
   const greeting = completed === 0
@@ -134,9 +121,14 @@ export const OnboardingProgressCTA: React.FC<OnboardingProgressCTAProps> = ({
     ? "You're off to a great start!"
     : "Almost there — keep going!";
 
+  const handleSectionClick = (section: typeof ONBOARDING_SECTIONS[0]) => {
+    if (onAskInChat) {
+      onAskInChat(section.prompt);
+    }
+  };
+
   return (
     <div className={`rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-background p-4 space-y-3 relative ${className || ""}`}>
-      {/* Dismiss */}
       <button
         onClick={onDismiss}
         className="absolute top-3 right-3 p-1 rounded-full hover:bg-muted/80 transition-colors"
@@ -145,7 +137,6 @@ export const OnboardingProgressCTA: React.FC<OnboardingProgressCTAProps> = ({
         <X className="w-3.5 h-3.5 text-muted-foreground" />
       </button>
 
-      {/* Header */}
       <div className="flex items-center gap-2.5 pr-6">
         <div className="w-9 h-9 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
           <Sparkles className="w-4.5 h-4.5 text-primary-foreground" />
@@ -158,7 +149,6 @@ export const OnboardingProgressCTA: React.FC<OnboardingProgressCTAProps> = ({
         </div>
       </div>
 
-      {/* Progress bar */}
       <div className="space-y-1">
         <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
           <div
@@ -168,22 +158,23 @@ export const OnboardingProgressCTA: React.FC<OnboardingProgressCTAProps> = ({
         </div>
       </div>
 
-      {/* Section pills — show next 3 incomplete */}
       <div className="flex flex-wrap gap-1.5">
         {ONBOARDING_SECTIONS.slice(0, 6).map((section) => {
           const isDone = profile ? section.check(profile) : false;
           return (
-            <span
+            <button
               key={section.id}
+              onClick={() => !isDone && handleSectionClick(section)}
+              disabled={isDone}
               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors ${
                 isDone
-                  ? "bg-primary/15 text-primary"
-                  : "bg-muted text-muted-foreground"
+                  ? "bg-primary/15 text-primary cursor-default"
+                  : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary cursor-pointer"
               }`}
             >
               {isDone ? <Check className="w-2.5 h-2.5" /> : <span>{section.emoji}</span>}
               {section.label}
-            </span>
+            </button>
           );
         })}
         {ONBOARDING_SECTIONS.length > 6 && (
@@ -193,12 +184,11 @@ export const OnboardingProgressCTA: React.FC<OnboardingProgressCTAProps> = ({
         )}
       </div>
 
-      {/* Next step CTA */}
       {nextSection && (
         <Button
           size="sm"
           className="w-full gap-2 bg-[image:var(--gradient-hero)] hover:opacity-90 h-10 font-semibold"
-          onClick={() => navigate("/setup?setup=full")}
+          onClick={() => handleSectionClick(nextSection)}
         >
           <span>{nextSection.emoji}</span>
           Continue: {nextSection.label}
