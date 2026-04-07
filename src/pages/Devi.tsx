@@ -1715,43 +1715,7 @@ const Devi = () => {
     return <Navigate to="/auth" replace />;
   }
 
-  if (isFree) {
-    return (
-      <div className="min-h-screen bg-[image:var(--gradient-page)] pb-24">
-        <header className="sticky top-0 z-50 bg-[image:var(--gradient-header)] backdrop-blur-xl border-b border-border/50 safe-area-top">
-          <div className="container mx-auto px-4 py-4 max-w-lg">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-xl hover:bg-primary/10">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="rounded-xl hover:bg-primary/10">
-                <Home className="w-5 h-5" />
-              </Button>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary-foreground" />
-                </div>
-                <h1 className="text-xl font-semibold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">D.E.V.I.</h1>
-              </div>
-            </div>
-          </div>
-        </header>
-        <main className="container mx-auto px-4 py-6 max-w-lg">
-          <div className="bg-card rounded-xl border border-border p-6 text-center space-y-4">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-muted flex items-center justify-center">
-              <Sparkles className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h2 className="text-xl font-semibold">Unlock D.E.V.I. Chat</h2>
-            <p className="text-muted-foreground">Upgrade to chat with your AI assistant and get personalized advice.</p>
-            <Button className="bg-[image:var(--gradient-hero)]" onClick={() => navigate("/settings?tab=billing")}>
-              <Sparkles className="w-4 h-4 mr-2" />
-              Upgrade to Unlock
-            </Button>
-          </div>
-        </main>
-      </div>
-    );
-  }
+  // D.E.V.I. chat is now available to all users (free trial included)
 
   // First-time intake submission handler
   const handleFirstTimeIntake = async (data: {
