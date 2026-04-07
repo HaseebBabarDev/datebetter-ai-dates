@@ -38,7 +38,7 @@ const FEATURES = [
     icon: Zap,
     label: "AI Predictions",
     desc: "Where things are heading",
-    path: "/devi?action=predictions",
+    path: "/candidates",
     color: "text-amber-500",
     bg: "bg-amber-500/10",
   },
