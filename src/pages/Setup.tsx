@@ -68,17 +68,19 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
     setShowInterstitial(false);
   }, []);
 
-  // Handle setup mode from URL params - skip WelcomeScreen if already chosen
+  // Handle setup mode from URL params
   useEffect(() => {
     if (!loading && !initialized && currentStep === 0 && setupMode) {
       if (setupMode === "quick") {
-        updateData({ quickStartMode: true });
-        goToStep(1);
+        // For quick mode, show the choice screen (already set in state init)
+        setShowIntakeChoice(true);
+        setInitialized(true);
       } else if (setupMode === "full") {
         updateData({ quickStartMode: false });
         goToStep(1);
+        setShowIntakeChoice(false);
+        setInitialized(true);
       }
-      setInitialized(true);
     } else if (!loading && !initialized) {
       setInitialized(true);
     }
@@ -93,6 +95,11 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
         </div>
       </div>
     );
+  }
+
+  // Show the upload vs manual choice screen for quick mode
+  if (showIntakeChoice && data.quickStartMode !== false) {
+    return <OnboardingChoiceScreen />;
   }
 
   // Show interstitial overlay
