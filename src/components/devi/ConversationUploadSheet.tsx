@@ -162,23 +162,26 @@ export function ConversationUploadSheet({
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {/* STEP 1: Platform Selection */}
           {step === "platform" && (
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-3">
-                Select Platform
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                This helps D.E.V.I. understand the chat layout better.
               </p>
-              {PLATFORMS.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => handleSelectPlatform(p)}
-                  className="w-full flex items-center gap-3 p-3.5 rounded-xl border border-border hover:border-primary/40 hover:bg-primary/5 transition-all group"
-                >
-                  <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-lg", p.color)}>
-                    {p.icon}
-                  </div>
-                  <span className="flex-1 text-left text-sm font-medium">{p.label}</span>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </button>
-              ))}
+              <div className="grid grid-cols-2 gap-3">
+                {PLATFORMS.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => handleSelectPlatform(p)}
+                    className={cn(
+                      "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all",
+                      "border-border/60 hover:border-primary hover:bg-primary/5",
+                      "active:scale-95"
+                    )}
+                  >
+                    <span className="text-2xl">{p.icon}</span>
+                    <span className="text-xs font-medium text-foreground/80">{p.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
