@@ -1122,15 +1122,6 @@ const Devi = () => {
     const textToSend = messageText || input.trim();
     if ((!textToSend && pendingImages.length === 0) || isLoading) return;
     
-    // Check chat requirements based on mode
-    if (chatMode === "candidate" && !canChatWithCandidate) {
-      setShowProfileDialog(true);
-      return;
-    }
-    if (chatMode === "general" && !canChatGeneral) {
-      setShowProfileDialog(true);
-      return;
-    }
 
     // Free trial gate: 5 exchanges max
     if (freeTrialExhausted) {
