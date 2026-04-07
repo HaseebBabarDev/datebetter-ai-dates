@@ -322,8 +322,8 @@ const CandidateThread = () => {
           <TabsTrigger value="flags" className="text-xs rounded-lg gap-1 data-[state=active]:bg-background">
             <Flag className="w-3 h-3" /> Flags
           </TabsTrigger>
-          <TabsTrigger value="journal" className="text-xs rounded-lg gap-1 data-[state=active]:bg-background">
-            <BookOpen className="w-3 h-3" /> Journal
+          <TabsTrigger value="predictions" className="text-xs rounded-lg gap-1 data-[state=active]:bg-background">
+            <TrendingUp className="w-3 h-3" /> Predictions
           </TabsTrigger>
         </TabsList>
 
