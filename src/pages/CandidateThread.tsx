@@ -543,10 +543,12 @@ const CandidateThread = () => {
               </div>
               {candidate.score_breakdown && typeof candidate.score_breakdown === 'object' && (
                 <div className="grid grid-cols-2 gap-2 mt-3">
-                  {Object.entries(candidate.score_breakdown as Record<string, number>).map(([key, val]) => (
+                  {Object.entries(candidate.score_breakdown as Record<string, unknown>)
+                    .filter(([, val]) => typeof val === 'number' || typeof val === 'string')
+                    .map(([key, val]) => (
                     <div key={key} className="flex items-center justify-between text-xs bg-muted/30 rounded-lg px-3 py-2">
                       <span className="capitalize text-muted-foreground">{key.replace(/_/g, ' ')}</span>
-                      <span className="font-semibold">{val}%</span>
+                      <span className="font-semibold">{String(val)}{typeof val === 'number' ? '%' : ''}</span>
                     </div>
                   ))}
                 </div>
