@@ -37,12 +37,6 @@ const PLATFORMS: Platform[] = [
   { id: "other", label: "Other", icon: "💬", color: "bg-muted text-muted-foreground" },
 ];
 
-const UPLOAD_STEPS = [
-  { num: 1, text: "Open the chat and scroll to the **starting message** you want analyzed" },
-  { num: 2, text: "**Screen record** yourself scrolling through the conversation" },
-  { num: 3, text: "Scroll at **~2 screens per second** so D.E.V.I. can read it" },
-  { num: 4, text: "Tap **Stop** when finished, then upload the recording below" },
-];
 
 interface ConversationUploadSheetProps {
   open: boolean;
