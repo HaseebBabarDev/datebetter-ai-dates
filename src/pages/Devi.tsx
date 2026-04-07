@@ -53,6 +53,7 @@ import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
 import { DatingAdvisorCard } from "@/components/devi/DatingAdvisorCard";
 import { FirstTimeIntake } from "@/components/devi/FirstTimeIntake";
 import { CompleteProfileNudge } from "@/components/devi/CompleteProfileNudge";
+import { OnboardingProgressCTA } from "@/components/devi/OnboardingProgressCTA";
 import { ConversationUploadSheet } from "@/components/devi/ConversationUploadSheet";
 
 type Candidate = Tables<"candidates">;
