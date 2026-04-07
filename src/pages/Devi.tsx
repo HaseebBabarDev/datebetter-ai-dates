@@ -53,6 +53,7 @@ import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
 import { DatingAdvisorCard } from "@/components/devi/DatingAdvisorCard";
 import { FirstTimeIntake } from "@/components/devi/FirstTimeIntake";
 import { CompleteProfileNudge } from "@/components/devi/CompleteProfileNudge";
+import { ConversationUploadSheet } from "@/components/devi/ConversationUploadSheet";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -480,6 +481,9 @@ const Devi = () => {
   
   // Dating advisor interactive card state
   const [showDatingAdvisorCard, setShowDatingAdvisorCard] = useState(false);
+  
+  // Conversation upload sheet state
+  const [showConvoUpload, setShowConvoUpload] = useState(false);
   
   // Chat layout style - chatgpt (default) or bubble
   const [chatLayout, setChatLayout] = useState<"bubble" | "chatgpt">(() => {
@@ -972,6 +976,27 @@ const Devi = () => {
       fileInputRef.current.setAttribute('data-type', type);
       fileInputRef.current.click();
     }
+  };
+
+  const handleConversationUpload = (data: {
+    platform: string;
+    files: { data: string; type: string; isVideo: boolean }[];
+    perspective: "me" | "them";
+  }) => {
+    // Add all files as pending images with the conversation context
+    const newImages = data.files.map(f => ({
+      data: f.data,
+      type: f.isVideo ? "conversation_video" : "text_screenshot",
+    }));
+    setPendingImages(prev => [...prev, ...newImages]);
+    setTextScreenshotRightSide(data.perspective);
+
+    // Set a smart prompt
+    const platformLabel = data.platform.replace(/_/g, " ");
+    const candidateRef = selectedCandidate ? ` with ${selectedCandidate.nickname}` : "";
+    setInput(
+      `Analyze this ${platformLabel} conversation${candidateRef}. Tell me who's chasing, red/green flags, attachment patterns, and what I should do next.`
+    );
   };
 
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -2606,16 +2631,34 @@ const Devi = () => {
             </button>
           ) : (
             <div className="flex gap-2 items-end" data-tour="devi-input">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleImageUpload('general')}
-                className="shrink-0 h-11 w-11 rounded-xl border-primary/30 hover:bg-primary/10"
-                disabled={isLoading}
-                data-tour="devi-image-upload"
-              >
-                <ImagePlus className="w-6 h-6 text-primary" />
-              </Button>
+              {/* Upload menu: screenshot or conversation analysis */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0 h-11 w-11 rounded-xl border-primary/30 hover:bg-primary/10"
+                    disabled={isLoading}
+                    data-tour="devi-image-upload"
+                  >
+                    <ImagePlus className="w-6 h-6 text-primary" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuItem onClick={() => handleImageUpload('text_screenshot')} className="gap-2">
+                    <Camera className="w-4 h-4" />
+                    Upload Screenshot
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleImageUpload('dating_profile')} className="gap-2">
+                    <Heart className="w-4 h-4" />
+                    Dating Profile Screenshot
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowConvoUpload(true)} className="gap-2">
+                    <MessageCircle className="w-4 h-4 text-primary" />
+                    <span className="font-medium">Analyze a Conversation</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Textarea
                 ref={textareaRef}
                 value={input}
@@ -2649,7 +2692,7 @@ const Devi = () => {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,video/*"
         multiple
         onChange={onFileChange}
         className="hidden"
@@ -2662,6 +2705,14 @@ const Devi = () => {
         userId={user.id}
         candidateId={selectedCandidate?.id}
         conversationId={currentConversationId || undefined}
+      />
+
+      {/* Conversation Upload Sheet */}
+      <ConversationUploadSheet
+        open={showConvoUpload}
+        onOpenChange={setShowConvoUpload}
+        candidateName={selectedCandidate?.nickname}
+        onSubmit={handleConversationUpload}
       />
     </div>
   );
