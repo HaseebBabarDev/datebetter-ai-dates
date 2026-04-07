@@ -154,26 +154,25 @@ export function ConversationUploadSheet({
         {/* Header */}
         <SheetHeader className="px-5 pt-5 pb-3 border-b border-border shrink-0">
           <div className="flex items-center gap-3">
-            {step !== "platform" && (
+            {step === "platform" && (
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 shrink-0"
-                onClick={() => setStep(step === "upload" ? "instructions" : "platform")}
+                onClick={() => setStep("upload")}
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
             )}
             <SheetTitle className="text-left">
-              {step === "platform" && "Analyze a Conversation"}
-              {step === "instructions" && "How to Record"}
-              {step === "upload" && "Upload Your Conversation"}
+              {step === "upload" && "Analyze a Conversation"}
+              {step === "platform" && "Where is this from?"}
             </SheetTitle>
           </div>
-          {step === "platform" && (
+          {step === "upload" && (
             <p className="text-sm text-muted-foreground mt-1">
-              D.E.V.I. will analyze the conversation and give you a full breakdown
-              {candidateName ? ` about ${candidateName}` : ""}.
+              Upload a screen recording or screenshots of any conversation
+              {candidateName ? ` with ${candidateName}` : ""} and D.E.V.I. will break it down.
             </p>
           )}
         </SheetHeader>
