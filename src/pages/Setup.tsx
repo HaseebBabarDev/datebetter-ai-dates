@@ -42,6 +42,7 @@ interface SetupContentProps {
 const SetupContent = ({ setupMode }: SetupContentProps) => {
   const { currentStep, loading, data, updateData, goToStep } = useOnboarding();
   const [initialized, setInitialized] = useState(false);
+  const [showIntakeChoice, setShowIntakeChoice] = useState(setupMode === "quick");
   const [showInterstitial, setShowInterstitial] = useState(false);
   const seenInterstitials = useRef<Set<number>>(new Set());
   const prevStepRef = useRef<number>(currentStep);
