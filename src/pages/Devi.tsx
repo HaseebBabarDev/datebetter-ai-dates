@@ -2631,16 +2631,34 @@ const Devi = () => {
             </button>
           ) : (
             <div className="flex gap-2 items-end" data-tour="devi-input">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleImageUpload('general')}
-                className="shrink-0 h-11 w-11 rounded-xl border-primary/30 hover:bg-primary/10"
-                disabled={isLoading}
-                data-tour="devi-image-upload"
-              >
-                <ImagePlus className="w-6 h-6 text-primary" />
-              </Button>
+              {/* Upload menu: screenshot or conversation analysis */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0 h-11 w-11 rounded-xl border-primary/30 hover:bg-primary/10"
+                    disabled={isLoading}
+                    data-tour="devi-image-upload"
+                  >
+                    <ImagePlus className="w-6 h-6 text-primary" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuItem onClick={() => handleImageUpload('text_screenshot')} className="gap-2">
+                    <Camera className="w-4 h-4" />
+                    Upload Screenshot
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleImageUpload('dating_profile')} className="gap-2">
+                    <Heart className="w-4 h-4" />
+                    Dating Profile Screenshot
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowConvoUpload(true)} className="gap-2">
+                    <MessageCircle className="w-4 h-4 text-primary" />
+                    <span className="font-medium">Analyze a Conversation</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Textarea
                 ref={textareaRef}
                 value={input}
