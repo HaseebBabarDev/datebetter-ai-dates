@@ -43,7 +43,7 @@ const DEVI_VOICES = [
 
 export const DeviSettings: React.FC<DeviSettingsProps> = ({ userId }) => {
   const [deviStyle, setDeviStyle] = useState("balanced");
-  const [deviVoice, setDeviVoice] = useState("mature");
+  const [deviVoice, setDeviVoice] = useState("female");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {

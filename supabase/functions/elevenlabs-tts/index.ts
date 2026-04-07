@@ -8,10 +8,13 @@ const corsHeaders = {
 
 // Voice options for D.E.V.I.
 const VOICE_IDS = {
-  mature: "sNLQ1mXur3j7xaL3YIA9",  // Custom cloned voice - natural, fluid
-  younger: "UROTxOkHtIFqWCaTocVv", // Custom younger voice
+  female: "sNLQ1mXur3j7xaL3YIA9",  // Female voice - warm, reassuring
+  male: "UROTxOkHtIFqWCaTocVv",     // Male voice - calm, grounded
+  // Legacy mappings
+  mature: "sNLQ1mXur3j7xaL3YIA9",
+  younger: "UROTxOkHtIFqWCaTocVv",
 };
-const DEFAULT_VOICE_ID = VOICE_IDS.mature;
+const DEFAULT_VOICE_ID = VOICE_IDS.female;
 
 serve(async (req) => {
   // Handle CORS preflight
