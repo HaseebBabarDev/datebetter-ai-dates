@@ -526,13 +526,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
     );
   }
 
-  const [showAllInsights, setShowAllInsights] = useState(false);
-
-  const firstStrength = scoreData.strengths?.[0];
-  const firstConcern = scoreData.concerns?.[0];
-  const remainingStrengths = scoreData.strengths?.slice(1) || [];
-  const remainingConcerns = scoreData.concerns?.slice(1) || [];
-  const hasMoreInsights = remainingStrengths.length > 0 || remainingConcerns.length > 0;
+  // Note: hooks moved to top of component to satisfy Rules of Hooks
 
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
