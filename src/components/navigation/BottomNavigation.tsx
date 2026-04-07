@@ -126,7 +126,8 @@ export function BottomNavigation() {
           const Icon = item.icon;
           const isActive =
             location.pathname === item.path ||
-            (item.path === "/dashboard" && location.pathname.startsWith("/candidate"));
+            (item.path === "/candidates" && location.pathname.startsWith("/thread")) ||
+            (item.path === "/candidates" && location.pathname.startsWith("/candidate"));
 
           const showCommunityBadge = item.path === "/community" && unreadDmCount > 0;
           const badgeText = unreadDmCount > 99 ? "99+" : String(unreadDmCount);

@@ -108,6 +108,8 @@ function AppContent() {
             <Route path="/auth" element={<Auth />} />
             <Route path="/setup" element={<Setup />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/candidates" element={<CandidatesView />} />
+            <Route path="/thread/:id" element={<CandidateThread />} />
             <Route path="/candidate/:id" element={<CandidateDetail />} />
             <Route path="/patterns" element={<Patterns />} />
             <Route path="/add-candidate" element={<AddCandidate />} />
