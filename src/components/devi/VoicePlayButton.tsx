@@ -78,6 +78,10 @@ const FloatingBlob: React.FC<{ isPlaying: boolean; onClick: () => void; isLoadin
 const SPEED_OPTIONS = [1, 1.5, 2] as const;
 type PlaybackSpeed = typeof SPEED_OPTIONS[number];
 
+// Module-level cache to prevent duplicate devi_voice fetches across instances
+let _cachedVoice: string | undefined;
+let _voiceFetchPromise: Promise<string | undefined> | null = null;
+
 export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
   text,
   disabled = false,
