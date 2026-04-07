@@ -1735,6 +1735,40 @@ const Devi = () => {
     }
   }, [messages, userProfile, userProfileCompleteness]);
 
+  // Auto-send onboarding context on first time if available
+  useEffect(() => {
+    if (isFirstTime && !onboardingContextSent.current) {
+      const uploadContext = localStorage.getItem("onboarding_upload_context");
+      if (uploadContext && uploadContext.trim()) {
+        onboardingContextSent.current = true;
+        setFirstTimeIntakeComplete(true);
+        
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete("firstTime");
+        setSearchParams(newParams, { replace: true });
+        
+        const goal = localStorage.getItem("onboarding_goal") || "evaluate";
+        const goalLabel = goal === "detachment" ? "detach from someone" 
+          : goal === "healing" ? "heal from a past relationship"
+          : goal === "evaluate" ? "evaluate someone I'm dating"
+          : goal === "checkup" ? "do a relationship check-up"
+          : "start dating better";
+        
+        const contextMessage = [
+          `I'm here to ${goalLabel}.`,
+          uploadContext,
+          "Can you help me get started?",
+        ].filter(Boolean).join("\n\n");
+        
+        setTimeout(() => {
+          sendMessage(contextMessage);
+        }, 500);
+        
+        localStorage.removeItem("onboarding_upload_context");
+      }
+    }
+  }, [isFirstTime]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[image:var(--gradient-page)]">
