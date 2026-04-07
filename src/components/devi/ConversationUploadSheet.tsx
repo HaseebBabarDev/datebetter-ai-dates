@@ -128,18 +128,6 @@ export function ConversationUploadSheet({
     e.target.value = "";
   };
 
-  const renderBoldText = (text: string) => {
-    const parts = text.split(/\*\*(.*?)\*\*/g);
-    return parts.map((part, i) =>
-      i % 2 === 1 ? (
-        <span key={i} className="font-semibold text-foreground">
-          {part}
-        </span>
-      ) : (
-        <span key={i}>{part}</span>
-      )
-    );
-  };
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
