@@ -517,7 +517,7 @@ const CandidateThread = () => {
 
         {/* Journal Tab */}
         <TabsContent value="journal" className="flex-1 overflow-y-auto px-3 py-3 mt-0">
-          <CandidateJournal candidateId={id!} userId={user?.id || ""} />
+          <CandidateJournal candidateId={id!} candidateName={candidate.nickname} />
         </TabsContent>
       </Tabs>
 
