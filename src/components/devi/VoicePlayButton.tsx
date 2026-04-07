@@ -94,11 +94,10 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const fetchDeviVoiceNoStore = useCallback(async (): Promise<
-    "mature" | "younger" | undefined
+    string | undefined
   > => {
     if (!user) return undefined;
 
-    // Use an authenticated REST call with `cache: 'no-store'` to avoid any browser/service-worker caching.
     const { data: sessionData } = await supabase.auth.getSession();
     const accessToken = sessionData.session?.access_token;
     if (!accessToken) return undefined;
@@ -120,7 +119,7 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
     if (!res.ok) return undefined;
     const rows = (await res.json().catch(() => [])) as Array<{ devi_voice?: string | null }>;
     const v = rows?.[0]?.devi_voice;
-    return v === "younger" ? "younger" : v === "mature" ? "mature" : undefined;
+    return v || undefined;
   }, [user]);
 
   // Keep local state in sync with explicit prop
