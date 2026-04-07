@@ -62,7 +62,7 @@ export function ConversationUploadSheet({
   candidateName,
   onSubmit,
 }: ConversationUploadSheetProps) {
-  const [step, setStep] = useState<"platform" | "instructions" | "upload">("platform");
+  const [step, setStep] = useState<"upload" | "platform" | "instructions">("upload");
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
   const [files, setFiles] = useState<{ data: string; type: string; isVideo: boolean; name: string }[]>([]);
   const [perspective, setPerspective] = useState<"me" | "them">("me");
@@ -70,7 +70,7 @@ export function ConversationUploadSheet({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const reset = () => {
-    setStep("platform");
+    setStep("upload");
     setSelectedPlatform(null);
     setFiles([]);
     setPerspective("me");
@@ -84,7 +84,7 @@ export function ConversationUploadSheet({
 
   const handleSelectPlatform = (platform: Platform) => {
     setSelectedPlatform(platform);
-    setStep("instructions");
+    handleSubmitFinal(platform);
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
