@@ -2368,15 +2368,6 @@ const Devi = () => {
                 </div>
               )}
 
-              {/* Profile sections nudge - show when profile is complete but family/relationship sections are missing */}
-              {hasFullProfile && !profileNudgeDismissed && (
-                <div className="pl-10 mt-4">
-                  <ProfileSectionsNudge 
-                    profile={userProfile} 
-                    onDismiss={() => setProfileNudgeDismissed(true)}
-                  />
-                </div>
-              )}
 
               {/* Healing Journey - show only in general chat mode (no candidate selected) */}
               {hasFullProfile && !selectedCandidate && (
