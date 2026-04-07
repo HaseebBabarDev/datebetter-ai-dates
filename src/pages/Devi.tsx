@@ -2547,7 +2547,11 @@ const Devi = () => {
           {showProfileNudge && (
             <OnboardingProgressCTA 
               profile={userProfile}
-              onDismiss={() => setShowProfileNudge(false)} 
+              onDismiss={() => setShowProfileNudge(false)}
+              onAskInChat={(prompt) => {
+                setShowProfileNudge(false);
+                sendMessage(prompt);
+              }}
               className="mt-4"
             />
           )}
