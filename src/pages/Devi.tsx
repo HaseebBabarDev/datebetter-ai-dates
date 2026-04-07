@@ -2706,6 +2706,14 @@ const Devi = () => {
         candidateId={selectedCandidate?.id}
         conversationId={currentConversationId || undefined}
       />
+
+      {/* Conversation Upload Sheet */}
+      <ConversationUploadSheet
+        open={showConvoUpload}
+        onOpenChange={setShowConvoUpload}
+        candidateName={selectedCandidate?.nickname}
+        onSubmit={handleConversationUpload}
+      />
     </div>
   );
 };
