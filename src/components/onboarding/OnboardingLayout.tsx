@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 interface OnboardingLayoutProps {
   children: React.ReactNode;
