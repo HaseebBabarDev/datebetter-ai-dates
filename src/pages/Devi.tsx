@@ -2279,18 +2279,6 @@ const Devi = () => {
                 </div>
               )}
 
-              {/* Locked state - inline */}
-              {!hasFullProfile && (
-                <div className="pl-10">
-                  <button
-                    onClick={() => setShowProfileDialog(true)}
-                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
-                  >
-                    <Lock className="w-3 h-3" />
-                    Complete profile to unlock chat
-                  </button>
-                </div>
-              )}
 
 
               {/* Healing Journey - show only in general chat mode (no candidate selected) */}
