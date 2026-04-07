@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 interface OnboardingLayoutProps {
   children: React.ReactNode;
@@ -28,9 +32,27 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   emoji,
 }) => {
   const { currentStep, totalSteps, prevStep } = useOnboarding();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const progress = ((currentStep + 1) / totalSteps) * 100;
+  const [skipping, setSkipping] = useState(false);
 
   const handleBack = onBack || prevStep;
+
+  const handleSkipOnboarding = async () => {
+    if (!user) return;
+    setSkipping(true);
+    try {
+      await supabase
+        .from("profiles")
+        .update({ onboarding_completed: true, onboarding_step: 0 })
+        .eq("user_id", user.id);
+      navigate("/devi", { replace: true });
+    } catch (err) {
+      toast.error("Something went wrong");
+      setSkipping(false);
+    }
+  };
 
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col">
@@ -80,6 +102,15 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
               {currentStep}/{totalSteps - 1}
             </span>
           )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs text-muted-foreground hover:text-foreground h-8 px-2"
+            onClick={handleSkipOnboarding}
+            disabled={skipping}
+          >
+            {skipping ? "..." : "Skip"}
+          </Button>
         </header>
       )}
 
