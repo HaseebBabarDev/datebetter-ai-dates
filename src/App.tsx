@@ -24,6 +24,8 @@ import Offline from "./pages/Offline";
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Setup = lazy(() => import("./pages/Setup"));
 const CandidateDetail = lazy(() => import("./pages/CandidateDetail"));
+const CandidatesView = lazy(() => import("./pages/CandidatesView"));
+const CandidateThread = lazy(() => import("./pages/CandidateThread"));
 const Patterns = lazy(() => import("./pages/Patterns"));
 const AddCandidate = lazy(() => import("./pages/AddCandidate"));
 const Settings = lazy(() => import("./pages/Settings"));
