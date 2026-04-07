@@ -291,9 +291,11 @@ const OnboardingChoiceScreen = () => {
               className="space-y-3 flex-1 flex flex-col"
             >
               <div className="flex items-center gap-2">
-                <button onClick={() => setStep("goals")} className="text-muted-foreground hover:text-foreground">
-                  <ArrowLeft className="w-4 h-4" />
-                </button>
+                {initialStep !== "upload" && (
+                  <button onClick={() => setStep("goals")} className="text-muted-foreground hover:text-foreground">
+                    <ArrowLeft className="w-4 h-4" />
+                  </button>
+                )}
                 <div>
                   <h2 className="text-lg font-bold text-foreground">Got screenshots or recordings?</h2>
                   <p className="text-xs text-muted-foreground">Upload conversations — D.E.V.I. will analyze them</p>
@@ -480,16 +482,21 @@ const OnboardingChoiceScreen = () => {
           )}
         </AnimatePresence>
 
-        {/* Step indicator */}
+        {/* Step indicator - only show steps from the initial step onward */}
         <div className="flex justify-center gap-1.5 pt-4 pb-2">
-          {(["basics", "goals", "upload", "choice"] as Step[]).map((s) => (
-            <div
-              key={s}
-              className={`h-1 rounded-full transition-all duration-300 ${
-                s === step ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/30"
-              }`}
-            />
-          ))}
+          {(["basics", "goals", "upload", "choice"] as Step[])
+            .filter((s) => {
+              const order = ["basics", "goals", "upload", "choice"];
+              return order.indexOf(s) >= order.indexOf(initialStep);
+            })
+            .map((s) => (
+              <div
+                key={s}
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  s === step ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/30"
+                }`}
+              />
+            ))}
         </div>
       </div>
     </div>
