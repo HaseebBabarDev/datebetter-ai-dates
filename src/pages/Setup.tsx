@@ -42,7 +42,7 @@ interface SetupContentProps {
 const SetupContent = ({ setupMode }: SetupContentProps) => {
   const { currentStep, loading, data, updateData, goToStep } = useOnboarding();
   const [initialized, setInitialized] = useState(false);
-  const [showIntakeChoice, setShowIntakeChoice] = useState(setupMode === "quick");
+  const [showIntakeChoice, setShowIntakeChoice] = useState(true);
   const [showInterstitial, setShowInterstitial] = useState(false);
   const seenInterstitials = useRef<Set<number>>(new Set());
   const prevStepRef = useRef<number>(currentStep);
@@ -70,23 +70,17 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
 
   // Handle setup mode from URL params
   useEffect(() => {
-    if (!loading && !initialized && currentStep === 0 && setupMode) {
-      if (setupMode === "quick") {
-        // For quick mode, show the choice screen (already set in state init)
-        setShowIntakeChoice(true);
-        setInitialized(true);
-      } else if (setupMode === "full") {
+    if (!loading && !initialized) {
+      if (setupMode === "full") {
         updateData({ quickStartMode: false });
         goToStep(1);
         setShowIntakeChoice(false);
-        setInitialized(true);
       }
-    } else if (!loading && !initialized) {
       setInitialized(true);
     }
-  }, [loading, initialized, currentStep, setupMode, updateData, goToStep]);
+  }, [loading, initialized, setupMode, updateData, goToStep]);
 
-  if (loading || (!initialized && setupMode)) {
+  if (loading || !initialized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
@@ -97,7 +91,7 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
     );
   }
 
-  // Show the upload vs manual choice screen for quick mode
+  // Show the basics → goals → upload → choice flow first
   if (showIntakeChoice && data.quickStartMode !== false) {
     return <OnboardingChoiceScreen />;
   }
