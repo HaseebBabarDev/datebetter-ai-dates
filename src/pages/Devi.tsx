@@ -53,6 +53,7 @@ import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
 import { DatingAdvisorCard } from "@/components/devi/DatingAdvisorCard";
 import { FirstTimeIntake } from "@/components/devi/FirstTimeIntake";
 import { CompleteProfileNudge } from "@/components/devi/CompleteProfileNudge";
+import { OnboardingProgressCTA } from "@/components/devi/OnboardingProgressCTA";
 import { ConversationUploadSheet } from "@/components/devi/ConversationUploadSheet";
 
 type Candidate = Tables<"candidates">;
@@ -1690,16 +1691,20 @@ const Devi = () => {
     }
   }, [searchParams, profilesLoading, conversationsLoading, setSearchParams, startNewChat, userProfile]);
 
-  // Show profile nudge after first AI response for first-time users
+  // Show profile nudge after AI responses — for incomplete profiles
   useEffect(() => {
-    if (isFirstTime && !firstTimeAnalysisShown.current && messages.length >= 2) {
+    if (!firstTimeAnalysisShown.current && messages.length >= 2 && userProfile) {
       const lastMsg = messages[messages.length - 1];
       if (lastMsg?.role === "assistant") {
-        firstTimeAnalysisShown.current = true;
-        setShowProfileNudge(true);
+        // Check if profile is incomplete
+        const hasBasics = !!(userProfile.gender_identity && userProfile.relationship_goal);
+        if (!hasBasics || userProfileCompleteness < 80) {
+          firstTimeAnalysisShown.current = true;
+          setShowProfileNudge(true);
+        }
       }
     }
-  }, [isFirstTime, messages]);
+  }, [messages, userProfile, userProfileCompleteness]);
 
   if (authLoading) {
     return (
@@ -2538,9 +2543,10 @@ const Devi = () => {
             </div>
           )}
           
-          {/* Complete profile nudge for first-time users */}
+          {/* Progressive onboarding nudge */}
           {showProfileNudge && (
-            <CompleteProfileNudge 
+            <OnboardingProgressCTA 
+              profile={userProfile}
               onDismiss={() => setShowProfileNudge(false)} 
               className="mt-4"
             />
