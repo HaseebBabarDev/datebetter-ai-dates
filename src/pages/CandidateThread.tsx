@@ -456,35 +456,14 @@ const CandidateThread = () => {
           </div>
         </TabsContent>
 
-        {/* Analysis Tab */}
-        <TabsContent value="analysis" className="flex-1 overflow-y-auto px-3 py-3 space-y-3 mt-0">
-          {candidate.compatibility_score !== null && (
-            <ScoreCard
-              score={candidate.compatibility_score}
-              breakdown={breakdown}
-            />
-          )}
-
-          {pros.length > 0 && <InsightCard insights={pros} title="Pros" />}
-          {cons.length > 0 && <InsightCard insights={cons} title="Cons" />}
-
-          {candidate.ai_description && (
-            <div className="rounded-2xl border border-border bg-card/80 p-4">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                AI Summary
-              </p>
-              <p className="text-sm text-foreground/90">{candidate.ai_description}</p>
-            </div>
-          )}
-
-          {!candidate.compatibility_score && (
-            <div className="flex flex-col items-center py-12 text-center space-y-3">
-              <BarChart3 className="w-8 h-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground max-w-xs">
-                Upload a conversation or add more details to get a compatibility analysis
-              </p>
-            </div>
-          )}
+        {/* Compatibility Tab - Full breakdown */}
+        <TabsContent value="compatibility" className="flex-1 overflow-y-auto px-3 py-3 space-y-3 mt-0">
+          <CompatibilityScore
+            candidate={candidate}
+            onUpdate={(updates) => {
+              setCandidate(prev => prev ? { ...prev, ...updates } as Candidate : prev);
+            }}
+          />
         </TabsContent>
 
         {/* Flags Tab */}
