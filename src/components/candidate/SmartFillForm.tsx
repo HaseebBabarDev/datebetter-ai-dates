@@ -231,10 +231,28 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
               type="button"
               variant="outline"
               className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs"
-              onClick={handleScreenRecord}
+              onClick={() => {
+                const uploadInput = document.createElement('input');
+                uploadInput.type = 'file';
+                uploadInput.accept = 'video/*';
+                uploadInput.multiple = true;
+                uploadInput.onchange = (e) => {
+                  const target = e.target as HTMLInputElement;
+                  const files = Array.from(target.files || []);
+                  const validFiles = files.filter(f => {
+                    if (f.size > 20 * 1024 * 1024) {
+                      toast.error(`${f.name} is too large (max 20MB)`);
+                      return false;
+                    }
+                    return true;
+                  });
+                  setUploadedFiles(prev => [...prev, ...validFiles]);
+                };
+                uploadInput.click();
+              }}
             >
-              <Video className="w-5 h-5 text-primary" />
-              Record Screen
+              <FileVideo className="w-5 h-5 text-primary" />
+              Upload Recording
             </Button>
             <Button
               type="button"

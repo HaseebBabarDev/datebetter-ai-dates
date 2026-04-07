@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import EngagementInterstitial, { interstitials } from "@/components/onboarding/EngagementInterstitial";
+import OnboardingChoiceScreen from "@/components/onboarding/screens/OnboardingChoiceScreen";
 
 // Import all screens
 import WelcomeScreen from "@/components/onboarding/screens/WelcomeScreen";
@@ -41,6 +42,7 @@ interface SetupContentProps {
 const SetupContent = ({ setupMode }: SetupContentProps) => {
   const { currentStep, loading, data, updateData, goToStep } = useOnboarding();
   const [initialized, setInitialized] = useState(false);
+  const [showIntakeChoice, setShowIntakeChoice] = useState(setupMode === "quick");
   const [showInterstitial, setShowInterstitial] = useState(false);
   const seenInterstitials = useRef<Set<number>>(new Set());
   const prevStepRef = useRef<number>(currentStep);
@@ -66,17 +68,19 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
     setShowInterstitial(false);
   }, []);
 
-  // Handle setup mode from URL params - skip WelcomeScreen if already chosen
+  // Handle setup mode from URL params
   useEffect(() => {
     if (!loading && !initialized && currentStep === 0 && setupMode) {
       if (setupMode === "quick") {
-        updateData({ quickStartMode: true });
-        goToStep(1);
+        // For quick mode, show the choice screen (already set in state init)
+        setShowIntakeChoice(true);
+        setInitialized(true);
       } else if (setupMode === "full") {
         updateData({ quickStartMode: false });
         goToStep(1);
+        setShowIntakeChoice(false);
+        setInitialized(true);
       }
-      setInitialized(true);
     } else if (!loading && !initialized) {
       setInitialized(true);
     }
@@ -91,6 +95,11 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
         </div>
       </div>
     );
+  }
+
+  // Show the upload vs manual choice screen for quick mode
+  if (showIntakeChoice && data.quickStartMode !== false) {
+    return <OnboardingChoiceScreen />;
   }
 
   // Show interstitial overlay

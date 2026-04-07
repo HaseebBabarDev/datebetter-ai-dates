@@ -200,7 +200,7 @@ const Auth = () => {
           }
           
           if (setupMode === "quick") {
-            // Quick setup: save name + goal to profile, then go straight to D.E.V.I.
+            // Quick setup: save name + goal to profile, then show choice screen
             const quickName = localStorage.getItem("onboarding_name") || "";
             const quickGoal = localStorage.getItem("onboarding_goal") || "";
             
@@ -208,12 +208,11 @@ const Auth = () => {
               await supabase.from("profiles").update({
                 name: quickName || null,
                 dating_motivation: quickGoal ? [quickGoal] : null,
-                onboarding_completed: true,
                 onboarding_step: 0,
               }).eq("user_id", data.user.id);
             }
             
-            navigate("/devi?firstTime=true");
+            navigate("/setup?setup=quick");
           } else {
             const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
             navigate(`/setup${setupQuery}`);
@@ -240,7 +239,7 @@ const Auth = () => {
             }
             
             if (setupMode === "quick") {
-              navigate("/devi?firstTime=true");
+              navigate("/setup?setup=quick");
             } else {
               const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
               navigate(`/setup${setupQuery}`);
