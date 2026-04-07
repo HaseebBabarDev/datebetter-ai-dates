@@ -131,13 +131,28 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
     if (voicePreference) setUserVoice(voicePreference);
   }, [voicePreference]);
 
-  // Fetch user's voice preference if not explicitly provided
+  // Fetch user's voice preference if not explicitly provided — cached across instances
   useEffect(() => {
     if (voicePreference || !user) return;
     
+    // Return cached value immediately if available
+    if (_cachedVoice) {
+      setUserVoice(_cachedVoice);
+      return;
+    }
+    
     const fetchVoicePref = async () => {
-      const v = await fetchDeviVoiceNoStore();
-      if (v) setUserVoice(v);
+      // Deduplicate in-flight requests
+      if (!_voiceFetchPromise) {
+        _voiceFetchPromise = fetchDeviVoiceNoStore().finally(() => {
+          _voiceFetchPromise = null;
+        });
+      }
+      const v = await _voiceFetchPromise;
+      if (v) {
+        _cachedVoice = v;
+        setUserVoice(v);
+      }
     };
     
     fetchVoicePref();
