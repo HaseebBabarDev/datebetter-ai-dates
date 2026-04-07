@@ -981,11 +981,6 @@ const Devi = () => {
   }, [user, currentConversationId, startNewChat]);
 
   const handleImageUpload = (type: string) => {
-    // If a candidate is selected, check profile completion
-    if (selectedCandidate && !canChatWithCandidate) {
-      setShowProfileDialog(true);
-      return;
-    }
     if (fileInputRef.current) {
       fileInputRef.current.setAttribute('data-type', type);
       fileInputRef.current.click();
