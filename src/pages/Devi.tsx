@@ -1691,16 +1691,20 @@ const Devi = () => {
     }
   }, [searchParams, profilesLoading, conversationsLoading, setSearchParams, startNewChat, userProfile]);
 
-  // Show profile nudge after first AI response for first-time users
+  // Show profile nudge after AI responses — for incomplete profiles
   useEffect(() => {
-    if (isFirstTime && !firstTimeAnalysisShown.current && messages.length >= 2) {
+    if (!firstTimeAnalysisShown.current && messages.length >= 2 && userProfile) {
       const lastMsg = messages[messages.length - 1];
       if (lastMsg?.role === "assistant") {
-        firstTimeAnalysisShown.current = true;
-        setShowProfileNudge(true);
+        // Check if profile is incomplete
+        const hasBasics = !!(userProfile.gender_identity && userProfile.relationship_goal);
+        if (!hasBasics || userProfileCompleteness < 80) {
+          firstTimeAnalysisShown.current = true;
+          setShowProfileNudge(true);
+        }
       }
     }
-  }, [isFirstTime, messages]);
+  }, [messages, userProfile, userProfileCompleteness]);
 
   if (authLoading) {
     return (
