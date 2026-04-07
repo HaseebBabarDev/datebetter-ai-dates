@@ -423,56 +423,68 @@ const OnboardingChoiceScreen = () => {
                   <ArrowLeft className="w-4 h-4" />
                 </button>
                 <div>
-                  <h2 className="text-lg font-bold text-foreground">How do you want to continue?</h2>
-                  <p className="text-xs text-muted-foreground">You can always complete your profile later</p>
+                  <h2 className="text-lg font-bold text-foreground">One more step for the best results</h2>
+                  <p className="text-xs text-muted-foreground">The more D.E.V.I. knows about you, the better the advice</p>
                 </div>
               </div>
 
-              {/* Option A: Chat with Devi */}
+              {/* Accuracy callout */}
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="flex items-start gap-2 p-2.5 rounded-xl bg-primary/5 border border-primary/15"
+              >
+                <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  <span className="font-semibold text-foreground">Users who complete setup get 3× more accurate scoring</span> — your dating patterns, dealbreakers, and values help D.E.V.I. spot red flags others miss.
+                </p>
+              </motion.div>
+
+              {/* Option A: Full Setup (now primary) */}
               <motion.button
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                onClick={handleGoToDevi}
-                disabled={isProcessing}
+                onClick={handleFullSetup}
                 className="w-full p-4 rounded-2xl bg-[image:var(--gradient-hero)] shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all group text-left"
               >
                 <div className="flex items-start gap-3">
                   <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                    <MessageCircle className="w-5 h-5 text-white" />
+                    <Layers className="w-5 h-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white text-sm">Chat with D.E.V.I.</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20 text-white font-medium">Recommended</span>
+                      <span className="font-semibold text-white text-sm">Full Setup</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20 text-white font-medium">Best Results</span>
                     </div>
                     <p className="text-xs text-white/80 mt-1">
-                      Jump in now — add more info as you go
+                      ~10 min — unlocks the most accurate AI scoring & personalized advice
                     </p>
                   </div>
                   <ArrowRight className="w-4 h-4 text-white/70 group-hover:text-white transition-colors shrink-0 mt-3" />
                 </div>
               </motion.button>
 
-              {/* Option B: Full manual */}
+              {/* Option B: Chat with Devi (secondary) */}
               <motion.button
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                onClick={handleFullSetup}
+                onClick={handleGoToDevi}
+                disabled={isProcessing}
                 className="w-full p-4 rounded-2xl border border-border/50 bg-card hover:bg-accent/50 hover:border-primary/30 transition-all group text-left"
               >
                 <div className="flex items-start gap-3">
                   <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                    <Layers className="w-5 h-5 text-primary" />
+                    <MessageCircle className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-foreground text-sm">Full Setup</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">~10 min</span>
+                      <span className="font-semibold text-foreground text-sm">Chat with D.E.V.I.</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Best for optimizing AI scoring & personalized advice
+                      Jump in now — add more info as you go
                     </p>
                   </div>
                   <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-3" />
