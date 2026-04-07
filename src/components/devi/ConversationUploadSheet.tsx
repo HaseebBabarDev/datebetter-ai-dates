@@ -22,19 +22,18 @@ import { toast } from "sonner";
 interface Platform {
   id: string;
   label: string;
-  icon: string;
-  color: string;
+  abbr: string;
 }
 
 const PLATFORMS: Platform[] = [
-  { id: "imessage", label: "iMessage / SMS", icon: "💬", color: "bg-green-500/10 text-green-600" },
-  { id: "whatsapp", label: "WhatsApp", icon: "📱", color: "bg-emerald-500/10 text-emerald-600" },
-  { id: "instagram", label: "Instagram DMs", icon: "📸", color: "bg-pink-500/10 text-pink-600" },
-  { id: "tiktok", label: "TikTok DMs", icon: "🎵", color: "bg-foreground/5 text-foreground" },
-  { id: "snapchat", label: "Snapchat", icon: "👻", color: "bg-yellow-500/10 text-yellow-600" },
-  { id: "facebook", label: "Facebook Messenger", icon: "💙", color: "bg-blue-500/10 text-blue-600" },
-  { id: "hinge", label: "Hinge / Dating App", icon: "💕", color: "bg-rose-500/10 text-rose-600" },
-  { id: "other", label: "Other", icon: "💬", color: "bg-muted text-muted-foreground" },
+  { id: "imessage", label: "iMessage / SMS", abbr: "iM" },
+  { id: "whatsapp", label: "WhatsApp", abbr: "WA" },
+  { id: "instagram", label: "Instagram DMs", abbr: "IG" },
+  { id: "tiktok", label: "TikTok DMs", abbr: "TT" },
+  { id: "snapchat", label: "Snapchat", abbr: "SC" },
+  { id: "facebook", label: "Messenger", abbr: "FB" },
+  { id: "hinge", label: "Hinge / Dating App", abbr: "H" },
+  { id: "other", label: "Other", abbr: "?" },
 ];
 
 
