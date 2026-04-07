@@ -84,7 +84,13 @@ export function ConversationUploadSheet({
 
   const handleSelectPlatform = (platform: Platform) => {
     setSelectedPlatform(platform);
-    handleSubmitFinal(platform);
+    if (files.length === 0) return;
+    onSubmit({
+      platform: platform.id,
+      files: files.map((f) => ({ data: f.data, type: f.type, isVideo: f.isVideo })),
+      perspective,
+    });
+    handleClose(false);
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,16 +133,6 @@ export function ConversationUploadSheet({
 
     setUploading(false);
     e.target.value = "";
-  };
-
-  const handleSubmit = () => {
-    if (files.length === 0) return;
-    onSubmit({
-      platform: selectedPlatform?.id || "other",
-      files: files.map((f) => ({ data: f.data, type: f.type, isVideo: f.isVideo })),
-      perspective,
-    });
-    handleClose(false);
   };
 
   const renderBoldText = (text: string) => {
