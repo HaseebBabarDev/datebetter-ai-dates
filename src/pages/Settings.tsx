@@ -34,11 +34,11 @@ import { useNdaAgreement } from "@/hooks/useNdaAgreement";
 type Profile = Tables<"profiles">;
 type SubscriptionPlan = "free" | "basic" | "starter" | "unlimited";
 
-const PLAN_DISPLAY: Record<SubscriptionPlan, { name: string; price: string; stripeKey?: keyof typeof STRIPE_PLANS }> = {
-  free: { name: "Free", price: "$0" },
-  basic: { name: "Starter", price: "$9.99/mo", stripeKey: "basic" },
-  starter: { name: "Plus", price: "$15.99/mo", stripeKey: "starter" },
-  unlimited: { name: "Unlimited", price: "$29.99/mo", stripeKey: "unlimited" },
+const PLAN_DISPLAY: Record<SubscriptionPlan, { name: string; price: string; stripeKey?: keyof typeof STRIPE_PLANS | string }> = {
+  free: { name: "Free Trial", price: "15 days free" },
+  basic: { name: "Unlimited", price: "$15/mo", stripeKey: "unlimited" },
+  starter: { name: "Unlimited", price: "$15/mo", stripeKey: "unlimited" },
+  unlimited: { name: "Unlimited", price: "$15/mo", stripeKey: "unlimited" },
 };
 
 const GENDER_OPTIONS = [
