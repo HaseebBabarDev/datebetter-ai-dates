@@ -168,7 +168,7 @@ const CandidateDetail = () => {
   }, [user, id]);
 
   const fetchData = async () => {
-    console.log("Fetching candidate data for id:", id, "user:", user?.id);
+    
     try {
       // Fetch all primary data in parallel
       const [candidateRes, interactionsRes, profileRes, conversationsRes] = await Promise.all([
