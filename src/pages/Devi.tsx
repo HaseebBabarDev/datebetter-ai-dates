@@ -981,11 +981,6 @@ const Devi = () => {
   }, [user, currentConversationId, startNewChat]);
 
   const handleImageUpload = (type: string) => {
-    // If a candidate is selected, check profile completion
-    if (selectedCandidate && !canChatWithCandidate) {
-      setShowProfileDialog(true);
-      return;
-    }
     if (fileInputRef.current) {
       fileInputRef.current.setAttribute('data-type', type);
       fileInputRef.current.click();
@@ -1127,15 +1122,6 @@ const Devi = () => {
     const textToSend = messageText || input.trim();
     if ((!textToSend && pendingImages.length === 0) || isLoading) return;
     
-    // Check chat requirements based on mode
-    if (chatMode === "candidate" && !canChatWithCandidate) {
-      setShowProfileDialog(true);
-      return;
-    }
-    if (chatMode === "general" && !canChatGeneral) {
-      setShowProfileDialog(true);
-      return;
-    }
 
     // Free trial gate: 5 exchanges max
     if (freeTrialExhausted) {
@@ -2215,96 +2201,6 @@ const Devi = () => {
         category={crisisCategory}
       />
 
-      {/* Requirements Dialog */}
-      <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              No Fluff. Just Real Advice.
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-              <p className="text-sm text-foreground font-medium">
-                Unlike other apps, D.E.V.I. doesn't guess or give generic tips.
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                We use your actual data, patterns, and history to give you real, personalized advice backed by logic — not vibes.
-              </p>
-            </div>
-            
-            <p className="text-xs text-muted-foreground text-center">
-              Complete these to unlock D.E.V.I.:
-            </p>
-            
-            <div className="space-y-3">
-              {/* Your Profile */}
-              <div className="p-3 rounded-lg border border-border bg-muted/30 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Your Profile</span>
-                  </div>
-                  <span className={`text-sm font-medium ${hasFullProfile ? 'text-primary' : 'text-muted-foreground'}`}>
-                    {userProfileCompleteness}%
-                  </span>
-                </div>
-                <Progress value={userProfileCompleteness} className="h-1.5" />
-                {!hasFullProfile && missingProfileFields.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    Missing: {missingProfileFields.slice(0, 3).join(", ")}
-                    {missingProfileFields.length > 3 && ` +${missingProfileFields.length - 3} more`}
-                  </p>
-                )}
-                {!hasFullProfile && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full mt-2 gap-2"
-                    onClick={() => {
-                      setShowProfileDialog(false);
-                      navigate("/settings", { state: { tab: "profile" } });
-                    }}
-                  >
-                    Complete Profile
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-
-              {/* Logged Interaction */}
-              <div className="p-3 rounded-lg border border-border bg-muted/30 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Logged Interaction</span>
-                  </div>
-                  <span className={`text-sm font-medium ${hasInteractions ? 'text-primary' : 'text-muted-foreground'}`}>
-                    {hasInteractions ? `${interactions.length} logged` : "None"}
-                  </span>
-                </div>
-                <Progress value={hasInteractions ? 100 : 0} className="h-1.5" />
-                {!hasInteractions && selectedCandidate && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full mt-2 gap-2"
-                    onClick={() => {
-                      setShowProfileDialog(false);
-                      navigate(`/candidate/${selectedCandidate.id}`);
-                    }}
-                  >
-                    Log an Interaction
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Messages */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0">
         <div className={`container mx-auto px-4 py-4 ${chatLayout === "chatgpt" ? "max-w-2xl" : "max-w-lg"} space-y-4`}>
@@ -2383,18 +2279,6 @@ const Devi = () => {
                 </div>
               )}
 
-              {/* Locked state - inline */}
-              {!hasFullProfile && (
-                <div className="pl-10">
-                  <button
-                    onClick={() => setShowProfileDialog(true)}
-                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
-                  >
-                    <Lock className="w-3 h-3" />
-                    Complete profile to unlock chat
-                  </button>
-                </div>
-              )}
 
 
               {/* Healing Journey - show only in general chat mode (no candidate selected) */}
@@ -2668,14 +2552,6 @@ const Devi = () => {
                 See Plans
               </Button>
             </div>
-          ) : !hasFullProfile ? (
-            <button
-              onClick={() => setShowProfileDialog(true)}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-border bg-muted/50 text-muted-foreground hover:bg-muted transition-colors"
-            >
-              <Lock className="w-4 h-4" />
-              <span className="text-sm">Complete profile to unlock chat</span>
-            </button>
           ) : (
             <div className="flex gap-2 items-end" data-tour="devi-input">
               {/* Upload menu: screenshot or conversation analysis */}
