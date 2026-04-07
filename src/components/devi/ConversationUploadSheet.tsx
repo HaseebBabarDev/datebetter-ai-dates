@@ -206,19 +206,22 @@ export function ConversationUploadSheet({
               <p className="text-sm text-muted-foreground">
                 This helps D.E.V.I. understand the chat layout better.
               </p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-2">
                 {PLATFORMS.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => handleSelectPlatform(p)}
                     className={cn(
-                      "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all",
-                      "border-border/60 hover:border-primary hover:bg-primary/5",
-                      "active:scale-95"
+                      "flex items-center gap-3 w-full px-4 py-3 rounded-xl border transition-all",
+                      "border-border/60 hover:border-primary/60 hover:bg-primary/5",
+                      "active:scale-[0.98]"
                     )}
                   >
-                    <span className="text-2xl">{p.icon}</span>
-                    <span className="text-xs font-medium text-foreground/80">{p.label}</span>
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-primary">{p.abbr}</span>
+                    </div>
+                    <span className="text-sm font-medium text-foreground">{p.label}</span>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
                   </button>
                 ))}
               </div>
