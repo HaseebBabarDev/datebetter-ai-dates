@@ -1461,6 +1461,7 @@ const Devi = () => {
             (profileUpdates as any)[field] = value;
           }
           hasUpdates = true;
+        }
         
         // Parse compatibility score marker for candidate
         const compatScoreMatch = fullContent.match(/\[SET_COMPATIBILITY_SCORE:(\d+)\]/);
