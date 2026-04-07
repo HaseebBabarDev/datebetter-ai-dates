@@ -482,6 +482,9 @@ const Devi = () => {
   // Dating advisor interactive card state
   const [showDatingAdvisorCard, setShowDatingAdvisorCard] = useState(false);
   
+  // Conversation upload sheet state
+  const [showConvoUpload, setShowConvoUpload] = useState(false);
+  
   // Chat layout style - chatgpt (default) or bubble
   const [chatLayout, setChatLayout] = useState<"bubble" | "chatgpt">(() => {
     if (typeof window !== 'undefined') {
