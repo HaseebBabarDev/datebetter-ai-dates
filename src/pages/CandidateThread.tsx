@@ -298,9 +298,6 @@ const CandidateThread = () => {
   const greenFlags = Array.isArray(candidate.green_flags)
     ? (candidate.green_flags as string[])
     : [];
-  const breakdown = candidate.score_breakdown && typeof candidate.score_breakdown === "object"
-    ? (candidate.score_breakdown as Record<string, number>)
-    : undefined;
 
   return (
     <div className="h-[100dvh] flex flex-col bg-background">
