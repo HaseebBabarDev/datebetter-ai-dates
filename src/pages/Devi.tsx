@@ -510,13 +510,11 @@ const Devi = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const isFree = subscription?.plan === "free";
-  // Free users get 1 trial conversation with max 5 user→AI exchanges (10 messages total)
-  const FREE_EXCHANGE_LIMIT = 5;
-  const freeExchangesUsed = isFree
-    ? Math.floor(messages.filter(m => m.role === "user").length)
-    : 0;
-  const freeExchangesRemaining = Math.max(0, FREE_EXCHANGE_LIMIT - freeExchangesUsed);
-  const freeTrialExhausted = isFree && freeExchangesUsed >= FREE_EXCHANGE_LIMIT;
+  // All users now have full chat access during 15-day trial
+  const FREE_EXCHANGE_LIMIT = 999999;
+  const freeExchangesUsed = 0;
+  const freeExchangesRemaining = 999999;
+  const freeTrialExhausted = false;
   const candidateIdFromState = (location.state as { candidateId?: string })?.candidateId;
 
   // Start tour for new users
