@@ -445,7 +445,7 @@ const OnboardingChoiceScreen = () => {
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20 text-white font-medium">Recommended</span>
                     </div>
                     <p className="text-xs text-white/80 mt-1">
-                      Jump in now — D.E.V.I. will learn about you through conversation
+                      Jump in now — add more info as you go
                     </p>
                   </div>
                   <ArrowRight className="w-4 h-4 text-white/70 group-hover:text-white transition-colors shrink-0 mt-3" />
@@ -466,11 +466,11 @@ const OnboardingChoiceScreen = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-foreground text-sm">Full Manual Setup</span>
+                      <span className="font-semibold text-foreground text-sm">Full Setup</span>
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">~10 min</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Detailed questions for the most accurate AI scoring
+                      Best for optimizing AI scoring & personalized advice
                     </p>
                   </div>
                   <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-3" />
