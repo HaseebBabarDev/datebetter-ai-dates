@@ -2005,6 +2005,17 @@ const Devi = () => {
                           <span className="text-xs font-medium">{selectedCandidate.nickname.charAt(0)}</span>
                         </div>
                         {selectedCandidate.nickname}
+                        {selectedCandidate.compatibility_score != null && (
+                          <span className={`ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                            selectedCandidate.compatibility_score >= 70 
+                              ? "bg-green-500/15 text-green-600" 
+                              : selectedCandidate.compatibility_score >= 40 
+                                ? "bg-amber-500/15 text-amber-600" 
+                                : "bg-red-500/15 text-red-600"
+                          }`}>
+                            {selectedCandidate.compatibility_score}%
+                          </span>
+                        )}
                       </>
                     ) : (
                       <>
@@ -2015,7 +2026,7 @@ const Devi = () => {
                     <ChevronDown className="w-4 h-4 ml-auto" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuContent align="start" className="w-56">
                   {/* General option - no candidate */}
                   <DropdownMenuItem
                     onClick={() => {
@@ -2049,7 +2060,18 @@ const Devi = () => {
                           <span className="text-xs font-medium">{c.nickname.charAt(0)}</span>
                         </div>
                         <span className="flex-1">{c.nickname}</span>
-                        {hasConversation && (
+                        {c.compatibility_score != null && (
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                            c.compatibility_score >= 70 
+                              ? "bg-green-500/15 text-green-600" 
+                              : c.compatibility_score >= 40 
+                                ? "bg-amber-500/15 text-amber-600" 
+                                : "bg-red-500/15 text-red-600"
+                          }`}>
+                            {c.compatibility_score}%
+                          </span>
+                        )}
+                        {hasConversation && !c.compatibility_score && (
                           <MessageCircle className="w-3 h-3 text-muted-foreground" />
                         )}
                         {selectedCandidate?.id === c.id && (
