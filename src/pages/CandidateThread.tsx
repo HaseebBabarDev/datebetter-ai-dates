@@ -319,13 +319,13 @@ const CandidateThread = () => {
       />
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
         <TabsList className="shrink-0 mx-3 mt-2 bg-muted/50 rounded-xl h-9">
           <TabsTrigger value="chat" className="text-xs rounded-lg gap-1 data-[state=active]:bg-background">
             <Sparkles className="w-3 h-3" /> Chat
           </TabsTrigger>
-          <TabsTrigger value="analysis" className="text-xs rounded-lg gap-1 data-[state=active]:bg-background">
-            <BarChart3 className="w-3 h-3" /> Analysis
+          <TabsTrigger value="compatibility" className="text-xs rounded-lg gap-1 data-[state=active]:bg-background">
+            <Heart className="w-3 h-3" /> Score
           </TabsTrigger>
           <TabsTrigger value="flags" className="text-xs rounded-lg gap-1 data-[state=active]:bg-background">
             <Flag className="w-3 h-3" /> Flags
