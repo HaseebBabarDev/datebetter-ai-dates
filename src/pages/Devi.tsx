@@ -2692,7 +2692,7 @@ const Devi = () => {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,video/*"
         multiple
         onChange={onFileChange}
         className="hidden"
