@@ -18,7 +18,6 @@ import { ConversationUploadSheet } from "@/components/devi/ConversationUploadShe
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
 import { FlagsSection } from "@/components/candidate/FlagsSection";
-import { CandidateJournal } from "@/components/candidate/CandidateJournal";
 import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
 
 type Candidate = Tables<"candidates">;
