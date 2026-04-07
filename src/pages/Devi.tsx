@@ -504,6 +504,7 @@ const Devi = () => {
   const [firstTimeIntakeComplete, setFirstTimeIntakeComplete] = useState(false);
   const [showProfileNudge, setShowProfileNudge] = useState(false);
   const firstTimeAnalysisShown = useRef(false);
+  const onboardingContextSent = useRef(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
