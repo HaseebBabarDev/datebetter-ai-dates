@@ -102,6 +102,15 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
               {currentStep}/{totalSteps - 1}
             </span>
           )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs text-muted-foreground hover:text-foreground h-8 px-2"
+            onClick={handleSkipOnboarding}
+            disabled={skipping}
+          >
+            {skipping ? "..." : "Skip"}
+          </Button>
         </header>
       )}
 
