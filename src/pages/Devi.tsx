@@ -504,6 +504,7 @@ const Devi = () => {
   const [firstTimeIntakeComplete, setFirstTimeIntakeComplete] = useState(false);
   const [showProfileNudge, setShowProfileNudge] = useState(false);
   const firstTimeAnalysisShown = useRef(false);
+  const onboardingContextSent = useRef(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -1734,6 +1735,40 @@ const Devi = () => {
     }
   }, [messages, userProfile, userProfileCompleteness]);
 
+  // Auto-send onboarding context on first time if available
+  useEffect(() => {
+    if (isFirstTime && !onboardingContextSent.current) {
+      const uploadContext = localStorage.getItem("onboarding_upload_context");
+      if (uploadContext && uploadContext.trim()) {
+        onboardingContextSent.current = true;
+        setFirstTimeIntakeComplete(true);
+        
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete("firstTime");
+        setSearchParams(newParams, { replace: true });
+        
+        const goal = localStorage.getItem("onboarding_goal") || "evaluate";
+        const goalLabel = goal === "detachment" ? "detach from someone" 
+          : goal === "healing" ? "heal from a past relationship"
+          : goal === "evaluate" ? "evaluate someone I'm dating"
+          : goal === "checkup" ? "do a relationship check-up"
+          : "start dating better";
+        
+        const contextMessage = [
+          `I'm here to ${goalLabel}.`,
+          uploadContext,
+          "Can you help me get started?",
+        ].filter(Boolean).join("\n\n");
+        
+        setTimeout(() => {
+          sendMessage(contextMessage);
+        }, 500);
+        
+        localStorage.removeItem("onboarding_upload_context");
+      }
+    }
+  }, [isFirstTime]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[image:var(--gradient-page)]">
@@ -1811,10 +1846,9 @@ const Devi = () => {
     newParams.delete("firstTime");
     setSearchParams(newParams, { replace: true });
   };
+
   
-  
-  
-  // Show first-time intake form
+  // Show first-time intake form (only if no upload context was provided)
   if (isFirstTime && !firstTimeIntakeComplete) {
     const userName = localStorage.getItem("onboarding_name") || userProfile?.name || "";
     const userGoal = localStorage.getItem("onboarding_goal") || "evaluate";
