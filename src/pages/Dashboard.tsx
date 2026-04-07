@@ -62,7 +62,7 @@ const FEATURES = [
     icon: Unlink,
     label: "Detachment Plans",
     desc: "Guided plans to move on",
-    path: "/detachment-plan",
+    path: "/candidates",
     color: "text-teal-500",
     bg: "bg-teal-500/10",
   },
