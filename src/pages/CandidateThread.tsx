@@ -10,8 +10,6 @@ import { Send, ImagePlus, X, Sparkles, Flag, BarChart3, BookOpen, Heart } from "
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ThreadHeader } from "@/components/thread/ThreadHeader";
-import { ScoreCard } from "@/components/thread/ScoreCard";
-import { InsightCard } from "@/components/thread/InsightCard";
 import { RedFlagCard } from "@/components/thread/RedFlagCard";
 import { ChatGPTMessage } from "@/components/devi/ChatGPTMessage";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
