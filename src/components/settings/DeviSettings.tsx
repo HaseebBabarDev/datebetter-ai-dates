@@ -30,14 +30,14 @@ const DEVI_STYLES = [
 
 const DEVI_VOICES = [
   {
-    value: "younger",
-    label: "Younger",
-    description: "Energetic and relatable vibe.",
+    value: "female",
+    label: "Female",
+    description: "Warm and reassuring tone.",
   },
   {
-    value: "mature",
-    label: "Mature",
-    description: "Warm and reassuring tone.",
+    value: "male",
+    label: "Male",
+    description: "Calm and grounded tone.",
   },
 ];
 
