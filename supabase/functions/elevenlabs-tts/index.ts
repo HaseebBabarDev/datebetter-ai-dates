@@ -8,10 +8,13 @@ const corsHeaders = {
 
 // Voice options for D.E.V.I.
 const VOICE_IDS = {
-  mature: "sNLQ1mXur3j7xaL3YIA9",  // Custom cloned voice - natural, fluid
-  younger: "UROTxOkHtIFqWCaTocVv", // Custom younger voice
+  female: "sNLQ1mXur3j7xaL3YIA9",  // Female voice - warm, reassuring
+  male: "UROTxOkHtIFqWCaTocVv",     // Male voice - calm, grounded
+  // Legacy mappings
+  mature: "sNLQ1mXur3j7xaL3YIA9",
+  younger: "UROTxOkHtIFqWCaTocVv",
 };
-const DEFAULT_VOICE_ID = VOICE_IDS.mature;
+const DEFAULT_VOICE_ID = VOICE_IDS.female;
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -80,15 +83,15 @@ serve(async (req) => {
         body: JSON.stringify({
           text: cleanText,
           model_id: "eleven_turbo_v2_5", // Low latency model
-          voice_settings: selectedVoice === VOICE_IDS.younger
+          voice_settings: selectedVoice === VOICE_IDS.male
             ? {
-                stability: 0.65,          // Higher stability to prevent pitch/speed drift
+                stability: 0.65,
                 similarity_boost: 0.80,
-                style: 0.15,              // Low style to keep consistent
+                style: 0.15,
                 use_speaker_boost: true,
               }
             : {
-                stability: 0.4,           // More expressive for mature voice
+                stability: 0.4,
                 similarity_boost: 0.75,
                 style: 0.3,
                 use_speaker_boost: true,
