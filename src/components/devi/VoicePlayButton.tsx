@@ -12,7 +12,7 @@ interface VoicePlayButtonProps {
   size?: "sm" | "default" | "lg";
   variant?: "inline" | "icon" | "bar" | "blob";
   className?: string;
-  voicePreference?: "mature" | "younger";
+  voicePreference?: "mature" | "younger" | "male" | "female";
 }
 
 // Animated sound wave bars that update continuously while playing
