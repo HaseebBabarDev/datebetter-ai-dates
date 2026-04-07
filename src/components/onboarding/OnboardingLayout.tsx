@@ -32,9 +32,27 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   emoji,
 }) => {
   const { currentStep, totalSteps, prevStep } = useOnboarding();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const progress = ((currentStep + 1) / totalSteps) * 100;
+  const [skipping, setSkipping] = useState(false);
 
   const handleBack = onBack || prevStep;
+
+  const handleSkipOnboarding = async () => {
+    if (!user) return;
+    setSkipping(true);
+    try {
+      await supabase
+        .from("profiles")
+        .update({ onboarding_completed: true, onboarding_step: 0 })
+        .eq("user_id", user.id);
+      navigate("/devi", { replace: true });
+    } catch (err) {
+      toast.error("Something went wrong");
+      setSkipping(false);
+    }
+  };
 
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col">
