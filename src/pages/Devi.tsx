@@ -1978,17 +1978,17 @@ const Devi = () => {
                           </div>
                           <div className="flex items-center gap-1.5">
                             <span className="font-medium">{selectedCandidate.nickname}</span>
-                            {selectedCandidate.compatibility_score != null && (
-                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                                selectedCandidate.compatibility_score >= 70 
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                              selectedCandidate.compatibility_score != null
+                                ? selectedCandidate.compatibility_score >= 70 
                                   ? "bg-green-500/15 text-green-600" 
                                   : selectedCandidate.compatibility_score >= 40 
                                     ? "bg-amber-500/15 text-amber-600" 
                                     : "bg-red-500/15 text-red-600"
-                              }`}>
-                                {selectedCandidate.compatibility_score}%
-                              </span>
-                            )}
+                                : "bg-muted text-muted-foreground"
+                            }`}>
+                              {selectedCandidate.compatibility_score != null ? `${selectedCandidate.compatibility_score}%` : "New"}
+                            </span>
                           </div>
                         </>
                       ) : (
