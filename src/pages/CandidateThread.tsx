@@ -6,12 +6,10 @@ import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, ImagePlus, X, Sparkles, Flag, BarChart3, BookOpen } from "lucide-react";
+import { Send, ImagePlus, X, Sparkles, Flag, BarChart3, BookOpen, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ThreadHeader } from "@/components/thread/ThreadHeader";
-import { ScoreCard } from "@/components/thread/ScoreCard";
-import { InsightCard } from "@/components/thread/InsightCard";
 import { RedFlagCard } from "@/components/thread/RedFlagCard";
 import { ChatGPTMessage } from "@/components/devi/ChatGPTMessage";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
@@ -21,6 +19,7 @@ import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
 import { FlagsSection } from "@/components/candidate/FlagsSection";
 import { CandidateJournal } from "@/components/candidate/CandidateJournal";
+import { CompatibilityScore } from "@/components/candidate/CompatibilityScore";
 
 type Candidate = Tables<"candidates">;
 type DeviMessage = Tables<"devi_messages">;
@@ -299,11 +298,6 @@ const CandidateThread = () => {
   const greenFlags = Array.isArray(candidate.green_flags)
     ? (candidate.green_flags as string[])
     : [];
-  const pros = Array.isArray(candidate.pros) ? (candidate.pros as string[]) : [];
-  const cons = Array.isArray(candidate.cons) ? (candidate.cons as string[]) : [];
-  const breakdown = candidate.score_breakdown && typeof candidate.score_breakdown === "object"
-    ? (candidate.score_breakdown as Record<string, number>)
-    : undefined;
 
   return (
     <div className="h-[100dvh] flex flex-col bg-background">
@@ -318,13 +312,13 @@ const CandidateThread = () => {
       />
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
         <TabsList className="shrink-0 mx-3 mt-2 bg-muted/50 rounded-xl h-9">
           <TabsTrigger value="chat" className="text-xs rounded-lg gap-1 data-[state=active]:bg-background">
             <Sparkles className="w-3 h-3" /> Chat
           </TabsTrigger>
-          <TabsTrigger value="analysis" className="text-xs rounded-lg gap-1 data-[state=active]:bg-background">
-            <BarChart3 className="w-3 h-3" /> Analysis
+          <TabsTrigger value="compatibility" className="text-xs rounded-lg gap-1 data-[state=active]:bg-background">
+            <Heart className="w-3 h-3" /> Score
           </TabsTrigger>
           <TabsTrigger value="flags" className="text-xs rounded-lg gap-1 data-[state=active]:bg-background">
             <Flag className="w-3 h-3" /> Flags
@@ -455,35 +449,14 @@ const CandidateThread = () => {
           </div>
         </TabsContent>
 
-        {/* Analysis Tab */}
-        <TabsContent value="analysis" className="flex-1 overflow-y-auto px-3 py-3 space-y-3 mt-0">
-          {candidate.compatibility_score !== null && (
-            <ScoreCard
-              score={candidate.compatibility_score}
-              breakdown={breakdown}
-            />
-          )}
-
-          {pros.length > 0 && <InsightCard insights={pros} title="Pros" />}
-          {cons.length > 0 && <InsightCard insights={cons} title="Cons" />}
-
-          {candidate.ai_description && (
-            <div className="rounded-2xl border border-border bg-card/80 p-4">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                AI Summary
-              </p>
-              <p className="text-sm text-foreground/90">{candidate.ai_description}</p>
-            </div>
-          )}
-
-          {!candidate.compatibility_score && (
-            <div className="flex flex-col items-center py-12 text-center space-y-3">
-              <BarChart3 className="w-8 h-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground max-w-xs">
-                Upload a conversation or add more details to get a compatibility analysis
-              </p>
-            </div>
-          )}
+        {/* Compatibility Tab - Full breakdown */}
+        <TabsContent value="compatibility" className="flex-1 overflow-y-auto px-3 py-3 space-y-3 mt-0">
+          <CompatibilityScore
+            candidate={candidate}
+            onUpdate={(updates) => {
+              setCandidate(prev => prev ? { ...prev, ...updates } as Candidate : prev);
+            }}
+          />
         </TabsContent>
 
         {/* Flags Tab */}
