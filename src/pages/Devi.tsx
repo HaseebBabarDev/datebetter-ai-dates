@@ -537,12 +537,11 @@ const Devi = () => {
   const userProfileCompleteness = profileCompletenessResult.percentage;
   const missingProfileFields = profileCompletenessResult.missingFields;
   
-  // Check if user has full profile - for general chat only profile needed, for candidate chat also need interactions
-  // First-time users bypass all profile checks
-  const hasFullProfile = isFirstTime || userProfileCompleteness === 100;
+  // No gates - chat is always accessible with the new trial model
+  const hasFullProfile = true;
   const hasInteractions = interactions.length > 0;
-  const canChatWithCandidate = isFirstTime || (hasFullProfile && hasInteractions);
-  const canChatGeneral = hasFullProfile; // General chat only needs profile
+  const canChatWithCandidate = true;
+  const canChatGeneral = true;
   
   // Mode: "general" = no candidate, "candidate" = specific candidate
   const chatMode = selectedCandidate ? "candidate" : "general";
