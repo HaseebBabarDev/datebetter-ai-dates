@@ -239,7 +239,7 @@ const Auth = () => {
             }
             
             if (setupMode === "quick") {
-              navigate("/devi?firstTime=true");
+              navigate("/setup?setup=quick");
             } else {
               const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
               navigate(`/setup${setupQuery}`);
