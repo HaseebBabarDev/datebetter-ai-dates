@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Lock, Zap, Stars, ShieldCheck, Sparkles, ArrowRight, Layers } from "lucide-react";
+import { Lock, Zap, Stars, ShieldCheck, Sparkles } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,9 +16,8 @@ import {
 import welcomeBg from "@/assets/welcome-bg.jpeg";
 
 const WelcomeScreen = () => {
-  const { data, updateData, nextStep, goToStep } = useOnboarding();
+  const { data, updateData, nextStep } = useOnboarding();
   const [showAgeGate, setShowAgeGate] = useState(false);
-  const [showIntakeChoice, setShowIntakeChoice] = useState(false);
   
   const [month, setMonth] = useState("");
   const [day, setDay] = useState("");
@@ -50,22 +49,6 @@ const WelcomeScreen = () => {
       ageConfirmed: true,
     });
     
-    // Show intake choice modal
-    setShowIntakeChoice(true);
-  };
-
-  const handleQuickStart = () => {
-    // Quick start mode - mark it and proceed
-    updateData({ quickStartMode: true });
-    setShowIntakeChoice(false);
-    nextStep();
-  };
-
-  const handleDetailedSetup = () => {
-    // Full detailed setup
-    updateData({ quickStartMode: false });
-    // Full detailed setup
-    setShowIntakeChoice(false);
     nextStep();
   };
 
@@ -73,7 +56,6 @@ const WelcomeScreen = () => {
 
   return (
     <div className="min-h-screen relative">
-      {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${welcomeBg})` }}
@@ -89,21 +71,18 @@ const WelcomeScreen = () => {
         subtitle="Your dating journey begins here"
       >
         <div className="space-y-5 animate-fade-in relative z-10">
-          {/* Welcome Heading */}
           <div className="text-center mb-2">
             <h1 className="text-xl md:text-2xl font-poppins font-bold text-foreground">
               Let's Get Started!
             </h1>
           </div>
 
-          {/* D.E.V.I. Badge */}
           <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-background/80 backdrop-blur-sm border border-primary/30 mx-auto w-fit">
             <Stars className="w-3 h-3 text-primary" />
             <span className="text-xs font-medium text-foreground">D.E.V.I.</span>
             <span className="text-[10px] text-foreground/70">Dating Evaluation & Vetting Intelligence</span>
           </div>
 
-          {/* Onboarding Info - Modern pill badges */}
           <div className="flex justify-center gap-2 flex-wrap">
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card shadow-sm border border-border/50">
               <Zap className="w-3.5 h-3.5 text-primary" />
@@ -119,81 +98,40 @@ const WelcomeScreen = () => {
             </div>
           </div>
 
-          {/* Age Verification */}
           <div className="space-y-3">
             <Label className="text-base font-medium">Please confirm your date of birth</Label>
-            
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label className="text-xs text-muted-foreground">Month</Label>
-                <Input
-                  type="number"
-                  placeholder="MM"
-                  min={1}
-                  max={12}
-                  value={month}
-                  onChange={(e) => setMonth(e.target.value)}
-                  className="text-center"
-                />
+                <Input type="number" placeholder="MM" min={1} max={12} value={month} onChange={(e) => setMonth(e.target.value)} className="text-center" />
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground">Day</Label>
-                <Input
-                  type="number"
-                  placeholder="DD"
-                  min={1}
-                  max={31}
-                  value={day}
-                  onChange={(e) => setDay(e.target.value)}
-                  className="text-center"
-                />
+                <Input type="number" placeholder="DD" min={1} max={31} value={day} onChange={(e) => setDay(e.target.value)} className="text-center" />
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground">Year</Label>
-                <Input
-                  type="number"
-                  placeholder="YYYY"
-                  min={1900}
-                  max={new Date().getFullYear()}
-                  value={year}
-                  onChange={(e) => setYear(e.target.value)}
-                  className="text-center"
-                />
+                <Input type="number" placeholder="YYYY" min={1900} max={new Date().getFullYear()} value={year} onChange={(e) => setYear(e.target.value)} className="text-center" />
               </div>
             </div>
           </div>
 
-          {/* Confirmation Checkbox */}
           <div className="flex items-start gap-3">
-            <Checkbox
-              id="ageConfirm"
-              checked={data.ageConfirmed}
-              onCheckedChange={(checked) => updateData({ ageConfirmed: checked === true })}
-            />
-            <Label htmlFor="ageConfirm" className="text-sm cursor-pointer leading-relaxed">
-              I confirm I am 18 years or older
-            </Label>
+            <Checkbox id="ageConfirm" checked={data.ageConfirmed} onCheckedChange={(checked) => updateData({ ageConfirmed: checked === true })} />
+            <Label htmlFor="ageConfirm" className="text-sm cursor-pointer leading-relaxed">I confirm I am 18 years or older</Label>
           </div>
 
-          {/* Terms */}
           <p className="text-xs text-muted-foreground text-center">
             By continuing, you agree to our{" "}
             <span className="text-primary hover:underline cursor-pointer">Terms</span> &{" "}
             <span className="text-primary hover:underline cursor-pointer">Privacy Policy</span>
           </p>
 
-          {/* Continue Button */}
-          <Button
-            onClick={handleContinue}
-            disabled={!isValid}
-            className="w-full"
-            size="lg"
-          >
+          <Button onClick={handleContinue} disabled={!isValid} className="w-full" size="lg">
             Get Started
           </Button>
         </div>
 
-        {/* Age Gate Modal */}
         <Dialog open={showAgeGate} onOpenChange={setShowAgeGate}>
           <DialogContent className="border-alert border-2">
             <DialogHeader>
@@ -202,91 +140,12 @@ const WelcomeScreen = () => {
                   <Lock className="w-8 h-8 text-destructive" />
                 </div>
               </div>
-              <DialogTitle className="text-center">
-                You must be 18+ to use dateBetter
-              </DialogTitle>
+              <DialogTitle className="text-center">You must be 18+ to use dateBetter</DialogTitle>
               <DialogDescription className="text-center">
                 Come back when you're older! Dating apps require users to be 18 or older for safety reasons.
               </DialogDescription>
             </DialogHeader>
-            <Button onClick={() => window.close()} className="w-full">
-              I Understand
-            </Button>
-          </DialogContent>
-        </Dialog>
-
-        {/* Intake Choice Modal - Mobile optimized */}
-        <Dialog open={showIntakeChoice} onOpenChange={setShowIntakeChoice}>
-          <DialogContent className="w-[calc(100%-2rem)] max-w-sm mx-auto border-primary/20 p-0 overflow-hidden rounded-2xl">
-            <div className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-5">
-              <DialogHeader className="space-y-2">
-                <div className="flex justify-center">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-primary" />
-                  </div>
-                </div>
-                <DialogTitle className="text-center text-lg">
-                  How would you like to set up?
-                </DialogTitle>
-                <DialogDescription className="text-center text-xs">
-                  Choose your path - you can always add more details later
-                </DialogDescription>
-              </DialogHeader>
-            </div>
-            
-            <div className="p-4 space-y-2.5">
-              {/* Full Setup Option - Recommended */}
-              <button
-                onClick={handleDetailedSetup}
-                className="w-full p-3.5 rounded-xl bg-[image:var(--gradient-hero)] shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all group text-left"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                    <Layers className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white">Full Setup</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20 text-white font-medium">
-                        Recommended
-                      </span>
-                    </div>
-                    <p className="text-xs text-white/80 mt-0.5">
-                      Most accurate AI scoring & personalized insights
-                    </p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-white/70 group-hover:text-white transition-colors shrink-0 mt-2.5" />
-                </div>
-              </button>
-
-              {/* Quick Start Option */}
-              <button
-                onClick={handleQuickStart}
-                className="w-full p-3.5 rounded-xl border border-border/50 bg-card hover:bg-accent/50 hover:border-primary/30 transition-all group text-left"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                    <Zap className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-foreground">Quick Start</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
-                        2 min
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Get AI scoring right away—refine accuracy later
-                    </p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-2.5" />
-                </div>
-              </button>
-
-              <p className="text-[10px] text-muted-foreground text-center pt-1">
-                Your data is encrypted and never shared
-              </p>
-            </div>
+            <Button onClick={() => window.close()} className="w-full">I Understand</Button>
           </DialogContent>
         </Dialog>
       </OnboardingLayout>
