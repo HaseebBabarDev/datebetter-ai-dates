@@ -2638,14 +2638,6 @@ const Devi = () => {
               <Lock className="w-4 h-4" />
               <span className="text-sm">Complete profile to unlock chat</span>
             </button>
-          ) : chatMode === "candidate" && !canChatWithCandidate ? (
-            <button
-              onClick={() => setShowProfileDialog(true)}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-border bg-muted/50 text-muted-foreground hover:bg-muted transition-colors"
-            >
-              <Lock className="w-4 h-4" />
-              <span className="text-sm">Log an interaction to unlock chat</span>
-            </button>
           ) : (
             <div className="flex gap-2 items-end" data-tour="devi-input">
               {/* Upload menu: screenshot or conversation analysis */}
