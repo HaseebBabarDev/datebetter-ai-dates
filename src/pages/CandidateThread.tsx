@@ -298,8 +298,6 @@ const CandidateThread = () => {
   const greenFlags = Array.isArray(candidate.green_flags)
     ? (candidate.green_flags as string[])
     : [];
-  const pros = Array.isArray(candidate.pros) ? (candidate.pros as string[]) : [];
-  const cons = Array.isArray(candidate.cons) ? (candidate.cons as string[]) : [];
   const breakdown = candidate.score_breakdown && typeof candidate.score_breakdown === "object"
     ? (candidate.score_breakdown as Record<string, number>)
     : undefined;
