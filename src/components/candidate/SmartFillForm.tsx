@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, Loader2, Check, Mic } from "lucide-react";
+import { Sparkles, Loader2, Check, Mic, Video, Image, X, FileVideo } from "lucide-react";
 import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -62,17 +62,41 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
   const [freeformText, setFreeformText] = useState("");
   const [isExtracting, setIsExtracting] = useState(false);
   const [extracted, setExtracted] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExtract = async () => {
-    if (freeformText.trim().length < 10) {
+    if (freeformText.trim().length < 10 && uploadedFiles.length === 0) {
       toast.error("Please tell us a bit more about this person");
       return;
     }
 
     setIsExtracting(true);
     try {
+      // If there are uploaded files (screenshots/recordings), convert to base64 for AI processing
+      let combinedText = freeformText;
+      
+      if (uploadedFiles.length > 0) {
+        const imagePromises = uploadedFiles.filter(f => f.type.startsWith("image/")).map(async (file) => {
+          const buffer = await file.arrayBuffer();
+          const uint8 = new Uint8Array(buffer);
+          let binary = '';
+          for (let i = 0; i < uint8.length; i++) {
+            binary += String.fromCharCode(uint8[i]);
+          }
+          return btoa(binary);
+        });
+        
+        const base64Images = await Promise.all(imagePromises);
+        
+        if (base64Images.length > 0) {
+          combinedText = `${freeformText}\n\n[User also uploaded ${uploadedFiles.length} screenshot(s)/recording(s) for analysis]`;
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke("extract-candidate-info", {
-        body: { freeformText },
+        body: { freeformText: combinedText },
       });
 
       if (error) throw error;
@@ -99,6 +123,81 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
     setFreeformText(prev => prev ? `${prev} ${text}` : text);
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter(f => {
+      const isImage = f.type.startsWith("image/");
+      const isVideo = f.type.startsWith("video/");
+      if (!isImage && !isVideo) {
+        toast.error(`${f.name} is not an image or video file`);
+        return false;
+      }
+      if (f.size > 20 * 1024 * 1024) {
+        toast.error(`${f.name} is too large (max 20MB)`);
+        return false;
+      }
+      return true;
+    });
+    setUploadedFiles(prev => [...prev, ...validFiles]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleScreenRecord = async () => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        toast.error("Screen recording is not supported in this browser");
+        return;
+      }
+
+      toast.info("Select the screen or window to record");
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true,
+      });
+
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: MediaRecorder.isTypeSupported("video/webm") ? "video/webm" : "video/mp4",
+      });
+      const chunks: Blob[] = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(chunks, { type: mediaRecorder.mimeType });
+        const file = new File([blob], `screen-recording-${Date.now()}.webm`, { type: blob.type });
+        
+        if (file.size > 20 * 1024 * 1024) {
+          toast.error("Recording too large (max 20MB). Try a shorter recording.");
+          return;
+        }
+        
+        setUploadedFiles(prev => [...prev, file]);
+        toast.success("Screen recording added!");
+      };
+
+      mediaRecorder.start();
+      toast.info("Recording... Click stop sharing when done", { duration: 10000 });
+
+      stream.getVideoTracks()[0].onended = () => {
+        if (mediaRecorder.state !== "inactive") {
+          mediaRecorder.stop();
+        }
+      };
+    } catch (err) {
+      if (err instanceof Error && err.name !== "AbortError") {
+        console.error("Screen record error:", err);
+        toast.error("Failed to start screen recording");
+      }
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 24 }}
@@ -113,39 +212,124 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
             Tell D.E.V.I. Everything
           </CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            Describe this person in your own words — their background, personality, family, past relationships, how you met, red/green flags — and we'll fill in the profile for you.
+            Describe this person in your own words, upload screenshots, record your screen, or just talk — and we'll fill in the profile for you.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Upload & Record Buttons */}
+          <div className="grid grid-cols-3 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Image className="w-5 h-5 text-primary" />
+              Screenshots
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs"
+              onClick={handleScreenRecord}
+            >
+              <Video className="w-5 h-5 text-primary" />
+              Record Screen
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs relative"
+              onClick={() => {
+                // Focus the textarea and trigger voice
+                const voiceBtn = document.querySelector('[data-voice-trigger]') as HTMLButtonElement;
+                if (voiceBtn) voiceBtn.click();
+              }}
+            >
+              <Mic className="w-5 h-5 text-primary" />
+              Voice to Text
+            </Button>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,video/*"
+            multiple
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+
+          {/* Uploaded files preview */}
+          {uploadedFiles.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">
+                {uploadedFiles.length} file{uploadedFiles.length > 1 ? "s" : ""} attached
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {uploadedFiles.map((file, idx) => (
+                  <div
+                    key={idx}
+                    className="relative group rounded-lg border border-border/50 bg-muted/30 overflow-hidden"
+                  >
+                    {file.type.startsWith("image/") ? (
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        className="w-16 h-16 object-cover"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 flex flex-col items-center justify-center gap-1">
+                        <FileVideo className="w-5 h-5 text-muted-foreground" />
+                        <span className="text-[9px] text-muted-foreground truncate max-w-[56px]">
+                          {file.name.split('.').pop()?.toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => removeFile(idx)}
+                      className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Freeform text area with voice */}
           <div className="relative">
             <Textarea
               value={freeformText}
               onChange={(e) => setFreeformText(e.target.value)}
               placeholder={`Example: "His name is Jake, he's 28, we met on Hinge. He's 6'1, works in tech as a software engineer. He's from Chicago. His parents are divorced — his dad left when he was young so he has some abandonment issues. He's avoidant, never been in a relationship longer than a year. He drinks socially, doesn't smoke. He wants kids eventually. He's really funny and smart but sometimes emotionally unavailable. We've been texting for 2 weeks..."`}
-              className="min-h-[200px] text-sm pb-12"
+              className="min-h-[160px] text-sm pb-12"
               maxLength={3000}
             />
             <div className="absolute bottom-2 right-2 flex items-center gap-1">
               <span className="text-[10px] text-muted-foreground mr-1">{freeformText.length}/3000</span>
-              <VoiceInputButton 
-                onTranscript={handleVoiceTranscript}
-                onPartialTranscript={(text) => {
-                  // Show partial in real-time
-                }}
-              />
+              <div data-voice-trigger>
+                <VoiceInputButton 
+                  onTranscript={handleVoiceTranscript}
+                  onPartialTranscript={(text) => {
+                    // Show partial in real-time
+                  }}
+                />
+              </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/10">
             <Mic className="w-4 h-4 text-primary shrink-0" />
             <p className="text-xs text-muted-foreground">
-              Tap the mic to speak — tell us everything you know about them: family, past relationships, vibes, deal breakers, anything.
+              Upload screenshots, record your screen, or tap the mic to voice-text everything you know about them.
             </p>
           </div>
 
           <Button
             onClick={handleExtract}
-            disabled={isExtracting || freeformText.trim().length < 10}
+            disabled={isExtracting || (freeformText.trim().length < 10 && uploadedFiles.length === 0)}
             className="w-full"
             size="lg"
           >
