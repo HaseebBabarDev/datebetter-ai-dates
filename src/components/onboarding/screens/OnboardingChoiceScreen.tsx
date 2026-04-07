@@ -43,10 +43,16 @@ const OnboardingChoiceScreen = () => {
   const { user } = useAuth();
   const { updateData } = useOnboarding();
 
-  const [step, setStep] = useState<Step>("basics");
-  const [name, setName] = useState(localStorage.getItem("onboarding_name") || "");
+  const storedName = localStorage.getItem("onboarding_name") || "";
+  const storedGoal = localStorage.getItem("onboarding_goal") || "";
+  
+  // Skip basics+goals if already collected from pre-auth onboarding
+  const initialStep: Step = storedName && storedGoal ? "upload" : storedName ? "goals" : "basics";
+  
+  const [step, setStep] = useState<Step>(initialStep);
+  const [name, setName] = useState(storedName);
   const [age, setAge] = useState("");
-  const [selectedGoal, setSelectedGoal] = useState(localStorage.getItem("onboarding_goal") || "");
+  const [selectedGoal, setSelectedGoal] = useState(storedGoal);
 
   // Upload state
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
