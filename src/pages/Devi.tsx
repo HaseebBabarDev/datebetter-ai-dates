@@ -883,7 +883,22 @@ const Devi = () => {
   }, []);
 
   // Handle candidate selection with conversation choice
-  const handleCandidateSelect = useCallback((candidate: Candidate) => {
+  const handleCandidateSelect = useCallback(async (candidate: Candidate) => {
+    // If there's a current general conversation (no candidate), link it to this candidate
+    if (currentConversationId && !selectedCandidate && messages.length > 0) {
+      await supabase
+        .from("devi_conversations")
+        .update({ candidate_id: candidate.id })
+        .eq("id", currentConversationId);
+      
+      setSelectedCandidate(candidate);
+      // Update conversations list to reflect the change
+      setConversations(prev => prev.map(c => 
+        c.id === currentConversationId ? { ...c, candidate_id: candidate.id } : c
+      ));
+      return;
+    }
+
     // Check if there's an existing conversation for this candidate
     const existingConv = conversations.find(c => c.candidate_id === candidate.id);
     
@@ -896,7 +911,7 @@ const Devi = () => {
       // No existing conversation, just select
       setSelectedCandidate(candidate);
     }
-  }, [conversations, selectedCandidate]);
+  }, [conversations, selectedCandidate, currentConversationId, messages.length]);
 
   // Continue existing conversation
   const handleContinueConversation = useCallback(async () => {
