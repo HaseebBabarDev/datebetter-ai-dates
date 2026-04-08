@@ -157,28 +157,47 @@ serve(async (req) => {
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: "active",
-      limit: 1,
+      limit: 10,
     });
 
-    const hasActiveSub = subscriptions.data.length > 0;
+    let hasActiveSub = false;
     let plan = "free";
     let productId = null;
     let subscriptionEnd = null;
     let priceId = null;
+    let hasTextSimulator = false;
+    let hasDetachmentPlanSub = false;
+    let textSimSubId: string | null = null;
+    let detachmentSubId: string | null = null;
 
-    if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
-      // Try multiple ways to get the period end — basil API may differ
-      const periodEnd = subscription.current_period_end 
-        ?? (subscription as any).currentPeriodEnd
-        ?? subscription.items?.data?.[0]?.current_period_end;
-      subscriptionEnd = safeTimestamp(periodEnd);
-      productId = subscription.items.data[0]?.price?.product as string;
-      priceId = subscription.items.data[0]?.price?.id;
-      plan = PRODUCT_TO_PLAN[productId] || "unknown";
-      logStep("Active subscription found", { plan, productId, priceId, endDate: subscriptionEnd, rawPeriodEnd: periodEnd });
-    } else {
-      logStep("No active subscription");
+    for (const subscription of subscriptions.data) {
+      const itemProductId = subscription.items.data[0]?.price?.product as string;
+      const itemPlan = PRODUCT_TO_PLAN[itemProductId] || "unknown";
+
+      if (itemPlan === "text_simulator") {
+        hasTextSimulator = true;
+        textSimSubId = subscription.id;
+        logStep("Text Simulator add-on active", { subId: subscription.id });
+      } else if (itemPlan === "detachment_plan") {
+        hasDetachmentPlanSub = true;
+        detachmentSubId = subscription.id;
+        logStep("Detachment Plan add-on active", { subId: subscription.id });
+      } else if (!hasActiveSub) {
+        // Main subscription (first non-addon found)
+        hasActiveSub = true;
+        const periodEnd = subscription.current_period_end 
+          ?? (subscription as any).currentPeriodEnd
+          ?? subscription.items?.data?.[0]?.current_period_end;
+        subscriptionEnd = safeTimestamp(periodEnd);
+        productId = itemProductId;
+        priceId = subscription.items.data[0]?.price?.id;
+        plan = itemPlan;
+        logStep("Active subscription found", { plan, productId, priceId, endDate: subscriptionEnd });
+      }
+    }
+
+    if (!hasActiveSub) {
+      logStep("No active main subscription");
     }
 
     // Check for one-time purchases (Day Pass, Detachment Plan)
