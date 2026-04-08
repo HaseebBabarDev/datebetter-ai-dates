@@ -28,8 +28,6 @@ import { STRIPE_PLANS } from "@/lib/stripeConfig";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { format, parse } from "date-fns";
 import { useTour, SETTINGS_TOUR_STEPS, TourRestartButton } from "@/components/tour";
-import { BetaNdaDialog } from "@/components/auth/BetaNdaDialog";
-import { useNdaAgreement } from "@/hooks/useNdaAgreement";
 
 type Profile = Tables<"profiles">;
 type SubscriptionPlan = "free" | "basic" | "starter" | "unlimited";
@@ -95,7 +93,7 @@ const Settings = () => {
   const defaultTab = searchParams.get("tab") || "account";
   const section = searchParams.get("section");
   const { startTour, hasCompletedTour, resetAllTours } = useTour();
-  const { ndaAcceptance, loading: ndaLoading } = useNdaAgreement();
+  
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -109,7 +107,7 @@ const Settings = () => {
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [referralStats, setReferralStats] = useState<{ total: number; converted: number; trialEarned: boolean }>({ total: 0, converted: 0, trialEarned: false });
   const [copiedReferral, setCopiedReferral] = useState(false);
-  const [showBetaNda, setShowBetaNda] = useState(false);
+  
 
   // Account form state
   const [name, setName] = useState("");
@@ -766,17 +764,6 @@ const Settings = () => {
                 <Button
                   variant="outline"
                   className="w-full justify-between h-10 text-sm"
-                  onClick={() => setShowBetaNda(true)}
-                >
-                  <span className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-muted-foreground" />
-                    Beta Tester NDA
-                  </span>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-between h-10 text-sm"
                   onClick={() => navigate("/terms")}
                 >
                   <span className="flex items-center gap-2">
@@ -796,11 +783,6 @@ const Settings = () => {
                   </span>
                   <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 </Button>
-                {ndaAcceptance?.accepted_at && (
-                  <p className="text-xs text-muted-foreground pt-2 border-t">
-                    Beta NDA accepted on {new Date(ndaAcceptance.accepted_at).toLocaleDateString()}
-                  </p>
-                )}
               </CardContent>
             </Card>
 
@@ -1303,13 +1285,6 @@ const Settings = () => {
 
       {/* Payment now handled via Stripe Checkout redirect */}
 
-      {/* Beta NDA Dialog - View Only */}
-      <BetaNdaDialog
-        open={showBetaNda}
-        onAccept={() => setShowBetaNda(false)}
-        viewOnly
-        acceptedAt={ndaAcceptance?.accepted_at}
-      />
     </div>
   );
 };
