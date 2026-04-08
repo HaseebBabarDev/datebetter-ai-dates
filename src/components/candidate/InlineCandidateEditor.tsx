@@ -147,6 +147,36 @@ const SOCIAL_STYLE_OPTIONS = [
   { value: "ambivert", label: "Ambivert" },
 ];
 
+const CAREER_STAGE_OPTIONS = [
+  { value: "Student", label: "Student" },
+  { value: "Entry Level", label: "Entry Level" },
+  { value: "Mid-Career", label: "Mid-Career" },
+  { value: "Senior/Executive", label: "Senior/Executive" },
+  { value: "Entrepreneur", label: "Entrepreneur" },
+  { value: "Freelance/Creative", label: "Freelance/Creative" },
+  { value: "Between Jobs", label: "Between Jobs" },
+  { value: "Retired", label: "Retired" },
+];
+
+const EDUCATION_LEVEL_OPTIONS = [
+  { value: "High School", label: "High School" },
+  { value: "Some College", label: "Some College" },
+  { value: "Bachelor's", label: "Bachelor's" },
+  { value: "Master's", label: "Master's" },
+  { value: "Doctorate", label: "Doctorate" },
+  { value: "Trade/Technical", label: "Trade/Technical" },
+  { value: "Self-taught", label: "Self-taught" },
+];
+
+const SCHEDULE_OPTIONS = [
+  { value: "remote_flexible", label: "Remote/Flexible" },
+  { value: "hybrid", label: "Hybrid" },
+  { value: "office_9_5", label: "Office 9-5" },
+  { value: "shift_work", label: "Shift Work" },
+  { value: "on_call", label: "On-Call" },
+  { value: "overnight", label: "Overnight" },
+];
+
 const FAMILY_STABILITY_OPTIONS = [
   { value: "very_stable", label: "Very stable" },
   { value: "mostly_stable", label: "Mostly stable" },
@@ -531,30 +561,9 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
       case "career_lifestyle":
         return (
           <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Career Stage</Label>
-              <Input
-                placeholder="e.g. Mid-career, Student, Entrepreneur"
-                value={formData.their_career_stage as string || ""}
-                onChange={(e) => updateField("their_career_stage", e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Education Level</Label>
-              <Input
-                placeholder="e.g. Bachelor's, Master's, Self-taught"
-                value={formData.their_education_level as string || ""}
-                onChange={(e) => updateField("their_education_level", e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Schedule Flexibility</Label>
-              <Input
-                placeholder="e.g. Very flexible, Busy weekdays"
-                value={formData.their_schedule_flexibility as string || ""}
-                onChange={(e) => updateField("their_schedule_flexibility", e.target.value)}
-              />
-            </div>
+            {renderSelectField("their_career_stage", "Career Stage", CAREER_STAGE_OPTIONS)}
+            {renderSelectField("their_education_level", "Education Level", EDUCATION_LEVEL_OPTIONS)}
+            {renderSelectField("their_schedule_flexibility", "Schedule Flexibility", SCHEDULE_OPTIONS)}
             {renderSliderField("their_ambition_level", "Ambition Level")}
           </div>
         );
