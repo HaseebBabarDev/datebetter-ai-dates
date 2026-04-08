@@ -2811,6 +2811,21 @@ const Devi = () => {
           }}
         />
       )}
+
+      {/* Inline Candidate Editor */}
+      {user && selectedCandidate && (
+        <InlineCandidateEditor
+          open={!!candidateEditorSection}
+          sectionId={candidateEditorSection}
+          candidate={selectedCandidate}
+          userId={user.id}
+          onClose={() => setCandidateEditorSection(null)}
+          onSaved={(updatedCandidate) => {
+            setSelectedCandidate(updatedCandidate);
+            setCandidates(prev => prev.map(c => c.id === updatedCandidate.id ? updatedCandidate : c));
+          }}
+        />
+      )}
     </div>
   );
 };
