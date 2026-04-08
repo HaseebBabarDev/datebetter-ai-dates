@@ -283,6 +283,26 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
           data.intimacy_comfort = profile.intimacy_comfort || "";
           data.red_flag_sensitivity = profile.red_flag_sensitivity || 5;
           break;
+        case "mental_health":
+          data.is_neurodivergent = (profile as any).is_neurodivergent || "";
+          data.mental_health_openness = profile.mental_health_openness || "";
+          data.mental_health_importance = profile.mental_health_importance || 5;
+          data.in_therapy = profile.in_therapy ?? null;
+          break;
+        case "relationship_trauma":
+          data.relationship_trauma_notes = profile.relationship_trauma_notes || "";
+          data.ex_contact_status = profile.ex_contact_status || "";
+          data.typical_partner_type = profile.typical_partner_type || "";
+          break;
+        case "healing":
+          data.over_ex_level = profile.over_ex_level || 5;
+          data.attachment_to_past = profile.attachment_to_past || 5;
+          data.ex_contact_status = profile.ex_contact_status || "";
+          break;
+        case "dating_style":
+          data.dating_honesty_intent = profile.dating_honesty_intent || "";
+          data.dating_history_text = profile.dating_history_text || "";
+          break;
       }
       setFormData(data);
     }
