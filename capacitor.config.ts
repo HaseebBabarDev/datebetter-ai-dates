@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "com.datebetter.app",
+  appId: "com.datebetter.ai",
   appName: "DateBetter",
   webDir: "dist",
   ios: {

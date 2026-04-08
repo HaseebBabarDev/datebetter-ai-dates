@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -10,6 +10,9 @@ import { Check, Crown, Sparkles, Heart, ArrowLeft, Zap, ShoppingBag, MessageCirc
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { STRIPE_PLANS, STRIPE_ONE_TIME } from "@/lib/stripeConfig";
+
+import { Capacitor } from "@capacitor/core";
+import { Purchases, LOG_LEVEL } from "@revenuecat/purchases-capacitor";
 
 const SUBSCRIPTION_PLANS = [
   {
@@ -100,6 +103,46 @@ export default function Subscription() {
   const { subscription, refetch } = useSubscription();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
+
+
+  const loadOfferingsForPaywall = useCallback(async () => {
+    try {
+      const offerings = await Purchases.getOfferings();
+      console.log("[Subscription] offerings", offerings);
+      const current = offerings.current;
+      const packages = current?.availablePackages ?? [];
+      if (current != null && packages.length > 0) {
+        console.log("[Subscription] offerings current=", current.identifier, {
+          packageCount: packages.length,
+          productIds: packages.map((p) => p.product.identifier),
+        });
+      } else {
+        console.warn("[Subscription] offerings: no current offering or empty packages");
+      }
+    } catch (error) {
+      console.warn("[Subscription] getOfferings failed", error);
+    }
+  }, []);
+
+  const onDeviceReady = useCallback(async () => {
+    console.log("[Subscription] Initializing RevenueCat");
+    try {
+      await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
+      const apiKey = import.meta.env.VITE_REVENUECAT_IOS_API_KEY;
+      if (Capacitor.getPlatform() === "ios" && typeof apiKey === "string" && apiKey.length > 0) {
+        await Purchases.configure({ apiKey });
+        console.log("[Subscription] RevenueCat configured");
+        await loadOfferingsForPaywall();
+      }
+    } catch (e) {
+      console.error("[Subscription] RevenueCat init failed", e);
+      toast.error("Could not initialize billing. Try again or use web checkout.");
+    }
+  }, [loadOfferingsForPaywall]);
+
+  useEffect(() => {
+    void onDeviceReady();
+  }, [onDeviceReady]);
 
   // Handle return from Stripe Checkout
   useEffect(() => {
