@@ -171,6 +171,10 @@ const SECTION_CONFIG: Record<string, { title: string; emoji: string; subtitle: s
   past_patterns: { title: "Past Patterns", emoji: "🔄", subtitle: "Your relationship history" },
   family_upbringing: { title: "Family Background", emoji: "🏠", subtitle: "Where you come from" },
   boundaries: { title: "Boundaries & Safety", emoji: "🛡️", subtitle: "Your dealbreakers and limits" },
+  mental_health: { title: "Mental Health", emoji: "🧠", subtitle: "Therapy and self-awareness" },
+  relationship_trauma: { title: "Past Relationships", emoji: "💔", subtitle: "What you've been through" },
+  healing: { title: "Healing & Growth", emoji: "🌱", subtitle: "Where you are in your journey" },
+  dating_style: { title: "Dating Style", emoji: "✨", subtitle: "How you show up in dating" },
 };
 
 const PARENTS_RELATIONSHIP_OPTIONS = [
