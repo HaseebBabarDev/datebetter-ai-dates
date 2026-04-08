@@ -101,7 +101,7 @@ const Dashboard = () => {
           className="w-full p-5 rounded-2xl bg-[image:var(--gradient-hero)] text-primary-foreground text-left group active:scale-[0.98] transition-transform relative overflow-hidden"
         >
           <div className="flex items-center gap-4">
-            <img src={logo} alt="D.E.V.I." className="w-14 h-14 rounded-2xl object-cover ring-2 ring-white/20 shrink-0" />
+            <img src={logo} alt="D.E.V.I." className="w-14 h-14 rounded-2xl object-contain shrink-0" />
             <div className="flex-1 min-w-0">
               <h2 className="font-bold text-lg">Chat with D.E.V.I.</h2>
               <p className="text-sm opacity-90">Your AI dating advisor — ask anything</p>
