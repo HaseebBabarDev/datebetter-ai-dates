@@ -75,7 +75,7 @@ export const PricingSection: React.FC = () => {
           whileInView="visible"
           viewport={{ once: true }}
           variants={stagger}
-          className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto"
+          className="flex justify-center max-w-lg mx-auto"
         >
           {plans.map((plan) => (
             <motion.div
@@ -138,17 +138,27 @@ export const PricingSection: React.FC = () => {
           ))}
         </motion.div>
 
-        {/* One-time add-on */}
+        {/* Monthly add-ons */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.5 }}
-          className="mt-8 max-w-md mx-auto text-center"
+          className="mt-8 max-w-lg mx-auto"
         >
-          <div className="p-4 rounded-xl bg-muted/50 border border-border">
-            <p className="text-sm font-semibold text-foreground mb-1">🩹 Detachment Plan — $9.99 one-time</p>
-            <p className="text-xs text-muted-foreground">Personalized AI recovery timeline when you need to let someone go.</p>
+          <p className="text-center text-sm font-semibold text-muted-foreground mb-4">Optional Add-ons</p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {addons.map((addon) => (
+              <div key={addon.name} className="p-4 rounded-xl bg-muted/50 border border-border flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <addon.icon className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{addon.name} — {addon.price}</p>
+                  <p className="text-xs text-muted-foreground">{addon.description}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </motion.div>
       </div>
