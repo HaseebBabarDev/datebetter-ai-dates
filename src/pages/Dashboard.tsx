@@ -3,17 +3,10 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import {
-  Sparkles,
-  TrendingUp,
-  AlertTriangle,
   Heart,
-  MessageSquare,
   Brain,
-  Unlink,
   Users,
   Search,
-  Shield,
-  Zap,
   Compass,
 } from "lucide-react";
 
