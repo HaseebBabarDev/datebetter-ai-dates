@@ -37,6 +37,30 @@ const SECTION_CONFIG: Record<string, { title: string; emoji: string }> = {
   chemistry: { title: "Chemistry & Attraction", emoji: "🔥" },
 };
 
+const LEGACY_KIDS_DESIRE_MAP: Record<string, string> = {
+  wants_kids: "definitely_yes",
+  open_to_kids: "maybe",
+  doesnt_want: "definitely_no",
+  has_and_wants_more: "definitely_yes",
+  has_and_done: "already_have",
+};
+
+const LEGACY_KIDS_STATUS_MAP: Record<string, string> = {
+  has_kids_full_time: "has_young_kids",
+  has_kids_part_time: "has_young_kids",
+  expecting: "has_young_kids",
+};
+
+const normalizeKidsDesire = (value: unknown) => {
+  if (typeof value !== "string") return value;
+  return LEGACY_KIDS_DESIRE_MAP[value] ?? value;
+};
+
+const normalizeKidsStatus = (value: unknown) => {
+  if (typeof value !== "string") return value;
+  return LEGACY_KIDS_STATUS_MAP[value] ?? value;
+};
+
 const GENDER_OPTIONS = [
   { value: "woman_cis", label: "Woman" },
   { value: "woman_trans", label: "Woman (trans)" },
@@ -205,8 +229,8 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
         init.their_politics = candidate.their_politics || "";
         break;
       case "kids_family":
-        init.their_kids_desire = candidate.their_kids_desire || "";
-        init.their_kids_status = candidate.their_kids_status || "";
+        init.their_kids_desire = normalizeKidsDesire(candidate.their_kids_desire || "");
+        init.their_kids_status = normalizeKidsStatus(candidate.their_kids_status || "");
         break;
       case "career_lifestyle":
         init.their_career_stage = candidate.their_career_stage || "";
@@ -280,10 +304,13 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
           if (formData.their_religion) updateData.their_religion = formData.their_religion;
           if (formData.their_politics) updateData.their_politics = formData.their_politics;
           break;
-        case "kids_family":
-          if (formData.their_kids_desire) updateData.their_kids_desire = formData.their_kids_desire;
-          if (formData.their_kids_status) updateData.their_kids_status = formData.their_kids_status;
+        case "kids_family": {
+          const normalizedKidsDesire = normalizeKidsDesire(formData.their_kids_desire);
+          const normalizedKidsStatus = normalizeKidsStatus(formData.their_kids_status);
+          if (normalizedKidsDesire) updateData.their_kids_desire = normalizedKidsDesire;
+          if (normalizedKidsStatus) updateData.their_kids_status = normalizedKidsStatus;
           break;
+        }
         case "career_lifestyle":
           if (formData.their_career_stage) updateData.their_career_stage = formData.their_career_stage as string;
           if (formData.their_education_level) updateData.their_education_level = formData.their_education_level as string;
@@ -337,7 +364,7 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
       setTimeout(() => onClose(), 600);
     } catch (err) {
       console.error("Error saving candidate section:", err);
-      toast.error("Failed to save. Try again.");
+      toast.error(err instanceof Error ? err.message : "Failed to save. Try again.");
     } finally {
       setSaving(false);
     }
