@@ -62,6 +62,12 @@ const CANDIDATE_SECTIONS = [
     check: (c: Candidate) => !!(c.their_parents_relationship || c.their_family_stability),
   },
   {
+    id: "past_relationships",
+    label: "Past Relationships",
+    emoji: "💔",
+    check: (c: Candidate) => !!(c.their_past_relationships && (c.their_past_relationships as unknown[]).length > 0) || !!c.their_relationship_notes,
+  },
+  {
     id: "mental_health",
     label: "Mental Health",
     emoji: "🧠",
