@@ -14,6 +14,10 @@ interface StripeSubscription {
   detachment_plan_candidates: string[];
   trial_active: boolean;
   trial_ends_at: string | null;
+  has_text_simulator: boolean;
+  has_detachment_plan: boolean;
+  text_sim_subscription_id: string | null;
+  detachment_subscription_id: string | null;
 }
 
 // Interaction limit for the test user (nak@j.co) — everyone else gets 300
