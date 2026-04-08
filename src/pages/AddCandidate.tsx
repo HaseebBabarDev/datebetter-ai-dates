@@ -707,14 +707,26 @@ const THEIR_ISSUE_OPTIONS = [
 
         // Auto-calculate compatibility score
         try {
-          await supabase.functions.invoke("calculate-compatibility", {
+          toast.loading("Calculating compatibility score...", { id: "compat-score" });
+          const { data: scoreData, error: scoreError } = await supabase.functions.invoke("calculate-compatibility", {
             body: { candidateId: data.id },
           });
+          if (scoreError) {
+            console.error("Auto-score error:", scoreError);
+            toast.dismiss("compat-score");
+          } else {
+            const score = scoreData?.compatibility_score ?? scoreData?.score;
+            if (score != null) {
+              toast.success(`${nickname} scored ${score}% compatibility!`, { id: "compat-score" });
+            } else {
+              toast.dismiss("compat-score");
+            }
+          }
         } catch (e) {
           console.error("Auto-score failed:", e);
+          toast.dismiss("compat-score");
         }
 
-        toast.success(`${nickname} added!`);
         navigate(`/candidate/${data.id}`, { state: { isNewCandidate: true, isFirstCandidate } });
       }
     } catch (error) {
