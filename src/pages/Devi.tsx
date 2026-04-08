@@ -1490,8 +1490,42 @@ const Devi = () => {
             console.error('Compatibility score update error:', err);
           }
         }
+
+        // Parse CREATE_CANDIDATE marker
+        const createCandidateMatch = fullContent.match(/\[CREATE_CANDIDATE:([^|]+)\|([^|]*)\|([^|]*)\|([^\]]*)\]/);
+        if (createCandidateMatch && user && !selectedCandidate) {
+          const nickname = createCandidateMatch[1].trim();
+          const age = createCandidateMatch[2].trim() ? parseInt(createCandidateMatch[2].trim()) : null;
+          const city = createCandidateMatch[3].trim() || null;
+          const status = createCandidateMatch[4].trim() || 'talking';
+          
+          if (nickname) {
+            try {
+              const { data: newCandidate, error } = await supabase
+                .from('candidates')
+                .insert({
+                  user_id: user.id,
+                  nickname,
+                  age,
+                  city,
+                  status: status as any,
+                })
+                .select()
+                .single();
+              
+              if (!error && newCandidate) {
+                setSelectedCandidate(newCandidate);
+                setCandidates(prev => [newCandidate, ...prev]);
+                toast.success(`${nickname} added as a candidate!`);
+              } else {
+                console.error('Failed to create candidate:', error);
+              }
+            } catch (err) {
+              console.error('Candidate creation error:', err);
+            }
+          }
+        }
         
-        // Apply profile updates to database
         if (hasUpdates && user) {
           try {
             const { error } = await supabase

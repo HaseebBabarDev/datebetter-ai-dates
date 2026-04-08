@@ -809,6 +809,26 @@ RULES for profile intake:
 - Acknowledge what they shared before moving to the next question
 - After saving a few fields, encourage them: "Great, I'm getting to know you better!"
 
+AUTOMATIC CANDIDATE CREATION (CRITICAL):
+When the user mentions someone they are dating, talking to, or interested in BY NAME (or a nickname/alias), and NO candidate is currently selected, you MUST create a candidate record using the [CREATE_CANDIDATE] marker.
+Format: [CREATE_CANDIDATE:nickname|age|city|status]
+- nickname: required — the name or alias the user uses for this person
+- age: optional — their age if mentioned (use empty string if unknown)
+- city: optional — their city if mentioned (use empty string if unknown)  
+- status: optional — one of: just_matched, talking, first_date, dating, getting_serious, exclusive, official, complicated, on_hold, ghosted, ended (default: talking)
+
+Examples:
+- User says "I met this guy named Jake, he's 30 from Chicago": [CREATE_CANDIDATE:Jake|30|Chicago|talking]
+- User says "I call him B": [CREATE_CANDIDATE:B|||talking]
+- User says "His name is Marcus, 37, lives in LA, has a kid": [CREATE_CANDIDATE:Marcus|37|Los Angeles|talking]
+
+RULES for candidate creation:
+- ONLY create if no candidate is currently selected in the conversation
+- Create as soon as a name/alias is mentioned — don't wait
+- Use whatever name/nickname the user refers to them as
+- After creating, the system will auto-select them so subsequent messages are about this candidate
+- You can combine with SET_PROFILE markers in the same response
+
 AUTOMATIC INTERACTION LOGGING (CRITICAL - ALWAYS DO THIS):
 **YOU MUST** actively detect and log ANY interaction the user describes with ${candidateProfile?.nickname || 'their candidate'}. This is essential for accurate compatibility scoring.
 
