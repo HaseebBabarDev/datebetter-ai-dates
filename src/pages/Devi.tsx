@@ -652,6 +652,11 @@ const Devi = () => {
       // Process profile
       if (profileRes.data) {
         setUserProfile(profileRes.data);
+        // Redirect to setup if onboarding not completed
+        if (!profileRes.data.onboarding_completed) {
+          navigate("/setup", { replace: true });
+          return;
+        }
       }
       
       // Process conversations
