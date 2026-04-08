@@ -1146,99 +1146,18 @@ const Settings = () => {
               </CardContent>
             </Card>
 
-            {/* Plans */}
+            {/* Plan */}
             <div className="space-y-3">
               <h4 className="font-medium text-sm text-muted-foreground">
-                {currentPlan === "free" ? "Upgrade to unlock more features" : "Change your plan"}
+                {currentPlan === "free" ? "Upgrade to unlock all features" : "Your plan"}
               </h4>
 
-              {/* Starter Plan — $9.99 */}
-              <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "basic" ? "border-primary bg-primary/5" : ""}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <MessageCircle className="w-4 h-4 text-muted-foreground" />
-                        <h4 className="font-semibold">Starter</h4>
-                      </div>
-                      <p className="text-sm text-muted-foreground">5 candidates • 300 D.E.V.I. messages</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-bold">$9.99</p>
-                      <p className="text-xs text-muted-foreground">/month</p>
-                    </div>
+              <Card className={`relative overflow-hidden ${currentPlan !== "free" ? "border-primary bg-primary/5" : "border-primary/30"}`}>
+                {currentPlan !== "free" && (
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-bl">
+                    Current Plan
                   </div>
-                  <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["Up to 5 candidates", "300 D.E.V.I. messages", "1 text simulator exchange (trial)", "5 compatibility refreshes per candidate", "Red flag detection", "Cycle tracking"].map((f) => (
-                      <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Check className="w-4 h-4 text-green-500 shrink-0" />
-                        <span>{f}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    className="w-full mt-4"
-                    variant={currentPlan === "basic" ? "secondary" : "outline"}
-                    disabled={currentPlan === "basic" || checkoutLoading !== null}
-                    onClick={() => handleChangePlan("basic")}
-                  >
-                    {checkoutLoading === "basic" ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
-                    ) : currentPlan === "basic" ? (
-                      <><Check className="w-4 h-4 mr-2" />Current Plan</>
-                    ) : (
-                      "Get Starter"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Plus Plan — $15.99 */}
-              <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "starter" ? "border-primary bg-primary/5" : ""}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-primary" />
-                        <h4 className="font-semibold">Plus</h4>
-                      </div>
-                      <p className="text-sm text-muted-foreground">10 candidates • 1,000 D.E.V.I. messages</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-bold">$15.99</p>
-                      <p className="text-xs text-muted-foreground">/month</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["Up to 10 candidates", "1,000 D.E.V.I. messages", "5 text simulator conversations", "10 compatibility refreshes per candidate", "Red flag detection", "Voice playback insights"].map((f) => (
-                      <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Check className="w-4 h-4 text-green-500 shrink-0" />
-                        <span>{f}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    className="w-full mt-4"
-                    variant={currentPlan === "starter" ? "secondary" : "outline"}
-                    disabled={currentPlan === "starter" || checkoutLoading !== null}
-                    onClick={() => handleChangePlan("starter")}
-                  >
-                    {checkoutLoading === "starter" ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
-                    ) : currentPlan === "starter" ? (
-                      <><Check className="w-4 h-4 mr-2" />Current Plan</>
-                    ) : (
-                      "Get Plus"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Unlimited Plan — $29.99 */}
-              <Card className={`cursor-pointer hover:border-primary/50 transition-colors relative overflow-hidden ${currentPlan === "unlimited" ? "border-primary bg-primary/5" : "border-primary/30"}`}>
-                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-bl">
-                  Most Popular
-                </div>
+                )}
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -1249,12 +1168,12 @@ const Settings = () => {
                       <p className="text-sm text-muted-foreground">Unlimited candidates & messages</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold">$29.99</p>
+                      <p className="text-xl font-bold">$15</p>
                       <p className="text-xs text-muted-foreground">/month</p>
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["Unlimited candidates", "Unlimited D.E.V.I. messages", "20 text simulator conversations", "Unlimited compatibility refreshes", "Red flag detection", "Priority support"].map((f) => (
+                    {["Unlimited candidates", "Unlimited D.E.V.I. messages", "AI scoring & compatibility insights", "Red flag & pattern detection", "Community access", "15-day free trial"].map((f) => (
                       <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Check className="w-4 h-4 text-green-500 shrink-0" />
                         <span>{f}</span>
@@ -1263,16 +1182,16 @@ const Settings = () => {
                   </div>
                   <Button
                     className="w-full mt-4"
-                    variant={currentPlan === "unlimited" ? "secondary" : "default"}
-                    disabled={currentPlan === "unlimited" || checkoutLoading !== null}
+                    variant={currentPlan !== "free" ? "secondary" : "default"}
+                    disabled={currentPlan !== "free" || checkoutLoading !== null}
                     onClick={() => handleChangePlan("unlimited")}
                   >
                     {checkoutLoading === "unlimited" ? (
                       <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
-                    ) : currentPlan === "unlimited" ? (
+                    ) : currentPlan !== "free" ? (
                       <><Check className="w-4 h-4 mr-2" />Current Plan</>
                     ) : (
-                      "Get Unlimited"
+                      "Start Free Trial"
                     )}
                   </Button>
                 </CardContent>
