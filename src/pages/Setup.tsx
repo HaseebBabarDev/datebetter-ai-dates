@@ -68,17 +68,20 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
     setShowInterstitial(false);
   }, []);
 
-  // Handle setup mode from URL params
+  // Handle setup mode from URL params and resume from saved step
   useEffect(() => {
     if (!loading && !initialized) {
       if (setupMode === "full") {
         updateData({ quickStartMode: false });
         goToStep(1);
         setShowIntakeChoice(false);
+      } else if (currentStep > 0) {
+        // User has progress saved — skip the choice screen and resume
+        setShowIntakeChoice(false);
       }
       setInitialized(true);
     }
-  }, [loading, initialized, setupMode, updateData, goToStep]);
+  }, [loading, initialized, setupMode, updateData, goToStep, currentStep]);
 
   if (loading || !initialized) {
     return (
