@@ -2089,7 +2089,7 @@ const Devi = () => {
                           setMessages([]);
                           setCurrentConversationId(null);
                           lastLoadedCandidateRef.current = null;
-                          handleSendMessage("Let's continue my onboarding — help me complete my profile setup.");
+                          sendMessage("Let's continue my onboarding — help me complete my profile setup.");
                         }}
                         className="gap-2 py-2.5"
                       >
