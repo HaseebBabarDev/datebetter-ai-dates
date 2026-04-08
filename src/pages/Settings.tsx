@@ -24,7 +24,8 @@ import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { ProfilePhotoUpload } from "@/components/settings/ProfilePhotoUpload";
 import { Badge } from "@/components/ui/badge";
-import { STRIPE_PLANS } from "@/lib/stripeConfig";
+import { STRIPE_PLANS, STRIPE_ADDONS } from "@/lib/stripeConfig";
+import { useSubscription } from "@/hooks/useSubscription";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { format, parse } from "date-fns";
 import { useTour, SETTINGS_TOUR_STEPS, TourRestartButton } from "@/components/tour";
@@ -93,6 +94,7 @@ const Settings = () => {
   const defaultTab = searchParams.get("tab") || "account";
   const section = searchParams.get("section");
   const { startTour, hasCompletedTour, resetAllTours } = useTour();
+  const { subscription, refetch: refetchSubscription } = useSubscription();
   
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -971,6 +973,144 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Add-ons Management */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  Add-ons
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {/* Text Simulator */}
+                <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <MessageCircle className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Text Simulator</p>
+                      <p className="text-xs text-muted-foreground">$5/mo • Practice conversations</p>
+                    </div>
+                  </div>
+                  {subscription?.has_text_simulator ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                      disabled={checkoutLoading === "cancel_text_sim"}
+                      onClick={async () => {
+                        if (!confirm("Cancel your Text Simulator subscription? You'll lose access at the end of your billing period.")) return;
+                        setCheckoutLoading("cancel_text_sim");
+                        try {
+                          const { data, error } = await supabase.functions.invoke("cancel-addon", {
+                            body: { subscriptionId: subscription.text_sim_subscription_id },
+                          });
+                          if (error) throw error;
+                          toast.success("Text Simulator cancelled");
+                          refetchSubscription();
+                        } catch (e) {
+                          console.error("Cancel error:", e);
+                          toast.error("Failed to cancel. Try again.");
+                        } finally {
+                          setCheckoutLoading(null);
+                        }
+                      }}
+                    >
+                      {checkoutLoading === "cancel_text_sim" ? <Loader2 className="w-3 h-3 animate-spin" /> : "Cancel"}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="gap-1"
+                      disabled={checkoutLoading === "add_text_sim"}
+                      onClick={async () => {
+                        setCheckoutLoading("add_text_sim");
+                        try {
+                          const { data, error } = await supabase.functions.invoke("create-checkout", {
+                            body: { priceId: STRIPE_ADDONS.text_simulator.price_id, mode: "subscription" },
+                          });
+                          if (error) throw error;
+                          if (data?.url) window.location.href = data.url;
+                        } catch (e) {
+                          console.error("Checkout error:", e);
+                          toast.error("Failed to start checkout.");
+                        } finally {
+                          setCheckoutLoading(null);
+                        }
+                      }}
+                    >
+                      {checkoutLoading === "add_text_sim" ? <Loader2 className="w-3 h-3 animate-spin" /> : "Subscribe"}
+                    </Button>
+                  )}
+                </div>
+
+                {/* Detachment Plan */}
+                <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Heart className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Detachment Plan</p>
+                      <p className="text-xs text-muted-foreground">$5/mo • Guided healing journey</p>
+                    </div>
+                  </div>
+                  {subscription?.has_detachment_plan ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                      disabled={checkoutLoading === "cancel_detach"}
+                      onClick={async () => {
+                        if (!confirm("Cancel your Detachment Plan subscription? You'll lose access at the end of your billing period.")) return;
+                        setCheckoutLoading("cancel_detach");
+                        try {
+                          const { data, error } = await supabase.functions.invoke("cancel-addon", {
+                            body: { subscriptionId: subscription.detachment_subscription_id },
+                          });
+                          if (error) throw error;
+                          toast.success("Detachment Plan cancelled");
+                          refetchSubscription();
+                        } catch (e) {
+                          console.error("Cancel error:", e);
+                          toast.error("Failed to cancel. Try again.");
+                        } finally {
+                          setCheckoutLoading(null);
+                        }
+                      }}
+                    >
+                      {checkoutLoading === "cancel_detach" ? <Loader2 className="w-3 h-3 animate-spin" /> : "Cancel"}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="gap-1"
+                      disabled={checkoutLoading === "add_detach"}
+                      onClick={async () => {
+                        setCheckoutLoading("add_detach");
+                        try {
+                          const { data, error } = await supabase.functions.invoke("create-checkout", {
+                            body: { priceId: STRIPE_ADDONS.detachment_plan.price_id, mode: "subscription" },
+                          });
+                          if (error) throw error;
+                          if (data?.url) window.location.href = data.url;
+                        } catch (e) {
+                          console.error("Checkout error:", e);
+                          toast.error("Failed to start checkout.");
+                        } finally {
+                          setCheckoutLoading(null);
+                        }
+                      }}
+                    >
+                      {checkoutLoading === "add_detach" ? <Loader2 className="w-3 h-3 animate-spin" /> : "Subscribe"}
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Legal & App Info Section */}
             <Card>
               <CardHeader className="pb-3">
