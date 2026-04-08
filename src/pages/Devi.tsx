@@ -56,6 +56,8 @@ import { CompleteProfileNudge } from "@/components/devi/CompleteProfileNudge";
 import { OnboardingProgressCTA } from "@/components/devi/OnboardingProgressCTA";
 import { ConversationUploadSheet } from "@/components/devi/ConversationUploadSheet";
 import { InlineProfileEditor } from "@/components/devi/InlineProfileEditor";
+import { CandidateIntakeCTA } from "@/components/candidate/CandidateIntakeCTA";
+import { InlineCandidateEditor } from "@/components/candidate/InlineCandidateEditor";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -518,6 +520,8 @@ const Devi = () => {
   const [firstTimeIntakeComplete, setFirstTimeIntakeComplete] = useState(false);
   const [showProfileNudge, setShowProfileNudge] = useState(false);
   const [profileEditorSection, setProfileEditorSection] = useState<string | null>(null);
+  const [candidateIntakeDismissed, setCandidateIntakeDismissed] = useState(false);
+  const [candidateEditorSection, setCandidateEditorSection] = useState<string | null>(null);
   const firstTimeAnalysisShown = useRef(false);
   const onboardingContextSent = useRef(false);
   
