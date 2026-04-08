@@ -1,6 +1,6 @@
 // Stripe product and price mappings
 // Pricing: 15-day free trial → $15/mo unlimited app access
-// Add-ons: $5/mo text simulator, $5 one-time detachment plan
+// Add-ons: $5/mo text simulator, $5/mo detachment plan
 
 export const STRIPE_PLANS = {
   unlimited: {
@@ -21,11 +21,11 @@ export const STRIPE_ADDONS = {
     description: "5 message exchanges per month",
   },
   detachment_plan: {
-    product_id: "prod_UIMa8d7vPaFLEk",
-    price_id: "price_1TJlrLCzzhGXp07lUzN0ftsd",
+    product_id: "prod_UIPURomBJJucEc",
+    price_id: "price_1TJofBCzzhGXp07lV9ove4cG",
     name: "Detachment Plan",
-    price: 5,
-    description: "One-time personalized detachment plan",
+    priceMonthly: 5,
+    description: "Monthly personalized detachment plan access",
   },
 } as const;
 
