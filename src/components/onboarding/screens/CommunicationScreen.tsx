@@ -36,6 +36,13 @@ const CommunicationScreen = () => {
           </div>
         </div>
         <ContinueButton onClick={nextStep} disabled={!data.communicationStyle} />
+        <button
+          type="button"
+          onClick={nextStep}
+          className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
+        >
+          Skip for now
+        </button>
       </div>
     </OnboardingLayout>
   );
