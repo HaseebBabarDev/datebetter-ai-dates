@@ -2029,6 +2029,28 @@ const Devi = () => {
           <div className="flex items-center gap-2">
             {profilesLoading ? (
               <div className="h-10 flex-1 bg-muted rounded-xl animate-pulse" />
+            ) : !userProfile?.onboarding_completed && selectedCandidate ? (
+              /* During onboarding: show name only, no dropdown */
+              <div 
+                className="h-10 gap-2 flex-1 flex items-center px-3 rounded-md border border-border bg-background"
+                data-tour="devi-candidate-select"
+              >
+                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+                  <span className="text-xs font-semibold">{selectedCandidate.nickname.charAt(0)}</span>
+                </div>
+                <span className="font-medium">{selectedCandidate.nickname}</span>
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                  selectedCandidate.compatibility_score != null
+                    ? selectedCandidate.compatibility_score >= 70 
+                      ? "bg-green-500/15 text-green-600" 
+                      : selectedCandidate.compatibility_score >= 40 
+                        ? "bg-amber-500/15 text-amber-600" 
+                        : "bg-red-500/15 text-red-600"
+                    : "bg-muted text-muted-foreground"
+                }`}>
+                  {selectedCandidate.compatibility_score != null ? `${selectedCandidate.compatibility_score}%` : "New"}
+                </span>
+              </div>
             ) : (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
