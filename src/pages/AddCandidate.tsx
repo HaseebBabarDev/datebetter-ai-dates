@@ -299,6 +299,7 @@ const AddCandidate = () => {
   const [candidateMode, setCandidateMode] = useState<"quick" | "full" | "smart" | null>(isEditMode ? "full" : initialMode === "smart" ? "smart" : null);
   const [smartFillApplied, setSmartFillApplied] = useState(false);
   const [zodiacModeEnabled, setZodiacModeEnabled] = useState(false);
+  const [showSmartFillTip, setShowSmartFillTip] = useState(false);
 const TABS = ["basics", "about", "family", "history", "chemistry"] as const;
 
 interface TheirPastRelationship {
