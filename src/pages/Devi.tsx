@@ -1647,7 +1647,8 @@ const Devi = () => {
           fullContent.includes('[SET_OVER_EX_LEVEL:') ||
           fullContent.includes('[SET_ATTACHMENT_TO_PAST:') ||
           fullContent.includes('[LOG_INTERACTION:') ||
-          fullContent.includes('[SET_PROFILE:');
+          fullContent.includes('[SET_PROFILE:') ||
+          fullContent.includes('[CREATE_CANDIDATE:');
           
         if (hasMarkers) {
           setMessages(prev => 
