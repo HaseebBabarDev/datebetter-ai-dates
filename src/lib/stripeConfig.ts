@@ -1,6 +1,6 @@
 // Stripe product and price mappings
 // Pricing: 15-day free trial → $15/mo unlimited app access
-// Add-ons: $5/mo text simulator, $5 one-time detachment plan
+// Add-ons: $5/mo text simulator, $5/mo detachment plan
 
 export const STRIPE_PLANS = {
   unlimited: {
