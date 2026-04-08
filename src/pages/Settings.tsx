@@ -1004,8 +1004,8 @@ const Settings = () => {
                         if (!confirm("Cancel your Text Simulator subscription? You'll lose access at the end of your billing period.")) return;
                         setCheckoutLoading("cancel_text_sim");
                         try {
-                          const { data, error } = await supabase.functions.invoke("admin-manage-subscription", {
-                            body: { action: "cancel", subscriptionId: subscription.text_sim_subscription_id },
+                          const { data, error } = await supabase.functions.invoke("cancel-addon", {
+                            body: { subscriptionId: subscription.text_sim_subscription_id },
                           });
                           if (error) throw error;
                           toast.success("Text Simulator cancelled");
@@ -1067,8 +1067,8 @@ const Settings = () => {
                         if (!confirm("Cancel your Detachment Plan subscription? You'll lose access at the end of your billing period.")) return;
                         setCheckoutLoading("cancel_detach");
                         try {
-                          const { data, error } = await supabase.functions.invoke("admin-manage-subscription", {
-                            body: { action: "cancel", subscriptionId: subscription.detachment_subscription_id },
+                          const { data, error } = await supabase.functions.invoke("cancel-addon", {
+                            body: { subscriptionId: subscription.detachment_subscription_id },
                           });
                           if (error) throw error;
                           toast.success("Detachment Plan cancelled");
