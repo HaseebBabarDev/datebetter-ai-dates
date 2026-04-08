@@ -2505,9 +2505,8 @@ const Devi = () => {
             <OnboardingProgressCTA 
               profile={userProfile}
               onDismiss={() => setShowProfileNudge(false)}
-              onAskInChat={(prompt) => {
-                setShowProfileNudge(false);
-                sendMessage(prompt);
+              onOpenSection={(sectionId) => {
+                setProfileEditorSection(sectionId);
               }}
               className="mt-4"
             />
