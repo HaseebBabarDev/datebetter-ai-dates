@@ -32,6 +32,7 @@ const SECTION_CONFIG: Record<string, { title: string; emoji: string }> = {
   kids_family: { title: "Kids & Family", emoji: "👶" },
   career_lifestyle: { title: "Career & Lifestyle", emoji: "💼" },
   family_background: { title: "Family Background", emoji: "🏠" },
+  past_relationships: { title: "Past Relationships", emoji: "💔" },
   mental_health: { title: "Mental Health", emoji: "🧠" },
   chemistry: { title: "Chemistry & Attraction", emoji: "🔥" },
 };
@@ -133,11 +134,14 @@ const FAMILY_STABILITY_OPTIONS = [
 ];
 
 const PARENTS_RELATIONSHIP_OPTIONS = [
+  { value: "together", label: "Parents together" },
   { value: "together_happy", label: "Together & happy" },
   { value: "together_unhappy", label: "Together but unhappy" },
   { value: "divorced_amicable", label: "Divorced (amicable)" },
   { value: "divorced_contentious", label: "Divorced (contentious)" },
   { value: "single_parent", label: "Single parent household" },
+  { value: "separated", label: "Separated" },
+  { value: "deceased_parent", label: "Parent(s) deceased" },
   { value: "unknown", label: "Don't know yet" },
 ];
 
