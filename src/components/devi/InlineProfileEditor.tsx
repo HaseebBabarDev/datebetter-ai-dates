@@ -731,6 +731,123 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
           </div>
         );
 
+      case "mental_health":
+        return (
+          <div className="space-y-4">
+            <Field label="Are you neurodivergent?">
+              <SelectField value={formData.is_neurodivergent} onChange={v => updateField("is_neurodivergent", v)} options={[
+                { value: "yes", label: "Yes" },
+                { value: "no", label: "No" },
+                { value: "suspect", label: "I suspect so" },
+                { value: "prefer_not_say", label: "Prefer not to say" },
+              ]} placeholder="Select" />
+            </Field>
+            <Field label="Mental Health Openness">
+              <SelectField value={formData.mental_health_openness} onChange={v => updateField("mental_health_openness", v)} options={[
+                { value: "very_open", label: "Very open about it" },
+                { value: "somewhat_open", label: "Somewhat open" },
+                { value: "private", label: "Keep it private" },
+                { value: "uncomfortable", label: "Uncomfortable discussing" },
+              ]} placeholder="How open are you?" />
+            </Field>
+            <Field label="Currently in therapy?">
+              <div className="flex gap-3">
+                {[{ val: true, label: "Yes" }, { val: false, label: "No" }].map(({ val, label }) => (
+                  <button key={label} type="button" onClick={() => updateField("in_therapy", val)} className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${formData.in_therapy === val ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border"}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </Field>
+            <Field label={`Mental Health Importance in Partner: ${formData.mental_health_importance || 5}/10`}>
+              <input type="range" min={1} max={10} value={formData.mental_health_importance || 5} onChange={e => updateField("mental_health_importance", Number(e.target.value))} className="w-full accent-primary" />
+              <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                <span>Not important</span>
+                <span>Very important</span>
+              </div>
+            </Field>
+          </div>
+        );
+
+      case "relationship_trauma":
+        return (
+          <div className="space-y-4">
+            <Field label="Contact with your ex?">
+              <SelectField value={formData.ex_contact_status} onChange={v => updateField("ex_contact_status", v)} options={[
+                { value: "no_contact", label: "No contact" },
+                { value: "minimal", label: "Minimal / Occasional" },
+                { value: "friendly", label: "Friendly" },
+                { value: "coparenting", label: "Co-parenting" },
+                { value: "complicated", label: "It's complicated" },
+                { value: "no_ex", label: "No ex to speak of" },
+              ]} placeholder="Select" />
+            </Field>
+            <Field label="Type of partners you typically attract">
+              <Input value={formData.typical_partner_type || ""} onChange={e => updateField("typical_partner_type", e.target.value)} placeholder="e.g., emotionally unavailable, love bombers..." />
+            </Field>
+            <Field label="Notes about past relationships">
+              <textarea
+                value={formData.relationship_trauma_notes || ""}
+                onChange={e => updateField("relationship_trauma_notes", e.target.value)}
+                placeholder="Anything D.E.V.I. should know about your past relationships — patterns, trauma, lessons learned..."
+                className="w-full min-h-[100px] rounded-xl border border-border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </Field>
+          </div>
+        );
+
+      case "healing":
+        return (
+          <div className="space-y-4">
+            <Field label="Contact with your ex?">
+              <SelectField value={formData.ex_contact_status} onChange={v => updateField("ex_contact_status", v)} options={[
+                { value: "no_contact", label: "No contact" },
+                { value: "minimal", label: "Minimal / Occasional" },
+                { value: "friendly", label: "Friendly" },
+                { value: "coparenting", label: "Co-parenting" },
+                { value: "complicated", label: "It's complicated" },
+                { value: "no_ex", label: "No ex to speak of" },
+              ]} placeholder="Select" />
+            </Field>
+            <Field label={`How over your ex are you? ${formData.over_ex_level || 5}/10`}>
+              <input type="range" min={1} max={10} value={formData.over_ex_level || 5} onChange={e => updateField("over_ex_level", Number(e.target.value))} className="w-full accent-primary" />
+              <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                <span>Not at all</span>
+                <span>Completely over it</span>
+              </div>
+            </Field>
+            <Field label={`Attachment to the past: ${formData.attachment_to_past || 5}/10`}>
+              <input type="range" min={1} max={10} value={formData.attachment_to_past || 5} onChange={e => updateField("attachment_to_past", Number(e.target.value))} className="w-full accent-primary" />
+              <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                <span>Moved on</span>
+                <span>Still attached</span>
+              </div>
+            </Field>
+          </div>
+        );
+
+      case "dating_style":
+        return (
+          <div className="space-y-4">
+            <Field label="How honest are you when dating?">
+              <SelectField value={formData.dating_honesty_intent} onChange={v => updateField("dating_honesty_intent", v)} options={[
+                { value: "fully_honest", label: "Fully honest / transparent" },
+                { value: "mostly_honest", label: "Mostly honest" },
+                { value: "white_lies", label: "Small white lies sometimes" },
+                { value: "strategic", label: "Strategic about what I share" },
+              ]} placeholder="Select" />
+            </Field>
+            <Field label="Describe your dating history">
+              <textarea
+                value={formData.dating_history_text || ""}
+                onChange={e => updateField("dating_history_text", e.target.value)}
+                placeholder="Tell D.E.V.I. about your dating journey — how many relationships, what worked, what didn't..."
+                className="w-full min-h-[100px] rounded-xl border border-border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </Field>
+          </div>
+        );
+
       default:
         return <p className="text-muted-foreground text-sm">Section not found</p>;
     }
