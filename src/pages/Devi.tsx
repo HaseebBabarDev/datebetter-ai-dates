@@ -55,6 +55,7 @@ import { FirstTimeIntake } from "@/components/devi/FirstTimeIntake";
 import { CompleteProfileNudge } from "@/components/devi/CompleteProfileNudge";
 import { OnboardingProgressCTA } from "@/components/devi/OnboardingProgressCTA";
 import { ConversationUploadSheet } from "@/components/devi/ConversationUploadSheet";
+import { InlineProfileEditor } from "@/components/devi/InlineProfileEditor";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -503,6 +504,7 @@ const Devi = () => {
   const isFirstTime = searchParams.get("firstTime") === "true";
   const [firstTimeIntakeComplete, setFirstTimeIntakeComplete] = useState(false);
   const [showProfileNudge, setShowProfileNudge] = useState(false);
+  const [profileEditorSection, setProfileEditorSection] = useState<string | null>(null);
   const firstTimeAnalysisShown = useRef(false);
   const onboardingContextSent = useRef(false);
   
