@@ -221,6 +221,10 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
         init.their_family_stability = candidate.their_family_stability || "";
         init.their_family_notes = candidate.their_family_notes || "";
         break;
+      case "past_relationships":
+        init.their_past_relationships = candidate.their_past_relationships || [];
+        init.their_relationship_notes = candidate.their_relationship_notes || "";
+        break;
       case "mental_health":
         init.their_in_therapy = candidate.their_in_therapy || "";
         init.their_mental_health_awareness = candidate.their_mental_health_awareness || "";
