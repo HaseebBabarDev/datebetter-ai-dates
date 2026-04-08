@@ -246,6 +246,10 @@ serve(async (req) => {
       trial_ends_at: trialEndsAt,
       day_pass_active: hasDayPass,
       detachment_plan_candidates: detachmentPlanCandidates,
+      has_text_simulator: hasTextSimulator,
+      has_detachment_plan: hasDetachmentPlanSub,
+      text_sim_subscription_id: textSimSubId,
+      detachment_subscription_id: detachmentSubId,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
