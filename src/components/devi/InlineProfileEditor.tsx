@@ -83,19 +83,17 @@ const RELIGION_OPTIONS = [
 ];
 
 const KIDS_DESIRE_OPTIONS = [
-  { value: "want_kids", label: "Want kids" },
-  { value: "dont_want", label: "Don't want kids" },
-  { value: "have_and_want_more", label: "Have kids, want more" },
-  { value: "have_and_done", label: "Have kids, done" },
-  { value: "open_to_it", label: "Open to it" },
-  { value: "not_sure", label: "Not sure yet" },
+  { value: "definitely_yes", label: "Definitely want kids" },
+  { value: "maybe", label: "Open to kids" },
+  { value: "definitely_no", label: "Don't want kids" },
+  { value: "already_have", label: "Already have kids, done" },
+  { value: "unsure", label: "Not sure yet" },
 ];
 
 const KIDS_STATUS_OPTIONS = [
-  { value: "no_kids", label: "No kids" },
-  { value: "has_kids_full_time", label: "Has kids (full time)" },
-  { value: "has_kids_part_time", label: "Has kids (part time)" },
-  { value: "expecting", label: "Expecting" },
+  { value: "no_kids", label: "No children" },
+  { value: "has_young_kids", label: "Yes, young children" },
+  { value: "has_adult_kids", label: "Yes, adult children" },
 ];
 
 const COMMUNICATION_STYLE_OPTIONS = [
