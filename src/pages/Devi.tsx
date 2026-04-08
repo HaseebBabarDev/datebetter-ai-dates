@@ -332,10 +332,12 @@ const MessageBubble: React.FC<{
   isLoading?: boolean;
 }> = ({ message, isLast, onQuickReply, isLoading }) => {
   const [expanded, setExpanded] = useState(false);
-  const isLong = message.role === 'assistant' && message.content.length > MAX_MESSAGE_LENGTH;
+  // Strip internal metadata markers from displayed content
+  const cleanContent = message.content.replace(/\[User (?:also )?uploaded \d+ (?:file|screenshot|recording)\(s\)[^\]]*\]\n*/gi, '').trim();
+  const isLong = message.role === 'assistant' && cleanContent.length > MAX_MESSAGE_LENGTH;
   const displayContent = isLong && !expanded 
-    ? message.content.slice(0, MAX_MESSAGE_LENGTH) + "..." 
-    : message.content;
+    ? cleanContent.slice(0, MAX_MESSAGE_LENGTH) + "..." 
+    : cleanContent;
 
   const showQuickReplies = message.role === 'assistant' && isLast && !isLoading && onQuickReply;
 
