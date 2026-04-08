@@ -16,6 +16,7 @@ const PRODUCT_TO_PLAN: Record<string, string> = {
   // Current prices
   "prod_UIMZ5IauGEL3oH": "unlimited",
   "prod_UIMa82sEzF3PA4": "text_simulator",
+  "prod_UIPURomBJJucEc": "detachment_plan",
   // Legacy product IDs for existing subscribers
   "prod_U5BaepUGcVqsIg": "basic",
   "prod_U5Ba3aovhb68xI": "starter",
