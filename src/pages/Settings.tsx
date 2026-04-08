@@ -94,6 +94,7 @@ const Settings = () => {
   const defaultTab = searchParams.get("tab") || "account";
   const section = searchParams.get("section");
   const { startTour, hasCompletedTour, resetAllTours } = useTour();
+  const { subscription, refetch: refetchSubscription } = useSubscription();
   
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
