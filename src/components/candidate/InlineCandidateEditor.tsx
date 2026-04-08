@@ -390,7 +390,7 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Height</Label>
               <Input
-                placeholder="e.g. 5'10\""
+                placeholder={'e.g. 5\'10"'}
                 value={formData.height as string || ""}
                 onChange={(e) => updateField("height", e.target.value)}
               />
