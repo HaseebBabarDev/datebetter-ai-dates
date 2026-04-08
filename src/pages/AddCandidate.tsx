@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, UserPlus, Sparkles, Heart, Pencil, User, Brain, Zap, Home, Clock, Layers, ArrowRight, Mic } from "lucide-react";
+import { ArrowLeft, UserPlus, Sparkles, Heart, Pencil, User, Brain, Zap, Home, Clock, Layers, ArrowRight, Mic, X, Video, Camera, MessageCircle, Info } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SliderInput } from "@/components/onboarding/SliderInput";
 import { toast } from "sonner";
