@@ -634,13 +634,17 @@ const Devi = () => {
       // Process candidates
       if (candidatesRes.data) {
         setCandidates(candidatesRes.data);
-        // Auto-select ONLY if coming from candidate page with explicit candidateId
-        // Never auto-select when navigating without candidateId (general chat mode)
+        // Auto-select candidate: explicit candidateId from navigation, or default to most recently added
         if (candidateIdFromState && !isGeneralChatMode) {
           const found = candidatesRes.data.find(c => c.id === candidateIdFromState);
           if (found) setSelectedCandidate(found);
+        } else if (!isGeneralChatMode && !selectedCandidate) {
+          // Default to the most recently added candidate
+          const sorted = [...candidatesRes.data].sort((a, b) => 
+            new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+          );
+          if (sorted.length > 0) setSelectedCandidate(sorted[0]);
         }
-        // Removed: auto-selecting single candidate - users should explicitly choose
       }
       
       // Process profile
