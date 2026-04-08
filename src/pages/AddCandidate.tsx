@@ -891,7 +891,8 @@ const THEIR_ISSUE_OPTIONS = [
                 </motion.div>
               )}
             </AnimatePresence>
-            </motion.div>
+
+
 
             {/* Full Profile Option - Recommended */}
             <motion.button
