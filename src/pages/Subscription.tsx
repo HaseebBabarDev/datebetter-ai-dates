@@ -6,92 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Check, Crown, Sparkles, Heart, ArrowLeft, Zap, ShoppingBag, MessageCircle, Settings, Loader2 } from "lucide-react";
+import { Check, Crown, ArrowLeft, Zap, Sparkles, Settings, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { STRIPE_PLANS, STRIPE_ONE_TIME } from "@/lib/stripeConfig";
-
-const SUBSCRIPTION_PLANS = [
-  {
-    id: "free",
-    stripeKey: null,
-    name: "Free",
-    price: 0,
-    description: "Try it out",
-    icon: Heart,
-    features: [
-      "1 candidate",
-      "5 D.E.V.I. messages",
-      "Basic compatibility insights",
-      "Cycle tracking",
-    ],
-    color: "bg-muted",
-    textColor: "text-foreground",
-    popular: false,
-    badge: null,
-  },
-  {
-    id: "basic",
-    stripeKey: "basic" as const,
-    name: "Starter",
-    price: 9.99,
-    description: "Start dating with clarity",
-    icon: MessageCircle,
-    features: [
-      "Up to 5 candidates",
-      "300 D.E.V.I. messages",
-      "1 text simulator exchange (trial)",
-      "5 compatibility refreshes per candidate",
-      "Red flag detection",
-      "Cycle tracking",
-    ],
-    color: "bg-muted/60",
-    textColor: "text-muted-foreground",
-    popular: false,
-    badge: null,
-  },
-  {
-    id: "starter",
-    stripeKey: "starter" as const,
-    name: "Plus",
-    price: 15.99,
-    description: "Everything you need to date smarter",
-    icon: Sparkles,
-    features: [
-      "Up to 10 candidates",
-      "1,000 D.E.V.I. messages",
-      "5 text simulator conversations",
-      "10 compatibility refreshes per candidate",
-      "Red flag detection",
-      "Voice playback insights",
-      "Cycle-aware insights",
-    ],
-    color: "bg-primary/10",
-    textColor: "text-primary",
-    popular: false,
-    badge: null,
-  },
-  {
-    id: "unlimited",
-    stripeKey: "unlimited" as const,
-    name: "Unlimited",
-    price: 29.99,
-    description: "No limits, ever",
-    icon: Crown,
-    features: [
-      "Unlimited candidates",
-      "Unlimited D.E.V.I. messages",
-      "20 text simulator conversations",
-      "Unlimited compatibility refreshes",
-      "Red flag detection",
-      "Priority support",
-    ],
-    color: "bg-gradient-to-br from-primary/20 to-accent/20",
-    textColor: "text-primary",
-    popular: true,
-    badge: "Most Popular",
-  },
-];
+import { STRIPE_PLANS, STRIPE_ADDONS } from "@/lib/stripeConfig";
 
 export default function Subscription() {
   const navigate = useNavigate();
@@ -101,7 +19,6 @@ export default function Subscription() {
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
 
-  // Handle return from Stripe Checkout
   useEffect(() => {
     if (searchParams.get("success") === "true") {
       toast.success("Payment successful! Your subscription is now active.");
@@ -111,57 +28,17 @@ export default function Subscription() {
     }
   }, [searchParams, refetch]);
 
-  const handleCheckout = async (planId: string, stripeKey: string | null) => {
-    if (!user) {
-      toast.error("Please sign in first");
-      navigate("/auth");
-      return;
-    }
-    if (planId === "free") {
-      toast.info("You're already on the free plan");
-      return;
-    }
-    if (planId === subscription?.plan) {
-      toast.info("You're already on this plan");
-      return;
-    }
-    if (!stripeKey) return;
-
-    setCheckoutLoading(planId);
-    try {
-      const stripePlan = STRIPE_PLANS[stripeKey as keyof typeof STRIPE_PLANS];
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId: stripePlan.price_id, mode: "subscription" },
-      });
-
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error("No checkout URL returned");
-      }
-    } catch (error) {
-      console.error("Checkout error:", error);
-      toast.error("Failed to start checkout. Please try again.");
-    } finally {
-      setCheckoutLoading(null);
-    }
-  };
-
-  const handleOneTimeCheckout = async (type: "day_pass" | "detachment") => {
+  const handleCheckout = async (priceId: string, mode: "subscription" | "payment" = "subscription") => {
     if (!user) {
       toast.error("Please sign in first");
       navigate("/auth");
       return;
     }
 
-    setCheckoutLoading(type === "day_pass" ? "daypass" : "detachment");
+    setCheckoutLoading(priceId);
     try {
-      const priceId = type === "day_pass" 
-        ? STRIPE_ONE_TIME.day_pass.price_id 
-        : STRIPE_ONE_TIME.detachment_plan.price_id;
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId, mode: "payment" },
+        body: { priceId, mode },
       });
 
       if (error) throw error;
@@ -197,32 +74,36 @@ export default function Subscription() {
   };
 
   const currentPlan = subscription?.plan || "free";
+  const isUnlimited = currentPlan === "unlimited";
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <div className="container max-w-4xl mx-auto px-4 py-6 sm:py-8">
+      <div className="container max-w-lg mx-auto px-4 py-6 sm:py-8">
         {/* Header */}
-        <div className="mb-6 sm:mb-8">
+        <div className="mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-            Choose Your Plan
-          </h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            Unlock deeper insights, more candidates, and smarter dating decisions.
+          <h1 className="text-2xl font-bold text-foreground mb-1">Billing</h1>
+          <p className="text-muted-foreground text-sm">
+            Simple pricing — one plan, optional add-ons.
           </p>
         </div>
 
-        {/* Manage subscription button for active subscribers */}
+        {/* Manage subscription for active subscribers */}
         {subscription?.subscribed && (
           <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-lg flex items-center justify-between">
             <div>
               <p className="font-medium text-foreground">
                 You're on the <span className="text-primary capitalize">{currentPlan}</span> plan
               </p>
-              {subscription.subscription_end && (
+              {subscription.trial_active && subscription.trial_ends_at && (
+                <p className="text-xs text-muted-foreground">
+                  Trial ends {new Date(subscription.trial_ends_at).toLocaleDateString()}
+                </p>
+              )}
+              {!subscription.trial_active && subscription.subscription_end && (
                 <p className="text-xs text-muted-foreground">
                   Renews {new Date(subscription.subscription_end).toLocaleDateString()}
                 </p>
@@ -235,137 +116,96 @@ export default function Subscription() {
           </div>
         )}
 
-        {/* Plans Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-          {SUBSCRIPTION_PLANS.map((plan) => {
-            const Icon = plan.icon;
-            const isCurrentPlan = currentPlan === plan.id;
-            const isPaidPlan = plan.id !== "free";
-
-            return (
-              <Card
-                key={plan.id}
-                className={`relative overflow-hidden transition-all duration-200 hover:shadow-lg flex flex-col ${
-                  plan.popular ? "ring-2 ring-primary shadow-md" : ""
-                } ${isCurrentPlan ? "ring-2 ring-accent" : ""}`}
-              >
-                {plan.badge && (
-                  <div className="absolute top-0 right-0">
-                    <Badge className="rounded-none rounded-bl-lg bg-primary text-primary-foreground text-xs">
-                      {plan.badge}
-                    </Badge>
-                  </div>
-                )}
-                {isCurrentPlan && (
-                  <div className="absolute top-0 left-0">
-                    <Badge variant="secondary" className="rounded-none rounded-br-lg text-xs">
-                      Current Plan
-                    </Badge>
-                  </div>
-                )}
-
-                <CardHeader className={`${plan.color} pb-4`}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Icon className={`w-5 h-5 ${plan.textColor}`} />
-                    <CardTitle className="text-base sm:text-lg">{plan.name}</CardTitle>
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl sm:text-3xl font-bold">${plan.price.toFixed(2)}</span>
-                    {isPaidPlan && (
-                      <span className="text-xs sm:text-sm text-muted-foreground">/mo</span>
-                    )}
-                  </div>
-                  <CardDescription className="text-xs sm:text-sm mt-1">{plan.description}</CardDescription>
-                </CardHeader>
-
-                <CardContent className="pt-4 flex flex-col flex-1">
-                  <ul className="space-y-2 mb-6 flex-1">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-xs sm:text-sm">
-                        <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Button
-                    className="w-full text-sm"
-                    variant={plan.popular ? "default" : "outline"}
-                    disabled={isCurrentPlan || checkoutLoading !== null}
-                    onClick={() => handleCheckout(plan.id, plan.stripeKey)}
-                  >
-                    {checkoutLoading === plan.id ? (
-                      <><Loader2 className="w-4 h-4 animate-spin mr-1" /> Processing...</>
-                    ) : isCurrentPlan ? (
-                      "Current Plan"
-                    ) : plan.id === "free" ? (
-                      "Downgrade"
-                    ) : (
-                      "Get Started"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        {/* Unlimited Plan */}
+        <Card className={`relative overflow-hidden mb-6 ${isUnlimited ? "ring-2 ring-primary shadow-md" : "border-2 border-primary/40"}`}>
+          {isUnlimited && (
+            <div className="absolute top-0 left-0">
+              <Badge variant="secondary" className="rounded-none rounded-br-lg text-xs">
+                Current Plan
+              </Badge>
+            </div>
+          )}
+          <CardHeader className="bg-primary/10 pb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Crown className="w-5 h-5 text-primary" />
+              <CardTitle className="text-lg">Unlimited</CardTitle>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-3xl font-bold">$15</span>
+              <span className="text-sm text-muted-foreground">/mo</span>
+            </div>
+            <CardDescription className="text-sm mt-1">
+              Full relationship intelligence — 15-day free trial
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <ul className="space-y-2 mb-6">
+              {[
+                "Unlimited candidates",
+                "Unlimited D.E.V.I. messages",
+                "AI scoring & compatibility insights",
+                "Red flag & pattern detection",
+                "Community access",
+                "15-day free trial",
+              ].map((feature) => (
+                <li key={feature} className="flex items-start gap-2 text-sm">
+                  <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <Button
+              className="w-full"
+              disabled={isUnlimited || checkoutLoading !== null}
+              onClick={() => handleCheckout(STRIPE_PLANS.unlimited.price_id)}
+            >
+              {checkoutLoading === STRIPE_PLANS.unlimited.price_id ? (
+                <><Loader2 className="w-4 h-4 animate-spin mr-1" /> Processing...</>
+              ) : isUnlimited ? (
+                "Current Plan"
+              ) : (
+                "Start Free Trial"
+              )}
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Add-Ons */}
-        <Separator className="mb-8" />
+        <Separator className="mb-6" />
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-foreground mb-1">Add-Ons</h2>
-          <p className="text-sm text-muted-foreground">One-time purchases to unlock extra features.</p>
+          <h2 className="text-lg font-semibold text-foreground mb-1">Optional Add-ons</h2>
+          <p className="text-sm text-muted-foreground">Monthly extras to enhance your experience.</p>
         </div>
 
         <div className="space-y-4">
-          {/* Day Pass */}
-          <Card className="border-dashed border-2 border-accent/30 hover:border-accent/60 hover:shadow-md transition-all duration-200">
-            <CardContent className="p-5 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-                <div className="flex items-center gap-3 shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
-                    <Zap className="w-6 h-6 text-accent" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-foreground text-base">Day Pass</span>
-                      <Badge variant="outline" className="text-[10px] px-1.5">24 Hours</Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">Unlimited access for a full day</p>
-                  </div>
+          {/* Text Simulator */}
+          <Card className="border border-border hover:border-primary/30 transition-all">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Zap className="w-5 h-5 text-primary" />
                 </div>
-
-                <ul className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
-                  {[
-                    "Unlimited interactions for 24 hours",
-                    "20 text simulator conversations",
-                    "Unlimited D.E.V.I. messages",
-                    "All premium features unlocked",
-                  ].map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground">
-                      <Check className="w-3.5 h-3.5 text-accent mt-0.5 shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="flex sm:flex-col items-center sm:items-end gap-3 shrink-0">
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-foreground">$5.99</div>
-                    <div className="text-xs text-muted-foreground">one-time</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-semibold text-foreground">Text Simulator</span>
+                    <span className="font-bold text-foreground">$5<span className="text-xs font-normal text-muted-foreground">/mo</span></span>
                   </div>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Practice conversations with AI-powered text simulations. 5 message exchanges per month.
+                  </p>
                   <Button
-                    variant="default"
-                    className="shrink-0"
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
                     disabled={checkoutLoading !== null}
-                    onClick={() => handleOneTimeCheckout("day_pass")}
+                    onClick={() => handleCheckout(STRIPE_ADDONS.text_simulator.price_id)}
                   >
-                    {checkoutLoading === "daypass" ? (
-                      <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                    {checkoutLoading === STRIPE_ADDONS.text_simulator.price_id ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-1" />
                     ) : (
-                      <Zap className="w-4 h-4 mr-1.5" />
+                      <Zap className="w-4 h-4 mr-1" />
                     )}
-                    Get Day Pass
+                    Subscribe
                   </Button>
                 </div>
               </div>
@@ -373,53 +213,33 @@ export default function Subscription() {
           </Card>
 
           {/* Detachment Plan */}
-          <Card className="border-dashed border-2 border-primary/30 hover:border-primary/60 hover:shadow-md transition-all duration-200">
-            <CardContent className="p-5 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-                <div className="flex items-center gap-3 shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <ShoppingBag className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-foreground text-base">Detachment Plan</span>
-                      <Badge variant="outline" className="text-[10px] px-1.5">One-Time</Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">Break free from emotional attachment</p>
-                  </div>
+          <Card className="border border-border hover:border-primary/30 transition-all">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5 text-primary" />
                 </div>
-
-                <ul className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
-                  {[
-                    "AI-personalized recovery timeline",
-                    "4-phase detachment program",
-                    "Tailored to your specific candidate",
-                    "One-time purchase per candidate",
-                  ].map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground">
-                      <Check className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="flex sm:flex-col items-center sm:items-end gap-3 shrink-0">
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-foreground">$9.99</div>
-                    <div className="text-xs text-muted-foreground">per candidate</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-semibold text-foreground">Detachment Plan</span>
+                    <span className="font-bold text-foreground">$5<span className="text-xs font-normal text-muted-foreground">/mo</span></span>
                   </div>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Personalized AI recovery timeline when you need to let someone go.
+                  </p>
                   <Button
-                    variant="default"
-                    className="shrink-0"
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
                     disabled={checkoutLoading !== null}
-                    onClick={() => handleOneTimeCheckout("detachment")}
+                    onClick={() => handleCheckout(STRIPE_ADDONS.detachment_plan.price_id)}
                   >
-                    {checkoutLoading === "detachment" ? (
-                      <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                    {checkoutLoading === STRIPE_ADDONS.detachment_plan.price_id ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-1" />
                     ) : (
-                      <Zap className="w-4 h-4 mr-1.5" />
+                      <Sparkles className="w-4 h-4 mr-1" />
                     )}
-                    Unlock
+                    Subscribe
                   </Button>
                 </div>
               </div>
@@ -427,10 +247,8 @@ export default function Subscription() {
           </Card>
         </div>
 
-        <p className="mt-8 text-xs sm:text-sm text-muted-foreground text-center">
-          All plans include cycle tracking, hormone-aware insights, and basic pattern detection.
-          <br className="hidden sm:block" />
-          {" "}Cancel anytime. No hidden fees. Powered by Stripe.
+        <p className="mt-8 text-xs text-muted-foreground text-center">
+          Cancel anytime. No hidden fees. Powered by Stripe.
         </p>
       </div>
     </div>
