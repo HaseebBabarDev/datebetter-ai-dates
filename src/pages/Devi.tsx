@@ -539,9 +539,10 @@ const Devi = () => {
   
   const userProfileCompleteness = profileCompletenessResult.percentage;
   const missingProfileFields = profileCompletenessResult.missingFields;
+  const onboardingIncomplete = !!userProfile && !userProfile.onboarding_completed;
   
   // No gates - chat is always accessible with the new trial model
-  const hasFullProfile = true;
+  const hasFullProfile = !!userProfile?.onboarding_completed;
   const hasInteractions = interactions.length > 0;
   const canChatWithCandidate = true;
   const canChatGeneral = true;
@@ -652,10 +653,8 @@ const Devi = () => {
       // Process profile
       if (profileRes.data) {
         setUserProfile(profileRes.data);
-        // Redirect to setup if onboarding not completed
         if (!profileRes.data.onboarding_completed) {
-          navigate("/setup", { replace: true });
-          return;
+          setShowProfileNudge(true);
         }
       }
       
@@ -1731,17 +1730,23 @@ const Devi = () => {
     }
   }, [searchParams, profilesLoading, conversationsLoading, setSearchParams, startNewChat, userProfile]);
 
-  // Show profile nudge after AI responses — for incomplete profiles
+  // Keep onboarding nudge visible for incomplete profiles, and resurface it after AI replies
   useEffect(() => {
-    if (!firstTimeAnalysisShown.current && messages.length >= 2 && userProfile) {
+    if (!userProfile) return;
+
+    const hasBasics = !!(userProfile.gender_identity && userProfile.relationship_goal);
+    const shouldShowNudge = !userProfile.onboarding_completed || !hasBasics || userProfileCompleteness < 80;
+
+    if (messages.length === 0) {
+      setShowProfileNudge(shouldShowNudge);
+      return;
+    }
+
+    if (!firstTimeAnalysisShown.current && messages.length >= 2) {
       const lastMsg = messages[messages.length - 1];
-      if (lastMsg?.role === "assistant") {
-        // Check if profile is incomplete
-        const hasBasics = !!(userProfile.gender_identity && userProfile.relationship_goal);
-        if (!hasBasics || userProfileCompleteness < 80) {
-          firstTimeAnalysisShown.current = true;
-          setShowProfileNudge(true);
-        }
+      if (lastMsg?.role === "assistant" && shouldShowNudge) {
+        firstTimeAnalysisShown.current = true;
+        setShowProfileNudge(true);
       }
     }
   }, [messages, userProfile, userProfileCompleteness]);
@@ -2347,8 +2352,8 @@ const Devi = () => {
 
 
 
-              {/* Healing Journey - show only in general chat mode (no candidate selected) */}
-              {hasFullProfile && !selectedCandidate && (
+              {/* Healing Journey - show only after onboarding is complete and in general chat mode */}
+              {hasFullProfile && !onboardingIncomplete && !selectedCandidate && (
                 <div className="pl-10 mt-4">
                   <HealingJourney />
                 </div>
@@ -2531,7 +2536,10 @@ const Devi = () => {
           {showProfileNudge && (
             <OnboardingProgressCTA 
               profile={userProfile}
-              onDismiss={() => setShowProfileNudge(false)}
+              onDismiss={() => {
+                setShowProfileNudge(false);
+                setProfileNudgeDismissed(true);
+              }}
               onOpenSection={(sectionId) => {
                 setProfileEditorSection(sectionId);
               }}
