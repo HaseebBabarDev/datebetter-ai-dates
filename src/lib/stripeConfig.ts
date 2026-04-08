@@ -1,11 +1,11 @@
 // Stripe product and price mappings
-// New pricing: 15-day free trial → $15/mo unlimited app access
+// Pricing: 15-day free trial → $15/mo unlimited app access
 // Add-ons: $5/mo text simulator, $5 one-time detachment plan
 
 export const STRIPE_PLANS = {
   unlimited: {
-    product_id: "prod_U5Ba2gOJLLzLpj",
-    price_id: "price_1T71DbCzzhGXp07lewyKASiz",
+    product_id: "prod_UIMZ5IauGEL3oH",
+    price_id: "price_1TJlqkCzzhGXp07l4rcCtkRB",
     name: "Unlimited",
     priceMonthly: 15,
     trialDays: 15,
@@ -14,15 +14,15 @@ export const STRIPE_PLANS = {
 
 export const STRIPE_ADDONS = {
   text_simulator: {
-    product_id: "prod_U5BaepUGcVqsIg",
-    price_id: "price_1T71D3CzzhGXp07lLETuuc6P",
+    product_id: "prod_UIMa82sEzF3PA4",
+    price_id: "price_1TJlr5CzzhGXp07lQRAFpglG",
     name: "Text Simulator",
     priceMonthly: 5,
     description: "5 message exchanges per month",
   },
   detachment_plan: {
-    product_id: "prod_U5BbMHiR1wNAAm",
-    price_id: "price_1T71E7CzzhGXp07lh3Iyg7nf",
+    product_id: "prod_UIMa8d7vPaFLEk",
+    price_id: "price_1TJlrLCzzhGXp07lUzN0ftsd",
     name: "Detachment Plan",
     price: 5,
     description: "One-time personalized detachment plan",
@@ -43,6 +43,8 @@ export const STRIPE_ONE_TIME = {
 // Map Stripe product IDs back to internal plan names
 export const PRODUCT_ID_TO_PLAN: Record<string, string> = {
   [STRIPE_PLANS.unlimited.product_id]: "unlimited",
+  // Legacy product IDs for existing subscribers
+  "prod_U5Ba2gOJLLzLpj": "unlimited",
 };
 
 // Free trial configuration
