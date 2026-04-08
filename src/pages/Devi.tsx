@@ -2039,22 +2039,31 @@ const Devi = () => {
           <div className="flex items-center gap-2">
             {profilesLoading ? (
               <div className="h-10 flex-1 bg-muted rounded-xl animate-pulse" />
-            ) : !userProfile?.onboarding_completed && selectedCandidate ? (
-              /* During onboarding: show name + "Complete Onboarding" button */
+            ) : !userProfile?.onboarding_completed ? (
+              /* During onboarding: replace selector with onboarding CTA */
               <div 
                 className="h-10 gap-2 flex-1 flex items-center justify-between px-3 rounded-md border border-border bg-background"
                 data-tour="devi-candidate-select"
               >
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
-                    <span className="text-xs font-semibold">{selectedCandidate.nickname.charAt(0)}</span>
-                  </div>
-                  <span className="font-medium text-sm">{selectedCandidate.nickname}</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  {selectedCandidate ? (
+                    <>
+                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                        <span className="text-xs font-semibold">{selectedCandidate.nickname.charAt(0)}</span>
+                      </div>
+                      <span className="font-medium text-sm truncate">{selectedCandidate.nickname}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 text-primary shrink-0" />
+                      <span className="font-medium text-sm truncate">Finish your setup for better advice</span>
+                    </>
+                  )}
                 </div>
                 <Button
                   size="sm"
                   variant="default"
-                  className="h-7 text-xs gap-1 bg-[image:var(--gradient-hero)] hover:opacity-90"
+                  className="h-7 text-xs gap-1 bg-[image:var(--gradient-hero)] hover:opacity-90 shrink-0"
                   onClick={() => navigate("/setup")}
                 >
                   <Sparkles className="w-3 h-3" />
