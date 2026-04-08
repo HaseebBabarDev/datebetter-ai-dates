@@ -580,7 +580,7 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
             {renderSection()}
           </ScrollArea>
 
-          <div className="px-5 py-4 border-t border-border bg-background safe-area-bottom">
+          <div className="px-5 py-4 border-t border-border bg-background safe-area-bottom space-y-2">
             <Button
               className="w-full h-11 font-semibold gap-2"
               onClick={handleSave}
@@ -602,6 +602,14 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
                   Save & Continue
                 </>
               )}
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full h-9 text-muted-foreground text-sm"
+              onClick={onClose}
+              disabled={saving}
+            >
+              Skip for now
             </Button>
           </div>
         </div>
