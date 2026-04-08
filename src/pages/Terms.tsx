@@ -33,13 +33,6 @@ export default function Terms() {
           </p>
         </section>
 
-        {/* Beta Notice */}
-        <section className="p-4 bg-primary/5 border border-primary/20 rounded-lg space-y-2">
-          <h3 className="text-sm font-semibold text-foreground">Beta Program Notice</h3>
-          <p className="text-sm text-foreground/80 leading-relaxed">
-            The Service is currently in beta testing. By using the Service, you acknowledge that it may contain bugs, errors, or incomplete features. You have agreed to the Beta Tester Non-Disclosure Agreement as a condition of access.
-          </p>
-        </section>
 
         {/* Eligibility */}
         <section className="space-y-3">
