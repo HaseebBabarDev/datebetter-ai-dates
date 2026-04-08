@@ -132,16 +132,16 @@ const Splash = () => {
         {/* Logo Text */}
         <div className="text-center mb-2">
           <h1 className="font-poppins text-4xl sm:text-5xl md:text-7xl font-bold bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent mb-1 tracking-tight drop-shadow-lg">
-            dateBetter
+            D.E.V.I.
           </h1>
           <p className="font-poppins text-base sm:text-lg md:text-xl text-white font-semibold tracking-wide drop-shadow-lg">
-            Data for Dating
+            by dateBetter
           </p>
         </div>
 
         {/* Tagline */}
         <p className="font-poppins text-center text-white/90 text-sm mb-3 max-w-xs sm:max-w-sm font-semibold drop-shadow-lg">
-          AI-backed app helping you select better partners
+          Your AI dating advisor — helping you choose better partners
         </p>
         
         {/* D.E.V.I. Badge */}
