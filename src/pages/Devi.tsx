@@ -2675,6 +2675,20 @@ const Devi = () => {
         candidateName={selectedCandidate?.nickname}
         onSubmit={handleConversationUpload}
       />
+
+      {/* Inline Profile Editor */}
+      {user && (
+        <InlineProfileEditor
+          open={!!profileEditorSection}
+          sectionId={profileEditorSection}
+          profile={userProfile}
+          userId={user.id}
+          onClose={() => setProfileEditorSection(null)}
+          onSaved={(updatedProfile) => {
+            setUserProfile(updatedProfile);
+          }}
+        />
+      )}
     </div>
   );
 };
