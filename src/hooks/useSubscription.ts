@@ -44,7 +44,7 @@ export function useSubscription() {
       if (error) {
         console.error("Error checking subscription:", error);
         setSubscription({
-43:           subscribed: false,
+subscribed: false,
           plan: "free",
           product_id: null,
           price_id: null,
