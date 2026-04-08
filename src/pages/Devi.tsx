@@ -398,7 +398,18 @@ const MessageBubble: React.FC<{
 // Core fields that are required for onboarding completion
 // Only include fields that are actually collected during the onboarding flow
 const USER_PROFILE_FIELDS = [
-  { key: "onboarding_completed", weight: 10, label: "Onboarding Complete" },
+  { key: "gender_identity", weight: 2, label: "Gender Identity" },
+  { key: "pronouns", weight: 1, label: "Pronouns" },
+  { key: "interested_in", weight: 2, label: "Dating Preferences" },
+  { key: "relationship_goal", weight: 2, label: "Relationship Goal" },
+  { key: "kids_desire", weight: 1, label: "Kids & Family" },
+  { key: "career_stage", weight: 1, label: "Career" },
+  { key: "education_level", weight: 1, label: "Education" },
+  { key: "communication_style", weight: 1, label: "Communication Style" },
+  { key: "attachment_style", weight: 1, label: "Attachment Style" },
+  { key: "parents_relationship_dynamic", weight: 1, label: "Family Background" },
+  { key: "felt_loved_as_child", weight: 1, label: "Upbringing" },
+  { key: "boundary_strength", weight: 1, label: "Boundaries" },
 ];
 
 const CANDIDATE_PROFILE_FIELDS = [
@@ -540,7 +551,7 @@ const Devi = () => {
   const userProfileCompleteness = profileCompletenessResult.percentage;
   const missingProfileFields = profileCompletenessResult.missingFields;
   const hasCoreOnboardingProfile = !!(userProfile?.gender_identity && userProfile?.relationship_goal);
-  const onboardingIncomplete = !profilesLoading && (!userProfile || !userProfile.onboarding_completed || !hasCoreOnboardingProfile);
+  const onboardingIncomplete = !profilesLoading && (!userProfile || !hasCoreOnboardingProfile || userProfileCompleteness < 80);
   
   // No gates - chat is always accessible with the new trial model
   const hasFullProfile = !onboardingIncomplete;
@@ -652,12 +663,9 @@ const Devi = () => {
       }
       
       // Process profile
-      if (profileRes.data) {
-        setUserProfile(profileRes.data);
-        if (!profileRes.data.onboarding_completed) {
-          setShowProfileNudge(true);
+        if (profileRes.data) {
+          setUserProfile(profileRes.data);
         }
-      }
       
       // Process conversations
       if (conversationsRes.data) {
