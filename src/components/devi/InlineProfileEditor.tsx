@@ -63,23 +63,26 @@ const COUNTRY_OPTIONS = [
 ];
 
 const RELATIONSHIP_GOAL_OPTIONS = [
-  { value: "long_term", label: "Long-term relationship" },
-  { value: "marriage", label: "Marriage" },
   { value: "casual", label: "Casual dating" },
-  { value: "figuring_out", label: "Figuring it out" },
-  { value: "friendship_first", label: "Friendship first" },
+  { value: "dating", label: "Dating" },
+  { value: "serious", label: "Serious relationship" },
+  { value: "marriage", label: "Marriage" },
+  { value: "unsure", label: "Figuring it out" },
+  { value: "situationship", label: "Situationship" },
 ];
 
 const RELIGION_OPTIONS = [
-  { value: "christianity", label: "Christianity" },
-  { value: "islam", label: "Islam" },
-  { value: "judaism", label: "Judaism" },
-  { value: "hinduism", label: "Hinduism" },
-  { value: "buddhism", label: "Buddhism" },
+  { value: "none", label: "None" },
   { value: "spiritual", label: "Spiritual" },
-  { value: "agnostic", label: "Agnostic" },
-  { value: "atheist", label: "Atheist" },
+  { value: "christian_catholic", label: "Christian (Catholic)" },
+  { value: "christian_protestant", label: "Christian (Protestant)" },
+  { value: "christian_other", label: "Christian (Other)" },
+  { value: "jewish", label: "Jewish" },
+  { value: "muslim", label: "Muslim" },
+  { value: "hindu", label: "Hindu" },
+  { value: "buddhist", label: "Buddhist" },
   { value: "other", label: "Other" },
+  { value: "prefer_not_say", label: "Prefer not to say" },
 ];
 
 const KIDS_DESIRE_OPTIONS = [
