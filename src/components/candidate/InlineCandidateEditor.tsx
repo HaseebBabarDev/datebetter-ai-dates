@@ -297,6 +297,10 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
           if (formData.their_family_stability) updateData.their_family_stability = formData.their_family_stability as string;
           if (formData.their_family_notes) updateData.their_family_notes = formData.their_family_notes as string;
           break;
+        case "past_relationships":
+          updateData.their_past_relationships = formData.their_past_relationships;
+          if (formData.their_relationship_notes) updateData.their_relationship_notes = formData.their_relationship_notes as string;
+          break;
         case "mental_health":
           if (formData.their_in_therapy) updateData.their_in_therapy = formData.their_in_therapy as string;
           if (formData.their_mental_health_awareness) updateData.their_mental_health_awareness = formData.their_mental_health_awareness as string;
@@ -545,6 +549,47 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
             </div>
           </div>
         );
+      case "past_relationships": {
+        const exList = (formData.their_past_relationships as Array<{ name: string; duration: string; endReason: string }>) || [];
+        const addEx = () => {
+          updateField("their_past_relationships", [...exList, { name: "", duration: "", endReason: "" }]);
+        };
+        const removeEx = (idx: number) => {
+          updateField("their_past_relationships", exList.filter((_, i) => i !== idx));
+        };
+        const updateEx = (idx: number, field: string, value: string) => {
+          const updated = exList.map((ex, i) => i === idx ? { ...ex, [field]: value } : ex);
+          updateField("their_past_relationships", updated);
+        };
+        return (
+          <div className="space-y-4">
+            <p className="text-xs text-muted-foreground">Add their significant past relationships to help D.E.V.I. understand their patterns.</p>
+            {exList.map((ex, idx) => (
+              <div key={idx} className="space-y-2 p-3 rounded-lg border border-border bg-muted/30">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-medium">Ex #{idx + 1}</Label>
+                  <Button type="button" variant="ghost" size="sm" className="h-7 text-destructive text-xs" onClick={() => removeEx(idx)}>Remove</Button>
+                </div>
+                <Input placeholder="Name or nickname" value={ex.name} onChange={(e) => updateEx(idx, "name", e.target.value)} />
+                <Input placeholder="Duration (e.g. 2 years)" value={ex.duration} onChange={(e) => updateEx(idx, "duration", e.target.value)} />
+                <Input placeholder="How it ended" value={ex.endReason} onChange={(e) => updateEx(idx, "endReason", e.target.value)} />
+              </div>
+            ))}
+            <Button type="button" variant="outline" className="w-full gap-2" onClick={addEx}>
+              + Add an Ex
+            </Button>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">General notes on their past relationships</Label>
+              <Textarea
+                placeholder="Patterns you've noticed, what they've shared about exes, red/green flags..."
+                value={formData.their_relationship_notes as string || ""}
+                onChange={(e) => updateField("their_relationship_notes", e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+        );
+      }
       case "mental_health":
         return (
           <div className="space-y-4">
