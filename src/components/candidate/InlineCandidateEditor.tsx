@@ -561,30 +561,9 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
       case "career_lifestyle":
         return (
           <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Career Stage</Label>
-              <Input
-                placeholder="e.g. Mid-career, Student, Entrepreneur"
-                value={formData.their_career_stage as string || ""}
-                onChange={(e) => updateField("their_career_stage", e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Education Level</Label>
-              <Input
-                placeholder="e.g. Bachelor's, Master's, Self-taught"
-                value={formData.their_education_level as string || ""}
-                onChange={(e) => updateField("their_education_level", e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Schedule Flexibility</Label>
-              <Input
-                placeholder="e.g. Very flexible, Busy weekdays"
-                value={formData.their_schedule_flexibility as string || ""}
-                onChange={(e) => updateField("their_schedule_flexibility", e.target.value)}
-              />
-            </div>
+            {renderSelectField("their_career_stage", "Career Stage", CAREER_STAGE_OPTIONS)}
+            {renderSelectField("their_education_level", "Education Level", EDUCATION_LEVEL_OPTIONS)}
+            {renderSelectField("their_schedule_flexibility", "Schedule Flexibility", SCHEDULE_OPTIONS)}
             {renderSliderField("their_ambition_level", "Ambition Level")}
           </div>
         );
