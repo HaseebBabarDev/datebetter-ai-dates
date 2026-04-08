@@ -9,6 +9,7 @@ interface OnboardingProgressCTAProps {
   profile: Profile | null;
   onDismiss: () => void;
   onAskInChat?: (prompt: string) => void;
+  onOpenSection?: (sectionId: string) => void;
   className?: string;
 }
 
@@ -89,6 +90,7 @@ export const OnboardingProgressCTA: React.FC<OnboardingProgressCTAProps> = ({
   profile,
   onDismiss,
   onAskInChat,
+  onOpenSection,
   className,
 }) => {
   const { completed, total, nextSection, percentage } = useMemo(() => {
@@ -122,7 +124,9 @@ export const OnboardingProgressCTA: React.FC<OnboardingProgressCTAProps> = ({
     : "Almost there — keep going!";
 
   const handleSectionClick = (section: typeof ONBOARDING_SECTIONS[0]) => {
-    if (onAskInChat) {
+    if (onOpenSection) {
+      onOpenSection(section.id);
+    } else if (onAskInChat) {
       onAskInChat(section.prompt);
     }
   };
