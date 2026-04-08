@@ -560,7 +560,7 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
   };
 
   return (
-    <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
+    <Sheet open={open} onOpenChange={(o) => !o && onClose()} modal={false}>
       <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl p-0 z-[60]">
         <div className="flex flex-col h-full">
           <SheetHeader className="px-5 pt-5 pb-3 border-b border-border">
