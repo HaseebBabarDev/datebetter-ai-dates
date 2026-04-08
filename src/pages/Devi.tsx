@@ -56,6 +56,8 @@ import { CompleteProfileNudge } from "@/components/devi/CompleteProfileNudge";
 import { OnboardingProgressCTA } from "@/components/devi/OnboardingProgressCTA";
 import { ConversationUploadSheet } from "@/components/devi/ConversationUploadSheet";
 import { InlineProfileEditor } from "@/components/devi/InlineProfileEditor";
+import { CandidateIntakeCTA } from "@/components/candidate/CandidateIntakeCTA";
+import { InlineCandidateEditor } from "@/components/candidate/InlineCandidateEditor";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -518,6 +520,8 @@ const Devi = () => {
   const [firstTimeIntakeComplete, setFirstTimeIntakeComplete] = useState(false);
   const [showProfileNudge, setShowProfileNudge] = useState(false);
   const [profileEditorSection, setProfileEditorSection] = useState<string | null>(null);
+  const [candidateIntakeDismissed, setCandidateIntakeDismissed] = useState(false);
+  const [candidateEditorSection, setCandidateEditorSection] = useState<string | null>(null);
   const firstTimeAnalysisShown = useRef(false);
   const onboardingContextSent = useRef(false);
   
@@ -899,7 +903,8 @@ const Devi = () => {
     setMessages([]);
     setCurrentConversationId(null);
     setHistoryOpen(false);
-    setSoftWarningDismissed(false); // Reset warning dismissal for new chat
+    setSoftWarningDismissed(false);
+    setCandidateIntakeDismissed(false);
     lastLoadedCandidateRef.current = null; // Reset so new conversation can be created
   }, []);
 
@@ -2599,8 +2604,17 @@ const Devi = () => {
               className="mt-4"
             />
           )}
+
+          {/* Candidate intake nudge */}
+          {selectedCandidate && !candidateIntakeDismissed && (
+            <CandidateIntakeCTA
+              candidate={selectedCandidate}
+              onDismiss={() => setCandidateIntakeDismissed(true)}
+              onOpenSection={(sectionId) => setCandidateEditorSection(sectionId)}
+              className="mt-4"
+            />
+          )}
           
-          {/* Win prompt - show after conversation has messages and not loading */}
           {messages.length >= 2 && messages.length < MAX_CONVERSATION_MESSAGES && !isLoading && messages[messages.length - 1]?.role === 'assistant' && (
             <DeviWinPrompt onLogWin={() => setShowWinDialog(true)} className="mt-4" />
           )}
@@ -2795,6 +2809,21 @@ const Devi = () => {
           onClose={() => setProfileEditorSection(null)}
           onSaved={(updatedProfile) => {
             setUserProfile(updatedProfile);
+          }}
+        />
+      )}
+
+      {/* Inline Candidate Editor */}
+      {user && selectedCandidate && (
+        <InlineCandidateEditor
+          open={!!candidateEditorSection}
+          sectionId={candidateEditorSection}
+          candidate={selectedCandidate}
+          userId={user.id}
+          onClose={() => setCandidateEditorSection(null)}
+          onSaved={(updatedCandidate) => {
+            setSelectedCandidate(updatedCandidate);
+            setCandidates(prev => prev.map(c => c.id === updatedCandidate.id ? updatedCandidate : c));
           }}
         />
       )}
