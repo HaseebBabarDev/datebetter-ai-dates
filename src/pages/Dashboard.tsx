@@ -3,18 +3,13 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import {
-  Sparkles,
-  TrendingUp,
-  AlertTriangle,
   Heart,
-  MessageSquare,
   Brain,
-  Unlink,
   Users,
   Search,
-  Shield,
-  Zap,
   Compass,
+  Sparkles,
+  ChevronRight,
 } from "lucide-react";
 
 const FEATURES = [
@@ -27,44 +22,12 @@ const FEATURES = [
     bg: "bg-violet-500/10",
   },
   {
-    icon: MessageSquare,
-    label: "Text Simulator",
-    desc: "Practice what to say next",
-    path: "/devi?action=textsim",
-    color: "text-blue-500",
-    bg: "bg-blue-500/10",
-  },
-  {
-    icon: Zap,
-    label: "AI Predictions",
-    desc: "Where things are heading",
-    path: "/candidates",
-    color: "text-amber-500",
-    bg: "bg-amber-500/10",
-  },
-  {
-    icon: AlertTriangle,
-    label: "Red Flags",
-    desc: "Detected warnings across candidates",
-    path: "/candidates",
-    color: "text-red-500",
-    bg: "bg-red-500/10",
-  },
-  {
     icon: Heart,
     label: "Healing Score",
     desc: "Track your emotional recovery",
     path: "/devi?action=healing",
     color: "text-pink-500",
     bg: "bg-pink-500/10",
-  },
-  {
-    icon: Unlink,
-    label: "Detachment Plans",
-    desc: "Guided plans to move on",
-    path: "/candidates",
-    color: "text-teal-500",
-    bg: "bg-teal-500/10",
   },
   {
     icon: Search,
@@ -143,7 +106,7 @@ const Dashboard = () => {
                     <h3 className="font-semibold text-sm">{feature.label}</h3>
                     <p className="text-xs text-muted-foreground">{feature.desc}</p>
                   </div>
-                  <TrendingUp className="w-4 h-4 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
                 </div>
               </motion.button>
             );
