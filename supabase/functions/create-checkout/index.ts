@@ -47,8 +47,6 @@ serve(async (req) => {
       customerId = customers.data[0].id;
       logStep("Found existing customer", { customerId });
     } else {
-      // Always create customer with the authenticated user's email
-      // This prevents email mismatch when checking subscription later
       const newCustomer = await stripe.customers.create({
         email: user.email,
         metadata: { supabase_user_id: user.id },
@@ -58,11 +56,12 @@ serve(async (req) => {
     }
 
     const origin = req.headers.get("origin") || "https://datebetter-ai-dates.lovable.app";
+    const checkoutMode = mode || "subscription";
 
     const sessionParams: any = {
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
-      mode: mode || "subscription",
+      mode: checkoutMode,
       success_url: successUrl || `${origin}/subscription?success=true`,
       cancel_url: `${origin}/subscription?canceled=true`,
       metadata: {
@@ -70,6 +69,24 @@ serve(async (req) => {
         candidate_id: candidateId || "",
       },
     };
+
+    // Add 15-day free trial for subscription checkouts
+    if (checkoutMode === "subscription") {
+      // Check if this customer already had a trial/subscription before
+      const existingSubs = await stripe.subscriptions.list({
+        customer: customerId,
+        limit: 1,
+      });
+      // Only offer trial to truly new subscribers (no previous subscriptions)
+      if (existingSubs.data.length === 0) {
+        sessionParams.subscription_data = {
+          trial_period_days: 15,
+        };
+        logStep("Adding 15-day free trial for new subscriber");
+      } else {
+        logStep("Returning subscriber - no trial applied");
+      }
+    }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
