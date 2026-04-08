@@ -248,8 +248,8 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
       switch (sectionId) {
         case "basics":
           if (formData.age) updateData.age = Number(formData.age);
-          if (formData.gender_identity) updateData.gender_identity = formData.gender_identity;
-          if (formData.pronouns) updateData.pronouns = formData.pronouns;
+          if (formData.gender_identity && formData.gender_identity !== "") updateData.gender_identity = formData.gender_identity;
+          if (formData.pronouns && formData.pronouns !== "") updateData.pronouns = formData.pronouns;
           if (formData.height) updateData.height = formData.height as string;
           if (formData.zodiac_sign) updateData.zodiac_sign = formData.zodiac_sign as string;
           if (formData.city) updateData.city = formData.city as string;
