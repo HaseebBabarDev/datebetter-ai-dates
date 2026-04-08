@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, UserPlus, Sparkles, Heart, Pencil, User, Brain, Zap, Home, Clock, Layers, ArrowRight, Mic } from "lucide-react";
+import { ArrowLeft, UserPlus, Sparkles, Heart, Pencil, User, Brain, Zap, Home, Clock, Layers, ArrowRight, Mic, X, Video, Camera, MessageCircle, Info } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SliderInput } from "@/components/onboarding/SliderInput";
 import { toast } from "sonner";
@@ -299,6 +299,7 @@ const AddCandidate = () => {
   const [candidateMode, setCandidateMode] = useState<"quick" | "full" | "smart" | null>(isEditMode ? "full" : initialMode === "smart" ? "smart" : null);
   const [smartFillApplied, setSmartFillApplied] = useState(false);
   const [zodiacModeEnabled, setZodiacModeEnabled] = useState(false);
+  const [showSmartFillTip, setShowSmartFillTip] = useState(false);
 const TABS = ["basics", "about", "family", "history", "chemistry"] as const;
 
 interface TheirPastRelationship {
@@ -804,6 +805,94 @@ const THEIR_ISSUE_OPTIONS = [
               <h2 className="text-xl font-semibold mb-1">How much do you know?</h2>
               <p className="text-sm text-muted-foreground">More details = more accurate AI scoring</p>
             </motion.div>
+
+            {/* Smart Fill Tip Banner */}
+            <AnimatePresence>
+              {!showSmartFillTip && (
+                <motion.button
+                  type="button"
+                  onClick={() => setShowSmartFillTip(true)}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ delay: 0.15 }}
+                  className="w-full p-3 rounded-xl border border-primary/20 bg-primary/5 flex items-start gap-3 text-left hover:bg-primary/10 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Info className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">💡 Tip: Let D.E.V.I. fill in the profile for you</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Upload screenshots, screen recordings, or just talk — tap to learn more</p>
+                  </div>
+                </motion.button>
+              )}
+            </AnimatePresence>
+
+            {/* Smart Fill Tip Expanded */}
+            <AnimatePresence>
+              {showSmartFillTip && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="rounded-2xl border border-primary/20 bg-card shadow-lg overflow-hidden"
+                >
+                  <div className="p-4 bg-[image:var(--gradient-hero)] flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-white" />
+                      <h3 className="font-semibold text-white text-sm">How to add a candidate fast</h3>
+                    </div>
+                    <button onClick={() => setShowSmartFillTip(false)} className="text-white/70 hover:text-white p-1">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <Video className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Someone new?</p>
+                        <p className="text-xs text-muted-foreground">Screen record their dating profile (Hinge, Bumble, etc.) and upload it — D.E.V.I. will extract their details automatically</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <Camera className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Already talking?</p>
+                        <p className="text-xs text-muted-foreground">Upload screenshots or screen recordings of your DMs and conversations — D.E.V.I. will analyze them and build the profile</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <MessageCircle className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Just tell D.E.V.I.</p>
+                        <p className="text-xs text-muted-foreground">Tell D.E.V.I. their name, how you met, and anything you know — type it out or use voice</p>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setShowSmartFillTip(false);
+                        if (!canAddCandidate()) { setShowUpgradeDialog(true); return; }
+                        setCandidateMode("smart");
+                      }}
+                      className="w-full gap-2 rounded-xl bg-[image:var(--gradient-hero)]"
+                    >
+                      <Mic className="w-4 h-4" />
+                      Tell D.E.V.I. Everything
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+
 
             {/* Full Profile Option - Recommended */}
             <motion.button
