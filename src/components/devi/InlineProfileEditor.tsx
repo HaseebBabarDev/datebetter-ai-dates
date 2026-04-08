@@ -154,9 +154,10 @@ const POLITICS_OPTIONS = [
 ];
 
 const SOCIAL_STYLE_OPTIONS = [
-  { value: "introvert", label: "Introvert" },
-  { value: "extrovert", label: "Extrovert" },
-  { value: "ambivert", label: "Ambivert" },
+  { value: "homebody", label: "Homebody" },
+  { value: "social_butterfly", label: "Social butterfly" },
+  { value: "balanced", label: "Balanced" },
+  { value: "mood_dependent", label: "Depends on my mood" },
 ];
 
 const SECTION_CONFIG: Record<string, { title: string; emoji: string; subtitle: string }> = {
