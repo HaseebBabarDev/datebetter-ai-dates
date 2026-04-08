@@ -414,6 +414,10 @@ const USER_PROFILE_FIELDS = [
   { key: "parents_relationship_dynamic", weight: 1, label: "Family Background" },
   { key: "felt_loved_as_child", weight: 1, label: "Upbringing" },
   { key: "boundary_strength", weight: 1, label: "Boundaries" },
+  { key: "mental_health_openness", weight: 1, label: "Mental Health" },
+  { key: "over_ex_level", weight: 1, label: "Healing & Growth" },
+  { key: "dating_honesty_intent", weight: 1, label: "Dating Style" },
+  { key: "religion", weight: 1, label: "Faith & Values" },
 ];
 
 const CANDIDATE_PROFILE_FIELDS = [
