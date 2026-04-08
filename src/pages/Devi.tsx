@@ -2603,8 +2603,17 @@ const Devi = () => {
               className="mt-4"
             />
           )}
+
+          {/* Candidate intake nudge */}
+          {selectedCandidate && !candidateIntakeDismissed && (
+            <CandidateIntakeCTA
+              candidate={selectedCandidate}
+              onDismiss={() => setCandidateIntakeDismissed(true)}
+              onOpenSection={(sectionId) => setCandidateEditorSection(sectionId)}
+              className="mt-4"
+            />
+          )}
           
-          {/* Win prompt - show after conversation has messages and not loading */}
           {messages.length >= 2 && messages.length < MAX_CONVERSATION_MESSAGES && !isLoading && messages[messages.length - 1]?.role === 'assistant' && (
             <DeviWinPrompt onLogWin={() => setShowWinDialog(true)} className="mt-4" />
           )}
