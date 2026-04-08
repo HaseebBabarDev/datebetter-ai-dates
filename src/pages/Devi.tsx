@@ -903,7 +903,8 @@ const Devi = () => {
     setMessages([]);
     setCurrentConversationId(null);
     setHistoryOpen(false);
-    setSoftWarningDismissed(false); // Reset warning dismissal for new chat
+    setSoftWarningDismissed(false);
+    setCandidateIntakeDismissed(false);
     lastLoadedCandidateRef.current = null; // Reset so new conversation can be created
   }, []);
 
