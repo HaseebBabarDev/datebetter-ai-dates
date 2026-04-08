@@ -1973,10 +1973,6 @@ const Devi = () => {
               </div>
             </div>
             
-            {/* New Candidate */}
-            <Button variant="ghost" size="icon" onClick={() => navigate("/add-candidate?mode=smart")} className="rounded-lg shrink-0 h-8 w-8" title="Add Candidate">
-              <Plus className="w-4 h-4" />
-            </Button>
 
             {/* Add Candidate */}
             <Button variant="ghost" size="icon" onClick={() => navigate("/add-candidate?mode=smart")} className="rounded-lg shrink-0 h-8 w-8 text-primary" title="Add Candidate">
