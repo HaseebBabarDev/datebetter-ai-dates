@@ -2699,6 +2699,27 @@ const Devi = () => {
                     <MessageCircle className="w-4 h-4 text-primary" />
                     <span className="font-medium">Analyze a Conversation</span>
                   </DropdownMenuItem>
+                  {selectedCandidate && (
+                    <>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setPendingCandidateSelection(selectedCandidate);
+                          setShowTextSimFromDialog(true);
+                        }}
+                        className="gap-2"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        Text Simulator
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => navigate(`/detachment-plan/${selectedCandidate.id}`)}
+                        className="gap-2"
+                      >
+                        <Unlink className="w-4 h-4" />
+                        Detachment Plan
+                      </DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
               <Textarea
