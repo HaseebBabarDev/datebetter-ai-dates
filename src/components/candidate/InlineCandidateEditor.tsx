@@ -104,19 +104,17 @@ const POLITICS_OPTIONS = [
 ];
 
 const KIDS_DESIRE_OPTIONS = [
-  { value: "wants_kids", label: "Wants kids" },
-  { value: "open_to_kids", label: "Open to kids" },
-  { value: "doesnt_want", label: "Doesn't want kids" },
-  { value: "has_and_wants_more", label: "Has kids, wants more" },
-  { value: "has_and_done", label: "Has kids, done" },
+  { value: "definitely_yes", label: "Definitely wants kids" },
+  { value: "maybe", label: "Open to kids" },
+  { value: "definitely_no", label: "Doesn't want kids" },
+  { value: "already_have", label: "Already has kids, done" },
   { value: "unsure", label: "Not sure" },
 ];
 
 const KIDS_STATUS_OPTIONS = [
   { value: "no_kids", label: "No kids" },
-  { value: "has_kids_full_time", label: "Has kids (full time)" },
-  { value: "has_kids_part_time", label: "Has kids (part time)" },
-  { value: "expecting", label: "Expecting" },
+  { value: "has_young_kids", label: "Has young kids" },
+  { value: "has_adult_kids", label: "Has adult kids" },
 ];
 
 const SOCIAL_STYLE_OPTIONS = [
