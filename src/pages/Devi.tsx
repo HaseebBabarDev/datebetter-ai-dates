@@ -2040,26 +2040,26 @@ const Devi = () => {
             {profilesLoading ? (
               <div className="h-10 flex-1 bg-muted rounded-xl animate-pulse" />
             ) : !userProfile?.onboarding_completed && selectedCandidate ? (
-              /* During onboarding: show name only, no dropdown */
+              /* During onboarding: show name + "Complete Onboarding" button */
               <div 
-                className="h-10 gap-2 flex-1 flex items-center px-3 rounded-md border border-border bg-background"
+                className="h-10 gap-2 flex-1 flex items-center justify-between px-3 rounded-md border border-border bg-background"
                 data-tour="devi-candidate-select"
               >
-                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
-                  <span className="text-xs font-semibold">{selectedCandidate.nickname.charAt(0)}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+                    <span className="text-xs font-semibold">{selectedCandidate.nickname.charAt(0)}</span>
+                  </div>
+                  <span className="font-medium text-sm">{selectedCandidate.nickname}</span>
                 </div>
-                <span className="font-medium">{selectedCandidate.nickname}</span>
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                  selectedCandidate.compatibility_score != null
-                    ? selectedCandidate.compatibility_score >= 70 
-                      ? "bg-green-500/15 text-green-600" 
-                      : selectedCandidate.compatibility_score >= 40 
-                        ? "bg-amber-500/15 text-amber-600" 
-                        : "bg-red-500/15 text-red-600"
-                    : "bg-muted text-muted-foreground"
-                }`}>
-                  {selectedCandidate.compatibility_score != null ? `${selectedCandidate.compatibility_score}%` : "New"}
-                </span>
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="h-7 text-xs gap-1 bg-[image:var(--gradient-hero)] hover:opacity-90"
+                  onClick={() => navigate("/setup")}
+                >
+                  <Sparkles className="w-3 h-3" />
+                  Complete Onboarding
+                </Button>
               </div>
             ) : (
               <DropdownMenu>
