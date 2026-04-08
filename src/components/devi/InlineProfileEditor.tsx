@@ -694,7 +694,7 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
 
   return (
     <Sheet open={open} onOpenChange={v => !v && onClose()}>
-      <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl p-0">
+      <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl p-0 z-[60]">
         <div className="flex flex-col h-full">
           <SheetHeader className="p-5 pb-3 border-b border-border/50 bg-gradient-to-br from-primary/10 to-background">
             <div className="flex items-center gap-3">
