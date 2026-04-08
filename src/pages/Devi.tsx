@@ -2040,36 +2040,26 @@ const Devi = () => {
             {profilesLoading ? (
               <div className="h-10 flex-1 bg-muted rounded-xl animate-pulse" />
             ) : onboardingIncomplete ? (
-              /* During onboarding: replace selector with onboarding CTA */
-              <div 
-                className="h-10 gap-2 flex-1 flex items-center justify-between px-3 rounded-md border border-border bg-background"
+              /* During onboarding: full-width "Complete Onboarding" button */
+              <Button
+                variant="default"
+                size="sm"
+                className="h-10 flex-1 gap-2 bg-[image:var(--gradient-hero)] hover:opacity-90 font-semibold"
+                onClick={() => navigate("/setup")}
                 data-tour="devi-candidate-select"
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  {selectedCandidate ? (
-                    <>
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                        <span className="text-xs font-semibold">{selectedCandidate.nickname.charAt(0)}</span>
-                      </div>
-                      <span className="font-medium text-sm truncate">{selectedCandidate.nickname}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4 text-primary shrink-0" />
-                      <span className="font-medium text-sm truncate">Finish your setup for better advice</span>
-                    </>
-                  )}
-                </div>
-                <Button
-                  size="sm"
-                  variant="default"
-                  className="h-7 text-xs gap-1 bg-[image:var(--gradient-hero)] hover:opacity-90 shrink-0"
-                  onClick={() => navigate("/setup")}
-                >
-                  <Sparkles className="w-3 h-3" />
-                  Complete Onboarding
-                </Button>
-              </div>
+                {selectedCandidate ? (
+                  <>
+                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-semibold text-primary-foreground">{selectedCandidate.nickname.charAt(0)}</span>
+                    </div>
+                    <span className="truncate">{selectedCandidate.nickname}</span>
+                    <span className="text-primary-foreground/70">·</span>
+                  </>
+                ) : null}
+                <span className="whitespace-nowrap">Complete Onboarding</span>
+                <ArrowRight className="w-3.5 h-3.5 shrink-0 ml-auto" />
+              </Button>
             ) : (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
