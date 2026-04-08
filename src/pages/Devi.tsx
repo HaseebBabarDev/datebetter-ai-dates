@@ -1973,8 +1973,8 @@ const Devi = () => {
               </div>
             </div>
             
-            {/* New Chat */}
-            <Button variant="ghost" size="icon" onClick={startNewChat} className="rounded-lg shrink-0 h-8 w-8" title="New Chat">
+            {/* New Candidate */}
+            <Button variant="ghost" size="icon" onClick={() => navigate("/add-candidate?mode=smart")} className="rounded-lg shrink-0 h-8 w-8" title="Add Candidate">
               <Plus className="w-4 h-4" />
             </Button>
 
@@ -2373,7 +2373,16 @@ const Devi = () => {
                         {q}
                       </button>
                     ))}
-                  </div>
+                    </div>
+                    <button
+                      onClick={() => navigate("/add-candidate?mode=smart")}
+                      className={`rounded-full border border-primary text-primary hover:bg-primary/10 transition-colors flex items-center gap-1.5 ${
+                        chatLayout === "chatgpt" ? "text-sm px-4 py-2" : "text-xs px-3 py-1.5"
+                      }`}
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                      Add a new candidate
+                    </button>
                   
                   {/* Upload hint and Text Simulator - only for candidate mode */}
                   {selectedCandidate && (
