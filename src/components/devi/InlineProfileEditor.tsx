@@ -171,6 +171,10 @@ const SECTION_CONFIG: Record<string, { title: string; emoji: string; subtitle: s
   past_patterns: { title: "Past Patterns", emoji: "🔄", subtitle: "Your relationship history" },
   family_upbringing: { title: "Family Background", emoji: "🏠", subtitle: "Where you come from" },
   boundaries: { title: "Boundaries & Safety", emoji: "🛡️", subtitle: "Your dealbreakers and limits" },
+  mental_health: { title: "Mental Health", emoji: "🧠", subtitle: "Therapy and self-awareness" },
+  relationship_trauma: { title: "Past Relationships", emoji: "💔", subtitle: "What you've been through" },
+  healing: { title: "Healing & Growth", emoji: "🌱", subtitle: "Where you are in your journey" },
+  dating_style: { title: "Dating Style", emoji: "✨", subtitle: "How you show up in dating" },
 };
 
 const PARENTS_RELATIONSHIP_OPTIONS = [
@@ -279,6 +283,26 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
           data.intimacy_comfort = profile.intimacy_comfort || "";
           data.red_flag_sensitivity = profile.red_flag_sensitivity || 5;
           break;
+        case "mental_health":
+          data.is_neurodivergent = (profile as any).is_neurodivergent || "";
+          data.mental_health_openness = profile.mental_health_openness || "";
+          data.mental_health_importance = profile.mental_health_importance || 5;
+          data.in_therapy = profile.in_therapy ?? null;
+          break;
+        case "relationship_trauma":
+          data.relationship_trauma_notes = profile.relationship_trauma_notes || "";
+          data.ex_contact_status = profile.ex_contact_status || "";
+          data.typical_partner_type = profile.typical_partner_type || "";
+          break;
+        case "healing":
+          data.over_ex_level = profile.over_ex_level || 5;
+          data.attachment_to_past = profile.attachment_to_past || 5;
+          data.ex_contact_status = profile.ex_contact_status || "";
+          break;
+        case "dating_style":
+          data.dating_honesty_intent = profile.dating_honesty_intent || "";
+          data.dating_history_text = profile.dating_history_text || "";
+          break;
       }
       setFormData(data);
     }
@@ -364,6 +388,26 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
           updates.boundary_strength = formData.boundary_strength;
           updates.intimacy_comfort = formData.intimacy_comfort || null;
           updates.red_flag_sensitivity = formData.red_flag_sensitivity;
+          break;
+        case "mental_health":
+          updates.is_neurodivergent = formData.is_neurodivergent || null;
+          updates.mental_health_openness = formData.mental_health_openness || null;
+          updates.mental_health_importance = formData.mental_health_importance;
+          updates.in_therapy = formData.in_therapy;
+          break;
+        case "relationship_trauma":
+          updates.relationship_trauma_notes = formData.relationship_trauma_notes || null;
+          updates.ex_contact_status = formData.ex_contact_status || null;
+          updates.typical_partner_type = formData.typical_partner_type || null;
+          break;
+        case "healing":
+          updates.over_ex_level = formData.over_ex_level;
+          updates.attachment_to_past = formData.attachment_to_past;
+          updates.ex_contact_status = formData.ex_contact_status || null;
+          break;
+        case "dating_style":
+          updates.dating_honesty_intent = formData.dating_honesty_intent || null;
+          updates.dating_history_text = formData.dating_history_text || null;
           break;
       }
 
@@ -683,6 +727,123 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
                 { value: "cautious", label: "Cautious" },
                 { value: "uncomfortable", label: "Not comfortable yet" },
               ]} placeholder="How comfortable?" />
+            </Field>
+          </div>
+        );
+
+      case "mental_health":
+        return (
+          <div className="space-y-4">
+            <Field label="Are you neurodivergent?">
+              <SelectField value={formData.is_neurodivergent} onChange={v => updateField("is_neurodivergent", v)} options={[
+                { value: "yes", label: "Yes" },
+                { value: "no", label: "No" },
+                { value: "suspect", label: "I suspect so" },
+                { value: "prefer_not_say", label: "Prefer not to say" },
+              ]} placeholder="Select" />
+            </Field>
+            <Field label="Mental Health Openness">
+              <SelectField value={formData.mental_health_openness} onChange={v => updateField("mental_health_openness", v)} options={[
+                { value: "very_open", label: "Very open about it" },
+                { value: "somewhat_open", label: "Somewhat open" },
+                { value: "private", label: "Keep it private" },
+                { value: "uncomfortable", label: "Uncomfortable discussing" },
+              ]} placeholder="How open are you?" />
+            </Field>
+            <Field label="Currently in therapy?">
+              <div className="flex gap-3">
+                {[{ val: true, label: "Yes" }, { val: false, label: "No" }].map(({ val, label }) => (
+                  <button key={label} type="button" onClick={() => updateField("in_therapy", val)} className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${formData.in_therapy === val ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border"}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </Field>
+            <Field label={`Mental Health Importance in Partner: ${formData.mental_health_importance || 5}/10`}>
+              <input type="range" min={1} max={10} value={formData.mental_health_importance || 5} onChange={e => updateField("mental_health_importance", Number(e.target.value))} className="w-full accent-primary" />
+              <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                <span>Not important</span>
+                <span>Very important</span>
+              </div>
+            </Field>
+          </div>
+        );
+
+      case "relationship_trauma":
+        return (
+          <div className="space-y-4">
+            <Field label="Contact with your ex?">
+              <SelectField value={formData.ex_contact_status} onChange={v => updateField("ex_contact_status", v)} options={[
+                { value: "no_contact", label: "No contact" },
+                { value: "minimal", label: "Minimal / Occasional" },
+                { value: "friendly", label: "Friendly" },
+                { value: "coparenting", label: "Co-parenting" },
+                { value: "complicated", label: "It's complicated" },
+                { value: "no_ex", label: "No ex to speak of" },
+              ]} placeholder="Select" />
+            </Field>
+            <Field label="Type of partners you typically attract">
+              <Input value={formData.typical_partner_type || ""} onChange={e => updateField("typical_partner_type", e.target.value)} placeholder="e.g., emotionally unavailable, love bombers..." />
+            </Field>
+            <Field label="Notes about past relationships">
+              <textarea
+                value={formData.relationship_trauma_notes || ""}
+                onChange={e => updateField("relationship_trauma_notes", e.target.value)}
+                placeholder="Anything D.E.V.I. should know about your past relationships — patterns, trauma, lessons learned..."
+                className="w-full min-h-[100px] rounded-xl border border-border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </Field>
+          </div>
+        );
+
+      case "healing":
+        return (
+          <div className="space-y-4">
+            <Field label="Contact with your ex?">
+              <SelectField value={formData.ex_contact_status} onChange={v => updateField("ex_contact_status", v)} options={[
+                { value: "no_contact", label: "No contact" },
+                { value: "minimal", label: "Minimal / Occasional" },
+                { value: "friendly", label: "Friendly" },
+                { value: "coparenting", label: "Co-parenting" },
+                { value: "complicated", label: "It's complicated" },
+                { value: "no_ex", label: "No ex to speak of" },
+              ]} placeholder="Select" />
+            </Field>
+            <Field label={`How over your ex are you? ${formData.over_ex_level || 5}/10`}>
+              <input type="range" min={1} max={10} value={formData.over_ex_level || 5} onChange={e => updateField("over_ex_level", Number(e.target.value))} className="w-full accent-primary" />
+              <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                <span>Not at all</span>
+                <span>Completely over it</span>
+              </div>
+            </Field>
+            <Field label={`Attachment to the past: ${formData.attachment_to_past || 5}/10`}>
+              <input type="range" min={1} max={10} value={formData.attachment_to_past || 5} onChange={e => updateField("attachment_to_past", Number(e.target.value))} className="w-full accent-primary" />
+              <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                <span>Moved on</span>
+                <span>Still attached</span>
+              </div>
+            </Field>
+          </div>
+        );
+
+      case "dating_style":
+        return (
+          <div className="space-y-4">
+            <Field label="How honest are you when dating?">
+              <SelectField value={formData.dating_honesty_intent} onChange={v => updateField("dating_honesty_intent", v)} options={[
+                { value: "fully_honest", label: "Fully honest / transparent" },
+                { value: "mostly_honest", label: "Mostly honest" },
+                { value: "white_lies", label: "Small white lies sometimes" },
+                { value: "strategic", label: "Strategic about what I share" },
+              ]} placeholder="Select" />
+            </Field>
+            <Field label="Describe your dating history">
+              <textarea
+                value={formData.dating_history_text || ""}
+                onChange={e => updateField("dating_history_text", e.target.value)}
+                placeholder="Tell D.E.V.I. about your dating journey — how many relationships, what worked, what didn't..."
+                className="w-full min-h-[100px] rounded-xl border border-border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
             </Field>
           </div>
         );

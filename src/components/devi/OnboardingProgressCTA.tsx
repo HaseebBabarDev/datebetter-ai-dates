@@ -84,6 +84,37 @@ const ONBOARDING_SECTIONS = [
     prompt: "Ask me about my boundaries and dealbreakers — what I won't tolerate and my safety priorities.",
     check: (p: Profile) => !!(p.boundary_strength || (p.dealbreakers && (p.dealbreakers as unknown[]).length > 0)),
   },
+  {
+    id: "mental_health",
+    label: "Mental Health",
+    emoji: "🧠",
+    prompt: "Let's talk about my mental health — therapy, neurodivergence, and emotional awareness.",
+    check: (p: Profile) => !!(p.mental_health_openness || p.in_therapy !== null),
+  },
+  {
+    id: "relationship_trauma",
+    label: "Past Relationships",
+    emoji: "💔",
+    prompt: "Ask me about my past relationships — what happened, what I learned, and any patterns.",
+    check: (p: Profile) => {
+      const traumas = p.past_relationship_traumas as unknown[];
+      return (Array.isArray(traumas) && traumas.length > 0) || !!(p.relationship_trauma_notes);
+    },
+  },
+  {
+    id: "healing",
+    label: "Healing & Growth",
+    emoji: "🌱",
+    prompt: "Let's assess where I am in my healing journey — how over my ex I am and my attachment to the past.",
+    check: (p: Profile) => !!(p.over_ex_level || p.ex_contact_status),
+  },
+  {
+    id: "dating_style",
+    label: "Dating Style",
+    emoji: "✨",
+    prompt: "Ask me about my dating style — honesty, challenges, and what I struggle with most.",
+    check: (p: Profile) => !!(p.dating_honesty_intent || (p.dating_skill_challenges && (p.dating_skill_challenges as unknown[]).length > 0)),
+  },
 ];
 
 export const OnboardingProgressCTA: React.FC<OnboardingProgressCTAProps> = ({
@@ -163,7 +194,7 @@ export const OnboardingProgressCTA: React.FC<OnboardingProgressCTAProps> = ({
       </div>
 
       <div className="flex flex-wrap gap-1.5">
-        {ONBOARDING_SECTIONS.slice(0, 6).map((section) => {
+        {ONBOARDING_SECTIONS.map((section) => {
           const isDone = profile ? section.check(profile) : false;
           return (
             <button
@@ -181,11 +212,6 @@ export const OnboardingProgressCTA: React.FC<OnboardingProgressCTAProps> = ({
             </button>
           );
         })}
-        {ONBOARDING_SECTIONS.length > 6 && (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted text-muted-foreground">
-            +{ONBOARDING_SECTIONS.length - 6} more
-          </span>
-        )}
       </div>
 
       {nextSection && (
