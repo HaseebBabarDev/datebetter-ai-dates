@@ -8,6 +8,8 @@ import {
   Users,
   Search,
   Compass,
+  Sparkles,
+  ChevronRight,
 } from "lucide-react";
 
 const FEATURES = [
@@ -104,7 +106,7 @@ const Dashboard = () => {
                     <h3 className="font-semibold text-sm">{feature.label}</h3>
                     <p className="text-xs text-muted-foreground">{feature.desc}</p>
                   </div>
-                  <TrendingUp className="w-4 h-4 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
                 </div>
               </motion.button>
             );
