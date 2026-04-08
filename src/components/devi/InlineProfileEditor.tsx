@@ -63,39 +63,40 @@ const COUNTRY_OPTIONS = [
 ];
 
 const RELATIONSHIP_GOAL_OPTIONS = [
-  { value: "long_term", label: "Long-term relationship" },
-  { value: "marriage", label: "Marriage" },
   { value: "casual", label: "Casual dating" },
-  { value: "figuring_out", label: "Figuring it out" },
-  { value: "friendship_first", label: "Friendship first" },
+  { value: "dating", label: "Dating" },
+  { value: "serious", label: "Serious relationship" },
+  { value: "marriage", label: "Marriage" },
+  { value: "unsure", label: "Figuring it out" },
+  { value: "situationship", label: "Situationship" },
 ];
 
 const RELIGION_OPTIONS = [
-  { value: "christianity", label: "Christianity" },
-  { value: "islam", label: "Islam" },
-  { value: "judaism", label: "Judaism" },
-  { value: "hinduism", label: "Hinduism" },
-  { value: "buddhism", label: "Buddhism" },
+  { value: "none", label: "None" },
   { value: "spiritual", label: "Spiritual" },
-  { value: "agnostic", label: "Agnostic" },
-  { value: "atheist", label: "Atheist" },
+  { value: "christian_catholic", label: "Christian (Catholic)" },
+  { value: "christian_protestant", label: "Christian (Protestant)" },
+  { value: "christian_other", label: "Christian (Other)" },
+  { value: "jewish", label: "Jewish" },
+  { value: "muslim", label: "Muslim" },
+  { value: "hindu", label: "Hindu" },
+  { value: "buddhist", label: "Buddhist" },
   { value: "other", label: "Other" },
+  { value: "prefer_not_say", label: "Prefer not to say" },
 ];
 
 const KIDS_DESIRE_OPTIONS = [
-  { value: "want_kids", label: "Want kids" },
-  { value: "dont_want", label: "Don't want kids" },
-  { value: "have_and_want_more", label: "Have kids, want more" },
-  { value: "have_and_done", label: "Have kids, done" },
-  { value: "open_to_it", label: "Open to it" },
-  { value: "not_sure", label: "Not sure yet" },
+  { value: "definitely_yes", label: "Definitely want kids" },
+  { value: "maybe", label: "Open to kids" },
+  { value: "definitely_no", label: "Don't want kids" },
+  { value: "already_have", label: "Already have kids, done" },
+  { value: "unsure", label: "Not sure yet" },
 ];
 
 const KIDS_STATUS_OPTIONS = [
-  { value: "no_kids", label: "No kids" },
-  { value: "has_kids_full_time", label: "Has kids (full time)" },
-  { value: "has_kids_part_time", label: "Has kids (part time)" },
-  { value: "expecting", label: "Expecting" },
+  { value: "no_kids", label: "No children" },
+  { value: "has_young_kids", label: "Yes, young children" },
+  { value: "has_adult_kids", label: "Yes, adult children" },
 ];
 
 const COMMUNICATION_STYLE_OPTIONS = [
