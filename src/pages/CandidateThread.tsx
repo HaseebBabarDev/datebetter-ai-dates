@@ -323,7 +323,7 @@ const CandidateThread = () => {
             <Flag className="w-3 h-3" /> Flags
           </TabsTrigger>
           <TabsTrigger value="predictions" className="text-xs rounded-lg gap-1 data-[state=active]:bg-background">
-            <TrendingUp className="w-3 h-3" /> Predictions
+            <TrendingUp className="w-3 h-3" /> Insights
           </TabsTrigger>
         </TabsList>
 
