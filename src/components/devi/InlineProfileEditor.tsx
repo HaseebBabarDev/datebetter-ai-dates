@@ -389,6 +389,26 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
           updates.intimacy_comfort = formData.intimacy_comfort || null;
           updates.red_flag_sensitivity = formData.red_flag_sensitivity;
           break;
+        case "mental_health":
+          updates.is_neurodivergent = formData.is_neurodivergent || null;
+          updates.mental_health_openness = formData.mental_health_openness || null;
+          updates.mental_health_importance = formData.mental_health_importance;
+          updates.in_therapy = formData.in_therapy;
+          break;
+        case "relationship_trauma":
+          updates.relationship_trauma_notes = formData.relationship_trauma_notes || null;
+          updates.ex_contact_status = formData.ex_contact_status || null;
+          updates.typical_partner_type = formData.typical_partner_type || null;
+          break;
+        case "healing":
+          updates.over_ex_level = formData.over_ex_level;
+          updates.attachment_to_past = formData.attachment_to_past;
+          updates.ex_contact_status = formData.ex_contact_status || null;
+          break;
+        case "dating_style":
+          updates.dating_honesty_intent = formData.dating_honesty_intent || null;
+          updates.dating_history_text = formData.dating_history_text || null;
+          break;
       }
 
       const { data, error } = await supabase
