@@ -539,10 +539,11 @@ const Devi = () => {
   
   const userProfileCompleteness = profileCompletenessResult.percentage;
   const missingProfileFields = profileCompletenessResult.missingFields;
-  const onboardingIncomplete = !!userProfile && !userProfile.onboarding_completed;
+  const hasCoreOnboardingProfile = !!(userProfile?.gender_identity && userProfile?.relationship_goal);
+  const onboardingIncomplete = !profilesLoading && (!userProfile || !userProfile.onboarding_completed || !hasCoreOnboardingProfile);
   
   // No gates - chat is always accessible with the new trial model
-  const hasFullProfile = !!userProfile?.onboarding_completed;
+  const hasFullProfile = !onboardingIncomplete;
   const hasInteractions = interactions.length > 0;
   const canChatWithCandidate = true;
   const canChatGeneral = true;
@@ -1734,8 +1735,7 @@ const Devi = () => {
   useEffect(() => {
     if (!userProfile) return;
 
-    const hasBasics = !!(userProfile.gender_identity && userProfile.relationship_goal);
-    const shouldShowNudge = !userProfile.onboarding_completed || !hasBasics || userProfileCompleteness < 80;
+    const shouldShowNudge = onboardingIncomplete || userProfileCompleteness < 80;
 
     if (messages.length === 0) {
       setShowProfileNudge(shouldShowNudge);
@@ -2039,7 +2039,7 @@ const Devi = () => {
           <div className="flex items-center gap-2">
             {profilesLoading ? (
               <div className="h-10 flex-1 bg-muted rounded-xl animate-pulse" />
-            ) : !userProfile?.onboarding_completed ? (
+            ) : onboardingIncomplete ? (
               /* During onboarding: replace selector with onboarding CTA */
               <div 
                 className="h-10 gap-2 flex-1 flex items-center justify-between px-3 rounded-md border border-border bg-background"
