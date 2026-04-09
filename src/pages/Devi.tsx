@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink, Zap } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, UserPlus, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink, Zap } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -51,6 +51,13 @@ import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
 import { DatingAdvisorCard } from "@/components/devi/DatingAdvisorCard";
+import { FirstTimeIntake } from "@/components/devi/FirstTimeIntake";
+import { CompleteProfileNudge } from "@/components/devi/CompleteProfileNudge";
+import { OnboardingProgressCTA } from "@/components/devi/OnboardingProgressCTA";
+import { ConversationUploadSheet } from "@/components/devi/ConversationUploadSheet";
+import { InlineProfileEditor } from "@/components/devi/InlineProfileEditor";
+import { CandidateIntakeCTA } from "@/components/candidate/CandidateIntakeCTA";
+import { InlineCandidateEditor } from "@/components/candidate/InlineCandidateEditor";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -327,10 +334,12 @@ const MessageBubble: React.FC<{
   isLoading?: boolean;
 }> = ({ message, isLast, onQuickReply, isLoading }) => {
   const [expanded, setExpanded] = useState(false);
-  const isLong = message.role === 'assistant' && message.content.length > MAX_MESSAGE_LENGTH;
+  // Strip internal metadata markers from displayed content
+  const cleanContent = message.content.replace(/\[User (?:also )?uploaded \d+ (?:file|screenshot|recording)\(s\)[^\]]*\]\n*/gi, '').trim();
+  const isLong = message.role === 'assistant' && cleanContent.length > MAX_MESSAGE_LENGTH;
   const displayContent = isLong && !expanded 
-    ? message.content.slice(0, MAX_MESSAGE_LENGTH) + "..." 
-    : message.content;
+    ? cleanContent.slice(0, MAX_MESSAGE_LENGTH) + "..." 
+    : cleanContent;
 
   const showQuickReplies = message.role === 'assistant' && isLast && !isLoading && onQuickReply;
 
@@ -393,7 +402,22 @@ const MessageBubble: React.FC<{
 // Core fields that are required for onboarding completion
 // Only include fields that are actually collected during the onboarding flow
 const USER_PROFILE_FIELDS = [
-  { key: "onboarding_completed", weight: 10, label: "Onboarding Complete" },
+  { key: "gender_identity", weight: 2, label: "Gender Identity" },
+  { key: "pronouns", weight: 1, label: "Pronouns" },
+  { key: "interested_in", weight: 2, label: "Dating Preferences" },
+  { key: "relationship_goal", weight: 2, label: "Relationship Goal" },
+  { key: "kids_desire", weight: 1, label: "Kids & Family" },
+  { key: "career_stage", weight: 1, label: "Career" },
+  { key: "education_level", weight: 1, label: "Education" },
+  { key: "communication_style", weight: 1, label: "Communication Style" },
+  { key: "attachment_style", weight: 1, label: "Attachment Style" },
+  { key: "parents_relationship_dynamic", weight: 1, label: "Family Background" },
+  { key: "felt_loved_as_child", weight: 1, label: "Upbringing" },
+  { key: "boundary_strength", weight: 1, label: "Boundaries" },
+  { key: "mental_health_openness", weight: 1, label: "Mental Health" },
+  { key: "over_ex_level", weight: 1, label: "Healing & Growth" },
+  { key: "dating_honesty_intent", weight: 1, label: "Dating Style" },
+  { key: "religion", weight: 1, label: "Faith & Values" },
 ];
 
 const CANDIDATE_PROFILE_FIELDS = [
@@ -479,6 +503,9 @@ const Devi = () => {
   // Dating advisor interactive card state
   const [showDatingAdvisorCard, setShowDatingAdvisorCard] = useState(false);
   
+  // Conversation upload sheet state
+  const [showConvoUpload, setShowConvoUpload] = useState(false);
+  
   // Chat layout style - chatgpt (default) or bubble
   const [chatLayout, setChatLayout] = useState<"bubble" | "chatgpt">(() => {
     if (typeof window !== 'undefined') {
@@ -492,19 +519,27 @@ const Devi = () => {
   const initialPromptTypeRef = useRef<string | null>(searchParams.get("prompt"));
   const feelingPromptHandled = useRef(false);
   
+  // First-time user flow
+  const isFirstTime = searchParams.get("firstTime") === "true";
+  const [firstTimeIntakeComplete, setFirstTimeIntakeComplete] = useState(false);
+  const [showProfileNudge, setShowProfileNudge] = useState(false);
+  const [profileEditorSection, setProfileEditorSection] = useState<string | null>(null);
+  const [candidateIntakeDismissed, setCandidateIntakeDismissed] = useState(false);
+  const [candidateEditorSection, setCandidateEditorSection] = useState<string | null>(null);
+  const firstTimeAnalysisShown = useRef(false);
+  const onboardingContextSent = useRef(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const isFree = subscription?.plan === "free";
-  // Free users get 1 trial conversation with max 5 user→AI exchanges (10 messages total)
-  const FREE_EXCHANGE_LIMIT = 5;
-  const freeExchangesUsed = isFree
-    ? Math.floor(messages.filter(m => m.role === "user").length)
-    : 0;
-  const freeExchangesRemaining = Math.max(0, FREE_EXCHANGE_LIMIT - freeExchangesUsed);
-  const freeTrialExhausted = isFree && freeExchangesUsed >= FREE_EXCHANGE_LIMIT;
+  // All users now have full chat access during 15-day trial
+  const FREE_EXCHANGE_LIMIT = 999999;
+  const freeExchangesUsed = 0;
+  const freeExchangesRemaining = 999999;
+  const freeTrialExhausted = false;
   const candidateIdFromState = (location.state as { candidateId?: string })?.candidateId;
 
   // Start tour for new users
@@ -525,12 +560,14 @@ const Devi = () => {
   
   const userProfileCompleteness = profileCompletenessResult.percentage;
   const missingProfileFields = profileCompletenessResult.missingFields;
+  const hasCoreOnboardingProfile = !!(userProfile?.gender_identity && userProfile?.relationship_goal);
+  const onboardingIncomplete = !profilesLoading && (!userProfile || !hasCoreOnboardingProfile || userProfileCompleteness < 80);
   
-  // Check if user has full profile - for general chat only profile needed, for candidate chat also need interactions
-  const hasFullProfile = userProfileCompleteness === 100;
+  // No gates - chat is always accessible with the new trial model
+  const hasFullProfile = !onboardingIncomplete;
   const hasInteractions = interactions.length > 0;
-  const canChatWithCandidate = hasFullProfile && hasInteractions;
-  const canChatGeneral = hasFullProfile; // General chat only needs profile
+  const canChatWithCandidate = true;
+  const canChatGeneral = true;
   
   // Mode: "general" = no candidate, "candidate" = specific candidate
   const chatMode = selectedCandidate ? "candidate" : "general";
@@ -622,19 +659,23 @@ const Devi = () => {
       // Process candidates
       if (candidatesRes.data) {
         setCandidates(candidatesRes.data);
-        // Auto-select ONLY if coming from candidate page with explicit candidateId
-        // Never auto-select when navigating without candidateId (general chat mode)
+        // Auto-select candidate: explicit candidateId from navigation, or default to most recently added
         if (candidateIdFromState && !isGeneralChatMode) {
           const found = candidatesRes.data.find(c => c.id === candidateIdFromState);
           if (found) setSelectedCandidate(found);
+        } else if (!isGeneralChatMode && !selectedCandidate) {
+          // Default to the most recently added candidate
+          const sorted = [...candidatesRes.data].sort((a, b) => 
+            new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+          );
+          if (sorted.length > 0) setSelectedCandidate(sorted[0]);
         }
-        // Removed: auto-selecting single candidate - users should explicitly choose
       }
       
       // Process profile
-      if (profileRes.data) {
-        setUserProfile(profileRes.data);
-      }
+        if (profileRes.data) {
+          setUserProfile(profileRes.data);
+        }
       
       // Process conversations
       if (conversationsRes.data) {
@@ -866,12 +907,28 @@ const Devi = () => {
     setMessages([]);
     setCurrentConversationId(null);
     setHistoryOpen(false);
-    setSoftWarningDismissed(false); // Reset warning dismissal for new chat
+    setSoftWarningDismissed(false);
+    setCandidateIntakeDismissed(false);
     lastLoadedCandidateRef.current = null; // Reset so new conversation can be created
   }, []);
 
   // Handle candidate selection with conversation choice
-  const handleCandidateSelect = useCallback((candidate: Candidate) => {
+  const handleCandidateSelect = useCallback(async (candidate: Candidate) => {
+    // If there's a current general conversation (no candidate), link it to this candidate
+    if (currentConversationId && !selectedCandidate && messages.length > 0) {
+      await supabase
+        .from("devi_conversations")
+        .update({ candidate_id: candidate.id })
+        .eq("id", currentConversationId);
+      
+      setSelectedCandidate(candidate);
+      // Update conversations list to reflect the change
+      setConversations(prev => prev.map(c => 
+        c.id === currentConversationId ? { ...c, candidate_id: candidate.id } : c
+      ));
+      return;
+    }
+
     // Check if there's an existing conversation for this candidate
     const existingConv = conversations.find(c => c.candidate_id === candidate.id);
     
@@ -884,7 +941,7 @@ const Devi = () => {
       // No existing conversation, just select
       setSelectedCandidate(candidate);
     }
-  }, [conversations, selectedCandidate]);
+  }, [conversations, selectedCandidate, currentConversationId, messages.length]);
 
   // Continue existing conversation
   const handleContinueConversation = useCallback(async () => {
@@ -954,15 +1011,31 @@ const Devi = () => {
   }, [user, currentConversationId, startNewChat]);
 
   const handleImageUpload = (type: string) => {
-    // If a candidate is selected, check profile completion
-    if (selectedCandidate && !canChatWithCandidate) {
-      setShowProfileDialog(true);
-      return;
-    }
     if (fileInputRef.current) {
       fileInputRef.current.setAttribute('data-type', type);
       fileInputRef.current.click();
     }
+  };
+
+  const handleConversationUpload = (data: {
+    platform: string;
+    files: { data: string; type: string; isVideo: boolean }[];
+    perspective: "me" | "them";
+  }) => {
+    // Add all files as pending images with the conversation context
+    const newImages = data.files.map(f => ({
+      data: f.data,
+      type: f.isVideo ? "conversation_video" : "text_screenshot",
+    }));
+    setPendingImages(prev => [...prev, ...newImages]);
+    setTextScreenshotRightSide(data.perspective);
+
+    // Set a smart prompt
+    const platformLabel = data.platform.replace(/_/g, " ");
+    const candidateRef = selectedCandidate ? ` with ${selectedCandidate.nickname}` : "";
+    setInput(
+      `Analyze this ${platformLabel} conversation${candidateRef}. Tell me who's chasing, red/green flags, attachment patterns, and what I should do next.`
+    );
   };
 
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1079,15 +1152,6 @@ const Devi = () => {
     const textToSend = messageText || input.trim();
     if ((!textToSend && pendingImages.length === 0) || isLoading) return;
     
-    // Check chat requirements based on mode
-    if (chatMode === "candidate" && !canChatWithCandidate) {
-      setShowProfileDialog(true);
-      return;
-    }
-    if (chatMode === "general" && !canChatGeneral) {
-      setShowProfileDialog(true);
-      return;
-    }
 
     // Free trial gate: 5 exchanges max
     if (freeTrialExhausted) {
@@ -1208,6 +1272,7 @@ const Devi = () => {
         .replace(/\[SET_ATTACHMENT_TO_PAST:\d+\]/g, '')
         .replace(/\[SET_COMPATIBILITY_SCORE:\d+\]/g, '')
         .replace(/\[LOG_INTERACTION:[^\]]*\]?/g, '')
+        .replace(/\[SET_PROFILE:[^\]]*\]?/g, '')
         .replace(/\[[A-Z_]+:[^\]]*\]?/g, '')
         .replace(/\[[A-Z_]{3,}\]/g, '')
         .trim();
@@ -1389,6 +1454,32 @@ const Devi = () => {
           toast.success(`Attachment to past updated to ${value}/10`);
         }
         
+        // Parse SET_PROFILE markers for onboarding intake
+        const profileFieldMatches = fullContent.matchAll(/\[SET_PROFILE:(\w+):([^\]]+)\]/g);
+        for (const match of profileFieldMatches) {
+          const field = match[1];
+          const value = match[2];
+          
+          // Handle special cases
+          if (field === 'interested_in') {
+            profileUpdates.interested_in = value.split(',').map(v => v.trim());
+          } else if (field === 'faith_importance') {
+            profileUpdates.faith_importance = Math.min(10, Math.max(1, parseInt(value)));
+          } else if (['gender_identity', 'pronouns', 'sexual_orientation', 'relationship_goal', 
+                       'relationship_status', 'relationship_structure', 'religion', 'kids_desire',
+                       'kids_status', 'communication_style', 'attachment_style', 'politics', 
+                       'social_style'].includes(field)) {
+            // Enum fields - set directly
+            (profileUpdates as any)[field] = value;
+          } else if (['name', 'city', 'country', 'conflict_style', 'career_stage', 
+                       'education_level', 'typical_partner_type', 'parents_relationship_dynamic',
+                       'felt_loved_as_child'].includes(field)) {
+            // Free text fields
+            (profileUpdates as any)[field] = value;
+          }
+          hasUpdates = true;
+        }
+        
         // Parse compatibility score marker for candidate
         const compatScoreMatch = fullContent.match(/\[SET_COMPATIBILITY_SCORE:(\d+)\]/);
         if (compatScoreMatch && selectedCandidate && user) {
@@ -1418,8 +1509,42 @@ const Devi = () => {
             console.error('Compatibility score update error:', err);
           }
         }
+
+        // Parse CREATE_CANDIDATE marker
+        const createCandidateMatch = fullContent.match(/\[CREATE_CANDIDATE:([^|]+)\|([^|]*)\|([^|]*)\|([^\]]*)\]/);
+        if (createCandidateMatch && user && !selectedCandidate) {
+          const nickname = createCandidateMatch[1].trim();
+          const age = createCandidateMatch[2].trim() ? parseInt(createCandidateMatch[2].trim()) : null;
+          const city = createCandidateMatch[3].trim() || null;
+          const status = createCandidateMatch[4].trim() || 'talking';
+          
+          if (nickname) {
+            try {
+              const { data: newCandidate, error } = await supabase
+                .from('candidates')
+                .insert({
+                  user_id: user.id,
+                  nickname,
+                  age,
+                  city,
+                  status: status as any,
+                })
+                .select()
+                .single();
+              
+              if (!error && newCandidate) {
+                setSelectedCandidate(newCandidate);
+                setCandidates(prev => [newCandidate, ...prev]);
+                toast.success(`${nickname} added as a candidate!`);
+              } else {
+                console.error('Failed to create candidate:', error);
+              }
+            } catch (err) {
+              console.error('Candidate creation error:', err);
+            }
+          }
+        }
         
-        // Apply profile updates to database
         if (hasUpdates && user) {
           try {
             const { error } = await supabase
@@ -1540,7 +1665,9 @@ const Devi = () => {
           fullContent.includes('[SET_LOVE_BOMBING_SENSITIVITY:') ||
           fullContent.includes('[SET_OVER_EX_LEVEL:') ||
           fullContent.includes('[SET_ATTACHMENT_TO_PAST:') ||
-          fullContent.includes('[LOG_INTERACTION:');
+          fullContent.includes('[LOG_INTERACTION:') ||
+          fullContent.includes('[SET_PROFILE:') ||
+          fullContent.includes('[CREATE_CANDIDATE:');
           
         if (hasMarkers) {
           setMessages(prev => 
@@ -1658,6 +1785,60 @@ const Devi = () => {
     }
   }, [searchParams, profilesLoading, conversationsLoading, setSearchParams, startNewChat, userProfile]);
 
+  // Keep onboarding nudge visible for incomplete profiles, and resurface it after AI replies
+  useEffect(() => {
+    if (!userProfile) return;
+
+    const shouldShowNudge = onboardingIncomplete || userProfileCompleteness < 80;
+
+    if (messages.length === 0) {
+      setShowProfileNudge(shouldShowNudge);
+      return;
+    }
+
+    if (!firstTimeAnalysisShown.current && messages.length >= 2) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg?.role === "assistant" && shouldShowNudge) {
+        firstTimeAnalysisShown.current = true;
+        setShowProfileNudge(true);
+      }
+    }
+  }, [messages, userProfile, userProfileCompleteness]);
+
+  // Auto-send onboarding context on first time if available
+  useEffect(() => {
+    if (isFirstTime && !onboardingContextSent.current) {
+      const uploadContext = localStorage.getItem("onboarding_upload_context");
+      if (uploadContext && uploadContext.trim()) {
+        onboardingContextSent.current = true;
+        setFirstTimeIntakeComplete(true);
+        
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete("firstTime");
+        setSearchParams(newParams, { replace: true });
+        
+        const goal = localStorage.getItem("onboarding_goal") || "evaluate";
+        const goalLabel = goal === "detachment" ? "detach from someone" 
+          : goal === "healing" ? "heal from a past relationship"
+          : goal === "evaluate" ? "evaluate someone I'm dating"
+          : goal === "checkup" ? "do a relationship check-up"
+          : "start dating better";
+        
+        const contextMessage = [
+          `I'm here to ${goalLabel}.`,
+          uploadContext,
+          "Can you help me get started?",
+        ].filter(Boolean).join("\n\n");
+        
+        setTimeout(() => {
+          sendMessage(contextMessage);
+        }, 500);
+        
+        localStorage.removeItem("onboarding_upload_context");
+      }
+    }
+  }, [isFirstTime]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[image:var(--gradient-page)]">
@@ -1670,40 +1851,99 @@ const Devi = () => {
     return <Navigate to="/auth" replace />;
   }
 
-  if (isFree) {
+  // D.E.V.I. chat is now available to all users (free trial included)
+
+  // First-time intake submission handler
+  const handleFirstTimeIntake = async (data: {
+    candidateName: string;
+    candidateAge: string;
+    candidateLocation: string;
+    candidateSex: string;
+    freeformInfo: string;
+  }) => {
+    if (!user) return;
+    
+    // Create candidate
+    const { data: newCandidate, error } = await supabase
+      .from("candidates")
+      .insert({
+        user_id: user.id,
+        nickname: data.candidateName,
+        age: data.candidateAge ? parseInt(data.candidateAge) : null,
+        city: data.candidateLocation || null,
+        gender_identity: data.candidateSex as any || null,
+        notes: data.freeformInfo || null,
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      toast.error("Failed to create candidate");
+      return;
+    }
+    
+    if (newCandidate) {
+      setCandidates(prev => [newCandidate, ...prev]);
+      setSelectedCandidate(newCandidate);
+    }
+    
+    setFirstTimeIntakeComplete(true);
+    
+    // Remove firstTime param from URL
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("firstTime");
+    setSearchParams(newParams, { replace: true });
+    
+    // Auto-send a guided message asking for screenshot
+    const goal = localStorage.getItem("onboarding_goal") || "evaluate";
+    const contextParts = [
+      `I just started using the app to ${goal === "detachment" ? "detach from" : goal === "healing" ? "heal from" : "evaluate"} ${data.candidateName}.`,
+      data.candidateAge ? `They're ${data.candidateAge} years old.` : "",
+      data.candidateLocation ? `Based in ${data.candidateLocation}.` : "",
+      data.freeformInfo ? `Here's what I know: ${data.freeformInfo}` : "",
+      "Can you give me an initial analysis? I'll upload screenshots of our conversations next.",
+    ].filter(Boolean).join(" ");
+    
+    // Slight delay to let state settle
+    setTimeout(() => {
+      sendMessage(contextParts);
+    }, 300);
+  };
+  
+  const handleSkipToChat = () => {
+    setFirstTimeIntakeComplete(true);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("firstTime");
+    setSearchParams(newParams, { replace: true });
+  };
+
+  
+  // Show first-time intake form (only if no upload context was provided)
+  if (isFirstTime && !firstTimeIntakeComplete) {
+    const userName = localStorage.getItem("onboarding_name") || userProfile?.name || "";
+    const userGoal = localStorage.getItem("onboarding_goal") || "evaluate";
+    
     return (
-      <div className="min-h-screen bg-[image:var(--gradient-page)] pb-24">
-        <header className="sticky top-0 z-50 bg-[image:var(--gradient-header)] backdrop-blur-xl border-b border-border/50 safe-area-top">
-          <div className="container mx-auto px-4 py-4 max-w-lg">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-xl hover:bg-primary/10">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="rounded-xl hover:bg-primary/10">
-                <Home className="w-5 h-5" />
-              </Button>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary-foreground" />
-                </div>
-                <h1 className="text-xl font-semibold bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">D.E.V.I.</h1>
+      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border safe-area-top">
+          <div className="container mx-auto px-2 py-2 max-w-lg">
+            <div className="flex items-center gap-1.5">
+              <div className="w-7 h-7 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
+                <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="font-semibold text-sm text-foreground leading-tight">D.E.V.I.</h1>
+                <p className="text-xs text-muted-foreground">Let's get started</p>
               </div>
             </div>
           </div>
         </header>
-        <main className="container mx-auto px-4 py-6 max-w-lg">
-          <div className="bg-card rounded-xl border border-border p-6 text-center space-y-4">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-muted flex items-center justify-center">
-              <Sparkles className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h2 className="text-xl font-semibold">Unlock D.E.V.I. Chat</h2>
-            <p className="text-muted-foreground">Upgrade to chat with your AI assistant and get personalized advice.</p>
-            <Button className="bg-[image:var(--gradient-hero)]" onClick={() => navigate("/settings?tab=billing")}>
-              <Sparkles className="w-4 h-4 mr-2" />
-              Upgrade to Unlock
-            </Button>
-          </div>
-        </main>
+        <FirstTimeIntake
+          userName={userName}
+          userGoal={userGoal}
+          onSubmit={handleFirstTimeIntake}
+          onSkipToChat={handleSkipToChat}
+        />
       </div>
     );
   }
@@ -1713,13 +1953,27 @@ const Devi = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border safe-area-top">
         <div className="container mx-auto px-2 py-2 max-w-lg">
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-lg shrink-0 h-8 w-8">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="rounded-lg shrink-0 h-8 w-8">
-              <Home className="w-4 h-4" />
-            </Button>
+          <div className="flex items-center gap-1.5">
+            {/* Navigate dropdown — replaces back/home buttons */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-lg shrink-0 h-8 w-8">
+                  <Home className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem onClick={() => navigate("/dashboard")} className="gap-2">
+                  <LayoutGrid className="w-4 h-4" /> Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/community")} className="gap-2">
+                  <Users className="w-4 h-4" /> Community
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/settings")} className="gap-2">
+                  <SlidersHorizontal className="w-4 h-4" /> Settings
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <div className="w-7 h-7 rounded-lg bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
                 <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
@@ -1730,157 +1984,177 @@ const Devi = () => {
               </div>
             </div>
             
-            {/* Tour Restart Button */}
-            <TourRestartButton tourId="devi" tourSteps={DEVI_TOUR_STEPS} />
-            
-            {/* New Chat Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={startNewChat}
-              className="rounded-lg shrink-0 h-8 w-8"
-              title="New Chat"
-            >
-              <Plus className="w-4 h-4" />
+
+            {/* Add Candidate */}
+            <Button variant="ghost" size="icon" onClick={() => navigate("/add-candidate?mode=smart")} className="rounded-lg shrink-0 h-8 w-8 text-primary" title="Add Candidate">
+              <UserPlus className="w-4 h-4" />
             </Button>
             
-            {/* Adjust Tone Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/settings?tab=preferences")}
-              className="rounded-lg shrink-0 h-8 w-8"
-              title="Adjust D.E.V.I.'s Tone"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-            </Button>
-            
-            {/* Layout Toggle Button */}
-            <TooltipProvider delayDuration={400}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      const newLayout = chatLayout === "bubble" ? "chatgpt" : "bubble";
-                      setChatLayout(newLayout);
-                      localStorage.setItem('devi-chat-layout', newLayout);
-                    }}
-                    className="rounded-lg shrink-0 h-8 w-8"
-                    title={chatLayout === "bubble" ? "Switch to Article View" : "Switch to Bubble View"}
-                  >
-                    {chatLayout === "bubble" ? (
-                      <AlignLeft className="w-4 h-4" />
-                    ) : (
-                      <LayoutGrid className="w-4 h-4" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p className="text-xs">{chatLayout === "bubble" ? "Switch to Article View" : "Switch to Bubble View"}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            {/* Chat History Sheet */}
-            <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-lg shrink-0 h-8 w-8" title="Chat History" data-tour="devi-history">
-                  <MessageSquare className="w-4 h-4" />
+            {/* More actions menu — houses layout toggle, chat history, tone, tour */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-lg shrink-0 h-8 w-8" title="More">
+                  <SlidersHorizontal className="w-4 h-4" />
                 </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-80 p-0">
-                <SheetHeader className="p-4 border-b border-border">
-                  <SheetTitle className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    Chat History
-                  </SheetTitle>
-                </SheetHeader>
-                <ScrollArea className="h-[calc(100vh-80px)]">
-                  <div className="p-2 space-y-1">
-                    {conversationsLoading ? (
-                      <div className="p-4 text-center text-muted-foreground text-sm">
-                        <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
-                        Loading...
-                      </div>
-                    ) : conversations.length === 0 ? (
-                      <div className="p-4 text-center text-muted-foreground text-sm">
-                        No conversations yet
-                      </div>
-                    ) : (
-                      conversations.map((conv) => {
-                        const candidate = candidates.find(c => c.id === conv.candidate_id);
-                        return (
-                          <div
-                            key={conv.id}
-                            className={`group flex items-start gap-2 p-3 rounded-lg cursor-pointer hover:bg-muted transition-colors ${
-                              currentConversationId === conv.id ? 'bg-muted' : ''
-                            }`}
-                            onClick={() => loadConversation(conv.id)}
-                          >
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{conv.title || "New conversation"}</p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                {candidate && (
-                                  <span className="text-xs text-primary truncate">{candidate.nickname}</span>
-                                )}
-                                <span className="text-xs text-muted-foreground">
-                                  {format(new Date(conv.updated_at), "MMM d")}
-                                </span>
-                              </div>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteConversation(conv.id);
-                              }}
-                            >
-                              <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
-                            </Button>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                </ScrollArea>
-              </SheetContent>
-            </Sheet>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem onClick={() => setHistoryOpen(true)} className="gap-2">
+                  <Clock className="w-4 h-4" /> Chat History
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    const newLayout = chatLayout === "bubble" ? "chatgpt" : "bubble";
+                    setChatLayout(newLayout);
+                    localStorage.setItem('devi-chat-layout', newLayout);
+                  }}
+                  className="gap-2"
+                >
+                  {chatLayout === "bubble" ? <AlignLeft className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
+                  {chatLayout === "bubble" ? "Article View" : "Bubble View"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/settings?tab=preferences")} className="gap-2">
+                  <Sparkles className="w-4 h-4" /> Adjust D.E.V.I.'s Tone
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
+
+      {/* Chat History Sheet (opened via More menu) */}
+      <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
+        <SheetContent side="right" className="w-80 p-0">
+          <SheetHeader className="p-4 border-b border-border">
+            <SheetTitle className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              Chat History
+            </SheetTitle>
+          </SheetHeader>
+          <ScrollArea className="h-[calc(100vh-80px)]">
+            <div className="p-2 space-y-1">
+              {conversationsLoading ? (
+                <div className="p-4 text-center text-muted-foreground text-sm">
+                  <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
+                  Loading...
+                </div>
+              ) : conversations.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground text-sm">
+                  No conversations yet
+                </div>
+              ) : (
+                conversations.map((conv) => {
+                  const candidate = candidates.find(c => c.id === conv.candidate_id);
+                  return (
+                    <div
+                      key={conv.id}
+                      className={`group flex items-start gap-2 p-3 rounded-lg cursor-pointer hover:bg-muted transition-colors ${
+                        currentConversationId === conv.id ? 'bg-muted' : ''
+                      }`}
+                      onClick={() => loadConversation(conv.id)}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{conv.title || "New conversation"}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {candidate && (
+                            <span className="text-xs text-primary truncate">{candidate.nickname}</span>
+                          )}
+                          <span className="text-xs text-muted-foreground">
+                            {format(new Date(conv.updated_at), "MMM d")}
+                          </span>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteConversation(conv.id);
+                        }}
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
+                      </Button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
 
       {/* Candidate Selector Bar */}
       <div className="border-b border-border bg-muted/30">
         <div className="container mx-auto px-4 py-2 max-w-lg">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground shrink-0">Talking about:</span>
             {profilesLoading ? (
-              <div className="h-8 w-32 bg-muted rounded-lg animate-pulse" />
+              <div className="h-10 flex-1 bg-muted rounded-xl animate-pulse" />
             ) : (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 gap-2" data-tour="devi-candidate-select">
-                    {selectedCandidate ? (
-                      <>
-                        <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
-                          <span className="text-xs font-medium">{selectedCandidate.nickname.charAt(0)}</span>
-                        </div>
-                        {selectedCandidate.nickname}
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4 text-primary" />
-                        General
-                      </>
-                    )}
-                    <ChevronDown className="w-4 h-4 ml-auto" />
+                  <Button 
+                    variant={selectedCandidate ? "outline" : "secondary"} 
+                    size="sm" 
+                    className={`h-10 gap-2 flex-1 justify-between ${!selectedCandidate ? "border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary" : ""}`}
+                    data-tour="devi-candidate-select"
+                  >
+                    <div className="flex items-center gap-2">
+                      {selectedCandidate ? (
+                        <>
+                          <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+                            <span className="text-xs font-semibold">{selectedCandidate.nickname.charAt(0)}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-medium">{selectedCandidate.nickname}</span>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                              selectedCandidate.compatibility_score != null
+                                ? selectedCandidate.compatibility_score >= 70 
+                                  ? "bg-green-500/15 text-green-600" 
+                                  : selectedCandidate.compatibility_score >= 40 
+                                    ? "bg-amber-500/15 text-amber-600" 
+                                    : "bg-red-500/15 text-red-600"
+                                : "bg-muted text-muted-foreground"
+                            }`}>
+                              {selectedCandidate.compatibility_score != null ? `${selectedCandidate.compatibility_score}%` : "New"}
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <Users className="w-4 h-4" />
+                          <span className="font-medium">Select a candidate to discuss</span>
+                        </>
+                      )}
+                    </div>
+                    <ChevronDown className="w-4 h-4 shrink-0 opacity-60" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuContent align="start" className="w-64">
+                  {/* Complete Onboarding option - shown when onboarding is incomplete */}
+                  {onboardingIncomplete && (
+                    <>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelectedCandidate(null);
+                          setMessages([]);
+                          setCurrentConversationId(null);
+                          lastLoadedCandidateRef.current = null;
+                          sendMessage("Let's continue my onboarding — help me complete my profile setup.");
+                        }}
+                        className="gap-2 py-2.5"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-[image:var(--gradient-hero)] flex items-center justify-center shrink-0">
+                          <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
+                        </div>
+                        <div className="flex-1">
+                          <span className="font-medium">Complete Onboarding</span>
+                          <p className="text-[11px] text-muted-foreground">Finish your profile setup</p>
+                        </div>
+                      </DropdownMenuItem>
+                      <div className="h-px bg-border my-1" />
+                    </>
+                  )}
+
                   {/* General option - no candidate */}
                   <DropdownMenuItem
                     onClick={() => {
@@ -1889,17 +2163,25 @@ const Devi = () => {
                       setCurrentConversationId(null);
                       lastLoadedCandidateRef.current = null;
                     }}
-                    className="gap-2"
+                    className="gap-2 py-2.5"
                   >
                     <Sparkles className="w-4 h-4 text-primary" />
-                    <span className="flex-1">General</span>
+                    <div className="flex-1">
+                      <span className="font-medium">General Chat</span>
+                      <p className="text-[11px] text-muted-foreground">Dating advice, self-growth</p>
+                    </div>
                     {!selectedCandidate && (
                       <Check className="w-4 h-4 text-primary" />
                     )}
                   </DropdownMenuItem>
                   
                   {candidates.length > 0 && (
-                    <div className="h-px bg-border my-1" />
+                    <>
+                      <div className="h-px bg-border my-1" />
+                      <div className="px-2 py-1.5">
+                        <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Your Candidates</span>
+                      </div>
+                    </>
                   )}
                   
                   {candidates.map((c) => {
@@ -1908,14 +2190,25 @@ const Devi = () => {
                       <DropdownMenuItem
                         key={c.id}
                         onClick={() => handleCandidateSelect(c)}
-                        className="gap-2"
+                        className="gap-2 py-2.5"
                       >
-                        <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
-                          <span className="text-xs font-medium">{c.nickname.charAt(0)}</span>
+                        <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                          <span className="text-xs font-semibold">{c.nickname.charAt(0)}</span>
                         </div>
-                        <span className="flex-1">{c.nickname}</span>
-                        {hasConversation && (
-                          <MessageCircle className="w-3 h-3 text-muted-foreground" />
+                        <span className="flex-1 font-medium">{c.nickname}</span>
+                        {c.compatibility_score != null && (
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                            c.compatibility_score >= 70 
+                              ? "bg-green-500/15 text-green-600" 
+                              : c.compatibility_score >= 40 
+                                ? "bg-amber-500/15 text-amber-600" 
+                                : "bg-red-500/15 text-red-600"
+                          }`}>
+                            {c.compatibility_score}%
+                          </span>
+                        )}
+                        {hasConversation && !c.compatibility_score && (
+                          <MessageCircle className="w-3.5 h-3.5 text-muted-foreground" />
                         )}
                         {selectedCandidate?.id === c.id && (
                           <Check className="w-4 h-4 text-primary" />
@@ -1927,12 +2220,23 @@ const Devi = () => {
               </DropdownMenu>
             )}
             
-            {/* Update Score Button - only show for candidate mode */}
+            {/* View Profile + Update Score - only show for candidate mode */}
+            {selectedCandidate && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-10 gap-1.5 shrink-0"
+                onClick={() => navigate(`/candidate/${selectedCandidate.id}`)}
+              >
+                <User className="w-3.5 h-3.5" />
+                <span className="text-xs">Profile</span>
+              </Button>
+            )}
             {selectedCandidate && messages.length > 0 && (
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 gap-1.5 ml-auto"
+                className="h-10 gap-1.5 shrink-0"
                 onClick={handleUpdateScore}
                 disabled={isUpdatingScore}
               >
@@ -1941,7 +2245,7 @@ const Devi = () => {
                 ) : (
                   <RefreshCw className="w-3.5 h-3.5" />
                 )}
-                <span className="text-xs">Update Score</span>
+                <span className="text-xs">Score</span>
               </Button>
             )}
           </div>
@@ -2021,96 +2325,6 @@ const Devi = () => {
         category={crisisCategory}
       />
 
-      {/* Requirements Dialog */}
-      <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              No Fluff. Just Real Advice.
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-              <p className="text-sm text-foreground font-medium">
-                Unlike other apps, D.E.V.I. doesn't guess or give generic tips.
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                We use your actual data, patterns, and history to give you real, personalized advice backed by logic — not vibes.
-              </p>
-            </div>
-            
-            <p className="text-xs text-muted-foreground text-center">
-              Complete these to unlock D.E.V.I.:
-            </p>
-            
-            <div className="space-y-3">
-              {/* Your Profile */}
-              <div className="p-3 rounded-lg border border-border bg-muted/30 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Your Profile</span>
-                  </div>
-                  <span className={`text-sm font-medium ${hasFullProfile ? 'text-primary' : 'text-muted-foreground'}`}>
-                    {userProfileCompleteness}%
-                  </span>
-                </div>
-                <Progress value={userProfileCompleteness} className="h-1.5" />
-                {!hasFullProfile && missingProfileFields.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    Missing: {missingProfileFields.slice(0, 3).join(", ")}
-                    {missingProfileFields.length > 3 && ` +${missingProfileFields.length - 3} more`}
-                  </p>
-                )}
-                {!hasFullProfile && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full mt-2 gap-2"
-                    onClick={() => {
-                      setShowProfileDialog(false);
-                      navigate("/settings", { state: { tab: "profile" } });
-                    }}
-                  >
-                    Complete Profile
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-
-              {/* Logged Interaction */}
-              <div className="p-3 rounded-lg border border-border bg-muted/30 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Logged Interaction</span>
-                  </div>
-                  <span className={`text-sm font-medium ${hasInteractions ? 'text-primary' : 'text-muted-foreground'}`}>
-                    {hasInteractions ? `${interactions.length} logged` : "None"}
-                  </span>
-                </div>
-                <Progress value={hasInteractions ? 100 : 0} className="h-1.5" />
-                {!hasInteractions && selectedCandidate && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full mt-2 gap-2"
-                    onClick={() => {
-                      setShowProfileDialog(false);
-                      navigate(`/candidate/${selectedCandidate.id}`);
-                    }}
-                  >
-                    Log an Interaction
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Messages */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0">
         <div className={`container mx-auto px-4 py-4 ${chatLayout === "chatgpt" ? "max-w-2xl" : "max-w-lg"} space-y-4`}>
@@ -2166,7 +2380,16 @@ const Devi = () => {
                         {q}
                       </button>
                     ))}
-                  </div>
+                    </div>
+                    <button
+                      onClick={() => navigate("/add-candidate?mode=smart")}
+                      className={`rounded-full border border-primary text-primary hover:bg-primary/10 transition-colors flex items-center gap-1.5 ${
+                        chatLayout === "chatgpt" ? "text-sm px-4 py-2" : "text-xs px-3 py-1.5"
+                      }`}
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                      Add a new candidate
+                    </button>
                   
                   {/* Upload hint and Text Simulator - only for candidate mode */}
                   {selectedCandidate && (
@@ -2189,31 +2412,10 @@ const Devi = () => {
                 </div>
               )}
 
-              {/* Locked state - inline */}
-              {!hasFullProfile && (
-                <div className="pl-10">
-                  <button
-                    onClick={() => setShowProfileDialog(true)}
-                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
-                  >
-                    <Lock className="w-3 h-3" />
-                    Complete profile to unlock chat
-                  </button>
-                </div>
-              )}
 
-              {/* Profile sections nudge - show when profile is complete but family/relationship sections are missing */}
-              {hasFullProfile && !profileNudgeDismissed && (
-                <div className="pl-10 mt-4">
-                  <ProfileSectionsNudge 
-                    profile={userProfile} 
-                    onDismiss={() => setProfileNudgeDismissed(true)}
-                  />
-                </div>
-              )}
 
-              {/* Healing Journey - show only in general chat mode (no candidate selected) */}
-              {hasFullProfile && !selectedCandidate && (
+              {/* Healing Journey - show only after onboarding is complete and in general chat mode */}
+              {hasFullProfile && !onboardingIncomplete && !selectedCandidate && (
                 <div className="pl-10 mt-4">
                   <HealingJourney />
                 </div>
@@ -2392,7 +2594,31 @@ const Devi = () => {
             </div>
           )}
           
-          {/* Win prompt - show after conversation has messages and not loading */}
+          {/* Progressive onboarding nudge */}
+          {showProfileNudge && (
+            <OnboardingProgressCTA 
+              profile={userProfile}
+              onDismiss={() => {
+                setShowProfileNudge(false);
+                setProfileNudgeDismissed(true);
+              }}
+              onOpenSection={(sectionId) => {
+                setProfileEditorSection(sectionId);
+              }}
+              className="mt-4"
+            />
+          )}
+
+          {/* Candidate intake nudge */}
+          {selectedCandidate && !candidateIntakeDismissed && (
+            <CandidateIntakeCTA
+              candidate={selectedCandidate}
+              onDismiss={() => setCandidateIntakeDismissed(true)}
+              onOpenSection={(sectionId) => setCandidateEditorSection(sectionId)}
+              className="mt-4"
+            />
+          )}
+          
           {messages.length >= 2 && messages.length < MAX_CONVERSATION_MESSAGES && !isLoading && messages[messages.length - 1]?.role === 'assistant' && (
             <DeviWinPrompt onLogWin={() => setShowWinDialog(true)} className="mt-4" />
           )}
@@ -2470,74 +2696,79 @@ const Devi = () => {
                 See Plans
               </Button>
             </div>
-          ) : !hasFullProfile ? (
-            <button
-              onClick={() => setShowProfileDialog(true)}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-border bg-muted/50 text-muted-foreground hover:bg-muted transition-colors"
-            >
-              <Lock className="w-4 h-4" />
-              <span className="text-sm">Complete profile to unlock chat</span>
-            </button>
-          ) : chatMode === "candidate" && !canChatWithCandidate ? (
-            <button
-              onClick={() => setShowProfileDialog(true)}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-border bg-muted/50 text-muted-foreground hover:bg-muted transition-colors"
-            >
-              <Lock className="w-4 h-4" />
-              <span className="text-sm">Log an interaction to unlock chat</span>
-            </button>
           ) : (
             <div className="flex gap-2 items-end" data-tour="devi-input">
-              <TooltipProvider delayDuration={400}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleImageUpload('general')}
-                      className="shrink-0"
-                      disabled={isLoading}
-                      data-tour="devi-image-upload"
-                    >
-                      <ImagePlus className="w-5 h-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    <p className="text-xs">Upload text screenshots or dating profiles for analysis</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              {/* Upload menu: screenshot or conversation analysis */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0 h-11 w-11 rounded-xl border-primary/30 hover:bg-primary/10"
+                    disabled={isLoading}
+                    data-tour="devi-image-upload"
+                  >
+                    <ImagePlus className="w-6 h-6 text-primary" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuItem onClick={() => handleImageUpload('text_screenshot')} className="gap-2">
+                    <Camera className="w-4 h-4" />
+                    Upload Screenshot
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleImageUpload('dating_profile')} className="gap-2">
+                    <Heart className="w-4 h-4" />
+                    Dating Profile Screenshot
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowConvoUpload(true)} className="gap-2">
+                    <MessageCircle className="w-4 h-4 text-primary" />
+                    <span className="font-medium">Analyze a Conversation</span>
+                  </DropdownMenuItem>
+                  {selectedCandidate && (
+                    <>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setPendingCandidateSelection(selectedCandidate);
+                          setShowTextSimFromDialog(true);
+                        }}
+                        className="gap-2"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        Text Simulator
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => navigate(`/detachment-plan/${selectedCandidate.id}`)}
+                        className="gap-2"
+                      >
+                        <Unlink className="w-4 h-4" />
+                        Detachment Plan
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={selectedCandidate ? `Ask about ${selectedCandidate.nickname}...` : "Ask me anything about dating..."}
-                className="min-h-[44px] max-h-32 resize-none"
-                rows={1}
+                className="min-h-[52px] max-h-36 resize-none text-sm rounded-xl"
+                rows={2}
                 disabled={isLoading}
               />
-              <TooltipProvider delayDuration={400}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon"
-                      onClick={() => sendMessage()}
-                      disabled={(!input.trim() && pendingImages.length === 0) || isLoading}
-                      className="shrink-0 bg-[image:var(--gradient-hero)]"
-                    >
-                      {isLoading ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        <Send className="w-5 h-5" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    <p className="text-xs">Send your message to D.E.V.I.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Button
+                size="icon"
+                onClick={() => sendMessage()}
+                disabled={(!input.trim() && pendingImages.length === 0) || isLoading}
+                className="shrink-0 h-11 w-11 rounded-xl bg-[image:var(--gradient-hero)]"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+              </Button>
             </div>
           )}
           {/* AI Disclosure - at bottom for App Store compliance */}
@@ -2549,7 +2780,7 @@ const Devi = () => {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,video/*"
         multiple
         onChange={onFileChange}
         className="hidden"
@@ -2563,6 +2794,43 @@ const Devi = () => {
         candidateId={selectedCandidate?.id}
         conversationId={currentConversationId || undefined}
       />
+
+      {/* Conversation Upload Sheet */}
+      <ConversationUploadSheet
+        open={showConvoUpload}
+        onOpenChange={setShowConvoUpload}
+        candidateName={selectedCandidate?.nickname}
+        onSubmit={handleConversationUpload}
+      />
+
+      {/* Inline Profile Editor */}
+      {user && (
+        <InlineProfileEditor
+          open={!!profileEditorSection}
+          sectionId={profileEditorSection}
+          profile={userProfile}
+          userId={user.id}
+          onClose={() => setProfileEditorSection(null)}
+          onSaved={(updatedProfile) => {
+            setUserProfile(updatedProfile);
+          }}
+        />
+      )}
+
+      {/* Inline Candidate Editor */}
+      {user && selectedCandidate && (
+        <InlineCandidateEditor
+          open={!!candidateEditorSection}
+          sectionId={candidateEditorSection}
+          candidate={selectedCandidate}
+          userId={user.id}
+          onClose={() => setCandidateEditorSection(null)}
+          onSaved={(updatedCandidate) => {
+            setSelectedCandidate(updatedCandidate);
+            setCandidates(prev => prev.map(c => c.id === updatedCandidate.id ? updatedCandidate : c));
+          }}
+        />
+      )}
     </div>
   );
 };

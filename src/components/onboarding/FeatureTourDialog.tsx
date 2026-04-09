@@ -87,7 +87,9 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
   const [isMuted, setIsMuted] = useState(false);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [audioEnded, setAudioEnded] = useState(false);
-  const [userVoicePreference, setUserVoicePreference] = useState<"mature" | "younger" | undefined>(undefined);
+  const [userVoicePreference, setUserVoicePreference] = useState<
+    "female" | "male" | undefined
+  >(undefined);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const currentSlideRef = useRef(currentSlide);
   const isMutedRef = useRef(isMuted);
@@ -113,9 +115,9 @@ export function FeatureTourDialog({ open, onClose }: FeatureTourDialogProps) {
         .eq("user_id", user.id)
         .single();
 
-      const pref = (data?.devi_voice === "younger" ? "younger" : "mature") as
-        | "mature"
-        | "younger";
+      const pref = (data?.devi_voice === "male" ? "male" : "female") as
+        | "female"
+        | "male";
 
       if (!cancelled) setUserVoicePreference(pref);
     };

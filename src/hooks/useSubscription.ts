@@ -14,6 +14,10 @@ interface StripeSubscription {
   detachment_plan_candidates: string[];
   trial_active: boolean;
   trial_ends_at: string | null;
+  has_text_simulator: boolean;
+  has_detachment_plan: boolean;
+  text_sim_subscription_id: string | null;
+  detachment_subscription_id: string | null;
 }
 
 // Interaction limit for the test user (nak@j.co) — everyone else gets 300
@@ -40,7 +44,7 @@ export function useSubscription() {
       if (error) {
         console.error("Error checking subscription:", error);
         setSubscription({
-          subscribed: false,
+subscribed: false,
           plan: "free",
           product_id: null,
           price_id: null,
@@ -49,6 +53,10 @@ export function useSubscription() {
           detachment_plan_candidates: [],
           trial_active: false,
           trial_ends_at: null,
+          has_text_simulator: false,
+          has_detachment_plan: false,
+          text_sim_subscription_id: null,
+          detachment_subscription_id: null,
         });
       } else {
         setSubscription({
@@ -61,6 +69,10 @@ export function useSubscription() {
           detachment_plan_candidates: data.detachment_plan_candidates || [],
           trial_active: data.trial_active || false,
           trial_ends_at: data.trial_ends_at || null,
+          has_text_simulator: data.has_text_simulator || false,
+          has_detachment_plan: data.has_detachment_plan || false,
+          text_sim_subscription_id: data.text_sim_subscription_id || null,
+          detachment_subscription_id: data.detachment_subscription_id || null,
         });
       }
 
@@ -105,11 +117,11 @@ export function useSubscription() {
   const getPlanLimits = (plan: SubscriptionPlan) => {
     const interactionLimit = getInteractionLimit();
     switch (plan) {
-      case "free": return { candidates: 1, updates: interactionLimit, aiMessages: 5, textSimSessions: 0, compatRefreshPerCandidate: 0 };
-      case "basic": return { candidates: 5, updates: 300, aiMessages: 300, textSimSessions: 1, compatRefreshPerCandidate: 5 };
-      case "starter": return { candidates: 10, updates: 999, aiMessages: 1000, textSimSessions: 5, compatRefreshPerCandidate: 10 };
-      case "unlimited": return { candidates: 999, updates: 999, aiMessages: 999999, textSimSessions: 20, compatRefreshPerCandidate: 999 };
-      default: return { candidates: 1, updates: interactionLimit, aiMessages: 5, textSimSessions: 0, compatRefreshPerCandidate: 0 };
+      case "free": return { candidates: 999, updates: interactionLimit, aiMessages: 999999, textSimSessions: 0, compatRefreshPerCandidate: 5 };
+      case "basic": return { candidates: 999, updates: 999, aiMessages: 999999, textSimSessions: 5, compatRefreshPerCandidate: 10 };
+      case "starter": return { candidates: 999, updates: 999, aiMessages: 999999, textSimSessions: 5, compatRefreshPerCandidate: 10 };
+      case "unlimited": return { candidates: 999, updates: 999, aiMessages: 999999, textSimSessions: 999, compatRefreshPerCandidate: 999 };
+      default: return { candidates: 999, updates: interactionLimit, aiMessages: 999999, textSimSessions: 0, compatRefreshPerCandidate: 5 };
     }
   };
 

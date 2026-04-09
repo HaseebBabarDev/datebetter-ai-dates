@@ -12,7 +12,7 @@ interface VoicePlayButtonProps {
   size?: "sm" | "default" | "lg";
   variant?: "inline" | "icon" | "bar" | "blob";
   className?: string;
-  voicePreference?: "mature" | "younger";
+  voicePreference?: "female" | "male" | "mature" | "younger";
 }
 
 // Animated sound wave bars that update continuously while playing
@@ -78,6 +78,10 @@ const FloatingBlob: React.FC<{ isPlaying: boolean; onClick: () => void; isLoadin
 const SPEED_OPTIONS = [1, 1.5, 2] as const;
 type PlaybackSpeed = typeof SPEED_OPTIONS[number];
 
+// Module-level cache to prevent duplicate devi_voice fetches across instances
+let _cachedVoice: string | undefined;
+let _voiceFetchPromise: Promise<string | undefined> | null = null;
+
 export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
   text,
   disabled = false,
@@ -94,11 +98,10 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const fetchDeviVoiceNoStore = useCallback(async (): Promise<
-    "mature" | "younger" | undefined
+    string | undefined
   > => {
     if (!user) return undefined;
 
-    // Use an authenticated REST call with `cache: 'no-store'` to avoid any browser/service-worker caching.
     const { data: sessionData } = await supabase.auth.getSession();
     const accessToken = sessionData.session?.access_token;
     if (!accessToken) return undefined;
@@ -120,7 +123,7 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
     if (!res.ok) return undefined;
     const rows = (await res.json().catch(() => [])) as Array<{ devi_voice?: string | null }>;
     const v = rows?.[0]?.devi_voice;
-    return v === "younger" ? "younger" : v === "mature" ? "mature" : undefined;
+    return v || undefined;
   }, [user]);
 
   // Keep local state in sync with explicit prop
@@ -128,13 +131,28 @@ export const VoicePlayButton: React.FC<VoicePlayButtonProps> = ({
     if (voicePreference) setUserVoice(voicePreference);
   }, [voicePreference]);
 
-  // Fetch user's voice preference if not explicitly provided
+  // Fetch user's voice preference if not explicitly provided — cached across instances
   useEffect(() => {
     if (voicePreference || !user) return;
     
+    // Return cached value immediately if available
+    if (_cachedVoice) {
+      setUserVoice(_cachedVoice);
+      return;
+    }
+    
     const fetchVoicePref = async () => {
-      const v = await fetchDeviVoiceNoStore();
-      if (v) setUserVoice(v);
+      // Deduplicate in-flight requests
+      if (!_voiceFetchPromise) {
+        _voiceFetchPromise = fetchDeviVoiceNoStore().finally(() => {
+          _voiceFetchPromise = null;
+        });
+      }
+      const v = await _voiceFetchPromise;
+      if (v) {
+        _cachedVoice = v;
+        setUserVoice(v);
+      }
     };
     
     fetchVoicePref();

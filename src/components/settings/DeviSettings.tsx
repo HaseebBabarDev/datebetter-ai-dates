@@ -30,20 +30,20 @@ const DEVI_STYLES = [
 
 const DEVI_VOICES = [
   {
-    value: "younger",
-    label: "Younger",
-    description: "Energetic and relatable vibe.",
+    value: "female",
+    label: "Female",
+    description: "Warm and reassuring tone.",
   },
   {
-    value: "mature",
-    label: "Mature",
-    description: "Warm and reassuring tone.",
+    value: "male",
+    label: "Male",
+    description: "Calm and grounded tone.",
   },
 ];
 
 export const DeviSettings: React.FC<DeviSettingsProps> = ({ userId }) => {
   const [deviStyle, setDeviStyle] = useState("balanced");
-  const [deviVoice, setDeviVoice] = useState("mature");
+  const [deviVoice, setDeviVoice] = useState("female");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {

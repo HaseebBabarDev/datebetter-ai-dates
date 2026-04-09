@@ -13,68 +13,37 @@ const stagger = { visible: { transition: { staggerChildren: 0.15 } } };
 
 const plans = [
   {
-    name: "Free",
-    price: "$0",
-    period: "",
-    description: "Try it out — no card needed",
-    icon: Zap,
-    features: [
-      "1 candidate profile",
-      "5 D.E.V.I. messages",
-      "Basic compatibility insights",
-      "Cycle tracking",
-    ],
-    popular: false,
-  },
-  {
-    name: "Starter",
-    price: "$9.99",
-    period: "/mo",
-    description: "Start dating with clarity",
-    icon: Zap,
-    features: [
-      "Up to 5 candidates",
-      "300 D.E.V.I. messages",
-      "1 text simulator exchange (trial)",
-      "5 compatibility refreshes per candidate",
-      "Red flag detection",
-    ],
-    popular: false,
-  },
-  {
-    name: "Plus",
-    price: "$15.99",
-    period: "/mo",
-    description: "For active daters",
-    icon: Sparkles,
-    features: [
-      "Up to 10 candidates",
-      "1,000 D.E.V.I. messages",
-      "5 text simulator conversations",
-      "10 compatibility refreshes per candidate",
-      "Red flag detection",
-      "Voice playback insights",
-    ],
-    popular: false,
-  },
-  {
     name: "Unlimited",
-    price: "$29.99",
+    price: "$15",
     period: "/mo",
-    description: "Full relationship intelligence",
+    description: "Full relationship intelligence — 15-day free trial",
     icon: Crown,
     features: [
       "Unlimited candidates",
       "Unlimited D.E.V.I. messages",
-      "20 text simulator conversations",
-      "Unlimited compatibility refreshes",
-      "Red flag detection",
-      "Priority support",
+      "AI scoring & compatibility insights",
+      "Red flag & pattern detection",
+      "Community access",
+      "15-day free trial",
     ],
     popular: true,
   },
 ];
 
+const addons = [
+  {
+    name: "Text Simulator",
+    price: "$5/mo",
+    description: "Practice conversations with AI-powered text simulations.",
+    icon: Zap,
+  },
+  {
+    name: "Detachment Plan",
+    price: "$5/mo",
+    description: "Personalized AI recovery timeline when you need to let someone go.",
+    icon: Sparkles,
+  },
+];
 export const PricingSection: React.FC = () => {
   const navigate = useNavigate();
 
@@ -106,7 +75,7 @@ export const PricingSection: React.FC = () => {
           whileInView="visible"
           viewport={{ once: true }}
           variants={stagger}
-          className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto"
+          className="flex justify-center max-w-lg mx-auto"
         >
           {plans.map((plan) => (
             <motion.div
@@ -169,17 +138,27 @@ export const PricingSection: React.FC = () => {
           ))}
         </motion.div>
 
-        {/* One-time add-on */}
+        {/* Monthly add-ons */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.5 }}
-          className="mt-8 max-w-md mx-auto text-center"
+          className="mt-8 max-w-lg mx-auto"
         >
-          <div className="p-4 rounded-xl bg-muted/50 border border-border">
-            <p className="text-sm font-semibold text-foreground mb-1">🩹 Detachment Plan — $9.99 one-time</p>
-            <p className="text-xs text-muted-foreground">Personalized AI recovery timeline when you need to let someone go.</p>
+          <p className="text-center text-sm font-semibold text-muted-foreground mb-4">Optional Add-ons</p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {addons.map((addon) => (
+              <div key={addon.name} className="p-4 rounded-xl bg-muted/50 border border-border flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <addon.icon className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{addon.name} — {addon.price}</p>
+                  <p className="text-xs text-muted-foreground">{addon.description}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </motion.div>
       </div>

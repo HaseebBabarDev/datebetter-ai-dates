@@ -13,6 +13,11 @@ const logStep = (step: string, details?: any) => {
 };
 
 const PRODUCT_TO_PLAN: Record<string, string> = {
+  // Current prices
+  "prod_UIMZ5IauGEL3oH": "unlimited",
+  "prod_UIMa82sEzF3PA4": "text_simulator",
+  "prod_UIPURomBJJucEc": "detachment_plan",
+  // Legacy product IDs for existing subscribers
   "prod_U5BaepUGcVqsIg": "basic",
   "prod_U5Ba3aovhb68xI": "starter",
   "prod_U5Ba2gOJLLzLpj": "unlimited",
@@ -64,17 +69,38 @@ serve(async (req) => {
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ subscribed: false, plan: "free" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    
+    // Create a user-scoped client to validate the token
+    const userClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    
+    const { data: userData, error: userError } = await userClient.auth.getUser();
+    if (userError || !userData?.user) {
+      logStep("Auth failed, returning free plan", { error: userError?.message });
+      return new Response(JSON.stringify({ subscribed: false, plan: "free" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    if (!user.email) throw new Error("User email not available");
+    const userId = user.id;
+    const email = user.email;
+    logStep("User authenticated", { userId, email });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    const customers = await stripe.customers.list({ email, limit: 1 });
 
     // Check for active trial in user_subscriptions
     let trialActive = false;
@@ -84,7 +110,7 @@ serve(async (req) => {
       const { data: subData } = await supabaseClient
         .from("user_subscriptions")
         .select("trial_ends_at, plan, candidates_limit, updates_per_candidate")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .maybeSingle();
 
       if (subData?.trial_ends_at) {
@@ -131,28 +157,47 @@ serve(async (req) => {
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: "active",
-      limit: 1,
+      limit: 10,
     });
 
-    const hasActiveSub = subscriptions.data.length > 0;
+    let hasActiveSub = false;
     let plan = "free";
     let productId = null;
     let subscriptionEnd = null;
     let priceId = null;
+    let hasTextSimulator = false;
+    let hasDetachmentPlanSub = false;
+    let textSimSubId: string | null = null;
+    let detachmentSubId: string | null = null;
 
-    if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
-      // Try multiple ways to get the period end — basil API may differ
-      const periodEnd = subscription.current_period_end 
-        ?? (subscription as any).currentPeriodEnd
-        ?? subscription.items?.data?.[0]?.current_period_end;
-      subscriptionEnd = safeTimestamp(periodEnd);
-      productId = subscription.items.data[0]?.price?.product as string;
-      priceId = subscription.items.data[0]?.price?.id;
-      plan = PRODUCT_TO_PLAN[productId] || "unknown";
-      logStep("Active subscription found", { plan, productId, priceId, endDate: subscriptionEnd, rawPeriodEnd: periodEnd });
-    } else {
-      logStep("No active subscription");
+    for (const subscription of subscriptions.data) {
+      const itemProductId = subscription.items.data[0]?.price?.product as string;
+      const itemPlan = PRODUCT_TO_PLAN[itemProductId] || "unknown";
+
+      if (itemPlan === "text_simulator") {
+        hasTextSimulator = true;
+        textSimSubId = subscription.id;
+        logStep("Text Simulator add-on active", { subId: subscription.id });
+      } else if (itemPlan === "detachment_plan") {
+        hasDetachmentPlanSub = true;
+        detachmentSubId = subscription.id;
+        logStep("Detachment Plan add-on active", { subId: subscription.id });
+      } else if (!hasActiveSub) {
+        // Main subscription (first non-addon found)
+        hasActiveSub = true;
+        const periodEnd = subscription.current_period_end 
+          ?? (subscription as any).currentPeriodEnd
+          ?? subscription.items?.data?.[0]?.current_period_end;
+        subscriptionEnd = safeTimestamp(periodEnd);
+        productId = itemProductId;
+        priceId = subscription.items.data[0]?.price?.id;
+        plan = itemPlan;
+        logStep("Active subscription found", { plan, productId, priceId, endDate: subscriptionEnd });
+      }
+    }
+
+    if (!hasActiveSub) {
+      logStep("No active main subscription");
     }
 
     // Check for one-time purchases (Day Pass, Detachment Plan)
@@ -201,6 +246,10 @@ serve(async (req) => {
       trial_ends_at: trialEndsAt,
       day_pass_active: hasDayPass,
       detachment_plan_candidates: detachmentPlanCandidates,
+      has_text_simulator: hasTextSimulator,
+      has_detachment_plan: hasDetachmentPlanSub,
+      text_sim_subscription_id: textSimSubId,
+      detachment_subscription_id: detachmentSubId,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

@@ -24,21 +24,20 @@ import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { ProfilePhotoUpload } from "@/components/settings/ProfilePhotoUpload";
 import { Badge } from "@/components/ui/badge";
-import { STRIPE_PLANS } from "@/lib/stripeConfig";
+import { STRIPE_PLANS, STRIPE_ADDONS } from "@/lib/stripeConfig";
+import { useSubscription } from "@/hooks/useSubscription";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { format, parse } from "date-fns";
 import { useTour, SETTINGS_TOUR_STEPS, TourRestartButton } from "@/components/tour";
-import { BetaNdaDialog } from "@/components/auth/BetaNdaDialog";
-import { useNdaAgreement } from "@/hooks/useNdaAgreement";
 
 type Profile = Tables<"profiles">;
 type SubscriptionPlan = "free" | "basic" | "starter" | "unlimited";
 
-const PLAN_DISPLAY: Record<SubscriptionPlan, { name: string; price: string; stripeKey?: keyof typeof STRIPE_PLANS }> = {
-  free: { name: "Free", price: "$0" },
-  basic: { name: "Starter", price: "$9.99/mo", stripeKey: "basic" },
-  starter: { name: "Plus", price: "$15.99/mo", stripeKey: "starter" },
-  unlimited: { name: "Unlimited", price: "$29.99/mo", stripeKey: "unlimited" },
+const PLAN_DISPLAY: Record<SubscriptionPlan, { name: string; price: string; stripeKey?: keyof typeof STRIPE_PLANS | string }> = {
+  free: { name: "Free Trial", price: "15 days free" },
+  basic: { name: "Unlimited", price: "$15/mo", stripeKey: "unlimited" },
+  starter: { name: "Unlimited", price: "$15/mo", stripeKey: "unlimited" },
+  unlimited: { name: "Unlimited", price: "$15/mo", stripeKey: "unlimited" },
 };
 
 const GENDER_OPTIONS = [
@@ -95,7 +94,8 @@ const Settings = () => {
   const defaultTab = searchParams.get("tab") || "account";
   const section = searchParams.get("section");
   const { startTour, hasCompletedTour, resetAllTours } = useTour();
-  const { ndaAcceptance, loading: ndaLoading } = useNdaAgreement();
+  const { subscription, refetch: refetchSubscription } = useSubscription();
+  
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -109,7 +109,7 @@ const Settings = () => {
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [referralStats, setReferralStats] = useState<{ total: number; converted: number; trialEarned: boolean }>({ total: 0, converted: 0, trialEarned: false });
   const [copiedReferral, setCopiedReferral] = useState(false);
-  const [showBetaNda, setShowBetaNda] = useState(false);
+  
 
   // Account form state
   const [name, setName] = useState("");
@@ -686,6 +686,39 @@ const Settings = () => {
 
             {/* Theme / Appearance */}
 
+            {/* Default Start Screen */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Home className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground text-sm">Default Start Screen</p>
+                      <p className="text-xs text-muted-foreground">Where the app opens to</p>
+                    </div>
+                  </div>
+                  <Select
+                    value={localStorage.getItem("default_start_screen") || "dashboard"}
+                    onValueChange={(val) => {
+                      localStorage.setItem("default_start_screen", val);
+                      toast.success("Default screen updated");
+                    }}
+                  >
+                    <SelectTrigger className="w-[140px] h-9 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="dashboard">Dashboard</SelectItem>
+                      <SelectItem value="devi">D.E.V.I.</SelectItem>
+                      <SelectItem value="top-candidate">Top Candidate</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Theme / Appearance */}
             <ThemeSelector />
 
@@ -733,17 +766,6 @@ const Settings = () => {
                 <Button
                   variant="outline"
                   className="w-full justify-between h-10 text-sm"
-                  onClick={() => setShowBetaNda(true)}
-                >
-                  <span className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-muted-foreground" />
-                    Beta Tester NDA
-                  </span>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-between h-10 text-sm"
                   onClick={() => navigate("/terms")}
                 >
                   <span className="flex items-center gap-2">
@@ -763,11 +785,6 @@ const Settings = () => {
                   </span>
                   <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 </Button>
-                {ndaAcceptance?.accepted_at && (
-                  <p className="text-xs text-muted-foreground pt-2 border-t">
-                    Beta NDA accepted on {new Date(ndaAcceptance.accepted_at).toLocaleDateString()}
-                  </p>
-                )}
               </CardContent>
             </Card>
 
@@ -956,6 +973,144 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Add-ons Management */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  Add-ons
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {/* Text Simulator */}
+                <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <MessageCircle className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Text Simulator</p>
+                      <p className="text-xs text-muted-foreground">$5/mo • Practice conversations</p>
+                    </div>
+                  </div>
+                  {subscription?.has_text_simulator ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                      disabled={checkoutLoading === "cancel_text_sim"}
+                      onClick={async () => {
+                        if (!confirm("Cancel your Text Simulator subscription? You'll lose access at the end of your billing period.")) return;
+                        setCheckoutLoading("cancel_text_sim");
+                        try {
+                          const { data, error } = await supabase.functions.invoke("cancel-addon", {
+                            body: { subscriptionId: subscription.text_sim_subscription_id },
+                          });
+                          if (error) throw error;
+                          toast.success("Text Simulator cancelled");
+                          refetchSubscription();
+                        } catch (e) {
+                          console.error("Cancel error:", e);
+                          toast.error("Failed to cancel. Try again.");
+                        } finally {
+                          setCheckoutLoading(null);
+                        }
+                      }}
+                    >
+                      {checkoutLoading === "cancel_text_sim" ? <Loader2 className="w-3 h-3 animate-spin" /> : "Cancel"}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="gap-1"
+                      disabled={checkoutLoading === "add_text_sim"}
+                      onClick={async () => {
+                        setCheckoutLoading("add_text_sim");
+                        try {
+                          const { data, error } = await supabase.functions.invoke("create-checkout", {
+                            body: { priceId: STRIPE_ADDONS.text_simulator.price_id, mode: "subscription" },
+                          });
+                          if (error) throw error;
+                          if (data?.url) window.location.href = data.url;
+                        } catch (e) {
+                          console.error("Checkout error:", e);
+                          toast.error("Failed to start checkout.");
+                        } finally {
+                          setCheckoutLoading(null);
+                        }
+                      }}
+                    >
+                      {checkoutLoading === "add_text_sim" ? <Loader2 className="w-3 h-3 animate-spin" /> : "Subscribe"}
+                    </Button>
+                  )}
+                </div>
+
+                {/* Detachment Plan */}
+                <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Heart className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Detachment Plan</p>
+                      <p className="text-xs text-muted-foreground">$5/mo • Guided healing journey</p>
+                    </div>
+                  </div>
+                  {subscription?.has_detachment_plan ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                      disabled={checkoutLoading === "cancel_detach"}
+                      onClick={async () => {
+                        if (!confirm("Cancel your Detachment Plan subscription? You'll lose access at the end of your billing period.")) return;
+                        setCheckoutLoading("cancel_detach");
+                        try {
+                          const { data, error } = await supabase.functions.invoke("cancel-addon", {
+                            body: { subscriptionId: subscription.detachment_subscription_id },
+                          });
+                          if (error) throw error;
+                          toast.success("Detachment Plan cancelled");
+                          refetchSubscription();
+                        } catch (e) {
+                          console.error("Cancel error:", e);
+                          toast.error("Failed to cancel. Try again.");
+                        } finally {
+                          setCheckoutLoading(null);
+                        }
+                      }}
+                    >
+                      {checkoutLoading === "cancel_detach" ? <Loader2 className="w-3 h-3 animate-spin" /> : "Cancel"}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="gap-1"
+                      disabled={checkoutLoading === "add_detach"}
+                      onClick={async () => {
+                        setCheckoutLoading("add_detach");
+                        try {
+                          const { data, error } = await supabase.functions.invoke("create-checkout", {
+                            body: { priceId: STRIPE_ADDONS.detachment_plan.price_id, mode: "subscription" },
+                          });
+                          if (error) throw error;
+                          if (data?.url) window.location.href = data.url;
+                        } catch (e) {
+                          console.error("Checkout error:", e);
+                          toast.error("Failed to start checkout.");
+                        } finally {
+                          setCheckoutLoading(null);
+                        }
+                      }}
+                    >
+                      {checkoutLoading === "add_detach" ? <Loader2 className="w-3 h-3 animate-spin" /> : "Subscribe"}
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Legal & App Info Section */}
             <Card>
               <CardHeader className="pb-3">
@@ -1131,99 +1286,18 @@ const Settings = () => {
               </CardContent>
             </Card>
 
-            {/* Plans */}
+            {/* Plan */}
             <div className="space-y-3">
               <h4 className="font-medium text-sm text-muted-foreground">
-                {currentPlan === "free" ? "Upgrade to unlock more features" : "Change your plan"}
+                {currentPlan === "free" ? "Upgrade to unlock all features" : "Your plan"}
               </h4>
 
-              {/* Starter Plan — $9.99 */}
-              <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "basic" ? "border-primary bg-primary/5" : ""}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <MessageCircle className="w-4 h-4 text-muted-foreground" />
-                        <h4 className="font-semibold">Starter</h4>
-                      </div>
-                      <p className="text-sm text-muted-foreground">5 candidates • 300 D.E.V.I. messages</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-bold">$9.99</p>
-                      <p className="text-xs text-muted-foreground">/month</p>
-                    </div>
+              <Card className={`relative overflow-hidden ${currentPlan !== "free" ? "border-primary bg-primary/5" : "border-primary/30"}`}>
+                {currentPlan !== "free" && (
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-bl">
+                    Current Plan
                   </div>
-                  <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["Up to 5 candidates", "300 D.E.V.I. messages", "1 text simulator exchange (trial)", "5 compatibility refreshes per candidate", "Red flag detection", "Cycle tracking"].map((f) => (
-                      <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Check className="w-4 h-4 text-green-500 shrink-0" />
-                        <span>{f}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    className="w-full mt-4"
-                    variant={currentPlan === "basic" ? "secondary" : "outline"}
-                    disabled={currentPlan === "basic" || checkoutLoading !== null}
-                    onClick={() => handleChangePlan("basic")}
-                  >
-                    {checkoutLoading === "basic" ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
-                    ) : currentPlan === "basic" ? (
-                      <><Check className="w-4 h-4 mr-2" />Current Plan</>
-                    ) : (
-                      "Get Starter"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Plus Plan — $15.99 */}
-              <Card className={`cursor-pointer hover:border-primary/50 transition-colors ${currentPlan === "starter" ? "border-primary bg-primary/5" : ""}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-primary" />
-                        <h4 className="font-semibold">Plus</h4>
-                      </div>
-                      <p className="text-sm text-muted-foreground">10 candidates • 1,000 D.E.V.I. messages</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-bold">$15.99</p>
-                      <p className="text-xs text-muted-foreground">/month</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["Up to 10 candidates", "1,000 D.E.V.I. messages", "5 text simulator conversations", "10 compatibility refreshes per candidate", "Red flag detection", "Voice playback insights"].map((f) => (
-                      <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Check className="w-4 h-4 text-green-500 shrink-0" />
-                        <span>{f}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    className="w-full mt-4"
-                    variant={currentPlan === "starter" ? "secondary" : "outline"}
-                    disabled={currentPlan === "starter" || checkoutLoading !== null}
-                    onClick={() => handleChangePlan("starter")}
-                  >
-                    {checkoutLoading === "starter" ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
-                    ) : currentPlan === "starter" ? (
-                      <><Check className="w-4 h-4 mr-2" />Current Plan</>
-                    ) : (
-                      "Get Plus"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Unlimited Plan — $29.99 */}
-              <Card className={`cursor-pointer hover:border-primary/50 transition-colors relative overflow-hidden ${currentPlan === "unlimited" ? "border-primary bg-primary/5" : "border-primary/30"}`}>
-                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-bl">
-                  Most Popular
-                </div>
+                )}
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -1234,12 +1308,12 @@ const Settings = () => {
                       <p className="text-sm text-muted-foreground">Unlimited candidates & messages</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold">$29.99</p>
+                      <p className="text-xl font-bold">$15</p>
                       <p className="text-xs text-muted-foreground">/month</p>
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["Unlimited candidates", "Unlimited D.E.V.I. messages", "20 text simulator conversations", "Unlimited compatibility refreshes", "Red flag detection", "Priority support"].map((f) => (
+                    {["Unlimited candidates", "Unlimited D.E.V.I. messages", "AI scoring & compatibility insights", "Red flag & pattern detection", "Community access", "15-day free trial"].map((f) => (
                       <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Check className="w-4 h-4 text-green-500 shrink-0" />
                         <span>{f}</span>
@@ -1248,16 +1322,16 @@ const Settings = () => {
                   </div>
                   <Button
                     className="w-full mt-4"
-                    variant={currentPlan === "unlimited" ? "secondary" : "default"}
-                    disabled={currentPlan === "unlimited" || checkoutLoading !== null}
+                    variant={currentPlan !== "free" ? "secondary" : "default"}
+                    disabled={currentPlan !== "free" || checkoutLoading !== null}
                     onClick={() => handleChangePlan("unlimited")}
                   >
                     {checkoutLoading === "unlimited" ? (
                       <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
-                    ) : currentPlan === "unlimited" ? (
+                    ) : currentPlan !== "free" ? (
                       <><Check className="w-4 h-4 mr-2" />Current Plan</>
                     ) : (
-                      "Get Unlimited"
+                      "Start Free Trial"
                     )}
                   </Button>
                 </CardContent>
@@ -1270,13 +1344,6 @@ const Settings = () => {
 
       {/* Payment now handled via Stripe Checkout redirect */}
 
-      {/* Beta NDA Dialog - View Only */}
-      <BetaNdaDialog
-        open={showBetaNda}
-        onAccept={() => setShowBetaNda(false)}
-        viewOnly
-        acceptedAt={ndaAcceptance?.accepted_at}
-      />
     </div>
   );
 };

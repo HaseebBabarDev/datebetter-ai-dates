@@ -13,10 +13,6 @@ import {
   signInWithAppleNative,
 } from "@/lib/appleAuth";
 import authBg from "@/assets/auth-bg.jpg";
-import { BetaNdaDialog } from "@/components/auth/BetaNdaDialog";
-import { BetaWelcomeDialog } from "@/components/auth/BetaWelcomeDialog";
-import { useNdaAgreement } from "@/hooks/useNdaAgreement";
-import { useBetaWelcome } from "@/hooks/useBetaWelcome";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -36,22 +32,6 @@ const Auth = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   
-  // Beta NDA state
-  const { hasAcceptedNda, acceptNda, loading: ndaLoading } = useNdaAgreement();
-  const { hasSeenWelcome, markWelcomeSeen, loading: welcomeLoading } = useBetaWelcome();
-  const [showBetaNda, setShowBetaNda] = useState(false);
-  const [showBetaWelcome, setShowBetaWelcome] = useState(false);
-
-  // Check for Beta NDA and Welcome acceptance on mount
-  useEffect(() => {
-    if (!ndaLoading && !welcomeLoading) {
-      if (hasAcceptedNda === false) {
-        setShowBetaNda(true);
-      } else if (hasAcceptedNda === true && hasSeenWelcome === false) {
-        setShowBetaWelcome(true);
-      }
-    }
-  }, [ndaLoading, welcomeLoading, hasAcceptedNda, hasSeenWelcome]);
 
   const getPasswordStrength = () => {
     if (password.length === 0) return { strength: 0, label: "", color: "" };
@@ -203,8 +183,24 @@ const Auth = () => {
             }
           }
           
-          const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
-          navigate(`/setup${setupQuery}`);
+          if (setupMode === "quick") {
+            // Quick setup: save name + goal to profile, then show choice screen
+            const quickName = localStorage.getItem("onboarding_name") || "";
+            const quickGoal = localStorage.getItem("onboarding_goal") || "";
+            
+            if (data?.user) {
+              await supabase.from("profiles").update({
+                name: quickName || null,
+                dating_motivation: quickGoal ? [quickGoal] : null,
+                onboarding_step: 0,
+              }).eq("user_id", data.user.id);
+            }
+            
+            navigate("/setup?setup=quick");
+          } else {
+            const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
+            navigate(`/setup${setupQuery}`);
+          }
         }
       } else {
         // Sign in flow
@@ -226,8 +222,12 @@ const Auth = () => {
               return;
             }
             
-            const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
-            navigate(`/setup${setupQuery}`);
+            if (setupMode === "quick") {
+              navigate("/setup?setup=quick");
+            } else {
+              const setupQuery = setupMode ? `?setup=${encodeURIComponent(setupMode)}` : "";
+              navigate(`/setup${setupQuery}`);
+            }
           }
         }
       }
@@ -622,22 +622,6 @@ const Auth = () => {
       </div>
     </div>
     
-    <BetaNdaDialog
-      open={showBetaNda}
-      onAccept={async () => {
-        await acceptNda();
-        setShowBetaNda(false);
-        setShowBetaWelcome(true);
-      }}
-    />
-    
-    <BetaWelcomeDialog
-      open={showBetaWelcome}
-      onContinue={async () => {
-        await markWelcomeSeen();
-        setShowBetaWelcome(false);
-      }}
-    />
     </>
   );
 };

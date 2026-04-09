@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import EngagementInterstitial, { interstitials } from "@/components/onboarding/EngagementInterstitial";
+import OnboardingChoiceScreen from "@/components/onboarding/screens/OnboardingChoiceScreen";
 
 // Import all screens
 import WelcomeScreen from "@/components/onboarding/screens/WelcomeScreen";
@@ -41,6 +42,7 @@ interface SetupContentProps {
 const SetupContent = ({ setupMode }: SetupContentProps) => {
   const { currentStep, loading, data, updateData, goToStep } = useOnboarding();
   const [initialized, setInitialized] = useState(false);
+  const [showIntakeChoice, setShowIntakeChoice] = useState(true);
   const [showInterstitial, setShowInterstitial] = useState(false);
   const seenInterstitials = useRef<Set<number>>(new Set());
   const prevStepRef = useRef<number>(currentStep);
@@ -66,23 +68,22 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
     setShowInterstitial(false);
   }, []);
 
-  // Handle setup mode from URL params - skip WelcomeScreen if already chosen
+  // Handle setup mode from URL params and resume from saved step
   useEffect(() => {
-    if (!loading && !initialized && currentStep === 0 && setupMode) {
-      if (setupMode === "quick") {
-        updateData({ quickStartMode: true });
-        goToStep(1);
-      } else if (setupMode === "full") {
+    if (!loading && !initialized) {
+      if (setupMode === "full") {
         updateData({ quickStartMode: false });
         goToStep(1);
+        setShowIntakeChoice(false);
+      } else if (currentStep > 0) {
+        // User has progress saved — skip the choice screen and resume
+        setShowIntakeChoice(false);
       }
       setInitialized(true);
-    } else if (!loading && !initialized) {
-      setInitialized(true);
     }
-  }, [loading, initialized, currentStep, setupMode, updateData, goToStep]);
+  }, [loading, initialized, setupMode, updateData, goToStep, currentStep]);
 
-  if (loading || (!initialized && setupMode)) {
+  if (loading || !initialized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
@@ -91,6 +92,11 @@ const SetupContent = ({ setupMode }: SetupContentProps) => {
         </div>
       </div>
     );
+  }
+
+  // Show the basics → goals → upload → choice flow first
+  if (showIntakeChoice && data.quickStartMode !== false) {
+    return <OnboardingChoiceScreen />;
   }
 
   // Show interstitial overlay

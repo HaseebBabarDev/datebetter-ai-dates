@@ -526,13 +526,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
     );
   }
 
-  const [showAllInsights, setShowAllInsights] = useState(false);
-
-  const firstStrength = scoreData.strengths?.[0];
-  const firstConcern = scoreData.concerns?.[0];
-  const remainingStrengths = scoreData.strengths?.slice(1) || [];
-  const remainingConcerns = scoreData.concerns?.slice(1) || [];
-  const hasMoreInsights = remainingStrengths.length > 0 || remainingConcerns.length > 0;
+  // Note: hooks moved to top of component to satisfy Rules of Hooks
 
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
@@ -595,79 +589,58 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
 
       <CardContent className="space-y-4 pt-2">
 
-        {/* Key Insights - 1 Concern + 1 Strength */}
-        {(firstStrength || firstConcern) && (
+        {/* All Strengths */}
+        {scoreData.strengths?.length > 0 && (
           <div className="space-y-2">
-            {firstConcern && (
-              <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
-                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+            <p className="text-xs font-semibold text-green-600 uppercase tracking-wide flex items-center gap-1.5">
+              <TrendingUp className="w-3.5 h-3.5" />
+              Strengths
+            </p>
+            {scoreData.strengths.map((strength, i) => (
+              <div key={`s-${i}`} className="flex items-start gap-3 p-3 rounded-xl bg-green-500/5 border border-green-500/10">
+                <div className="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                  <Check className="w-3.5 h-3.5 text-green-600" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-amber-600 mb-0.5">Watch for</p>
-                  <p className="text-sm text-foreground">{renderWithBold(firstConcern)}</p>
-                </div>
+                <p className="text-sm text-foreground pt-0.5">{renderWithBold(strength)}</p>
               </div>
-            )}
-            {firstStrength && (
-              <div className="flex items-start gap-3 p-3 rounded-xl bg-green-500/5 border border-green-500/10">
-                <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                  <TrendingUp className="w-4 h-4 text-green-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-green-600 mb-0.5">Strength</p>
-                  <p className="text-sm text-foreground">{renderWithBold(firstStrength)}</p>
-                </div>
-              </div>
-            )}
+            ))}
           </div>
         )}
 
-        {/* Collapsible More Insights */}
-        {hasMoreInsights && (
-          <Collapsible open={showAllInsights} onOpenChange={setShowAllInsights}>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground hover:text-foreground">
-                <ChevronDown className={`w-4 h-4 mr-1 transition-transform ${showAllInsights ? "rotate-180" : ""}`} />
-                {showAllInsights ? "Show less" : `${remainingStrengths.length + remainingConcerns.length} more insights`}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-2 pt-2">
-              {remainingStrengths.map((strength, i) => (
-                <div key={`s-${i}`} className="flex items-start gap-3 p-3 rounded-xl bg-green-500/5 border border-green-500/10">
-                  <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                    <TrendingUp className="w-4 h-4 text-green-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-green-600 mb-0.5">Strength</p>
-                    <p className="text-sm text-foreground">{renderWithBold(strength)}</p>
-                  </div>
+        {/* All Concerns */}
+        {scoreData.concerns?.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              Watch For
+            </p>
+            {scoreData.concerns.map((concern, i) => (
+              <div key={`c-${i}`} className="flex items-start gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
                 </div>
-              ))}
-              {remainingConcerns.map((concern, i) => (
-                <div key={`c-${i}`} className="flex items-start gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
-                    <AlertTriangle className="w-4 h-4 text-amber-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-amber-600 mb-0.5">Watch for</p>
-                    <p className="text-sm text-foreground">{renderWithBold(concern)}</p>
-                  </div>
-                </div>
-              ))}
-            </CollapsibleContent>
-          </Collapsible>
+                <p className="text-sm text-foreground pt-0.5">{renderWithBold(concern)}</p>
+              </div>
+            ))}
+          </div>
         )}
 
-        {/* AI Advice */}
+        {/* D.E.V.I. Advice - read-only, no accept/decline */}
         {scoreData.advice && (
-          <AdviceSection 
-            advice={scoreData.advice}
-            adviceResponse={adviceResponse}
-            respondingToAdvice={respondingToAdvice}
-            onAccept={() => respondToAdvice(true)}
-            onDecline={() => respondToAdvice(false)}
-          />
+          <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/10">
+            <div className="flex items-center gap-2 mb-2">
+              <img 
+                src={logo} 
+                alt="D.E.V.I." 
+                className="w-6 h-6 rounded-full object-cover ring-1 ring-primary/20"
+              />
+              <span className="text-xs font-semibold text-primary flex items-center gap-1">
+                D.E.V.I. Insight
+                <Sparkles className="w-3 h-3" />
+              </span>
+            </div>
+            <p className="text-sm text-foreground leading-relaxed">{scoreData.advice}</p>
+          </div>
         )}
 
         {/* Self-Worth Reminder for abusive patterns */}
