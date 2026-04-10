@@ -105,7 +105,7 @@ export function PostDetailSheet({ post, onClose, currentScreenName, onPostUpdate
       // Get screen names
       const userIds = [...new Set(commentsData.map((c) => c.user_id))];
       const { data: profilesData } = await supabase
-        .from("profiles")
+        .from("community_profiles" as any)
         .select("user_id, screen_name")
         .in("user_id", userIds);
 

@@ -143,7 +143,7 @@ export function DirectMessages({ currentScreenName, onUnreadCountChange }: Direc
       // Get screen names
       const participantIds = Array.from(conversationMap.keys());
       const { data: profilesData } = await supabase
-        .from("profiles")
+        .from("community_profiles" as any)
         .select("user_id, screen_name")
         .in("user_id", participantIds);
 
