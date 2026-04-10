@@ -1,9 +1,14 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const bodySchema = z.object({
+  targetUserId: z.string().uuid("Invalid user ID format"),
+});
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,7 +18,10 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      throw new Error('No authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const supabaseClient = createClient(
@@ -24,7 +32,10 @@ Deno.serve(async (req) => {
 
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
     if (userError || !user) {
-      throw new Error('Unauthorized');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Verify requesting user is admin
@@ -36,18 +47,29 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (!adminCheck) {
-      throw new Error('Unauthorized: Admin access required');
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: Admin access required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const { targetUserId } = await req.json();
-
-    if (!targetUserId) {
-      throw new Error('targetUserId is required');
+    // Validate input
+    const parsed = bodySchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input', details: parsed.error.flatten().fieldErrors }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    const { targetUserId } = parsed.data;
 
     // Prevent admin from deleting themselves
     if (targetUserId === user.id) {
-      throw new Error('Cannot delete your own account');
+      return new Response(
+        JSON.stringify({ error: 'Cannot delete your own account' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     console.log(`Admin ${user.id} deleting user ${targetUserId}`);
@@ -59,12 +81,14 @@ Deno.serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    // Delete user from auth (cascade will handle related data)
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(targetUserId);
 
     if (deleteError) {
       console.error('Error deleting user:', deleteError);
-      throw new Error(`Failed to delete user: ${deleteError.message}`);
+      return new Response(
+        JSON.stringify({ error: 'Failed to delete user.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     console.log(`Successfully deleted user ${targetUserId}`);
@@ -76,10 +100,9 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('Error in admin-delete-user:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: 'An unexpected error occurred.' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
