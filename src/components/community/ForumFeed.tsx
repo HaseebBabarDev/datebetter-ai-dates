@@ -99,7 +99,7 @@ export function ForumFeed({ category, searchQuery, currentScreenName, cityFilter
       const { data: profilesData, error: profilesError } = await supabase
         .from("community_profiles" as any)
         .select("user_id, screen_name")
-        .in("user_id", userIds);
+        .in("user_id", userIds) as { data: { user_id: string; screen_name: string }[] | null; error: any };
 
       if (profilesError) {
         console.error("Error fetching screen names:", profilesError);

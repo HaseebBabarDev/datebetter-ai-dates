@@ -40,10 +40,10 @@ export function ScreenNameSetup({ onComplete }: ScreenNameSetupProps) {
 
     try {
       const { data, error } = await supabase
-        .from("profiles")
+        .from("community_profiles" as any)
         .select("screen_name")
         .eq("screen_name", name.toLowerCase())
-        .maybeSingle();
+        .maybeSingle() as { data: { screen_name: string } | null; error: any };
 
       if (error) throw error;
 
