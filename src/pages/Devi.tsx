@@ -464,6 +464,7 @@ const Devi = () => {
   const [pendingImages, setPendingImages] = useState<{ data: string; type: string }[]>([]);
   const [textScreenshotRightSide, setTextScreenshotRightSide] = useState<"me" | "them">("me");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [archivedCandidates, setArchivedCandidates] = useState<Candidate[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [profilesLoading, setProfilesLoading] = useState(true);
