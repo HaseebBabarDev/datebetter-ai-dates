@@ -213,7 +213,7 @@ ${focusAreas || '- General emotional healing and self-work'}
 `;
 };
 
-const buildSystemPrompt = (userProfile: any, candidateProfile: any, interactions: any[], journalEntries?: any[]) => {
+const buildSystemPrompt = (userProfile: any, candidateProfile: any, interactions: any[], journalEntries?: any[], allCandidates?: any[]) => {
   // Build family background context
   const familyContext = userProfile ? buildFamilyContext(userProfile) : '';
   
@@ -921,7 +921,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, imageData, imagesData, imageType, textScreenshotRightSide, userProfile, candidateProfile, interactions, journalEntries } = await req.json();
+    const { messages, imageData, imagesData, imageType, textScreenshotRightSide, userProfile, candidateProfile, allCandidates, interactions, journalEntries } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
