@@ -13,7 +13,7 @@ import { ThreadHeader } from "@/components/thread/ThreadHeader";
 import { RedFlagCard } from "@/components/thread/RedFlagCard";
 import { ChatGPTMessage } from "@/components/devi/ChatGPTMessage";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
-import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
+
 import { ConversationUploadSheet } from "@/components/devi/ConversationUploadSheet";
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
@@ -452,10 +452,6 @@ const CandidateThread = () => {
                 rows={1}
               />
 
-              <VoiceInputButton
-                onTranscript={(text) => setInput((prev) => prev + text)}
-                disabled={sending}
-              />
 
               <Button
                 size="icon"

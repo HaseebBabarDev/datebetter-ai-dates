@@ -47,7 +47,7 @@ import { HealingJourney } from "@/components/devi/HealingJourney";
 import { ChatGPTMessage } from "@/components/devi/ChatGPTMessage";
 import { AIDisclosure } from "@/components/AIDisclosure";
 import TextSimulator, { TextSimulatorCTA } from "@/components/candidate/TextSimulator";
-import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
+
 import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
 import { DatingAdvisorCard } from "@/components/devi/DatingAdvisorCard";
@@ -2746,14 +2746,6 @@ const Devi = () => {
                 placeholder={selectedCandidate ? `Ask about ${selectedCandidate.nickname}...` : "Ask me anything about dating..."}
                 className="min-h-[52px] max-h-36 resize-none text-sm rounded-xl"
                 rows={2}
-                disabled={isLoading}
-              />
-              <VoiceInputButton
-                onTranscript={(text) => setInput(prev => prev ? prev + " " + text : text)}
-                onPartialTranscript={(text) => setInput(prev => {
-                  const base = prev.replace(/\s*\[.*?\]\s*$/, '');
-                  return base ? `${base} [${text}]` : `[${text}]`;
-                })}
                 disabled={isLoading}
               />
               <Button
