@@ -181,7 +181,12 @@ ${relationshipSummaries.map((s, i) => `${i + 1}. ${s}`).join('\n')}
 
 **General Reflections:** ${profile.relationship_trauma_notes || "None provided"}
 
-${dailyFeeling ? `**Today's Feeling:** "${dailyFeeling}"` : ''}
+${dailyFeeling ? `**Today's Feeling:** "${dailyFeeling}"
+
+IMPORTANT: The user just shared how they feel today. If their feeling is POSITIVE (e.g., feeling good, hopeful, happy, strong, moved on), the score should INCREASE or at minimum STAY THE SAME compared to their previous score of ${previousScore ?? 'N/A'}. A positive daily check-in should NEVER cause the score to drop. Only decrease the score if the daily feeling explicitly indicates regression (e.g., contacted ex, feeling hopeless, relapsed).` : ''}
+
+${previousScore !== null ? `**Previous Healing Score:** ${previousScore}%
+IMPORTANT: For daily check-ins and manual refreshes, the score should be STABLE (within ±5 points) unless the user's daily feeling or profile changes clearly warrant a larger shift. Do NOT recalculate from scratch — use the previous score as an anchor.` : ''}
 
 ## SCORING CRITERIA (CRITICAL - READ CAREFULLY):
 
