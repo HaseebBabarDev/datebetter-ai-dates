@@ -558,6 +558,16 @@ ${healingGuidance}
 ${candidateContext}
 ${intimacyGuidance}
 ${interactionContext}
+${allCandidates && allCandidates.length > 0 ? `
+ALL CANDIDATES (active and recently closed — user may ask about any of them, especially when sharing screenshots or recordings):
+${allCandidates.map((c: any) => `- ${c.nickname}: ${c.status === 'archived' ? 'CLOSED' : c.status?.replace(/_/g, ' ')}${c.compatibility_score ? ` (${c.compatibility_score}% match)` : ''}${c.end_reason ? ` — ended: ${c.end_reason}` : ''}${c.age ? `, age ${c.age}` : ''}${c.met_via ? `, met via ${c.met_via}` : ''}`).join('\n')}
+
+CLOSED CANDIDATE GUIDANCE:
+- Users can discuss closed/archived candidates freely in general chat without reopening them.
+- If a user shares screenshots or recordings about a closed candidate, analyze them normally — reference the candidate by name if you can identify who they're asking about.
+- If it seems like the user wants to re-engage with a closed candidate, gently note they can reopen them from the candidate selector dropdown.
+- Do NOT refuse to discuss someone just because they're archived.
+` : ''}
 ${journalEntries && journalEntries.length > 0 ? `
 USER'S JOURNAL ENTRIES (private reflections about this candidate — use these to understand their emotional state and patterns):
 ${journalEntries.slice(0, 10).map((e: any) => `- [${e.created_at?.split('T')[0] || 'Unknown date'}]${e.mood ? ` (Mood: ${e.mood})` : ''}: ${e.content}`).join('\n')}
