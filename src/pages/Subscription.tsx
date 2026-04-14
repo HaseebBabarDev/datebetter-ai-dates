@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -9,16 +9,144 @@ import { Separator } from "@/components/ui/separator";
 import { Check, Crown, ArrowLeft, Zap, Sparkles, Settings, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { STRIPE_PLANS, STRIPE_ADDONS } from "@/lib/stripeConfig";
+import { STRIPE_PLANS,STRIPE_ADDONS } from "@/lib/stripeConfig";
+
+import { Capacitor } from "@capacitor/core";
+import { Purchases, LOG_LEVEL } from "@revenuecat/purchases-capacitor";
+
+// const SUBSCRIPTION_PLANS = [
+//   {
+//     id: "free",
+//     stripeKey: null,
+//     name: "Free",
+//     price: 0,
+//     description: "Try it out",
+//     icon: Heart,
+//     features: [
+//       "1 candidate",
+//       "5 D.E.V.I. messages",
+//       "Basic compatibility insights",
+//       "Cycle tracking",
+//     ],
+//     color: "bg-muted",
+//     textColor: "text-foreground",
+//     popular: false,
+//     badge: null,
+//   },
+//   {
+//     id: "basic",
+//     stripeKey: "basic" as const,
+//     name: "Starter",
+//     price: 9.99,
+//     description: "Start dating with clarity",
+//     icon: MessageCircle,
+//     features: [
+//       "Up to 5 candidates",
+//       "300 D.E.V.I. messages",
+//       "1 text simulator exchange (trial)",
+//       "5 compatibility refreshes per candidate",
+//       "Red flag detection",
+//       "Cycle tracking",
+//     ],
+//     color: "bg-muted/60",
+//     textColor: "text-muted-foreground",
+//     popular: false,
+//     badge: null,
+//   },
+//   {
+//     id: "starter",
+//     stripeKey: "starter" as const,
+//     name: "Plus",
+//     price: 15.99,
+//     description: "Everything you need to date smarter",
+//     icon: Sparkles,
+//     features: [
+//       "Up to 10 candidates",
+//       "1,000 D.E.V.I. messages",
+//       "5 text simulator conversations",
+//       "10 compatibility refreshes per candidate",
+//       "Red flag detection",
+//       "Voice playback insights",
+//       "Cycle-aware insights",
+//     ],
+//     color: "bg-primary/10",
+//     textColor: "text-primary",
+//     popular: false,
+//     badge: null,
+//   },
+//   {
+//     id: "unlimited",
+//     stripeKey: "unlimited" as const,
+//     name: "Unlimited",
+//     price: 29.99,
+//     description: "No limits, ever",
+//     icon: Crown,
+//     features: [
+//       "Unlimited candidates",
+//       "Unlimited D.E.V.I. messages",
+//       "20 text simulator conversations",
+//       "Unlimited compatibility refreshes",
+//       "Red flag detection",
+//       "Priority support",
+//     ],
+//     color: "bg-gradient-to-br from-primary/20 to-accent/20",
+//     textColor: "text-primary",
+//     popular: true,
+//     badge: "Most Popular",
+//   },
+// ];
 
 export default function Subscription() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { subscription, refetch } = useSubscription();
+  console.log("[Subscription] subscription", subscription);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
 
+
+  const loadOfferingsForPaywall = useCallback(async () => {
+    try {
+      const offerings = await Purchases.getOfferings();
+      console.log("[Subscription] offerings", offerings);
+      const current = offerings.current;
+      const packages = current?.availablePackages ?? [];
+      if (current != null && packages.length > 0) {
+        console.log("[Subscription] offerings current=", current.identifier, {
+          packageCount: packages.length,
+          productIds: packages.map((p) => p.product.identifier),
+        });
+      } else {
+        console.warn("[Subscription] offerings: no current offering or empty packages");
+      }
+    } catch (error) {
+      console.warn("[Subscription] getOfferings failed", error);
+    }
+  }, []);
+
+  const onDeviceReady = useCallback(async () => {
+    console.log("[Subscription] Initializing RevenueCat");
+    try {
+      await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
+      const apiKey = import.meta.env.VITE_REVENUECAT_IOS_API_KEY;
+      if (Capacitor.getPlatform() === "ios" && typeof apiKey === "string" && apiKey.length > 0) {
+        await Purchases.configure({ apiKey });
+        console.log("[Subscription] RevenueCat configured");
+        await loadOfferingsForPaywall();
+      }
+    } catch (e) {
+      console.error("[Subscription] RevenueCat init failed", e);
+      toast.error("Could not initialize billing. Try again or use web checkout.");
+    }
+  }, [loadOfferingsForPaywall]);
+
+  useEffect(() => {
+    console.log("[Subscription] useEffect");
+    void onDeviceReady();
+  }, [onDeviceReady]);
+
+  // Handle return from Stripe Checkout
   useEffect(() => {
     if (searchParams.get("success") === "true") {
       toast.success("Payment successful! Your subscription is now active.");
