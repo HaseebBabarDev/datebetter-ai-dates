@@ -2748,6 +2748,14 @@ const Devi = () => {
                 rows={2}
                 disabled={isLoading}
               />
+              <VoiceInputButton
+                onTranscript={(text) => setInput(prev => prev ? prev + " " + text : text)}
+                onPartialTranscript={(text) => setInput(prev => {
+                  const base = prev.replace(/\s*\[.*?\]\s*$/, '');
+                  return base ? `${base} [${text}]` : `[${text}]`;
+                })}
+                disabled={isLoading}
+              />
               <Button
                 size="icon"
                 onClick={() => sendMessage()}
