@@ -680,6 +680,11 @@ const Devi = () => {
         }
       }
       
+      // Process archived candidates
+      if (archivedRes.data) {
+        setArchivedCandidates(archivedRes.data);
+      }
+      
       // Process profile
         if (profileRes.data) {
           setUserProfile(profileRes.data);
