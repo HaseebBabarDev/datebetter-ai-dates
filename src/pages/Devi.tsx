@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, UserPlus, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink, Zap } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, UserPlus, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink, Zap, RotateCcw } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
