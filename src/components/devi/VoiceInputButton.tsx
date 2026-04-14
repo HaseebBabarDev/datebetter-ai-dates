@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,6 +8,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useScribe, CommitStrategy } from "@elevenlabs/react";
 
 interface VoiceInputButtonProps {
   onTranscript: (text: string) => void;
@@ -20,118 +22,84 @@ export const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
   onPartialTranscript,
   disabled = false,
 }) => {
-  const [isRecording, setIsRecording] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const recognitionRef = useRef<any>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const cleanup = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (_) {}
-      recognitionRef.current = null;
-    }
-    setIsRecording(false);
-    setIsConnecting(false);
-  }, []);
+  const scribe = useScribe({
+    modelId: "scribe_v2_realtime",
+    commitStrategy: CommitStrategy.VAD,
+    onPartialTranscript: (data) => {
+      onPartialTranscript?.(data.text);
+    },
+    onCommittedTranscript: (data) => {
+      if (data.text.trim()) {
+        onTranscript(data.text.trim());
+      }
+    },
+  });
 
   const startRecording = useCallback(async () => {
-    if (isRecording) {
-      cleanup();
-      return;
-    }
-
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      toast.error("Voice input not supported in this browser.");
+    if (scribe.isConnected) {
+      scribe.disconnect();
       return;
     }
 
     setIsConnecting(true);
 
     try {
-      // Request mic permission first
-      if (navigator.mediaDevices?.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach(t => t.stop());
+      // Get scribe token from edge function
+      const { data, error } = await supabase.functions.invoke(
+        "elevenlabs-scribe-token"
+      );
+
+      if (error || !data?.token) {
+        throw new Error(error?.message || "No token received");
       }
 
-      const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = "en-US";
-      recognitionRef.current = recognition;
-
-      recognition.onstart = () => {
-        setIsRecording(true);
-        setIsConnecting(false);
-        // Auto-stop after 30 seconds
-        timeoutRef.current = setTimeout(() => {
-          cleanup();
-          toast.info("Recording stopped (max 30 seconds)");
-        }, 30000);
-      };
-
-      recognition.onresult = (event: any) => {
-        let finalText = "";
-        let interimText = "";
-        for (let i = 0; i < event.results.length; i++) {
-          const result = event.results[i];
-          if (result.isFinal) {
-            finalText += result[0].transcript;
-          } else {
-            interimText += result[0].transcript;
-          }
-        }
-        if (interimText) {
-          onPartialTranscript?.(interimText);
-        }
-        if (finalText) {
-          onTranscript(finalText.trim());
-        }
-      };
-
-      recognition.onerror = (event: any) => {
-        console.error("Speech recognition error:", event.error);
-        cleanup();
-        if (event.error === "not-allowed") {
-          toast.error("Microphone access denied. Please allow microphone access.");
-        } else if (event.error !== "aborted") {
-          toast.error("Voice recording error. Please try again.");
-        }
-      };
-
-      recognition.onend = () => {
-        cleanup();
-      };
-
-      recognition.start();
+      await scribe.connect({
+        token: data.token,
+        microphone: {
+          echoCancellation: true,
+          noiseSuppression: true,
+        },
+      });
     } catch (error) {
       console.error("Recording error:", error);
-      cleanup();
       if (error instanceof Error && error.name === "NotAllowedError") {
         toast.error("Microphone access denied. Please allow microphone access.");
       } else {
-        toast.error("Failed to start recording");
+        toast.error("Failed to start voice input. Please try again.");
       }
+    } finally {
+      setIsConnecting(false);
     }
-  }, [isRecording, cleanup, onTranscript, onPartialTranscript]);
+  }, [scribe]);
+
+  // Auto-stop after 30 seconds
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    return cleanup;
-  }, [cleanup]);
+    if (scribe.isConnected) {
+      timeoutRef.current = setTimeout(() => {
+        scribe.disconnect();
+        toast.info("Recording stopped (max 30 seconds)");
+      }, 30000);
+    } else {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    }
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [scribe.isConnected]);
 
   return (
     <TooltipProvider delayDuration={300}>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant={isRecording ? "destructive" : "ghost"}
+            variant={scribe.isConnected ? "destructive" : "ghost"}
             size="icon"
             onClick={startRecording}
             disabled={disabled || isConnecting}
@@ -139,7 +107,7 @@ export const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
           >
             {isConnecting ? (
               <Loader2 className="w-5 h-5 animate-spin" />
-            ) : isRecording ? (
+            ) : scribe.isConnected ? (
               <MicOff className="w-5 h-5" />
             ) : (
               <Mic className="w-5 h-5" />
@@ -148,7 +116,7 @@ export const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
         </TooltipTrigger>
         <TooltipContent side="top">
           <p className="text-xs">
-            {isRecording ? "Stop recording" : "Voice input"}
+            {scribe.isConnected ? "Stop recording" : "Voice input"}
           </p>
         </TooltipContent>
       </Tooltip>
