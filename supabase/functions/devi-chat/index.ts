@@ -939,7 +939,7 @@ serve(async (req) => {
     }
 
     // Build personalized system prompt
-    const systemPrompt = buildSystemPrompt(userProfile, candidateProfile, interactions, journalEntries);
+    const systemPrompt = buildSystemPrompt(userProfile, candidateProfile, interactions, journalEntries, allCandidates);
 
     // Build the messages array for the AI
     const aiMessages: any[] = [
