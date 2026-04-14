@@ -636,7 +636,7 @@ const Devi = () => {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       
       // Fetch all data in parallel
-      const [candidatesRes, profileRes, conversationsRes] = await Promise.all([
+      const [candidatesRes, profileRes, conversationsRes, archivedRes] = await Promise.all([
         supabase
           .from("candidates")
           .select("*")
@@ -655,6 +655,13 @@ const Devi = () => {
           .gte("updated_at", thirtyDaysAgo.toISOString())
           .order("updated_at", { ascending: false })
           .limit(50),
+        supabase
+          .from("candidates")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("status", "archived")
+          .gte("updated_at", thirtyDaysAgo.toISOString())
+          .order("updated_at", { ascending: false }),
       ]);
       
       // Process candidates
