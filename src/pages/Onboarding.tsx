@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Sparkles, Heart, Unlink, TrendingUp, Search, Stethoscope, ChevronRight } from "lucide-react";
-import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
+
 
 const GOALS = [
   { value: "evaluate", icon: TrendingUp, label: "Evaluate someone I'm dating", desc: "Get AI scoring & red flag detection" },

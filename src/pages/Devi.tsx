@@ -47,7 +47,7 @@ import { HealingJourney } from "@/components/devi/HealingJourney";
 import { ChatGPTMessage } from "@/components/devi/ChatGPTMessage";
 import { AIDisclosure } from "@/components/AIDisclosure";
 import TextSimulator, { TextSimulatorCTA } from "@/components/candidate/TextSimulator";
-import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
+
 import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
 import { DatingAdvisorCard } from "@/components/devi/DatingAdvisorCard";
