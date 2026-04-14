@@ -2411,13 +2411,6 @@ const Devi = () => {
               )}
 
 
-
-              {/* Healing Journey - show only after onboarding is complete and in general chat mode */}
-              {hasFullProfile && !onboardingIncomplete && !selectedCandidate && (
-                <div className="pl-10 mt-4">
-                  <HealingJourney />
-                </div>
-              )}
             </div>
           ) : (
           <>
