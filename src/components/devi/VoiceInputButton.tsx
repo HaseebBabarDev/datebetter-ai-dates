@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useScribe } from "@elevenlabs/react";
+import { useScribe, CommitStrategy } from "@elevenlabs/react";
 
 interface VoiceInputButtonProps {
   onTranscript: (text: string) => void;
