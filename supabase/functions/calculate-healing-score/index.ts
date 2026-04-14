@@ -214,7 +214,7 @@ The score should INVERSELY relate to negative indicators:
 You MUST respond with ONLY a valid JSON object in this exact format:
 {
   "score": <number between 0-100>,
-  "insight": "<2-3 sentence personalized insight about their healing journey, be warm and supportive>"
+  "insight": "<2-3 sentences that reference SPECIFIC data points from their profile — name specific traumas, ex-contact patterns, or attachment style. Never use filler phrases like 'truly commendable' or 'excellent progress.' Be direct and concrete, e.g. 'Your no-contact stance is protecting you, but your 30% over-ex level suggests the emotional bond is still strong.' Sound like a sharp friend, not a therapist brochure.>"
 }
 
 Do not include any other text, markdown, or explanation outside the JSON.`;
