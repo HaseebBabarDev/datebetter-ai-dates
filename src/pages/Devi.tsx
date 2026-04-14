@@ -925,7 +925,28 @@ const Devi = () => {
     lastLoadedCandidateRef.current = null; // Reset so new conversation can be created
   }, []);
 
-  // Handle candidate selection with conversation choice
+  // Reopen an archived candidate
+  const handleReopenCandidate = useCallback(async (candidate: Candidate) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from("candidates")
+      .update({ status: "just_matched", relationship_ended_at: null })
+      .eq("id", candidate.id)
+      .eq("user_id", user.id);
+    
+    if (error) {
+      toast.error("Failed to reopen candidate");
+      return;
+    }
+    
+    // Move from archived to active list
+    setArchivedCandidates(prev => prev.filter(c => c.id !== candidate.id));
+    const reopened = { ...candidate, status: "just_matched" as const, relationship_ended_at: null };
+    setCandidates(prev => [reopened, ...prev]);
+    setSelectedCandidate(reopened);
+    toast.success(`${candidate.nickname} reopened!`);
+  }, [user]);
+
   const handleCandidateSelect = useCallback(async (candidate: Candidate) => {
     // If there's a current general conversation (no candidate), link it to this candidate
     if (currentConversationId && !selectedCandidate && messages.length > 0) {
