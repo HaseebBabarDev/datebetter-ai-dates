@@ -1894,14 +1894,12 @@ const Devi = () => {
     newParams.delete("firstTime");
     setSearchParams(newParams, { replace: true });
     
-    // Auto-send a guided message asking for screenshot
+    // Auto-send a guided message to start the conversation
     const goal = localStorage.getItem("onboarding_goal") || "evaluate";
     const contextParts = [
-      `I just started using the app to ${goal === "detachment" ? "detach from" : goal === "healing" ? "heal from" : "evaluate"} ${data.candidateName}.`,
-      data.candidateAge ? `They're ${data.candidateAge} years old.` : "",
-      data.candidateLocation ? `Based in ${data.candidateLocation}.` : "",
-      data.freeformInfo ? `Here's what I know: ${data.freeformInfo}` : "",
-      "Can you give me an initial analysis? I'll upload screenshots of our conversations next.",
+      `I just added ${data.candidateName} — I want to ${goal === "detachment" ? "detach from them" : goal === "healing" ? "heal from this" : "evaluate things with them"}.`,
+      data.freeformInfo ? `Here's what I know so far: ${data.freeformInfo}` : "",
+      "What should I be thinking about?",
     ].filter(Boolean).join(" ");
     
     // Slight delay to let state settle
