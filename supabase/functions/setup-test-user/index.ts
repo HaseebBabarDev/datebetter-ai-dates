@@ -23,10 +23,15 @@ serve(async (req) => {
       }
     );
 
-    // Create the test user
-    const email = "spiritualbutsassy@gmail.com";
-    const password = "Miamigirl24*";
-    const name = "Spiritual";
+    // Get credentials from request body instead of hardcoding
+    const { email, password, name } = await req.json();
+
+    if (!email || !password) {
+      return new Response(
+        JSON.stringify({ error: "email and password are required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     console.log(`Creating test user: ${email}`);
 
@@ -37,14 +42,17 @@ serve(async (req) => {
     if (userExists) {
       console.log("User already exists, updating password");
       
-      // Update password if user exists
       const { error: updateError } = await supabaseClient.auth.admin.updateUserById(
         userExists.id,
         { password }
       );
 
       if (updateError) {
-        throw updateError;
+        console.error("Error updating user:", updateError);
+        return new Response(
+          JSON.stringify({ error: "Failed to update test user." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
 
       return new Response(
@@ -64,12 +72,16 @@ serve(async (req) => {
       password,
       email_confirm: true,
       user_metadata: {
-        name
+        name: name || null
       }
     });
 
     if (createError) {
-      throw createError;
+      console.error("Error creating user:", createError);
+      return new Response(
+        JSON.stringify({ error: "Failed to create test user." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     console.log("Test user created successfully:", newUser.user?.id);
@@ -84,10 +96,9 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "An unknown error occurred";
-    console.error("Error in setup-test-user:", message);
+    console.error("Error in setup-test-user:", error);
     return new Response(
-      JSON.stringify({ error: message }),
+      JSON.stringify({ error: "An unexpected error occurred." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -13,7 +13,7 @@ import { ThreadHeader } from "@/components/thread/ThreadHeader";
 import { RedFlagCard } from "@/components/thread/RedFlagCard";
 import { ChatGPTMessage } from "@/components/devi/ChatGPTMessage";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
-import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
+
 import { ConversationUploadSheet } from "@/components/devi/ConversationUploadSheet";
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
 import { InteractionHistory } from "@/components/candidate/InteractionHistory";
@@ -307,7 +307,28 @@ const CandidateThread = () => {
         compatibilityScore={candidate.compatibility_score}
         status={candidate.status}
         onViewProfile={() => navigate(`/candidate/${id}`)}
-        onDelete={undefined}
+        onDelete={async () => {
+          if (!window.confirm(`Remove ${candidate.nickname}? This will delete all their data including interactions and conversations.`)) return;
+          try {
+            // Delete related data first
+            await Promise.all([
+              supabase.from("interactions").delete().eq("candidate_id", candidate.id),
+              supabase.from("devi_conversations").delete().eq("candidate_id", candidate.id),
+              supabase.from("journal_entries").delete().eq("candidate_id", candidate.id),
+              supabase.from("behavioral_patterns").delete().eq("candidate_id", candidate.id),
+              supabase.from("no_contact_progress").delete().eq("candidate_id", candidate.id),
+              supabase.from("celibacy_tracking").delete().eq("candidate_id", candidate.id),
+              supabase.from("detachment_plans").delete().eq("candidate_id", candidate.id),
+            ]);
+            const { error } = await supabase.from("candidates").delete().eq("id", candidate.id);
+            if (error) throw error;
+            toast.success(`${candidate.nickname} removed`);
+            navigate("/candidates");
+          } catch (err) {
+            console.error("Delete error:", err);
+            toast.error("Failed to remove candidate");
+          }
+        }}
       />
 
       {/* Tabs */}
@@ -431,10 +452,6 @@ const CandidateThread = () => {
                 rows={1}
               />
 
-              <VoiceInputButton
-                onTranscript={(text) => setInput((prev) => prev + text)}
-                disabled={sending}
-              />
 
               <Button
                 size="icon"
