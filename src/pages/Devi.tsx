@@ -49,6 +49,7 @@ import { AIDisclosure } from "@/components/AIDisclosure";
 import TextSimulator, { TextSimulatorCTA } from "@/components/candidate/TextSimulator";
 
 import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
+import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
 import { DatingAdvisorCard } from "@/components/devi/DatingAdvisorCard";
 import { FirstTimeIntake } from "@/components/devi/FirstTimeIntake";
