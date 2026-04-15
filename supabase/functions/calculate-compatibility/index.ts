@@ -383,9 +383,11 @@ serve(async (req) => {
       shouldEndRelationship = true;
     }
 
-    const historicalFlagText = `${(historicalFlagInteractions || [])
+    // Build historical flag text from interaction notes only (NOT candidate.notes,
+    // which may contain user's own intentions like "avoid manipulation" that would false-flag)
+    const historicalFlagText = (historicalFlagInteractions || [])
       .map((r: any) => r.notes || "")
-      .join(" ")} ${(candidate.notes || "")}`.toLowerCase();
+      .join(" ").toLowerCase();
 
     const hasHistoricalGhosting = historicalFlagText.includes("ghost");
     const hasHistoricalBlocked = historicalFlagText.includes("blocked") || 
@@ -397,10 +399,15 @@ serve(async (req) => {
       historicalFlagText.includes("dropped off after sex") ||
       historicalFlagText.includes("changed after intimacy") ||
       historicalFlagText.includes("different after sex");
+    // For manipulation, require stronger signals - not just the word appearing
+    // "avoid manipulation" or "fear of manipulation" should NOT trigger this
     const hasHistoricalManipulation = 
-      historicalFlagText.includes("gaslight") || historicalFlagText.includes("manipulat") ||
-      historicalFlagText.includes("narcissis") || historicalFlagText.includes("toxic") ||
-      historicalFlagText.includes("abusive") || historicalFlagText.includes("unhinged");
+      (historicalFlagText.includes("he gaslight") || historicalFlagText.includes("she gaslight") ||
+       historicalFlagText.includes("is manipulat") || historicalFlagText.includes("was manipulat") ||
+       historicalFlagText.includes("is narcissis") || historicalFlagText.includes("was narcissis") ||
+       historicalFlagText.includes("is toxic") || historicalFlagText.includes("was toxic") ||
+       historicalFlagText.includes("is abusive") || historicalFlagText.includes("was abusive") ||
+       historicalFlagText.includes("unhinged"));
 
     if (hasHistoricalGhosting) hasGhostingPattern = true;
     if (hasHistoricalBlocked) hasBlockedPattern = true;
