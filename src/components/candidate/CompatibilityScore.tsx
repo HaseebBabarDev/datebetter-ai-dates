@@ -272,7 +272,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       
       onUpdate({
         compatibility_score: nextScore,
-        score_breakdown: nextAnalysis,
+        score_breakdown: (nextAnalysis as unknown as Candidate["score_breakdown"]) ?? null,
         last_score_update: refreshedCandidate?.last_score_update ?? new Date().toISOString(),
       });
 
@@ -314,6 +314,10 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
       setLoading(false);
     }
   }, [candidate.compatibility_score, candidate.id, canRefresh, hasStoredScore, incrementUsage, onUpdate, rawScoreData?.previous_score, refetchSubscription, remainingUpdates, scoreData, toast]);
+
+  const handleCalculateScoreClick = useCallback(() => {
+    void calculateScore();
+  }, [calculateScore]);
 
   useEffect(() => {
     if (!user || loading || hasDetailedScore || autoCalculationAttemptedRef.current === candidate.id) {
