@@ -1408,6 +1408,14 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
       analysis.overall_score = maxAllowed;
     }
     
+    // 2b. SYMMETRICAL: Also prevent drops of more than 1% per recalculation
+    // This stops scores from slowly bleeding down on repeated recalcs with no new negative signals
+    if (previousScoreNum !== null && !shouldEndRelationship && negativeCount === 0 && analysis.overall_score < previousScoreNum - 1) {
+      const minAllowed = previousScoreNum - 1;
+      console.log(`PREVENTING SCORE BLEED: Previous was ${previousScoreNum}%, AI suggested ${analysis.overall_score}%, flooring to ${minAllowed}%`);
+      analysis.overall_score = minAllowed;
+    }
+    
     // 3. If previous score was between 25-40%, prevent jumping more than +5 points
     if (previousScoreNum !== null && previousScoreNum >= 25 && previousScoreNum < 40 && analysis.overall_score > previousScoreNum + 5) {
       const maxAllowed = previousScoreNum + 5;
