@@ -549,7 +549,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
           <p className="text-sm text-muted-foreground mb-4">
             Get a D.E.V.I.-powered analysis of your compatibility based on your preferences and what you know about {candidate.nickname}.
           </p>
-          <Button onClick={calculateScore} disabled={loading} className="w-full">
+          <Button onClick={handleCalculateScoreClick} disabled={loading} className="w-full">
             {loading ? (
               <>
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -587,7 +587,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    onClick={calculateScore} 
+                    onClick={handleCalculateScoreClick} 
                     disabled={loading || !canRefresh} 
                     className="h-7 px-2 text-xs"
                   >
