@@ -1185,7 +1185,7 @@ const Devi = () => {
   const sendMessage = async (messageText?: string) => {
     const textToSend = messageText || input.trim();
     if ((!textToSend && pendingImages.length === 0) || isLoading) return;
-    
+import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 
     // Free trial gate: 5 exchanges max
     if (freeTrialExhausted) {
@@ -2843,7 +2843,15 @@ const Devi = () => {
         multiple
         onChange={onFileChange}
         className="hidden"
-      />
+              />
+              <VoiceInputButton
+                onTranscript={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
+                onPartialTranscript={(text) => setInput((prev) => {
+                  const base = prev.replace(/\s*\[.*?\]\s*$/, '');
+                  return base ? `${base} [${text}]` : `[${text}]`;
+                })}
+                disabled={isLoading}
+              />
 
       {/* Win logging dialog */}
       <DeviWinDialog
