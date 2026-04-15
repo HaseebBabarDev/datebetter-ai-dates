@@ -1185,7 +1185,7 @@ const Devi = () => {
   const sendMessage = async (messageText?: string) => {
     const textToSend = messageText || input.trim();
     if ((!textToSend && pendingImages.length === 0) || isLoading) return;
-import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
+
 
     // Free trial gate: 5 exchanges max
     if (freeTrialExhausted) {
