@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sparkles, ArrowRight, MessageCircle } from "lucide-react";
+import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 
 interface FirstTimeIntakeProps {
   userName: string;
@@ -51,7 +52,7 @@ export const FirstTimeIntake: React.FC<FirstTimeIntakeProps> = ({
         {/* Just the name */}
         <div className="bg-card rounded-2xl p-4 border border-border/50">
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Their name or nickname</Label>
+            <div className="flex items-center justify-between"><Label className="text-xs font-medium">Their name or nickname</Label><VoiceInputButton onTranscript={(text) => setCandidateName(text.trim())} /></div>
             <Input
               placeholder="e.g. Alex, Coffee Guy, etc."
               value={candidateName}

@@ -49,6 +49,7 @@ import { AIDisclosure } from "@/components/AIDisclosure";
 import TextSimulator, { TextSimulatorCTA } from "@/components/candidate/TextSimulator";
 
 import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
+import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
 import { DatingAdvisorCard } from "@/components/devi/DatingAdvisorCard";
 import { FirstTimeIntake } from "@/components/devi/FirstTimeIntake";
@@ -1185,7 +1186,7 @@ const Devi = () => {
   const sendMessage = async (messageText?: string) => {
     const textToSend = messageText || input.trim();
     if ((!textToSend && pendingImages.length === 0) || isLoading) return;
-    
+
 
     // Free trial gate: 5 exchanges max
     if (freeTrialExhausted) {
@@ -2843,7 +2844,15 @@ const Devi = () => {
         multiple
         onChange={onFileChange}
         className="hidden"
-      />
+              />
+              <VoiceInputButton
+                onTranscript={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
+                onPartialTranscript={(text) => setInput((prev) => {
+                  const base = prev.replace(/\s*\[.*?\]\s*$/, '');
+                  return base ? `${base} [${text}]` : `[${text}]`;
+                })}
+                disabled={isLoading}
+              />
 
       {/* Win logging dialog */}
       <DeviWinDialog
