@@ -363,7 +363,7 @@ export function ConversationUploadSheet({
                     {uploading ? "Processing..." : "Tap to upload"}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Videos or screenshots • Max 50MB
+                    Screenshots or short videos (~10s) • Max 50MB
                   </p>
                 </div>
               </button>
