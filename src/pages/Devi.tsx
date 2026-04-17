@@ -1080,6 +1080,16 @@ const Devi = () => {
     const imageType = e.target.getAttribute('data-type') || 'general';
     const newImages: { data: string; type: string }[] = [];
 
+    // If the user picked a video here, redirect them to the Conversation Analysis flow
+    // (it extracts frames so we don't blow up the edge function with raw video).
+    const hasVideo = files.some(f => f.type.startsWith('video/'));
+    if (hasVideo) {
+      e.target.value = '';
+      toast.info("For screen recordings, use 'Analyze a Conversation' so D.E.V.I. can read every frame.");
+      setShowConvoUpload(true);
+      return;
+    }
+
     for (const file of files) {
       if (!file.type.startsWith('image/')) {
         toast.error(`${file.name} is not an image`);
