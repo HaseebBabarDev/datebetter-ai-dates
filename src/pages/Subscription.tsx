@@ -15,6 +15,7 @@ import {
   isIosRevenueCatEnabled,
 } from "@/lib/revenuecat/initPurchases";
 import {
+  localEntitlementsFromRcCustomerInfo,
   resolveOfferingPackages,
   type ResolvedRcPackages,
 } from "@/lib/revenuecat/resolvePackages";
@@ -116,6 +117,15 @@ export default function Subscription() {
   const useIap = isIosRevenueCatEnabled();
   const [rcPackages, setRcPackages] = useState<ResolvedRcPackages | null>(null);
   const [iapAction, setIapAction] = useState<string | null>(null);
+  /** RC SDK truth right after IAP; server webhook can lag. */
+  const [iapAddonHint, setIapAddonHint] = useState<{
+    textSimulator: boolean;
+    detachment: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    setIapAddonHint(null);
+  }, [user?.id]);
 
   useEffect(() => {
     if (!useIap) return;
@@ -164,6 +174,12 @@ export default function Subscription() {
       setIapAction(actionKey);
       try {
         await Purchases.purchasePackage({ aPackage: pkg });
+        const { customerInfo } = await Purchases.getCustomerInfo();
+        const loc = localEntitlementsFromRcCustomerInfo(customerInfo);
+        setIapAddonHint({
+          textSimulator: loc.textSimulator,
+          detachment: loc.detachment,
+        });
         toast.success("You're subscribed!");
         await refetch();
       } catch (e: unknown) {
@@ -183,6 +199,12 @@ export default function Subscription() {
     try {
       await initPurchases();
       await Purchases.restorePurchases();
+      const { customerInfo } = await Purchases.getCustomerInfo();
+      const loc = localEntitlementsFromRcCustomerInfo(customerInfo);
+      setIapAddonHint({
+        textSimulator: loc.textSimulator,
+        detachment: loc.detachment,
+      });
       toast.success("Purchases restored.");
       await refetch();
     } catch (e: unknown) {
@@ -250,6 +272,12 @@ export default function Subscription() {
 
   const currentPlan = subscription?.plan || "free";
   const isUnlimited = currentPlan === "unlimited";
+  const hasTextSimAddon =
+    Boolean(subscription?.has_text_simulator) ||
+    (useIap && Boolean(iapAddonHint?.textSimulator));
+  const hasDetachmentAddon =
+    Boolean(subscription?.has_detachment_plan) ||
+    (useIap && Boolean(iapAddonHint?.detachment));
   const unlimitedPriceLabel =
     useIap && rcPackages?.unlimited?.product?.priceString
       ? rcPackages.unlimited.product.priceString
@@ -424,7 +452,7 @@ export default function Subscription() {
                     variant="outline"
                     size="sm"
                     className="w-full"
-                    disabled={!isUnlimited || busy}
+                    disabled={!isUnlimited || hasTextSimAddon || busy}
                     onClick={() => {
                       if (useIap) {
                         void purchaseIapPackage("text_sim", rcPackages?.textSimulator ?? null);
@@ -444,7 +472,7 @@ export default function Subscription() {
                     ) : (
                       <Zap className="w-4 h-4 mr-1" />
                     )}
-                    Subscribe
+                    {hasTextSimAddon ? "Subscribed" : "Subscribe"}
                   </Button>
                 </div>
               </div>
@@ -475,7 +503,7 @@ export default function Subscription() {
                     variant="outline"
                     size="sm"
                     className="w-full"
-                    disabled={!isUnlimited || busy}
+                    disabled={!isUnlimited || hasDetachmentAddon || busy}
                     onClick={() => {
                       if (useIap) {
                         void purchaseIapPackage("detachment", rcPackages?.detachment ?? null);
@@ -495,7 +523,7 @@ export default function Subscription() {
                     ) : (
                       <Sparkles className="w-4 h-4 mr-1" />
                     )}
-                    Subscribe
+                    {hasDetachmentAddon ? "Subscribed" : "Subscribe"}
                   </Button>
                 </div>
               </div>

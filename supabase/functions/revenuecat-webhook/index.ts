@@ -26,6 +26,13 @@ function isFutureOrUnknown(expirationAtMs: number | null | undefined): boolean {
   return expirationAtMs > Date.now();
 }
 
+/** Comma-separated Store product ids for the main Unlimited IAP only (not add-on SKUs). */
+function iapBaseProductIds(): string[] {
+  const raw = Deno.env.get("RC_IAP_BASE_PRODUCT_IDS")?.trim();
+  if (!raw) return [];
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -102,6 +109,10 @@ serve(async (req) => {
     : [];
   const expMs =
     typeof ev.expiration_at_ms === "number" ? ev.expiration_at_ms : undefined;
+  const productId = String(ev.product_id ?? "").trim();
+  const baseIds = iapBaseProductIds();
+  const treatAsBasePlanPurchase =
+    baseIds.length > 0 && productId.length > 0 && baseIds.includes(productId);
 
   const { data: existing } = await supabase
     .from("apple_entitlements")
@@ -158,8 +169,12 @@ serve(async (req) => {
         }
       }
     }
-    if (entIds.includes(ent.textSimulator)) textSim = true;
-    if (entIds.includes(ent.detachment)) det = true;
+    // Do not infer add-ons from entitlement_ids on Unlimited SKU events — RC often
+    // lists multiple entitlements per subscription; set RC_IAP_BASE_PRODUCT_IDS to your base IAP product id(s).
+    if (!treatAsBasePlanPurchase) {
+      if (entIds.includes(ent.textSimulator)) textSim = true;
+      if (entIds.includes(ent.detachment)) det = true;
+    }
   }
 
   const { error } = await supabase.from("apple_entitlements").upsert(
