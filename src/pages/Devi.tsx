@@ -1534,35 +1534,12 @@ const Devi = () => {
           hasUpdates = true;
         }
         
-        // Parse compatibility score marker for candidate
-        const compatScoreMatch = fullContent.match(/\[SET_COMPATIBILITY_SCORE:(\d+)\]/);
-        if (compatScoreMatch && selectedCandidate && user) {
-          const value = Math.min(100, Math.max(0, parseInt(compatScoreMatch[1])));
-          try {
-            const { error } = await supabase
-              .from('candidates')
-              .update({ 
-                compatibility_score: value,
-                last_score_update: new Date().toISOString(),
-              })
-              .eq('id', selectedCandidate.id)
-              .eq('user_id', user.id);
-            
-            if (!error) {
-              setSelectedCandidate(prev => prev ? {
-                ...prev,
-                compatibility_score: value,
-                last_score_update: new Date().toISOString(),
-              } : prev);
-              toast.success(`${selectedCandidate.nickname}'s compatibility score updated to ${value}%`);
-            } else {
-              console.error('Failed to update compatibility score:', error);
-              toast.error('Failed to update compatibility score');
-            }
-          } catch (err) {
-            console.error('Compatibility score update error:', err);
-          }
-        }
+        // NOTE: [SET_COMPATIBILITY_SCORE:X] is intentionally IGNORED.
+        // Compatibility scores are deterministic and computed only by the
+        // calculate-compatibility edge function based on profile + interaction data.
+        // D.E.V.I. is not allowed to overwrite the score from chat — this preserves
+        // scoring integrity and prevents users from "talking" the score up or down.
+        // The marker is stripped from displayed content above; we do nothing here.
 
         // Parse CREATE_CANDIDATE marker
         const createCandidateMatch = fullContent.match(/\[CREATE_CANDIDATE:([^|]+)\|([^|]*)\|([^|]*)\|([^\]]*)\]/);
