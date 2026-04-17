@@ -9,10 +9,20 @@ import { Separator } from "@/components/ui/separator";
 import { Check, Crown, ArrowLeft, Zap, Sparkles, Settings, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { STRIPE_PLANS,STRIPE_ADDONS } from "@/lib/stripeConfig";
+import { STRIPE_PLANS, STRIPE_ADDONS } from "@/lib/stripeConfig";
+import {
+  initPurchases,
+  isIosRevenueCatEnabled,
+} from "@/lib/revenuecat/initPurchases";
+import {
+  resolveOfferingPackages,
+  type ResolvedRcPackages,
+} from "@/lib/revenuecat/resolvePackages";
 
-import { Capacitor } from "@capacitor/core";
-import { Purchases, LOG_LEVEL } from "@revenuecat/purchases-capacitor";
+import {
+  Purchases,
+  type PurchasesPackage,
+} from "@revenuecat/purchases-capacitor";
 
 // const SUBSCRIPTION_PLANS = [
 //   {
@@ -101,50 +111,87 @@ export default function Subscription() {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { subscription, refetch } = useSubscription();
-  console.log("[Subscription] subscription", subscription);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
-
-
-  const loadOfferingsForPaywall = useCallback(async () => {
-    try {
-      const offerings = await Purchases.getOfferings();
-      console.log("[Subscription] offerings", offerings);
-      const current = offerings.current;
-      const packages = current?.availablePackages ?? [];
-      if (current != null && packages.length > 0) {
-        console.log("[Subscription] offerings current=", current.identifier, {
-          packageCount: packages.length,
-          productIds: packages.map((p) => p.product.identifier),
-        });
-      } else {
-        console.warn("[Subscription] offerings: no current offering or empty packages");
-      }
-    } catch (error) {
-      console.warn("[Subscription] getOfferings failed", error);
-    }
-  }, []);
-
-  const onDeviceReady = useCallback(async () => {
-    console.log("[Subscription] Initializing RevenueCat");
-    try {
-      await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
-      const apiKey = import.meta.env.VITE_REVENUECAT_IOS_API_KEY;
-      if (Capacitor.getPlatform() === "ios" && typeof apiKey === "string" && apiKey.length > 0) {
-        await Purchases.configure({ apiKey });
-        console.log("[Subscription] RevenueCat configured");
-        await loadOfferingsForPaywall();
-      }
-    } catch (e) {
-      console.error("[Subscription] RevenueCat init failed", e);
-      toast.error("Could not initialize billing. Try again or use web checkout.");
-    }
-  }, [loadOfferingsForPaywall]);
+  const useIap = isIosRevenueCatEnabled();
+  const [rcPackages, setRcPackages] = useState<ResolvedRcPackages | null>(null);
+  const [iapAction, setIapAction] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log("[Subscription] useEffect");
-    void onDeviceReady();
-  }, [onDeviceReady]);
+    if (!useIap) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        await initPurchases();
+        const offerings = await Purchases.getOfferings();
+        if (cancelled) return;
+        const resolved = resolveOfferingPackages(offerings);
+        setRcPackages(resolved);
+        if (
+          import.meta.env.DEV &&
+          offerings.current?.availablePackages?.length
+        ) {
+          console.log("[Subscription] RC packages resolved", {
+            offering: offerings.current.identifier,
+            unlimited: resolved.unlimited?.identifier,
+            textSimulator: resolved.textSimulator?.identifier,
+            detachment: resolved.detachment?.identifier,
+          });
+        }
+      } catch (e) {
+        console.warn("[Subscription] getOfferings failed", e);
+        if (!cancelled) {
+          toast.error("Could not load App Store subscriptions.");
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [useIap]);
+
+  const purchaseIapPackage = useCallback(
+    async (actionKey: string, pkg: PurchasesPackage | null) => {
+      if (!user) {
+        toast.error("Please sign in first");
+        navigate("/auth");
+        return;
+      }
+      if (!pkg) {
+        toast.error("That product is not available right now.");
+        return;
+      }
+      setIapAction(actionKey);
+      try {
+        await Purchases.purchasePackage({ aPackage: pkg });
+        toast.success("You're subscribed!");
+        await refetch();
+      } catch (e: unknown) {
+        const err = e as { userCancelled?: boolean; message?: string };
+        if (err?.userCancelled) return;
+        toast.error(err?.message || "Purchase could not be completed.");
+      } finally {
+        setIapAction(null);
+      }
+    },
+    [user, navigate, refetch]
+  );
+
+  const handleRestoreIap = useCallback(async () => {
+    if (!useIap) return;
+    setIapAction("restore");
+    try {
+      await initPurchases();
+      await Purchases.restorePurchases();
+      toast.success("Purchases restored.");
+      await refetch();
+    } catch (e: unknown) {
+      const err = e as { message?: string };
+      toast.error(err?.message || "Restore failed.");
+    } finally {
+      setIapAction(null);
+    }
+  }, [useIap, refetch]);
 
   // Handle return from Stripe Checkout
   useEffect(() => {
@@ -203,6 +250,11 @@ export default function Subscription() {
 
   const currentPlan = subscription?.plan || "free";
   const isUnlimited = currentPlan === "unlimited";
+  const unlimitedPriceLabel =
+    useIap && rcPackages?.unlimited?.product?.priceString
+      ? rcPackages.unlimited.product.priceString
+      : "$15";
+  const busy = checkoutLoading !== null || iapAction !== null;
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -217,6 +269,22 @@ export default function Subscription() {
           <p className="text-muted-foreground text-sm">
             Simple pricing — one plan, optional add-ons.
           </p>
+          {useIap && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={busy}
+                onClick={() => void handleRestoreIap()}
+              >
+                {iapAction === "restore" ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                ) : null}
+                Restore purchases
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Manage subscription for active subscribers */}
@@ -259,11 +327,17 @@ export default function Subscription() {
               <CardTitle className="text-lg">Unlimited</CardTitle>
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold">$15</span>
+              <span className="text-3xl font-bold">{unlimitedPriceLabel}</span>
               <span className="text-sm text-muted-foreground">/mo</span>
             </div>
             <CardDescription className="text-sm mt-1">
               Full relationship intelligence — 15-day free trial
+              {useIap && !rcPackages?.unlimited && (
+                <span className="block text-amber-600/90 mt-1 text-xs">
+                  App Store package not matched — set VITE_RC_PACKAGE_* env vars or check
+                  RevenueCat offering identifiers.
+                </span>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
@@ -284,16 +358,34 @@ export default function Subscription() {
             </ul>
             <Button
               className="w-full"
-              disabled={isUnlimited || checkoutLoading !== null}
-              onClick={() => handleCheckout(STRIPE_PLANS.unlimited.price_id)}
+              disabled={isUnlimited || busy}
+              onClick={() => {
+                if (useIap) {
+                  void purchaseIapPackage("unlimited", rcPackages?.unlimited ?? null);
+                } else {
+                  void handleCheckout(STRIPE_PLANS.unlimited.price_id);
+                }
+              }}
             >
-              {checkoutLoading === STRIPE_PLANS.unlimited.price_id ? (
-                <><Loader2 className="w-4 h-4 animate-spin mr-1" /> Processing...</>
-              ) : isUnlimited ? (
-                "Current Plan"
-              ) : (
-                "Start Free Trial"
-              )}
+              {useIap
+                ? iapAction === "unlimited"
+                  ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin mr-1" /> Processing...
+                      </>
+                    )
+                  : isUnlimited
+                    ? "Current Plan"
+                    : "Start Free Trial"
+                : checkoutLoading === STRIPE_PLANS.unlimited.price_id
+                  ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin mr-1" /> Processing...
+                      </>
+                    )
+                  : isUnlimited
+                    ? "Current Plan"
+                    : "Start Free Trial"}
             </Button>
           </CardContent>
         </Card>
@@ -302,7 +394,9 @@ export default function Subscription() {
         <Separator className="mb-6" />
         <div className="mb-4">
           <h2 className="text-lg font-semibold text-foreground mb-1">Optional Add-ons</h2>
-          <p className="text-sm text-muted-foreground">Monthly extras to enhance your experience.</p>
+          <p className="text-sm text-muted-foreground">
+            Monthly extras on top of Unlimited. {!isUnlimited && "Subscribe to Unlimited first to unlock add-ons."}
+          </p>
         </div>
 
         <div className="space-y-4">
@@ -316,7 +410,12 @@ export default function Subscription() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-semibold text-foreground">Text Simulator</span>
-                    <span className="font-bold text-foreground">$5<span className="text-xs font-normal text-muted-foreground">/mo</span></span>
+                    <span className="font-bold text-foreground">
+                      {useIap && rcPackages?.textSimulator?.product?.priceString
+                        ? rcPackages.textSimulator.product.priceString
+                        : "$5"}
+                      <span className="text-xs font-normal text-muted-foreground">/mo</span>
+                    </span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-3">
                     Practice conversations with AI-powered text simulations. 5 message exchanges per month.
@@ -325,10 +424,22 @@ export default function Subscription() {
                     variant="outline"
                     size="sm"
                     className="w-full"
-                    disabled={checkoutLoading !== null}
-                    onClick={() => handleCheckout(STRIPE_ADDONS.text_simulator.price_id)}
+                    disabled={!isUnlimited || busy}
+                    onClick={() => {
+                      if (useIap) {
+                        void purchaseIapPackage("text_sim", rcPackages?.textSimulator ?? null);
+                      } else {
+                        void handleCheckout(STRIPE_ADDONS.text_simulator.price_id);
+                      }
+                    }}
                   >
-                    {checkoutLoading === STRIPE_ADDONS.text_simulator.price_id ? (
+                    {useIap ? (
+                      iapAction === "text_sim" ? (
+                        <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                      ) : (
+                        <Zap className="w-4 h-4 mr-1" />
+                      )
+                    ) : checkoutLoading === STRIPE_ADDONS.text_simulator.price_id ? (
                       <Loader2 className="w-4 h-4 animate-spin mr-1" />
                     ) : (
                       <Zap className="w-4 h-4 mr-1" />
@@ -350,7 +461,12 @@ export default function Subscription() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-semibold text-foreground">Detachment Plan</span>
-                    <span className="font-bold text-foreground">$5<span className="text-xs font-normal text-muted-foreground">/mo</span></span>
+                    <span className="font-bold text-foreground">
+                      {useIap && rcPackages?.detachment?.product?.priceString
+                        ? rcPackages.detachment.product.priceString
+                        : "$5"}
+                      <span className="text-xs font-normal text-muted-foreground">/mo</span>
+                    </span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-3">
                     Personalized AI recovery timeline when you need to let someone go.
@@ -359,10 +475,22 @@ export default function Subscription() {
                     variant="outline"
                     size="sm"
                     className="w-full"
-                    disabled={checkoutLoading !== null}
-                    onClick={() => handleCheckout(STRIPE_ADDONS.detachment_plan.price_id)}
+                    disabled={!isUnlimited || busy}
+                    onClick={() => {
+                      if (useIap) {
+                        void purchaseIapPackage("detachment", rcPackages?.detachment ?? null);
+                      } else {
+                        void handleCheckout(STRIPE_ADDONS.detachment_plan.price_id);
+                      }
+                    }}
                   >
-                    {checkoutLoading === STRIPE_ADDONS.detachment_plan.price_id ? (
+                    {useIap ? (
+                      iapAction === "detachment" ? (
+                        <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                      ) : (
+                        <Sparkles className="w-4 h-4 mr-1" />
+                      )
+                    ) : checkoutLoading === STRIPE_ADDONS.detachment_plan.price_id ? (
                       <Loader2 className="w-4 h-4 animate-spin mr-1" />
                     ) : (
                       <Sparkles className="w-4 h-4 mr-1" />
@@ -376,7 +504,8 @@ export default function Subscription() {
         </div>
 
         <p className="mt-8 text-xs text-muted-foreground text-center">
-          Cancel anytime. No hidden fees. Powered by Stripe.
+          Cancel anytime. No hidden fees.
+          {useIap ? " Subscriptions billed through Apple." : " Powered by Stripe."}
         </p>
       </div>
     </div>
