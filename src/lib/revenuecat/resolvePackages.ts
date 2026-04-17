@@ -1,4 +1,43 @@
-import type { PurchasesOfferings, PurchasesPackage } from "@revenuecat/purchases-capacitor";
+import type {
+  CustomerInfo,
+  PurchasesOfferings,
+  PurchasesPackage,
+} from "@revenuecat/purchases-capacitor";
+
+function rcEntitlementId(
+  key: "unlimited" | "textSimulator" | "detachment",
+): string {
+  const env =
+    key === "unlimited"
+      ? import.meta.env.VITE_RC_ENTITLEMENT_UNLIMITED
+      : key === "textSimulator"
+        ? import.meta.env.VITE_RC_ENTITLEMENT_TEXT_SIMULATOR
+        : import.meta.env.VITE_RC_ENTITLEMENT_DETACHMENT;
+  const fallback =
+    key === "unlimited"
+      ? "unlimited"
+      : key === "textSimulator"
+        ? "text_simulator"
+        : "detachment_plan";
+  const v = typeof env === "string" ? env.trim() : "";
+  return v || fallback;
+}
+
+/** Active entitlement flags from RC SDK (immediate after purchase; mirrors dashboard). */
+export function localEntitlementsFromRcCustomerInfo(
+  customerInfo: CustomerInfo,
+): {
+  unlimited: boolean;
+  textSimulator: boolean;
+  detachment: boolean;
+} {
+  const active = customerInfo.entitlements.active;
+  return {
+    unlimited: !!active[rcEntitlementId("unlimited")],
+    textSimulator: !!active[rcEntitlementId("textSimulator")],
+    detachment: !!active[rcEntitlementId("detachment")],
+  };
+}
 
 export type ResolvedRcPackages = {
   unlimited: PurchasesPackage | null;

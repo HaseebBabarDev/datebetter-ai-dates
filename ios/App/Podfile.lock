@@ -1,23 +1,23 @@
 PODS:
-  - Capacitor (6.2.1):
+  - Capacitor (8.3.1):
     - CapacitorCordova
-  - CapacitorApp (6.0.3):
+  - CapacitorApp (8.1.0):
     - Capacitor
-  - CapacitorCommunityAppleSignIn (6.0.0):
+  - CapacitorCommunityAppleSignIn (7.1.0):
     - Capacitor
-  - CapacitorCordova (6.2.1)
-  - CapacitorKeyboard (6.0.4):
+  - CapacitorCordova (8.3.1)
+  - CapacitorKeyboard (8.0.3):
     - Capacitor
-  - CapacitorSplashScreen (6.0.4):
+  - CapacitorSplashScreen (8.0.1):
     - Capacitor
-  - CapacitorStatusBar (6.0.3):
+  - CapacitorStatusBar (8.0.2):
     - Capacitor
-  - PurchasesHybridCommon (13.26.0):
-    - RevenueCat (= 5.20.0)
-  - RevenueCat (5.20.0)
-  - RevenuecatPurchasesCapacitor (9.2.2):
+  - PurchasesHybridCommon (18.0.0):
+    - RevenueCat (= 5.67.2)
+  - RevenueCat (5.67.2)
+  - RevenuecatPurchasesCapacitor (13.0.0):
     - Capacitor
-    - PurchasesHybridCommon (= 13.26.0)
+    - PurchasesHybridCommon (= 18.0.0)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -53,17 +53,17 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@revenuecat/purchases-capacitor"
 
 SPEC CHECKSUMS:
-  Capacitor: c95400d761e376be9da6be5a05f226c0e865cebf
-  CapacitorApp: a19ccb4f5f32d2534be5c6f524d5a9b614a1e8a7
-  CapacitorCommunityAppleSignIn: c9c2541ee7580618055a91b3516c3f0313fe2544
-  CapacitorCordova: 8d93e14982f440181be7304aa9559ca631d77fff
-  CapacitorKeyboard: e8cd50fd5cbdd023a5947a5c0f5cca6e5aa5a253
-  CapacitorSplashScreen: ef140a8b1ea7244e0c245ce2dd4ce5251e7ab86a
-  CapacitorStatusBar: 149cde8f1328ec3aa6cbdd872a55137ae3f98b16
-  PurchasesHybridCommon: fa166fc8b385cf80f581f923c91d8ccffe5dd7f8
-  RevenueCat: e47ff90dfd271fde155a4befe48e8fc02e8281e4
-  RevenuecatPurchasesCapacitor: 6727a4dc1455bdf2374259420719ce5dfbe957fa
+  Capacitor: 46dbaa89c1d1cd121b9fc2dc839c1f39cc49e326
+  CapacitorApp: 449ffe26375e96f8aaaee625ac6e01e5c57c8650
+  CapacitorCommunityAppleSignIn: 271cb2860576fd2961508bbfa7a82117d93eadca
+  CapacitorCordova: 9010447fe25e869705fcf525e5f490facde87608
+  CapacitorKeyboard: 31c8285d92c9d1410071d52449f16d2c6673b6f4
+  CapacitorSplashScreen: 4b46c72298db552b3c57ce021ef028b6dc7f1fa7
+  CapacitorStatusBar: 01d5763b4ed720de5ce2edbc938de6a98f4c8f32
+  PurchasesHybridCommon: 5905e1b6e8a650e90ba7a27ee190df551a82db76
+  RevenueCat: 98177fc8a596e55a62b109c37e6d35f0132b4309
+  RevenuecatPurchasesCapacitor: 626dd9417edc7cb207e6bf69b5feefa7e22d74e0
 
-PODFILE CHECKSUM: bf4ed6830eb501294ccea12face5cabf22b5f151
+PODFILE CHECKSUM: 3f53a6f085f2b1e0e415abba98b9b6249b0c221e
 
 COCOAPODS: 1.16.2
