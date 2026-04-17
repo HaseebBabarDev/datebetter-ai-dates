@@ -342,6 +342,9 @@ export function ConversationUploadSheet({
                     <p className="font-medium text-foreground">Tip: Screen record the conversation</p>
                     <p><span className="font-medium">iPhone:</span> Swipe down → Control Center → Screen Recording</p>
                     <p><span className="font-medium">Android:</span> Swipe down → Quick Settings → Screen Record</p>
+                    <p className="pt-1 text-foreground/80">
+                      ⏱️ Keep recordings <span className="font-semibold">under 10 seconds</span> — scroll slowly through the chat. Longer videos may fail to analyze.
+                    </p>
                   </div>
                 </div>
               </div>
