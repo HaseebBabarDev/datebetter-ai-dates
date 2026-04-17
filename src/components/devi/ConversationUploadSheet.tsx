@@ -237,27 +237,29 @@ export function ConversationUploadSheet({
         }
 
         try {
-          let dataUrl: string;
           if (isImage) {
-            dataUrl = await compressImage(file);
+            const dataUrl = await compressImage(file);
+            setFiles((prev) => [
+              ...prev,
+              { data: dataUrl, type: "text_screenshot", isVideo: false, name: file.name },
+            ]);
           } else {
-            dataUrl = await new Promise<string>((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(reader.result as string);
-              reader.onerror = () => reject(new Error("Failed to read file"));
-              reader.readAsDataURL(file);
-            });
+            // Extract frames so we send small JPEGs to the AI instead of a huge video blob
+            const frames = await extractVideoFrames(file, { frameCount: 6, maxDim: 1280, quality: 0.8 });
+            if (!frames.length) {
+              toast.error(`${file.name}: Could not read video frames`);
+              continue;
+            }
+            setFiles((prev) => [
+              ...prev,
+              ...frames.map((data, i) => ({
+                data,
+                type: "text_screenshot",
+                isVideo: false,
+                name: `${file.name} — frame ${i + 1}/${frames.length}`,
+              })),
+            ]);
           }
-
-          setFiles((prev) => [
-            ...prev,
-            {
-              data: dataUrl,
-              type: isVideo ? "conversation_video" : "text_screenshot",
-              isVideo,
-              name: file.name,
-            },
-          ]);
         } catch (err) {
           console.error("Error processing file:", err);
           toast.error(`${file.name}: Failed to process`);
