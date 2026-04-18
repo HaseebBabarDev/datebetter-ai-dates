@@ -128,8 +128,12 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
     const validFiles = files.filter(f => {
       const isImage = f.type.startsWith("image/");
       const isVideo = f.type.startsWith("video/");
-      if (!isImage && !isVideo) {
-        toast.error(`${f.name} is not an image or video file`);
+      if (isVideo) {
+        toast.error("Recordings aren't supported here. Use Analyze a Conversation in D.E.V.I. chat for screen recordings.", { duration: 6000 });
+        return false;
+      }
+      if (!isImage) {
+        toast.error(`${f.name} is not an image file`);
         return false;
       }
       if (f.size > 20 * 1024 * 1024) {
