@@ -663,9 +663,9 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
             </p>
           </SheetHeader>
 
-          <ScrollArea className="flex-1 px-5 py-4">
+          <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
             {renderSection()}
-          </ScrollArea>
+          </div>
 
           <div className="px-5 py-4 border-t border-border bg-background safe-area-bottom space-y-2">
             <Button
