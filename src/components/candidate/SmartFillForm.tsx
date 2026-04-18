@@ -128,8 +128,12 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
     const validFiles = files.filter(f => {
       const isImage = f.type.startsWith("image/");
       const isVideo = f.type.startsWith("video/");
-      if (!isImage && !isVideo) {
-        toast.error(`${f.name} is not an image or video file`);
+      if (isVideo) {
+        toast.error("Recordings aren't supported here. Use Analyze a Conversation in D.E.V.I. chat for screen recordings.", { duration: 6000 });
+        return false;
+      }
+      if (!isImage) {
+        toast.error(`${f.name} is not an image file`);
         return false;
       }
       if (f.size > 20 * 1024 * 1024) {
@@ -232,34 +236,18 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
               variant="outline"
               className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs"
               onClick={() => {
-                const uploadInput = document.createElement('input');
-                uploadInput.type = 'file';
-                uploadInput.accept = 'video/*';
-                uploadInput.multiple = true;
-                uploadInput.onchange = (e) => {
-                  const target = e.target as HTMLInputElement;
-                  const files = Array.from(target.files || []);
-                  const validFiles = files.filter(f => {
-                    if (f.size > 20 * 1024 * 1024) {
-                      toast.error(`${f.name} is too large (max 20MB)`);
-                      return false;
-                    }
-                    return true;
-                  });
-                  setUploadedFiles(prev => [...prev, ...validFiles]);
-                };
-                uploadInput.click();
+                toast.info("For screen recordings, use 'Analyze a Conversation' in D.E.V.I. chat — it's built for video analysis.", { duration: 6000 });
               }}
             >
-              <FileVideo className="w-5 h-5 text-primary" />
-              Upload Recording
+              <FileVideo className="w-5 h-5 text-muted-foreground" />
+              Recording
+              <span className="text-[9px] text-muted-foreground leading-none">Use D.E.V.I. chat</span>
             </Button>
             <Button
               type="button"
               variant="outline"
               className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs relative"
               onClick={() => {
-                // Focus the textarea and trigger voice
                 const voiceBtn = document.querySelector('[data-voice-trigger]') as HTMLButtonElement;
                 if (voiceBtn) voiceBtn.click();
               }}
@@ -272,7 +260,7 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*,video/*"
+            accept="image/*"
             multiple
             className="hidden"
             onChange={handleFileUpload}
