@@ -119,12 +119,12 @@ const RELIGION_OPTIONS = [
 ];
 
 const POLITICS_OPTIONS = [
+  { value: "progressive", label: "Progressive" },
   { value: "liberal", label: "Liberal" },
   { value: "moderate", label: "Moderate" },
   { value: "conservative", label: "Conservative" },
-  { value: "libertarian", label: "Libertarian" },
-  { value: "apolitical", label: "Apolitical" },
-  { value: "other", label: "Other" },
+  { value: "traditional", label: "Traditional" },
+  { value: "prefer_not_say", label: "Prefer not to say" },
 ];
 
 const KIDS_DESIRE_OPTIONS = [
