@@ -234,6 +234,7 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
   userId,
   onClose,
   onSaved,
+  onAdvance,
 }) => {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [saving, setSaving] = useState(false);
