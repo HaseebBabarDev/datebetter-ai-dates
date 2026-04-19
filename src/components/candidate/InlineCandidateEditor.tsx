@@ -21,7 +21,23 @@ interface InlineCandidateEditorProps {
   userId: string;
   onClose: () => void;
   onSaved: (updatedCandidate: Candidate) => void;
+  onAdvance?: (nextSectionId: string) => void;
 }
+
+// Order used to auto-advance after a successful save
+const SECTION_ORDER = [
+  "basics",
+  "dating_context",
+  "relationship_intent",
+  "personality",
+  "values",
+  "kids_family",
+  "career_lifestyle",
+  "family_background",
+  "past_relationships",
+  "mental_health",
+  "chemistry",
+];
 
 const SECTION_CONFIG: Record<string, { title: string; emoji: string }> = {
   basics: { title: "Basics", emoji: "👤" },
@@ -218,6 +234,7 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
   userId,
   onClose,
   onSaved,
+  onAdvance,
 }) => {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [saving, setSaving] = useState(false);
@@ -391,7 +408,19 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
         onSaved(data as Candidate);
       }
 
-      setTimeout(() => onClose(), 600);
+      const currentIdx = sectionId ? SECTION_ORDER.indexOf(sectionId) : -1;
+      const nextSection =
+        currentIdx >= 0 && currentIdx < SECTION_ORDER.length - 1
+          ? SECTION_ORDER[currentIdx + 1]
+          : null;
+
+      setTimeout(() => {
+        if (nextSection && onAdvance) {
+          onAdvance(nextSection);
+        } else {
+          onClose();
+        }
+      }, 600);
     } catch (err) {
       console.error("Error saving candidate section:", err);
       toast.error(err instanceof Error ? err.message : "Failed to save. Try again.");
@@ -651,15 +680,16 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
       <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl p-0 z-[60]" hideOverlay onInteractOutside={(e) => e.preventDefault()} onPointerDownOutside={(e) => e.preventDefault()}>
         <div className="flex flex-col h-full">
           <SheetHeader className="px-5 pt-5 pb-3 border-b border-border">
+            <div className="inline-flex items-center gap-1.5 self-start px-2.5 py-1 rounded-full bg-accent text-accent-foreground text-[11px] font-bold uppercase tracking-wide mb-2">
+              <span>💕</span>
+              About {candidate?.nickname || "this candidate"}
+            </div>
             <SheetTitle className="flex items-center gap-2 text-base">
               <span className="text-lg">{config?.emoji}</span>
               {config?.title || "Update Candidate"}
-              {candidate && (
-                <span className="text-muted-foreground font-normal">— {candidate.nickname}</span>
-              )}
             </SheetTitle>
             <p className="text-xs text-muted-foreground">
-              Fill in what you know — you can always update later
+              You're entering info about <span className="font-semibold text-foreground">{candidate?.nickname || "them"}</span> — not yourself.
             </p>
           </SheetHeader>
 
@@ -686,7 +716,7 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  Save & Continue
+                  Save &amp; Next
                 </>
               )}
             </Button>
