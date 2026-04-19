@@ -2869,6 +2869,7 @@ const Devi = () => {
           onSaved={(updatedProfile) => {
             setUserProfile(updatedProfile);
           }}
+          onAdvance={(nextSectionId) => setProfileEditorSection(nextSectionId)}
         />
       )}
 
@@ -2884,6 +2885,7 @@ const Devi = () => {
             setSelectedCandidate(updatedCandidate);
             setCandidates(prev => prev.map(c => c.id === updatedCandidate.id ? updatedCandidate : c));
           }}
+          onAdvance={(nextSectionId) => setCandidateEditorSection(nextSectionId)}
         />
       )}
     </div>
