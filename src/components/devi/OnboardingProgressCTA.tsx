@@ -149,10 +149,10 @@ export const OnboardingProgressCTA: React.FC<OnboardingProgressCTAProps> = ({
   if (completed >= total) return null;
 
   const greeting = completed === 0
-    ? "Let's personalize D.E.V.I. for you!"
+    ? "Tell D.E.V.I. about YOU"
     : completed <= 3
-    ? "You're off to a great start!"
-    : "Almost there — keep going!";
+    ? "Your profile — off to a great start!"
+    : "Your profile — almost there!";
 
   const handleSectionClick = (section: typeof ONBOARDING_SECTIONS[0]) => {
     if (onOpenSection) {
@@ -179,7 +179,7 @@ export const OnboardingProgressCTA: React.FC<OnboardingProgressCTAProps> = ({
         <div>
           <p className="font-semibold text-sm text-foreground">{greeting}</p>
           <p className="text-[11px] text-muted-foreground">
-            {completed}/{total} sections complete
+            About you · {completed}/{total} sections complete
           </p>
         </div>
       </div>
