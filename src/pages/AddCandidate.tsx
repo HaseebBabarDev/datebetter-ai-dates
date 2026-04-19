@@ -2077,10 +2077,19 @@ const THEIR_ISSUE_OPTIONS = [
           <div className="space-y-2 pt-2">
             {isEditMode ? (
               <div className="flex flex-col gap-2">
+                <Button
+                  type="submit"
+                  className="w-full rounded-xl h-12 text-base font-semibold bg-[image:var(--gradient-primary)] hover:opacity-90 shadow-[var(--shadow-soft)]"
+                  size="lg"
+                  disabled={loading || !nickname.trim()}
+                >
+                  {loading ? "Saving..." : "Save Changes"}
+                </Button>
                 {activeTab !== "chemistry" && (
-                  <Button 
-                    type="button" 
-                    className="w-full text-xs h-9" 
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-10 text-sm"
                     disabled={loading}
                     onClick={() => {
                       const currentIndex = TABS.indexOf(activeTab as typeof TABS[number]);
@@ -2089,17 +2098,9 @@ const THEIR_ISSUE_OPTIONS = [
                       }
                     }}
                   >
-                    Add More Info →
+                    Next Section →
                   </Button>
                 )}
-                <Button 
-                  type="submit" 
-                  variant="outline"
-                  className="w-full text-xs h-9" 
-                  disabled={loading}
-                >
-                  {loading ? "Saving..." : "Save Changes"}
-                </Button>
               </div>
             ) : (
               <Button
