@@ -408,7 +408,19 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
         onSaved(data as Candidate);
       }
 
-      setTimeout(() => onClose(), 600);
+      const currentIdx = sectionId ? SECTION_ORDER.indexOf(sectionId) : -1;
+      const nextSection =
+        currentIdx >= 0 && currentIdx < SECTION_ORDER.length - 1
+          ? SECTION_ORDER[currentIdx + 1]
+          : null;
+
+      setTimeout(() => {
+        if (nextSection && onAdvance) {
+          onAdvance(nextSection);
+        } else {
+          onClose();
+        }
+      }, 600);
     } catch (err) {
       console.error("Error saving candidate section:", err);
       toast.error(err instanceof Error ? err.message : "Failed to save. Try again.");
