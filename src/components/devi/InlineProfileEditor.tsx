@@ -889,6 +889,10 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
       <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl p-0 z-[60]" hideOverlay onInteractOutside={(e) => e.preventDefault()} onPointerDownOutside={(e) => e.preventDefault()}>
         <div className="flex flex-col h-full">
           <SheetHeader className="p-5 pb-3 border-b border-border/50 bg-gradient-to-br from-primary/10 to-background">
+            <div className="inline-flex items-center gap-1.5 self-start px-2.5 py-1 rounded-full bg-primary/15 text-primary text-[11px] font-bold uppercase tracking-wide mb-2">
+              <span>👤</span>
+              About YOU
+            </div>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center">
                 <span className="text-lg">{config.emoji}</span>
@@ -898,6 +902,9 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
                 <p className="text-sm text-muted-foreground">{config.subtitle}</p>
               </div>
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              You're updating <span className="font-semibold text-foreground">your own</span> profile.
+            </p>
           </SheetHeader>
 
           <ScrollArea className="flex-1 px-5 py-4">
