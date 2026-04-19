@@ -219,6 +219,7 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
   userId,
   onClose,
   onSaved,
+  onAdvance,
 }) => {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
