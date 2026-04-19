@@ -442,7 +442,18 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
 
       toast.success("Profile updated!");
       onSaved(data as Profile);
-      onClose();
+
+      const currentIdx = sectionId ? PROFILE_SECTION_ORDER.indexOf(sectionId) : -1;
+      const nextSection =
+        currentIdx >= 0 && currentIdx < PROFILE_SECTION_ORDER.length - 1
+          ? PROFILE_SECTION_ORDER[currentIdx + 1]
+          : null;
+
+      if (nextSection && onAdvance) {
+        onAdvance(nextSection);
+      } else {
+        onClose();
+      }
     } catch (error) {
       console.error("Error saving profile:", error);
       toast.error("Failed to save. Please try again.");
