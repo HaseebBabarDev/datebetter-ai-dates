@@ -89,7 +89,7 @@ const CandidatesView = () => {
   if (!authLoading && !user) return <Navigate to="/auth" replace />;
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-28">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50 px-4 pt-safe-top">
         <div className="flex items-center justify-between py-3">

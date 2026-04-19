@@ -76,7 +76,7 @@ const Dashboard = () => {
   if (!user) return <Navigate to="/auth" replace />;
 
   return (
-    <div className="min-h-[100dvh] bg-[image:var(--gradient-page)] pb-20">
+    <div className="min-h-[100dvh] bg-[image:var(--gradient-page)] pb-28">
       <header className="px-4 py-4 pt-safe-top">
         <div className="max-w-lg mx-auto">
           <div className="flex items-center gap-2 mb-1">
