@@ -21,7 +21,23 @@ interface InlineCandidateEditorProps {
   userId: string;
   onClose: () => void;
   onSaved: (updatedCandidate: Candidate) => void;
+  onAdvance?: (nextSectionId: string) => void;
 }
+
+// Order used to auto-advance after a successful save
+const SECTION_ORDER = [
+  "basics",
+  "dating_context",
+  "relationship_intent",
+  "personality",
+  "values",
+  "kids_family",
+  "career_lifestyle",
+  "family_background",
+  "past_relationships",
+  "mental_health",
+  "chemistry",
+];
 
 const SECTION_CONFIG: Record<string, { title: string; emoji: string }> = {
   basics: { title: "Basics", emoji: "👤" },

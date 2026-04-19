@@ -19,7 +19,26 @@ interface InlineProfileEditorProps {
   userId: string;
   onClose: () => void;
   onSaved: (updatedProfile: Profile) => void;
+  onAdvance?: (nextSectionId: string) => void;
 }
+
+// Order used to auto-advance after a successful save
+const PROFILE_SECTION_ORDER = [
+  "identity",
+  "dating_prefs",
+  "goals",
+  "values",
+  "kids_family",
+  "career",
+  "communication",
+  "past_patterns",
+  "family_upbringing",
+  "boundaries",
+  "mental_health",
+  "relationship_trauma",
+  "healing",
+  "dating_style",
+];
 
 const GENDER_OPTIONS = [
   { value: "woman_cis", label: "Woman" },
