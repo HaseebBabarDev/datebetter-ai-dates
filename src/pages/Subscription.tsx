@@ -285,7 +285,7 @@ export default function Subscription() {
   const busy = checkoutLoading !== null || iapAction !== null;
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-[calc(env(safe-area-inset-bottom)+7rem)]">
       <div className="container max-w-lg mx-auto px-4 py-6 sm:py-8">
         {/* Header */}
         <div className="mb-6">

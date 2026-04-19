@@ -684,7 +684,7 @@ const CandidateDetail = () => {
 
   return (
     <div
-      className="h-[100dvh] bg-background overflow-auto pb-24"
+      className="h-[100dvh] bg-background overflow-auto pb-[calc(env(safe-area-inset-bottom)+7rem)]"
       style={{ overscrollBehavior: "contain" }}
     >
       {/* Header */}
