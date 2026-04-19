@@ -679,8 +679,8 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
     <Sheet open={open} onOpenChange={(o) => !o && onClose()} modal={false}>
       <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl p-0 z-[60]" hideOverlay onInteractOutside={(e) => e.preventDefault()} onPointerDownOutside={(e) => e.preventDefault()}>
         <div className="flex flex-col h-full">
-          <SheetHeader className="px-5 pt-5 pb-3 border-b border-border">
-            <div className="inline-flex items-center gap-1.5 self-start px-2.5 py-1 rounded-full bg-accent text-accent-foreground text-[11px] font-bold uppercase tracking-wide mb-2">
+          <SheetHeader className="px-5 pt-5 pb-3 border-b border-border bg-gradient-to-br from-rose-500/10 to-background">
+            <div className="inline-flex items-center gap-1.5 self-start px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 text-[11px] font-bold uppercase tracking-wide mb-2">
               <span>💕</span>
               About {candidate?.nickname || "this candidate"}
             </div>
