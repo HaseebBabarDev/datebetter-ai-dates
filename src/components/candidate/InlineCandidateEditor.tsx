@@ -716,7 +716,7 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  Save & Continue
+                  Save &amp; Next
                 </>
               )}
             </Button>
