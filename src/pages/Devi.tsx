@@ -2802,7 +2802,6 @@ const Devi = () => {
                 placeholder={selectedCandidate ? `Ask about ${selectedCandidate.nickname}...` : "Ask me anything about dating..."}
                 className="min-h-[52px] max-h-36 resize-none text-sm rounded-xl"
                 rows={2}
-                disabled={isLoading}
               />
               <Button
                 size="icon"
