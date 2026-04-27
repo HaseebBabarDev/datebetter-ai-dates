@@ -1754,6 +1754,7 @@ const Devi = () => {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey && (input.trim() || pendingImages.length > 0)) {
       e.preventDefault();
+      if (isLoading) return; // don't send while D.E.V.I. is responding, but allow typing
       sendMessage();
     }
   };
