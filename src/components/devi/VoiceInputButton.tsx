@@ -89,6 +89,12 @@ export const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
   }, [scribe]);
 
   // Elapsed counter + auto-stop after 30 seconds
+  // IMPORTANT: only depend on isConnected (stable boolean). Depending on the
+  // `scribe` object causes the effect to re-run on every render, which keeps
+  // resetting `start` and makes the timer flip-flop between 0s and 1s.
+  const scribeRef = useRef(scribe);
+  scribeRef.current = scribe;
+
   useEffect(() => {
     if (!scribe.isConnected) {
       setElapsed(0);
@@ -99,12 +105,13 @@ export const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
       const secs = Math.floor((Date.now() - start) / 1000);
       setElapsed(secs);
       if (secs >= 30) {
-        scribe.disconnect();
+        scribeRef.current.disconnect();
         toast.info("Recording stopped (max 30 seconds)");
       }
     }, 250);
     return () => clearInterval(interval);
-  }, [scribe.isConnected, scribe]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scribe.isConnected]);
 
   // Active recording UI: stop + cancel controls with timer
   if (scribe.isConnected) {
