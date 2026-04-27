@@ -1304,6 +1304,7 @@ const Devi = () => {
             interactions,
             journalEntries,
           }),
+          signal: abortController.signal,
         }
       );
 
