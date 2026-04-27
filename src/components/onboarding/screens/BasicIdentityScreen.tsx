@@ -272,12 +272,19 @@ const BasicIdentityScreen = () => {
           </Select>
           
           {data.pronouns === "other" && (
-            <Input
-              placeholder="Enter your pronouns"
-              value={data.customPronouns || ""}
-              onChange={(e) => updateData({ customPronouns: e.target.value })}
-              className="mt-2"
-            />
+            <div className="relative mt-2">
+              <Input
+                placeholder="Enter your pronouns"
+                value={data.customPronouns || ""}
+                onChange={(e) => updateData({ customPronouns: e.target.value })}
+                className="pr-10"
+              />
+              <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                <VoiceInputButton
+                  onTranscript={(text) => updateData({ customPronouns: appendText(data.customPronouns, text) })}
+                />
+              </div>
+            </div>
           )}
         </div>
 
