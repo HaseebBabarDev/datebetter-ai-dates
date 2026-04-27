@@ -60,9 +60,11 @@ const HealingAssessmentScreen = () => {
   const { user } = useAuth();
   
   const [exContactStatus, setExContactStatus] = useState(data.exContactStatus || "");
-  const [overExLevel, setOverExLevel] = useState(data.overExLevel || 50);
-  const [attachmentToPast, setAttachmentToPast] = useState(data.attachmentToPast || 50);
-  
+  const [thinkAboutEx, setThinkAboutEx] = useState<string>("");
+  const [checkTheirSocials, setCheckTheirSocials] = useState<string>("");
+  const [newPartnersFeeling, setNewPartnersFeeling] = useState<string>("");
+  const [repeatPatterns, setRepeatPatterns] = useState<string>("");
+
   // Score calculation state
   const [isCalculating, setIsCalculating] = useState(false);
   const [healingScore, setHealingScore] = useState<number | null>(null);
@@ -74,14 +76,21 @@ const HealingAssessmentScreen = () => {
     updateData({ exContactStatus: value });
   };
 
-  const handleOverExChange = (value: number[]) => {
-    setOverExLevel(value[0]);
-    updateData({ overExLevel: value[0] });
+  // Derive 0–100 indicators from behavioral answers (no self-rating)
+  const deriveOverExLevel = () => {
+    const a = THINK_ABOUT_EX_OPTIONS.find((o) => o.value === thinkAboutEx)?.score;
+    const b = CHECK_THEIR_SOCIALS_OPTIONS.find((o) => o.value === checkTheirSocials)?.score;
+    const c = NEW_PARTNERS_FEELING_OPTIONS.find((o) => o.value === newPartnersFeeling)?.score;
+    const vals = [a, b, c].filter((v): v is number => typeof v === "number");
+    if (vals.length === 0) return 50;
+    return Math.round(vals.reduce((s, v) => s + v, 0) / vals.length);
   };
 
-  const handleAttachmentChange = (value: number[]) => {
-    setAttachmentToPast(value[0]);
-    updateData({ attachmentToPast: value[0] });
+  const deriveAttachmentToPast = () => {
+    const r = REPEAT_PATTERNS_OPTIONS.find((o) => o.value === repeatPatterns)?.score;
+    // High "still attached to past" = low score on broken-cycle question
+    if (typeof r !== "number") return 50;
+    return Math.max(0, Math.min(100, 100 - r));
   };
 
   const calculateScore = async () => {
