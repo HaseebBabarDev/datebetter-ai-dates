@@ -1725,27 +1725,47 @@ const Devi = () => {
       }
 
     } catch (error) {
-      console.error("Chat error:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to send message");
+      // User-initiated abort: silently restore the draft so they can edit
+      const isAbort = (error instanceof DOMException && error.name === 'AbortError') ||
+        (error instanceof Error && error.name === 'AbortError');
+      if (isAbort) {
+        setInput(draftInput);
+        setPendingImages(draftImages);
+        setTextScreenshotRightSide(draftTextScreenshotRightSide);
+        setMessages(prev => prev.filter(m => m.id !== userMessage.id));
+      } else {
+        console.error("Chat error:", error);
+        toast.error(error instanceof Error ? error.message : "Failed to send message");
 
-      // Restore draft so screenshot uploads/text are not lost on failure
-      setInput(draftInput);
-      setPendingImages(draftImages);
-      setTextScreenshotRightSide(draftTextScreenshotRightSide);
+        // Restore draft so screenshot uploads/text are not lost on failure
+        setInput(draftInput);
+        setPendingImages(draftImages);
+        setTextScreenshotRightSide(draftTextScreenshotRightSide);
 
-      // Remove optimistic user message if the request failed before getting a usable assistant response
-      setMessages(prev => prev.filter(m => m.id !== userMessage.id));
+        // Remove optimistic user message if the request failed before getting a usable assistant response
+        setMessages(prev => prev.filter(m => m.id !== userMessage.id));
 
-      const errorMessage: Message = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: "Sorry, I couldn't process that message. Please try again.",
-      };
-      setMessages(prev => [...prev, errorMessage]);
+        const errorMessage: Message = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: "Sorry, I couldn't process that message. Please try again.",
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
     } finally {
       setIsLoading(false);
       setIsThinking(false);
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null;
+      }
     }
+  };
+
+  const stopGeneration = () => {
+    const controller = abortControllerRef.current;
+    if (!controller) return;
+    controller.abort();
+    abortControllerRef.current = null;
   };
 
   const getImagePrompt = (type: string, rightSide: "me" | "them"): string => {
