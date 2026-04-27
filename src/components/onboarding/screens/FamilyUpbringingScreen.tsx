@@ -423,10 +423,15 @@ const FamilyUpbringingScreen = () => {
 
         {/* Free-form notes about family experience */}
         <div className="space-y-2">
-          <Label className="text-sm flex items-center gap-2">
-            <PenLine className="h-4 w-4" />
-            Anything else about your family or upbringing? (optional)
-          </Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-sm flex items-center gap-2">
+              <PenLine className="h-4 w-4" />
+              Anything else about your family or upbringing? (optional)
+            </Label>
+            <VoiceInputButton
+              onTranscript={(text) => handleFamilyNotesChange(((data.familyUpbringingNotes || "") + " " + text).trim())}
+            />
+          </div>
           <Textarea
             value={data.familyUpbringingNotes || ""}
             onChange={(e) => handleFamilyNotesChange(e.target.value)}
