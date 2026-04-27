@@ -324,7 +324,12 @@ const RelationshipTraumaScreen = () => {
 
         {/* General notes */}
         <div className="space-y-2">
-          <Label className="text-sm">General reflections on past relationships (optional)</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-sm">General reflections on past relationships (optional)</Label>
+            <VoiceInputButton
+              onTranscript={(text) => handleGeneralNotesChange(((generalNotes || "") + " " + text).trim())}
+            />
+          </div>
           <Textarea
             placeholder="Any patterns you've noticed, lessons learned, or things you want D.E.V.I. to understand about your relationship history..."
             value={generalNotes}
