@@ -5,6 +5,10 @@ import ContinueButton from "../ContinueButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OptionCard } from "../OptionCard";
+import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
+
+const appendText = (prev: string | undefined, text: string) =>
+  prev && prev.trim() ? `${prev} ${text}`.trim() : text.trim();
 import {
   Select,
   SelectContent,
