@@ -2839,12 +2839,13 @@ const Devi = () => {
               />
               <Button
                 size="icon"
-                onClick={() => sendMessage()}
-                disabled={(!input.trim() && pendingImages.length === 0) || isLoading}
+                onClick={() => (isLoading ? stopGeneration() : sendMessage())}
+                disabled={!isLoading && !input.trim() && pendingImages.length === 0}
+                aria-label={isLoading ? "Stop generating and edit message" : "Send message"}
                 className="shrink-0 h-11 w-11 rounded-xl bg-[image:var(--gradient-hero)]"
               >
                 {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Square className="w-4 h-4 fill-current" />
                 ) : (
                   <Send className="w-5 h-5" />
                 )}
