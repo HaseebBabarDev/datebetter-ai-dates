@@ -213,7 +213,12 @@ export const EditInteractionDialog: React.FC<EditInteractionDialogProps> = ({
 
             {/* Notes */}
             <div className="space-y-2">
-              <Label>Notes</Label>
+              <div className="flex items-center justify-between">
+                <Label>Notes</Label>
+                <VoiceInputButton
+                  onTranscript={(text) => setNotes((prev) => (prev ? `${prev} ${text}` : text))}
+                />
+              </div>
               <Textarea
                 placeholder="What happened? How did it feel?"
                 value={notes}
