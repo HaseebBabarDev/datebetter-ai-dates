@@ -1754,6 +1754,7 @@ const Devi = () => {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey && (input.trim() || pendingImages.length > 0)) {
       e.preventDefault();
+      if (isLoading) return; // don't send while D.E.V.I. is responding, but allow typing
       sendMessage();
     }
   };
@@ -2802,7 +2803,6 @@ const Devi = () => {
                 placeholder={selectedCandidate ? `Ask about ${selectedCandidate.nickname}...` : "Ask me anything about dating..."}
                 className="min-h-[52px] max-h-36 resize-none text-sm rounded-xl"
                 rows={2}
-                disabled={isLoading}
               />
               <Button
                 size="icon"
