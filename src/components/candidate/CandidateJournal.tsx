@@ -185,13 +185,20 @@ export const CandidateJournal: React.FC<CandidateJournalProps> = ({
                 <p className="text-xs text-muted-foreground">
                   What's on your mind about {candidateName}?
                 </p>
-                <Textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Write your thoughts, feelings, or reflections..."
-                  className="min-h-[100px] text-sm"
-                  autoFocus
-                />
+                <div className="relative">
+                  <Textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Write your thoughts, feelings, or reflections..."
+                    className="min-h-[100px] text-sm pr-12"
+                    autoFocus
+                  />
+                  <div className="absolute bottom-2 right-2">
+                    <VoiceInputButton
+                      onTranscript={(text) => setContent((prev) => (prev ? `${prev} ${text}` : text))}
+                    />
+                  </div>
+                </div>
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground">How are you feeling?</p>
                   <div className="flex gap-2">
