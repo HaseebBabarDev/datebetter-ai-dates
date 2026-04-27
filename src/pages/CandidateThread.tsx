@@ -453,6 +453,10 @@ const CandidateThread = () => {
                 rows={1}
               />
 
+              <VoiceInputButton
+                onTranscript={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
+                disabled={sending}
+              />
 
               <Button
                 size="icon"
