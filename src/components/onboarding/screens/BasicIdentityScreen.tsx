@@ -166,7 +166,12 @@ const BasicIdentityScreen = () => {
 
         {/* Name Section */}
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-sm font-medium">What should we call you?</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="name" className="text-sm font-medium">What should we call you?</Label>
+            <VoiceInputButton
+              onTranscript={(text) => updateData({ name: appendText(data.name, text) })}
+            />
+          </div>
           <Input
             id="name"
             placeholder="Your name"
