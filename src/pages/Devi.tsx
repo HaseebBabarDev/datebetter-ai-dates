@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, UserPlus, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink, Zap, RotateCcw } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, UserPlus, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink, Zap, RotateCcw, Square } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -462,6 +462,7 @@ const Devi = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [pendingImages, setPendingImages] = useState<{ data: string; type: string }[]>([]);
   const [textScreenshotRightSide, setTextScreenshotRightSide] = useState<"me" | "them">("me");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -1234,6 +1235,17 @@ const Devi = () => {
     setIsLoading(true);
     setIsThinking(true);
 
+    // Set up abort controller so the user can stop generation
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    // Stash draft on the controller so stopGeneration can restore it
+    (abortController as any)._draft = {
+      input: draftInput,
+      images: draftImages,
+      rightSide: draftTextScreenshotRightSide,
+      userMessageId: userMessage.id,
+    };
+
     let convId = currentConversationId;
     try {
       // Create or use existing conversation
@@ -1292,6 +1304,7 @@ const Devi = () => {
             interactions,
             journalEntries,
           }),
+          signal: abortController.signal,
         }
       );
 
@@ -1712,27 +1725,47 @@ const Devi = () => {
       }
 
     } catch (error) {
-      console.error("Chat error:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to send message");
+      // User-initiated abort: silently restore the draft so they can edit
+      const isAbort = (error instanceof DOMException && error.name === 'AbortError') ||
+        (error instanceof Error && error.name === 'AbortError');
+      if (isAbort) {
+        setInput(draftInput);
+        setPendingImages(draftImages);
+        setTextScreenshotRightSide(draftTextScreenshotRightSide);
+        setMessages(prev => prev.filter(m => m.id !== userMessage.id));
+      } else {
+        console.error("Chat error:", error);
+        toast.error(error instanceof Error ? error.message : "Failed to send message");
 
-      // Restore draft so screenshot uploads/text are not lost on failure
-      setInput(draftInput);
-      setPendingImages(draftImages);
-      setTextScreenshotRightSide(draftTextScreenshotRightSide);
+        // Restore draft so screenshot uploads/text are not lost on failure
+        setInput(draftInput);
+        setPendingImages(draftImages);
+        setTextScreenshotRightSide(draftTextScreenshotRightSide);
 
-      // Remove optimistic user message if the request failed before getting a usable assistant response
-      setMessages(prev => prev.filter(m => m.id !== userMessage.id));
+        // Remove optimistic user message if the request failed before getting a usable assistant response
+        setMessages(prev => prev.filter(m => m.id !== userMessage.id));
 
-      const errorMessage: Message = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: "Sorry, I couldn't process that message. Please try again.",
-      };
-      setMessages(prev => [...prev, errorMessage]);
+        const errorMessage: Message = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: "Sorry, I couldn't process that message. Please try again.",
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
     } finally {
       setIsLoading(false);
       setIsThinking(false);
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null;
+      }
     }
+  };
+
+  const stopGeneration = () => {
+    const controller = abortControllerRef.current;
+    if (!controller) return;
+    controller.abort();
+    abortControllerRef.current = null;
   };
 
   const getImagePrompt = (type: string, rightSide: "me" | "them"): string => {
@@ -2806,12 +2839,13 @@ const Devi = () => {
               />
               <Button
                 size="icon"
-                onClick={() => sendMessage()}
-                disabled={(!input.trim() && pendingImages.length === 0) || isLoading}
+                onClick={() => (isLoading ? stopGeneration() : sendMessage())}
+                disabled={!isLoading && !input.trim() && pendingImages.length === 0}
+                aria-label={isLoading ? "Stop generating and edit message" : "Send message"}
                 className="shrink-0 h-11 w-11 rounded-xl bg-[image:var(--gradient-hero)]"
               >
                 {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Square className="w-4 h-4 fill-current" />
                 ) : (
                   <Send className="w-5 h-5" />
                 )}
