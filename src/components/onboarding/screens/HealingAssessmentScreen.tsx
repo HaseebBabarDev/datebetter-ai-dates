@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { OnboardingLayout } from "../OnboardingLayout";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { Heart, AlertTriangle, Sparkles, RefreshCw, CheckCircle, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +22,37 @@ const EX_CONTACT_OPTIONS = [
   { value: "frequent", label: "Frequent contact (talk often)" },
   { value: "still_connected", label: "Still emotionally connected" },
   { value: "not_applicable", label: "No significant exes" },
+];
+
+// Behavioral indicators — we infer healing instead of asking the user to score themselves
+const THINK_ABOUT_EX_OPTIONS = [
+  { value: "rarely", label: "Rarely or never", score: 95 },
+  { value: "sometimes", label: "A few times a month", score: 75 },
+  { value: "weekly", label: "Most weeks", score: 50 },
+  { value: "daily", label: "Most days", score: 25 },
+  { value: "constantly", label: "Constantly / can't stop", score: 5 },
+];
+
+const CHECK_THEIR_SOCIALS_OPTIONS = [
+  { value: "never", label: "Never — I don't follow them", score: 95 },
+  { value: "rarely", label: "Once in a while", score: 70 },
+  { value: "weekly", label: "Weekly", score: 40 },
+  { value: "daily", label: "Daily or more", score: 10 },
+];
+
+const NEW_PARTNERS_FEELING_OPTIONS = [
+  { value: "excited", label: "Excited to meet someone new", score: 90 },
+  { value: "open", label: "Open but cautious", score: 70 },
+  { value: "comparing", label: "I keep comparing them to my ex", score: 35 },
+  { value: "numb", label: "Numb or not interested yet", score: 25 },
+  { value: "havent_tried", label: "Haven't tried yet", score: 50 },
+];
+
+const REPEAT_PATTERNS_OPTIONS = [
+  { value: "no", label: "No, I've broken the cycle", score: 90 },
+  { value: "aware", label: "I notice them but catch myself", score: 65 },
+  { value: "sometimes", label: "Sometimes, despite trying", score: 40 },
+  { value: "yes", label: "Yes, the same patterns keep showing up", score: 15 },
 ];
 
 const HealingAssessmentScreen = () => {
