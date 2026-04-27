@@ -95,10 +95,12 @@ const HealingAssessmentScreen = () => {
 
   const calculateScore = async () => {
     if (!user) return;
-    
+
+    const overExLevel = deriveOverExLevel();
+    const attachmentToPast = deriveAttachmentToPast();
+
     setIsCalculating(true);
     try {
-      // First save the assessment data to profile
       await supabase
         .from("profiles")
         .update({
@@ -108,7 +110,6 @@ const HealingAssessmentScreen = () => {
         })
         .eq("user_id", user.id);
 
-      // Then calculate the healing score
       const { data: scoreData, error } = await supabase.functions.invoke("calculate-healing-score", {
         body: { triggerType: "assessment" },
       });
@@ -120,15 +121,14 @@ const HealingAssessmentScreen = () => {
       setShowDisclosure(scoreData.showDisclosure);
     } catch (error) {
       console.error("Error calculating healing score:", error);
-      // Calculate locally as fallback
       let baseScore = 50;
       const exContactScores: Record<string, number> = {
-        "no_contact": 15,
-        "occasional": 12,
-        "regular": 8,
-        "frequent": 4,
-        "still_connected": 0,
-        "not_applicable": 15,
+        no_contact: 15,
+        occasional: 12,
+        regular: 8,
+        frequent: 4,
+        still_connected: 0,
+        not_applicable: 15,
       };
       baseScore += exContactScores[exContactStatus || "not_applicable"] || 0;
       baseScore += Math.round(overExLevel * 0.25);
@@ -144,26 +144,10 @@ const HealingAssessmentScreen = () => {
   const handleContinue = () => {
     updateData({
       exContactStatus,
-      overExLevel,
-      attachmentToPast,
+      overExLevel: deriveOverExLevel(),
+      attachmentToPast: deriveAttachmentToPast(),
     });
     nextStep();
-  };
-
-  const getOverExLabel = (value: number) => {
-    if (value <= 20) return "Still deeply attached";
-    if (value <= 40) return "Working through it";
-    if (value <= 60) return "Making progress";
-    if (value <= 80) return "Mostly moved on";
-    return "Completely over them";
-  };
-
-  const getAttachmentLabel = (value: number) => {
-    if (value <= 20) return "Very detached";
-    if (value <= 40) return "Mostly detached";
-    if (value <= 60) return "Neutral";
-    if (value <= 80) return "Somewhat attached";
-    return "Very attached to past";
   };
 
   const getScoreColor = (score: number) => {
@@ -178,7 +162,12 @@ const HealingAssessmentScreen = () => {
     return { text: "Focus on healing first", color: "text-rose-600", icon: <Heart className="w-5 h-5" /> };
   };
 
-  const canCalculate = exContactStatus !== "";
+  const exRequired = !!exContactStatus && exContactStatus !== "not_applicable";
+  const canCalculate =
+    exContactStatus !== "" &&
+    (!exRequired || (!!thinkAboutEx && !!checkTheirSocials)) &&
+    !!newPartnersFeeling &&
+    !!repeatPatterns;
 
   return (
     <OnboardingLayout
