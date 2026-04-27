@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
+import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import {
   Popover,
   PopoverContent,
@@ -212,7 +213,12 @@ export const EditInteractionDialog: React.FC<EditInteractionDialogProps> = ({
 
             {/* Notes */}
             <div className="space-y-2">
-              <Label>Notes</Label>
+              <div className="flex items-center justify-between">
+                <Label>Notes</Label>
+                <VoiceInputButton
+                  onTranscript={(text) => setNotes((prev) => (prev ? `${prev} ${text}` : text))}
+                />
+              </div>
               <Textarea
                 placeholder="What happened? How did it feel?"
                 value={notes}
