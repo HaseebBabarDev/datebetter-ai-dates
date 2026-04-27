@@ -335,7 +335,7 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
               onChange={(e) => setFreeformText(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              placeholder={isFocused ? "" : `Example: "His name is Jake, he's 28, we met on Hinge. He's 6'1, works in tech as a software engineer. He's from Chicago. His parents are divorced — his dad left when he was young so he has some abandonment issues. He's avoidant, never been in a relationship longer than a year. He drinks socially, doesn't smoke. He wants kids eventually. He's really funny and smart but sometimes emotionally unavailable. We've been texting for 2 weeks..."`}
+              placeholder={isFocused || freeformText.length > 0 ? "" : `Tap here, then type or use the mic to tell D.E.V.I. about them — name, age, how you met, vibe, anything you remember.`}
               className="min-h-[160px] text-sm pb-12"
               maxLength={3000}
             />

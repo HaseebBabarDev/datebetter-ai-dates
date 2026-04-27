@@ -2837,6 +2837,14 @@ const Devi = () => {
                 className="min-h-[52px] max-h-36 resize-none text-sm rounded-xl"
                 rows={2}
               />
+              <VoiceInputButton
+                onTranscript={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
+                onPartialTranscript={(text) => setInput((prev) => {
+                  const base = prev.replace(/\s*\[.*?\]\s*$/, '');
+                  return base ? `${base} [${text}]` : `[${text}]`;
+                })}
+                disabled={isLoading}
+              />
               <Button
                 size="icon"
                 onClick={() => (isLoading ? stopGeneration() : sendMessage())}
@@ -2865,15 +2873,7 @@ const Devi = () => {
         multiple
         onChange={onFileChange}
         className="hidden"
-              />
-              <VoiceInputButton
-                onTranscript={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
-                onPartialTranscript={(text) => setInput((prev) => {
-                  const base = prev.replace(/\s*\[.*?\]\s*$/, '');
-                  return base ? `${base} [${text}]` : `[${text}]`;
-                })}
-                disabled={isLoading}
-              />
+      />
 
       {/* Win logging dialog */}
       <DeviWinDialog
