@@ -10,6 +10,7 @@ import { MultiSelectOption } from "../MultiSelectOption";
 import { Heart, AlertTriangle, Shield, Users, PenLine } from "lucide-react";
 import { detectCrisisContent } from "@/lib/crisisDetection";
 import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
+import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 
 const parentStatusOptions = [
   { value: "married_together", label: "Married Together", description: "Parents married and living together" },
