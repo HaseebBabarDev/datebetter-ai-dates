@@ -280,7 +280,12 @@ const RelationshipTraumaScreen = () => {
 
                   {/* Freeform notes */}
                   <div className="space-y-2">
-                    <Label className="text-xs">Additional notes (optional)</Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Additional notes (optional)</Label>
+                      <VoiceInputButton
+                        onTranscript={(text) => updateRelationship(rel.id, "notes", ((rel.notes || "") + " " + text).trim())}
+                      />
+                    </div>
                     <Textarea
                       placeholder="Anything else D.E.V.I. should know about this relationship..."
                       value={rel.notes}
