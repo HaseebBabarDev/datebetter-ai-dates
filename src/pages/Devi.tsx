@@ -1235,6 +1235,17 @@ const Devi = () => {
     setIsLoading(true);
     setIsThinking(true);
 
+    // Set up abort controller so the user can stop generation
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    // Stash draft on the controller so stopGeneration can restore it
+    (abortController as any)._draft = {
+      input: draftInput,
+      images: draftImages,
+      rightSide: draftTextScreenshotRightSide,
+      userMessageId: userMessage.id,
+    };
+
     let convId = currentConversationId;
     try {
       // Create or use existing conversation
