@@ -205,7 +205,12 @@ const BasicIdentityScreen = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="city">City</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="city">City</Label>
+                <VoiceInputButton
+                  onTranscript={(text) => updateData({ city: appendText(data.city, text) })}
+                />
+              </div>
               <Input
                 id="city"
                 placeholder="City"
@@ -214,7 +219,12 @@ const BasicIdentityScreen = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="state">State/Province</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="state">State/Province</Label>
+                <VoiceInputButton
+                  onTranscript={(text) => updateData({ state: appendText(data.state, text) })}
+                />
+              </div>
               <Input
                 id="state"
                 placeholder="State"
