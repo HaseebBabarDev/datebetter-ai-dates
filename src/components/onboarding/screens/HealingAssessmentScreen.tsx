@@ -256,50 +256,67 @@ const HealingAssessmentScreen = () => {
               </Select>
             </div>
 
-            {/* Over Ex Slider */}
+            {/* Behavioral indicators about ex */}
             {exContactStatus && exContactStatus !== "not_applicable" && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">How over your most recent significant ex are you?</Label>
-                  <p className="text-xs text-muted-foreground">Be honest — this helps D.E.V.I. support you better</p>
+              <>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">How often do you think about your most recent significant ex?</Label>
+                  <Select value={thinkAboutEx} onValueChange={setThinkAboutEx}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select an option..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {THINK_ABOUT_EX_OPTIONS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="pt-2 pb-4">
-                  <Slider
-                    value={[overExLevel]}
-                    onValueChange={handleOverExChange}
-                    max={100}
-                    step={5}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between mt-2">
-                    <span className="text-xs text-muted-foreground">Still attached</span>
-                    <span className="text-xs font-medium text-primary">{getOverExLabel(overExLevel)}</span>
-                    <span className="text-xs text-muted-foreground">Completely over</span>
-                  </div>
+
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">Do you check their social media or messages?</Label>
+                  <Select value={checkTheirSocials} onValueChange={setCheckTheirSocials}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select an option..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CHECK_THEIR_SOCIALS_OPTIONS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </div>
+              </>
             )}
 
-            {/* Attachment to Past Slider */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">How attached are you to past relationship patterns?</Label>
-                <p className="text-xs text-muted-foreground">Consider if you find yourself repeating the same dynamics</p>
-              </div>
-              <div className="pt-2 pb-4">
-                <Slider
-                  value={[attachmentToPast]}
-                  onValueChange={handleAttachmentChange}
-                  max={100}
-                  step={5}
-                  className="w-full"
-                />
-                <div className="flex justify-between mt-2">
-                  <span className="text-xs text-muted-foreground">Detached</span>
-                  <span className="text-xs font-medium text-primary">{getAttachmentLabel(attachmentToPast)}</span>
-                  <span className="text-xs text-muted-foreground">Very attached</span>
-                </div>
-              </div>
+            {/* How new partners feel */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">When you imagine meeting someone new, what comes up?</Label>
+              <Select value={newPartnersFeeling} onValueChange={setNewPartnersFeeling}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select an option..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {NEW_PARTNERS_FEELING_OPTIONS.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Repeating patterns */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Do you notice yourself repeating the same relationship patterns?</Label>
+              <Select value={repeatPatterns} onValueChange={setRepeatPatterns}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select an option..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {REPEAT_PATTERNS_OPTIONS.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Calculate Score button */}
