@@ -9,6 +9,7 @@ import { MultiSelectOption } from "../MultiSelectOption";
 import { Heart, Plus, Trash2, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 import { detectCrisisContent } from "@/lib/crisisDetection";
 import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
+import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import {
   Accordion,
   AccordionContent,
