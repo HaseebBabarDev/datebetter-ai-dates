@@ -23,20 +23,63 @@ function rcEntitlementId(
   return v || fallback;
 }
 
-/** Active entitlement flags from RC SDK (immediate after purchase; mirrors dashboard). */
+function entitlementIsActive(customerInfo: CustomerInfo, id: string): boolean {
+  const e = customerInfo.entitlements.all[id];
+  return e?.isActive === true;
+}
+
+/** True if this Store product has an active subscription (preferred for add-on SKUs). */
+function storeProductSubscriptionActive(
+  customerInfo: CustomerInfo,
+  productId: string | null | undefined,
+): boolean {
+  if (!productId) return false;
+  const subs = customerInfo.activeSubscriptions;
+  if (Array.isArray(subs) && subs.includes(productId)) return true;
+  const row = customerInfo.subscriptionsByProductIdentifier?.[productId];
+  return row?.isActive === true;
+}
+
+/**
+ * RC SDK entitlement / subscription state for paywall UI.
+ * When `packages` is set, add-ons use **active Store product ids** so a base Unlimited SKU
+ * that still lists extra entitlements in the dashboard does not flip add-on buttons.
+ */
 export function localEntitlementsFromRcCustomerInfo(
   customerInfo: CustomerInfo,
+  packages?: ResolvedRcPackages | null,
 ): {
   unlimited: boolean;
   textSimulator: boolean;
   detachment: boolean;
 } {
-  const active = customerInfo.entitlements.active;
-  return {
-    unlimited: !!active[rcEntitlementId("unlimited")],
-    textSimulator: !!active[rcEntitlementId("textSimulator")],
-    detachment: !!active[rcEntitlementId("detachment")],
-  };
+  const unlimitedEnt = rcEntitlementId("unlimited");
+  const textEnt = rcEntitlementId("textSimulator");
+  const detEnt = rcEntitlementId("detachment");
+
+  const unlimited =
+    (packages?.unlimited
+      ? storeProductSubscriptionActive(
+          customerInfo,
+          packages.unlimited.product.identifier,
+        )
+      : false) || entitlementIsActive(customerInfo, unlimitedEnt);
+
+  const textSimulator = packages?.textSimulator
+    ? storeProductSubscriptionActive(
+        customerInfo,
+        packages.textSimulator.product.identifier,
+      )
+    : entitlementIsActive(customerInfo, textEnt);
+
+  const detachment = packages?.detachment
+    ? storeProductSubscriptionActive(
+        customerInfo,
+        packages.detachment.product.identifier,
+      )
+    : entitlementIsActive(customerInfo, detEnt);
+
+  return { unlimited, textSimulator, detachment };
 }
 
 export type ResolvedRcPackages = {

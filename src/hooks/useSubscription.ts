@@ -31,20 +31,43 @@ export function useSubscription() {
   const [interactionCount, setInteractionCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  // Always read the session from the Supabase client (not React `user` alone). After login or cold start,
+  // `user` can be set one frame before the access token is available; invoking the edge function then
+  // sends no/invalid JWT and check-subscription returns anonymous "free".
   const checkSubscription = useCallback(async () => {
-    if (!user) {
+    let userId: string | null = null;
+    let accessToken: string | null = null;
+
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const { data: sessionWrap } = await supabase.auth.getSession();
+      const session = sessionWrap.session;
+      if (session?.user?.id && session.access_token) {
+        userId = session.user.id;
+        accessToken = session.access_token;
+        break;
+      }
+      await new Promise((r) => setTimeout(r, 100));
+    }
+
+    if (!userId || !accessToken) {
       setSubscription(null);
+      setCandidateCount(0);
+      setInteractionCount(0);
       setLoading(false);
       return;
     }
 
+    setLoading(true);
+
     try {
-      const { data, error } = await supabase.functions.invoke("check-subscription");
+      const { data, error } = await supabase.functions.invoke("check-subscription", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
       if (error) {
         console.error("Error checking subscription:", error);
         setSubscription({
-subscribed: false,
+          subscribed: false,
           plan: "free",
           product_id: null,
           price_id: null,
@@ -76,19 +99,17 @@ subscribed: false,
         });
       }
 
-      // Fetch candidate count
       const { count: candCount } = await supabase
         .from("candidates")
         .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id);
+        .eq("user_id", userId);
 
       setCandidateCount(candCount || 0);
 
-      // Fetch total interaction count across all candidates
       const { count: intCount } = await supabase
         .from("interactions")
         .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id);
+        .eq("user_id", userId);
 
       setInteractionCount(intCount || 0);
     } catch (error) {
@@ -96,18 +117,24 @@ subscribed: false,
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
-    checkSubscription();
+    void checkSubscription();
+    const {
+      data: { subscription: authListener },
+    } = supabase.auth.onAuthStateChange(() => {
+      void checkSubscription();
+    });
+    return () => authListener.unsubscribe();
   }, [checkSubscription]);
 
-  // Auto-refresh every 60 seconds
   useEffect(() => {
-    if (!user) return;
-    const interval = setInterval(checkSubscription, 60000);
+    const interval = setInterval(() => {
+      void checkSubscription();
+    }, 60000);
     return () => clearInterval(interval);
-  }, [user, checkSubscription]);
+  }, [checkSubscription]);
 
   const getInteractionLimit = () => {
     if (user?.email === "nak@j.co") return TEST_USER_INTERACTION_LIMIT;

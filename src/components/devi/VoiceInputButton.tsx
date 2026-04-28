@@ -8,8 +8,26 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { Capacitor } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
 import { useScribe, CommitStrategy } from "@elevenlabs/react";
+
+function voiceInputErrorMessage(raw: string): string {
+  const m = raw.toLowerCase();
+  if (
+    m.includes("https") ||
+    m.includes("secure context") ||
+    m.includes("not available") ||
+    m.includes("modern browser") ||
+    m.includes("mediadevices")
+  ) {
+    if (Capacitor.isNativePlatform()) {
+      return "Voice input could not use the microphone. On iPhone, confirm Microphone is allowed for DateBetter in Settings → Privacy & Security → Microphone, then try again.";
+    }
+    return "Voice input needs a secure page (https://) or localhost. Open the app over HTTPS and try again.";
+  }
+  return raw;
+}
 
 interface VoiceInputButtonProps {
   onTranscript: (text: string) => void;
@@ -65,9 +83,15 @@ export const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
     } catch (error) {
       console.error("Recording error:", error);
       if (error instanceof Error && error.name === "NotAllowedError") {
-        toast.error("Microphone access denied. Please allow microphone access.");
+        toast.error(
+          Capacitor.isNativePlatform()
+            ? "Microphone access denied. Enable the microphone for DateBetter in Settings → Privacy & Security → Microphone."
+            : "Microphone access denied. Please allow microphone access for this site.",
+        );
       } else {
-        toast.error("Failed to start voice input. Please try again.");
+        const raw =
+          error instanceof Error ? error.message : "Failed to start voice input. Please try again.";
+        toast.error(voiceInputErrorMessage(raw));
       }
     } finally {
       setIsConnecting(false);

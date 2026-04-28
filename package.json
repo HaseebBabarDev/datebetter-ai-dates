@@ -9,6 +9,7 @@
     "build:dev": "vite build --mode development",
     "build:ios": "vite build --mode capacitor",
     "cap:sync": "npm run build:ios && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx cap sync ios",
+    "ios:pod": "cd ios/App && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pod install --repo-update",
     "cap:open": "npx cap open ios",
     "lint": "eslint .",
     "preview": "vite preview"

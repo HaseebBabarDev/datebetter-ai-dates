@@ -45,5 +45,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>DateBetter uses the microphone so you can dictate messages to D.E.V.I. with voice input.</string>
 </dict>
 </plist>

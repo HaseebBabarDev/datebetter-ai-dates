@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, RotateCcw, Gift, Copy, Share2, Users, ScrollText, Sparkles, Heart, Brain, MessageCircle, Crown } from "lucide-react";
+import { ArrowLeft, LogOut, User, Settings2, CreditCard, Check, Home, Trash2, Mail, Loader2, Shield, Key, FileText, HelpCircle, Info, Smartphone, ChevronRight, RotateCcw, Gift, Copy, Share2, Users, ScrollText, Sparkles, Crown } from "lucide-react";
 import { ThemeSelector } from "@/components/settings/ThemeSelector";
 import { ZodiacModeSettings } from "@/components/settings/ZodiacModeSettings";
 import { DeviSettings } from "@/components/settings/DeviSettings";
@@ -24,20 +24,24 @@ import { toast } from "sonner";
 import { ProfilePreferencesEditor } from "@/components/settings/ProfilePreferencesEditor";
 import { ProfilePhotoUpload } from "@/components/settings/ProfilePhotoUpload";
 import { Badge } from "@/components/ui/badge";
-import { STRIPE_PLANS, STRIPE_ADDONS } from "@/lib/stripeConfig";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useSubscription, type SubscriptionPlan } from "@/hooks/useSubscription";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { format, parse } from "date-fns";
 import { useTour, SETTINGS_TOUR_STEPS, TourRestartButton } from "@/components/tour";
 
 type Profile = Tables<"profiles">;
-type SubscriptionPlan = "free" | "basic" | "starter" | "unlimited";
+type AdminUserRow = {
+  user_id: string;
+  name: string | null;
+  created_at: string | null;
+  isAdmin: boolean;
+};
 
-const PLAN_DISPLAY: Record<SubscriptionPlan, { name: string; price: string; stripeKey?: keyof typeof STRIPE_PLANS | string }> = {
+const PLAN_DISPLAY: Record<SubscriptionPlan, { name: string; price: string }> = {
   free: { name: "Free Trial", price: "15 days free" },
-  basic: { name: "Unlimited", price: "$15/mo", stripeKey: "unlimited" },
-  starter: { name: "Unlimited", price: "$15/mo", stripeKey: "unlimited" },
-  unlimited: { name: "Unlimited", price: "$15/mo", stripeKey: "unlimited" },
+  basic: { name: "Unlimited", price: "$15/mo" },
+  starter: { name: "Unlimited", price: "$15/mo" },
+  unlimited: { name: "Unlimited", price: "$15/mo" },
 };
 
 const GENDER_OPTIONS = [
@@ -94,19 +98,17 @@ const Settings = () => {
   const defaultTab = searchParams.get("tab") || "account";
   const section = searchParams.get("section");
   const { startTour, hasCompletedTour, resetAllTours } = useTour();
-  const { subscription, refetch: refetchSubscription } = useSubscription();
-  
+  const { subscription } = useSubscription();
+
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [currentPlan, setCurrentPlan] = useState<SubscriptionPlan>("free");
-  
+
   const [isAdmin, setIsAdmin] = useState(false);
-  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [allUsers, setAllUsers] = useState<AdminUserRow[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
   const [togglingRole, setTogglingRole] = useState<string | null>(null);
-  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [referralStats, setReferralStats] = useState<{ total: number; converted: number; trialEarned: boolean }>({ total: 0, converted: 0, trialEarned: false });
   const [copiedReferral, setCopiedReferral] = useState(false);
   
@@ -132,9 +134,8 @@ const Settings = () => {
   const fetchAllData = async () => {
     try {
       // Fetch all data in parallel for faster load times
-      const [profileRes, subscriptionRes, adminRes, referralRes] = await Promise.all([
+      const [profileRes, adminRes, referralRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", user!.id).single(),
-        supabase.from("user_subscriptions").select("*").eq("user_id", user!.id).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", user!.id).eq("role", "admin").maybeSingle(),
         supabase.from("referrals").select("*").eq("referrer_id", user!.id),
       ]);
@@ -155,15 +156,6 @@ const Settings = () => {
         setPronouns(data.pronouns || "");
         setSexualOrientation(data.sexual_orientation || "");
         setScreenName(data.screen_name || "");
-      }
-
-      // Process subscription - map from Stripe plan names
-      if (subscriptionRes.data?.plan) {
-        const validPlans: SubscriptionPlan[] = ["free", "basic", "starter", "unlimited"];
-        const plan = validPlans.includes(subscriptionRes.data.plan as SubscriptionPlan) 
-          ? subscriptionRes.data.plan as SubscriptionPlan 
-          : "free";
-        setCurrentPlan(plan);
       }
 
       // Process admin status
@@ -189,6 +181,16 @@ const Settings = () => {
 
   const referralCode = user?.id ? `DEVI-${user.id.slice(0, 6).toUpperCase()}` : "DEVI-FRIEND";
   const referralLink = `${window.location.origin}/auth?ref=${referralCode}`;
+
+  const billingPlan = (subscription?.plan ?? "free") as SubscriptionPlan;
+  const billingDisplay = PLAN_DISPLAY[billingPlan] ?? PLAN_DISPLAY.free;
+  const billingIsPaid = billingPlan !== "free" && Boolean(subscription?.subscribed);
+  const billingCtaUpgrade = Boolean(
+    subscription &&
+      !subscription.subscribed &&
+      billingPlan === "free" &&
+      !subscription.trial_active,
+  );
 
   const handleCopyReferral = async () => {
     try {
@@ -353,38 +355,6 @@ const Settings = () => {
       toast.error(error instanceof Error ? error.message : "Failed to reset password");
     } finally {
       setResettingPassword(null);
-    }
-  };
-
-
-  const handleChangePlan = async (newPlan: SubscriptionPlan) => {
-    if (newPlan === currentPlan) return;
-    if (newPlan === "free") {
-      // Redirect to customer portal for downgrade
-      navigate("/subscription");
-      return;
-    }
-
-    const planInfo = PLAN_DISPLAY[newPlan];
-    if (!planInfo?.stripeKey) return;
-
-    setCheckoutLoading(newPlan);
-    try {
-      const stripePlan = STRIPE_PLANS[planInfo.stripeKey];
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId: stripePlan.price_id, mode: "subscription" },
-      });
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error("No checkout URL returned");
-      }
-    } catch (error) {
-      console.error("Checkout error:", error);
-      toast.error("Failed to start checkout. Please try again.");
-    } finally {
-      setCheckoutLoading(null);
     }
   };
 
@@ -921,193 +891,39 @@ const Settings = () => {
           )}
 
           <TabsContent value="billing" className="space-y-4">
-            {/* Subscription Management */}
             <Card className="border-primary/20 bg-primary/5">
               <CardContent className="pt-6 space-y-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Current Plan</span>
+                  <span className="text-sm text-muted-foreground">Your plan</span>
                   <Badge variant="secondary" className="bg-primary/10 text-primary">
-                    {currentPlan === "free" ? "Free" : "Active"}
+                    {!subscription
+                      ? "…"
+                      : subscription.trial_active
+                        ? "Trial"
+                        : billingIsPaid
+                          ? "Active"
+                          : "Free"}
                   </Badge>
                 </div>
-                <h3 className="text-xl font-bold">{PLAN_DISPLAY[currentPlan]?.name || "Free"}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {PLAN_DISPLAY[currentPlan]?.price || "$0"}
+                <h3 className="text-xl font-bold">{billingDisplay.name}</h3>
+                <p className="text-sm text-muted-foreground">{billingDisplay.price}</p>
+                {subscription?.trial_active && subscription.trial_ends_at && (
+                  <p className="text-xs text-muted-foreground">
+                    Trial ends {new Date(subscription.trial_ends_at).toLocaleDateString()}
+                  </p>
+                )}
+                {billingIsPaid && !subscription?.trial_active && subscription?.subscription_end && (
+                  <p className="text-xs text-muted-foreground">
+                    Renews {new Date(subscription.subscription_end).toLocaleDateString()}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Change plan, add-ons, and billing on the subscription page.
                 </p>
-                <div className="flex gap-2">
-                  {currentPlan !== "free" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5"
-                      disabled={checkoutLoading === "portal"}
-                      onClick={async () => {
-                        setCheckoutLoading("portal");
-                        try {
-                          const { data, error } = await supabase.functions.invoke("customer-portal");
-                          if (error) throw error;
-                          if (data?.url) {
-                            window.location.href = data.url;
-                          }
-                        } catch (e) {
-                          console.error("Portal error:", e);
-                          toast.error("Failed to open billing portal.");
-                        } finally {
-                          setCheckoutLoading(null);
-                        }
-                      }}
-                    >
-                      {checkoutLoading === "portal" ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
-                      Manage Subscription
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-1.5"
-                    onClick={() => navigate("/subscription")}
-                  >
-                    <Crown className="w-4 h-4" />
-                    {currentPlan === "free" ? "Upgrade" : "View Plans"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Add-ons Management */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  Add-ons
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {/* Text Simulator */}
-                <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <MessageCircle className="w-4 h-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Text Simulator</p>
-                      <p className="text-xs text-muted-foreground">$5/mo • Practice conversations</p>
-                    </div>
-                  </div>
-                  {subscription?.has_text_simulator ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-destructive border-destructive/30 hover:bg-destructive/10"
-                      disabled={checkoutLoading === "cancel_text_sim"}
-                      onClick={async () => {
-                        if (!confirm("Cancel your Text Simulator subscription? You'll lose access at the end of your billing period.")) return;
-                        setCheckoutLoading("cancel_text_sim");
-                        try {
-                          const { data, error } = await supabase.functions.invoke("cancel-addon", {
-                            body: { subscriptionId: subscription.text_sim_subscription_id },
-                          });
-                          if (error) throw error;
-                          toast.success("Text Simulator cancelled");
-                          refetchSubscription();
-                        } catch (e) {
-                          console.error("Cancel error:", e);
-                          toast.error("Failed to cancel. Try again.");
-                        } finally {
-                          setCheckoutLoading(null);
-                        }
-                      }}
-                    >
-                      {checkoutLoading === "cancel_text_sim" ? <Loader2 className="w-3 h-3 animate-spin" /> : "Cancel"}
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      className="gap-1"
-                      disabled={checkoutLoading === "add_text_sim"}
-                      onClick={async () => {
-                        setCheckoutLoading("add_text_sim");
-                        try {
-                          const { data, error } = await supabase.functions.invoke("create-checkout", {
-                            body: { priceId: STRIPE_ADDONS.text_simulator.price_id, mode: "subscription" },
-                          });
-                          if (error) throw error;
-                          if (data?.url) window.location.href = data.url;
-                        } catch (e) {
-                          console.error("Checkout error:", e);
-                          toast.error("Failed to start checkout.");
-                        } finally {
-                          setCheckoutLoading(null);
-                        }
-                      }}
-                    >
-                      {checkoutLoading === "add_text_sim" ? <Loader2 className="w-3 h-3 animate-spin" /> : "Subscribe"}
-                    </Button>
-                  )}
-                </div>
-
-                {/* Detachment Plan */}
-                <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Heart className="w-4 h-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Detachment Plan</p>
-                      <p className="text-xs text-muted-foreground">$5/mo • Guided healing journey</p>
-                    </div>
-                  </div>
-                  {subscription?.has_detachment_plan ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-destructive border-destructive/30 hover:bg-destructive/10"
-                      disabled={checkoutLoading === "cancel_detach"}
-                      onClick={async () => {
-                        if (!confirm("Cancel your Detachment Plan subscription? You'll lose access at the end of your billing period.")) return;
-                        setCheckoutLoading("cancel_detach");
-                        try {
-                          const { data, error } = await supabase.functions.invoke("cancel-addon", {
-                            body: { subscriptionId: subscription.detachment_subscription_id },
-                          });
-                          if (error) throw error;
-                          toast.success("Detachment Plan cancelled");
-                          refetchSubscription();
-                        } catch (e) {
-                          console.error("Cancel error:", e);
-                          toast.error("Failed to cancel. Try again.");
-                        } finally {
-                          setCheckoutLoading(null);
-                        }
-                      }}
-                    >
-                      {checkoutLoading === "cancel_detach" ? <Loader2 className="w-3 h-3 animate-spin" /> : "Cancel"}
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      className="gap-1"
-                      disabled={checkoutLoading === "add_detach"}
-                      onClick={async () => {
-                        setCheckoutLoading("add_detach");
-                        try {
-                          const { data, error } = await supabase.functions.invoke("create-checkout", {
-                            body: { priceId: STRIPE_ADDONS.detachment_plan.price_id, mode: "subscription" },
-                          });
-                          if (error) throw error;
-                          if (data?.url) window.location.href = data.url;
-                        } catch (e) {
-                          console.error("Checkout error:", e);
-                          toast.error("Failed to start checkout.");
-                        } finally {
-                          setCheckoutLoading(null);
-                        }
-                      }}
-                    >
-                      {checkoutLoading === "add_detach" ? <Loader2 className="w-3 h-3 animate-spin" /> : "Subscribe"}
-                    </Button>
-                  )}
-                </div>
+                <Button className="w-full gap-2" onClick={() => navigate("/subscription")}>
+                  <Crown className="w-4 h-4" />
+                  {billingCtaUpgrade ? "Upgrade" : "Plans & billing"}
+                </Button>
               </CardContent>
             </Card>
 
@@ -1286,63 +1102,9 @@ const Settings = () => {
               </CardContent>
             </Card>
 
-            {/* Plan */}
-            <div className="space-y-3">
-              <h4 className="font-medium text-sm text-muted-foreground">
-                {currentPlan === "free" ? "Upgrade to unlock all features" : "Your plan"}
-              </h4>
-
-              <Card className={`relative overflow-hidden ${currentPlan !== "free" ? "border-primary bg-primary/5" : "border-primary/30"}`}>
-                {currentPlan !== "free" && (
-                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-bl">
-                    Current Plan
-                  </div>
-                )}
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Crown className="w-4 h-4 text-primary" />
-                        <h4 className="font-semibold">Unlimited</h4>
-                      </div>
-                      <p className="text-sm text-muted-foreground">Unlimited candidates & messages</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-bold">$15</p>
-                      <p className="text-xs text-muted-foreground">/month</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 pt-3 border-t space-y-1.5">
-                    {["Unlimited candidates", "Unlimited D.E.V.I. messages", "AI scoring & compatibility insights", "Red flag & pattern detection", "Community access", "15-day free trial"].map((f) => (
-                      <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Check className="w-4 h-4 text-green-500 shrink-0" />
-                        <span>{f}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    className="w-full mt-4"
-                    variant={currentPlan !== "free" ? "secondary" : "default"}
-                    disabled={currentPlan !== "free" || checkoutLoading !== null}
-                    onClick={() => handleChangePlan("unlimited")}
-                  >
-                    {checkoutLoading === "unlimited" ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
-                    ) : currentPlan !== "free" ? (
-                      <><Check className="w-4 h-4 mr-2" />Current Plan</>
-                    ) : (
-                      "Start Free Trial"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-
           </TabsContent>
         </Tabs>
       </main>
-
-      {/* Payment now handled via Stripe Checkout redirect */}
 
     </div>
   );
