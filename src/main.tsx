@@ -3,9 +3,11 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { initNativeShell } from "@/lib/capacitor/initNativeShell";
+import { initIosFcm } from "@/lib/push/iosFcm";
 import { initPurchases } from "@/lib/revenuecat/initPurchases";
 
 void initNativeShell();
+void initIosFcm();
 void initPurchases();
 
 // Auto-recover from stale PWA cache / chunk loading failures

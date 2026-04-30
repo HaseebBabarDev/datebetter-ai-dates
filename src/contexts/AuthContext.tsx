@@ -12,6 +12,8 @@ import {
   revenueCatLogIn,
   revenueCatLogOut,
 } from "@/lib/revenuecat/initPurchases";
+import { deleteIosFcmTokenIfNative, syncIosFcmTokenToSupabase } from "@/lib/push/iosFcm";
+import { deletePushTokensForUser } from "@/lib/push/pushTokens";
 
 interface SignUpData {
   user: User | null;
@@ -64,6 +66,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(nextSession?.user ?? null);
       setLoading(false);
       void syncRevenueCatUser(nextSession?.user?.id ?? null);
+      if (nextSession?.user?.id) {
+        void syncIosFcmTokenToSupabase();
+      }
     });
 
     // THEN check for existing session
@@ -72,6 +77,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(existing?.user ?? null);
       setLoading(false);
       void syncRevenueCatUser(existing?.user?.id ?? null);
+      if (existing?.user?.id) {
+        void syncIosFcmTokenToSupabase();
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -113,11 +121,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const signOut = async () => {
+    const uid = user?.id;
+    if (uid) {
+      await deletePushTokensForUser(uid);
+    }
     try {
       await revenueCatLogOut();
     } catch (e) {
       console.warn("[Auth] RevenueCat logOut on signOut failed", e);
     }
+    await deleteIosFcmTokenIfNative();
     lastRevenueCatUserId.current = null;
     await supabase.auth.signOut();
     setUser(null);

@@ -1,3 +1,4 @@
+/// <reference types="@capacitor-firebase/messaging" />
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
@@ -17,6 +18,9 @@ const config: CapacitorConfig = {
       launchShowDuration: 0,
       launchAutoHide: true,
       backgroundColor: "#1A1A1A",
+    },
+    FirebaseMessaging: {
+      presentationOptions: ["alert", "badge", "sound"],
     },
   },
 };
