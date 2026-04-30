@@ -64,7 +64,9 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
   const [extracted, setExtracted] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const recordingInputRef = useRef<HTMLInputElement>(null);
 
   const handleExtract = async () => {
     if (freeformText.trim().length < 10 && uploadedFiles.length === 0) {
@@ -127,9 +129,8 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
     const files = Array.from(e.target.files || []);
     const validFiles = files.filter(f => {
       const isImage = f.type.startsWith("image/");
-      const isVideo = f.type.startsWith("video/");
-      if (!isImage && !isVideo) {
-        toast.error(`${f.name} is not an image or video file`);
+      if (!isImage) {
+        toast.error(`${f.name} is not an image file`);
         return false;
       }
       if (f.size > 20 * 1024 * 1024) {
@@ -140,6 +141,27 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
     });
     setUploadedFiles(prev => [...prev, ...validFiles]);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleRecordingUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter(f => {
+      const isVideo = f.type.startsWith("video/");
+      if (!isVideo) {
+        toast.error(`${f.name} is not a video/recording file`);
+        return false;
+      }
+      if (f.size > 20 * 1024 * 1024) {
+        toast.error(`${f.name} is too large (max 20MB). Try a shorter clip.`);
+        return false;
+      }
+      return true;
+    });
+    if (validFiles.length > 0) {
+      setUploadedFiles(prev => [...prev, ...validFiles]);
+      toast.success(`${validFiles.length} recording${validFiles.length > 1 ? "s" : ""} added!`);
+    }
+    if (recordingInputRef.current) recordingInputRef.current.value = "";
   };
 
   const removeFile = (index: number) => {
@@ -231,36 +253,18 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
               type="button"
               variant="outline"
               className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs"
-              onClick={() => {
-                const uploadInput = document.createElement('input');
-                uploadInput.type = 'file';
-                uploadInput.accept = 'video/*';
-                uploadInput.multiple = true;
-                uploadInput.onchange = (e) => {
-                  const target = e.target as HTMLInputElement;
-                  const files = Array.from(target.files || []);
-                  const validFiles = files.filter(f => {
-                    if (f.size > 20 * 1024 * 1024) {
-                      toast.error(`${f.name} is too large (max 20MB)`);
-                      return false;
-                    }
-                    return true;
-                  });
-                  setUploadedFiles(prev => [...prev, ...validFiles]);
-                };
-                uploadInput.click();
-              }}
+              onClick={() => recordingInputRef.current?.click()}
             >
               <FileVideo className="w-5 h-5 text-primary" />
-              Upload Recording
+              Recording
+              <span className="text-[9px] text-muted-foreground leading-none">Upload video</span>
             </Button>
             <Button
               type="button"
               variant="outline"
               className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs relative"
               onClick={() => {
-                // Focus the textarea and trigger voice
-                const voiceBtn = document.querySelector('[data-voice-trigger]') as HTMLButtonElement;
+                const voiceBtn = document.querySelector('[data-voice-trigger] button') as HTMLButtonElement;
                 if (voiceBtn) voiceBtn.click();
               }}
             >
@@ -272,10 +276,18 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*,video/*"
+            accept="image/*"
             multiple
             className="hidden"
             onChange={handleFileUpload}
+          />
+          <input
+            ref={recordingInputRef}
+            type="file"
+            accept="video/*"
+            multiple
+            className="hidden"
+            onChange={handleRecordingUpload}
           />
 
           {/* Uploaded files preview */}
@@ -321,7 +333,9 @@ export const SmartFillForm: React.FC<SmartFillFormProps> = ({ onExtracted, onSwi
             <Textarea
               value={freeformText}
               onChange={(e) => setFreeformText(e.target.value)}
-              placeholder={`Example: "His name is Jake, he's 28, we met on Hinge. He's 6'1, works in tech as a software engineer. He's from Chicago. His parents are divorced — his dad left when he was young so he has some abandonment issues. He's avoidant, never been in a relationship longer than a year. He drinks socially, doesn't smoke. He wants kids eventually. He's really funny and smart but sometimes emotionally unavailable. We've been texting for 2 weeks..."`}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              placeholder={isFocused || freeformText.length > 0 ? "" : `Tap here, then type or use the mic to tell D.E.V.I. about them — name, age, how you met, vibe, anything you remember.`}
               className="min-h-[160px] text-sm pb-12"
               maxLength={3000}
             />

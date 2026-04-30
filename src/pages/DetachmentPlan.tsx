@@ -399,7 +399,7 @@ const DetachmentPlan = () => {
   const overallPct = totalPractices > 0 ? Math.round((totalChecked / totalPractices) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-background pb-28">
+    <div className="min-h-screen bg-background pb-[calc(env(safe-area-inset-bottom)+7rem)]">
       {/* Sticky header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-4 py-3 flex items-center gap-3">
         <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => navigate(-1)}>

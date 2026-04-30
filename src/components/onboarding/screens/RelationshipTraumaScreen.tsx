@@ -9,6 +9,7 @@ import { MultiSelectOption } from "../MultiSelectOption";
 import { Heart, Plus, Trash2, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 import { detectCrisisContent } from "@/lib/crisisDetection";
 import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
+import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import {
   Accordion,
   AccordionContent,
@@ -279,7 +280,12 @@ const RelationshipTraumaScreen = () => {
 
                   {/* Freeform notes */}
                   <div className="space-y-2">
-                    <Label className="text-xs">Additional notes (optional)</Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Additional notes (optional)</Label>
+                      <VoiceInputButton
+                        onTranscript={(text) => updateRelationship(rel.id, "notes", ((rel.notes || "") + " " + text).trim())}
+                      />
+                    </div>
                     <Textarea
                       placeholder="Anything else D.E.V.I. should know about this relationship..."
                       value={rel.notes}
@@ -318,7 +324,12 @@ const RelationshipTraumaScreen = () => {
 
         {/* General notes */}
         <div className="space-y-2">
-          <Label className="text-sm">General reflections on past relationships (optional)</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-sm">General reflections on past relationships (optional)</Label>
+            <VoiceInputButton
+              onTranscript={(text) => handleGeneralNotesChange(((generalNotes || "") + " " + text).trim())}
+            />
+          </div>
           <Textarea
             placeholder="Any patterns you've noticed, lessons learned, or things you want D.E.V.I. to understand about your relationship history..."
             value={generalNotes}

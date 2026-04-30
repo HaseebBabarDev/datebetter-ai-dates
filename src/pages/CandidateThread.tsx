@@ -13,6 +13,7 @@ import { ThreadHeader } from "@/components/thread/ThreadHeader";
 import { RedFlagCard } from "@/components/thread/RedFlagCard";
 import { ChatGPTMessage } from "@/components/devi/ChatGPTMessage";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
+import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 
 import { ConversationUploadSheet } from "@/components/devi/ConversationUploadSheet";
 import { CandidateProfile } from "@/components/candidate/CandidateProfile";
@@ -452,6 +453,10 @@ const CandidateThread = () => {
                 rows={1}
               />
 
+              <VoiceInputButton
+                onTranscript={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
+                disabled={sending}
+              />
 
               <Button
                 size="icon"
@@ -558,18 +563,39 @@ const CandidateThread = () => {
                 <span className="text-3xl font-bold text-primary">{candidate.compatibility_score}%</span>
                 <span className="text-sm text-muted-foreground">compatibility</span>
               </div>
-              {candidate.score_breakdown && typeof candidate.score_breakdown === 'object' && (
-                <div className="grid grid-cols-2 gap-2 mt-3">
-                  {Object.entries(candidate.score_breakdown as Record<string, unknown>)
-                    .filter(([, val]) => typeof val === 'number' || typeof val === 'string')
-                    .map(([key, val]) => (
-                    <div key={key} className="flex items-center justify-between text-xs bg-muted/30 rounded-lg px-3 py-2">
-                      <span className="capitalize text-muted-foreground">{key.replace(/_/g, ' ')}</span>
-                      <span className="font-semibold">{String(val)}{typeof val === 'number' ? '%' : ''}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+              {candidate.score_breakdown && typeof candidate.score_breakdown === 'object' && (() => {
+                const entries = Object.entries(candidate.score_breakdown as Record<string, unknown>)
+                  .filter(([, val]) => typeof val === 'number' || typeof val === 'string');
+
+                const numericEntries = entries.filter(([, val]) => typeof val === 'number');
+                const textEntries = entries.filter(([, val]) => typeof val === 'string');
+
+                return (
+                  <div className="space-y-3 mt-3">
+                    {numericEntries.length > 0 && (
+                      <div className="grid grid-cols-2 gap-2">
+                        {numericEntries.map(([key, val]) => (
+                          <div key={key} className="flex items-center justify-between text-xs bg-muted/30 rounded-lg px-3 py-2 min-w-0">
+                            <span className="capitalize text-muted-foreground truncate mr-2">{key.replace(/_/g, ' ')}</span>
+                            <span className="font-semibold shrink-0">{String(val)}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {textEntries.map(([key, val]) => (
+                      <div key={key} className="bg-muted/30 rounded-lg px-3 py-2.5 space-y-1">
+                        <span className="block capitalize text-[11px] font-medium text-muted-foreground tracking-wide">
+                          {key.replace(/_/g, ' ')}
+                        </span>
+                        <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap break-words">
+                          {String(val)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           )}
 

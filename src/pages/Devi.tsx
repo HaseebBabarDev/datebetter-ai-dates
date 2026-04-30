@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, UserPlus, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink, Zap, RotateCcw } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, UserPlus, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink, Zap, RotateCcw, Square } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -462,6 +462,7 @@ const Devi = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [pendingImages, setPendingImages] = useState<{ data: string; type: string }[]>([]);
   const [textScreenshotRightSide, setTextScreenshotRightSide] = useState<"me" | "them">("me");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -1080,6 +1081,16 @@ const Devi = () => {
     const imageType = e.target.getAttribute('data-type') || 'general';
     const newImages: { data: string; type: string }[] = [];
 
+    // If the user picked a video here, redirect them to the Conversation Analysis flow
+    // (it extracts frames so we don't blow up the edge function with raw video).
+    const hasVideo = files.some(f => f.type.startsWith('video/'));
+    if (hasVideo) {
+      e.target.value = '';
+      toast.info("For screen recordings, use 'Analyze a Conversation' so D.E.V.I. can read every frame.");
+      setShowConvoUpload(true);
+      return;
+    }
+
     for (const file of files) {
       if (!file.type.startsWith('image/')) {
         toast.error(`${file.name} is not an image`);
@@ -1224,6 +1235,17 @@ const Devi = () => {
     setIsLoading(true);
     setIsThinking(true);
 
+    // Set up abort controller so the user can stop generation
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    // Stash draft on the controller so stopGeneration can restore it
+    (abortController as any)._draft = {
+      input: draftInput,
+      images: draftImages,
+      rightSide: draftTextScreenshotRightSide,
+      userMessageId: userMessage.id,
+    };
+
     let convId = currentConversationId;
     try {
       // Create or use existing conversation
@@ -1282,6 +1304,7 @@ const Devi = () => {
             interactions,
             journalEntries,
           }),
+          signal: abortController.signal,
         }
       );
 
@@ -1524,35 +1547,12 @@ const Devi = () => {
           hasUpdates = true;
         }
         
-        // Parse compatibility score marker for candidate
-        const compatScoreMatch = fullContent.match(/\[SET_COMPATIBILITY_SCORE:(\d+)\]/);
-        if (compatScoreMatch && selectedCandidate && user) {
-          const value = Math.min(100, Math.max(0, parseInt(compatScoreMatch[1])));
-          try {
-            const { error } = await supabase
-              .from('candidates')
-              .update({ 
-                compatibility_score: value,
-                last_score_update: new Date().toISOString(),
-              })
-              .eq('id', selectedCandidate.id)
-              .eq('user_id', user.id);
-            
-            if (!error) {
-              setSelectedCandidate(prev => prev ? {
-                ...prev,
-                compatibility_score: value,
-                last_score_update: new Date().toISOString(),
-              } : prev);
-              toast.success(`${selectedCandidate.nickname}'s compatibility score updated to ${value}%`);
-            } else {
-              console.error('Failed to update compatibility score:', error);
-              toast.error('Failed to update compatibility score');
-            }
-          } catch (err) {
-            console.error('Compatibility score update error:', err);
-          }
-        }
+        // NOTE: [SET_COMPATIBILITY_SCORE:X] is intentionally IGNORED.
+        // Compatibility scores are deterministic and computed only by the
+        // calculate-compatibility edge function based on profile + interaction data.
+        // D.E.V.I. is not allowed to overwrite the score from chat — this preserves
+        // scoring integrity and prevents users from "talking" the score up or down.
+        // The marker is stripped from displayed content above; we do nothing here.
 
         // Parse CREATE_CANDIDATE marker
         const createCandidateMatch = fullContent.match(/\[CREATE_CANDIDATE:([^|]+)\|([^|]*)\|([^|]*)\|([^\]]*)\]/);
@@ -1725,27 +1725,47 @@ const Devi = () => {
       }
 
     } catch (error) {
-      console.error("Chat error:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to send message");
+      // User-initiated abort: silently restore the draft so they can edit
+      const isAbort = (error instanceof DOMException && error.name === 'AbortError') ||
+        (error instanceof Error && error.name === 'AbortError');
+      if (isAbort) {
+        setInput(draftInput);
+        setPendingImages(draftImages);
+        setTextScreenshotRightSide(draftTextScreenshotRightSide);
+        setMessages(prev => prev.filter(m => m.id !== userMessage.id));
+      } else {
+        console.error("Chat error:", error);
+        toast.error(error instanceof Error ? error.message : "Failed to send message");
 
-      // Restore draft so screenshot uploads/text are not lost on failure
-      setInput(draftInput);
-      setPendingImages(draftImages);
-      setTextScreenshotRightSide(draftTextScreenshotRightSide);
+        // Restore draft so screenshot uploads/text are not lost on failure
+        setInput(draftInput);
+        setPendingImages(draftImages);
+        setTextScreenshotRightSide(draftTextScreenshotRightSide);
 
-      // Remove optimistic user message if the request failed before getting a usable assistant response
-      setMessages(prev => prev.filter(m => m.id !== userMessage.id));
+        // Remove optimistic user message if the request failed before getting a usable assistant response
+        setMessages(prev => prev.filter(m => m.id !== userMessage.id));
 
-      const errorMessage: Message = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: "Sorry, I couldn't process that message. Please try again.",
-      };
-      setMessages(prev => [...prev, errorMessage]);
+        const errorMessage: Message = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: "Sorry, I couldn't process that message. Please try again.",
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
     } finally {
       setIsLoading(false);
       setIsThinking(false);
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null;
+      }
     }
+  };
+
+  const stopGeneration = () => {
+    const controller = abortControllerRef.current;
+    if (!controller) return;
+    controller.abort();
+    abortControllerRef.current = null;
   };
 
   const getImagePrompt = (type: string, rightSide: "me" | "them"): string => {
@@ -1767,6 +1787,7 @@ const Devi = () => {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey && (input.trim() || pendingImages.length > 0)) {
       e.preventDefault();
+      if (isLoading) return; // don't send while D.E.V.I. is responding, but allow typing
       sendMessage();
     }
   };
@@ -2815,16 +2836,24 @@ const Devi = () => {
                 placeholder={selectedCandidate ? `Ask about ${selectedCandidate.nickname}...` : "Ask me anything about dating..."}
                 className="min-h-[52px] max-h-36 resize-none text-sm rounded-xl"
                 rows={2}
+              />
+              <VoiceInputButton
+                onTranscript={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
+                onPartialTranscript={(text) => setInput((prev) => {
+                  const base = prev.replace(/\s*\[.*?\]\s*$/, '');
+                  return base ? `${base} [${text}]` : `[${text}]`;
+                })}
                 disabled={isLoading}
               />
               <Button
                 size="icon"
-                onClick={() => sendMessage()}
-                disabled={(!input.trim() && pendingImages.length === 0) || isLoading}
+                onClick={() => (isLoading ? stopGeneration() : sendMessage())}
+                disabled={!isLoading && !input.trim() && pendingImages.length === 0}
+                aria-label={isLoading ? "Stop generating and edit message" : "Send message"}
                 className="shrink-0 h-11 w-11 rounded-xl bg-[image:var(--gradient-hero)]"
               >
                 {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Square className="w-4 h-4 fill-current" />
                 ) : (
                   <Send className="w-5 h-5" />
                 )}
@@ -2844,15 +2873,7 @@ const Devi = () => {
         multiple
         onChange={onFileChange}
         className="hidden"
-              />
-              <VoiceInputButton
-                onTranscript={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
-                onPartialTranscript={(text) => setInput((prev) => {
-                  const base = prev.replace(/\s*\[.*?\]\s*$/, '');
-                  return base ? `${base} [${text}]` : `[${text}]`;
-                })}
-                disabled={isLoading}
-              />
+      />
 
       {/* Win logging dialog */}
       <DeviWinDialog
@@ -2882,6 +2903,7 @@ const Devi = () => {
           onSaved={(updatedProfile) => {
             setUserProfile(updatedProfile);
           }}
+          onAdvance={(nextSectionId) => setProfileEditorSection(nextSectionId)}
         />
       )}
 
@@ -2897,6 +2919,7 @@ const Devi = () => {
             setSelectedCandidate(updatedCandidate);
             setCandidates(prev => prev.map(c => c.id === updatedCandidate.id ? updatedCandidate : c));
           }}
+          onAdvance={(nextSectionId) => setCandidateEditorSection(nextSectionId)}
         />
       )}
     </div>

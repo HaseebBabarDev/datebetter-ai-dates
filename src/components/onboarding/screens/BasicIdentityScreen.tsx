@@ -5,6 +5,10 @@ import ContinueButton from "../ContinueButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OptionCard } from "../OptionCard";
+import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
+
+const appendText = (prev: string | undefined, text: string) =>
+  prev && prev.trim() ? `${prev} ${text}`.trim() : text.trim();
 import {
   Select,
   SelectContent,
@@ -162,7 +166,12 @@ const BasicIdentityScreen = () => {
 
         {/* Name Section */}
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-sm font-medium">What should we call you?</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="name" className="text-sm font-medium">What should we call you?</Label>
+            <VoiceInputButton
+              onTranscript={(text) => updateData({ name: appendText(data.name, text) })}
+            />
+          </div>
           <Input
             id="name"
             placeholder="Your name"
@@ -196,7 +205,12 @@ const BasicIdentityScreen = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="city">City</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="city">City</Label>
+                <VoiceInputButton
+                  onTranscript={(text) => updateData({ city: appendText(data.city, text) })}
+                />
+              </div>
               <Input
                 id="city"
                 placeholder="City"
@@ -205,7 +219,12 @@ const BasicIdentityScreen = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="state">State/Province</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="state">State/Province</Label>
+                <VoiceInputButton
+                  onTranscript={(text) => updateData({ state: appendText(data.state, text) })}
+                />
+              </div>
               <Input
                 id="state"
                 placeholder="State"
@@ -253,12 +272,19 @@ const BasicIdentityScreen = () => {
           </Select>
           
           {data.pronouns === "other" && (
-            <Input
-              placeholder="Enter your pronouns"
-              value={data.customPronouns || ""}
-              onChange={(e) => updateData({ customPronouns: e.target.value })}
-              className="mt-2"
-            />
+            <div className="relative mt-2">
+              <Input
+                placeholder="Enter your pronouns"
+                value={data.customPronouns || ""}
+                onChange={(e) => updateData({ customPronouns: e.target.value })}
+                className="pr-10"
+              />
+              <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                <VoiceInputButton
+                  onTranscript={(text) => updateData({ customPronouns: appendText(data.customPronouns, text) })}
+                />
+              </div>
+            </div>
           )}
         </div>
 

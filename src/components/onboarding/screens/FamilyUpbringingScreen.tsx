@@ -10,6 +10,7 @@ import { MultiSelectOption } from "../MultiSelectOption";
 import { Heart, AlertTriangle, Shield, Users, PenLine } from "lucide-react";
 import { detectCrisisContent } from "@/lib/crisisDetection";
 import { CrisisAlertDialog } from "@/components/devi/CrisisAlertDialog";
+import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 
 const parentStatusOptions = [
   { value: "married_together", label: "Married Together", description: "Parents married and living together" },
@@ -422,10 +423,15 @@ const FamilyUpbringingScreen = () => {
 
         {/* Free-form notes about family experience */}
         <div className="space-y-2">
-          <Label className="text-sm flex items-center gap-2">
-            <PenLine className="h-4 w-4" />
-            Anything else about your family or upbringing? (optional)
-          </Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-sm flex items-center gap-2">
+              <PenLine className="h-4 w-4" />
+              Anything else about your family or upbringing? (optional)
+            </Label>
+            <VoiceInputButton
+              onTranscript={(text) => handleFamilyNotesChange(((data.familyUpbringingNotes || "") + " " + text).trim())}
+            />
+          </div>
           <Textarea
             value={data.familyUpbringingNotes || ""}
             onChange={(e) => handleFamilyNotesChange(e.target.value)}
