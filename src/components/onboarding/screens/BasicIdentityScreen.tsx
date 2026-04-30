@@ -182,6 +182,11 @@ const BasicIdentityScreen = () => {
               />
             </div>
           </div>
+          {isUnderage && (
+            <p className="text-xs font-medium text-destructive mt-1">
+              You must be at least 18 to use dateBetter.
+            </p>
+          )}
         </div>
 
         {/* Name Section */}
