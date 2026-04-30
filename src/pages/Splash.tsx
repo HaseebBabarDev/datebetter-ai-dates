@@ -6,11 +6,41 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import logoDb from "@/assets/logo-db.png";
 
+/** iOS/Capacitor: fixed + inset-0 can be shorter than the visible WebView; pin height to the real viewport. */
+function useSplashShellHeight(): number | null {
+  const [px, setPx] = React.useState<number | null>(null);
+
+  React.useLayoutEffect(() => {
+    const read = () => {
+      const vv = window.visualViewport;
+      const next = Math.max(
+        vv?.height ?? 0,
+        window.innerHeight,
+        document.documentElement?.clientHeight ?? 0
+      );
+      if (next > 0) setPx(next);
+    };
+    read();
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", read);
+    window.addEventListener("resize", read);
+    window.addEventListener("orientationchange", read);
+    return () => {
+      vv?.removeEventListener("resize", read);
+      window.removeEventListener("resize", read);
+      window.removeEventListener("orientationchange", read);
+    };
+  }, []);
+
+  return px;
+}
+
 const Splash = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [checkingOnboarding, setCheckingOnboarding] = React.useState(false);
+  const shellHeightPx = useSplashShellHeight();
 
   // Redirect logged-in users to dashboard or setup
   React.useEffect(() => {
@@ -77,10 +107,23 @@ const Splash = () => {
     };
   }, []);
 
+  const shellStyle =
+    shellHeightPx != null
+      ? { height: shellHeightPx, minHeight: shellHeightPx }
+      : ({ minHeight: "100dvh" } as const);
+
+  const shellFrame =
+    shellHeightPx != null
+      ? "fixed left-0 right-0 top-0 w-full overflow-hidden"
+      : "fixed inset-0 w-full overflow-hidden min-h-screen-safe";
+
   // Show loading state while checking auth
   if (authLoading || checkingOnboarding) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-background">
+      <div
+        className={`${shellFrame} flex items-center justify-center bg-background`}
+        style={shellStyle}
+      >
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Loading...</p>
@@ -90,8 +133,8 @@ const Splash = () => {
   }
 
   return (
-    <div className="fixed inset-0 overflow-hidden">
-      {/* Video background - covers entire viewport including safe areas */}
+    <div className={`${shellFrame} bg-black`} style={shellStyle}>
+      {/* Video background — height matches shell so overlays and frame stay aligned */}
       <video
         ref={videoRef}
         autoPlay
@@ -106,7 +149,7 @@ const Splash = () => {
         webkit-playsinline="true"
         aria-hidden="true"
         tabIndex={-1}
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
+        className="absolute inset-0 z-0 h-full w-full min-h-full min-w-full object-cover pointer-events-none [transform:translateZ(0)]"
       >
         <source
           src="/videos/splash-video.mp4"
@@ -114,9 +157,13 @@ const Splash = () => {
         />
       </video>
 
-      {/* Gradient overlays - extend beyond safe areas */}
+      {/* Gradient overlays — full shell; extra bottom scrim so dimming never “stops early” */}
       <div className="absolute inset-0 z-10 bg-gradient-to-b from-background/40 via-background/30 to-background/90" />
       <div className="absolute inset-0 z-10 bg-gradient-to-t from-emerald-500/10 via-transparent to-transparent" />
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[11] h-48 bg-gradient-to-t from-black/85 via-black/50 to-transparent sm:h-56"
+        aria-hidden
+      />
 
       {/* Decorative elements - hidden on mobile */}
     <div className="hidden sm:block absolute top-1/4 -right-20 z-10 w-64 h-64 rounded-full bg-emerald-500/20 blur-3xl" />

@@ -58,12 +58,16 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     <div className="min-h-[100dvh] bg-background flex flex-col">
       {/* Header */}
       {headerGradient ? (
-        <header className="bg-[image:var(--gradient-header)] px-4 py-3 pt-safe-top text-center relative">
+        <header
+          className="bg-[image:var(--gradient-header)] px-4 pb-3 text-center relative"
+          style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 0.75rem)" }}
+        >
           {showBack && (onBack || currentStep > 0) && (
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-3 top-3 text-foreground hover:bg-foreground/10 h-9 w-9"
+              className="absolute left-3 text-foreground hover:bg-foreground/10 h-9 w-9"
+              style={{ top: "max(env(safe-area-inset-top, 0px), 0.75rem)" }}
               onClick={handleBack}
             >
               <ArrowLeft className="w-5 h-5" />
@@ -81,7 +85,10 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
           )}
         </header>
       ) : (
-        <header className="px-4 py-2 pt-safe-top flex items-center justify-between border-b border-border/30">
+        <header
+          className="px-4 pb-2 flex items-center justify-between border-b border-border/30"
+          style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 0.75rem)" }}
+        >
           <div className="flex items-center gap-2">
             {showBack && (onBack || currentStep > 0) && (
               <Button

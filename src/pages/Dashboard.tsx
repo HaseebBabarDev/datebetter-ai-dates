@@ -77,7 +77,10 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[image:var(--gradient-page)] pb-20">
-      <header className="px-4 py-4 pt-safe-top">
+      <header
+        className="px-4 pb-4"
+        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 0.75rem)" }}
+      >
         <div className="max-w-lg mx-auto">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center">

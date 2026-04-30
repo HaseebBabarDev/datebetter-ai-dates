@@ -40,7 +40,10 @@ const Onboarding = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[image:var(--gradient-page)]">
-      <header className="px-4 py-3 pt-safe-top flex items-center gap-2">
+      <header
+        className="px-4 pb-3 flex items-center gap-2"
+        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 0.75rem)" }}
+      >
         <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="hover:bg-primary/10 rounded-xl h-9 w-9">
           <ArrowLeft className="w-5 h-5" />
         </Button>
