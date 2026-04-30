@@ -112,7 +112,27 @@ const BasicIdentityScreen = () => {
   }, [month, day, year]);
 
   const hasBirthDate = data.birthDate && data.birthDate.length === 10;
-  const isValid = data.name && data.genderIdentity && data.country && data.pronouns && hasBirthDate;
+
+  // Calculate age from birthDate (must be 18+)
+  const computedAge = React.useMemo(() => {
+    if (!data.birthDate) return null;
+    const dob = new Date(data.birthDate);
+    if (isNaN(dob.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    return age;
+  }, [data.birthDate]);
+
+  const isUnderage = computedAge !== null && computedAge < 18;
+  const isValid =
+    data.name &&
+    data.genderIdentity &&
+    data.country &&
+    data.pronouns &&
+    hasBirthDate &&
+    !isUnderage;
 
   return (
     <OnboardingLayout
@@ -162,6 +182,11 @@ const BasicIdentityScreen = () => {
               />
             </div>
           </div>
+          {isUnderage && (
+            <p className="text-xs font-medium text-destructive mt-1">
+              You must be at least 18 to use dateBetter.
+            </p>
+          )}
         </div>
 
         {/* Name Section */}
