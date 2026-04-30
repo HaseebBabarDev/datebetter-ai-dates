@@ -163,7 +163,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-7xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-13 h-auto gap-1 bg-muted/50 p-1 rounded-xl">
+          <TabsList className="flex flex-wrap w-full h-auto gap-1 bg-muted/50 p-1 rounded-xl">
             <TabsTrigger value="overview" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
 
               <BarChart3 className="w-4 h-4" />
