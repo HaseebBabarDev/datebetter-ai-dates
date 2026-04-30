@@ -752,8 +752,11 @@ const THEIR_ISSUE_OPTIONS = [
 
   return (
     <div className="min-h-screen bg-background pb-[calc(env(safe-area-inset-bottom)+10rem)]">
-      <header className="sticky top-0 bg-background/95 backdrop-blur border-b border-border/30 z-10">
-        <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-2">
+      <header
+        className="sticky top-0 bg-background/95 backdrop-blur border-b border-border/30 z-10"
+        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 0.75rem)" }}
+      >
+        <div className="container mx-auto px-4 pb-3 max-w-lg flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => {
             if (candidateMode && !isEditMode) {
               setCandidateMode(null);

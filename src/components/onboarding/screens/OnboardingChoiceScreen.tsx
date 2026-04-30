@@ -136,7 +136,10 @@ const OnboardingChoiceScreen = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[image:var(--gradient-page)] flex flex-col">
-      <div className="flex-1 px-4 py-6 max-w-lg mx-auto w-full flex flex-col safe-area-inset">
+      <div
+        className="flex-1 px-4 pb-6 max-w-lg mx-auto w-full flex flex-col"
+        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 0.75rem)" }}
+      >
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -289,6 +292,7 @@ const OnboardingChoiceScreen = () => {
               className="space-y-3 flex-1 flex flex-col"
             >
               <div className="flex items-center gap-2">
+                {/* No back when we jumped straight to upload (name+goal from pre-auth /onboarding) — matches “upload-only” flows */}
                 {initialStep !== "upload" && (
                   <button onClick={() => setStep("goals")} className="text-muted-foreground hover:text-foreground">
                     <ArrowLeft className="w-4 h-4" />

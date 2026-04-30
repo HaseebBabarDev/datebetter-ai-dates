@@ -180,7 +180,10 @@ export default function SubscriptionIap() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <div className="container max-w-lg mx-auto px-4 py-6 sm:py-8">
+      <div
+        className="container max-w-lg mx-auto px-4 pb-6 sm:pb-8"
+        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 0.75rem)" }}
+      >
         <div className="mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
