@@ -41,7 +41,6 @@ import { AdminAgreementsSection } from "@/components/admin/AdminAgreementsSectio
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { AdminMessaging } from "@/components/admin/AdminMessaging";
 import { PitchDeckAnalytics } from "@/components/admin/PitchDeckAnalytics";
-import { AdminConversionSection } from "@/components/admin/AdminConversionSection";
 
 const AdminDashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -163,7 +162,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-7xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="flex flex-wrap w-full h-auto gap-1 bg-muted/50 p-1 rounded-xl">
+          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12 h-auto gap-1 bg-muted/50 p-1 rounded-xl">
             <TabsTrigger value="overview" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
 
               <BarChart3 className="w-4 h-4" />
@@ -180,10 +179,6 @@ const AdminDashboard = () => {
             <TabsTrigger value="revenue" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
               <DollarSign className="w-4 h-4" />
               <span className="hidden sm:inline">Revenue</span>
-            </TabsTrigger>
-            <TabsTrigger value="conversion" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
-              <TrendingUp className="w-4 h-4" />
-              <span className="hidden sm:inline">Conversion</span>
             </TabsTrigger>
             <TabsTrigger value="ai" className="flex items-center gap-1.5 py-2.5 text-xs sm:text-sm">
               <Brain className="w-4 h-4" />
@@ -233,10 +228,6 @@ const AdminDashboard = () => {
 
           <TabsContent value="revenue" className="space-y-6">
             <RevenueAnalytics />
-          </TabsContent>
-
-          <TabsContent value="conversion" className="space-y-6">
-            <AdminConversionSection />
           </TabsContent>
 
           <TabsContent value="ai" className="space-y-6">
