@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -578,12 +577,7 @@ export const AddInteractionForm: React.FC<AddInteractionFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Notes</Label>
-                <VoiceInputButton
-                  onTranscript={(text) => setNotes((prev) => (prev ? `${prev} ${text}` : text))}
-                />
-              </div>
+              <Label>Notes</Label>
               <Textarea
                 placeholder="What happened? How did you feel? Any memorable moments?"
                 value={notes}

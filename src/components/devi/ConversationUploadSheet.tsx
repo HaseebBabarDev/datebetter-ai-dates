@@ -114,107 +114,6 @@ export function ConversationUploadSheet({
       img.src = url;
     });
 
-  /**
-   * Extract evenly-spaced frames from a video as downscaled JPEGs.
-   * Sending raw video data URLs to vision models blows up edge-function memory,
-   * so we convert the recording to a handful of screenshots instead.
-   */
-  const extractVideoFrames = (
-    file: File,
-    { frameCount = 6, maxDim = 1280, quality = 0.8 }: { frameCount?: number; maxDim?: number; quality?: number } = {}
-  ): Promise<string[]> =>
-    new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(file);
-      const video = document.createElement("video");
-      video.preload = "auto";
-      video.muted = true;
-      video.playsInline = true;
-      video.crossOrigin = "anonymous";
-      video.src = url;
-
-      const cleanup = () => URL.revokeObjectURL(url);
-
-      video.onloadedmetadata = async () => {
-        try {
-          const duration = isFinite(video.duration) && video.duration > 0 ? video.duration : 0;
-          if (!duration) {
-            cleanup();
-            reject(new Error("Could not read video duration"));
-            return;
-          }
-
-          const vw = video.videoWidth || 720;
-          const vh = video.videoHeight || 1280;
-          let width = vw;
-          let height = vh;
-          if (width > maxDim || height > maxDim) {
-            const ratio = Math.min(maxDim / width, maxDim / height);
-            width = Math.round(width * ratio);
-            height = Math.round(height * ratio);
-          }
-
-          const canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-          if (!ctx) {
-            cleanup();
-            reject(new Error("No canvas context"));
-            return;
-          }
-
-          // Pick frames evenly across the clip, skipping the very first/last frames
-          // which are often blank or transition frames.
-          const count = Math.max(2, Math.min(frameCount, 10));
-          const targets: number[] = [];
-          for (let i = 0; i < count; i++) {
-            const t = ((i + 1) / (count + 1)) * duration;
-            targets.push(Math.min(Math.max(t, 0), Math.max(duration - 0.05, 0)));
-          }
-
-          const frames: string[] = [];
-          for (const t of targets) {
-            await new Promise<void>((res, rej) => {
-              const onSeeked = () => {
-                video.removeEventListener("seeked", onSeeked);
-                video.removeEventListener("error", onErr);
-                try {
-                  ctx.drawImage(video, 0, 0, width, height);
-                  frames.push(canvas.toDataURL("image/jpeg", quality));
-                  res();
-                } catch (e) {
-                  rej(e);
-                }
-              };
-              const onErr = () => {
-                video.removeEventListener("seeked", onSeeked);
-                video.removeEventListener("error", onErr);
-                rej(new Error("Video seek failed"));
-              };
-              video.addEventListener("seeked", onSeeked);
-              video.addEventListener("error", onErr);
-              try {
-                video.currentTime = t;
-              } catch (e) {
-                rej(e);
-              }
-            });
-          }
-
-          cleanup();
-          resolve(frames);
-        } catch (err) {
-          cleanup();
-          reject(err);
-        }
-      };
-
-      video.onerror = () => {
-        cleanup();
-        reject(new Error("Failed to load video"));
-      };
-    });
-
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
     if (!selectedFiles.length) return;
@@ -237,29 +136,27 @@ export function ConversationUploadSheet({
         }
 
         try {
+          let dataUrl: string;
           if (isImage) {
-            const dataUrl = await compressImage(file);
-            setFiles((prev) => [
-              ...prev,
-              { data: dataUrl, type: "text_screenshot", isVideo: false, name: file.name },
-            ]);
+            dataUrl = await compressImage(file);
           } else {
-            // Extract frames so we send small JPEGs to the AI instead of a huge video blob
-            const frames = await extractVideoFrames(file, { frameCount: 6, maxDim: 1280, quality: 0.8 });
-            if (!frames.length) {
-              toast.error(`${file.name}: Could not read video frames`);
-              continue;
-            }
-            setFiles((prev) => [
-              ...prev,
-              ...frames.map((data, i) => ({
-                data,
-                type: "text_screenshot",
-                isVideo: false,
-                name: `${file.name} — frame ${i + 1}/${frames.length}`,
-              })),
-            ]);
+            dataUrl = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = () => reject(new Error("Failed to read file"));
+              reader.readAsDataURL(file);
+            });
           }
+
+          setFiles((prev) => [
+            ...prev,
+            {
+              data: dataUrl,
+              type: isVideo ? "conversation_video" : "text_screenshot",
+              isVideo,
+              name: file.name,
+            },
+          ]);
         } catch (err) {
           console.error("Error processing file:", err);
           toast.error(`${file.name}: Failed to process`);
@@ -342,9 +239,6 @@ export function ConversationUploadSheet({
                     <p className="font-medium text-foreground">Tip: Screen record the conversation</p>
                     <p><span className="font-medium">iPhone:</span> Swipe down → Control Center → Screen Recording</p>
                     <p><span className="font-medium">Android:</span> Swipe down → Quick Settings → Screen Record</p>
-                    <p className="pt-1 text-foreground/80">
-                      ⏱️ Keep recordings <span className="font-semibold">under 10 seconds</span> — scroll slowly through the chat. Longer videos may fail to analyze.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -363,7 +257,7 @@ export function ConversationUploadSheet({
                     {uploading ? "Processing..." : "Tap to upload"}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Screenshots or short videos (~10s) • Max 50MB
+                    Videos or screenshots • Max 50MB
                   </p>
                 </div>
               </button>

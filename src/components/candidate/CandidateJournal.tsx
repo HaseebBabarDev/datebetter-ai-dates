@@ -6,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -185,20 +184,13 @@ export const CandidateJournal: React.FC<CandidateJournalProps> = ({
                 <p className="text-xs text-muted-foreground">
                   What's on your mind about {candidateName}?
                 </p>
-                <div className="relative">
-                  <Textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="Write your thoughts, feelings, or reflections..."
-                    className="min-h-[100px] text-sm pr-12"
-                    autoFocus
-                  />
-                  <div className="absolute bottom-2 right-2">
-                    <VoiceInputButton
-                      onTranscript={(text) => setContent((prev) => (prev ? `${prev} ${text}` : text))}
-                    />
-                  </div>
-                </div>
+                <Textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Write your thoughts, feelings, or reflections..."
+                  className="min-h-[100px] text-sm"
+                  autoFocus
+                />
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground">How are you feeling?</p>
                   <div className="flex gap-2">

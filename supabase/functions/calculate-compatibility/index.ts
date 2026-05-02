@@ -1392,50 +1392,63 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
     // Track previous score for comparison
     const previousScore = candidate.compatibility_score;
 
-    // CRITICAL BUG FIX: Prevent dramatic score swings in EITHER direction.
-    // The compatibility score must evolve gradually based on logged data.
-    // Only a hard relationship-ending pattern (infidelity, abuse, harassment,
-    // discrimination, gaslighting, etc. — captured by `shouldEndRelationship`)
-    // is allowed to drop the score below the gradual-change envelope.
+    // CRITICAL BUG FIX: Prevent dramatic score increases
+    // If there was a previous score that was low (under 25%), it was low for a reason
+    // (relationship-ending patterns, red flags, etc.). We must prevent the AI from
+    // ignoring this and jumping to a high score.
     const previousScoreNum = typeof previousScore === "number" ? Math.round(previousScore) : null;
-
-    // 0. CRITICAL: If relationship-ending patterns are detected, FORCE score down to the low cap.
-    // This is the ONLY path that bypasses the ±2 envelope below.
+    
+    // ENFORCE SCORE LIMITS in multiple scenarios:
+    
+    // 0. CRITICAL: If relationship-ending patterns are detected, FORCE score down to cap
+    // This fixes the bug where score went to 83% but should be capped at 20%
     if (shouldEndRelationship && analysis.overall_score > sentimentAdjustedOverall) {
       console.log(`FORCING SCORE DOWN: Relationship-ending pattern detected. AI suggested ${analysis.overall_score}%, forcing to ${sentimentAdjustedOverall}%`);
       analysis.overall_score = sentimentAdjustedOverall;
     }
-
-    // 1. UNIVERSAL GRADUAL-CHANGE ENVELOPE (±2 per recalculation).
-    //    Applies to every recalc that is NOT a relationship-ending event.
-    //    This guarantees the score never jumps wildly between refreshes
-    //    just because the AI's qualitative read of the data shifted.
-    if (previousScoreNum !== null && !shouldEndRelationship) {
-      const MAX_DELTA_PER_RECALC = 2;
-      const upperBound = previousScoreNum + MAX_DELTA_PER_RECALC;
-      const lowerBound = previousScoreNum - MAX_DELTA_PER_RECALC;
-
-      if (analysis.overall_score > upperBound) {
-        console.log(`ENVELOPE CAP (up): Previous ${previousScoreNum}%, AI suggested ${analysis.overall_score}%, capping to ${upperBound}%`);
-        analysis.overall_score = upperBound;
-      } else if (analysis.overall_score < lowerBound) {
-        console.log(`ENVELOPE CAP (down): Previous ${previousScoreNum}%, AI suggested ${analysis.overall_score}%, flooring to ${lowerBound}%`);
-        analysis.overall_score = lowerBound;
-      }
+    
+    // 1. If there are negative interactions, cap the score
+    if (negativeCount > 0 && analysis.overall_score > sentimentAdjustedOverall) {
+      console.log(`Capping AI score from ${analysis.overall_score} to ${sentimentAdjustedOverall} due to ${negativeCount} negative interactions`);
+      analysis.overall_score = sentimentAdjustedOverall;
     }
-
-    // 2. Cap emotional compatibility if there are negative interactions
+    
+    // 2. CRITICAL: If previous score was low (under 25%), prevent jumping more than +3 points
+    // This prevents the AI from "forgetting" why the score was low
+    if (previousScoreNum !== null && previousScoreNum < 25 && analysis.overall_score > previousScoreNum + 3) {
+      const maxAllowed = previousScoreNum + 3;
+      console.log(`PREVENTING SCORE JUMP: Previous was ${previousScoreNum}%, AI suggested ${analysis.overall_score}%, capping to ${maxAllowed}%`);
+      analysis.overall_score = maxAllowed;
+    }
+    
+    // 2b. SYMMETRICAL: Also prevent drops of more than 1% per recalculation
+    // This stops scores from slowly bleeding down on repeated recalcs with no new negative signals
+    if (previousScoreNum !== null && !shouldEndRelationship && negativeCount === 0 && analysis.overall_score < previousScoreNum - 1) {
+      const minAllowed = previousScoreNum - 1;
+      console.log(`PREVENTING SCORE BLEED: Previous was ${previousScoreNum}%, AI suggested ${analysis.overall_score}%, flooring to ${minAllowed}%`);
+      analysis.overall_score = minAllowed;
+    }
+    
+    // 3. If previous score was between 25-40%, prevent jumping more than +5 points
+    if (previousScoreNum !== null && previousScoreNum >= 25 && previousScoreNum < 40 && analysis.overall_score > previousScoreNum + 5) {
+      const maxAllowed = previousScoreNum + 5;
+      console.log(`PREVENTING MODERATE SCORE JUMP: Previous was ${previousScoreNum}%, AI suggested ${analysis.overall_score}%, capping to ${maxAllowed}%`);
+      analysis.overall_score = maxAllowed;
+    }
+    
+    // 4. Also cap emotional compatibility if there are negative interactions
     if (negativeCount > 0 && analysis.breakdown?.emotional_compatibility > adjustedEmotionalScore) {
       analysis.breakdown.emotional_compatibility = adjustedEmotionalScore;
     }
-
-    // 3. Force emotional score down if relationship should end
+    
+    // 5. Force emotional score down if relationship should end
     if (shouldEndRelationship && analysis.breakdown?.emotional_compatibility > adjustedEmotionalScore) {
       analysis.breakdown.emotional_compatibility = adjustedEmotionalScore;
     }
 
-    // 4. If the relationship is in a "low cap" state but the user is logging a consistent
-    //    recovery streak, ensure the score goes up by exactly +1 (very gradual).
+    // If the relationship is in a "low cap" state but the user is logging a consistent
+    // recovery streak, ensure the score goes up by exactly +1 (very gradual).
+    // Max cap is now 20 (not 45) to keep recovery slow.
     if (
       shouldEndRelationship &&
       typeof previousScoreNum === "number" &&

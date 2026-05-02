@@ -32,19 +32,6 @@ const DB_PLAN_TO_FRONTEND: Record<string, string> = {
   "unlimited": "unlimited",
 };
 
-type AppleEntitlementsRow = {
-  unlimited_active: boolean;
-  unlimited_expires_at: string | null;
-  text_simulator_active: boolean;
-  detachment_plan_active: boolean;
-};
-
-function appleUnlimitedEffective(row: AppleEntitlementsRow | null): boolean {
-  if (!row?.unlimited_active) return false;
-  if (!row.unlimited_expires_at) return true;
-  return new Date(row.unlimited_expires_at) > new Date();
-}
-
 function safeTimestamp(val: any): string | null {
   if (!val) return null;
   try {
@@ -112,18 +99,6 @@ serve(async (req) => {
     const email = user.email;
     logStep("User authenticated", { userId, email });
 
-    const { data: appleRow } = await supabaseClient
-      .from("apple_entitlements")
-      .select(
-        "unlimited_active, unlimited_expires_at, text_simulator_active, detachment_plan_active",
-      )
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    const appleUnl = appleUnlimitedEffective(appleRow as AppleEntitlementsRow | null);
-    const appleText = !!(appleRow as AppleEntitlementsRow | null)?.text_simulator_active;
-    const appleDet = !!(appleRow as AppleEntitlementsRow | null)?.detachment_plan_active;
-
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email, limit: 1 });
 
@@ -165,39 +140,6 @@ serve(async (req) => {
           trial_ends_at: trialEndsAt,
           day_pass_active: false,
           detachment_plan_candidates: [],
-          has_text_simulator: appleText,
-          has_detachment_plan: appleDet,
-          text_sim_subscription_id: null,
-          detachment_subscription_id: null,
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        });
-      }
-      if (appleUnl || appleText || appleDet) {
-        const appleSubEnd =
-          appleUnl && appleRow && (appleRow as AppleEntitlementsRow).unlimited_expires_at
-            ? safeTimestamp((appleRow as AppleEntitlementsRow).unlimited_expires_at)
-            : null;
-        logStep("Apple entitlements only (no Stripe customer)", {
-          appleUnl,
-          appleText,
-          appleDet,
-        });
-        return new Response(JSON.stringify({
-          subscribed: appleUnl,
-          plan: appleUnl ? "unlimited" : "free",
-          product_id: null,
-          price_id: null,
-          subscription_end: appleSubEnd,
-          trial_active: false,
-          trial_ends_at: null,
-          day_pass_active: false,
-          detachment_plan_candidates: [],
-          has_text_simulator: appleText,
-          has_detachment_plan: appleDet,
-          text_sim_subscription_id: null,
-          detachment_subscription_id: null,
         }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
@@ -289,22 +231,10 @@ serve(async (req) => {
       logStep("Error fetching checkout sessions (non-fatal)", { message: String(e) });
     }
 
-    // If no active Stripe sub but trial is active, grant starter access; OR Apple unlimited (C-lite)
-    let effectiveSubscribed = hasActiveSub || trialActive || appleUnl;
-    let effectivePlan = hasActiveSub ? plan : (trialActive ? trialPlan : "free");
-    if (appleUnl && (!hasActiveSub || plan === "basic" || plan === "starter")) {
-      effectivePlan = "unlimited";
-    }
-    let effectiveEnd = hasActiveSub ? subscriptionEnd : (trialActive ? trialEndsAt : null);
-    if (appleUnl && appleRow && (appleRow as AppleEntitlementsRow).unlimited_expires_at) {
-      const appleEnd = safeTimestamp((appleRow as AppleEntitlementsRow).unlimited_expires_at);
-      if (
-        appleEnd &&
-        (!effectiveEnd || new Date(appleEnd) > new Date(effectiveEnd))
-      ) {
-        effectiveEnd = appleEnd;
-      }
-    }
+    // If no active Stripe sub but trial is active, grant starter access
+    const effectiveSubscribed = hasActiveSub || trialActive;
+    const effectivePlan = hasActiveSub ? plan : (trialActive ? trialPlan : "free");
+    const effectiveEnd = hasActiveSub ? subscriptionEnd : (trialActive ? trialEndsAt : null);
 
     return new Response(JSON.stringify({
       subscribed: effectiveSubscribed,
@@ -316,8 +246,8 @@ serve(async (req) => {
       trial_ends_at: trialEndsAt,
       day_pass_active: hasDayPass,
       detachment_plan_candidates: detachmentPlanCandidates,
-      has_text_simulator: hasTextSimulator || appleText,
-      has_detachment_plan: hasDetachmentPlanSub || appleDet,
+      has_text_simulator: hasTextSimulator,
+      has_detachment_plan: hasDetachmentPlanSub,
       text_sim_subscription_id: textSimSubId,
       detachment_subscription_id: detachmentSubId,
     }), {

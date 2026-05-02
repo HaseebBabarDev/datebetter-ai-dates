@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { OnboardingLayout } from "../OnboardingLayout";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { Heart, AlertTriangle, Sparkles, RefreshCw, CheckCircle, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,47 +25,14 @@ const EX_CONTACT_OPTIONS = [
   { value: "not_applicable", label: "No significant exes" },
 ];
 
-// Behavioral indicators — we infer healing instead of asking the user to score themselves
-const THINK_ABOUT_EX_OPTIONS = [
-  { value: "rarely", label: "Rarely or never", score: 95 },
-  { value: "sometimes", label: "A few times a month", score: 75 },
-  { value: "weekly", label: "Most weeks", score: 50 },
-  { value: "daily", label: "Most days", score: 25 },
-  { value: "constantly", label: "Constantly / can't stop", score: 5 },
-];
-
-const CHECK_THEIR_SOCIALS_OPTIONS = [
-  { value: "never", label: "Never — I don't follow them", score: 95 },
-  { value: "rarely", label: "Once in a while", score: 70 },
-  { value: "weekly", label: "Weekly", score: 40 },
-  { value: "daily", label: "Daily or more", score: 10 },
-];
-
-const NEW_PARTNERS_FEELING_OPTIONS = [
-  { value: "excited", label: "Excited to meet someone new", score: 90 },
-  { value: "open", label: "Open but cautious", score: 70 },
-  { value: "comparing", label: "I keep comparing them to my ex", score: 35 },
-  { value: "numb", label: "Numb or not interested yet", score: 25 },
-  { value: "havent_tried", label: "Haven't tried yet", score: 50 },
-];
-
-const REPEAT_PATTERNS_OPTIONS = [
-  { value: "no", label: "No, I've broken the cycle", score: 90 },
-  { value: "aware", label: "I notice them but catch myself", score: 65 },
-  { value: "sometimes", label: "Sometimes, despite trying", score: 40 },
-  { value: "yes", label: "Yes, the same patterns keep showing up", score: 15 },
-];
-
 const HealingAssessmentScreen = () => {
   const { data, updateData, nextStep } = useOnboarding();
   const { user } = useAuth();
   
   const [exContactStatus, setExContactStatus] = useState(data.exContactStatus || "");
-  const [thinkAboutEx, setThinkAboutEx] = useState<string>("");
-  const [checkTheirSocials, setCheckTheirSocials] = useState<string>("");
-  const [newPartnersFeeling, setNewPartnersFeeling] = useState<string>("");
-  const [repeatPatterns, setRepeatPatterns] = useState<string>("");
-
+  const [overExLevel, setOverExLevel] = useState(data.overExLevel || 50);
+  const [attachmentToPast, setAttachmentToPast] = useState(data.attachmentToPast || 50);
+  
   // Score calculation state
   const [isCalculating, setIsCalculating] = useState(false);
   const [healingScore, setHealingScore] = useState<number | null>(null);
@@ -76,31 +44,22 @@ const HealingAssessmentScreen = () => {
     updateData({ exContactStatus: value });
   };
 
-  // Derive 0–100 indicators from behavioral answers (no self-rating)
-  const deriveOverExLevel = () => {
-    const a = THINK_ABOUT_EX_OPTIONS.find((o) => o.value === thinkAboutEx)?.score;
-    const b = CHECK_THEIR_SOCIALS_OPTIONS.find((o) => o.value === checkTheirSocials)?.score;
-    const c = NEW_PARTNERS_FEELING_OPTIONS.find((o) => o.value === newPartnersFeeling)?.score;
-    const vals = [a, b, c].filter((v): v is number => typeof v === "number");
-    if (vals.length === 0) return 50;
-    return Math.round(vals.reduce((s, v) => s + v, 0) / vals.length);
+  const handleOverExChange = (value: number[]) => {
+    setOverExLevel(value[0]);
+    updateData({ overExLevel: value[0] });
   };
 
-  const deriveAttachmentToPast = () => {
-    const r = REPEAT_PATTERNS_OPTIONS.find((o) => o.value === repeatPatterns)?.score;
-    // High "still attached to past" = low score on broken-cycle question
-    if (typeof r !== "number") return 50;
-    return Math.max(0, Math.min(100, 100 - r));
+  const handleAttachmentChange = (value: number[]) => {
+    setAttachmentToPast(value[0]);
+    updateData({ attachmentToPast: value[0] });
   };
 
   const calculateScore = async () => {
     if (!user) return;
-
-    const overExLevel = deriveOverExLevel();
-    const attachmentToPast = deriveAttachmentToPast();
-
+    
     setIsCalculating(true);
     try {
+      // First save the assessment data to profile
       await supabase
         .from("profiles")
         .update({
@@ -110,6 +69,7 @@ const HealingAssessmentScreen = () => {
         })
         .eq("user_id", user.id);
 
+      // Then calculate the healing score
       const { data: scoreData, error } = await supabase.functions.invoke("calculate-healing-score", {
         body: { triggerType: "assessment" },
       });
@@ -121,14 +81,15 @@ const HealingAssessmentScreen = () => {
       setShowDisclosure(scoreData.showDisclosure);
     } catch (error) {
       console.error("Error calculating healing score:", error);
+      // Calculate locally as fallback
       let baseScore = 50;
       const exContactScores: Record<string, number> = {
-        no_contact: 15,
-        occasional: 12,
-        regular: 8,
-        frequent: 4,
-        still_connected: 0,
-        not_applicable: 15,
+        "no_contact": 15,
+        "occasional": 12,
+        "regular": 8,
+        "frequent": 4,
+        "still_connected": 0,
+        "not_applicable": 15,
       };
       baseScore += exContactScores[exContactStatus || "not_applicable"] || 0;
       baseScore += Math.round(overExLevel * 0.25);
@@ -144,10 +105,26 @@ const HealingAssessmentScreen = () => {
   const handleContinue = () => {
     updateData({
       exContactStatus,
-      overExLevel: deriveOverExLevel(),
-      attachmentToPast: deriveAttachmentToPast(),
+      overExLevel,
+      attachmentToPast,
     });
     nextStep();
+  };
+
+  const getOverExLabel = (value: number) => {
+    if (value <= 20) return "Still deeply attached";
+    if (value <= 40) return "Working through it";
+    if (value <= 60) return "Making progress";
+    if (value <= 80) return "Mostly moved on";
+    return "Completely over them";
+  };
+
+  const getAttachmentLabel = (value: number) => {
+    if (value <= 20) return "Very detached";
+    if (value <= 40) return "Mostly detached";
+    if (value <= 60) return "Neutral";
+    if (value <= 80) return "Somewhat attached";
+    return "Very attached to past";
   };
 
   const getScoreColor = (score: number) => {
@@ -162,12 +139,7 @@ const HealingAssessmentScreen = () => {
     return { text: "Focus on healing first", color: "text-rose-600", icon: <Heart className="w-5 h-5" /> };
   };
 
-  const exRequired = !!exContactStatus && exContactStatus !== "not_applicable";
-  const canCalculate =
-    exContactStatus !== "" &&
-    (!exRequired || (!!thinkAboutEx && !!checkTheirSocials)) &&
-    !!newPartnersFeeling &&
-    !!repeatPatterns;
+  const canCalculate = exContactStatus !== "";
 
   return (
     <OnboardingLayout
@@ -256,67 +228,50 @@ const HealingAssessmentScreen = () => {
               </Select>
             </div>
 
-            {/* Behavioral indicators about ex */}
+            {/* Over Ex Slider */}
             {exContactStatus && exContactStatus !== "not_applicable" && (
-              <>
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium">How often do you think about your most recent significant ex?</Label>
-                  <Select value={thinkAboutEx} onValueChange={setThinkAboutEx}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select an option..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {THINK_ABOUT_EX_OPTIONS.map((o) => (
-                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">How over your most recent significant ex are you?</Label>
+                  <p className="text-xs text-muted-foreground">Be honest — this helps D.E.V.I. support you better</p>
                 </div>
-
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium">Do you check their social media or messages?</Label>
-                  <Select value={checkTheirSocials} onValueChange={setCheckTheirSocials}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select an option..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CHECK_THEIR_SOCIALS_OPTIONS.map((o) => (
-                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="pt-2 pb-4">
+                  <Slider
+                    value={[overExLevel]}
+                    onValueChange={handleOverExChange}
+                    max={100}
+                    step={5}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between mt-2">
+                    <span className="text-xs text-muted-foreground">Still attached</span>
+                    <span className="text-xs font-medium text-primary">{getOverExLabel(overExLevel)}</span>
+                    <span className="text-xs text-muted-foreground">Completely over</span>
+                  </div>
                 </div>
-              </>
+              </div>
             )}
 
-            {/* How new partners feel */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">When you imagine meeting someone new, what comes up?</Label>
-              <Select value={newPartnersFeeling} onValueChange={setNewPartnersFeeling}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select an option..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {NEW_PARTNERS_FEELING_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Repeating patterns */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Do you notice yourself repeating the same relationship patterns?</Label>
-              <Select value={repeatPatterns} onValueChange={setRepeatPatterns}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select an option..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {REPEAT_PATTERNS_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Attachment to Past Slider */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">How attached are you to past relationship patterns?</Label>
+                <p className="text-xs text-muted-foreground">Consider if you find yourself repeating the same dynamics</p>
+              </div>
+              <div className="pt-2 pb-4">
+                <Slider
+                  value={[attachmentToPast]}
+                  onValueChange={handleAttachmentChange}
+                  max={100}
+                  step={5}
+                  className="w-full"
+                />
+                <div className="flex justify-between mt-2">
+                  <span className="text-xs text-muted-foreground">Detached</span>
+                  <span className="text-xs font-medium text-primary">{getAttachmentLabel(attachmentToPast)}</span>
+                  <span className="text-xs text-muted-foreground">Very attached</span>
+                </div>
+              </div>
             </div>
 
             {/* Calculate Score button */}

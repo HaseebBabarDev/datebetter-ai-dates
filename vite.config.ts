@@ -13,9 +13,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
-    // Skip PWA in native builds — avoids service worker / cache fighting WKWebView
-    mode !== "capacitor" &&
-      VitePWA({
+    VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
       manifest: {
@@ -80,7 +78,7 @@ export default defineConfig(({ mode }) => ({
           }
         ]
       }
-    }),
+    })
   ].filter(Boolean),
   resolve: {
     alias: {

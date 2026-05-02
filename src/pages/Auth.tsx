@@ -8,10 +8,6 @@ import { toast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, Sparkles, Heart, Shield, CheckCircle2, Bot, Apple } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import {
-  shouldUseNativeAppleSignIn,
-  signInWithAppleNative,
-} from "@/lib/appleAuth";
 import authBg from "@/assets/auth-bg.jpg";
 
 const Auth = () => {
@@ -242,56 +238,6 @@ const Auth = () => {
   const canSubmit = isSignUp 
     ? email && password && confirmPassword && password === confirmPassword && termsAccepted && privacyAccepted && strength >= 50
     : email && password;
-
-  const handleAppleSignIn = async () => {
-    setAppleLoading(true);
-    try {
-      if (shouldUseNativeAppleSignIn()) {
-        const { error } = await signInWithAppleNative();
-        console.log("error", error);
-        if (error) {
-          toast({
-            title: error.message || "Apple sign in failed",
-            variant: "destructive",
-          });
-          return;
-        }
-        toast({
-          title: isSignUp ? "Welcome to dateBetter!" : "Welcome back!",
-        });
-        const {
-          data: { user: currentUser },
-        } = await supabase.auth.getUser();
-        console.log("currentUser", currentUser);
-        if (currentUser) {
-          const profile = await checkOnboardingStatus(currentUser.id);
-          if (profile?.onboarding_completed) {
-            navigate("/dashboard");
-            return;
-          }
-          const setupQuery = setupMode
-            ? `?setup=${encodeURIComponent(setupMode)}`
-            : "";
-          navigate(`/setup${setupQuery}`);
-        }
-        return;
-      }
-
-      const { error } = await lovable.auth.signInWithOAuth("apple", {
-        redirect_uri: window.location.origin,
-      });
-      if (error) {
-        toast({
-          title: error.message || "Apple sign in failed",
-          variant: "destructive",
-        });
-      }
-    } catch {
-      toast({ title: "Apple sign in failed", variant: "destructive" });
-    } finally {
-      setAppleLoading(false);
-    }
-  };
 
   return (
     <>
@@ -561,21 +507,8 @@ const Auth = () => {
               </div>
             )}
 
-            {/* {!isForgotPassword && (
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full h-12 rounded-xl bg-foreground text-background hover:bg-foreground/90 border-0 text-base font-semibold gap-2"
-                disabled={appleLoading}
-                onClick={handleAppleSignIn}
-              >
-                {appleLoading ? (
-                  <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Apple className="w-5 h-5" />
-                )}
-                Sign in with Apple
-              </Button> */}
+            {/* Apple Sign In */}
+            {!isForgotPassword && (
               <div className="space-y-3">
                 {/* Google Sign In */}
                 <Button
@@ -615,27 +548,26 @@ const Auth = () => {
 
                 {/* Apple Sign In */}
                 <Button
-                type="button"
-                variant="outline"
-                className="w-full h-12 rounded-xl bg-foreground text-background hover:bg-foreground/90 border-0 text-base font-semibold gap-2"
-                disabled={appleLoading}
-                  onClick={handleAppleSignIn}
-                  // onClick={async () => {
-                  //   setAppleLoading(true);
-                  //   try {
-                  //     const result = await lovable.auth.signInWithOAuth("apple", {
-                  //       redirect_uri: window.location.origin,
-                  //     });
-                  //     if (result.error) {
-                  //       toast({ title: result.error.message || "Apple sign in failed", variant: "destructive" });
-                  //     }
-                  //     if (result.redirected) return;
-                  //   } catch (err) {
-                  //     toast({ title: "Apple sign in failed", variant: "destructive" });
-                  //   } finally {
-                  //     setAppleLoading(false);
-                  //   }
-                  // }}
+                  type="button"
+                  variant="outline"
+                  className="w-full h-12 rounded-xl bg-foreground text-background hover:bg-foreground/90 border-0 text-base font-semibold gap-2"
+                  disabled={appleLoading}
+                  onClick={async () => {
+                    setAppleLoading(true);
+                    try {
+                      const result = await lovable.auth.signInWithOAuth("apple", {
+                        redirect_uri: window.location.origin,
+                      });
+                      if (result.error) {
+                        toast({ title: result.error.message || "Apple sign in failed", variant: "destructive" });
+                      }
+                      if (result.redirected) return;
+                    } catch (err) {
+                      toast({ title: "Apple sign in failed", variant: "destructive" });
+                    } finally {
+                      setAppleLoading(false);
+                    }
+                  }}
                 >
                   {appleLoading ? (
                     <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
@@ -645,7 +577,7 @@ const Auth = () => {
                   Continue with Apple
                 </Button>
               </div>
-            {/* )} */}
+            )}
 
             {/* Toggle Sign In/Up */}
             <div className="mt-6 pt-4 border-t border-border/30">

@@ -21,23 +21,7 @@ interface InlineCandidateEditorProps {
   userId: string;
   onClose: () => void;
   onSaved: (updatedCandidate: Candidate) => void;
-  onAdvance?: (nextSectionId: string) => void;
 }
-
-// Order used to auto-advance after a successful save
-const SECTION_ORDER = [
-  "basics",
-  "dating_context",
-  "relationship_intent",
-  "personality",
-  "values",
-  "kids_family",
-  "career_lifestyle",
-  "family_background",
-  "past_relationships",
-  "mental_health",
-  "chemistry",
-];
 
 const SECTION_CONFIG: Record<string, { title: string; emoji: string }> = {
   basics: { title: "Basics", emoji: "👤" },
@@ -135,12 +119,12 @@ const RELIGION_OPTIONS = [
 ];
 
 const POLITICS_OPTIONS = [
-  { value: "progressive", label: "Progressive" },
   { value: "liberal", label: "Liberal" },
   { value: "moderate", label: "Moderate" },
   { value: "conservative", label: "Conservative" },
-  { value: "traditional", label: "Traditional" },
-  { value: "prefer_not_say", label: "Prefer not to say" },
+  { value: "libertarian", label: "Libertarian" },
+  { value: "apolitical", label: "Apolitical" },
+  { value: "other", label: "Other" },
 ];
 
 const KIDS_DESIRE_OPTIONS = [
@@ -234,7 +218,6 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
   userId,
   onClose,
   onSaved,
-  onAdvance,
 }) => {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [saving, setSaving] = useState(false);
@@ -408,19 +391,7 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
         onSaved(data as Candidate);
       }
 
-      const currentIdx = sectionId ? SECTION_ORDER.indexOf(sectionId) : -1;
-      const nextSection =
-        currentIdx >= 0 && currentIdx < SECTION_ORDER.length - 1
-          ? SECTION_ORDER[currentIdx + 1]
-          : null;
-
-      setTimeout(() => {
-        if (nextSection && onAdvance) {
-          onAdvance(nextSection);
-        } else {
-          onClose();
-        }
-      }, 600);
+      setTimeout(() => onClose(), 600);
     } catch (err) {
       console.error("Error saving candidate section:", err);
       toast.error(err instanceof Error ? err.message : "Failed to save. Try again.");
@@ -679,23 +650,22 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
     <Sheet open={open} onOpenChange={(o) => !o && onClose()} modal={false}>
       <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl p-0 z-[60]" hideOverlay onInteractOutside={(e) => e.preventDefault()} onPointerDownOutside={(e) => e.preventDefault()}>
         <div className="flex flex-col h-full">
-          <SheetHeader className="px-5 pt-5 pb-3 border-b border-border bg-gradient-to-br from-rose-500/10 to-background">
-            <div className="inline-flex items-center gap-1.5 self-start px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 text-[11px] font-bold uppercase tracking-wide mb-2">
-              <span>💕</span>
-              About {candidate?.nickname || "this candidate"}
-            </div>
+          <SheetHeader className="px-5 pt-5 pb-3 border-b border-border">
             <SheetTitle className="flex items-center gap-2 text-base">
               <span className="text-lg">{config?.emoji}</span>
               {config?.title || "Update Candidate"}
+              {candidate && (
+                <span className="text-muted-foreground font-normal">— {candidate.nickname}</span>
+              )}
             </SheetTitle>
             <p className="text-xs text-muted-foreground">
-              You're entering info about <span className="font-semibold text-foreground">{candidate?.nickname || "them"}</span> — not yourself.
+              Fill in what you know — you can always update later
             </p>
           </SheetHeader>
 
-          <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
+          <ScrollArea className="flex-1 px-5 py-4">
             {renderSection()}
-          </div>
+          </ScrollArea>
 
           <div className="px-5 py-4 border-t border-border bg-background safe-area-bottom space-y-2">
             <Button
@@ -716,7 +686,7 @@ export const InlineCandidateEditor: React.FC<InlineCandidateEditorProps> = ({
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  Save &amp; Next
+                  Save & Continue
                 </>
               )}
             </Button>

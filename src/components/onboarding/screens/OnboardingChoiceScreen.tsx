@@ -84,7 +84,9 @@ const OnboardingChoiceScreen = () => {
         contextParts.push(`Goal: ${GOALS.find(g => g.value === selectedGoal)?.label || selectedGoal}`);
       }
       if (freeformText.trim()) contextParts.push(freeformText.trim());
-      // Note: uploaded files are handled separately and shouldn't appear as text in the user's message
+      if (uploadedFiles.length > 0) {
+        contextParts.push(`[User uploaded ${uploadedFiles.length} file(s) for analysis]`);
+      }
       if (contextParts.length > 0) {
         localStorage.setItem("onboarding_upload_context", contextParts.join("\n"));
       }

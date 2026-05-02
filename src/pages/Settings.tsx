@@ -435,7 +435,7 @@ const Settings = () => {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[image:var(--gradient-page)] pb-[calc(env(safe-area-inset-bottom)+7rem)]">
+    <div className="min-h-[100dvh] bg-[image:var(--gradient-page)] pb-24">
       <header className="sticky top-0 z-50 bg-[image:var(--gradient-header)] backdrop-blur-xl border-b border-border/50 pt-safe-top">
         <div className="px-4 py-3 max-w-lg mx-auto">
           <div className="flex items-center gap-2">

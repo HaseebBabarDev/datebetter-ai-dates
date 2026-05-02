@@ -751,7 +751,7 @@ const THEIR_ISSUE_OPTIONS = [
   }
 
   return (
-    <div className="min-h-screen bg-background pb-[calc(env(safe-area-inset-bottom)+10rem)]">
+    <div className="min-h-screen bg-background">
       <header className="sticky top-0 bg-background/95 backdrop-blur border-b border-border/30 z-10">
         <div className="container mx-auto px-4 py-3 max-w-lg flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => {
@@ -2074,21 +2074,13 @@ const THEIR_ISSUE_OPTIONS = [
             </TabsContent>
           </Tabs>
 
-          <div className="h-32" />
-          </motion.form>
-        )}
-      </main>
-
-      {candidateMode && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/50 bg-background/95 backdrop-blur pb-[calc(env(safe-area-inset-bottom)+4.5rem)] pt-3 px-4">
-          <div className="container mx-auto max-w-lg space-y-2">
+          <div className="space-y-2 pt-2">
             {isEditMode ? (
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
                 {activeTab !== "chemistry" && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1 h-12 text-sm"
+                  <Button 
+                    type="button" 
+                    className="w-full text-xs h-9" 
                     disabled={loading}
                     onClick={() => {
                       const currentIndex = TABS.indexOf(activeTab as typeof TABS[number]);
@@ -2097,33 +2089,36 @@ const THEIR_ISSUE_OPTIONS = [
                       }
                     }}
                   >
-                    Next →
+                    Add More Info →
                   </Button>
                 )}
-                <Button
-                  type="button"
-                  onClick={handleSubmit as any}
-                  className="flex-[2] rounded-xl h-12 text-base font-semibold bg-[image:var(--gradient-primary)] hover:opacity-90 shadow-[var(--shadow-soft)]"
-                  size="lg"
-                  disabled={loading || !nickname.trim()}
+                <Button 
+                  type="submit" 
+                  variant="outline"
+                  className="w-full text-xs h-9" 
+                  disabled={loading}
                 >
                   {loading ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
             ) : (
               <Button
-                type="button"
-                onClick={handleSubmit as any}
+                type="submit"
                 className="w-full rounded-xl h-12 text-base font-semibold bg-[image:var(--gradient-primary)] hover:opacity-90 shadow-[var(--shadow-soft)]"
                 size="lg"
-                disabled={loading || !nickname.trim()}
+                disabled={loading}
               >
                 {loading ? "Saving..." : <><UserPlus className="w-5 h-5 mr-2" />Add Candidate</>}
               </Button>
             )}
+            <p className="text-xs text-center text-muted-foreground">
+              <Sparkles className="w-3 h-3 inline mr-1" />
+              {isEditMode ? "More details = better compatibility insights" : "More details = better AI compatibility analysis"}
+            </p>
           </div>
-        </div>
-      )}
+          </motion.form>
+        )}
+      </main>
       <UpgradeLimitDialog
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
