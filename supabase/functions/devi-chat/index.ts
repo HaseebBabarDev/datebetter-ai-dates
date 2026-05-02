@@ -213,7 +213,7 @@ ${focusAreas || '- General emotional healing and self-work'}
 `;
 };
 
-const buildSystemPrompt = (userProfile: any, candidateProfile: any, interactions: any[], journalEntries?: any[], allCandidates?: any[]) => {
+const buildSystemPrompt = (userProfile: any, candidateProfile: any, interactions: any[], journalEntries?: any[]) => {
   // Build family background context
   const familyContext = userProfile ? buildFamilyContext(userProfile) : '';
   
@@ -351,7 +351,7 @@ CANDIDATE PROFILE (the person they're dating):
 - Their Career Stage: ${candidateProfile.their_career_stage || 'Unknown'}
 - Their Education: ${candidateProfile.their_education_level || 'Unknown'}
 - Their Social Style: ${candidateProfile.their_social_style || 'Unknown'}
-- Compatibility Score: ${candidateProfile.compatibility_score || 'Not calculated'}% (CRITICAL: This is the ONLY correct score from the database. When discussing compatibility, ALWAYS quote this exact number. NEVER say a different percentage unless you are actively proposing a change AND including [SET_COMPATIBILITY_SCORE:X] in the same message. If you mention ANY percentage for this candidate, it MUST match this value OR include the marker to update it.)
+- Compatibility Score: ${candidateProfile.compatibility_score || 'Not calculated'}% (CRITICAL: This is the ONLY correct score. NEVER invent, estimate, or state a different number. Always use THIS exact value when referencing their compatibility.)
 - Red Flags Noted: ${formatArray(candidateProfile.red_flags)}
 - Green Flags Noted: ${formatArray(candidateProfile.green_flags)}
 - Notes: ${candidateProfile.notes || 'None'}
@@ -558,16 +558,6 @@ ${healingGuidance}
 ${candidateContext}
 ${intimacyGuidance}
 ${interactionContext}
-${allCandidates && allCandidates.length > 0 ? `
-ALL CANDIDATES (active and recently closed — user may ask about any of them, especially when sharing screenshots or recordings):
-${allCandidates.map((c: any) => `- ${c.nickname}: ${c.status === 'archived' ? 'CLOSED' : c.status?.replace(/_/g, ' ')}${c.compatibility_score ? ` (${c.compatibility_score}% match)` : ''}${c.end_reason ? ` — ended: ${c.end_reason}` : ''}${c.age ? `, age ${c.age}` : ''}${c.met_via ? `, met via ${c.met_via}` : ''}`).join('\n')}
-
-CLOSED CANDIDATE GUIDANCE:
-- Users can discuss closed/archived candidates freely in general chat without reopening them.
-- If a user shares screenshots or recordings about a closed candidate, analyze them normally — reference the candidate by name if you can identify who they're asking about.
-- If it seems like the user wants to re-engage with a closed candidate, gently note they can reopen them from the candidate selector dropdown.
-- Do NOT refuse to discuss someone just because they're archived.
-` : ''}
 ${journalEntries && journalEntries.length > 0 ? `
 USER'S JOURNAL ENTRIES (private reflections about this candidate — use these to understand their emotional state and patterns):
 ${journalEntries.slice(0, 10).map((e: any) => `- [${e.created_at?.split('T')[0] || 'Unknown date'}]${e.mood ? ` (Mood: ${e.mood})` : ''}: ${e.content}`).join('\n')}
@@ -707,7 +697,6 @@ COMPATIBILITY SCORE RELIABILITY (CRITICAL):
 - If a user reports a mismatch, acknowledge briefly and immediately align to the database score provided in context
 - If you and the user agree to change the score, include [SET_COMPATIBILITY_SCORE:X] in the same response
 - Keep this calm and concise; do NOT add a technical disclaimer paragraph
-- ABSOLUTE RULE: Every time you mention a specific percentage for this candidate's compatibility, it MUST exactly match the database score above. If you want to propose a DIFFERENT score, you MUST include [SET_COMPATIBILITY_SCORE:X] in that same response so the database updates immediately. Never say one number verbally while the database shows another.
 
 COMPATIBILITY SCORE UPDATE OFFERS:
 - When you learn NEW information about the candidate during our chat (from screenshots, their messages, new behaviors, etc.), OFFER to update their compatibility score
@@ -764,7 +753,6 @@ Use these markers to trigger updates (the app will execute them automatically):
    - Triggers: User agrees to your compatibility assessment, you discuss and agree on a score, user asks to update the score
    - CRITICAL: Whenever you mention or agree on a specific compatibility percentage for the candidate, YOU MUST include this marker to keep the dashboard in sync
    - This updates the candidate's score on the dashboard immediately
-   - NEVER state a percentage that differs from the database score without including this marker. If the database says 72%, you say 72%. If you think it should be 65%, say so AND include [SET_COMPATIBILITY_SCORE:65] in the same response.
 
 IMPORTANT for profile updates:
 - When suggesting an update, explain WHY you're recommending that specific value
@@ -931,7 +919,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, imageData, imagesData, imageType, textScreenshotRightSide, userProfile, candidateProfile, allCandidates, interactions, journalEntries } = await req.json();
+    const { messages, imageData, imagesData, imageType, textScreenshotRightSide, userProfile, candidateProfile, interactions, journalEntries } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -939,7 +927,7 @@ serve(async (req) => {
     }
 
     // Build personalized system prompt
-    const systemPrompt = buildSystemPrompt(userProfile, candidateProfile, interactions, journalEntries, allCandidates);
+    const systemPrompt = buildSystemPrompt(userProfile, candidateProfile, interactions, journalEntries);
 
     // Build the messages array for the AI
     const aiMessages: any[] = [

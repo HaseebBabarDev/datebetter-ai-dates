@@ -2229,27 +2229,6 @@ export type Database = {
       }
     }
     Views: {
-      community_profiles: {
-        Row: {
-          avatar_url: string | null
-          city: string | null
-          screen_name: string | null
-          user_id: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          city?: string | null
-          screen_name?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          city?: string | null
-          screen_name?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       studios_public: {
         Row: {
           amenities: Json | null

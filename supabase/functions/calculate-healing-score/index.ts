@@ -181,12 +181,7 @@ ${relationshipSummaries.map((s, i) => `${i + 1}. ${s}`).join('\n')}
 
 **General Reflections:** ${profile.relationship_trauma_notes || "None provided"}
 
-${dailyFeeling ? `**Today's Feeling:** "${dailyFeeling}"
-
-IMPORTANT: The user just shared how they feel today. If their feeling is POSITIVE (e.g., feeling good, hopeful, happy, strong, moved on), the score should INCREASE or at minimum STAY THE SAME compared to their previous score of ${previousScore ?? 'N/A'}. A positive daily check-in should NEVER cause the score to drop. Only decrease the score if the daily feeling explicitly indicates regression (e.g., contacted ex, feeling hopeless, relapsed).` : ''}
-
-${previousScore !== null ? `**Previous Healing Score:** ${previousScore}%
-IMPORTANT: For daily check-ins and manual refreshes, the score should be STABLE (within ±5 points) unless the user's daily feeling or profile changes clearly warrant a larger shift. Do NOT recalculate from scratch — use the previous score as an anchor.` : ''}
+${dailyFeeling ? `**Today's Feeling:** "${dailyFeeling}"` : ''}
 
 ## SCORING CRITERIA (CRITICAL - READ CAREFULLY):
 
@@ -214,7 +209,7 @@ The score should INVERSELY relate to negative indicators:
 You MUST respond with ONLY a valid JSON object in this exact format:
 {
   "score": <number between 0-100>,
-  "insight": "<2-3 sentences that reference SPECIFIC data points from their profile — name specific traumas, ex-contact patterns, or attachment style. Never use filler phrases like 'truly commendable' or 'excellent progress.' Be direct and concrete, e.g. 'Your no-contact stance is protecting you, but your 30% over-ex level suggests the emotional bond is still strong.' Sound like a sharp friend, not a therapist brochure.>"
+  "insight": "<2-3 sentence personalized insight about their healing journey, be warm and supportive>"
 }
 
 Do not include any other text, markdown, or explanation outside the JSON.`;

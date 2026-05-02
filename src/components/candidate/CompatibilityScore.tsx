@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { SelfWorthReminder } from "./SelfWorthReminder";
 
 // Helper to render markdown-style bold (*text*) as actual bold
@@ -46,18 +46,16 @@ type AdviceTracking = Tables<"advice_tracking">;
 
 interface ScoreBreakdown {
   overall_score: number;
-  breakdown?: {
+  breakdown: {
     values_alignment: number;
     lifestyle_compatibility: number;
     emotional_compatibility: number;
     chemistry_score: number;
     future_goals: number;
-  } | null;
-  strengths?: string[];
-  concerns?: string[];
-  advice?: string;
-  previous_score?: number | null;
-  score_changed?: boolean;
+  };
+  strengths: string[];
+  concerns: string[];
+  advice: string;
 }
 
 interface CompatibilityScoreProps {
@@ -165,39 +163,14 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
   const [respondingToAdvice, setRespondingToAdvice] = useState(false);
   const [showNoContactDialog, setShowNoContactDialog] = useState(false);
   const [scoreJustUpdated, setScoreJustUpdated] = useState(false);
-  const autoCalculationAttemptedRef = useRef<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { canUseUpdate, getRemainingUpdates, incrementUsage, refetch: refetchSubscription } = useSubscription();
 
-  const rawScoreData = candidate.score_breakdown as unknown as ScoreBreakdown | null;
-  const scoreData = useMemo<ScoreBreakdown | null>(() => {
-    if (rawScoreData && typeof rawScoreData.overall_score === "number") {
-      return rawScoreData;
-    }
-
-    if (typeof candidate.compatibility_score === "number") {
-      return {
-        overall_score: candidate.compatibility_score,
-        breakdown: null,
-        strengths: [],
-        concerns: [],
-        advice: "",
-      };
-    }
-
-    return null;
-  }, [rawScoreData, candidate.compatibility_score]);
-
+  const scoreData = candidate.score_breakdown as unknown as ScoreBreakdown | null;
   const remainingUpdates = getRemainingUpdates(candidate.id);
   const canRefresh = canUseUpdate(candidate.id);
-  const hasStoredScore = typeof candidate.compatibility_score === "number";
-  const hasDetailedScore = !!rawScoreData && typeof rawScoreData.overall_score === "number";
-
-  useEffect(() => {
-    autoCalculationAttemptedRef.current = null;
-  }, [candidate.id]);
 
   // Check if advice has already been responded to
   useEffect(() => {
@@ -221,9 +194,10 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
     checkAdviceResponse();
   }, [candidate.id, scoreData?.advice, user]);
 
-  const calculateScore = useCallback(async (options: { silent?: boolean; skipUsageLimit?: boolean } = {}) => {
-    const isFirstCalculation = !hasStoredScore;
-    if (!options.skipUsageLimit && !isFirstCalculation && !canRefresh) {
+  const calculateScore = async () => {
+    // Check usage limit (first calculation is free, subsequent ones count as updates)
+    const isFirstCalculation = !scoreData;
+    if (!isFirstCalculation && !canRefresh) {
       toast({
         title: "Update Limit Reached",
         description: "Upgrade your plan for more D.E.V.I. updates",
@@ -238,95 +212,80 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
         body: { candidateId: candidate.id },
       });
 
-      if (fnError || data?.error) {
-        if (!options.silent) {
+      // Handle errors or undefined response - no change, no prompts
+      if (fnError || !data || data?.error) {
+        if (scoreData) {
           toast({
-            title: scoreData ? "Score Unchanged" : "Unable to Calculate",
-            description: scoreData ? "Unable to refresh at this time." : "Please try again later.",
-            variant: scoreData ? "default" : "destructive",
+            title: "Score Unchanged",
+            description: "Unable to refresh at this time.",
+          });
+        } else {
+          toast({
+            title: "Unable to Calculate",
+            description: "Please try again later.",
           });
         }
         return;
       }
 
-      const { data: refreshedCandidate } = await supabase
-        .from("candidates")
-        .select("compatibility_score, score_breakdown, last_score_update")
-        .eq("id", candidate.id)
-        .maybeSingle();
-
-      const refreshedBreakdown = refreshedCandidate?.score_breakdown as unknown as ScoreBreakdown | null;
-      const nextScore = refreshedCandidate?.compatibility_score ?? data?.overall_score ?? data?.compatibility_score ?? data?.score ?? null;
-      const nextAnalysis = refreshedBreakdown && typeof refreshedBreakdown.overall_score === "number"
-        ? refreshedBreakdown
-        : data?.breakdown
-          ? data as ScoreBreakdown
-          : null;
-
-      if (nextScore === null) {
-        throw new Error("No compatibility score returned");
-      }
-
-      const previousScore = data?.previous_score ?? rawScoreData?.previous_score ?? (hasStoredScore ? candidate.compatibility_score : null);
-      const scoreChanged = data?.score_changed ?? (typeof previousScore === "number" ? nextScore !== previousScore : true);
+      const analysis = data;
+      const previousScore = analysis.previous_score;
+      const scoreChanged = analysis.score_changed;
       
       onUpdate({
-        compatibility_score: nextScore,
-        score_breakdown: (nextAnalysis as unknown as Candidate["score_breakdown"]) ?? null,
-        last_score_update: refreshedCandidate?.last_score_update ?? new Date().toISOString(),
+        compatibility_score: analysis.overall_score,
+        score_breakdown: analysis,
+        last_score_update: new Date().toISOString(),
       });
 
+      // Trigger score animation
       setScoreJustUpdated(true);
       setTimeout(() => setScoreJustUpdated(false), 1000);
+
+      // Reset advice response when new score is calculated
       setAdviceResponse(null);
 
-      if (!options.skipUsageLimit && !isFirstCalculation) {
+      // Track usage for refreshes (not first calculation)
+      if (!isFirstCalculation) {
         await incrementUsage(candidate.id);
       }
 
+      // Refetch subscription to update remaining count
       refetchSubscription();
 
-      if (!options.silent) {
-        const changeInfo = previousScore !== null && previousScore !== undefined 
-          ? scoreChanged 
-            ? nextScore > previousScore 
-              ? ` (+${nextScore - previousScore} from ${previousScore}%)`
-              : ` (${nextScore - previousScore} from ${previousScore}%)`
-            : " (no change)"
-          : "";
-        
-        toast({
-          title: nextScore < 35 ? "Low Compatibility" : "Compatibility Analyzed",
-          description: `Score: ${nextScore}%${changeInfo}${!isFirstCalculation ? ` • ${remainingUpdates - 1} updates left` : ""}`,
-          variant: nextScore < 35 ? "destructive" : "default",
-        });
-      }
+      // Show toast with result - include score change info
+      const changeInfo = previousScore !== null && previousScore !== undefined 
+        ? scoreChanged 
+          ? analysis.overall_score > previousScore 
+            ? ` (+${analysis.overall_score - previousScore} from ${previousScore}%)`
+            : ` (${analysis.overall_score - previousScore} from ${previousScore}%)`
+          : " (no change)"
+        : "";
+      
+      toast({
+        title: analysis.overall_score < 35 ? "Low Compatibility" : "Compatibility Analyzed",
+        description: `Score: ${analysis.overall_score}%${changeInfo}${!isFirstCalculation ? ` • ${remainingUpdates - 1} updates left` : ""}`,
+        variant: analysis.overall_score < 35 ? "destructive" : "default",
+      });
     } catch (error) {
       console.error("Error calculating compatibility:", error);
-      if (!options.silent) {
+      // Silent fail if score exists - no prompts needed
+      if (scoreData) {
         toast({
-          title: scoreData ? "Score Unchanged" : "Unable to Calculate",
-          description: scoreData ? "Unable to refresh at this time." : "Please try again later.",
-          variant: scoreData ? "default" : "destructive",
+          title: "Score Unchanged",
+          description: "Unable to refresh at this time.",
+        });
+      } else {
+        toast({
+          title: "Unable to Calculate", 
+          description: "Please try again later.",
+          variant: "destructive",
         });
       }
     } finally {
       setLoading(false);
     }
-  }, [candidate.compatibility_score, candidate.id, canRefresh, hasStoredScore, incrementUsage, onUpdate, rawScoreData?.previous_score, refetchSubscription, remainingUpdates, scoreData, toast]);
-
-  const handleCalculateScoreClick = useCallback(() => {
-    void calculateScore();
-  }, [calculateScore]);
-
-  useEffect(() => {
-    if (!user || loading || hasDetailedScore || autoCalculationAttemptedRef.current === candidate.id) {
-      return;
-    }
-
-    autoCalculationAttemptedRef.current = candidate.id;
-    void calculateScore({ silent: true, skipUsageLimit: true });
-  }, [calculateScore, candidate.id, hasDetailedScore, loading, user]);
+  };
 
   // Check if advice mentions no contact
   const isNoContactAdvice = (advice: string) => {
@@ -549,7 +508,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
           <p className="text-sm text-muted-foreground mb-4">
             Get a D.E.V.I.-powered analysis of your compatibility based on your preferences and what you know about {candidate.nickname}.
           </p>
-          <Button onClick={handleCalculateScoreClick} disabled={loading} className="w-full">
+          <Button onClick={calculateScore} disabled={loading} className="w-full">
             {loading ? (
               <>
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -587,7 +546,7 @@ export const CompatibilityScore: React.FC<CompatibilityScoreProps> = ({
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    onClick={handleCalculateScoreClick} 
+                    onClick={calculateScore} 
                     disabled={loading || !canRefresh} 
                     className="h-7 px-2 text-xs"
                   >

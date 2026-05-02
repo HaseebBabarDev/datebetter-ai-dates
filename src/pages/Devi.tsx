@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, UserPlus, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink, Zap, RotateCcw } from "lucide-react";
+import { ArrowLeft, Sparkles, Home, Send, ImagePlus, X, Camera, Instagram, Heart, Loader2, User, UserPlus, Users, ArrowRight, ChevronDown, Check, Lock, RefreshCw, MessageSquare, Plus, Clock, Trash2, MessageCircle, History, Brain, SlidersHorizontal, LayoutGrid, AlignLeft, Unlink, Zap } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -47,9 +47,8 @@ import { HealingJourney } from "@/components/devi/HealingJourney";
 import { ChatGPTMessage } from "@/components/devi/ChatGPTMessage";
 import { AIDisclosure } from "@/components/AIDisclosure";
 import TextSimulator, { TextSimulatorCTA } from "@/components/candidate/TextSimulator";
-
-import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
 import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
+import { VoicePlayButton } from "@/components/devi/VoicePlayButton";
 import { DeviThinkingIndicator } from "@/components/devi/DeviThinkingIndicator";
 import { DatingAdvisorCard } from "@/components/devi/DatingAdvisorCard";
 import { FirstTimeIntake } from "@/components/devi/FirstTimeIntake";
@@ -57,8 +56,6 @@ import { CompleteProfileNudge } from "@/components/devi/CompleteProfileNudge";
 import { OnboardingProgressCTA } from "@/components/devi/OnboardingProgressCTA";
 import { ConversationUploadSheet } from "@/components/devi/ConversationUploadSheet";
 import { InlineProfileEditor } from "@/components/devi/InlineProfileEditor";
-import { CandidateIntakeCTA } from "@/components/candidate/CandidateIntakeCTA";
-import { InlineCandidateEditor } from "@/components/candidate/InlineCandidateEditor";
 
 type Candidate = Tables<"candidates">;
 type Profile = Tables<"profiles">;
@@ -415,10 +412,6 @@ const USER_PROFILE_FIELDS = [
   { key: "parents_relationship_dynamic", weight: 1, label: "Family Background" },
   { key: "felt_loved_as_child", weight: 1, label: "Upbringing" },
   { key: "boundary_strength", weight: 1, label: "Boundaries" },
-  { key: "mental_health_openness", weight: 1, label: "Mental Health" },
-  { key: "over_ex_level", weight: 1, label: "Healing & Growth" },
-  { key: "dating_honesty_intent", weight: 1, label: "Dating Style" },
-  { key: "religion", weight: 1, label: "Faith & Values" },
 ];
 
 const CANDIDATE_PROFILE_FIELDS = [
@@ -465,7 +458,6 @@ const Devi = () => {
   const [pendingImages, setPendingImages] = useState<{ data: string; type: string }[]>([]);
   const [textScreenshotRightSide, setTextScreenshotRightSide] = useState<"me" | "them">("me");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [archivedCandidates, setArchivedCandidates] = useState<Candidate[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [profilesLoading, setProfilesLoading] = useState(true);
@@ -526,8 +518,6 @@ const Devi = () => {
   const [firstTimeIntakeComplete, setFirstTimeIntakeComplete] = useState(false);
   const [showProfileNudge, setShowProfileNudge] = useState(false);
   const [profileEditorSection, setProfileEditorSection] = useState<string | null>(null);
-  const [candidateIntakeDismissed, setCandidateIntakeDismissed] = useState(false);
-  const [candidateEditorSection, setCandidateEditorSection] = useState<string | null>(null);
   const firstTimeAnalysisShown = useRef(false);
   const onboardingContextSent = useRef(false);
   
@@ -637,7 +627,7 @@ const Devi = () => {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       
       // Fetch all data in parallel
-      const [candidatesRes, profileRes, conversationsRes, archivedRes] = await Promise.all([
+      const [candidatesRes, profileRes, conversationsRes] = await Promise.all([
         supabase
           .from("candidates")
           .select("*")
@@ -656,13 +646,6 @@ const Devi = () => {
           .gte("updated_at", thirtyDaysAgo.toISOString())
           .order("updated_at", { ascending: false })
           .limit(50),
-        supabase
-          .from("candidates")
-          .select("*")
-          .eq("user_id", user.id)
-          .eq("status", "archived")
-          .gte("updated_at", thirtyDaysAgo.toISOString())
-          .order("updated_at", { ascending: false }),
       ]);
       
       // Process candidates
@@ -679,11 +662,6 @@ const Devi = () => {
           );
           if (sorted.length > 0) setSelectedCandidate(sorted[0]);
         }
-      }
-      
-      // Process archived candidates
-      if (archivedRes.data) {
-        setArchivedCandidates(archivedRes.data);
       }
       
       // Process profile
@@ -921,33 +899,11 @@ const Devi = () => {
     setMessages([]);
     setCurrentConversationId(null);
     setHistoryOpen(false);
-    setSoftWarningDismissed(false);
-    setCandidateIntakeDismissed(false);
+    setSoftWarningDismissed(false); // Reset warning dismissal for new chat
     lastLoadedCandidateRef.current = null; // Reset so new conversation can be created
   }, []);
 
-  // Reopen an archived candidate
-  const handleReopenCandidate = useCallback(async (candidate: Candidate) => {
-    if (!user) return;
-    const { error } = await supabase
-      .from("candidates")
-      .update({ status: "just_matched", relationship_ended_at: null })
-      .eq("id", candidate.id)
-      .eq("user_id", user.id);
-    
-    if (error) {
-      toast.error("Failed to reopen candidate");
-      return;
-    }
-    
-    // Move from archived to active list
-    setArchivedCandidates(prev => prev.filter(c => c.id !== candidate.id));
-    const reopened = { ...candidate, status: "just_matched" as const, relationship_ended_at: null };
-    setCandidates(prev => [reopened, ...prev]);
-    setSelectedCandidate(reopened);
-    toast.success(`${candidate.nickname} reopened!`);
-  }, [user]);
-
+  // Handle candidate selection with conversation choice
   const handleCandidateSelect = useCallback(async (candidate: Candidate) => {
     // If there's a current general conversation (no candidate), link it to this candidate
     if (currentConversationId && !selectedCandidate && messages.length > 0) {
@@ -1186,7 +1142,7 @@ const Devi = () => {
   const sendMessage = async (messageText?: string) => {
     const textToSend = messageText || input.trim();
     if ((!textToSend && pendingImages.length === 0) || isLoading) return;
-
+    
 
     // Free trial gate: 5 exchanges max
     if (freeTrialExhausted) {
@@ -1270,15 +1226,6 @@ const Devi = () => {
               userMessage.imageType === "text_screenshot" ? textScreenshotRightSide : undefined,
             userProfile,
             candidateProfile: selectedCandidate,
-            allCandidates: [...candidates, ...archivedCandidates].map(c => ({
-              nickname: c.nickname,
-              status: c.status,
-              compatibility_score: c.compatibility_score,
-              age: c.age,
-              met_via: c.met_via,
-              relationship_ended_at: c.relationship_ended_at,
-              end_reason: c.end_reason,
-            })),
             interactions,
             journalEntries,
           }),
@@ -1938,12 +1885,14 @@ const Devi = () => {
     newParams.delete("firstTime");
     setSearchParams(newParams, { replace: true });
     
-    // Auto-send a guided message to start the conversation
+    // Auto-send a guided message asking for screenshot
     const goal = localStorage.getItem("onboarding_goal") || "evaluate";
     const contextParts = [
-      `I just added ${data.candidateName} — I want to ${goal === "detachment" ? "detach from them" : goal === "healing" ? "heal from this" : "evaluate things with them"}.`,
-      data.freeformInfo ? `Here's what I know so far: ${data.freeformInfo}` : "",
-      "What should I be thinking about?",
+      `I just started using the app to ${goal === "detachment" ? "detach from" : goal === "healing" ? "heal from" : "evaluate"} ${data.candidateName}.`,
+      data.candidateAge ? `They're ${data.candidateAge} years old.` : "",
+      data.candidateLocation ? `Based in ${data.candidateLocation}.` : "",
+      data.freeformInfo ? `Here's what I know: ${data.freeformInfo}` : "",
+      "Can you give me an initial analysis? I'll upload screenshots of our conversations next.",
     ].filter(Boolean).join(" ");
     
     // Slight delay to let state settle
@@ -2258,31 +2207,6 @@ const Devi = () => {
                       </DropdownMenuItem>
                     );
                   })}
-                  
-                  {archivedCandidates.length > 0 && (
-                    <>
-                      <div className="h-px bg-border my-1" />
-                      <div className="px-2 py-1.5">
-                        <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Recently Closed</span>
-                      </div>
-                      {archivedCandidates.map((c) => (
-                        <DropdownMenuItem
-                          key={c.id}
-                          onClick={() => handleReopenCandidate(c)}
-                          className="gap-2 py-2.5"
-                        >
-                          <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center shrink-0 opacity-60">
-                            <span className="text-xs font-semibold">{c.nickname.charAt(0)}</span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <span className="font-medium text-muted-foreground">{c.nickname}</span>
-                            <p className="text-[10px] text-muted-foreground/70">Tap to reopen</p>
-                          </div>
-                          <RotateCcw className="w-3.5 h-3.5 text-primary shrink-0" />
-                        </DropdownMenuItem>
-                      ))}
-                    </>
-                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -2480,6 +2404,13 @@ const Devi = () => {
               )}
 
 
+
+              {/* Healing Journey - show only after onboarding is complete and in general chat mode */}
+              {hasFullProfile && !onboardingIncomplete && !selectedCandidate && (
+                <div className="pl-10 mt-4">
+                  <HealingJourney />
+                </div>
+              )}
             </div>
           ) : (
           <>
@@ -2668,17 +2599,8 @@ const Devi = () => {
               className="mt-4"
             />
           )}
-
-          {/* Candidate intake nudge */}
-          {selectedCandidate && !candidateIntakeDismissed && (
-            <CandidateIntakeCTA
-              candidate={selectedCandidate}
-              onDismiss={() => setCandidateIntakeDismissed(true)}
-              onOpenSection={(sectionId) => setCandidateEditorSection(sectionId)}
-              className="mt-4"
-            />
-          )}
           
+          {/* Win prompt - show after conversation has messages and not loading */}
           {messages.length >= 2 && messages.length < MAX_CONVERSATION_MESSAGES && !isLoading && messages[messages.length - 1]?.role === 'assistant' && (
             <DeviWinPrompt onLogWin={() => setShowWinDialog(true)} className="mt-4" />
           )}
@@ -2844,15 +2766,7 @@ const Devi = () => {
         multiple
         onChange={onFileChange}
         className="hidden"
-              />
-              <VoiceInputButton
-                onTranscript={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
-                onPartialTranscript={(text) => setInput((prev) => {
-                  const base = prev.replace(/\s*\[.*?\]\s*$/, '');
-                  return base ? `${base} [${text}]` : `[${text}]`;
-                })}
-                disabled={isLoading}
-              />
+      />
 
       {/* Win logging dialog */}
       <DeviWinDialog
@@ -2881,21 +2795,6 @@ const Devi = () => {
           onClose={() => setProfileEditorSection(null)}
           onSaved={(updatedProfile) => {
             setUserProfile(updatedProfile);
-          }}
-        />
-      )}
-
-      {/* Inline Candidate Editor */}
-      {user && selectedCandidate && (
-        <InlineCandidateEditor
-          open={!!candidateEditorSection}
-          sectionId={candidateEditorSection}
-          candidate={selectedCandidate}
-          userId={user.id}
-          onClose={() => setCandidateEditorSection(null)}
-          onSaved={(updatedCandidate) => {
-            setSelectedCandidate(updatedCandidate);
-            setCandidates(prev => prev.map(c => c.id === updatedCandidate.id ? updatedCandidate : c));
           }}
         />
       )}

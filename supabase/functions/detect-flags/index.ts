@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -12,14 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const parsed = z.object({ candidateId: z.string().uuid() }).safeParse(await req.json());
-    if (!parsed.success) {
-      return new Response(
-        JSON.stringify({ error: "Invalid candidate ID format" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    const { candidateId } = parsed.data;
+    const { candidateId } = await req.json();
     
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -212,9 +205,9 @@ ANTI-RACISM & ANTI-HOMOPHOBIA GUARDRAIL: NEVER generate flags based on someone's
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error in detect-flags:", error);
+    console.error("Error:", error);
     return new Response(
-      JSON.stringify({ error: "An unexpected error occurred." }),
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
