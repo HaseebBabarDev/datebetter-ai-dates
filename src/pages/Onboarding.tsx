@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Sparkles, Heart, Unlink, TrendingUp, Search, Stethoscope, ChevronRight } from "lucide-react";
-import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
+
 
 const GOALS = [
   { value: "evaluate", icon: TrendingUp, label: "Evaluate someone I'm dating", desc: "Get AI scoring & red flag detection" },
@@ -57,10 +57,7 @@ const Onboarding = () => {
       <main className="px-4 py-4 max-w-lg mx-auto pb-safe-bottom space-y-5">
         {/* Name input */}
         <div className="space-y-2 animate-fade-in">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="name" className="text-sm font-medium">What should we call you?</Label>
-            <VoiceInputButton onTranscript={(text) => setName(text.trim())} />
-          </div>
+          <Label htmlFor="name" className="text-sm font-medium">What should we call you?</Label>
           <Input
             id="name"
             placeholder="Your first name"

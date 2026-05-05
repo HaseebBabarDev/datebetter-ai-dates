@@ -5,6 +5,10 @@ import ContinueButton from "../ContinueButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OptionCard } from "../OptionCard";
+import { VoiceInputButton } from "@/components/devi/VoiceInputButton";
+
+const appendText = (prev: string | undefined, text: string) =>
+  prev && prev.trim() ? `${prev} ${text}`.trim() : text.trim();
 import {
   Select,
   SelectContent,
@@ -108,7 +112,27 @@ const BasicIdentityScreen = () => {
   }, [month, day, year]);
 
   const hasBirthDate = data.birthDate && data.birthDate.length === 10;
-  const isValid = data.name && data.genderIdentity && data.country && data.pronouns && hasBirthDate;
+
+  // Calculate age from birthDate (must be 18+)
+  const computedAge = React.useMemo(() => {
+    if (!data.birthDate) return null;
+    const dob = new Date(data.birthDate);
+    if (isNaN(dob.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    return age;
+  }, [data.birthDate]);
+
+  const isUnderage = computedAge !== null && computedAge < 18;
+  const isValid =
+    data.name &&
+    data.genderIdentity &&
+    data.country &&
+    data.pronouns &&
+    hasBirthDate &&
+    !isUnderage;
 
   return (
     <OnboardingLayout
@@ -158,11 +182,21 @@ const BasicIdentityScreen = () => {
               />
             </div>
           </div>
+          {isUnderage && (
+            <p className="text-xs font-medium text-destructive mt-1">
+              You must be at least 18 to use dateBetter.
+            </p>
+          )}
         </div>
 
         {/* Name Section */}
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-sm font-medium">What should we call you?</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="name" className="text-sm font-medium">What should we call you?</Label>
+            <VoiceInputButton
+              onTranscript={(text) => updateData({ name: appendText(data.name, text) })}
+            />
+          </div>
           <Input
             id="name"
             placeholder="Your name"
@@ -196,7 +230,12 @@ const BasicIdentityScreen = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="city">City</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="city">City</Label>
+                <VoiceInputButton
+                  onTranscript={(text) => updateData({ city: appendText(data.city, text) })}
+                />
+              </div>
               <Input
                 id="city"
                 placeholder="City"
@@ -205,7 +244,12 @@ const BasicIdentityScreen = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="state">State/Province</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="state">State/Province</Label>
+                <VoiceInputButton
+                  onTranscript={(text) => updateData({ state: appendText(data.state, text) })}
+                />
+              </div>
               <Input
                 id="state"
                 placeholder="State"
@@ -253,12 +297,19 @@ const BasicIdentityScreen = () => {
           </Select>
           
           {data.pronouns === "other" && (
-            <Input
-              placeholder="Enter your pronouns"
-              value={data.customPronouns || ""}
-              onChange={(e) => updateData({ customPronouns: e.target.value })}
-              className="mt-2"
-            />
+            <div className="relative mt-2">
+              <Input
+                placeholder="Enter your pronouns"
+                value={data.customPronouns || ""}
+                onChange={(e) => updateData({ customPronouns: e.target.value })}
+                className="pr-10"
+              />
+              <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                <VoiceInputButton
+                  onTranscript={(text) => updateData({ customPronouns: appendText(data.customPronouns, text) })}
+                />
+              </div>
+            </div>
           )}
         </div>
 

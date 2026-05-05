@@ -1,10 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const bodySchema = z.object({
+  targetUserId: z.string().uuid("Invalid user ID format"),
+  action: z.enum(["add", "remove"]),
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -23,22 +29,17 @@ serve(async (req) => {
       }
     );
 
-    // Get the auth token from the request
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
 
-    // Verify the requesting user
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
     
     if (authError || !user) {
-      console.error("Auth error:", authError);
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    console.log("Request from user:", user.id);
 
     // Check if requesting user is admin
     const { data: roleData, error: roleError } = await supabaseClient
@@ -49,29 +50,22 @@ serve(async (req) => {
       .maybeSingle();
 
     if (roleError || !roleData) {
-      console.error("Role check error:", roleError);
       return new Response(
         JSON.stringify({ error: "Forbidden: Admin access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Get request body
-    const { targetUserId, action } = await req.json();
-
-    if (!targetUserId || !action) {
+    // Validate input
+    const parsed = bodySchema.safeParse(await req.json());
+    if (!parsed.success) {
       return new Response(
-        JSON.stringify({ error: "targetUserId and action are required" }),
+        JSON.stringify({ error: "Invalid input", details: parsed.error.flatten().fieldErrors }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    if (action !== "add" && action !== "remove") {
-      return new Response(
-        JSON.stringify({ error: "action must be 'add' or 'remove'" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const { targetUserId, action } = parsed.data;
 
     // Prevent self-modification
     if (targetUserId === user.id) {
@@ -84,7 +78,6 @@ serve(async (req) => {
     console.log(`Action: ${action} admin role for user ${targetUserId}`);
 
     if (action === "add") {
-      // Add admin role
       const { error: insertError } = await supabaseClient
         .from("user_roles")
         .insert({
@@ -93,23 +86,24 @@ serve(async (req) => {
         });
 
       if (insertError) {
-        // Check if it's a duplicate key error (user already has admin role)
         if (insertError.code === "23505") {
           return new Response(
             JSON.stringify({ success: true, message: "User already has admin role" }),
             { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
-        throw insertError;
+        console.error("Error adding role:", insertError);
+        return new Response(
+          JSON.stringify({ error: "Failed to add role." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
 
-      console.log("Admin role added successfully");
       return new Response(
         JSON.stringify({ success: true, message: "Admin role granted" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     } else {
-      // Remove admin role
       const { error: deleteError } = await supabaseClient
         .from("user_roles")
         .delete()
@@ -117,10 +111,13 @@ serve(async (req) => {
         .eq("role", "admin");
 
       if (deleteError) {
-        throw deleteError;
+        console.error("Error removing role:", deleteError);
+        return new Response(
+          JSON.stringify({ error: "Failed to remove role." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
 
-      console.log("Admin role removed successfully");
       return new Response(
         JSON.stringify({ success: true, message: "Admin role revoked" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -128,9 +125,8 @@ serve(async (req) => {
     }
   } catch (error) {
     console.error("Error in manage-user-role:", error);
-    const message = error instanceof Error ? error.message : "An unknown error occurred";
     return new Response(
-      JSON.stringify({ error: message }),
+      JSON.stringify({ error: "An unexpected error occurred." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

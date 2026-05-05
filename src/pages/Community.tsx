@@ -156,7 +156,7 @@ const Community = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-[calc(env(safe-area-inset-bottom)+7rem)]">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border/50">
         <div className="flex items-center justify-between px-4 py-3">

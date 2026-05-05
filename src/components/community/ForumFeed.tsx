@@ -97,9 +97,9 @@ export function ForumFeed({ category, searchQuery, currentScreenName, cityFilter
       // Get user screen names - only select screen_name field for privacy
       const userIds = [...new Set(postsData.map((p) => p.user_id))];
       const { data: profilesData, error: profilesError } = await supabase
-        .from("profiles")
+        .from("community_profiles" as any)
         .select("user_id, screen_name")
-        .in("user_id", userIds);
+        .in("user_id", userIds) as { data: { user_id: string; screen_name: string }[] | null; error: any };
 
       if (profilesError) {
         console.error("Error fetching screen names:", profilesError);

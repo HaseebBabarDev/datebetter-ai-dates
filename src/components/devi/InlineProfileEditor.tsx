@@ -19,7 +19,26 @@ interface InlineProfileEditorProps {
   userId: string;
   onClose: () => void;
   onSaved: (updatedProfile: Profile) => void;
+  onAdvance?: (nextSectionId: string) => void;
 }
+
+// Order used to auto-advance after a successful save
+const PROFILE_SECTION_ORDER = [
+  "identity",
+  "dating_prefs",
+  "goals",
+  "values",
+  "kids_family",
+  "career",
+  "communication",
+  "past_patterns",
+  "family_upbringing",
+  "boundaries",
+  "mental_health",
+  "relationship_trauma",
+  "healing",
+  "dating_style",
+];
 
 const GENDER_OPTIONS = [
   { value: "woman_cis", label: "Woman" },
@@ -200,6 +219,7 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
   userId,
   onClose,
   onSaved,
+  onAdvance,
 }) => {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -422,7 +442,18 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
 
       toast.success("Profile updated!");
       onSaved(data as Profile);
-      onClose();
+
+      const currentIdx = sectionId ? PROFILE_SECTION_ORDER.indexOf(sectionId) : -1;
+      const nextSection =
+        currentIdx >= 0 && currentIdx < PROFILE_SECTION_ORDER.length - 1
+          ? PROFILE_SECTION_ORDER[currentIdx + 1]
+          : null;
+
+      if (nextSection && onAdvance) {
+        onAdvance(nextSection);
+      } else {
+        onClose();
+      }
     } catch (error) {
       console.error("Error saving profile:", error);
       toast.error("Failed to save. Please try again.");
@@ -854,10 +885,14 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
   };
 
   return (
-    <Sheet open={open} onOpenChange={v => !v && onClose()}>
-      <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl p-0 z-[60]">
+    <Sheet open={open} onOpenChange={v => !v && onClose()} modal={false}>
+      <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl p-0 z-[60]" hideOverlay onInteractOutside={(e) => e.preventDefault()} onPointerDownOutside={(e) => e.preventDefault()}>
         <div className="flex flex-col h-full">
           <SheetHeader className="p-5 pb-3 border-b border-border/50 bg-gradient-to-br from-primary/10 to-background">
+            <div className="inline-flex items-center gap-1.5 self-start px-2.5 py-1 rounded-full bg-primary/15 text-primary text-[11px] font-bold uppercase tracking-wide mb-2">
+              <span>👤</span>
+              About YOU
+            </div>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[image:var(--gradient-hero)] flex items-center justify-center">
                 <span className="text-lg">{config.emoji}</span>
@@ -867,6 +902,9 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
                 <p className="text-sm text-muted-foreground">{config.subtitle}</p>
               </div>
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              You're updating <span className="font-semibold text-foreground">your own</span> profile.
+            </p>
           </SheetHeader>
 
           <ScrollArea className="flex-1 px-5 py-4">
@@ -884,7 +922,7 @@ export const InlineProfileEditor: React.FC<InlineProfileEditorProps> = ({
               ) : (
                 <Check className="w-4 h-4 mr-2" />
               )}
-              {saving ? "Saving..." : "Save & Continue"}
+              {saving ? "Saving..." : "Save & Next"}
             </Button>
           </div>
         </div>

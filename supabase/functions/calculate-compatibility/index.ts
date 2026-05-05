@@ -257,8 +257,11 @@ serve(async (req) => {
       }
       
       // Also check if the candidate profile was updated since last score
+      // Add a 5-second buffer to prevent the score update itself (which changes updated_at)
+      // from triggering another recalculation
       const candidateUpdatedAt = candidate.updated_at ? new Date(candidate.updated_at) : null;
-      if (candidateUpdatedAt && candidateUpdatedAt > lastScoreUpdate) {
+      const scoreUpdateBuffer = new Date(lastScoreUpdate.getTime() + 5000); // 5 second buffer
+      if (candidateUpdatedAt && candidateUpdatedAt > scoreUpdateBuffer) {
         hasNewDataSinceLastScore = true;
         console.log(`CANDIDATE PROFILE UPDATED since last score (profile: ${candidateUpdatedAt.toISOString()}, score: ${lastScoreUpdate.toISOString()})`);
       }
@@ -346,10 +349,12 @@ serve(async (req) => {
       .limit(50);
 
     // ALSO check D.E.V.I. conversation for relationship-ending signals
-    // D.E.V.I. may have advised blocking/ending that isn't captured in interaction notes
+    // ONLY check USER messages (role='user') to avoid false positives from D.E.V.I.'s own
+    // advice text which may use words like "toxic", "manipulation" in educational context
     const { data: deviEndSignals } = await supabase
       .from("devi_messages")
       .select("content, role")
+      .eq("role", "user")
       .in("conversation_id", 
         (await supabase
           .from("devi_conversations")
@@ -360,26 +365,29 @@ serve(async (req) => {
         ).data?.map((c: any) => c.id) || []
       )
       .order("created_at", { ascending: false })
-      .limit(30);
+      .limit(20);
 
-    // Check D.E.V.I. messages for relationship-ending context
-    const deviText = (deviEndSignals || []).map((m: any) => (m.content || "").toLowerCase()).join(" ");
+    // Check only USER messages for relationship-ending context
+    const deviUserText = (deviEndSignals || []).map((m: any) => (m.content || "").toLowerCase()).join(" ");
     const hasDeviEndSignal = 
-      (deviText.includes("block her") || deviText.includes("block him") || deviText.includes("block them") ||
-       deviText.includes("i blocked") || deviText.includes("go block") ||
-       deviText.includes("relationship is officially ended") ||
-       deviText.includes("end this relationship") || deviText.includes("let's end this") ||
-       deviText.includes("gaslighting") || deviText.includes("manipulation") || deviText.includes("manipulative") ||
-       deviText.includes("narcissis") || deviText.includes("toxic"));
+      (deviUserText.includes("block her") || deviUserText.includes("block him") || deviUserText.includes("block them") ||
+       deviUserText.includes("i blocked") || deviUserText.includes("go block") ||
+       deviUserText.includes("he's gaslighting") || deviUserText.includes("she's gaslighting") ||
+       deviUserText.includes("he manipulated") || deviUserText.includes("she manipulated") ||
+       deviUserText.includes("he's a narcissist") || deviUserText.includes("she's a narcissist") ||
+       deviUserText.includes("he's toxic") || deviUserText.includes("she's toxic") ||
+       deviUserText.includes("end this relationship") || deviUserText.includes("i'm done with"));
 
     if (hasDeviEndSignal) {
-      console.log("DETECTED: D.E.V.I. conversation contains relationship-ending signals (blocking/ending/manipulation)");
+      console.log("DETECTED: User reported relationship-ending signals in D.E.V.I. chat");
       shouldEndRelationship = true;
     }
 
-    const historicalFlagText = `${(historicalFlagInteractions || [])
+    // Build historical flag text from interaction notes only (NOT candidate.notes,
+    // which may contain user's own intentions like "avoid manipulation" that would false-flag)
+    const historicalFlagText = (historicalFlagInteractions || [])
       .map((r: any) => r.notes || "")
-      .join(" ")} ${(candidate.notes || "")}`.toLowerCase();
+      .join(" ").toLowerCase();
 
     const hasHistoricalGhosting = historicalFlagText.includes("ghost");
     const hasHistoricalBlocked = historicalFlagText.includes("blocked") || 
@@ -391,10 +399,15 @@ serve(async (req) => {
       historicalFlagText.includes("dropped off after sex") ||
       historicalFlagText.includes("changed after intimacy") ||
       historicalFlagText.includes("different after sex");
+    // For manipulation, require stronger signals - not just the word appearing
+    // "avoid manipulation" or "fear of manipulation" should NOT trigger this
     const hasHistoricalManipulation = 
-      historicalFlagText.includes("gaslight") || historicalFlagText.includes("manipulat") ||
-      historicalFlagText.includes("narcissis") || historicalFlagText.includes("toxic") ||
-      historicalFlagText.includes("abusive") || historicalFlagText.includes("unhinged");
+      (historicalFlagText.includes("he gaslight") || historicalFlagText.includes("she gaslight") ||
+       historicalFlagText.includes("is manipulat") || historicalFlagText.includes("was manipulat") ||
+       historicalFlagText.includes("is narcissis") || historicalFlagText.includes("was narcissis") ||
+       historicalFlagText.includes("is toxic") || historicalFlagText.includes("was toxic") ||
+       historicalFlagText.includes("is abusive") || historicalFlagText.includes("was abusive") ||
+       historicalFlagText.includes("unhinged"));
 
     if (hasHistoricalGhosting) hasGhostingPattern = true;
     if (hasHistoricalBlocked) hasBlockedPattern = true;
@@ -1379,55 +1392,50 @@ CRITICAL: In all output text (strengths, concerns, advice), use natural human la
     // Track previous score for comparison
     const previousScore = candidate.compatibility_score;
 
-    // CRITICAL BUG FIX: Prevent dramatic score increases
-    // If there was a previous score that was low (under 25%), it was low for a reason
-    // (relationship-ending patterns, red flags, etc.). We must prevent the AI from
-    // ignoring this and jumping to a high score.
+    // CRITICAL BUG FIX: Prevent dramatic score swings in EITHER direction.
+    // The compatibility score must evolve gradually based on logged data.
+    // Only a hard relationship-ending pattern (infidelity, abuse, harassment,
+    // discrimination, gaslighting, etc. — captured by `shouldEndRelationship`)
+    // is allowed to drop the score below the gradual-change envelope.
     const previousScoreNum = typeof previousScore === "number" ? Math.round(previousScore) : null;
-    
-    // ENFORCE SCORE LIMITS in multiple scenarios:
-    
-    // 0. CRITICAL: If relationship-ending patterns are detected, FORCE score down to cap
-    // This fixes the bug where score went to 83% but should be capped at 20%
+
+    // 0. CRITICAL: If relationship-ending patterns are detected, FORCE score down to the low cap.
+    // This is the ONLY path that bypasses the ±2 envelope below.
     if (shouldEndRelationship && analysis.overall_score > sentimentAdjustedOverall) {
       console.log(`FORCING SCORE DOWN: Relationship-ending pattern detected. AI suggested ${analysis.overall_score}%, forcing to ${sentimentAdjustedOverall}%`);
       analysis.overall_score = sentimentAdjustedOverall;
     }
-    
-    // 1. If there are negative interactions, cap the score
-    if (negativeCount > 0 && analysis.overall_score > sentimentAdjustedOverall) {
-      console.log(`Capping AI score from ${analysis.overall_score} to ${sentimentAdjustedOverall} due to ${negativeCount} negative interactions`);
-      analysis.overall_score = sentimentAdjustedOverall;
+
+    // 1. UNIVERSAL GRADUAL-CHANGE ENVELOPE (±2 per recalculation).
+    //    Applies to every recalc that is NOT a relationship-ending event.
+    //    This guarantees the score never jumps wildly between refreshes
+    //    just because the AI's qualitative read of the data shifted.
+    if (previousScoreNum !== null && !shouldEndRelationship) {
+      const MAX_DELTA_PER_RECALC = 2;
+      const upperBound = previousScoreNum + MAX_DELTA_PER_RECALC;
+      const lowerBound = previousScoreNum - MAX_DELTA_PER_RECALC;
+
+      if (analysis.overall_score > upperBound) {
+        console.log(`ENVELOPE CAP (up): Previous ${previousScoreNum}%, AI suggested ${analysis.overall_score}%, capping to ${upperBound}%`);
+        analysis.overall_score = upperBound;
+      } else if (analysis.overall_score < lowerBound) {
+        console.log(`ENVELOPE CAP (down): Previous ${previousScoreNum}%, AI suggested ${analysis.overall_score}%, flooring to ${lowerBound}%`);
+        analysis.overall_score = lowerBound;
+      }
     }
-    
-    // 2. CRITICAL: If previous score was low (under 25%), prevent jumping more than +3 points
-    // This prevents the AI from "forgetting" why the score was low
-    if (previousScoreNum !== null && previousScoreNum < 25 && analysis.overall_score > previousScoreNum + 3) {
-      const maxAllowed = previousScoreNum + 3;
-      console.log(`PREVENTING SCORE JUMP: Previous was ${previousScoreNum}%, AI suggested ${analysis.overall_score}%, capping to ${maxAllowed}%`);
-      analysis.overall_score = maxAllowed;
-    }
-    
-    // 3. If previous score was between 25-40%, prevent jumping more than +5 points
-    if (previousScoreNum !== null && previousScoreNum >= 25 && previousScoreNum < 40 && analysis.overall_score > previousScoreNum + 5) {
-      const maxAllowed = previousScoreNum + 5;
-      console.log(`PREVENTING MODERATE SCORE JUMP: Previous was ${previousScoreNum}%, AI suggested ${analysis.overall_score}%, capping to ${maxAllowed}%`);
-      analysis.overall_score = maxAllowed;
-    }
-    
-    // 4. Also cap emotional compatibility if there are negative interactions
+
+    // 2. Cap emotional compatibility if there are negative interactions
     if (negativeCount > 0 && analysis.breakdown?.emotional_compatibility > adjustedEmotionalScore) {
       analysis.breakdown.emotional_compatibility = adjustedEmotionalScore;
     }
-    
-    // 5. Force emotional score down if relationship should end
+
+    // 3. Force emotional score down if relationship should end
     if (shouldEndRelationship && analysis.breakdown?.emotional_compatibility > adjustedEmotionalScore) {
       analysis.breakdown.emotional_compatibility = adjustedEmotionalScore;
     }
 
-    // If the relationship is in a "low cap" state but the user is logging a consistent
-    // recovery streak, ensure the score goes up by exactly +1 (very gradual).
-    // Max cap is now 20 (not 45) to keep recovery slow.
+    // 4. If the relationship is in a "low cap" state but the user is logging a consistent
+    //    recovery streak, ensure the score goes up by exactly +1 (very gradual).
     if (
       shouldEndRelationship &&
       typeof previousScoreNum === "number" &&

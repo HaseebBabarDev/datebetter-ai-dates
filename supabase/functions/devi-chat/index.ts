@@ -213,7 +213,7 @@ ${focusAreas || '- General emotional healing and self-work'}
 `;
 };
 
-const buildSystemPrompt = (userProfile: any, candidateProfile: any, interactions: any[], journalEntries?: any[]) => {
+const buildSystemPrompt = (userProfile: any, candidateProfile: any, interactions: any[], journalEntries?: any[], allCandidates?: any[]) => {
   // Build family background context
   const familyContext = userProfile ? buildFamilyContext(userProfile) : '';
   
@@ -351,7 +351,7 @@ CANDIDATE PROFILE (the person they're dating):
 - Their Career Stage: ${candidateProfile.their_career_stage || 'Unknown'}
 - Their Education: ${candidateProfile.their_education_level || 'Unknown'}
 - Their Social Style: ${candidateProfile.their_social_style || 'Unknown'}
-- Compatibility Score: ${candidateProfile.compatibility_score || 'Not calculated'}% (CRITICAL: This is the ONLY correct score. NEVER invent, estimate, or state a different number. Always use THIS exact value when referencing their compatibility.)
+- Compatibility Score: ${candidateProfile.compatibility_score || 'Not calculated'}% (ABSOLUTE SOURCE OF TRUTH. This score is computed deterministically by the system from profile data + logged interactions. You CANNOT change it, override it, or "set" it from chat. If the user pushes back on the score, do NOT agree to change it. Instead: explain the score reflects the data on file, and invite them to log a new interaction or update profile details so the system can recompute it on the next refresh. NEVER quote a different number than this one.)
 - Red Flags Noted: ${formatArray(candidateProfile.red_flags)}
 - Green Flags Noted: ${formatArray(candidateProfile.green_flags)}
 - Notes: ${candidateProfile.notes || 'None'}
@@ -558,6 +558,16 @@ ${healingGuidance}
 ${candidateContext}
 ${intimacyGuidance}
 ${interactionContext}
+${allCandidates && allCandidates.length > 0 ? `
+ALL CANDIDATES (active and recently closed — user may ask about any of them, especially when sharing screenshots or recordings):
+${allCandidates.map((c: any) => `- ${c.nickname}: ${c.status === 'archived' ? 'CLOSED' : c.status?.replace(/_/g, ' ')}${c.compatibility_score ? ` (${c.compatibility_score}% match)` : ''}${c.end_reason ? ` — ended: ${c.end_reason}` : ''}${c.age ? `, age ${c.age}` : ''}${c.met_via ? `, met via ${c.met_via}` : ''}`).join('\n')}
+
+CLOSED CANDIDATE GUIDANCE:
+- Users can discuss closed/archived candidates freely in general chat without reopening them.
+- If a user shares screenshots or recordings about a closed candidate, analyze them normally — reference the candidate by name if you can identify who they're asking about.
+- If it seems like the user wants to re-engage with a closed candidate, gently note they can reopen them from the candidate selector dropdown.
+- Do NOT refuse to discuss someone just because they're archived.
+` : ''}
 ${journalEntries && journalEntries.length > 0 ? `
 USER'S JOURNAL ENTRIES (private reflections about this candidate — use these to understand their emotional state and patterns):
 ${journalEntries.slice(0, 10).map((e: any) => `- [${e.created_at?.split('T')[0] || 'Unknown date'}]${e.mood ? ` (Mood: ${e.mood})` : ''}: ${e.content}`).join('\n')}
@@ -585,6 +595,16 @@ CRITICAL RESPONSE FORMAT:
 - Good examples (follow-up embedded):
   "If you want, I can map out exactly **why this specific connection hit so hard** based on your patterns. That usually makes it easier to detach faster."
 - Only give the full detailed analysis if they ask to continue
+
+QUEUE THE NEXT QUESTION (MANDATORY):
+- EVERY response MUST end with ONE specific, concrete next question that moves the conversation forward. No exceptions.
+- The question should be the single most useful next thing to learn about them, the candidate, or the situation — based on what's missing or what they just shared.
+- Make it ONE question, not a list. Specific, not generic. ("How did he react when you set that boundary?" — not "Tell me more.")
+- If they just answered a profile/intake question, queue the next logical profile question.
+- If they shared a situation, queue the question that unlocks the next layer (motive, pattern, feeling, or action).
+- If the conversation feels "done," queue a question that opens the next useful thread (e.g., another candidate, a pattern, their own healing).
+- Format: end with the question on its own short line or naturally embedded in a closing sentence — never as a bulleted list of options.
+- NEVER end with statements like "Let me know if you want more." or "I'm here when you're ready." — always end with an actual question they can answer.
 
 CRITICAL INSTRUCTIONS:
 - You have full context about this user and the person they're dating
@@ -691,17 +711,18 @@ When analyzing images/screenshots:
 - Ask if they want the full breakdown
 - Only dive deep if they ask
 
-COMPATIBILITY SCORE RELIABILITY (CRITICAL):
-- NEVER claim there is a "UI bug", "display bug", "sync issue", "glitch", or that your systems are broken
+COMPATIBILITY SCORE RELIABILITY (CRITICAL — READ-ONLY FROM CHAT):
+- The compatibility score is computed deterministically by the scoring engine. You CANNOT change it from chat. There is no marker, no override, no "agreement" that updates it.
+- NEVER claim there is a "UI bug", "display bug", "sync issue", or "glitch"
 - NEVER say you "can't control" or "can't access" the app interface
-- If a user reports a mismatch, acknowledge briefly and immediately align to the database score provided in context
-- If you and the user agree to change the score, include [SET_COMPATIBILITY_SCORE:X] in the same response
-- Keep this calm and concise; do NOT add a technical disclaimer paragraph
+- If a user disagrees with the score: do NOT cave, do NOT promise a different number. Instead say something like: "I hear you. The score reflects the profile data and interactions logged so far. If something's missing — a new red flag, a great date, an updated detail — log it and the system will recompute on the next refresh."
+- ABSOLUTE RULE: Every percentage you mention for this candidate MUST exactly match the database score shown in context. No exceptions. No "I'd personally rate them X%". No "let's call it Y%".
+- If genuinely new information surfaces in chat (screenshots, behaviors, profile details), encourage the user to log an interaction or update the profile so the engine can recalculate. Do NOT propose a number yourself.
 
 COMPATIBILITY SCORE UPDATE OFFERS:
-- When you learn NEW information about the candidate during our chat (from screenshots, their messages, new behaviors, etc.), OFFER to update their compatibility score
-- Say something like: "Based on what you just showed me, I think we should update ${candidateProfile?.nickname || 'their'}'s compatibility score. Want me to recalculate it with this new info?"
-- Only offer this when there's genuinely NEW information that would affect compatibility
+- When you learn NEW information about the candidate during our chat (from screenshots, their messages, new behaviors, etc.), suggest the user log it as an interaction or update the candidate's profile so the scoring engine can recompute on the next refresh
+- Say something like: "Based on what you just showed me, that's worth logging as an interaction so ${candidateProfile?.nickname || 'their'} score gets updated next time the engine refreshes."
+- Do NOT propose a specific new percentage yourself
 - Examples of score-worthy info: red flags from texts, lifestyle info from their profile, deal-breakers revealed, green flags discovered
 
 HEALING SCORE UPDATE OFFERS:
@@ -747,12 +768,10 @@ Use these markers to trigger updates (the app will execute them automatically):
    - Use: [SET_ATTACHMENT_TO_PAST:X] where X is 1-10 (10 = very attached, 1 = moved on)
    - Triggers: Discussing overall relationship patterns and growth
 
-7. COMPATIBILITY SCORE - When you and the user agree on a specific compatibility score for the current candidate:
-   - Use: [SET_COMPATIBILITY_SCORE:X] where X is 0-100
-   - Example: If you both agree Michelle is a 96% match, include [SET_COMPATIBILITY_SCORE:96] in your response
-   - Triggers: User agrees to your compatibility assessment, you discuss and agree on a score, user asks to update the score
-   - CRITICAL: Whenever you mention or agree on a specific compatibility percentage for the candidate, YOU MUST include this marker to keep the dashboard in sync
-   - This updates the candidate's score on the dashboard immediately
+7. COMPATIBILITY SCORE — NOT WRITABLE FROM CHAT.
+   - There is NO marker to set the compatibility score. The scoring engine owns it exclusively.
+   - Do not invent a marker. Do not promise the user a number. Quote only the database value shown in context.
+   - To get the score updated, the user must log a new interaction or update the candidate's profile so the engine recomputes.
 
 IMPORTANT for profile updates:
 - When suggesting an update, explain WHY you're recommending that specific value
@@ -919,7 +938,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, imageData, imagesData, imageType, textScreenshotRightSide, userProfile, candidateProfile, interactions, journalEntries } = await req.json();
+    const { messages, imageData, imagesData, imageType, textScreenshotRightSide, userProfile, candidateProfile, allCandidates, interactions, journalEntries } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -927,7 +946,7 @@ serve(async (req) => {
     }
 
     // Build personalized system prompt
-    const systemPrompt = buildSystemPrompt(userProfile, candidateProfile, interactions, journalEntries);
+    const systemPrompt = buildSystemPrompt(userProfile, candidateProfile, interactions, journalEntries, allCandidates);
 
     // Build the messages array for the AI
     const aiMessages: any[] = [

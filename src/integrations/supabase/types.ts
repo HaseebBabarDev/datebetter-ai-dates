@@ -102,6 +102,33 @@ export type Database = {
           },
         ]
       }
+      apple_entitlements: {
+        Row: {
+          detachment_plan_active: boolean
+          text_simulator_active: boolean
+          unlimited_active: boolean
+          unlimited_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          detachment_plan_active?: boolean
+          text_simulator_active?: boolean
+          unlimited_active?: boolean
+          unlimited_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          detachment_plan_active?: boolean
+          text_simulator_active?: boolean
+          unlimited_active?: boolean
+          unlimited_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       behavioral_patterns: {
         Row: {
           acknowledged: boolean | null
@@ -2229,6 +2256,27 @@ export type Database = {
       }
     }
     Views: {
+      community_profiles: {
+        Row: {
+          avatar_url: string | null
+          city: string | null
+          screen_name: string | null
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          city?: string | null
+          screen_name?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          city?: string | null
+          screen_name?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       studios_public: {
         Row: {
           amenities: Json | null

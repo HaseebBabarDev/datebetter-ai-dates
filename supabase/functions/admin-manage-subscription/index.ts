@@ -1,9 +1,18 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const validPlans = ['free', 'basic', 'new_to_dating', 'starter', 'dating_often', 'dating_more', 'unlimited'] as const;
+
+const bodySchema = z.object({
+  targetUserId: z.string().uuid("Invalid user ID format"),
+  trialDays: z.number().int().min(0).max(365).optional().nullable(),
+  plan: z.enum(validPlans).optional(),
+});
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,17 +22,12 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      throw new Error('No authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Use anon key client for auth check
-    const anonClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    // Use service role client for admin operations
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -33,10 +37,13 @@ Deno.serve(async (req) => {
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError || !user) {
-      throw new Error('Unauthorized');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Verify requesting user is admin using service role client (bypasses RLS)
+    // Verify requesting user is admin
     const { data: adminCheck } = await supabaseClient
       .from('user_roles')
       .select('role')
@@ -45,14 +52,22 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (!adminCheck) {
-      throw new Error('Unauthorized: Admin access required');
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: Admin access required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const { targetUserId, trialDays, plan } = await req.json();
-
-    if (!targetUserId) {
-      throw new Error('targetUserId is required');
+    // Validate input
+    const parsed = bodySchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input', details: parsed.error.flatten().fieldErrors }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    const { targetUserId, trialDays, plan } = parsed.data;
 
     console.log(`Admin ${user.id} managing subscription for user ${targetUserId}`);
 
@@ -70,11 +85,6 @@ Deno.serve(async (req) => {
     }
 
     if (plan) {
-      // Note: DB enum is {free, new_to_dating, dating_often, dating_more, unlimited}
-      // but check-subscription reads the plan and returns it as-is for trials
-      // We store the plan name that check-subscription will return
-      // For trial purposes, we just store it in the plan field
-      // The DB enum may not match - so we update limits but keep plan in the DB enum
       switch (plan) {
         case 'free':
           updateData.plan = 'free';
@@ -114,7 +124,10 @@ Deno.serve(async (req) => {
 
     if (updateError) {
       console.error('Error updating subscription:', updateError);
-      throw new Error(`Failed to update subscription: ${updateError.message}`);
+      return new Response(
+        JSON.stringify({ error: 'Failed to update subscription.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const message = trialDays !== undefined 
@@ -130,10 +143,9 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('Error in admin-manage-subscription:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: 'An unexpected error occurred.' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

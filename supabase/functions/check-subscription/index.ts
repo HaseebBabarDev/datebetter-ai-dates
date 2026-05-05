@@ -16,6 +16,7 @@ const PRODUCT_TO_PLAN: Record<string, string> = {
   // Current prices
   "prod_UIMZ5IauGEL3oH": "unlimited",
   "prod_UIMa82sEzF3PA4": "text_simulator",
+  "prod_UIPURomBJJucEc": "detachment_plan",
   // Legacy product IDs for existing subscribers
   "prod_U5BaepUGcVqsIg": "basic",
   "prod_U5Ba3aovhb68xI": "starter",
@@ -30,6 +31,19 @@ const DB_PLAN_TO_FRONTEND: Record<string, string> = {
   "dating_more": "starter",
   "unlimited": "unlimited",
 };
+
+type AppleEntitlementsRow = {
+  unlimited_active: boolean;
+  unlimited_expires_at: string | null;
+  text_simulator_active: boolean;
+  detachment_plan_active: boolean;
+};
+
+function appleUnlimitedEffective(row: AppleEntitlementsRow | null): boolean {
+  if (!row?.unlimited_active) return false;
+  if (!row.unlimited_expires_at) return true;
+  return new Date(row.unlimited_expires_at) > new Date();
+}
 
 function safeTimestamp(val: any): string | null {
   if (!val) return null;
@@ -98,6 +112,18 @@ serve(async (req) => {
     const email = user.email;
     logStep("User authenticated", { userId, email });
 
+    const { data: appleRow } = await supabaseClient
+      .from("apple_entitlements")
+      .select(
+        "unlimited_active, unlimited_expires_at, text_simulator_active, detachment_plan_active",
+      )
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const appleUnl = appleUnlimitedEffective(appleRow as AppleEntitlementsRow | null);
+    const appleText = !!(appleRow as AppleEntitlementsRow | null)?.text_simulator_active;
+    const appleDet = !!(appleRow as AppleEntitlementsRow | null)?.detachment_plan_active;
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email, limit: 1 });
 
@@ -139,6 +165,39 @@ serve(async (req) => {
           trial_ends_at: trialEndsAt,
           day_pass_active: false,
           detachment_plan_candidates: [],
+          has_text_simulator: appleText,
+          has_detachment_plan: appleDet,
+          text_sim_subscription_id: null,
+          detachment_subscription_id: null,
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+      if (appleUnl || appleText || appleDet) {
+        const appleSubEnd =
+          appleUnl && appleRow && (appleRow as AppleEntitlementsRow).unlimited_expires_at
+            ? safeTimestamp((appleRow as AppleEntitlementsRow).unlimited_expires_at)
+            : null;
+        logStep("Apple entitlements only (no Stripe customer)", {
+          appleUnl,
+          appleText,
+          appleDet,
+        });
+        return new Response(JSON.stringify({
+          subscribed: appleUnl,
+          plan: appleUnl ? "unlimited" : "free",
+          product_id: null,
+          price_id: null,
+          subscription_end: appleSubEnd,
+          trial_active: false,
+          trial_ends_at: null,
+          day_pass_active: false,
+          detachment_plan_candidates: [],
+          has_text_simulator: appleText,
+          has_detachment_plan: appleDet,
+          text_sim_subscription_id: null,
+          detachment_subscription_id: null,
         }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
@@ -156,28 +215,47 @@ serve(async (req) => {
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: "active",
-      limit: 1,
+      limit: 10,
     });
 
-    const hasActiveSub = subscriptions.data.length > 0;
+    let hasActiveSub = false;
     let plan = "free";
     let productId = null;
     let subscriptionEnd = null;
     let priceId = null;
+    let hasTextSimulator = false;
+    let hasDetachmentPlanSub = false;
+    let textSimSubId: string | null = null;
+    let detachmentSubId: string | null = null;
 
-    if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
-      // Try multiple ways to get the period end — basil API may differ
-      const periodEnd = subscription.current_period_end 
-        ?? (subscription as any).currentPeriodEnd
-        ?? subscription.items?.data?.[0]?.current_period_end;
-      subscriptionEnd = safeTimestamp(periodEnd);
-      productId = subscription.items.data[0]?.price?.product as string;
-      priceId = subscription.items.data[0]?.price?.id;
-      plan = PRODUCT_TO_PLAN[productId] || "unknown";
-      logStep("Active subscription found", { plan, productId, priceId, endDate: subscriptionEnd, rawPeriodEnd: periodEnd });
-    } else {
-      logStep("No active subscription");
+    for (const subscription of subscriptions.data) {
+      const itemProductId = subscription.items.data[0]?.price?.product as string;
+      const itemPlan = PRODUCT_TO_PLAN[itemProductId] || "unknown";
+
+      if (itemPlan === "text_simulator") {
+        hasTextSimulator = true;
+        textSimSubId = subscription.id;
+        logStep("Text Simulator add-on active", { subId: subscription.id });
+      } else if (itemPlan === "detachment_plan") {
+        hasDetachmentPlanSub = true;
+        detachmentSubId = subscription.id;
+        logStep("Detachment Plan add-on active", { subId: subscription.id });
+      } else if (!hasActiveSub) {
+        // Main subscription (first non-addon found)
+        hasActiveSub = true;
+        const periodEnd = subscription.current_period_end 
+          ?? (subscription as any).currentPeriodEnd
+          ?? subscription.items?.data?.[0]?.current_period_end;
+        subscriptionEnd = safeTimestamp(periodEnd);
+        productId = itemProductId;
+        priceId = subscription.items.data[0]?.price?.id;
+        plan = itemPlan;
+        logStep("Active subscription found", { plan, productId, priceId, endDate: subscriptionEnd });
+      }
+    }
+
+    if (!hasActiveSub) {
+      logStep("No active main subscription");
     }
 
     // Check for one-time purchases (Day Pass, Detachment Plan)
@@ -211,10 +289,22 @@ serve(async (req) => {
       logStep("Error fetching checkout sessions (non-fatal)", { message: String(e) });
     }
 
-    // If no active Stripe sub but trial is active, grant starter access
-    const effectiveSubscribed = hasActiveSub || trialActive;
-    const effectivePlan = hasActiveSub ? plan : (trialActive ? trialPlan : "free");
-    const effectiveEnd = hasActiveSub ? subscriptionEnd : (trialActive ? trialEndsAt : null);
+    // If no active Stripe sub but trial is active, grant starter access; OR Apple unlimited (C-lite)
+    let effectiveSubscribed = hasActiveSub || trialActive || appleUnl;
+    let effectivePlan = hasActiveSub ? plan : (trialActive ? trialPlan : "free");
+    if (appleUnl && (!hasActiveSub || plan === "basic" || plan === "starter")) {
+      effectivePlan = "unlimited";
+    }
+    let effectiveEnd = hasActiveSub ? subscriptionEnd : (trialActive ? trialEndsAt : null);
+    if (appleUnl && appleRow && (appleRow as AppleEntitlementsRow).unlimited_expires_at) {
+      const appleEnd = safeTimestamp((appleRow as AppleEntitlementsRow).unlimited_expires_at);
+      if (
+        appleEnd &&
+        (!effectiveEnd || new Date(appleEnd) > new Date(effectiveEnd))
+      ) {
+        effectiveEnd = appleEnd;
+      }
+    }
 
     return new Response(JSON.stringify({
       subscribed: effectiveSubscribed,
@@ -226,6 +316,10 @@ serve(async (req) => {
       trial_ends_at: trialEndsAt,
       day_pass_active: hasDayPass,
       detachment_plan_candidates: detachmentPlanCandidates,
+      has_text_simulator: hasTextSimulator || appleText,
+      has_detachment_plan: hasDetachmentPlanSub || appleDet,
+      text_sim_subscription_id: textSimSubId,
+      detachment_subscription_id: detachmentSubId,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
