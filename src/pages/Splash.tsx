@@ -154,10 +154,10 @@ const Splash = () => {
         {/* Features - Clean list style */}
         <div className="w-full max-w-xs sm:max-w-sm mb-5">
           <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <FeatureItem icon={Sparkles} text="AI scoring" />
-            <FeatureItem icon={Brain} text="Pattern insights" />
-            <FeatureItem icon={MessageCircle} text="24/7 AI assistant" />
-            <FeatureItem icon={Users} text="Private community" />
+            <FeatureItem icon={Sparkles} text="AI Scoring" />
+            <FeatureItem icon={Brain} text="Pattern Insights" />
+            <FeatureItem icon={MessageCircle} text="24/7 AI Assistant" />
+            <FeatureItem icon={Users} text="Private Community" />
           </div>
         </div>
         
