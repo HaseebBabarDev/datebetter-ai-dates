@@ -782,7 +782,8 @@ const Settings = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="preferences">
+          <TabsContent value="preferences" className="space-y-4">
+            <NotificationSettings />
             <ProfilePreferencesEditor defaultSection={section} />
           </TabsContent>
 
