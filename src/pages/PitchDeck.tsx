@@ -417,9 +417,48 @@ const PitchDeck = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showDrawer, setShowDrawer] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const exportContainerRef = useRef<HTMLDivElement>(null);
   const controlsTimer = useRef<ReturnType<typeof setTimeout>>();
   const dragX = useMotionValue(0);
   const dragOpacity = useTransform(dragX, [-200, 0, 200], [0.5, 1, 0.5]);
+
+  const handleExportPDF = useCallback(async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      // Wait for hidden container to render
+      await new Promise((r) => setTimeout(r, 400));
+      const container = exportContainerRef.current;
+      if (!container) throw new Error("Export container not ready");
+      const slideEls = Array.from(container.querySelectorAll<HTMLDivElement>("[data-export-slide]"));
+
+      const pdf = new jsPDF({ orientation: "landscape", unit: "px", format: [1280, 720] });
+      const bg = getComputedStyle(document.body).backgroundColor || "#ffffff";
+
+      for (let i = 0; i < slideEls.length; i++) {
+        const canvas = await html2canvas(slideEls[i], {
+          backgroundColor: bg,
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          width: 1280,
+          height: 720,
+          windowWidth: 1280,
+          windowHeight: 720,
+        });
+        const img = canvas.toDataURL("image/jpeg", 0.92);
+        if (i > 0) pdf.addPage([1280, 720], "landscape");
+        pdf.addImage(img, "JPEG", 0, 0, 1280, 720);
+      }
+      pdf.save(`DateBetter-Pitch-Deck-${new Date().toISOString().slice(0, 10)}.pdf`);
+    } catch (err) {
+      console.error("PDF export failed", err);
+      alert("Sorry — PDF export failed. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  }, [exporting]);
 
   const goTo = useCallback((idx: number) => {
     setDirection(idx > current ? 1 : -1);
