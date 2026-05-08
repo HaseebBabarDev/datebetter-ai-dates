@@ -221,8 +221,8 @@ const slides = [
         </p>
         <div className="grid grid-cols-3 gap-8 text-center pt-2">
           {[
-            { metric: "$50–100K", label: "MRR in 12mo", accent: true },
-            { metric: "8,600+", label: "Paid Users" },
+            { metric: "$50–70K", label: "MRR by Month 12", accent: true },
+            { metric: "3,000+", label: "Net Paid Users" },
             { metric: "$44", label: "Blended CPA" },
           ].map((m, i) => (
             <div key={i}>
@@ -231,7 +231,7 @@ const slides = [
             </div>
           ))}
         </div>
-        <p className="text-lg text-muted-foreground text-center">Cash-flow positive by Month 12.</p>
+        <p className="text-lg text-muted-foreground text-center">Default-alive by Month 18. Series A-ready.</p>
       </div>
     ),
   },
