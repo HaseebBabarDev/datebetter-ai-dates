@@ -110,7 +110,7 @@ const slides = [
     content: (
       <div className="max-w-5xl mx-auto space-y-6">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">Meet <span className="text-primary">D.E.V.I.</span></h2>
-        <p className="text-xl md:text-2xl text-muted-foreground mb-2">Parses screenshots. Logs every interaction. Detects patterns. Advises in real time.</p>
+        <p className="text-xl md:text-2xl text-muted-foreground mb-2">Knows you. Analyzes them. Spots the patterns. <span className="text-foreground font-medium">Coaches you in real time.</span></p>
         <div className="grid grid-cols-4 gap-3 items-start">
           {[
             { label: "Screenshot Analysis", Demo: ScreenshotDemo },
