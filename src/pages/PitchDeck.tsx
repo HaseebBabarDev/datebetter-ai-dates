@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
-import { Eye, EyeOff, ChevronLeft, ChevronRight, ArrowLeft, Maximize2, Minimize2, LayoutGrid } from "lucide-react";
+import { Eye, EyeOff, ChevronLeft, ChevronRight, ArrowLeft, Maximize2, Minimize2, LayoutGrid, Download, Loader2 } from "lucide-react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -415,9 +417,48 @@ const PitchDeck = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showDrawer, setShowDrawer] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const exportContainerRef = useRef<HTMLDivElement>(null);
   const controlsTimer = useRef<ReturnType<typeof setTimeout>>();
   const dragX = useMotionValue(0);
   const dragOpacity = useTransform(dragX, [-200, 0, 200], [0.5, 1, 0.5]);
+
+  const handleExportPDF = useCallback(async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      // Wait for hidden container to render
+      await new Promise((r) => setTimeout(r, 400));
+      const container = exportContainerRef.current;
+      if (!container) throw new Error("Export container not ready");
+      const slideEls = Array.from(container.querySelectorAll<HTMLDivElement>("[data-export-slide]"));
+
+      const pdf = new jsPDF({ orientation: "landscape", unit: "px", format: [1280, 720] });
+      const bg = getComputedStyle(document.body).backgroundColor || "#ffffff";
+
+      for (let i = 0; i < slideEls.length; i++) {
+        const canvas = await html2canvas(slideEls[i], {
+          backgroundColor: bg,
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          width: 1280,
+          height: 720,
+          windowWidth: 1280,
+          windowHeight: 720,
+        });
+        const img = canvas.toDataURL("image/jpeg", 0.92);
+        if (i > 0) pdf.addPage([1280, 720], "landscape");
+        pdf.addImage(img, "JPEG", 0, 0, 1280, 720);
+      }
+      pdf.save(`DateBetter-Pitch-Deck-${new Date().toISOString().slice(0, 10)}.pdf`);
+    } catch (err) {
+      console.error("PDF export failed", err);
+      alert("Sorry — PDF export failed. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  }, [exporting]);
 
   const goTo = useCallback((idx: number) => {
     setDirection(idx > current ? 1 : -1);
@@ -532,6 +573,17 @@ const PitchDeck = () => {
           </motion.button>
         </div>
         <div className="flex items-center gap-3">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleExportPDF}
+            disabled={exporting}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-all text-xs font-semibold disabled:opacity-60"
+            title="Download PDF"
+          >
+            {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+            <span className="hidden sm:inline">{exporting ? "Exporting…" : "PDF"}</span>
+          </motion.button>
           <span className="text-xs text-muted-foreground tabular-nums font-medium">
             {current + 1} / {slides.length}
           </span>
@@ -637,6 +689,26 @@ const PitchDeck = () => {
           />
         )}
       </AnimatePresence>
+
+      {/* Hidden export container — rendered off-screen during PDF generation */}
+      {exporting && (
+        <div
+          ref={exportContainerRef}
+          aria-hidden
+          style={{ position: "fixed", top: 0, left: "-10000px", zIndex: -1, pointerEvents: "none" }}
+        >
+          {slides.map((s) => (
+            <div
+              key={`export-${s.id}`}
+              data-export-slide
+              className="bg-background font-poppins flex items-center justify-center"
+              style={{ width: 1280, height: 720, padding: "60px 80px", overflow: "hidden" }}
+            >
+              <div className="w-full max-w-5xl">{s.content}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
