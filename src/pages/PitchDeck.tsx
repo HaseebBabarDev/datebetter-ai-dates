@@ -370,7 +370,7 @@ const slides = [
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">A few more things.</h2>
         <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
           <p>Every interaction logged compounds into <span className="font-bold text-primary">structured behavioral data</span> — a moat generic AI cannot replicate.</p>
-          <p>Subscription SaaS at <span className="font-bold text-foreground">$9.99 / $15.99 / $29.99</span> per month. Blended ARPU: <span className="font-bold text-primary">$15</span>.</p>
+          <p>Simple SaaS pricing: <span className="font-bold text-foreground">$15/mo Unlimited</span>, plus <span className="font-bold text-foreground">$5/mo Detachment Plan</span> and <span className="font-bold text-foreground">$5/mo Text Simulator</span> add-ons. Blended ARPU target: <span className="font-bold text-primary">$18–22</span>.</p>
           <p>Cash-flow positive by <span className="font-bold text-primary">Month 12</span> at base case with capital remaining.</p>
           <p>Creator/affiliate channel offers the most efficient CPA at <span className="font-bold text-primary">$25/user</span>.</p>
         </div>
