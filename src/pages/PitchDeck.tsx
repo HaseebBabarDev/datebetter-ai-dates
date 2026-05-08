@@ -190,6 +190,21 @@ const slides = [
       </div>
     ),
   },
+  // 6b. Moat
+  {
+    id: 9,
+    content: (
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">The moat.</h2>
+        <div className="space-y-4 text-xl md:text-2xl text-muted-foreground">
+          <p>Every interaction logged becomes <span className="font-bold text-primary">structured behavioral data</span> — candidate profiles, patterns, outcomes — that compounds per user, per month.</p>
+          <p>ChatGPT forgets. <span className="font-bold text-foreground">D.E.V.I. remembers</span> — and gets sharper the longer you use it.</p>
+          <p>A therapist-reviewed psychology framework + a proprietary scoring engine generic AI <span className="font-bold text-primary">can't replicate</span>.</p>
+          <p className="text-foreground font-medium">Switching cost grows with every message. That's the moat.</p>
+        </div>
+      </div>
+    ),
+  },
   // 7. Model + 12 months
   {
     id: 7,
