@@ -95,10 +95,10 @@ const slides = [
     id: 2,
     content: (
       <div className="max-w-3xl mx-auto space-y-8">
-        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">People already use AI to date.</h2>
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">Apps swipe. Nobody <span className="text-primary">navigates</span>.</h2>
         <div className="space-y-4 text-xl md:text-2xl text-muted-foreground">
-          <p>Texts pasted into ChatGPT. Red flags crowdsourced on Reddit. Drama dumped into <span className="font-bold text-primary">$200/hr therapy</span>.</p>
-          <p>Generic AI has no memory, no patterns, no scoring, no dating context.</p>
+          <p>Tinder, Hinge, Bumble — built to <span className="font-bold text-foreground">find</span> people. Zero help once you do.</p>
+          <p>So daters take their texts, screenshots, and confusion to <span className="font-bold text-primary">ChatGPT</span> — an AI with no memory, no patterns, no dating context.</p>
           <p className="font-medium text-foreground">The behavior is here. The product isn't.</p>
         </div>
       </div>
@@ -186,6 +186,21 @@ const slides = [
           <p>We've <span className="font-bold text-foreground">built and launched apps before</span> — including <span className="font-bold text-primary">Good Fitness</span>, a top women's app in the App Store.</p>
           <p>Operators who ship. Marketers who acquire. A therapist-reviewed psychology framework.</p>
           <p className="text-foreground font-medium">We know how to take a consumer app from <span className="text-primary font-bold">zero to category leader</span>.</p>
+        </div>
+      </div>
+    ),
+  },
+  // 6b. Moat
+  {
+    id: 9,
+    content: (
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">The moat.</h2>
+        <div className="space-y-4 text-xl md:text-2xl text-muted-foreground">
+          <p>Every interaction logged becomes <span className="font-bold text-primary">structured behavioral data</span> — candidate profiles, patterns, outcomes — that compounds per user, per month.</p>
+          <p>ChatGPT forgets. <span className="font-bold text-foreground">D.E.V.I. remembers</span> — and gets sharper the longer you use it.</p>
+          <p>A therapist-reviewed psychology framework + a proprietary scoring engine generic AI <span className="font-bold text-primary">can't replicate</span>.</p>
+          <p className="text-foreground font-medium">Switching cost grows with every message. That's the moat.</p>
         </div>
       </div>
     ),
