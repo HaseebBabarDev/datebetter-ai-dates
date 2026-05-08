@@ -231,6 +231,7 @@ const slides = [
             </div>
           ))}
         </div>
+        <p className="text-sm text-muted-foreground text-center pt-1">$275K acquisition ÷ $44 CPA = 6,250 gross signups · 8% monthly churn → ~2,000 net paid by Month 12.</p>
         <p className="text-lg text-muted-foreground text-center">$360K ARR base case. Seed-ready by Month 18.</p>
       </div>
     ),
