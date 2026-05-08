@@ -1,7 +1,7 @@
 import React from "react";
 import { motion, type Easing } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle2, ArrowRight, Sparkles, Crown, Zap } from "lucide-react";
+import { ArrowRight, Sparkles, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const fadeUp = {
@@ -11,39 +11,6 @@ const fadeUp = {
 
 const stagger = { visible: { transition: { staggerChildren: 0.15 } } };
 
-const plans = [
-  {
-    name: "Unlimited",
-    price: "$15",
-    period: "/mo",
-    description: "Full relationship intelligence — 15-day free trial",
-    icon: Crown,
-    features: [
-      "Unlimited candidates",
-      "Unlimited D.E.V.I. messages",
-      "AI scoring & compatibility insights",
-      "Red flag & pattern detection",
-      "Community access",
-      "15-day free trial",
-    ],
-    popular: true,
-  },
-];
-
-const addons = [
-  {
-    name: "Text Simulator",
-    price: "$5/mo",
-    description: "Practice conversations with AI-powered text simulations.",
-    icon: Zap,
-  },
-  {
-    name: "Detachment Plan",
-    price: "$5/mo",
-    description: "Personalized AI recovery timeline when you need to let someone go.",
-    icon: Sparkles,
-  },
-];
 export const PricingSection: React.FC = () => {
   const navigate = useNavigate();
 
@@ -60,106 +27,39 @@ export const PricingSection: React.FC = () => {
           whileInView="visible"
           viewport={{ once: true }}
           variants={stagger}
-          className="text-center max-w-2xl mx-auto mb-14"
+          className="text-center max-w-2xl mx-auto"
         >
+          <motion.div
+            variants={fadeUp}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6"
+          >
+            <Crown className="w-4 h-4 text-primary" />
+            <span className="text-sm font-semibold text-primary">Unlimited Plan</span>
+          </motion.div>
+
           <motion.h2 variants={fadeUp} className="font-poppins text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            Simple, <span className="text-primary">transparent</span> pricing
+            15 Days <span className="text-primary">Free</span>, Then $15/Month Unlimited
           </motion.h2>
-          <motion.p variants={fadeUp} className="text-muted-foreground text-lg">
-            Invest in yourself. Every plan helps you date smarter — no contracts, cancel anytime.
+
+          <motion.p variants={fadeUp} className="text-muted-foreground text-lg mb-8">
+            Full access to every feature. No hidden tiers. No complicated plans. Cancel anytime.
           </motion.p>
-        </motion.div>
 
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={stagger}
-          className="flex justify-center max-w-lg mx-auto"
-        >
-          {plans.map((plan) => (
-            <motion.div
-              key={plan.name}
-              variants={fadeUp}
-              className={`relative rounded-2xl p-6 transition-all duration-300 ${
-                plan.popular
-                  ? "bg-card border-2 border-primary shadow-[var(--shadow-elegant)] scale-[1.02]"
-                  : "bg-card border border-border hover:border-primary/30 hover:shadow-[var(--shadow-soft)]"
-              }`}
-              whileHover={{ y: -6 }}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="px-4 py-1 rounded-full bg-[image:var(--gradient-primary)] text-primary-foreground text-xs font-bold shadow-[var(--shadow-soft)]">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                  plan.popular ? "bg-[image:var(--gradient-primary)]" : "bg-primary/10"
-                }`}>
-                  <plan.icon className={`w-5 h-5 ${plan.popular ? "text-primary-foreground" : "text-primary"}`} />
-                </div>
-                <div>
-                  <h3 className="font-poppins font-semibold text-lg text-foreground">{plan.name}</h3>
-                  <p className="text-xs text-muted-foreground">{plan.description}</p>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <span className="font-poppins text-4xl font-bold text-foreground">{plan.price}</span>
-                <span className="text-muted-foreground text-sm">{plan.period}</span>
-              </div>
-
-              <ul className="space-y-2.5 mb-6">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2">
-                    <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${plan.popular ? "text-primary" : "text-muted-foreground"}`} />
-                    <span className="text-sm text-foreground">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
+          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 justify-center">
+            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }}>
               <Button
-                className={`w-full font-semibold ${
-                  plan.popular
-                    ? "bg-[image:var(--gradient-primary)] text-primary-foreground border-0 shadow-[var(--shadow-soft)]"
-                    : ""
-                }`}
-                variant={plan.popular ? "default" : "outline"}
+                size="lg"
                 onClick={() => navigate("/onboarding")}
+                className="font-poppins font-semibold h-13 px-8 bg-[image:var(--gradient-primary)] text-primary-foreground border-0 shadow-[var(--shadow-soft)]"
               >
-                Get Started
-                <ArrowRight className="w-4 h-4 ml-2" />
+                <Sparkles className="w-4 h-4 mr-2" />
+                Start Free
+                <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </motion.span>
               </Button>
             </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Monthly add-ons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.5 }}
-          className="mt-8 max-w-lg mx-auto"
-        >
-          <p className="text-center text-sm font-semibold text-muted-foreground mb-4">Optional Add-ons</p>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {addons.map((addon) => (
-              <div key={addon.name} className="p-4 rounded-xl bg-muted/50 border border-border flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <addon.icon className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{addon.name} — {addon.price}</p>
-                  <p className="text-xs text-muted-foreground">{addon.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          </motion.div>
         </motion.div>
       </div>
     </section>
