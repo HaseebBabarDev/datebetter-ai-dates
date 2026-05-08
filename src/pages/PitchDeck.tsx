@@ -239,16 +239,27 @@ const slides = [
   {
     id: 8,
     content: (
-      <div className="flex flex-col items-center justify-center h-full gap-6 text-center max-w-2xl mx-auto">
-        <motion.img src={logo} alt="DateBetter" className="w-16 h-16 rounded-2xl shadow-lg ring-2 ring-primary/20" whileHover={{ scale: 1.05 }} />
+      <div className="flex flex-col items-center justify-center h-full gap-5 text-center max-w-2xl mx-auto">
+        <motion.img src={logo} alt="DateBetter" className="w-14 h-14 rounded-2xl shadow-lg ring-2 ring-primary/20" whileHover={{ scale: 1.05 }} />
         <h2 className="text-4xl md:text-6xl font-black leading-tight">
           <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">$500K · 15%</span>
         </h2>
-        <p className="text-xl md:text-2xl text-muted-foreground">~$3.3M post-money.</p>
-        <div className="w-16 h-px bg-primary/30 my-2" />
-        <p className="text-xl md:text-2xl text-foreground font-medium max-w-md">Relationship intelligence has no leader yet. We intend to be it.</p>
-        <p className="text-lg text-foreground font-bold mt-4">datebetterapp.com</p>
-        <p className="text-sm text-muted-foreground">nakita@datebetterapp.com</p>
+        <p className="text-lg md:text-xl text-muted-foreground">~$3.3M post-money · 18-month runway</p>
+        <div className="grid grid-cols-3 gap-4 w-full pt-2">
+          {[
+            { pct: "60%", label: "Paid Acquisition", sub: "Scale to 8,600+ paid users" },
+            { pct: "25%", label: "Product & AI", sub: "D.E.V.I. engine + iOS/Android" },
+            { pct: "15%", label: "Ops & Runway", sub: "Compliance, support, buffer" },
+          ].map((m, i) => (
+            <div key={i} className="rounded-xl border border-border/50 p-4 space-y-1">
+              <p className="text-2xl md:text-3xl font-black text-primary">{m.pct}</p>
+              <p className="text-sm font-bold text-foreground">{m.label}</p>
+              <p className="text-[11px] text-muted-foreground leading-tight">{m.sub}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-base md:text-lg text-foreground font-medium max-w-md pt-2">Relationship intelligence has no leader yet. <span className="text-primary font-bold">We intend to be it.</span></p>
+        <p className="text-sm text-foreground font-bold">datebetterapp.com · nakita@datebetterapp.com</p>
       </div>
     ),
   },
