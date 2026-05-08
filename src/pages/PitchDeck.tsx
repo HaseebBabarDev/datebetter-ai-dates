@@ -217,12 +217,12 @@ const slides = [
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">The model.</h2>
         <p className="text-xl md:text-2xl text-muted-foreground">
-          <span className="font-bold text-foreground">$15/mo Unlimited</span> + <span className="font-bold text-foreground">$5 Detachment</span> + <span className="font-bold text-foreground">$5 Text Simulator</span>. ARPU <span className="font-bold text-primary">$18–22</span>.
+          <span className="font-bold text-foreground">$15/mo Unlimited</span> — single plan. Add-ons (Detachment, Text Simulator) are pure upside.
         </p>
         <div className="grid grid-cols-3 gap-8 text-center pt-2">
           {[
-            { metric: "$50–70K", label: "MRR by Month 12", accent: true },
-            { metric: "3,000+", label: "Net Paid Users" },
+            { metric: "$30K", label: "MRR by Month 12", accent: true },
+            { metric: "2,000", label: "Net Paid @ $15" },
             { metric: "$44", label: "Blended CPA" },
           ].map((m, i) => (
             <div key={i}>
@@ -231,7 +231,7 @@ const slides = [
             </div>
           ))}
         </div>
-        <p className="text-lg text-muted-foreground text-center">Default-alive by Month 18. Series A-ready.</p>
+        <p className="text-lg text-muted-foreground text-center">$360K ARR base case. Seed-ready by Month 18.</p>
       </div>
     ),
   },
@@ -247,7 +247,7 @@ const slides = [
         <p className="text-lg md:text-xl text-muted-foreground">~$3.3M post-money · 18-month runway</p>
         <div className="grid grid-cols-3 gap-4 w-full pt-2">
           {[
-            { pct: "55%", label: "Paid Acquisition", sub: "~3,000 net paid users" },
+            { pct: "55%", label: "Paid Acquisition", sub: "~2,000 net paid @ $15/mo" },
             { pct: "30%", label: "Product & AI", sub: "D.E.V.I. engine + iOS/Android" },
             { pct: "15%", label: "Ops & Runway", sub: "Compliance, support, buffer" },
           ].map((m, i) => (
@@ -259,22 +259,22 @@ const slides = [
           ))}
         </div>
         <div className="w-full rounded-xl border-2 border-primary/40 bg-primary/5 p-4 mt-2">
-          <p className="text-[11px] uppercase tracking-wider text-primary font-bold mb-2">Pre-Seed Payback Path</p>
+          <p className="text-[11px] uppercase tracking-wider text-primary font-bold mb-2">Pre-Seed Payback Path (Conservative)</p>
           <div className="grid grid-cols-3 gap-3 text-center">
             <div>
-              <p className="text-xl md:text-2xl font-black text-foreground">3–4×</p>
-              <p className="text-[10px] text-muted-foreground">Mark-up at Seed (18mo)</p>
+              <p className="text-xl md:text-2xl font-black text-foreground">2×</p>
+              <p className="text-[10px] text-muted-foreground">Mark-up at Seed (~18mo)</p>
             </div>
             <div>
-              <p className="text-xl md:text-2xl font-black text-foreground">5–8×</p>
+              <p className="text-xl md:text-2xl font-black text-foreground">4–6×</p>
               <p className="text-[10px] text-muted-foreground">Series A (~36mo)</p>
             </div>
             <div>
-              <p className="text-xl md:text-2xl font-black bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">10–20×</p>
+              <p className="text-xl md:text-2xl font-black bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">8–15×</p>
               <p className="text-[10px] text-muted-foreground">Exit / Acquisition</p>
             </div>
           </div>
-          <p className="text-[10px] text-muted-foreground/80 text-center pt-2">Pre-seed math: get to $700K ARR → Seed at ~$10M post → Series A at ~$25M.</p>
+          <p className="text-[10px] text-muted-foreground/80 text-center pt-2">Base case: $15/mo only, no add-ons. $360K ARR → Seed at ~$6M post → Series A at ~$15M.</p>
         </div>
         <p className="text-base text-foreground font-medium max-w-md pt-1">Relationship intelligence has no leader yet. <span className="text-primary font-bold">We intend to be it.</span></p>
         <p className="text-xs text-foreground font-bold">datebetterapp.com · nakita@datebetterapp.com</p>
