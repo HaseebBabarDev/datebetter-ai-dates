@@ -247,8 +247,8 @@ const slides = [
         <p className="text-lg md:text-xl text-muted-foreground">~$3.3M post-money · 18-month runway</p>
         <div className="grid grid-cols-3 gap-4 w-full pt-2">
           {[
-            { pct: "60%", label: "Paid Acquisition", sub: "Scale to 8,600+ paid users" },
-            { pct: "25%", label: "Product & AI", sub: "D.E.V.I. engine + iOS/Android" },
+            { pct: "55%", label: "Paid Acquisition", sub: "~3,000 net paid users" },
+            { pct: "30%", label: "Product & AI", sub: "D.E.V.I. engine + iOS/Android" },
             { pct: "15%", label: "Ops & Runway", sub: "Compliance, support, buffer" },
           ].map((m, i) => (
             <div key={i} className="rounded-xl border border-border/50 p-4 space-y-1">
@@ -259,21 +259,22 @@ const slides = [
           ))}
         </div>
         <div className="w-full rounded-xl border-2 border-primary/40 bg-primary/5 p-4 mt-2">
-          <p className="text-[11px] uppercase tracking-wider text-primary font-bold mb-2">Investor Payback</p>
+          <p className="text-[11px] uppercase tracking-wider text-primary font-bold mb-2">Investor Payback — Series A Path</p>
           <div className="grid grid-cols-3 gap-3 text-center">
             <div>
-              <p className="text-xl md:text-2xl font-black text-foreground">$1.2M ARR</p>
-              <p className="text-[10px] text-muted-foreground">Month 12 run-rate</p>
+              <p className="text-xl md:text-2xl font-black text-foreground">$700K ARR</p>
+              <p className="text-[10px] text-muted-foreground">Month 12 run-rate (base case)</p>
             </div>
             <div>
-              <p className="text-xl md:text-2xl font-black text-foreground">~$18M</p>
-              <p className="text-[10px] text-muted-foreground">Series A val (15× ARR)</p>
+              <p className="text-xl md:text-2xl font-black text-foreground">$6–8M</p>
+              <p className="text-[10px] text-muted-foreground">Series A val (10× ARR)</p>
             </div>
             <div>
-              <p className="text-xl md:text-2xl font-black bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">5–8×</p>
-              <p className="text-[10px] text-muted-foreground">Return on $500K</p>
+              <p className="text-xl md:text-2xl font-black bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">2–3×</p>
+              <p className="text-[10px] text-muted-foreground">On paper at next round</p>
             </div>
           </div>
+          <p className="text-[10px] text-muted-foreground/80 text-center pt-2">Upside case (10× ARR multiple expansion + acquisition) → 5–7× exit.</p>
         </div>
         <p className="text-base text-foreground font-medium max-w-md pt-1">Relationship intelligence has no leader yet. <span className="text-primary font-bold">We intend to be it.</span></p>
         <p className="text-xs text-foreground font-bold">datebetterapp.com · nakita@datebetterapp.com</p>
