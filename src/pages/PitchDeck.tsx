@@ -573,6 +573,17 @@ const PitchDeck = () => {
           </motion.button>
         </div>
         <div className="flex items-center gap-3">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleExportPDF}
+            disabled={exporting}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-all text-xs font-semibold disabled:opacity-60"
+            title="Download PDF"
+          >
+            {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+            <span className="hidden sm:inline">{exporting ? "Exporting…" : "PDF"}</span>
+          </motion.button>
           <span className="text-xs text-muted-foreground tabular-nums font-medium">
             {current + 1} / {slides.length}
           </span>
