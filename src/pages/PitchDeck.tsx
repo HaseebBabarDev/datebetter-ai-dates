@@ -259,22 +259,22 @@ const slides = [
           ))}
         </div>
         <div className="w-full rounded-xl border-2 border-primary/40 bg-primary/5 p-4 mt-2">
-          <p className="text-[11px] uppercase tracking-wider text-primary font-bold mb-2">Investor Payback — Series A Path</p>
+          <p className="text-[11px] uppercase tracking-wider text-primary font-bold mb-2">Pre-Seed Payback Path</p>
           <div className="grid grid-cols-3 gap-3 text-center">
             <div>
-              <p className="text-xl md:text-2xl font-black text-foreground">$700K ARR</p>
-              <p className="text-[10px] text-muted-foreground">Month 12 run-rate (base case)</p>
+              <p className="text-xl md:text-2xl font-black text-foreground">3–4×</p>
+              <p className="text-[10px] text-muted-foreground">Mark-up at Seed (18mo)</p>
             </div>
             <div>
-              <p className="text-xl md:text-2xl font-black text-foreground">$6–8M</p>
-              <p className="text-[10px] text-muted-foreground">Series A val (10× ARR)</p>
+              <p className="text-xl md:text-2xl font-black text-foreground">5–8×</p>
+              <p className="text-[10px] text-muted-foreground">Series A (~36mo)</p>
             </div>
             <div>
-              <p className="text-xl md:text-2xl font-black bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">2–3×</p>
-              <p className="text-[10px] text-muted-foreground">On paper at next round</p>
+              <p className="text-xl md:text-2xl font-black bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">10–20×</p>
+              <p className="text-[10px] text-muted-foreground">Exit / Acquisition</p>
             </div>
           </div>
-          <p className="text-[10px] text-muted-foreground/80 text-center pt-2">Upside case (10× ARR multiple expansion + acquisition) → 5–7× exit.</p>
+          <p className="text-[10px] text-muted-foreground/80 text-center pt-2">Pre-seed math: get to $700K ARR → Seed at ~$10M post → Series A at ~$25M.</p>
         </div>
         <p className="text-base text-foreground font-medium max-w-md pt-1">Relationship intelligence has no leader yet. <span className="text-primary font-bold">We intend to be it.</span></p>
         <p className="text-xs text-foreground font-bold">datebetterapp.com · nakita@datebetterapp.com</p>
