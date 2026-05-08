@@ -95,10 +95,10 @@ const slides = [
     id: 2,
     content: (
       <div className="max-w-3xl mx-auto space-y-8">
-        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">People already use AI to date.</h2>
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">Apps swipe. Nobody <span className="text-primary">navigates</span>.</h2>
         <div className="space-y-4 text-xl md:text-2xl text-muted-foreground">
-          <p>Texts pasted into ChatGPT. Red flags crowdsourced on Reddit. Drama dumped into <span className="font-bold text-primary">$200/hr therapy</span>.</p>
-          <p>Generic AI has no memory, no patterns, no scoring, no dating context.</p>
+          <p>Tinder, Hinge, Bumble — built to <span className="font-bold text-foreground">find</span> people. Zero help once you do.</p>
+          <p>So daters take their texts, screenshots, and confusion to <span className="font-bold text-primary">ChatGPT</span> — an AI with no memory, no patterns, no dating context.</p>
           <p className="font-medium text-foreground">The behavior is here. The product isn't.</p>
         </div>
       </div>
