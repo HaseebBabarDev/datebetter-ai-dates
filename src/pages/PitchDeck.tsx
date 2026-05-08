@@ -136,21 +136,26 @@ const slides = [
         <div className="grid grid-cols-3 gap-6">
           <div className="rounded-2xl border border-border/50 p-5 space-y-2">
             <p className="text-xs uppercase tracking-wider text-muted-foreground font-bold">TAM</p>
-            <p className="text-3xl md:text-4xl font-black text-primary">$19.3B</p>
+            <p className="text-3xl md:text-4xl font-black text-primary">$19.3B<sup className="text-xs">1</sup></p>
             <p className="text-sm text-muted-foreground">Global dating by 2033</p>
           </div>
           <div className="rounded-2xl border border-border/50 p-5 space-y-2">
             <p className="text-xs uppercase tracking-wider text-muted-foreground font-bold">SAM</p>
-            <p className="text-3xl md:text-4xl font-black text-foreground">60M</p>
+            <p className="text-3xl md:text-4xl font-black text-foreground">60M<sup className="text-xs">2</sup></p>
             <p className="text-sm text-muted-foreground">U.S. daters — men & women</p>
           </div>
           <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5 space-y-2">
             <p className="text-xs uppercase tracking-wider text-primary font-bold">SOM</p>
-            <p className="text-3xl md:text-4xl font-black bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">78%</p>
+            <p className="text-3xl md:text-4xl font-black bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">78%<sup className="text-xs">3</sup></p>
             <p className="text-sm text-muted-foreground">Burned out & ready to pay</p>
           </div>
         </div>
         <p className="text-xl text-muted-foreground text-center pt-2">Dating apps own the match. <span className="text-foreground font-medium">We own what happens after.</span></p>
+        <p className="text-[10px] text-muted-foreground/70 text-center pt-4 leading-relaxed">
+          <sup>1</sup> Business Research Insights, Online Dating Market Report 2024 &nbsp;·&nbsp;
+          <sup>2</sup> Pew Research Center, "The State of Online Dating in the U.S." (2023) &nbsp;·&nbsp;
+          <sup>3</sup> Forbes Health / Singles in America survey (Match Group, 2023)
+        </p>
       </div>
     ),
   },
