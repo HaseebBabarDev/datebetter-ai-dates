@@ -266,7 +266,9 @@ const slides = [
     id: 8,
     content: (
       <div className="flex flex-col items-center justify-center h-full gap-5 text-center max-w-2xl mx-auto">
-        <motion.img src={logo} alt="DateBetter" className="w-14 h-14 rounded-2xl shadow-lg ring-2 ring-primary/20" whileHover={{ scale: 1.05 }} />
+        <motion.div whileHover={{ scale: 1.05 }} className="w-16 h-16 rounded-2xl bg-card shadow-lg ring-2 ring-primary/20 flex items-center justify-center overflow-hidden">
+          <img src={logo} alt="DateBetter" className="w-full h-full object-contain p-1" />
+        </motion.div>
         <h2 className="text-4xl md:text-6xl font-black leading-tight">
           <span className="bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">$500K · 15%</span>
         </h2>
@@ -336,7 +338,9 @@ const PasswordGate = ({ onUnlock }: { onUnlock: () => void }) => {
       >
         <div className="rounded-2xl border border-border/60 bg-card p-10 shadow-lg">
           <div className="flex flex-col items-center mb-8">
-            <img src={logo} alt="DateBetter" className="w-16 h-16 rounded-xl shadow-md mb-5" />
+            <div className="w-16 h-16 rounded-xl bg-card shadow-md mb-5 flex items-center justify-center overflow-hidden ring-1 ring-border/40">
+              <img src={logo} alt="DateBetter" className="w-full h-full object-contain p-1" />
+            </div>
             <h1 className="text-xl font-black text-foreground">DateBetter Pitch Deck</h1>
             <p className="text-sm text-muted-foreground mt-2">Enter password to continue</p>
           </div>
