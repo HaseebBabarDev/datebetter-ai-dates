@@ -214,33 +214,49 @@ const slides = [
   {
     id: 7,
     content: (
-      <div className="max-w-4xl mx-auto space-y-7">
+      <div className="max-w-4xl mx-auto space-y-6">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">The model.</h2>
-        <p className="text-xl md:text-2xl text-muted-foreground">
-          <span className="font-bold text-foreground">$15/mo · single plan · unlimited · cancel anytime.</span> Add-ons (Detachment Coach, Text Simulator) are pure upside.
+        <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+          <span className="font-bold text-foreground">$15/mo · single plan · unlimited · cancel anytime.</span>
+          <br className="hidden md:block" />
+          <span className="md:ml-0"> Add-ons (Detachment Coach, Text Simulator) are pure upside.</span>
         </p>
-        <div className="grid grid-cols-3 gap-8 text-center pt-2">
+
+        <div className="grid grid-cols-3 gap-4 md:gap-8 text-center pt-2">
           {[
             { metric: "$72K", label: "MRR by Month 12", accent: true },
             { metric: "4,800", label: "Net paid @ $15" },
             { metric: "$44", label: "Blended CPA" },
           ].map((m, i) => (
-            <div key={i}>
-              <p className={`text-3xl md:text-4xl font-black ${m.accent ? "text-primary" : "text-foreground"}`}>{m.metric}</p>
-              <p className="text-sm text-muted-foreground mt-2">{m.label}</p>
+            <div key={i} className="rounded-2xl border border-border/40 bg-card/30 backdrop-blur-sm py-5 px-2">
+              <p className={`text-3xl md:text-5xl font-black ${m.accent ? "text-primary" : "text-foreground"}`}>{m.metric}</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-2 leading-tight">{m.label}</p>
             </div>
           ))}
         </div>
-        <div className="border-t border-border/40 pt-5 space-y-2">
-          <p className="text-xs font-bold tracking-[0.2em] text-primary text-center">UNIT ECONOMICS</p>
-          <p className="text-base md:text-lg text-foreground text-center font-medium">
-            LTV <span className="font-bold">$300</span> · CAC <span className="font-bold">$44</span> · LTV/CAC <span className="font-bold text-primary">6.8×</span> · payback <span className="font-bold">2.9 mo</span> · <span className="font-bold">80%</span> gross margin
-          </p>
+
+        <div className="rounded-2xl border border-primary/30 bg-primary/5 px-5 py-4 space-y-3">
+          <p className="text-[11px] font-bold tracking-[0.25em] text-primary text-center">UNIT ECONOMICS</p>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center">
+            {[
+              { k: "LTV", v: "$300" },
+              { k: "CAC", v: "$44" },
+              { k: "LTV/CAC", v: "6.8×", accent: true },
+              { k: "Payback", v: "2.9 mo" },
+              { k: "Gross margin", v: "80%" },
+            ].map((u, i) => (
+              <div key={i}>
+                <p className={`text-lg md:text-2xl font-black ${u.accent ? "text-primary" : "text-foreground"}`}>{u.v}</p>
+                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider mt-1">{u.k}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="text-sm text-muted-foreground text-center space-y-1 pt-1">
+
+        <div className="text-xs md:text-sm text-muted-foreground text-center space-y-1.5 pt-1">
           <p>$275K acquisition ÷ $44 CPA = <span className="text-foreground font-semibold">6,250 paid signups</span></p>
-          <p>5% monthly churn (consumer subscription benchmark) → <span className="text-foreground font-semibold">4,800 net paid by Month 12</span></p>
-          <p className="text-base text-foreground font-semibold pt-2">$864K ARR run-rate. Series A-ready by Month 18.</p>
+          <p>5% monthly churn (consumer benchmark) → <span className="text-foreground font-semibold">4,800 net paid by Month 12</span></p>
+          <p className="text-sm md:text-base text-foreground font-semibold pt-2">$864K ARR run-rate · Series A-ready by Month 18.</p>
         </div>
       </div>
     ),
