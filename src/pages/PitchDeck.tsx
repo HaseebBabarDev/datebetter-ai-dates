@@ -564,7 +564,7 @@ const PitchDeck = () => {
     else if (info.offset.x > threshold && info.velocity.x > 0) prev();
   };
 
-  if (!unlocked) return <PasswordGate onUnlock={() => setUnlocked(true)} />;
+  
 
   const slide = slides[current];
   const progress = ((current + 1) / slides.length) * 100;
