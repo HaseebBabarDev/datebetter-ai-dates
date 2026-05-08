@@ -230,7 +230,7 @@ const slides = [
             <div className="space-y-2 pt-2 border-t border-border/30">
               <p className="text-sm text-muted-foreground">• 65% of adults 18–29 have used an app</p>
               <p className="text-sm text-muted-foreground">• 57% of users are men; 38% women</p>
-              <p className="text-sm text-muted-foreground">• 63% of men under 30 are single</p>
+              <p className="text-sm text-muted-foreground">• Built for men and women navigating modern dating</p>
             </div>
           </div>
           {/* SOM */}
