@@ -94,12 +94,12 @@ const slides = [
   {
     id: 2,
     content: (
-      <div className="max-w-3xl mx-auto space-y-8">
-        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">Apps swipe. Nobody <span className="text-primary">navigates</span>.</h2>
-        <div className="space-y-4 text-xl md:text-2xl text-muted-foreground">
+      <div className="max-w-4xl mx-auto space-y-7">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-[1.05]">Apps swipe. Nobody <span className="text-primary">navigates</span>.</h2>
+        <div className="space-y-4 text-lg md:text-xl text-muted-foreground leading-relaxed">
           <p>Tinder, Hinge, Bumble — built to <span className="font-bold text-foreground">find</span> people. Zero help once you do.</p>
           <p>So daters take their texts, screenshots, and confusion to <span className="font-bold text-primary">ChatGPT</span> — an AI with no memory, no patterns, no dating context.</p>
-          <p className="font-medium text-foreground">The behavior is here. The product isn't.</p>
+          <p className="text-foreground font-medium pt-1">The behavior is here. The product isn't.</p>
         </div>
       </div>
     ),
@@ -163,21 +163,21 @@ const slides = [
   {
     id: 5,
     content: (
-      <div className="max-w-3xl mx-auto space-y-8 text-center">
-        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">Already built. Already live.</h2>
-        <div className="grid grid-cols-3 gap-8 py-4">
+      <div className="max-w-4xl mx-auto space-y-8 text-center">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-[1.05]">Already built. Already live.</h2>
+        <div className="grid grid-cols-3 gap-4 md:gap-6 pt-2">
           {[
-            { metric: "40", label: "Beta Users", accent: true },
-            { metric: "10K", label: "MVP scales to 10K users" },
-            { metric: "67–82%", label: "Margins" },
+            { metric: "40", label: "Beta users", accent: true },
+            { metric: "10K", label: "Users supported by current infra" },
+            { metric: "67–82%", label: "Gross margins" },
           ].map((m, i) => (
-            <div key={i}>
-              <p className={`text-5xl md:text-6xl font-black ${m.accent ? "text-primary" : "text-foreground"}`}>{m.metric}</p>
-              <p className="text-sm text-muted-foreground mt-2">{m.label}</p>
+            <div key={i} className="rounded-2xl border border-border/40 bg-card/30 backdrop-blur-sm py-6 px-3">
+              <p className={`text-4xl md:text-5xl font-black ${m.accent ? "text-primary" : "text-foreground"}`}>{m.metric}</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-2 leading-tight">{m.label}</p>
             </div>
           ))}
         </div>
-        <p className="text-xl md:text-2xl text-muted-foreground">We're raising to <span className="text-primary font-bold">scale</span>, not build.</p>
+        <p className="text-lg md:text-xl text-muted-foreground pt-2">We're raising to <span className="text-primary font-bold">scale</span>, not build.</p>
       </div>
     ),
   },
@@ -185,12 +185,12 @@ const slides = [
   {
     id: 6,
     content: (
-      <div className="max-w-3xl mx-auto space-y-8">
-        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">The team.</h2>
-        <div className="space-y-4 text-xl md:text-2xl text-muted-foreground">
+      <div className="max-w-4xl mx-auto space-y-7">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-[1.05]">The team.</h2>
+        <div className="space-y-4 text-lg md:text-xl text-muted-foreground leading-relaxed">
           <p>We've <span className="font-bold text-foreground">built and launched apps before</span> — including <span className="font-bold text-primary">Good Fitness</span>, a top women's app in the App Store.</p>
           <p>Operators who ship. Marketers who acquire. A therapist-reviewed psychology framework.</p>
-          <p className="text-foreground font-medium">We know how to take a consumer app from <span className="text-primary font-bold">zero to category leader</span>.</p>
+          <p className="text-foreground font-medium pt-1">We know how to take a consumer app from <span className="text-primary font-bold">zero to category leader</span>.</p>
         </div>
       </div>
     ),
@@ -199,13 +199,13 @@ const slides = [
   {
     id: 9,
     content: (
-      <div className="max-w-3xl mx-auto space-y-8">
-        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">The moat.</h2>
-        <div className="space-y-4 text-xl md:text-2xl text-muted-foreground">
+      <div className="max-w-4xl mx-auto space-y-7">
+        <h2 className="text-4xl md:text-6xl font-black text-foreground leading-[1.05]">The moat.</h2>
+        <div className="space-y-4 text-lg md:text-xl text-muted-foreground leading-relaxed">
           <p>Every interaction logged becomes <span className="font-bold text-primary">structured behavioral data</span> — candidate profiles, patterns, outcomes — that compounds per user, per month.</p>
           <p>ChatGPT forgets. <span className="font-bold text-foreground">D.E.V.I. remembers</span> — and gets sharper the longer you use it.</p>
           <p>A therapist-reviewed psychology framework + a proprietary scoring engine generic AI <span className="font-bold text-primary">can't replicate</span>.</p>
-          <p className="text-foreground font-medium">Switching cost grows with every message. That's the moat.</p>
+          <p className="text-foreground font-medium pt-1">Switching cost grows with every message. That's the moat.</p>
         </div>
       </div>
     ),
