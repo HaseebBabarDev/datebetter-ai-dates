@@ -258,8 +258,25 @@ const slides = [
             </div>
           ))}
         </div>
-        <p className="text-base md:text-lg text-foreground font-medium max-w-md pt-2">Relationship intelligence has no leader yet. <span className="text-primary font-bold">We intend to be it.</span></p>
-        <p className="text-sm text-foreground font-bold">datebetterapp.com · nakita@datebetterapp.com</p>
+        <div className="w-full rounded-xl border-2 border-primary/40 bg-primary/5 p-4 mt-2">
+          <p className="text-[11px] uppercase tracking-wider text-primary font-bold mb-2">Investor Payback</p>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div>
+              <p className="text-xl md:text-2xl font-black text-foreground">$1.2M ARR</p>
+              <p className="text-[10px] text-muted-foreground">Month 12 run-rate</p>
+            </div>
+            <div>
+              <p className="text-xl md:text-2xl font-black text-foreground">~$18M</p>
+              <p className="text-[10px] text-muted-foreground">Series A val (15× ARR)</p>
+            </div>
+            <div>
+              <p className="text-xl md:text-2xl font-black bg-[image:var(--gradient-hero)] bg-clip-text text-transparent">5–8×</p>
+              <p className="text-[10px] text-muted-foreground">Return on $500K</p>
+            </div>
+          </div>
+        </div>
+        <p className="text-base text-foreground font-medium max-w-md pt-1">Relationship intelligence has no leader yet. <span className="text-primary font-bold">We intend to be it.</span></p>
+        <p className="text-xs text-foreground font-bold">datebetterapp.com · nakita@datebetterapp.com</p>
       </div>
     ),
   },
