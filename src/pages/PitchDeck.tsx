@@ -168,7 +168,7 @@ const slides = [
         <div className="grid grid-cols-3 gap-8 py-4">
           {[
             { metric: "40", label: "Beta Users", accent: true },
-            { metric: "10K", label: "Infra Ready" },
+            { metric: "10K", label: "MVP scales to 10K users" },
             { metric: "67–82%", label: "Margins" },
           ].map((m, i) => (
             <div key={i}>
