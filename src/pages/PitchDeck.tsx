@@ -217,12 +217,12 @@ const slides = [
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">The model.</h2>
         <p className="text-xl md:text-2xl text-muted-foreground">
-          <span className="font-bold text-foreground">$15/mo Unlimited</span> + <span className="font-bold text-foreground">$5 Detachment</span> + <span className="font-bold text-foreground">$5 Text Simulator</span>. ARPU <span className="font-bold text-primary">$18–22</span>.
+          <span className="font-bold text-foreground">$15/mo Unlimited</span> — single plan. Add-ons (Detachment, Text Simulator) are pure upside.
         </p>
         <div className="grid grid-cols-3 gap-8 text-center pt-2">
           {[
-            { metric: "$50–70K", label: "MRR by Month 12", accent: true },
-            { metric: "3,000+", label: "Net Paid Users" },
+            { metric: "$30K", label: "MRR by Month 12", accent: true },
+            { metric: "2,000", label: "Net Paid @ $15" },
             { metric: "$44", label: "Blended CPA" },
           ].map((m, i) => (
             <div key={i}>
@@ -231,7 +231,7 @@ const slides = [
             </div>
           ))}
         </div>
-        <p className="text-lg text-muted-foreground text-center">Default-alive by Month 18. Series A-ready.</p>
+        <p className="text-lg text-muted-foreground text-center">$360K ARR base case. Seed-ready by Month 18.</p>
       </div>
     ),
   },
