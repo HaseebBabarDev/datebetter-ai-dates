@@ -689,6 +689,26 @@ const PitchDeck = () => {
           />
         )}
       </AnimatePresence>
+
+      {/* Hidden export container — rendered off-screen during PDF generation */}
+      {exporting && (
+        <div
+          ref={exportContainerRef}
+          aria-hidden
+          style={{ position: "fixed", top: 0, left: "-10000px", zIndex: -1, pointerEvents: "none" }}
+        >
+          {slides.map((s) => (
+            <div
+              key={`export-${s.id}`}
+              data-export-slide
+              className="bg-background font-poppins flex items-center justify-center"
+              style={{ width: 1280, height: 720, padding: "60px 80px", overflow: "hidden" }}
+            >
+              <div className="w-full max-w-5xl">{s.content}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
