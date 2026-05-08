@@ -284,7 +284,7 @@ const slides = [
               <p className="text-[10px] text-muted-foreground">Exit / Acquisition</p>
             </div>
           </div>
-          <p className="text-[10px] text-muted-foreground/80 text-center pt-2">Base case: $15/mo only, no add-ons. $360K ARR → Seed at ~$6M post → Series A at ~$15M.</p>
+          <p className="text-[10px] text-muted-foreground/80 text-center pt-2">Base case: $15/mo only, no add-ons. $864K ARR run-rate → Series A-ready by Month 18.</p>
         </div>
         <p className="text-base text-foreground font-medium max-w-md pt-1">Relationship intelligence has no leader yet. <span className="text-primary font-bold">We intend to be it.</span></p>
         <p className="text-xs text-foreground font-bold">datebetterapp.com · nakita@datebetterapp.com</p>
