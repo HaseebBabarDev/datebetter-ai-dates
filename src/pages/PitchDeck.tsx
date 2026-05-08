@@ -230,7 +230,7 @@ const slides = [
             <div className="space-y-2 pt-2 border-t border-border/30">
               <p className="text-sm text-muted-foreground">• 65% of adults 18–29 have used an app</p>
               <p className="text-sm text-muted-foreground">• 57% of users are men; 38% women</p>
-              <p className="text-sm text-muted-foreground">• 63% of men under 30 are single</p>
+              <p className="text-sm text-muted-foreground">• Built for men and women navigating modern dating</p>
             </div>
           </div>
           {/* SOM */}
@@ -370,7 +370,7 @@ const slides = [
         <h2 className="text-4xl md:text-6xl font-black text-foreground leading-tight">A few more things.</h2>
         <div className="space-y-5 text-lg md:text-xl text-muted-foreground">
           <p>Every interaction logged compounds into <span className="font-bold text-primary">structured behavioral data</span> — a moat generic AI cannot replicate.</p>
-          <p>Subscription SaaS at <span className="font-bold text-foreground">$9.99 / $15.99 / $29.99</span> per month. Blended ARPU: <span className="font-bold text-primary">$15</span>.</p>
+          <p>Simple SaaS pricing: <span className="font-bold text-foreground">$15/mo Unlimited</span>, plus <span className="font-bold text-foreground">$5/mo Detachment Plan</span> and <span className="font-bold text-foreground">$5/mo Text Simulator</span> add-ons. Blended ARPU target: <span className="font-bold text-primary">$18–22</span>.</p>
           <p>Cash-flow positive by <span className="font-bold text-primary">Month 12</span> at base case with capital remaining.</p>
           <p>Creator/affiliate channel offers the most efficient CPA at <span className="font-bold text-primary">$25/user</span>.</p>
         </div>
@@ -492,9 +492,7 @@ const SlideDrawer = ({ slides: sl, current, onSelect, onClose }: { slides: typeo
 /* ─── Deck Viewer ─── */
 const PitchDeck = () => {
   const navigate = useNavigate();
-  const [unlocked, setUnlocked] = useState(
-    () => sessionStorage.getItem("pitch_unlocked") === "1"
-  );
+  const [unlocked] = useState(true);
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -566,7 +564,7 @@ const PitchDeck = () => {
     else if (info.offset.x > threshold && info.velocity.x > 0) prev();
   };
 
-  if (!unlocked) return <PasswordGate onUnlock={() => setUnlocked(true)} />;
+  
 
   const slide = slides[current];
   const progress = ((current + 1) / slides.length) * 100;
