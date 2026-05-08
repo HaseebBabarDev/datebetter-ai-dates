@@ -492,9 +492,7 @@ const SlideDrawer = ({ slides: sl, current, onSelect, onClose }: { slides: typeo
 /* ─── Deck Viewer ─── */
 const PitchDeck = () => {
   const navigate = useNavigate();
-  const [unlocked, setUnlocked] = useState(
-    () => sessionStorage.getItem("pitch_unlocked") === "1"
-  );
+  const [unlocked] = useState(true);
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
